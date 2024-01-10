@@ -1,5 +1,5 @@
 import React from "react";
-import { api } from "~/utils/api";
+import { api } from "@/utils/api";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -33,7 +33,10 @@ function DisplayTaskList() {
                 <Checkbox value={task.isCompleted ? "true" : "false"} />
                 <li className={"text-primary"}>{task.task}</li>
               </div>
-              <Button onClick={() => handleDelete(task.id)} variant={"destructive"}>
+              <Button
+                onClick={() => handleDelete(task.id)}
+                variant={"destructive"}
+              >
                 Delete
               </Button>
             </div>

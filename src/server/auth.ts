@@ -10,9 +10,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import DiscordProvider from "next-auth/providers/discord";
 import GithubProvider from "next-auth/providers/github";
 
-import { env } from "~/env";
-import { db } from "~/server/db";
-import { pgTable } from "~/server/db/schema";
+import { env } from "@/env";
+import { db } from "@/server/db";
+import { pgTable } from "@/server/db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

@@ -1,9 +1,9 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import React from "react";
-import Task from "~/components/task";
+import Task from "@/components/task";
 
-import { api } from "~/utils/api";
+import { api } from "@/utils/api";
 
 export default function Home() {
   const { data: sessionData } = useSession();
@@ -20,7 +20,7 @@ export default function Home() {
       <main className=" flex min-h-screen flex-col items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
           <div className="flex flex-col items-center gap-2">
-            <p className="text-primary text-2xl">
+            <p className="text-2xl text-primary">
               {hello.data ? hello.data.greeting : "Loading tRPC query..."}
             </p>
             <AuthShowcase />
@@ -42,12 +42,12 @@ function AuthShowcase() {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-primary text-center text-2xl">
+      <p className="text-center text-2xl text-primary">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
         {secretMessage && <span> - {secretMessage}</span>}
       </p>
       <button
-        className="text-primary rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
+        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-primary no-underline transition hover:bg-white/20"
         onClick={sessionData ? () => void signOut() : () => void signIn()}
       >
         {sessionData ? "Sign out" : "Sign in"}
