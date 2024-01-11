@@ -73,41 +73,6 @@ export const offers = pgTable("offer", {
   created_at: timestamp("created_at"),
 });
 
-export const tasks = pgTable(
-  "task",
-  {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    task: varchar("task", { length: 256 }),
-    isCompleted: boolean("isCompleted").default(false),
-    createdById: varchar("createdById", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("timestamp4").default(sql`now()`),
-  },
-  (example) => ({
-    createdByIdIdx: index("task_createdById_idx").on(example.createdById),
-    isCompletedIdx: index("task_isCompleted_idx").on(example.isCompleted),
-    taskIndex: index("task_task_idx").on(example.task),
-  }),
-);
-
-export const posts = pgTable(
-  "post",
-  {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    name: varchar("name", { length: 256 }),
-    createdById: varchar("createdById", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("timestamp4").default(sql`now()`),
-  },
-  (example) => ({
-    createdByIdIdx: index("createdById_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
-  }),
-);
 
 export const users = pgTable("user", {
   id: text("id").notNull().primaryKey(),
