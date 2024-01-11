@@ -1,5 +1,4 @@
 import { and, eq } from "drizzle-orm/sql";
-import { z } from "zod";
 
 import {
   createTRPCRouter,
@@ -8,9 +7,14 @@ import {
 } from "@/server/api/trpc";
 import { tasks } from "@/server/db/schema";
 
+import {
+  createTaskInput,
+  deleteTaskByIdInput,
+} from "@/server/api/schema/task.schema";
+
 export const taskRouter = createTRPCRouter({
-  create: protectedProcedure
-    .input(z.object({ task: z.string().min(1) }))
+  createTask: protectedProcedure
+    .input(createTaskInput)
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(tasks).values({
         task: input.task,
@@ -18,8 +22,8 @@ export const taskRouter = createTRPCRouter({
       });
     }),
 
-  deleteById: protectedProcedure
-    .input(z.object({ id: z.number().min(1) }))
+  deleteTaskById: protectedProcedure
+    .input(deleteTaskByIdInput)
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .delete(tasks)

@@ -1,7 +1,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import React from "react";
-import Task from "@/components/task";
+import Task from "@/components/task/task";
 
 import { api } from "@/utils/api";
 
