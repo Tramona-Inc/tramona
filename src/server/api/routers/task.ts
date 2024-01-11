@@ -35,7 +35,7 @@ export const taskRouter = createTRPCRouter({
         );
     }),
 
-  getAll: protectedProcedure.query(({ ctx }) => {
+  getAllTask: protectedProcedure.query(({ ctx }) => {
     return ctx.db.query.tasks.findMany({
       orderBy: (tasks, { desc }) => [desc(tasks.createdAt)],
     });

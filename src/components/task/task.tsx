@@ -14,10 +14,10 @@ export default function Task() {
     api.task.createTask.useMutation({
       onSuccess: () => {
         setInput("");
-        void utils.task.getAll.invalidate();
+        void utils.task.getAllTask.invalidate(); // will revalidate the tasks array to see if there are any changes
       },
       onError: () => {
-        // Toast UI displaying error
+        // TODO: Add Toast UI displaying error
       },
     });
 

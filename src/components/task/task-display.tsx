@@ -4,14 +4,14 @@ import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 
 export default function TaskDisplay() {
-  const { data: taskList } = api.task.getAll.useQuery();
+  const { data: taskList } = api.task.getAllTask.useQuery();
 
   const utils = api.useUtils(); // To allow to invalidate the data useContext depracated
 
   const { mutate: mutateDeleteTaskById, isLoading } =
     api.task.deleteTaskById.useMutation({
       onSuccess: () => {
-        void utils.task.getAll.invalidate();
+        void utils.task.getAllTask.invalidate(); // will revalidate the tasks array to see if there are any changes
       },
     });
 
