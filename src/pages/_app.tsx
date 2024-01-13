@@ -6,6 +6,7 @@ import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
 import TailwindIndicator from "@/components/ui/tailwind-indicator";
+import Navbar from "@/components/navbar";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -13,6 +14,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
+      <Navbar />
       <Component {...pageProps} />
 
       {/* Helps display screen size (Only in developer mode) */}

@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import Icons from "@/components/ui/icons";
+import Navbar from "@/components/navbar";
 
 const formSchema = z
   .object({
@@ -33,6 +34,7 @@ export default function SignIn({
   return (
     <>
       <div className="flex h-screen flex-col">
+        <Navbar />
         <Head>
           <title>Log in | Tramona</title>
         </Head>
@@ -83,7 +85,7 @@ export default function SignIn({
                     return (
                       <div key={provider.name}>
                         <button onClick={() => signIn(provider.id)}>
-                          <Icons iconName={provider.name} />
+                          {provider.name && <Icons iconName={provider.name} />}
                         </button>
                       </div>
                     );
