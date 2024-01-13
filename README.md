@@ -1,28 +1,33 @@
-# Create T3 App
+# Tramona
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
-
-## What's next? How do I make an app with this?
-
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
-
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+We use the [T3 stack](https://create.t3.gg/) with Drizzle, SST, and shadcn/ui:
 
 - [Next.js](https://nextjs.org)
 - [NextAuth.js](https://next-auth.js.org)
-- [Drizzle](https://orm.drizzle.team/)
+- [Drizzle](https://orm.drizzle.team)
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
+- [SST](https://sst.dev)
+- [shadcn/ui](https://ui.shadcn.com)
 
-## Learn More
+## Development setup
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+1. `npm install -g pnpm` if you don't have pnpm ("performant npm") already. Use it like npm, just with a p in front
+2. `pnpm install`
+3. `pnpm run dev`
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Using Shadcn
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+The idea behind shadcn is that you copy paste their components as a starting point, then customize them to your needs. All the components copy-pasted from shadcn are in the [components/ui](/src/common/components/ui/) folder. To get started:
 
-## How do I deploy this?
+1. Read the [introduction page](https://ui.shadcn.com/docs) and the [theming page](https://ui.shadcn.com/docs/theming). Then look at our [globals.css](/src/styles/globals.css) file. **Use these semantic colors whenever possible.**
+2. Skim throught the shadcn/ui docs to see all of the components shadcn offers, and **use them as much as possible too**.
+3. Use either our code or the examples in the shadcn docs as reference.
+4. Keep the following tips in mind:
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- Don't use `asChild` for link buttons, use the `buttonVariant` strategy instead ([docs](https://ui.shadcn.com/docs/components/button#link)).
+- thats it for now
+
+## Other
+
+Check out (and add to as needed) our [utility functions](/src/common/lib/utils.ts) and [utility comopnents](/src/common/components/utils/).
