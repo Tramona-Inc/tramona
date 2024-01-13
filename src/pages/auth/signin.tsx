@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // https://next-auth.js.org/configuration/pages
 
 import type {
@@ -10,21 +11,11 @@ import { authOptions } from "@/server/auth";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
-import { Icons } from "@/components/ui/icons";
+import Icons from "@/components/ui/icons";
 
 const formSchema = z
   .object({
@@ -89,13 +80,10 @@ export default function SignIn({
 
                 <div className="my-5">
                   {Object.values(providers).map((provider) => {
-                    const IconComponent =
-                      Icons[provider.name.toLowerCase()] || null;
-
                     return (
                       <div key={provider.name}>
                         <button onClick={() => signIn(provider.id)}>
-                          {IconComponent && <IconComponent />}
+                          <Icons iconName={provider.name} />
                         </button>
                       </div>
                     );
@@ -110,6 +98,7 @@ export default function SignIn({
               alt={"login house image"}
               objectFit="cover"
               fill
+              priority
               className="absolute hidden lg:block"
             />
           </div>
