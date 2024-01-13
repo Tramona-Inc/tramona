@@ -102,6 +102,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: env.GITHUB_CLIENT_SECRET,
     }),
   ],
+  pages: {
+    signIn: "/auth/signin",
+  },
 };
 
 /**
