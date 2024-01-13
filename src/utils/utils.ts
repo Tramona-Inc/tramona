@@ -1,4 +1,4 @@
-import { REFERRAL_CODE_LENGTH } from "@/server/db/schema/schema";
+import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
