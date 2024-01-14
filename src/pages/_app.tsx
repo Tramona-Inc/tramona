@@ -6,6 +6,7 @@ import { HydrationOverlay } from "@builder.io/react-hydration-overlay";
 import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
+import TailwindIndicator from "@/components/ui/tailwind-indicator";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -15,6 +16,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
     <HydrationOverlay>
       <SessionProvider session={session}>
         <Component {...pageProps} />
+
+        {/* Helps display screen size (Only in developer mode) */}
+        <TailwindIndicator />
       </SessionProvider>
     </HydrationOverlay>
   );
