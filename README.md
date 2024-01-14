@@ -12,7 +12,7 @@ We're using the [T3 stack](https://create.t3.gg/) with Drizzle, SST, and shadcn/
 
 ## Development setup
 
-1. `npm install -g pnpm` if you don't have pnpm ("performant npm") already. Use it like npm, just with a p in front
+1. `npm install -g pnpm` if you don't have pnpm ("performant npm") already. Use it like npm, just with a p in front (and do `pnpm ...` insetad of `npx ...`)
 2. `pnpm install`
 3. `pnpm run dev`
 
