@@ -16,11 +16,18 @@ import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import Icons from "@/components/ui/icons";
 import Navbar from "@/components/navbar";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/ui/form';
-import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast  } from '@/components/ui/use-toast';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "@/components/ui/use-toast";
 
 const formSchema = z
   .object({
@@ -33,21 +40,19 @@ export default function SignIn({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-    },
   });
 
   const { query } = useRouter();
 
   const handleSubmit = async ({ email }: z.infer<typeof formSchema>) => {
-    await signIn('email', { email: email })
+    await signIn("email", { email: email });
   };
 
   if (query.error) {
     toast({
-      title: "Could not login. Please check your e-mail or password or third-party application.",
-      variant: 'destructive',
+      title:
+        "Could not login. Please check your e-mail or password or third-party application.",
+      variant: "destructive",
     });
   }
 
@@ -72,7 +77,10 @@ export default function SignIn({
               <section className="flex flex-col items-center justify-center">
                 <div className="w-full space-y-5">
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                    <form
+                      onSubmit={form.handleSubmit(handleSubmit)}
+                      className="space-y-4"
+                    >
                       <FormField
                         control={form.control}
                         name="email"
@@ -88,7 +96,7 @@ export default function SignIn({
                       />
                       <FormMessage />
                       <Button type="submit" className="w-full">
-                      {/* <Button isLoading={form.formState.isSubmitting} type="submit" className="w-full"> */}
+                        {/* <Button isLoading={form.formState.isSubmitting} type="submit" className="w-full"> */}
                         Sign in with Email
                       </Button>
                     </form>
@@ -96,30 +104,31 @@ export default function SignIn({
                 </div>
 
                 <div className="my-5">
-                  {providers && Object.values(providers).map((provider) => {
-                    return (
-                      <div key={provider.name}>
-                        <button onClick={() => signIn(provider.id)}>
-                          {provider.name && <Icons iconName={provider.name} />}
-                        </button>
-                      </div>
-                    );
-                  })}
+                  {providers &&
+                    Object.values(providers).map((provider) => {
+                      return (
+                        <div key={provider.name}>
+                          <button onClick={() => signIn(provider.id)}>
+                            {provider.name && (
+                              <Icons iconName={provider.name} />
+                            )}
+                          </button>
+                        </div>
+                      );
+                    })}
                 </div>
               </section>
             </div>
           </div>
           <div className="relative hidden flex-1 lg:block">
             <Image
-              src={"/assets/images/house.jpg"}
-              alt={"login house image"}
-              objectFit="cover"
+              src="/assets/images/house.jpg"
+              alt=""
               fill
               priority
-              className="absolute hidden lg:block"
+              className="absolute hidden object-cover lg:block"
             />
           </div>
-
         </main>
       </div>
     </>
