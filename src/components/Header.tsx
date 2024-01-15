@@ -14,7 +14,7 @@ export default function Header() {
         </Link>
       </div>
 
-      <div className="hidden w-full items-center justify-center gap-2 lg:flex">
+      <div className="hidden items-center justify-center gap-2 lg:flex">
         <HeaderLink href="/partners">Refer and Earn</HeaderLink>
         <HeaderLink href="/forhosts">For Hosts</HeaderLink>
         <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
