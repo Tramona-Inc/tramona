@@ -10,6 +10,8 @@ import {
 import UserAvatar from "./UserAvatar";
 import { type Session } from "next-auth";
 import Link from "next/link";
+import { api } from "@/utils/api";
+import { Badge } from "./ui/badge";
 
 export default function HeaderTopRight() {
   const { data: session, status } = useSession();
@@ -65,7 +67,7 @@ function AvatarDropdown({ session }: { session: Session }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 py-4 text-lg font-medium"
+        className="w-72 py-4 text-lg font-medium"
       >
         <DropdownTop session={session} />
         <DropdownMenuSeparator />
@@ -92,9 +94,26 @@ function DropdownTop({ session }: { session: Session }) {
 
   return (
     <div className="pb-1 pl-3">
-      <p className="font-medium">{title}</p>
+      <p className="font-medium">
+        {title}
+        <span className="ml-2 inline-block -translate-y-0.5">
+          <RoleBadge />
+        </span>
+      </p>
+
       {subtitle && <p className="text-sm text-zinc-600">{subtitle}</p>}
     </div>
+  );
+}
+
+function RoleBadge() {
+  const { data } = api.users.me.useQuery();
+  if (!data) return null;
+
+  return (
+    <Badge variant="secondary" size="sm">
+      {data.role.toLocaleUpperCase()}
+    </Badge>
   );
 }
 
