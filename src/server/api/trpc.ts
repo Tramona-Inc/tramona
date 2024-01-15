@@ -121,10 +121,15 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
+  const { user, ...session } = ctx.session;
+
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      user,
+      session,
+      db,
     },
   });
 });
@@ -139,8 +144,10 @@ export const roleRestrictedProcedure = <
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
+    const { user, ...session } = ctx.session;
+
     const data = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.session.user.id),
+      where: eq(users.id, user.id),
       columns: { role: true },
     });
 
@@ -152,11 +159,10 @@ export const roleRestrictedProcedure = <
 
     return next({
       ctx: {
-        // infers the `session` as non-nullable
-        session: {
-          ...ctx.session,
-          user: { ...ctx.session.user, role: role as TAllowedRoles[number] },
-        },
+        // infers `session` as non-nullable and `role` as one of the allowed ones
+        user: { ...user, role: role as TAllowedRoles[number] },
+        session,
+        db,
       },
     });
   });
