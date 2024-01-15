@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import TramonaIcon from "./icons/TramonaIcon";
-import NavLink from "./utils/NavLink";
+import TramonaIcon from "../icons/TramonaIcon";
+import NavLink from "../utils/NavLink";
 import { cn } from "@/utils/utils";
 import HeaderTopRight from "./HeaderTopRight";
 
