@@ -10,6 +10,7 @@ import {
   timestamp,
   varchar,
   primaryKey,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -31,7 +32,7 @@ export const users = pgTable("user", {
   referralCodeUsed: varchar("referral_code_used", {
     length: REFERRAL_CODE_LENGTH,
   }),
-  role: text("role").$type<"admin" | "host" | "guest">().default("guest"),
+  role: pgEnum("role", ["admin", "guest", "host"])("role").default("guest"),
 });
 
 export const accounts = pgTable(
@@ -103,9 +104,12 @@ export const requests = pgTable("requests", {
   numGuests: smallint("num_guests").notNull().default(1),
   minNumBeds: smallint("min_num_beds").default(1),
   minNumBedrooms: smallint("min_num_bedrooms").default(1),
-  propertyType: varchar("property_type", { length: 255 }).$type<
-    "house" | "guesthouse" | "room" | "apartment"
-  >(),
+  propertyType: pgEnum("propertyType", [
+    "house",
+    "guesthouse",
+    "apartment",
+    "room",
+  ])("propertyType"),
   note: varchar("note", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
