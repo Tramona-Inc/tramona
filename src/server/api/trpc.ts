@@ -7,8 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { USER_ROLES, users } from "../db/schema";
+import { users } from "../db/schema";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
@@ -135,7 +134,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 });
 
 export const roleRestrictedProcedure = <
-  TAllowedRoles extends (typeof USER_ROLES)[number][],
+  TAllowedRoles extends (typeof users.$inferSelect.role)[],
 >(
   allowedRoles: TAllowedRoles,
 ) =>
