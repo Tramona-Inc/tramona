@@ -1,8 +1,5 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import React from "react";
-
-import { api } from "@/utils/api";
 
 export default function Home() {
   const { data: sessionData } = useSession();
