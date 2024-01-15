@@ -20,7 +20,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
 import { toast  } from '@/components/ui/use-toast';
 
 const formSchema = z
@@ -97,7 +96,7 @@ export default function SignIn({
                 </div>
 
                 <div className="my-5">
-                  {Object.values(providers).map((provider) => {
+                  {providers && Object.values(providers).map((provider) => {
                     return (
                       <div key={provider.name}>
                         <button onClick={() => signIn(provider.id)}>
