@@ -21,7 +21,7 @@ export default function CopyToClipboardBtn({
         clearTimeout(timeoutId.current);
       }
       navigator.clipboard.writeText(message).catch(() => {
-        errorToast("Couldn't copy to clipboard");
+        errorToast("Couldn't copy to clipboard, please try again");
       });
       setJustCopied(true);
       timeoutId.current = setTimeout(() => {
