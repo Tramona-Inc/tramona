@@ -14,7 +14,7 @@ const iconComponents: Icons = {
 };
 
 const NoIconFound: React.FC = () => {
-  return <div>No Icon Found</div>;
+  return null;
 };
 
 const Icons: React.FC<{ iconName: string }> = ({ iconName }) => {

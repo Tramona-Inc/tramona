@@ -12,24 +12,45 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import * as z from "zod";
-import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import Icons from "@/components/ui/icons";
 import Navbar from "@/components/navbar";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/ui/form';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { toast  } from '@/components/ui/use-toast';
 
 const formSchema = z
   .object({
     email: z.string().email(),
-    password: z.string(),
   })
   .required();
 
 export default function SignIn({
   providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { toast } = useToast();
-  const router = useRouter();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  const { query } = useRouter();
+
+  const handleSubmit = async ({ email }: z.infer<typeof formSchema>) => {
+    await signIn('email', { email: email })
+  };
+
+  if (query.error) {
+    toast({
+      title: "Could not login. Please check your e-mail or password or third-party application.",
+      variant: 'destructive',
+    });
+  }
 
   return (
     <>
@@ -48,36 +69,31 @@ export default function SignIn({
               >
                 Don&apos;t have an account? Sign up
               </Link>
+
               <section className="flex flex-col items-center justify-center">
                 <div className="w-full space-y-5">
-                  {/* <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl> */}
-                  <h1>Email</h1>
-                  <Input autoFocus />
-                  {/* </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    /> */}
-                  {/* <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl> */}
-                  <h1>Password</h1>
-                  <Input type="password" />
-                  {/* </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    /> */}
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input {...field} autoFocus />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormMessage />
+                      <Button type="submit" className="w-full">
+                      {/* <Button isLoading={form.formState.isSubmitting} type="submit" className="w-full"> */}
+                        Sign in with Email
+                      </Button>
+                    </form>
+                  </Form>
                 </div>
 
                 <div className="my-5">
@@ -104,6 +120,7 @@ export default function SignIn({
               className="absolute hidden lg:block"
             />
           </div>
+
         </main>
       </div>
     </>

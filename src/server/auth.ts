@@ -67,11 +67,11 @@ export const authOptions: NextAuthOptions = {
     // -- You can use the credential with another service like etherum, oAuth, etc.
     EmailProvider({
       server: {
-        host: env.EMAIL_SERVER_HOST,
-        port: env.EMAIL_SERVER_PORT,
+        host: env.SMTP_HOST,
+        port: env.SMTP_PORT,
         auth: {
-          user: env.EMAIL_SERVER_USER,
-          pass: env.EMAIL_SERVER_PASSWORD,
+          user: env.SMTP_USER,
+          pass: env.SMTP_PASSWORD,
         },
       },
       from: process.env.EMAIL_FROM,
@@ -79,10 +79,11 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
-    }),
+    })
   ],
   pages: {
-    // signIn: "/auth/signin",
+    signIn: "/auth/signin",
+    error: '/auth/error',
     signOut: "/",
   },
 };
