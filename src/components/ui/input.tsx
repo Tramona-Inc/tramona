@@ -2,8 +2,8 @@ import * as React from "react";
 
 import { cn } from "@/utils/utils";
 import { useState } from "react";
-import VisibleIcon from "../icons/visible";
-import HiddenIcon from "../icons/hidden";
+import VisibleIcon from "../icons/VisibleIcon";
+import HiddenIcon from "../icons/HiddenIcon";
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
