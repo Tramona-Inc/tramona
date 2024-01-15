@@ -7,14 +7,16 @@
  * need to use are documented accordingly near the end.
  */
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { USER_ROLES, users } from "../db/schema";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
-
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
 
 /**
  * 1. CONTEXT
@@ -126,3 +128,35 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     },
   });
 });
+
+export const roleRestrictedProcedure = <
+  TAllowedRoles extends (typeof USER_ROLES)[number][],
+>(
+  allowedRoles: TAllowedRoles,
+) =>
+  t.procedure.use(async ({ ctx, next }) => {
+    if (!ctx.session || !ctx.session.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const data = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.session.user.id),
+      columns: { role: true },
+    });
+
+    const role = data?.role ?? "guest";
+
+    if (!allowedRoles.includes(role)) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: {
+          ...ctx.session,
+          user: { ...ctx.session.user, role: role as TAllowedRoles[number] },
+        },
+      },
+    });
+  });
