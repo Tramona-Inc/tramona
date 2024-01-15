@@ -6,6 +6,7 @@ import { HydrationOverlay } from "@builder.io/react-hydration-overlay";
 import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
+
 import TailwindIndicator from "@/components/TailwindIndicator";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
