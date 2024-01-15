@@ -28,7 +28,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             e.preventDefault();
             setShowingPassword(!showingPassword);
           }}
-          className="absolute bottom-0 right-0 grid h-10 w-10 place-items-center rounded-full hover:bg-black/10 focus-visible:bg-black/10"
+          className="absolute bottom-0 right-0 grid h-10 w-10 place-items-center rounded-full text-zinc-600 hover:bg-black/10 focus-visible:bg-black/10"
         >
           {showingPassword ? <VisibleIcon /> : <HiddenIcon />}
         </button>
