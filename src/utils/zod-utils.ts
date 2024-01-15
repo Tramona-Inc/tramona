@@ -2,6 +2,10 @@ import { parseISO } from "date-fns";
 import { type ZodType, z } from "zod";
 
 /**
+ * Zod wasn't meant for forms, so these utilities make it a lot less weird to write
+ * validators for react-hook-form (e.g. trim input, parse empty strings as undefined,
+ * minimum length of 1 by default)
+ *
  * Example usage:
  * const schema = z.object({
  *  name: zodString({ minLen: 3, maxLen: 50 }),
