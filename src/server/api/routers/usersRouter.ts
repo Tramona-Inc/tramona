@@ -14,7 +14,7 @@ export const usersRouter = createTRPCRouter({
 
     return {
       role: res?.role ?? "guest",
-      referralcodeUsed: res?.referralCodeUsed ?? null,
+      referralCodeUsed: res?.referralCodeUsed ?? null,
     };
   }),
 });
