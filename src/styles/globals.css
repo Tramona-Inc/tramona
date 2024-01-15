@@ -8,7 +8,7 @@
 
 @layer base {
   :root {
-    --background: var(--white);
+    --background: var(--zinc-50);
     --foreground: var(--zinc-950);
     --card: var(--white);
     --card-foreground: var(--zinc-950);
