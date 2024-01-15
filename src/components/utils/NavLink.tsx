@@ -1,6 +1,6 @@
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useRouter } from "next/router";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 export default function NavLink({
   href,

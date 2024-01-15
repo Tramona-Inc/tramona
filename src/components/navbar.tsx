@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { signIn, useSession, signOut } from "next-auth/react";
-import Icons from "@/ui/icons";
+import Icons from "./ui/icons";
 
 function DropdownLink({
   children,

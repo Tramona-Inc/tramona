@@ -1,6 +1,12 @@
 export default function TramonaIcon() {
   return (
-    <svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <rect width="64" height="64" rx="12" fill="white" />
       <path
         d="M29.5407 46.1705V10.1004C29.5407 9.08113 28.1944 8.71512 27.6784 9.59406L6.5005 45.6642C6.1091 46.3308 6.5898 47.1705 7.36285 47.1705H28.5407C29.093 47.1705 29.5407 46.7228 29.5407 46.1705Z"

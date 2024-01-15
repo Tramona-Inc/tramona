@@ -79,11 +79,11 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
-    })
+    }),
   ],
   pages: {
     signIn: "/auth/signin",
-    error: '/auth/error',
+    error: "/auth/error",
     signOut: "/",
   },
 };
