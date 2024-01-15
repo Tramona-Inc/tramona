@@ -1,9 +1,9 @@
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 
-export function errorToast(error = "Something went wrong") {
+export function errorToast(error = "Something went wrong, please try again") {
   return toast({
-    title: `${error}, please try again`,
+    title: error,
     description: (
       <>
         <Link href="/support" className="underline underline-offset-2">
