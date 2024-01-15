@@ -12,6 +12,8 @@ import EmailProvider from "next-auth/providers/email";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { pgTable } from "drizzle-orm/pg-core";
+import { generateReferralCode } from "@/utils/utils";
+import { referralCodes } from "./db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -48,6 +50,26 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
+    // TODO: generate code when on new user is created (Maybe generate only when sharing the code)
+    // async signIn({ user }) {
+    //   const newReferralCode = generateReferralCode(); // Implement your logic to generate a new referral code
+
+    //   if (user) {
+    //     const result = await db.query.referralCodes.findMany({
+    //       where: (referralCodes, { eq }) => eq(referralCodes.ownerId, user.id),
+    //     });
+
+    //     if (!result || result.length === 0) {
+    //       // If result is null or empty, generate a new row
+    //       await db.insert(referralCodes).values({
+    //         referral_code: newReferralCode,
+    //         ownerId: user.id,
+    //       });
+    //     }
+    //   }
+
+    //   return Promise.resolve(true);
+    // },
   },
   adapter: DrizzleAdapter(db, pgTable) as Adapter,
   providers: [
