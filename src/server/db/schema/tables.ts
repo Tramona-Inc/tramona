@@ -112,7 +112,7 @@ export const requests = pgTable("requests", {
   numGuests: smallint("num_guests").notNull().default(1),
   minNumBeds: smallint("min_num_beds").default(1),
   minNumBedrooms: smallint("min_num_bedrooms").default(1),
-  propertyType: pgEnum("propertyType", PROPERTY_TYPES)("propertyType"),
+  propertyType: pgEnum("property_type", PROPERTY_TYPES)("property_type"),
   note: varchar("note", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
