@@ -23,9 +23,7 @@ export const offersRouter = createTRPCRouter({
             },
             with: {
               madeByUser: {
-                columns: {
-                  id: true,
-                },
+                columns: { id: true },
               },
             },
           },
@@ -52,6 +50,42 @@ export const offersRouter = createTRPCRouter({
         .update(requests)
         .set({ isActive: false })
         .where(eq(offers.id, offerDetails.request.id));
+    }),
+
+  getByRequestId: protectedProcedure
+    .input(createSelectSchema(requests).pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const requestDetails = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+        columns: {},
+        with: {
+          madeByUser: {
+            columns: { id: true },
+          },
+        },
+      });
+
+      if (requestDetails?.madeByUser?.id !== ctx.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+
+      const offersForRequest = await ctx.db.query.offers.findMany({
+        where: eq(offers.id, input.id),
+        columns: {
+          createdAt: true,
+        },
+        with: {
+          property: {
+            with: {
+              host: true,
+            },
+          },
+        },
+      });
+
+      return offersForRequest;
     }),
 
   create: roleRestrictedProcedure(["admin", "host"])
