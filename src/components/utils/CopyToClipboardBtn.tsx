@@ -1,3 +1,4 @@
+import { errorToast } from "@/utils/toasts";
 import { useRef, useState } from "react";
 
 export default function CopyToClipboardBtn({
@@ -19,7 +20,9 @@ export default function CopyToClipboardBtn({
       if (timeoutId?.current) {
         clearTimeout(timeoutId.current);
       }
-      void navigator.clipboard.writeText(message);
+      navigator.clipboard.writeText(message).catch(() => {
+        errorToast("Couldn't copy to clipboard");
+      });
       setJustCopied(true);
       timeoutId.current = setTimeout(() => {
         setJustCopied(false);
