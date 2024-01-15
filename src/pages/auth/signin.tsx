@@ -8,14 +8,12 @@ import type {
 import { getProviders, signIn } from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/server/auth";
-import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import * as z from "zod";
 import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import Icons from "@/components/ui/icons";
-import Navbar from "@/components/navbar";
 import {
   Form,
   FormControl,
@@ -28,6 +26,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
+import MainLayout from "@/components/layouts/MainLayout";
 
 const formSchema = z
   .object({
@@ -57,81 +56,73 @@ export default function SignIn({
   }
 
   return (
-    <>
-      <div className="flex h-screen flex-col">
-        <Navbar />
-        <Head>
-          <title>Log in | Tramona</title>
-        </Head>
-        <main className="flex flex-1">
-          <div className="grid flex-1 place-items-center p-4">
-            <div className="w-[20rem] space-y-4">
-              <h1 className="text-4xl font-bold tracking-wide">Log in</h1>
-              <Link
-                href="/signup"
-                className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline"
-              >
-                Don&apos;t have an account? Sign up
-              </Link>
+    <MainLayout pageTitle="Sign in">
+      <div className="flex items-stretch h-screen">
+        <div className="grid flex-1 place-items-center p-4">
+          <div className="w-[20rem] space-y-4">
+            <h1 className="text-4xl font-bold tracking-wide">Log in</h1>
+            <Link
+              href="/signup"
+              className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline"
+            >
+              Don&apos;t have an account? Sign up
+            </Link>
 
-              <section className="flex flex-col items-center justify-center">
-                <div className="w-full space-y-5">
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(handleSubmit)}
-                      className="space-y-4"
-                    >
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input {...field} autoFocus />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormMessage />
-                      <Button type="submit" className="w-full">
-                        {/* <Button isLoading={form.formState.isSubmitting} type="submit" className="w-full"> */}
-                        Sign in with Email
-                      </Button>
-                    </form>
-                  </Form>
-                </div>
+            <section className="flex flex-col items-center justify-center">
+              <div className="w-full space-y-5">
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(handleSubmit)}
+                    className="space-y-4"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input {...field} autoFocus />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormMessage />
+                    <Button type="submit" className="w-full">
+                      {/* <Button isLoading={form.formState.isSubmitting} type="submit" className="w-full"> */}
+                      Sign in with Email
+                    </Button>
+                  </form>
+                </Form>
+              </div>
 
-                <div className="my-5">
-                  {providers &&
-                    Object.values(providers).map((provider) => {
-                      return (
-                        <div key={provider.name}>
-                          <button onClick={() => signIn(provider.id)}>
-                            {provider.name && (
-                              <Icons iconName={provider.name} />
-                            )}
-                          </button>
-                        </div>
-                      );
-                    })}
-                </div>
-              </section>
-            </div>
+              <div className="my-5">
+                {providers &&
+                  Object.values(providers).map((provider) => {
+                    return (
+                      <div key={provider.name}>
+                        <button onClick={() => signIn(provider.id)}>
+                          {provider.name && <Icons iconName={provider.name} />}
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
+            </section>
           </div>
-          <div className="relative hidden flex-1 lg:block">
-            <Image
-              src="/assets/images/house.jpg"
-              alt=""
-              fill
-              priority
-              className="absolute hidden object-cover lg:block"
-            />
-          </div>
-        </main>
+        </div>
+        <div className="relative hidden flex-1 lg:block">
+          <Image
+            src="/assets/images/house.jpg"
+            alt=""
+            fill
+            priority
+            className="absolute hidden object-cover lg:block"
+          />
+        </div>
       </div>
-    </>
+    </MainLayout>
   );
 }
 
