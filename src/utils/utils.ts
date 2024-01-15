@@ -74,3 +74,22 @@ export function formatDateRangeFromStrs({
 
   return formatDateRange({ from: fromDate, to: toDate });
 }
+
+export function formatArrayToString(arr: string[]) {
+  if (arr.length === 0) {
+    return "";
+  } else if (arr.length === 1) {
+    return arr[0]!;
+  } else if (arr.length === 2) {
+    return `${arr[0]} and ${arr[1]}`;
+  } else {
+    const lastItem = arr.pop();
+    const joinedItems = arr.join(", ");
+    return `${joinedItems}, and ${lastItem}`;
+  }
+}
+
+// Example usage:
+const inputArray = ["one", "two", "three"];
+const formattedString = formatArrayToString(inputArray);
+console.log(formattedString);
