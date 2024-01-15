@@ -23,10 +23,9 @@ const buttonVariants = cva(
           "w-full bg-accent/70 text-zinc-500 hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50",
         filledInput:
           "w-full bg-primary-foreground font-normal text-black hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50",
-        darkPrimary: "bg-black text-white font-bold text-lg rounded-3xl",
-        darkOutline: "border-2 border-black font-bold text-lg rounded-3xl",
-        darkOutlineWhite:
-          "border-2 border-white text-white font-bold text-lg rounded-3xl",
+        darkPrimary: "bg-black text-white hover:bg-black/80",
+        darkOutline: "border-2 border-black hover:bg-zinc-200",
+        darkOutlineWhite: "border-2 border-white text-white",
         follow: "bg-red-500 text-white rounded-3xl",
       },
       size: {
