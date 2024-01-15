@@ -1,11 +1,59 @@
-import { createTRPCRouter, roleRestrictedProcedure } from "@/server/api/trpc";
-import { offers } from "@/server/db/schema";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  roleRestrictedProcedure,
+} from "@/server/api/trpc";
+import { offers, requests } from "@/server/db/schema";
 import { formatArrayToString } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const offersRouter = createTRPCRouter({
+  accept: protectedProcedure
+    .input(createSelectSchema(offers).pick({ id: true }))
+    .mutation(async ({ ctx, input }) => {
+      const offerDetails = await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.id),
+        columns: {},
+        with: {
+          request: {
+            columns: {
+              id: true,
+            },
+            with: {
+              madeByUser: {
+                columns: {
+                  id: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // request must still exist
+      if (!offerDetails?.request) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      // you can only accept your own offers
+      if (offerDetails.request.madeByUser.id !== ctx.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+
+      // deactivate the request
+      // TODO: payments (make sure to do a batch write)
+      await ctx.db
+        .update(requests)
+        .set({ isActive: false })
+        .where(eq(offers.id, offerDetails.request.id));
+    }),
+
   create: roleRestrictedProcedure(["admin", "host"])
     .input(createInsertSchema(offers))
     .mutation(async ({ ctx, input }) => {
