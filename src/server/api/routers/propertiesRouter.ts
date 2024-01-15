@@ -38,6 +38,7 @@ export const propertiesRouter = createTRPCRouter({
             ...input,
             hostId: null, // unnecessary, just for clarity
           });
+          return;
       }
     }),
 
@@ -48,15 +49,17 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const request = await ctx.db.query.properties.findFirst({
-        where: eq(properties.id, input.id),
-        columns: {
-          hostId: true,
-        },
-      });
+      if (ctx.user.role === "host") {
+        const request = await ctx.db.query.properties.findFirst({
+          where: eq(properties.id, input.id),
+          columns: {
+            hostId: true,
+          },
+        });
 
-      if (request?.hostId !== ctx.user.id && ctx.user.role === "admin") {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+        if (request?.hostId !== ctx.user.id) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
       }
 
       await ctx.db.delete(properties).where(eq(properties.id, input.id));
