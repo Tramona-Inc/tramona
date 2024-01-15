@@ -1,12 +1,12 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { requests, users } from "@/server/db/schema";
+import { requests } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const requestsRouter = createTRPCRouter({
-  getAllOutgoing: protectedProcedure.query(async ({ ctx }) => {
-    const requestsMade = await ctx.db.query.requests
+  getMyRequests: protectedProcedure.query(async ({ ctx }) => {
+    const myRequests = await ctx.db.query.requests
       .findMany({
         where: eq(requests.userId, ctx.user.id),
         columns: {
@@ -44,8 +44,21 @@ export const requestsRouter = createTRPCRouter({
         }),
       );
 
+    const activeRequests = myRequests
+      .filter((request) => request.isActive)
+      .sort(
+        (a, b) =>
+          b.numOffers - a.numOffers ||
+          b.createdAt.getTime() - a.createdAt.getTime(),
+      );
+
+    const inactiveRequests = myRequests
+      .filter((request) => !request.isActive)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
     return {
-      requestsMade,
+      activeRequests,
+      inactiveRequests,
     };
   }),
 
