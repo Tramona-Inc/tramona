@@ -7,7 +7,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 export const requestsRouter = createTRPCRouter({
   getAllOutgoing: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.session.user.id),
+      where: eq(users.id, ctx.user.id),
       columns: {},
       with: {
         requestsMade: {
@@ -59,11 +59,10 @@ export const requestsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const newRequest = {
+      await ctx.db.insert(requests).values({
         ...input,
-        userId: ctx.session.user.id,
-      };
-      await ctx.db.insert(requests).values(newRequest);
+        userId: ctx.user.id,
+      });
     }),
 
   delete: protectedProcedure
@@ -80,7 +79,7 @@ export const requestsRouter = createTRPCRouter({
         },
       });
 
-      if (request?.userId !== ctx.session.user.id) {
+      if (request?.userId !== ctx.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
