@@ -8,7 +8,7 @@ import HeaderTopRight from "./HeaderTopRight";
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 flex items-center bg-white px-4 py-2 text-sm shadow-md sm:py-4 sm:text-base">
-      <div className="flex min-w-0 flex-1 gap-4">
+      <div className="flex flex-1 gap-4">
         <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
           <TramonaIcon /> Tramona
         </Link>
@@ -21,7 +21,7 @@ export default function Header() {
         <HeaderLink href="/feed">Social Feed</HeaderLink>
       </div>
 
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+      <div className="flex flex-1 items-center justify-end gap-2">
         <HeaderTopRight />
       </div>
     </header>
