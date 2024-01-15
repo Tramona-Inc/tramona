@@ -11,10 +11,18 @@ import {
   varchar,
   primaryKey,
   pgEnum,
+  unique,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
 export const REFERRAL_CODE_LENGTH = 7;
+export const USER_ROLES = ["guest", "host", "admin"] as const;
+export const PROPERTY_TYPES = [
+  "house",
+  "guesthouse",
+  "apartment",
+  "room",
+] as const;
 
 // the users, accounts, sessions, and verificationTokens tables are all from nextauth
 // (except for the custom fields on the users table)
@@ -32,7 +40,7 @@ export const users = pgTable("user", {
   referralCodeUsed: varchar("referral_code_used", {
     length: REFERRAL_CODE_LENGTH,
   }),
-  role: pgEnum("role", ["admin", "guest", "host"])("role").default("guest"),
+  role: pgEnum("role", USER_ROLES)("role").default("guest"),
 });
 
 export const accounts = pgTable(
@@ -104,37 +112,38 @@ export const requests = pgTable("requests", {
   numGuests: smallint("num_guests").notNull().default(1),
   minNumBeds: smallint("min_num_beds").default(1),
   minNumBedrooms: smallint("min_num_bedrooms").default(1),
-  propertyType: pgEnum("propertyType", [
-    "house",
-    "guesthouse",
-    "apartment",
-    "room",
-  ])("propertyType"),
+  propertyType: pgEnum("propertyType", PROPERTY_TYPES)("propertyType"),
   note: varchar("note", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const properties = pgTable("properites", {
-  id: serial("id").primaryKey(),
-  hostId: text("host_id").references(() => users.id),
-  name: varchar("name", { length: 255 }).notNull(),
+export const properties = pgTable(
+  "properites",
+  {
+    id: serial("id").primaryKey(),
+    hostId: text("host_id").references(() => users.id),
+    name: varchar("name", { length: 255 }).notNull(),
 
-  // for when blake/preju manually upload, otherwise get the host's name via hostId
-  hostName: varchar("host_name", { length: 255 }),
+    // for when blake/preju manually upload, otherwise get the host's name via hostId
+    hostName: varchar("host_name", { length: 255 }),
 
-  // how many guests does this property accomodate at most?
-  maxNumGuests: smallint("max_num_guests").notNull(),
-  numBeds: smallint("num_beds").notNull(),
-  numBedrooms: smallint("num_bedrooms").notNull(),
-  avgRating: doublePrecision("avg_rating").notNull(),
-  numRatings: integer("num_ratings").notNull(),
-  airbnbUrl: varchar("airbnb_url").notNull(),
-  imageUrls: varchar("image_url").array().notNull(),
-  originalPrice: integer("original_price"), // in cents
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+    // how many guests does this property accomodate at most?
+    maxNumGuests: smallint("max_num_guests").notNull(),
+    numBeds: smallint("num_beds").notNull(),
+    numBedrooms: smallint("num_bedrooms").notNull(),
+    avgRating: doublePrecision("avg_rating").notNull(),
+    numRatings: integer("num_ratings").notNull(),
+    airbnbUrl: varchar("airbnb_url").notNull(),
+    imageUrls: varchar("image_url").array().notNull(),
+    originalPrice: integer("original_price"), // in cents
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    unq: unique().on(t.airbnbUrl),
+  }),
+);
 
 export const offers = pgTable("offer", {
   id: serial("id").primaryKey(),
