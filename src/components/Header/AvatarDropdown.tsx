@@ -1,61 +1,24 @@
-import { signIn, signOut, useSession } from "next-auth/react";
-import { Button } from "./ui/button";
+import { signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import UserAvatar from "./UserAvatar";
+} from "../ui/dropdown-menu";
+import UserAvatar from "../UserAvatar";
 import { type Session } from "next-auth";
 import Link from "next/link";
 import { api } from "@/utils/api";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
 
-export default function HeaderTopRight() {
-  const { data: session, status } = useSession();
-
-  switch (status) {
-    case "loading":
-      return <div className="h-10" />;
-    case "unauthenticated":
-      return (
-        <>
-          <LogInBtn />
-          <SignUpBtn />
-        </>
-      );
-    case "authenticated":
-      return <AvatarDropdown session={session} />;
+export default function AvatarDropdown({ session }: { session: Session }) {
+  const { data } = api.users.me.useQuery();
+  if (!data) {
+    return <Skeleton className="h-10 w-10 rounded-full" />;
   }
-}
 
-function LogInBtn() {
-  return (
-    <Button
-      className="rounded-full"
-      variant="darkOutline"
-      onClick={() => signIn()}
-    >
-      Log in
-    </Button>
-  );
-}
-
-function SignUpBtn() {
-  return (
-    <Button
-      className="rounded-full"
-      variant="darkPrimary"
-      onClick={() => signIn()}
-    >
-      Sign up
-    </Button>
-  );
-}
-
-function AvatarDropdown({ session }: { session: Session }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
@@ -71,6 +34,18 @@ function AvatarDropdown({ session }: { session: Session }) {
       >
         <DropdownTop session={session} />
         <DropdownMenuSeparator />
+        {data.role === "admin" && (
+          <>
+            <DropdownLink href="/admin">Admin Dashboard</DropdownLink>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        {data.role === "host" && (
+          <>
+            <DropdownLink href="/host">Host Dashboard</DropdownLink>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownLink href="/">Home</DropdownLink>
         <DropdownLink href="/requests">Your Requests</DropdownLink>
         <DropdownLink href="/profile">Profile</DropdownLink>
@@ -111,8 +86,8 @@ function RoleBadge() {
   if (!data) return null;
 
   return (
-    <Badge variant="secondary" size="sm">
-      {data.role.toLocaleUpperCase()}
+    <Badge variant="secondary" size="sm" className="uppercase">
+      {data.role}
     </Badge>
   );
 }
