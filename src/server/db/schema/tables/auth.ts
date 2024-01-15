@@ -14,8 +14,9 @@ import { type AdapterAccount } from "next-auth/adapters";
 // https://authjs.dev/reference/adapter/drizzle
 
 export const REFERRAL_CODE_LENGTH = 7;
+export const ALL_ROLES = ["guest", "host", "admin"] as const;
 
-export const roleEnum = pgEnum("role", ["guest", "host", "admin"]);
+export const roleEnum = pgEnum("role", ALL_ROLES);
 
 export const users = pgTable("user", {
   // nextauth fields

@@ -7,7 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
-import { users } from "../db/schema";
+import { ALL_ROLES, users } from "../db/schema";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
@@ -134,7 +134,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 });
 
 export const roleRestrictedProcedure = <
-  TAllowedRoles extends (typeof users.$inferSelect.role)[],
+  TAllowedRoles extends readonly (typeof users.$inferSelect.role)[],
 >(
   allowedRoles: TAllowedRoles,
 ) =>
@@ -165,3 +165,5 @@ export const roleRestrictedProcedure = <
       },
     });
   });
+
+export const roleBasedProcedure = roleRestrictedProcedure(ALL_ROLES);
