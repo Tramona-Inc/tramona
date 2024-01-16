@@ -188,7 +188,7 @@ devDependencies:
     specifier: ^10.4.14
     version: 10.4.16(postcss@8.4.33)
   drizzle-kit:
-    specifier: ^0.20.12
+    specifier: ^0.20.13
     version: 0.20.13
   embla-carousel:
     specifier: 8.0.0-rc19

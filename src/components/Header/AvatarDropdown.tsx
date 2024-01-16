@@ -1,4 +1,4 @@
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,16 +8,13 @@ import {
 } from "../ui/dropdown-menu";
 import UserAvatar from "../UserAvatar";
 import { type Session } from "next-auth";
+import { ALL_ROLES } from "@/server/db/schema";
 import Link from "next/link";
 import { api } from "@/utils/api";
 import { Badge } from "../ui/badge";
-import { Skeleton } from "../ui/skeleton";
 
 export default function AvatarDropdown({ session }: { session: Session }) {
-  const { data } = api.users.me.useQuery();
-  if (!data) {
-    return <Skeleton className="h-10 w-10 rounded-full" />;
-  }
+  console.log(session.user.role);
 
   return (
     <DropdownMenu>
@@ -34,13 +31,13 @@ export default function AvatarDropdown({ session }: { session: Session }) {
       >
         <DropdownTop session={session} />
         <DropdownMenuSeparator />
-        {data.role === "admin" && (
+        {session.user.role === ALL_ROLES[0] && (
           <>
             <DropdownLink href="/admin">Admin Dashboard</DropdownLink>
             <DropdownMenuSeparator />
           </>
         )}
-        {data.role === "host" && (
+        {session.user.role === ALL_ROLES[1] && (
           <>
             <DropdownLink href="/host">Host Dashboard</DropdownLink>
             <DropdownMenuSeparator />
