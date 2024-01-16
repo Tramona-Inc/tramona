@@ -1,13 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
 import * as schema from "./db/schema/tables/auth"; // this is where your custom tables are defined
 import { and, eq } from "drizzle-orm";
-import { type PgDatabase } from "drizzle-orm/pg-core";
 import { type Awaitable } from "next-auth";
 import { type AdapterUser, type Adapter } from "next-auth/adapters";
+import { PgDatabase } from "drizzle-orm/pg-core";
+import { ALL_ROLES } from "./db/schema/tables/auth";
 
 type CustomAdapter = Omit<Adapter, "createUser"> & {
   createUser: (
@@ -26,7 +22,7 @@ export function CustomPgDrizzleAdapter(
         .insert(users)
         .values({ ...data, id: crypto.randomUUID(), role: data.role }) // added role
         .returning()
-        .then((res) => res[0] ?? null);
+        .then((res) => res[0]!);
     },
     async getUser(data) {
       return await client
@@ -47,7 +43,7 @@ export function CustomPgDrizzleAdapter(
         .insert(sessions)
         .values(data)
         .returning()
-        .then((res) => res[0]);
+        .then((res) => res[0]!);
     },
     async getSessionAndUser(data) {
       return await client
@@ -70,7 +66,7 @@ export function CustomPgDrizzleAdapter(
         .set(data)
         .where(eq(users.id, data.id))
         .returning()
-        .then((res) => res[0]);
+        .then((res) => res[0]!);
     },
     async updateSession(data) {
       return await client
@@ -85,22 +81,20 @@ export function CustomPgDrizzleAdapter(
         .insert(accounts)
         .values(rawAccount)
         .returning()
-        .then((res) => res[0]);
+        .then((res) => res[0]!);
 
       // Drizzle will return `null` for fields that are not defined.
       // However, the return type is expecting `undefined`.
-      const account = {
+      return {
         ...updatedAccount,
-        access_token: updatedAccount.accessToken ?? undefined,
-        token_type: updatedAccount.tokenType ?? undefined,
-        id_token: updatedAccount.idToken ?? undefined,
-        refresh_token: updatedAccount.refreshToken ?? undefined,
+        access_token: updatedAccount.access_token ?? undefined,
+        token_type: updatedAccount.token_type ?? undefined,
+        id_token: updatedAccount.id_token ?? undefined,
+        refresh_token: updatedAccount.refresh_token ?? undefined,
         scope: updatedAccount.scope ?? undefined,
-        expires_at: updatedAccount.expiresAt ?? undefined,
-        session_state: updatedAccount.sessionState ?? undefined,
+        expires_at: updatedAccount.expires_at ?? undefined,
+        session_state: updatedAccount.session_state ?? undefined,
       };
-
-      return account;
     },
     async getUserByAccount(account) {
       const dbAccount =
@@ -120,7 +114,7 @@ export function CustomPgDrizzleAdapter(
         return null;
       }
 
-      return dbAccount.users;
+      return dbAccount.user;
     },
     async deleteSession(sessionToken) {
       const session = await client
@@ -162,7 +156,7 @@ export function CustomPgDrizzleAdapter(
         .then((res) => res[0] ?? null);
     },
     async unlinkAccount(account) {
-      const { type, provider, providerAccountId, userId } = await client
+      const deletedAccount = await client
         .delete(accounts)
         .where(
           and(
@@ -173,7 +167,12 @@ export function CustomPgDrizzleAdapter(
         .returning()
         .then((res) => res[0] ?? null);
 
-      return { provider, type, providerAccountId, userId };
+      if (deletedAccount) {
+        const { provider, type, providerAccountId, userId } = deletedAccount;
+        return { provider, type, providerAccountId, userId };
+      }
+
+      return undefined;
     },
   };
 }
