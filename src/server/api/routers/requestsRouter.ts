@@ -45,7 +45,8 @@ export const requestsRouter = createTRPCRouter({
       );
 
     const activeRequests = myRequests
-      .filter((request) => request.isActive)
+      .filter((request) => request.resolvedAt === null)
+      .map((request) => ({ ...request, resolvedAt: null })) // because ts is dumb
       .sort(
         (a, b) =>
           b.numOffers - a.numOffers ||
@@ -53,7 +54,11 @@ export const requestsRouter = createTRPCRouter({
       );
 
     const inactiveRequests = myRequests
-      .filter((request) => !request.isActive)
+      .filter((request) => request.resolvedAt !== null)
+      .map((request) => ({
+        ...request,
+        resolvedAt: request.resolvedAt ?? new Date(),
+      })) // because ts is dumb, new Date will never actually happen
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     return {

@@ -17,7 +17,6 @@ export const requests = pgTable("requests", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  isActive: boolean("is_active").notNull().default(true),
   maxPreferredPrice: integer("max_preferred_price").notNull(), // in cents
   location: varchar("location", { length: 255 }).notNull(), // TODO: use postGIS
   checkIn: date("check_in").notNull(),
@@ -28,5 +27,5 @@ export const requests = pgTable("requests", {
   propertyType: propertyTypeEnum("property_type"),
   note: varchar("note", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
 });
