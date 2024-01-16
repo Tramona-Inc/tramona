@@ -7,15 +7,15 @@
  * need to use are documented accordingly near the end.
  */
 
-import { ALL_ROLES, users } from "../db/schema";
-import { initTRPC, TRPCError } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { type Session } from "next-auth";
-import superjson from "superjson";
-import { ZodError } from "zod";
-import { getServerAuthSession } from "@/server/auth";
-import { db } from "@/server/db";
-import { eq } from "drizzle-orm";
+import { ALL_ROLES, users } from '../db/schema';
+import { initTRPC, TRPCError } from '@trpc/server';
+import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
+import { type Session } from 'next-auth';
+import superjson from 'superjson';
+import { ZodError } from 'zod';
+import { getServerAuthSession } from '@/server/auth';
+import { db } from '@/server/db';
+import { eq } from 'drizzle-orm';
 
 /**
  * 1. CONTEXT
@@ -78,8 +78,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },
@@ -118,7 +117,7 @@ export const publicProcedure = t.procedure;
  */
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
 
   const { user, ...session } = ctx.session;
@@ -133,14 +132,12 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   });
 });
 
-export const roleRestrictedProcedure = <
-  TAllowedRoles extends readonly (typeof users.$inferSelect.role)[],
->(
+export const roleRestrictedProcedure = <TAllowedRoles extends readonly (typeof users.$inferSelect.role)[]>(
   allowedRoles: TAllowedRoles,
 ) =>
   t.procedure.use(async ({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
 
     const { user, ...session } = ctx.session;
@@ -150,10 +147,10 @@ export const roleRestrictedProcedure = <
       columns: { role: true },
     });
 
-    const role = data?.role ?? "guest";
+    const role = data?.role ?? 'guest';
 
     if (!allowedRoles.includes(role)) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
 
     return next({

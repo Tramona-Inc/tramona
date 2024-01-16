@@ -1,15 +1,12 @@
-import { errorToast } from "@/utils/toasts";
-import { useRef, useState } from "react";
+import { errorToast } from '@/utils/toasts';
+import { useRef, useState } from 'react';
 
 export default function CopyToClipboardBtn({
   message,
   render,
 }: {
   message: string;
-  render: (props: {
-    justCopied: boolean;
-    copyMessage: () => void;
-  }) => JSX.Element;
+  render: (props: { justCopied: boolean; copyMessage: () => void }) => JSX.Element;
 }) {
   const [justCopied, setJustCopied] = useState(false);
   const timeoutId = useRef<NodeJS.Timeout | null>(null);

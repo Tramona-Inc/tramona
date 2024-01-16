@@ -1,6 +1,6 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { users } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
+import { users } from '@/server/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const usersRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -13,7 +13,7 @@ export const usersRouter = createTRPCRouter({
     });
 
     return {
-      role: res?.role ?? "guest",
+      role: res?.role ?? 'guest',
       referralCodeUsed: res?.referralCodeUsed ?? null,
     };
   }),
