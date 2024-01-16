@@ -78,7 +78,7 @@ export const verificationTokens = pgTable(
 );
 
 export const referralCodes = pgTable("referral_codes", {
-  referral_code: varchar("referral_code", {
+  referralCode: varchar("referral_code", {
     length: REFERRAL_CODE_LENGTH,
   }).primaryKey(),
   ownerId: text("owner_id")
