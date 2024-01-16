@@ -1,4 +1,4 @@
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +8,6 @@ import {
 } from "../ui/dropdown-menu";
 import UserAvatar from "../UserAvatar";
 import { type Session } from "next-auth";
-import { ALL_ROLES } from "@/server/db/schema";
 import Link from "next/link";
 import { api } from "@/utils/api";
 import { Badge } from "../ui/badge";
@@ -31,13 +30,13 @@ export default function AvatarDropdown({ session }: { session: Session }) {
       >
         <DropdownTop session={session} />
         <DropdownMenuSeparator />
-        {session.user.role === ALL_ROLES[0] && (
+        {session.user.role === "admin" && (
           <>
             <DropdownLink href="/admin">Admin Dashboard</DropdownLink>
             <DropdownMenuSeparator />
           </>
         )}
-        {session.user.role === ALL_ROLES[1] && (
+        {session.user.role === "host" && (
           <>
             <DropdownLink href="/host">Host Dashboard</DropdownLink>
             <DropdownMenuSeparator />

@@ -7,7 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
-import { ALL_ROLES, users } from "../db/schema";
+import { type User, users } from "../db/schema";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
@@ -117,7 +117,7 @@ export const publicProcedure = t.procedure;
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+  if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
@@ -134,12 +134,12 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 });
 
 export const roleRestrictedProcedure = <
-  TAllowedRoles extends readonly (typeof users.$inferSelect.role)[],
+  TAllowedRoles extends readonly User["role"][],
 >(
   allowedRoles: TAllowedRoles,
 ) =>
   t.procedure.use(async ({ ctx, next }) => {
-    if (!ctx.session || !ctx.session.user) {
+    if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
@@ -165,5 +165,3 @@ export const roleRestrictedProcedure = <
       },
     });
   });
-
-export const roleBasedProcedure = roleRestrictedProcedure(ALL_ROLES);

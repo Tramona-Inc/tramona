@@ -28,3 +28,5 @@ export const requests = pgTable("requests", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
 });
+
+export type Request = typeof requests.$inferSelect;

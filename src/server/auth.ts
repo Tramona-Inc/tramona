@@ -1,18 +1,14 @@
 import { type GetServerSidePropsContext } from "next";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
 import GithubProvider from "next-auth/providers/github";
 import EmailProvider from "next-auth/providers/email";
-
+import type { User } from "./db/schema";
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { pgTable } from "drizzle-orm/pg-core";
-import { type ALL_ROLES } from "./db/schema/tables/users";
 import { CustomPgDrizzleAdapter } from "./adapter";
 
 /**
@@ -23,16 +19,7 @@ import { CustomPgDrizzleAdapter } from "./adapter";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
-      id: string;
-      // ...other properties
-      role: (typeof ALL_ROLES)[number];
-    } & DefaultSession["user"];
-  }
-
-  interface User {
-    // ...other properties
-    role: (typeof ALL_ROLES)[number];
+    user: User;
   }
 }
 
@@ -43,14 +30,7 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-        role: user.role,
-      },
-    }),
+    session: ({ session, user: _ }) => session,
     // TODO: generate code when on new user is created (Maybe generate only when sharing the code)
     // async signIn({ user }) {
     //   const newReferralCode = generateReferralCode(); // Implement your logic to generate a new referral code
@@ -73,7 +53,7 @@ export const authOptions: NextAuthOptions = {
     // },
   },
   // adapter: DrizzleAdapter(db, pgTable) as Adapter,
-  adapter: CustomPgDrizzleAdapter(db) as Adapter, // New custom adapter
+  adapter: CustomPgDrizzleAdapter(db), // New custom adapter
   providers: [
     // DiscordProvider({
     //   clientId: env.DISCORD_CLIENT_ID,
