@@ -1,7 +1,7 @@
-import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format, isSameMonth, isSameYear } from "date-fns";
+import { REFERRAL_CODE_LENGTH } from "@/server/db/schema/tables/referralCodes";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

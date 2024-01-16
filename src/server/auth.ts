@@ -12,7 +12,7 @@ import EmailProvider from "next-auth/providers/email";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { pgTable } from "drizzle-orm/pg-core";
-import { type ALL_ROLES } from "./db/schema/tables/auth";
+import { type ALL_ROLES } from "./db/schema/tables/users";
 import { CustomPgDrizzleAdapter } from "./adapter";
 
 /**

@@ -10,7 +10,7 @@ import {
   unique,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import { users } from "./auth";
+import { users } from "./users";
 
 export const propertyTypeEnum = pgEnum("property_type", [
   "house",

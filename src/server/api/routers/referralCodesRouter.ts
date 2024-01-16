@@ -1,5 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { referralCodes, users } from "@/server/db/schema";
+import { users } from "@/server/db/schema";
+import { referralCodes } from "@/server/db/schema/tables/referralCodes";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { createSelectSchema } from "drizzle-zod";

@@ -1,9 +1,9 @@
-import * as schema from "./db/schema/tables/auth"; // this is where your custom tables are defined
+import * as schema from "@/server/db/schema";
 import { and, eq } from "drizzle-orm";
 import { type Awaitable } from "next-auth";
 import { type AdapterUser, type Adapter } from "next-auth/adapters";
 import { PgDatabase } from "drizzle-orm/pg-core";
-import { ALL_ROLES } from "./db/schema/tables/auth";
+import { ALL_ROLES } from "./db/schema/tables/users";
 
 type CustomAdapter = Omit<Adapter, "createUser"> & {
   createUser: (
