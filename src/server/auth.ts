@@ -12,8 +12,8 @@ import EmailProvider from "next-auth/providers/email";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { pgTable } from "drizzle-orm/pg-core";
-import { generateReferralCode } from "@/utils/utils";
-import { referralCodes } from "./db/schema";
+import { type ALL_ROLES } from "./db/schema/tables/auth";
+import { CustomPgDrizzleAdapter } from "./adapter";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -26,14 +26,14 @@ declare module "next-auth" {
     user: {
       id: string;
       // ...other properties
-      // role: UserRole;
+      role: (typeof ALL_ROLES)[number];
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    // ...other properties
+    role: (typeof ALL_ROLES)[number];
+  }
 }
 
 /**
@@ -48,6 +48,7 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
+        role: user.role,
       },
     }),
     // TODO: generate code when on new user is created (Maybe generate only when sharing the code)
@@ -71,7 +72,8 @@ export const authOptions: NextAuthOptions = {
     //   return Promise.resolve(true);
     // },
   },
-  adapter: DrizzleAdapter(db, pgTable) as Adapter,
+  // adapter: DrizzleAdapter(db, pgTable) as Adapter,
+  adapter: CustomPgDrizzleAdapter(db) as Adapter, // New custom adapter
   providers: [
     // DiscordProvider({
     //   clientId: env.DISCORD_CLIENT_ID,
