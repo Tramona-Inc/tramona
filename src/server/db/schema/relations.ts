@@ -1,8 +1,13 @@
 import { relations } from "drizzle-orm";
-import { accounts, referralCodes, sessions, users } from "./tables/auth";
-import { properties } from "./tables/properties";
-import { requests } from "./tables/requests";
-import { offers } from "./tables/offers";
+import {
+  accounts,
+  offers,
+  properties,
+  referralCodes,
+  requests,
+  sessions,
+  users,
+} from ".";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),

@@ -1,6 +1,5 @@
 import {
   serial,
-  boolean,
   date,
   integer,
   pgTable,
@@ -9,7 +8,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { users } from "./auth";
+import { users } from "./users";
 import { propertyTypeEnum } from "./properties";
 
 export const requests = pgTable("requests", {
