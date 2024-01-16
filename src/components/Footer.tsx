@@ -1,19 +1,11 @@
-import Link from "next/link";
-import type { ReactNode } from "react";
-import { useState } from "react";
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
 
-function FooterLink({
-  children,
-  href,
-  external = false,
-}: {
-  children: ReactNode;
-  href: string;
-  external?: boolean;
-}) {
+function FooterLink({ children, href, external = false }: { children: ReactNode; href: string; external?: boolean }) {
   return (
     <Link
-      target={external ? "_blank" : "_self"}
+      target={external ? '_blank' : '_self'}
       className="block py-0.5 underline-offset-4 hover:underline"
       href={href}
     >
@@ -32,7 +24,7 @@ export default function Footer() {
           <div>
             <p className="pb-2 text-lg font-medium text-zinc-300">Newsletter</p>
             <form
-              onSubmit={(e) => {
+              onSubmit={e => {
                 e.preventDefault();
                 // const formData = new FormData(e.currentTarget);
                 // const email = formData.get('email');
@@ -46,9 +38,7 @@ export default function Footer() {
                 type="email"
                 name="email"
                 required
-                placeholder={
-                  submittedEmail ? "Thanks, we'll be in touch!" : "Your Email"
-                }
+                placeholder={submittedEmail ? "Thanks, we'll be in touch!" : 'Your Email'}
                 className="w-full rounded-full bg-zinc-700 px-6 py-3 font-semibold text-white placeholder:text-zinc-400"
               />
               <button
@@ -72,24 +62,15 @@ export default function Footer() {
               <FooterLink href="/support">Report a Bug</FooterLink>
             </div>
             <div className="flex-1">
-              <FooterLink
-                external
-                href="https://www.instagram.com/shoptramona/"
-              >
+              <FooterLink external href="https://www.instagram.com/shoptramona/">
                 Instagram
               </FooterLink>
 
-              <FooterLink
-                external
-                href="https://www.facebook.com/ShopTramona?mibextid=LQQJ4d"
-              >
+              <FooterLink external href="https://www.facebook.com/ShopTramona?mibextid=LQQJ4d">
                 Facebook
               </FooterLink>
 
-              <FooterLink
-                external
-                href="https://www.linkedin.com/company/tramona/"
-              >
+              <FooterLink external href="https://www.linkedin.com/company/tramona/">
                 LinkedIn
               </FooterLink>
             </div>

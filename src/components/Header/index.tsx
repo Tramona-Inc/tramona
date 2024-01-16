@@ -1,9 +1,9 @@
-import Link from "next/link";
-import type { PropsWithChildren } from "react";
-import TramonaIcon from "../icons/TramonaIcon";
-import NavLink from "../utils/NavLink";
-import { cn } from "@/utils/utils";
-import HeaderTopRight from "./HeaderTopRight";
+import Link from 'next/link';
+import type { PropsWithChildren } from 'react';
+import TramonaIcon from '../icons/TramonaIcon';
+import NavLink from '../utils/NavLink';
+import { cn } from '@/utils/utils';
+import HeaderTopRight from './HeaderTopRight';
 
 export default function Header() {
   return (
@@ -35,8 +35,8 @@ function HeaderLink({ href, children }: PropsWithChildren<{ href: string }>) {
       render={({ selected }) => (
         <div
           className={cn(
-            "rounded-lg px-5 py-2 font-medium",
-            selected ? "bg-black text-white" : "text-black hover:bg-zinc-200",
+            'rounded-lg px-5 py-2 font-medium',
+            selected ? 'bg-black text-white' : 'text-black hover:bg-zinc-200',
           )}
         >
           {children}

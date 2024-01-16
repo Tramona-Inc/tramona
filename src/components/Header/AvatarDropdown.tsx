@@ -1,17 +1,17 @@
-import { signOut } from "next-auth/react";
+import { signOut } from 'next-auth/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import UserAvatar from "../UserAvatar";
-import { type Session } from "next-auth";
-import Link from "next/link";
-import { api } from "@/utils/api";
-import { Badge } from "../ui/badge";
-import { Skeleton } from "../ui/skeleton";
+} from '../ui/dropdown-menu';
+import UserAvatar from '../UserAvatar';
+import { type Session } from 'next-auth';
+import Link from 'next/link';
+import { api } from '@/utils/api';
+import { Badge } from '../ui/badge';
+import { Skeleton } from '../ui/skeleton';
 
 export default function AvatarDropdown({ session }: { session: Session }) {
   const { data } = api.users.me.useQuery();
@@ -22,25 +22,18 @@ export default function AvatarDropdown({ session }: { session: Session }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
-        <UserAvatar
-          name={session.user?.name}
-          email={session.user?.email}
-          image={session.user?.image}
-        />
+        <UserAvatar name={session.user?.name} email={session.user?.email} image={session.user?.image} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-72 py-4 text-lg font-medium"
-      >
+      <DropdownMenuContent align="end" className="w-72 py-4 text-lg font-medium">
         <DropdownTop session={session} />
         <DropdownMenuSeparator />
-        {data.role === "admin" && (
+        {data.role === 'admin' && (
           <>
             <DropdownLink href="/admin">Admin Dashboard</DropdownLink>
             <DropdownMenuSeparator />
           </>
         )}
-        {data.role === "host" && (
+        {data.role === 'host' && (
           <>
             <DropdownLink href="/host">Host Dashboard</DropdownLink>
             <DropdownMenuSeparator />
@@ -64,7 +57,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
 }
 
 function DropdownTop({ session }: { session: Session }) {
-  const title = session.user.name ?? session.user.email ?? "Anonymous";
+  const title = session.user.name ?? session.user.email ?? 'Anonymous';
   const subtitle = session.user.name ? session.user.email : null;
 
   return (
@@ -92,10 +85,7 @@ function RoleBadge() {
   );
 }
 
-function DropdownLink({
-  children,
-  href,
-}: React.PropsWithChildren<{ href: string }>) {
+function DropdownLink({ children, href }: React.PropsWithChildren<{ href: string }>) {
   return (
     <DropdownMenuItem>
       <Link href={href} className="flex w-full items-center gap-2 py-2 pl-3">

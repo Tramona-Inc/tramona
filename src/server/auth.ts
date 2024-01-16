@@ -1,19 +1,15 @@
-import { type GetServerSidePropsContext } from "next";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import {
-  getServerSession,
-  type DefaultSession,
-  type NextAuthOptions,
-} from "next-auth";
-import { type Adapter } from "next-auth/adapters";
-import GithubProvider from "next-auth/providers/github";
-import EmailProvider from "next-auth/providers/email";
+import { type GetServerSidePropsContext } from 'next';
+import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import { getServerSession, type DefaultSession, type NextAuthOptions } from 'next-auth';
+import { type Adapter } from 'next-auth/adapters';
+import GithubProvider from 'next-auth/providers/github';
+import EmailProvider from 'next-auth/providers/email';
 
-import { env } from "@/env";
-import { db } from "@/server/db";
-import { pgTable } from "drizzle-orm/pg-core";
-import { generateReferralCode } from "@/utils/utils";
-import { referralCodes } from "./db/schema";
+import { env } from '@/env';
+import { db } from '@/server/db';
+import { pgTable } from 'drizzle-orm/pg-core';
+import { generateReferralCode } from '@/utils/utils';
+import { referralCodes } from './db/schema';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -21,13 +17,13 @@ import { referralCodes } from "./db/schema";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string;
       // ...other properties
       // role: UserRole;
-    } & DefaultSession["user"];
+    } & DefaultSession['user'];
   }
 
   // interface User {
@@ -104,10 +100,10 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error",
-    newUser: "/auth/welcome",
-    signOut: "/",
+    signIn: '/auth/signin',
+    error: '/auth/error',
+    newUser: '/auth/welcome',
+    signOut: '/',
   },
 };
 
@@ -117,8 +113,8 @@ export const authOptions: NextAuthOptions = {
  * @see https://next-auth.js.org/configuration/nextjs
  */
 export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
+  req: GetServerSidePropsContext['req'];
+  res: GetServerSidePropsContext['res'];
 }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
 };
