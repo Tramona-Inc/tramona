@@ -27,3 +27,5 @@ export const offers = pgTable(
     acceptedAtIndex: index("accepted_at_index").on(t.acceptedAt),
   }),
 );
+
+export type Offer = typeof offers.$inferSelect;

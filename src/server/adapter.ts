@@ -1,26 +1,18 @@
 import * as schema from "@/server/db/schema";
 import { and, eq } from "drizzle-orm";
-import { type Awaitable } from "next-auth";
-import { type AdapterUser, type Adapter } from "next-auth/adapters";
+import { type Adapter } from "next-auth/adapters";
 import { PgDatabase } from "drizzle-orm/pg-core";
-import { ALL_ROLES } from "./db/schema/tables/users";
-
-type CustomAdapter = Omit<Adapter, "createUser"> & {
-  createUser: (
-    user: Omit<AdapterUser & { role: (typeof ALL_ROLES)[number] }, "id">,
-  ) => Awaitable<AdapterUser & { role: (typeof ALL_ROLES)[number] }>;
-};
 
 export function CustomPgDrizzleAdapter(
   client: InstanceType<typeof PgDatabase>,
-): CustomAdapter {
+): Adapter {
   const { users, accounts, sessions, verificationTokens } = schema;
 
   return {
     async createUser(data) {
       return await client
         .insert(users)
-        .values({ ...data, id: crypto.randomUUID(), role: data.role }) // added role
+        .values({ ...data, id: crypto.randomUUID() })
         .returning()
         .then((res) => res[0]!);
     },

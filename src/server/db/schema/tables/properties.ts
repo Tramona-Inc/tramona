@@ -45,3 +45,5 @@ export const properties = pgTable(
     uniqueAirbnbUrls: unique("unique_airbnb_urls").on(t.airbnbUrl),
   }),
 );
+
+export type Property = typeof properties.$inferSelect;
