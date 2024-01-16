@@ -44,11 +44,11 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
-      // deactivate the request
+      // resolve the request
       // TODO: payments (make sure to do a batch write)
       await ctx.db
         .update(requests)
-        .set({ isActive: false })
+        .set({ resolvedAt: new Date() })
         .where(eq(offers.id, offerDetails.request.id));
     }),
 
@@ -91,7 +91,6 @@ export const offersRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
     .input(createInsertSchema(offers))
     .mutation(async ({ ctx, input }) => {
-      // request cant be inactive
       const requestPromise = ctx.db.query.requests.findFirst({
         where: eq(offers.requestId, input.requestId),
       });
@@ -105,19 +104,28 @@ export const offersRouter = createTRPCRouter({
         propertyPromise,
       ]);
 
-      if (!request?.isActive) {
+      // request must exist,
+      if (!request) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "That request isn't active anymore",
+          message: "That request doesn't exist",
         });
       }
 
-      // host must own property (or its an admin)
+      // ...be unresolved,
+      if (request?.resolvedAt) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That request was already resolved",
+        });
+      }
+
+      // ...host must own property (or its an admin),
       if (ctx.user.role === "host" && property?.hostId !== ctx.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      // the property must fulfill the request
+      // ...and the property must fulfill the request
       const notEnoughSpace =
         property?.maxNumGuests != null &&
         request.numGuests > property.maxNumGuests;
@@ -156,6 +164,7 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
+      // yay
       await ctx.db.insert(offers).values(input);
     }),
 

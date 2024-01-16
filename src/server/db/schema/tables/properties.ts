@@ -40,9 +40,8 @@ export const properties = pgTable(
     propertyType: propertyTypeEnum("property_type").notNull(),
     originalPrice: integer("original_price"), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (t) => ({
-    unq: unique().on(t.airbnbUrl),
+    uniqueAirbnbUrls: unique("unique_airbnb_urls").on(t.airbnbUrl),
   }),
 );
