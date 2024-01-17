@@ -20,7 +20,7 @@ jobs:
             corepack prepare pnpm@latest-8 --activate
       - run:
           name: Install dependencies
-          command: cd frontend && pnpm install
+          command: pnpm install
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
@@ -28,7 +28,7 @@ jobs:
             - node_modules
       # - run:
       #     name: Build
-      #     command: cd frontend && pnpm run build
+      #     command: pnpm run build
       - run:
           name: Lint
-          command: cd frontend && pnpm run lint
+          command: pnpm run lint
