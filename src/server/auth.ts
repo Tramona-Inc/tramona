@@ -1,11 +1,15 @@
-import { type GetServerSidePropsContext } from 'next';
-import { type DefaultSession, type NextAuthOptions, getServerSession } from 'next-auth';
-import GithubProvider from 'next-auth/providers/github';
-import EmailProvider from 'next-auth/providers/email';
-import { env } from '@/env';
-import { db } from '@/server/db';
-import { CustomPgDrizzleAdapter } from './adapter';
-import { type User as TramonaUser } from './db/schema';
+import { type GetServerSidePropsContext } from "next";
+import {
+  type DefaultSession,
+  type NextAuthOptions,
+  getServerSession,
+} from "next-auth";
+import GithubProvider from "next-auth/providers/github";
+import EmailProvider from "next-auth/providers/email";
+import { env } from "@/env";
+import { db } from "@/server/db";
+import { CustomPgDrizzleAdapter } from "./adapter";
+import { type User as TramonaUser } from "./db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -13,7 +17,7 @@ import { type User as TramonaUser } from './db/schema';
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
-declare module 'next-auth' {
+declare module "next-auth" {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface User extends TramonaUser {}
 
@@ -87,10 +91,10 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error',
-    newUser: '/auth/welcome',
-    signOut: '/',
+    signIn: "/auth/signin",
+    error: "/auth/error",
+    newUser: "/auth/welcome",
+    signOut: "/",
   },
 };
 
@@ -100,8 +104,8 @@ export const authOptions: NextAuthOptions = {
  * @see https://next-auth.js.org/configuration/nextjs
  */
 export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext['req'];
-  res: GetServerSidePropsContext['res'];
+  req: GetServerSidePropsContext["req"];
+  res: GetServerSidePropsContext["res"];
 }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
 };

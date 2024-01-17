@@ -1,12 +1,12 @@
-import { createTRPCRouter, roleRestrictedProcedure } from '@/server/api/trpc';
-import { properties } from '@/server/db/schema';
-import { TRPCError } from '@trpc/server';
-import { eq } from 'drizzle-orm';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { createTRPCRouter, roleRestrictedProcedure } from "@/server/api/trpc";
+import { properties } from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const propertiesRouter = createTRPCRouter({
-  create: roleRestrictedProcedure(['admin', 'host'])
+  create: roleRestrictedProcedure(["admin", "host"])
     .input(
       createInsertSchema(properties, {
         imageUrls: z.string().url().array(),
@@ -23,15 +23,15 @@ export const propertiesRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       switch (ctx.user.role) {
-        case 'host':
+        case "host":
           await ctx.db.insert(properties).values({
             ...input,
             hostId: ctx.user.id,
           });
           return;
-        case 'admin':
+        case "admin":
           if (!input.hostName) {
-            throw new TRPCError({ code: 'BAD_REQUEST' });
+            throw new TRPCError({ code: "BAD_REQUEST" });
           }
 
           await ctx.db.insert(properties).values({
@@ -42,14 +42,14 @@ export const propertiesRouter = createTRPCRouter({
       }
     }),
 
-  delete: roleRestrictedProcedure(['admin', 'host'])
+  delete: roleRestrictedProcedure(["admin", "host"])
     .input(
       createSelectSchema(properties).pick({
         id: true,
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === 'host') {
+      if (ctx.user.role === "host") {
         const request = await ctx.db.query.properties.findFirst({
           where: eq(properties.id, input.id),
           columns: {
@@ -58,7 +58,7 @@ export const propertiesRouter = createTRPCRouter({
         });
 
         if (request?.hostId !== ctx.user.id) {
-          throw new TRPCError({ code: 'UNAUTHORIZED' });
+          throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
 
