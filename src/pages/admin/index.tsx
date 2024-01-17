@@ -11,15 +11,12 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createRequestInputSchema } from "@/server/api/schema/admin.schema";
-import { api } from "@/utils/api";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,21 +38,22 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { insertRequestSchema } from "@/server/db/schema";
 
 export default function Page() {
-  const form = useForm<z.infer<typeof createRequestInputSchema>>({
-    resolver: zodResolver(createRequestInputSchema),
+  const form = useForm<z.infer<typeof insertRequestSchema>>({
+    resolver: zodResolver(insertRequestSchema),
     defaultValues: {
-      max_preferred_price: 1,
+      maxPreferredPrice: 1,
       location: "",
-      num_guests: 1,
-      min_num_bed: 1,
-      min_num_bedrooms: 1,
+      numGuests: 1,
+      minNumBeds: 1,
+      minNumBedrooms: 1,
       note: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof createRequestInputSchema>) {
+  function onSubmit(values: z.infer<typeof insertRequestSchema>) {
     console.log(values);
   }
 
@@ -88,45 +86,53 @@ export default function Page() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="mt-5 space-y-5"
               >
-                <FormField
-                  control={form.control}
-                  name="max_preferred_price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Your max preferred price</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="120"
-                          type={"number"}
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(parseInt(e.target.value));
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Dubai" type="text" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <section className="flex flex-col gap-5 md:flex-row">
+                <section className="flex flex-row gap-5">
                   <FormField
                     control={form.control}
-                    name="check_in"
+                    name="maxPreferredPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Max Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="120"
+                            type={"number"}
+                            className="w-[100px]"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(parseInt(e.target.value));
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Dubai"
+                            type="text"
+                            className="w-full"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </section>
+
+                <section className="flex flex-row gap-5">
+                  <FormField
+                    control={form.control}
+                    name="checkIn"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Check-in date</FormLabel>
@@ -136,7 +142,7 @@ export default function Page() {
                               <Button
                                 variant={"outline"}
                                 className={cn(
-                                  "w-[240px] pl-3 text-left font-normal",
+                                  "w-[200px] pl-3 text-left font-normal",
                                   !field.value && "text-muted-foreground",
                                 )}
                               >
@@ -152,8 +158,10 @@ export default function Page() {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
+                              selected={new Date(field.value)}
+                              onSelect={(date) =>
+                                field.onChange(date?.toISOString())
+                              } // Convert date to ISO string
                               disabled={(date) => date < new Date()}
                             />
                           </PopoverContent>
@@ -165,7 +173,7 @@ export default function Page() {
 
                   <FormField
                     control={form.control}
-                    name="check_out"
+                    name="checkOut"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Check-in out</FormLabel>
@@ -175,7 +183,7 @@ export default function Page() {
                               <Button
                                 variant={"outline"}
                                 className={cn(
-                                  "w-[240px] pl-3 text-left font-normal",
+                                  "w-[200px] pl-3 text-left font-normal",
                                   !field.value && "text-muted-foreground",
                                 )}
                               >
@@ -191,8 +199,10 @@ export default function Page() {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
+                              selected={new Date(field.value)}
+                              onSelect={(date) =>
+                                field.onChange(date?.toISOString())
+                              } // Convert date to ISO string
                               disabled={(date) => date < new Date()}
                             />
                           </PopoverContent>
@@ -206,7 +216,7 @@ export default function Page() {
                 <section className="flex flex-row gap-5">
                   <FormField
                     control={form.control}
-                    name="num_guests"
+                    name="numGuests"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Guests</FormLabel>
@@ -228,7 +238,7 @@ export default function Page() {
 
                   <FormField
                     control={form.control}
-                    name="min_num_bed"
+                    name="minNumBeds"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Beds</FormLabel>
@@ -237,10 +247,7 @@ export default function Page() {
                             placeholder="1"
                             type={"number"}
                             min={1}
-                            {...field}
-                            onChange={(e) => {
-                              field.onChange(parseInt(e.target.value));
-                            }}
+                            value={field.value?.toString()}
                           />
                         </FormControl>
                         <FormMessage />
@@ -250,7 +257,7 @@ export default function Page() {
 
                   <FormField
                     control={form.control}
-                    name="min_num_bedrooms"
+                    name="minNumBedrooms"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Bedrooms</FormLabel>
@@ -259,10 +266,7 @@ export default function Page() {
                             placeholder="1"
                             type={"number"}
                             min={1}
-                            {...field}
-                            onChange={(e) => {
-                              field.onChange(parseInt(e.target.value));
-                            }}
+                            value={field.value?.toString()}
                           />
                         </FormControl>
                         <FormMessage />
@@ -273,7 +277,7 @@ export default function Page() {
 
                 <FormField
                   control={form.control}
-                  name="property_type"
+                  name="propertyType"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Property Type</FormLabel>
@@ -304,7 +308,8 @@ export default function Page() {
                         <Textarea
                           placeholder="Any notes about the property"
                           className="resize-none"
-                          {...field}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          value={field.value ?? ""}
                         />
                       </FormControl>
                       <FormMessage />
