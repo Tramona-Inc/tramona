@@ -62,8 +62,9 @@ function DropdownTop({ session }: { session: Session }) {
 
   return (
     <div className="pb-1 pl-3">
-      <p className="font-medium">
-        {title}
+      <div className="font-medium">
+        {name}
+
         <Badge
           variant="secondary"
           size="sm"
@@ -71,7 +72,7 @@ function DropdownTop({ session }: { session: Session }) {
         >
           {session.user.role}
         </Badge>
-      </p>
+      </div>
 
       {subtitle && <p className="text-sm text-zinc-600">{subtitle}</p>}
     </div>
