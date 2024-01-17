@@ -1,39 +1,32 @@
-import { signOut } from "next-auth/react";
+import { signOut } from 'next-auth/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import UserAvatar from "../UserAvatar";
-import { type Session } from "next-auth";
-import Link from "next/link";
-import { Badge } from "../ui/badge";
+} from '../ui/dropdown-menu';
+import UserAvatar from '../UserAvatar';
+import { type Session } from 'next-auth';
+import Link from 'next/link';
+import { Badge } from '../ui/badge';
 
 export default function AvatarDropdown({ session }: { session: Session }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
-        <UserAvatar
-          name={session.user.name}
-          email={session.user.email}
-          image={session.user.image}
-        />
+        <UserAvatar name={session.user.name} email={session.user.email} image={session.user.image} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-72 py-4 text-lg font-medium"
-      >
+      <DropdownMenuContent align="end" className="w-72 py-4 text-lg font-medium">
         <DropdownTop session={session} />
         <DropdownMenuSeparator />
-        {session.user.role === "admin" && (
+        {session.user.role === 'admin' && (
           <>
             <DropdownLink href="/admin">Admin Dashboard</DropdownLink>
             <DropdownMenuSeparator />
           </>
         )}
-        {session.user.role === "host" && (
+        {session.user.role === 'host' && (
           <>
             <DropdownLink href="/host">Host Dashboard</DropdownLink>
             <DropdownMenuSeparator />
@@ -57,7 +50,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
 }
 
 function DropdownTop({ session }: { session: Session }) {
-  const title = session.user.name ?? session.user.email ?? "Anonymous";
+  const title = session.user.name ?? session.user.email ?? 'Anonymous';
   const subtitle = session.user.name ? session.user.email : null;
 
   return (
@@ -65,11 +58,7 @@ function DropdownTop({ session }: { session: Session }) {
       <div className="font-medium">
         {title}
 
-        <Badge
-          variant="secondary"
-          size="sm"
-          className="ml-2 -translate-y-0.5 uppercase"
-        >
+        <Badge variant="secondary" size="sm" className="ml-2 -translate-y-0.5 uppercase">
           {session.user.role}
         </Badge>
       </div>
@@ -79,10 +68,7 @@ function DropdownTop({ session }: { session: Session }) {
   );
 }
 
-function DropdownLink({
-  children,
-  href,
-}: React.PropsWithChildren<{ href: string }>) {
+function DropdownLink({ children, href }: React.PropsWithChildren<{ href: string }>) {
   return (
     <DropdownMenuItem>
       <Link href={href} className="flex w-full items-center gap-2 py-2 pl-3">
