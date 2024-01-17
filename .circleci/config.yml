@@ -8,7 +8,7 @@ jobs:
       - checkout
       - restore_cache:
           name: Restore pnpm package cache
-          key: v1-cache-dependencies-{{ checksum "frontend/pnpm-lock.yaml" }}-{{ arch }}
+          key: v1-cache-dependencies-{{ checksum "pnpm-lock.yaml" }}-{{ arch }}
       - run:
           name: Install pnpm
           command: npm install -g pnpm
