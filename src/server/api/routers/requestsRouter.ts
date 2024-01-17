@@ -1,8 +1,8 @@
-import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
-import { requests } from '@/server/db/schema';
-import { TRPCError } from '@trpc/server';
-import { eq } from 'drizzle-orm';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { requests } from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -30,9 +30,11 @@ export const requestsRouter = createTRPCRouter({
           },
         },
       })
-      .then(res =>
-        res.map(request => {
-          const hostImages = request.offers.map(offer => offer.property.host?.image).filter(Boolean);
+      .then((res) =>
+        res.map((request) => {
+          const hostImages = request.offers
+            .map((offer) => offer.property.host?.image)
+            .filter(Boolean);
 
           const numOffers = request.offers.length;
 
@@ -43,11 +45,20 @@ export const requestsRouter = createTRPCRouter({
       );
 
     const activeRequests = myRequests
-      .filter(request => request.isActive)
-      .sort((a, b) => b.numOffers - a.numOffers || b.createdAt.getTime() - a.createdAt.getTime());
+      .filter((request) => request.resolvedAt === null)
+      .map((request) => ({ ...request, resolvedAt: null })) // because ts is dumb
+      .sort(
+        (a, b) =>
+          b.numOffers - a.numOffers ||
+          b.createdAt.getTime() - a.createdAt.getTime(),
+      );
 
     const inactiveRequests = myRequests
-      .filter(request => !request.isActive)
+      .filter((request) => request.resolvedAt !== null)
+      .map((request) => ({
+        ...request,
+        resolvedAt: request.resolvedAt ?? new Date(),
+      })) // because ts is dumb, new Date will never actually happen
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     return {
@@ -90,7 +101,7 @@ export const requestsRouter = createTRPCRouter({
       });
 
       if (request?.userId !== ctx.user.id) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' });
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       await ctx.db.delete(requests).where(eq(requests.id, input.id));

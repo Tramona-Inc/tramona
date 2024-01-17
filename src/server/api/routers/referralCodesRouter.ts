@@ -8,7 +8,7 @@ export const referralCodesRouter = createTRPCRouter({
   startUsingCode: protectedProcedure
     .input(
       createSelectSchema(referralCodes).pick({
-        code: true,
+        referralCode: true,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -27,7 +27,7 @@ export const referralCodesRouter = createTRPCRouter({
       }
 
       const code = await ctx.db.query.referralCodes.findFirst({
-        where: eq(referralCodes.code, input.code),
+        where: eq(referralCodes.referralCode, input.referralCode),
         columns: {
           ownerId: true,
         },
