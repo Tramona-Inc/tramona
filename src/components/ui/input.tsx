@@ -1,30 +1,30 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { cn } from "@/utils/utils";
-import { useState } from "react";
-import VisibleIcon from "../icons/VisibleIcon";
-import HiddenIcon from "../icons/HiddenIcon";
+import { cn } from '@/utils/utils';
+import { useState } from 'react';
+import VisibleIcon from '../icons/VisibleIcon';
+import HiddenIcon from '../icons/HiddenIcon';
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, value, defaultValue, ...props }, ref) => {
     const [showingPassword, setShowingPassword] = useState(false);
-    return type === "password" ? (
+    return type === 'password' ? (
       <div className="relative">
         <input
-          type={showingPassword ? "text" : "password"}
+          type={showingPassword ? 'text' : 'password'}
           className={cn(
-            "flex h-10 w-full rounded-md border border-input bg-primary-foreground px-3 py-2 text-sm text-black file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-auto",
+            'flex h-10 w-full rounded-md border border-input bg-primary-foreground px-3 py-2 text-sm text-black file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-auto',
             className,
           )}
           ref={ref}
-          value={defaultValue ?? value ?? ""}
+          value={defaultValue ?? value ?? ''}
           {...props}
         />
         <button
           type="button"
-          onClick={(e) => {
+          onClick={e => {
             e.preventDefault();
             setShowingPassword(!showingPassword);
           }}
@@ -37,7 +37,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-md border border-input bg-primary-foreground px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-auto",
+          'flex h-10 w-full rounded-md border border-input bg-primary-foreground px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-auto',
           className,
         )}
         ref={ref}
@@ -47,6 +47,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
   },
 );
-Input.displayName = "Input";
+Input.displayName = 'Input';
 
 export { Input };
