@@ -1,15 +1,15 @@
 import { type GetServerSidePropsContext } from "next";
 import {
-  getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  getServerSession,
 } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import EmailProvider from "next-auth/providers/email";
-import type { User } from "./db/schema";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { CustomPgDrizzleAdapter } from "./adapter";
+import { type User as TramonaUser } from "./db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -18,8 +18,11 @@ import { CustomPgDrizzleAdapter } from "./adapter";
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 declare module "next-auth" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface User extends TramonaUser {}
+
   interface Session extends DefaultSession {
-    user: User;
+    user: TramonaUser;
   }
 }
 
@@ -30,7 +33,9 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user: _ }) => session,
+    session: ({ session, user }) => {
+      return { ...session, user };
+    },
     // TODO: generate code when on new user is created (Maybe generate only when sharing the code)
     // async signIn({ user }) {
     //   const newReferralCode = generateReferralCode(); // Implement your logic to generate a new referral code
