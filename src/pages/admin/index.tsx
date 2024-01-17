@@ -306,10 +306,9 @@ export default function Page() {
                             <SelectItem value="townhouse">Townhouse</SelectItem>
                             <SelectItem value="apartment">Apartment</SelectItem>
                             <SelectItem value="house">House</SelectItem>
-                            {/* // TODO add guest house  */}
-                            {/* <SelectItem value="guesthouse">
+                            <SelectItem value="guesthouse">
                               Guest House
-                            </SelectItem> */}
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>

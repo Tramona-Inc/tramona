@@ -17,9 +17,8 @@ export const propertyTypeEnum = pgEnum("property_type", [
   "guesthouse",
   "apartment",
   "room",
+  "townhouse",
 ]);
-
-// TODO: add town house later and push
 
 export const properties = pgTable(
   "properties",
