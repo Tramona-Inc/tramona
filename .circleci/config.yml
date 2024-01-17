@@ -7,20 +7,22 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          name: Restore npm package cache
-          key: v1-cache-dependencies-{{ checksum "frontend/package-lock.json" }}-{{ arch }}
+          name: Restore pnpm package cache
+          key: v1-cache-dependencies-{{ checksum "frontend/pnpm-lock.yaml" }}-{{ arch }}
+      - run:
+          name: Install pnpm
+          command: npm install -g pnpm
       - run:
           name: Install dependencies
-          command: cd frontend && npm ci
+          command: cd frontend && pnpm install
       - save_cache:
-          name: Save npm package cache
+          name: Save pnpm package cache
           paths:
-            - ./frontend/node_modules
-          key: v1-cache-dependencies-{{ checksum "frontend/package-lock.json" }}-{{ arch }}
-      # TODO: Fix build and enable
+            - '~/.pnpm-store'
+          key: v1-cache-dependencies-{{ checksum "frontend/pnpm-lock.yaml" }}-{{ arch }}
       # - run:
       #     name: Build
-      #     command: cd frontend && npm run build
+      #     command: cd frontend && pnpm run build
       - run:
           name: Lint
-          command: cd frontend && npm run lint
+          command: cd frontend && pnpm run lint
