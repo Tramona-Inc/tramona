@@ -39,6 +39,9 @@ import { CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { insertRequestSchema } from "@/server/db/schema";
+import { useSession } from "next-auth/react";
+import router from "next/router";
+import { useEffect } from "react";
 
 export default function Page() {
   const form = useForm<z.infer<typeof insertRequestSchema>>({
@@ -55,6 +58,19 @@ export default function Page() {
 
   function onSubmit(values: z.infer<typeof insertRequestSchema>) {
     console.log(values);
+  }
+
+  const { data } = useSession();
+
+  // Only admin can access this page
+  useEffect(() => {
+    if (data?.user.role !== "admin") {
+      void router.push("/");
+    }
+  }, [data, router]);
+
+  if (!data || data?.user.role !== "admin") {
+    return null;
   }
 
   return (
