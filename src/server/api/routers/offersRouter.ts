@@ -3,10 +3,10 @@ import {
   protectedProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
-import { offers, requests } from "@/server/db/schema";
+import { offers, referralCodes, requests } from "@/server/db/schema";
 import { formatArrayToString } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const offersRouter = createTRPCRouter({
@@ -15,7 +15,7 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const offerDetails = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: {},
+        columns: { totalPrice: true },
         with: {
           request: {
             columns: {
@@ -44,12 +44,30 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
-      // resolve the request
-      // TODO: payments (make sure to do a batch write)
-      await ctx.db
-        .update(requests)
-        .set({ resolvedAt: new Date() })
-        .where(eq(offers.id, offerDetails.request.id));
+      await ctx.db.transaction(async (tx) => {
+        const results = await Promise.allSettled([
+          // resolve the request
+          tx
+            .update(requests)
+            .set({ resolvedAt: new Date() })
+            .where(eq(offers.id, offerDetails.request.id)),
+
+          // update referralCode
+          ctx.user.referralCodeUsed &&
+            tx
+              .update(referralCodes)
+              .set({
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
+              })
+              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+        ]);
+
+        if (results.some((result) => result.status === "rejected")) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        }
+      });
     }),
 
   getByRequestId: protectedProcedure
@@ -145,12 +163,15 @@ export const offersRouter = createTRPCRouter({
         property?.propertyType != null &&
         request.propertyType !== property.propertyType;
 
+      const tooExpensive = input.totalPrice > request.maxTotalPrice;
+
       if (notEnoughSpace || tooFewBeds || tooFewBedrooms || wrongPropertyType) {
         const messagesMap = [
           ["doesn't accomodate enough guests", notEnoughSpace],
           ["doesn't have enough beds", tooFewBeds],
           ["doesn't have enough bedrooms", tooFewBedrooms],
           ["is the wrong type", wrongPropertyType],
+          ["is too expensive", tooExpensive],
         ] as const;
 
         const errorMessage = formatArrayToString(
@@ -159,8 +180,7 @@ export const offersRouter = createTRPCRouter({
 
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "That property doesn't meet the requirements of the request",
-          cause: `It ${errorMessage}`,
+          message: `That property ${errorMessage}`,
         });
       }
 
