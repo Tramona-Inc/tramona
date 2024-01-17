@@ -1,5 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .map(s => s[0])
+    .slice(0, 2)
+    .join('');
+}
+
 export default function UserAvatar(props: {
   name: string | null | undefined;
   email: string | null | undefined;
@@ -13,12 +21,4 @@ export default function UserAvatar(props: {
       <AvatarFallback delayMs={600}>{fallback}</AvatarFallback>
     </Avatar>
   );
-}
-
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map(s => s[0])
-    .slice(0, 2)
-    .join('');
 }

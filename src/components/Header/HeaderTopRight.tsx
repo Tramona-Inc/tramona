@@ -2,6 +2,22 @@ import { signIn, useSession } from 'next-auth/react';
 import { Button } from '../ui/button';
 import AvatarDropdown from './AvatarDropdown';
 
+function LogInBtn() {
+  return (
+    <Button className="rounded-full" variant="darkOutline" onClick={() => signIn()}>
+      Log in
+    </Button>
+  );
+}
+
+function SignUpBtn() {
+  return (
+    <Button className="rounded-full" variant="darkPrimary" onClick={() => signIn()}>
+      Sign up
+    </Button>
+  );
+}
+
 export default function HeaderTopRight() {
   const { data: session, status } = useSession();
 
@@ -18,20 +34,4 @@ export default function HeaderTopRight() {
     case 'authenticated':
       return <AvatarDropdown session={session} />;
   }
-}
-
-function LogInBtn() {
-  return (
-    <Button className="rounded-full" variant="darkOutline" onClick={() => signIn()}>
-      Log in
-    </Button>
-  );
-}
-
-function SignUpBtn() {
-  return (
-    <Button className="rounded-full" variant="darkPrimary" onClick={() => signIn()}>
-      Sign up
-    </Button>
-  );
 }

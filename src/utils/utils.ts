@@ -86,4 +86,5 @@ export function formatArrayToString(arr: string[]) {
 // Example usage:
 const inputArray = ['one', 'two', 'three'];
 const formattedString = formatArrayToString(inputArray);
+// eslint-disable-next-line no-console
 console.log(formattedString);
