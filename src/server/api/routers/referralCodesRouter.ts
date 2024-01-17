@@ -1,8 +1,8 @@
-import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
-import { referralCodes, users } from '@/server/db/schema';
-import { TRPCError } from '@trpc/server';
-import { eq } from 'drizzle-orm';
-import { createSelectSchema } from 'drizzle-zod';
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { referralCodes, users } from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { createSelectSchema } from "drizzle-zod";
 
 export const referralCodesRouter = createTRPCRouter({
   startUsingCode: protectedProcedure
@@ -21,8 +21,8 @@ export const referralCodesRouter = createTRPCRouter({
 
       if (userDetails?.referralCodeUsed) {
         throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'You already used a referral code',
+          code: "BAD_REQUEST",
+          message: "You already used a referral code",
         });
       }
 
@@ -35,8 +35,8 @@ export const referralCodesRouter = createTRPCRouter({
 
       if (!code) {
         throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Invalid referral code',
+          code: "BAD_REQUEST",
+          message: "Invalid referral code",
         });
       }
 
@@ -49,7 +49,7 @@ export const referralCodesRouter = createTRPCRouter({
       });
 
       return {
-        codeOwnerName: referralCodeOwner?.name ?? 'an anonymous person',
+        codeOwnerName: referralCodeOwner?.name ?? "an anonymous person",
       };
     }),
 
@@ -63,11 +63,14 @@ export const referralCodesRouter = createTRPCRouter({
 
     if (!userDetails?.referralCodeUsed) {
       throw new TRPCError({
-        code: 'BAD_REQUEST',
+        code: "BAD_REQUEST",
         message: "You don't have a referral code",
       });
     }
 
-    await ctx.db.update(users).set({ referralCodeUsed: null }).where(eq(users.id, ctx.user.id));
+    await ctx.db
+      .update(users)
+      .set({ referralCodeUsed: null })
+      .where(eq(users.id, ctx.user.id));
   }),
 });

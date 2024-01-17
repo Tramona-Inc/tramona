@@ -1,37 +1,39 @@
-import { and, eq } from 'drizzle-orm';
-import { type Adapter } from 'next-auth/adapters';
-import { type PgDatabase } from 'drizzle-orm/pg-core';
-import { sessions, users, accounts, verificationTokens } from './db/schema';
+import { and, eq } from "drizzle-orm";
+import { type Adapter } from "next-auth/adapters";
+import { type PgDatabase } from "drizzle-orm/pg-core";
+import { sessions, users, accounts, verificationTokens } from "./db/schema";
 
-export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>): Adapter {
+export function CustomPgDrizzleAdapter(
+  client: InstanceType<typeof PgDatabase>,
+): Adapter {
   return {
     async createUser(data) {
       return await client
         .insert(users)
         .values({ ...data, id: crypto.randomUUID() })
         .returning()
-        .then(res => res[0]!);
+        .then((res) => res[0]!);
     },
     async getUser(data) {
       return await client
         .select()
         .from(users)
         .where(eq(users.id, data))
-        .then(res => res[0] ?? null);
+        .then((res) => res[0] ?? null);
     },
     async getUserByEmail(data) {
       return await client
         .select()
         .from(users)
         .where(eq(users.email, data))
-        .then(res => res[0] ?? null);
+        .then((res) => res[0] ?? null);
     },
     async createSession(data) {
       return await client
         .insert(sessions)
         .values(data)
         .returning()
-        .then(res => res[0]!);
+        .then((res) => res[0]!);
     },
     async getSessionAndUser(data) {
       return await client
@@ -42,11 +44,11 @@ export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>):
         .from(sessions)
         .where(eq(sessions.sessionToken, data))
         .innerJoin(users, eq(users.id, sessions.userId))
-        .then(res => res[0] ?? null);
+        .then((res) => res[0] ?? null);
     },
     async updateUser(data) {
       if (!data.id) {
-        throw new Error('No user id.');
+        throw new Error("No user id.");
       }
 
       return await client
@@ -54,7 +56,7 @@ export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>):
         .set(data)
         .where(eq(users.id, data.id))
         .returning()
-        .then(res => res[0]!);
+        .then((res) => res[0]!);
     },
     async updateSession(data) {
       return await client
@@ -62,14 +64,14 @@ export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>):
         .set(data)
         .where(eq(sessions.sessionToken, data.sessionToken))
         .returning()
-        .then(res => res[0]);
+        .then((res) => res[0]);
     },
     async linkAccount(rawAccount) {
       const updatedAccount = await client
         .insert(accounts)
         .values(rawAccount)
         .returning()
-        .then(res => res[0]!);
+        .then((res) => res[0]!);
 
       // Drizzle will return `null` for fields that are not defined.
       // However, the return type is expecting `undefined`.
@@ -90,10 +92,13 @@ export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>):
           .select()
           .from(accounts)
           .where(
-            and(eq(accounts.providerAccountId, account.providerAccountId), eq(accounts.provider, account.provider)),
+            and(
+              eq(accounts.providerAccountId, account.providerAccountId),
+              eq(accounts.provider, account.provider),
+            ),
           )
           .leftJoin(users, eq(accounts.userId, users.id))
-          .then(res => res[0])) ?? null;
+          .then((res) => res[0])) ?? null;
 
       if (!dbAccount) {
         return null;
@@ -106,7 +111,7 @@ export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>):
         .delete(sessions)
         .where(eq(sessions.sessionToken, sessionToken))
         .returning()
-        .then(res => res[0] ?? null);
+        .then((res) => res[0] ?? null);
 
       return session;
     },
@@ -115,17 +120,22 @@ export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>):
         .insert(verificationTokens)
         .values(token)
         .returning()
-        .then(res => res[0]);
+        .then((res) => res[0]);
     },
     async useVerificationToken(token) {
       try {
         return await client
           .delete(verificationTokens)
-          .where(and(eq(verificationTokens.identifier, token.identifier), eq(verificationTokens.token, token.token)))
+          .where(
+            and(
+              eq(verificationTokens.identifier, token.identifier),
+              eq(verificationTokens.token, token.token),
+            ),
+          )
           .returning()
-          .then(res => res[0] ?? null);
+          .then((res) => res[0] ?? null);
       } catch (err) {
-        throw new Error('No verification token found.');
+        throw new Error("No verification token found.");
       }
     },
     async deleteUser(id) {
@@ -133,14 +143,19 @@ export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>):
         .delete(users)
         .where(eq(users.id, id))
         .returning()
-        .then(res => res[0] ?? null);
+        .then((res) => res[0] ?? null);
     },
     async unlinkAccount(account) {
       const deletedAccount = await client
         .delete(accounts)
-        .where(and(eq(accounts.providerAccountId, account.providerAccountId), eq(accounts.provider, account.provider)))
+        .where(
+          and(
+            eq(accounts.providerAccountId, account.providerAccountId),
+            eq(accounts.provider, account.provider),
+          ),
+        )
         .returning()
-        .then(res => res[0] ?? null);
+        .then((res) => res[0] ?? null);
 
       if (deletedAccount) {
         const { provider, type, providerAccountId, userId } = deletedAccount;
