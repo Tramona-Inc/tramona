@@ -12,7 +12,9 @@
     "start": "next start",
     "lint": "next lint --max-warnings=0",
     "format": "prettier --write ./",
-    "storybook": "storybook dev -p 6006"
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "chromatic": "npx chromatic --project-token=chpt_e09628bd7bc2d55"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^0.3.14",
@@ -80,6 +82,7 @@
     "@storybook/nextjs": "^7.6.3",
     "@storybook/react": "^7.6.3",
     "@storybook/test": "^7.6.3",
+    "chromatic": "^10.1.0",
     "eslint-plugin-drizzle": "^0.2.3",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/eslint": "^8.44.7",
@@ -105,5 +108,7 @@
   "ct3aMetadata": {
     "initVersion": "7.25.1"
   },
-  "packageManager": "pnpm@8.14.1"
+  "packageManager": "pnpm@8.14.1",
+  "readme": "ERROR: No README data found!",
+  "_id": "tramona-trpc@0.1.0"
 }
