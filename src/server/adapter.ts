@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { type Adapter } from 'next-auth/adapters';
-import { PgDatabase } from 'drizzle-orm/pg-core';
+import { type PgDatabase } from 'drizzle-orm/pg-core';
 import { sessions, users, accounts, verificationTokens } from './db/schema';
 
 export function CustomPgDrizzleAdapter(client: InstanceType<typeof PgDatabase>): Adapter {
