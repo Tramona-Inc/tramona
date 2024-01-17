@@ -1,11 +1,11 @@
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 function getInitials(name: string) {
   return name
-    .split(' ')
-    .map(s => s[0])
+    .split(" ")
+    .map((s) => s[0])
     .slice(0, 2)
-    .join('');
+    .join("");
 }
 
 export default function UserAvatar(props: {
@@ -13,7 +13,9 @@ export default function UserAvatar(props: {
   email: string | null | undefined;
   image: string | null | undefined;
 }) {
-  const fallback = props.name ? getInitials(props.name) : props.email?.[0] ?? '?';
+  const fallback = props.name
+    ? getInitials(props.name)
+    : props.email?.[0] ?? "?";
 
   return (
     <Avatar className="h-10 w-10">

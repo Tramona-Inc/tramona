@@ -1,13 +1,13 @@
-import { pgTable, text, timestamp, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, primaryKey } from "drizzle-orm/pg-core";
 
 export const verificationTokens = pgTable(
-  'verificationToken',
+  "verificationToken",
   {
-    identifier: text('identifier').notNull(),
-    token: text('token').notNull(),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  vt => ({
+  (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 );

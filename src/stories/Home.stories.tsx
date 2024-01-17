@@ -1,5 +1,5 @@
-import Home from '../pages/index';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import Home from "../pages/index";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const HomeExample = () => {
   return (
@@ -10,7 +10,7 @@ export const HomeExample = () => {
 };
 
 const storyConfig = {
-  title: 'Pages/Home',
+  title: "Pages/Home",
   component: HomeExample,
 };
 
