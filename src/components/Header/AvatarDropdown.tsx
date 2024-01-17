@@ -9,19 +9,16 @@ import {
 import UserAvatar from "../UserAvatar";
 import { type Session } from "next-auth";
 import Link from "next/link";
-import { api } from "@/utils/api";
 import { Badge } from "../ui/badge";
 
 export default function AvatarDropdown({ session }: { session: Session }) {
-  console.log(session.user.role);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
         <UserAvatar
-          name={session.user?.name}
-          email={session.user?.email}
-          image={session.user?.image}
+          name={session.user.name}
+          email={session.user.email}
+          image={session.user.image}
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -67,24 +64,17 @@ function DropdownTop({ session }: { session: Session }) {
     <div className="pb-1 pl-3">
       <p className="font-medium">
         {title}
-        <span className="ml-2 inline-block -translate-y-0.5">
-          <RoleBadge />
-        </span>
+        <Badge
+          variant="secondary"
+          size="sm"
+          className="ml-2 -translate-y-0.5 uppercase"
+        >
+          {session.user.role}
+        </Badge>
       </p>
 
       {subtitle && <p className="text-sm text-zinc-600">{subtitle}</p>}
     </div>
-  );
-}
-
-function RoleBadge() {
-  const { data } = api.users.me.useQuery();
-  if (!data) return null;
-
-  return (
-    <Badge variant="secondary" size="sm" className="uppercase">
-      {data.role}
-    </Badge>
   );
 }
 
