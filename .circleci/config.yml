@@ -1,0 +1,26 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:21.5.0
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore npm package cache
+          key: v1-cache-dependencies-{{ checksum "frontend/package-lock.json" }}-{{ arch }}
+      - run:
+          name: Install dependencies
+          command: cd frontend && npm ci
+      - save_cache:
+          name: Save npm package cache
+          paths:
+            - ./frontend/node_modules
+          key: v1-cache-dependencies-{{ checksum "frontend/package-lock.json" }}-{{ arch }}
+      # TODO: Fix build and enable
+      # - run:
+      #     name: Build
+      #     command: cd frontend && npm run build
+      - run:
+          name: Lint
+          command: cd frontend && npm run lint
