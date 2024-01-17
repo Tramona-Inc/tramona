@@ -8,8 +8,6 @@ import EmailProvider from 'next-auth/providers/email';
 import { env } from '@/env';
 import { db } from '@/server/db';
 import { pgTable } from 'drizzle-orm/pg-core';
-import { generateReferralCode } from '@/utils/utils';
-import { referralCodes } from './db/schema';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

@@ -56,6 +56,7 @@ const listeners: Array<(state: State) => void> = [];
 
 let memoryState: State = { toasts: [] };
 
+
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'ADD_TOAST':
@@ -76,9 +77,11 @@ export const reducer = (state: State, action: Action): State => {
       // but I'll keep it here for simplicity
       if (toastId) {
         // TODO: addToRemoveQueue calls dispatch and dispatch calls reducer, double check if this is safe
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         addToRemoveQueue(toastId);
       } else {
         state.toasts.forEach(toast => {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           addToRemoveQueue(toast.id);
         });
       }
