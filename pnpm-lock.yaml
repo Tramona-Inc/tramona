@@ -214,6 +214,9 @@ devDependencies:
   autoprefixer:
     specifier: ^10.4.14
     version: 10.4.16(postcss@8.4.33)
+  chromatic:
+    specifier: ^10.1.0
+    version: 10.3.0
   drizzle-kit:
     specifier: ^0.20.13
     version: 0.20.13
@@ -6468,6 +6471,11 @@ packages:
   /chownr@2.0.0:
     resolution: {integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==}
     engines: {node: '>=10'}
+    dev: true
+
+  /chromatic@10.3.0:
+    resolution: {integrity: sha512-NhNMrpGOn8clK6SpLiFe3HjrabUv6T0W548/qwKKj6rpMcRBWv16gVDERwKQ1uLiCiXHZM/gapytVazAkDhvPA==}
+    hasBin: true
     dev: true
 
   /chrome-trace-event@1.0.3:
