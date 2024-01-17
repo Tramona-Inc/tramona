@@ -8,7 +8,7 @@ export const createRequestInputSchema = z.object({
   num_guests: z.number().default(1),
   min_num_bed: z.number().default(1),
   min_num_bedrooms: z.number().default(1),
-  property_type: z.number().default(1),
+  property_type: z.string(),
   note: z.string(),
 });
 
