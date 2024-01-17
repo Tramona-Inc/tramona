@@ -95,7 +95,7 @@ export default function Page() {
                         <FormLabel>Max Price</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="120"
+                            placeholder="1"
                             type={"number"}
                             className="w-[100px]"
                             {...field}
@@ -290,6 +290,10 @@ export default function Page() {
                             <SelectItem value="townhouse">Townhouse</SelectItem>
                             <SelectItem value="apartment">Apartment</SelectItem>
                             <SelectItem value="house">House</SelectItem>
+                            {/* // TODO add guest house  */}
+                            {/* <SelectItem value="guesthouse">
+                              Guest House
+                            </SelectItem> */}
                           </SelectContent>
                         </Select>
                       </FormControl>

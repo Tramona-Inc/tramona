@@ -11,6 +11,7 @@ import {
 import { users } from "./users";
 import { propertyTypeEnum } from "./properties";
 import { createInsertSchema } from "drizzle-zod";
+import { z } from 'zod';
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
@@ -34,5 +35,7 @@ export const insertRequestSchema = createInsertSchema(requests).omit({
   userId: true,
   resolvedAt: true,
 });
+
+// type RequestForm = z.infer<typeof insertRequestSchema>
 
 export type Request = typeof requests.$inferSelect;
