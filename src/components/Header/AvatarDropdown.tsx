@@ -63,7 +63,7 @@ function DropdownTop({ session }: { session: Session }) {
   return (
     <div className="pb-1 pl-3">
       <div className="font-medium">
-        {name}
+        {title}
 
         <Badge
           variant="secondary"
