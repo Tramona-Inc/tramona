@@ -26,9 +26,9 @@ jobs:
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - node_modules
-      # - run:
-      #     name: Build
-      #     command: pnpm run build
+      - run:
+          name: Build
+          command: pnpm run build
       - run:
           name: Lint
           command: pnpm run lint
