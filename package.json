@@ -70,7 +70,7 @@
   },
   "devDependencies": {
     "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "storybook": "7.6.8",
+    "storybook": "7.6.9",
     "storybook-addon-performance": "^0.17.1",
     "@storybook/addon-a11y": "^7.6.3",
     "@storybook/addon-essentials": "^7.6.3",
