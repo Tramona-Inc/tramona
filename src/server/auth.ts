@@ -36,29 +36,8 @@ export const authOptions: NextAuthOptions = {
     session: ({ session, user }) => {
       return { ...session, user };
     },
-    // TODO: generate code when on new user is created (Maybe generate only when sharing the code)
-    // async signIn({ user }) {
-    //   const newReferralCode = generateReferralCode(); // Implement your logic to generate a new referral code
-
-    //   if (user) {
-    //     const result = await db.query.referralCodes.findMany({
-    //       where: (referralCodes, { eq }) => eq(referralCodes.ownerId, user.id),
-    //     });
-
-    //     if (!result || result.length === 0) {
-    //       // If result is null or empty, generate a new row
-    //       await db.insert(referralCodes).values({
-    //         referral_code: newReferralCode,
-    //         ownerId: user.id,
-    //       });
-    //     }
-    //   }
-
-    //   return Promise.resolve(true);
-    // },
   },
-  // adapter: DrizzleAdapter(db, pgTable) as Adapter,
-  adapter: CustomPgDrizzleAdapter(db), // New custom adapter
+  adapter: CustomPgDrizzleAdapter(db), // custom adapter
   providers: [
     // DiscordProvider({
     //   clientId: env.DISCORD_CLIENT_ID,
@@ -103,9 +82,51 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+export async function getServerAuthSession(
+  ctx: Pick<GetServerSidePropsContext, "req" | "res">,
+) {
+  return await getServerSession(ctx.req, ctx.res, authOptions);
+}
+
+async function sendToSignIn(ctx: GetServerSidePropsContext) {
+  const baseUrl = process.env.NEXTAUTH_URL;
+  const callbackUrl = `${baseUrl}${ctx.resolvedUrl}`;
+  const urlSearchParams = new URLSearchParams({ callbackUrl });
+  return {
+    redirect: {
+      destination: `/auth/signin?${urlSearchParams.toString()}`,
+    },
+  };
+}
+
+/**
+ * Do `export const getServerSideProps = requireAuth;` at the bottom of
+ * any page to make it require authentication.
+ */
+export async function requireAuth(ctx: GetServerSidePropsContext) {
+  const session = await getServerAuthSession(ctx);
+  if (!session) {
+    return sendToSignIn(ctx);
+  }
+  return { props: {} };
+}
+
+/**
+ * Do `export const getServerSideProps = requireRole(["admin", "host"]);` to require
+ * the user to be signed in as either a admin or host for example
+ */
+export const requireRole = (allowedRoles: TramonaUser["role"][]) =>
+  async function (ctx: GetServerSidePropsContext) {
+    const session = await getServerAuthSession(ctx);
+    if (!session) {
+      return sendToSignIn(ctx);
+    }
+
+    if (!allowedRoles.includes(session.user.role)) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return { props: {} };
+  };

@@ -7,6 +7,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { requests } from "./requests";
 import { properties } from "./properties";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const offers = pgTable(
   "offers",
@@ -30,3 +31,5 @@ export const offers = pgTable(
 );
 
 export type Offer = typeof offers.$inferSelect;
+export const offerSelectSchema = createSelectSchema(offers);
+export const offerInsertSchema = createInsertSchema(offers);
