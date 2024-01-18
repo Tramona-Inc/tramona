@@ -51,7 +51,7 @@ export default function DateRangePicker<
                 mode="range"
                 selected={field.value}
                 onSelect={(e) => {
-                  if (e && e?.to === undefined) {
+                  if (e?.from && e.to === undefined) {
                     e.to = e.from;
                   }
                   field.onChange(e);

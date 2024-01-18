@@ -32,19 +32,24 @@ import {
 } from "../ui/select";
 import { capitalize } from "@/utils/utils";
 
-const formSchema = z.object({
-  location: zodString(),
-  maxTotalPrice: zodInteger({ min: 1 }),
-  date: z.object({
-    from: z.date(),
-    to: z.date(),
-  }),
-  numGuests: zodInteger({ min: 1 }),
-  propertyType: z.enum(ALL_PROPERTY_TYPES).optional(),
-  minNumBedrooms: optional(zodInteger()),
-  minNumBeds: optional(zodInteger()),
-  note: optional(zodString()),
-});
+const formSchema = z
+  .object({
+    location: zodString(),
+    maxTotalPriceUSD: zodInteger({ min: 1 }),
+    date: z.object({
+      from: z.date(),
+      to: z.date(),
+    }),
+    numGuests: zodInteger({ min: 1 }),
+    propertyType: z.enum(ALL_PROPERTY_TYPES).optional(),
+    minNumBedrooms: optional(zodInteger()),
+    minNumBeds: optional(zodInteger()),
+    note: optional(zodString()),
+  })
+  .refine((data) => data.date.to > data.date.from, {
+    message: "Must stay for at least 1 night",
+    path: ["date"],
+  });
 
 type FormSchema = z.infer<typeof formSchema>;
 
@@ -69,12 +74,13 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
   const fmtdFilters = filters.length === 0 ? undefined : filters.join(" • ");
 
   async function onSubmit(data: FormSchema) {
-    const { date: _date, ...dataExceptDate } = data;
+    const { date: _date, maxTotalPriceUSD, ...restData } = data;
 
     const newRequest = {
       checkIn: data.date.from,
       checkOut: data.date.to,
-      ...dataExceptDate,
+      maxTotalPrice: maxTotalPriceUSD * 100,
+      ...restData,
     };
 
     try {
@@ -110,14 +116,14 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
 
         <FormField
           control={form.control}
-          name="maxTotalPrice"
+          name="maxTotalPriceUSD"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Name your price</FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="$USD/night"
+                  placeholder="Total budget ($USD)"
                   inputMode="decimal"
                 />
               </FormControl>
