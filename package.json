@@ -49,6 +49,7 @@
     "date-fns": "^3.2.0",
     "drizzle-orm": "^0.29.3",
     "drizzle-zod": "^0.5.1",
+    "embla-carousel-autoplay": "8.0.0-rc19",
     "embla-carousel-react": "8.0.0-rc19",
     "lucide-react": "^0.311.0",
     "next": "^14.0.4",
@@ -67,9 +68,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "storybook": "7.6.3",
-    "storybook-addon-performance": "^0.17.1",
     "@storybook/addon-a11y": "^7.6.3",
     "@storybook/addon-essentials": "^7.6.3",
     "@storybook/addon-interactions": "^7.6.3",
@@ -80,7 +78,6 @@
     "@storybook/nextjs": "^7.6.3",
     "@storybook/react": "^7.6.3",
     "@storybook/test": "^7.6.3",
-    "eslint-plugin-drizzle": "^0.2.3",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/eslint": "^8.44.7",
     "@types/node": "^18.17.0",
@@ -94,12 +91,16 @@
     "embla-carousel": "8.0.0-rc19",
     "eslint": "^8.54.0",
     "eslint-config-next": "^14.0.4",
+    "eslint-plugin-drizzle": "^0.2.3",
     "i": "^0.3.7",
     "npm": "^10.3.0",
     "postcss": "^8.4.31",
     "prettier": "^3.1.0",
     "prettier-plugin-tailwindcss": "^0.5.7",
+    "storybook": "7.6.3",
+    "storybook-addon-performance": "^0.17.1",
     "tailwindcss": "^3.3.5",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "^5.1.6"
   },
   "ct3aMetadata": {
