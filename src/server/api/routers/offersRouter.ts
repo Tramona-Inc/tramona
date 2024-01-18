@@ -52,6 +52,12 @@ export const offersRouter = createTRPCRouter({
             .set({ resolvedAt: new Date() })
             .where(eq(offers.id, offerDetails.request.id)),
 
+          // mark the offer as accepted
+          tx
+            .update(offers)
+            .set({ acceptedAt: new Date() })
+            .where(eq(offers.id, input.id)),
+
           // update referralCode
           ctx.user.referralCodeUsed &&
             tx
