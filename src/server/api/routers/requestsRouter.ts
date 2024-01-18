@@ -1,4 +1,8 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  roleRestrictedProcedure,
+} from "@/server/api/trpc";
 import { requests } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
@@ -72,6 +76,12 @@ export const requestsRouter = createTRPCRouter({
   //     // get the requests close to this users properties
   //   },
   // ),
+
+  getAll: roleRestrictedProcedure(["admin"]).query(async ({ ctx }) => {
+    return await ctx.db.query.requests.findMany(
+      { orderBy: (requests, { desc }) => [desc(requests.createdAt)] }, // filter from most recent
+    );
+  }),
 
   create: protectedProcedure
     .input(
