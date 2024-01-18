@@ -16,7 +16,7 @@ export const requests = pgTable("requests", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  maxPreferredPrice: integer("max_preferred_price").notNull(), // in cents
+  maxTotalPrice: integer("max_total_price").notNull(), // in cents
   location: varchar("location", { length: 255 }).notNull(), // TODO: use postGIS
   checkIn: date("check_in").notNull(),
   checkOut: date("check_out").notNull(),
