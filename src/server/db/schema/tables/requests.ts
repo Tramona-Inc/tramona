@@ -1,6 +1,5 @@
 import {
   serial,
-  boolean,
   date,
   integer,
   pgTable,
@@ -9,15 +8,16 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { users } from "./auth";
+import { users } from "./users";
 import { propertyTypeEnum } from "./properties";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  maxPreferredPrice: integer("max_preferred_price").notNull(), // in cents
+  maxTotalPrice: integer("max_total_price").notNull(), // in cents
   location: varchar("location", { length: 255 }).notNull(), // TODO: use postGIS
   checkIn: date("check_in").notNull(),
   checkOut: date("check_out").notNull(),
@@ -29,3 +29,7 @@ export const requests = pgTable("requests", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
 });
+
+export type Request = typeof requests.$inferSelect;
+export const requestSelectSchema = createSelectSchema(requests);
+export const requestInsertSchema = createInsertSchema(requests);

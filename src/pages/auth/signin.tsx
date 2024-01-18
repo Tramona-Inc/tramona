@@ -57,7 +57,7 @@ export default function SignIn({
 
   return (
     <MainLayout pageTitle="Sign in">
-      <div className="flex items-stretch h-screen">
+      <div className="flex h-screen items-stretch">
         <div className="grid flex-1 place-items-center p-4">
           <div className="w-[20rem] space-y-4">
             <h1 className="text-4xl font-bold tracking-wide">Log in</h1>

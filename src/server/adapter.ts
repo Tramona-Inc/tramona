@@ -1,110 +1,116 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
-import * as schema from "./db/schema/tables/auth"; // this is where your custom tables are defined
 import { and, eq } from "drizzle-orm";
+import { type Adapter } from "next-auth/adapters";
 import { type PgDatabase } from "drizzle-orm/pg-core";
-import { type Awaitable } from "next-auth";
-import { type AdapterUser, type Adapter } from "next-auth/adapters";
-
-type CustomAdapter = Omit<Adapter, "createUser"> & {
-  createUser: (
-    user: Omit<AdapterUser & { role: (typeof ALL_ROLES)[number] }, "id">,
-  ) => Awaitable<AdapterUser & { role: (typeof ALL_ROLES)[number] }>;
-};
+import {
+  sessions,
+  users,
+  accounts,
+  verificationTokens,
+  referralCodes,
+} from "./db/schema";
+import { generateReferralCode, retry } from "@/utils/utils";
 
 export function CustomPgDrizzleAdapter(
-  client: InstanceType<typeof PgDatabase>,
-): CustomAdapter {
-  const { users, accounts, sessions, verificationTokens } = schema;
-
+  db: InstanceType<typeof PgDatabase>,
+): Adapter {
   return {
-    async createUser(data) {
-      return await client
-        .insert(users)
-        .values({ ...data, id: crypto.randomUUID(), role: data.role }) // added role
-        .returning()
-        .then((res) => res[0] ?? null);
+    async createUser(user) {
+      return await db.transaction(async (tx) => {
+        const userId = crypto.randomUUID();
+
+        const ret = await tx
+          .insert(users)
+          .values({ ...user, id: userId })
+          .returning()
+          .then((res) => res[0]!);
+
+        await retry(
+          // will throw on collisions since postgres primary keys have the unique constraint
+          tx
+            .insert(referralCodes)
+            .values({ ownerId: userId, referralCode: generateReferralCode() })
+            .returning(),
+          3,
+        );
+
+        return ret;
+      });
     },
-    async getUser(data) {
-      return await client
+    async getUser(userId) {
+      return await db
         .select()
         .from(users)
-        .where(eq(users.id, data))
+        .where(eq(users.id, userId))
         .then((res) => res[0] ?? null);
     },
-    async getUserByEmail(data) {
-      return await client
+    async getUserByEmail(email) {
+      return await db
         .select()
         .from(users)
-        .where(eq(users.email, data))
+        .where(eq(users.email, email))
         .then((res) => res[0] ?? null);
     },
-    async createSession(data) {
-      return await client
+    async createSession(session) {
+      return await db
         .insert(sessions)
-        .values(data)
+        .values(session)
         .returning()
-        .then((res) => res[0]);
+        .then((res) => res[0]!);
     },
-    async getSessionAndUser(data) {
-      return await client
+    async getSessionAndUser(sessionToken) {
+      return await db
         .select({
           session: sessions,
           user: users,
         })
         .from(sessions)
-        .where(eq(sessions.sessionToken, data))
+        .where(eq(sessions.sessionToken, sessionToken))
         .innerJoin(users, eq(users.id, sessions.userId))
         .then((res) => res[0] ?? null);
     },
-    async updateUser(data) {
-      if (!data.id) {
+    async updateUser(newUserData) {
+      if (!newUserData.id) {
         throw new Error("No user id.");
       }
 
-      return await client
+      return await db
         .update(users)
-        .set(data)
-        .where(eq(users.id, data.id))
+        .set(newUserData)
+        .where(eq(users.id, newUserData.id))
         .returning()
-        .then((res) => res[0]);
+        .then((res) => res[0]!);
     },
-    async updateSession(data) {
-      return await client
+    async updateSession(newSessionData) {
+      return await db
         .update(sessions)
-        .set(data)
-        .where(eq(sessions.sessionToken, data.sessionToken))
+        .set(newSessionData)
+        .where(eq(sessions.sessionToken, newSessionData.sessionToken))
         .returning()
         .then((res) => res[0]);
     },
     async linkAccount(rawAccount) {
-      const updatedAccount = await client
+      const updatedAccount = await db
         .insert(accounts)
         .values(rawAccount)
         .returning()
-        .then((res) => res[0]);
+        .then((res) => res[0]!);
 
       // Drizzle will return `null` for fields that are not defined.
       // However, the return type is expecting `undefined`.
-      const account = {
+      return {
         ...updatedAccount,
-        access_token: updatedAccount.accessToken ?? undefined,
-        token_type: updatedAccount.tokenType ?? undefined,
-        id_token: updatedAccount.idToken ?? undefined,
-        refresh_token: updatedAccount.refreshToken ?? undefined,
+        access_token: updatedAccount.access_token ?? undefined,
+        token_type: updatedAccount.token_type ?? undefined,
+        id_token: updatedAccount.id_token ?? undefined,
+        refresh_token: updatedAccount.refresh_token ?? undefined,
         scope: updatedAccount.scope ?? undefined,
-        expires_at: updatedAccount.expiresAt ?? undefined,
-        session_state: updatedAccount.sessionState ?? undefined,
+        expires_at: updatedAccount.expires_at ?? undefined,
+        session_state: updatedAccount.session_state ?? undefined,
       };
-
-      return account;
     },
     async getUserByAccount(account) {
       const dbAccount =
-        (await client
+        (await db
           .select()
           .from(accounts)
           .where(
@@ -120,10 +126,10 @@ export function CustomPgDrizzleAdapter(
         return null;
       }
 
-      return dbAccount.users;
+      return dbAccount.user;
     },
     async deleteSession(sessionToken) {
-      const session = await client
+      const session = await db
         .delete(sessions)
         .where(eq(sessions.sessionToken, sessionToken))
         .returning()
@@ -132,7 +138,7 @@ export function CustomPgDrizzleAdapter(
       return session;
     },
     async createVerificationToken(token) {
-      return await client
+      return await db
         .insert(verificationTokens)
         .values(token)
         .returning()
@@ -140,7 +146,7 @@ export function CustomPgDrizzleAdapter(
     },
     async useVerificationToken(token) {
       try {
-        return await client
+        return await db
           .delete(verificationTokens)
           .where(
             and(
@@ -155,14 +161,14 @@ export function CustomPgDrizzleAdapter(
       }
     },
     async deleteUser(id) {
-      await client
+      await db
         .delete(users)
         .where(eq(users.id, id))
         .returning()
         .then((res) => res[0] ?? null);
     },
     async unlinkAccount(account) {
-      const { type, provider, providerAccountId, userId } = await client
+      const deletedAccount = await db
         .delete(accounts)
         .where(
           and(
@@ -173,7 +179,12 @@ export function CustomPgDrizzleAdapter(
         .returning()
         .then((res) => res[0] ?? null);
 
-      return { provider, type, providerAccountId, userId };
+      if (deletedAccount) {
+        const { provider, type, providerAccountId, userId } = deletedAccount;
+        return { provider, type, providerAccountId, userId };
+      }
+
+      return undefined;
     },
   };
 }

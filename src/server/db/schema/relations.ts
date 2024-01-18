@@ -1,5 +1,7 @@
 import { relations } from "drizzle-orm";
-import { accounts, referralCodes, sessions, users } from "./tables/auth";
+import { referralCodes, users } from "./tables/users";
+import { accounts } from "./tables/auth/accounts";
+import { sessions } from "./tables/auth/sessions";
 import { properties } from "./tables/properties";
 import { requests } from "./tables/requests";
 import { offers } from "./tables/offers";

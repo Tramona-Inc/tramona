@@ -1,19 +1,15 @@
 import { type GetServerSidePropsContext } from "next";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
-  getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  getServerSession,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
 import GithubProvider from "next-auth/providers/github";
 import EmailProvider from "next-auth/providers/email";
-
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { pgTable } from "drizzle-orm/pg-core";
-import { type ALL_ROLES } from "./db/schema/tables/auth";
 import { CustomPgDrizzleAdapter } from "./adapter";
+import { type User as TramonaUser } from "./db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -22,17 +18,11 @@ import { CustomPgDrizzleAdapter } from "./adapter";
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-      // ...other properties
-      role: (typeof ALL_ROLES)[number];
-    } & DefaultSession["user"];
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface User extends TramonaUser {}
 
-  interface User {
-    // ...other properties
-    role: (typeof ALL_ROLES)[number];
+  interface Session extends DefaultSession {
+    user: TramonaUser;
   }
 }
 
@@ -43,37 +33,11 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-        role: user.role,
-      },
-    }),
-    // TODO: generate code when on new user is created (Maybe generate only when sharing the code)
-    // async signIn({ user }) {
-    //   const newReferralCode = generateReferralCode(); // Implement your logic to generate a new referral code
-
-    //   if (user) {
-    //     const result = await db.query.referralCodes.findMany({
-    //       where: (referralCodes, { eq }) => eq(referralCodes.ownerId, user.id),
-    //     });
-
-    //     if (!result || result.length === 0) {
-    //       // If result is null or empty, generate a new row
-    //       await db.insert(referralCodes).values({
-    //         referral_code: newReferralCode,
-    //         ownerId: user.id,
-    //       });
-    //     }
-    //   }
-
-    //   return Promise.resolve(true);
-    // },
+    session: ({ session, user }) => {
+      return { ...session, user };
+    },
   },
-  // adapter: DrizzleAdapter(db, pgTable) as Adapter,
-  adapter: CustomPgDrizzleAdapter(db) as Adapter, // New custom adapter
+  adapter: CustomPgDrizzleAdapter(db), // custom adapter
   providers: [
     // DiscordProvider({
     //   clientId: env.DISCORD_CLIENT_ID,
@@ -118,9 +82,51 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+export async function getServerAuthSession(
+  ctx: Pick<GetServerSidePropsContext, "req" | "res">,
+) {
+  return await getServerSession(ctx.req, ctx.res, authOptions);
+}
+
+async function sendToSignIn(ctx: GetServerSidePropsContext) {
+  const baseUrl = process.env.NEXTAUTH_URL;
+  const callbackUrl = `${baseUrl}${ctx.resolvedUrl}`;
+  const urlSearchParams = new URLSearchParams({ callbackUrl });
+  return {
+    redirect: {
+      destination: `/auth/signin?${urlSearchParams.toString()}`,
+    },
+  };
+}
+
+/**
+ * Do `export const getServerSideProps = requireAuth;` at the bottom of
+ * any page to make it require authentication.
+ */
+export async function requireAuth(ctx: GetServerSidePropsContext) {
+  const session = await getServerAuthSession(ctx);
+  if (!session) {
+    return sendToSignIn(ctx);
+  }
+  return { props: {} };
+}
+
+/**
+ * Do `export const getServerSideProps = requireRole(["admin", "host"]);` to require
+ * the user to be signed in as either a admin or host for example
+ */
+export const requireRole = (allowedRoles: TramonaUser["role"][]) =>
+  async function (ctx: GetServerSidePropsContext) {
+    const session = await getServerAuthSession(ctx);
+    if (!session) {
+      return sendToSignIn(ctx);
+    }
+
+    if (!allowedRoles.includes(session.user.role)) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return { props: {} };
+  };

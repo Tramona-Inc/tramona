@@ -1,7 +1,7 @@
-import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format, isSameMonth, isSameYear } from "date-fns";
+import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -86,5 +86,15 @@ export function formatArrayToString(arr: string[]) {
     const lastItem = arr.pop();
     const joinedItems = arr.join(", ");
     return `${joinedItems}, and ${lastItem}`;
+  }
+}
+
+export async function retry<T>(f: Promise<T>, numRetries: number) {
+  for (let i = 0; i < numRetries; i++) {
+    try {
+      return await f.catch(() => {
+        throw new Error();
+      });
+    } catch (err) {}
   }
 }

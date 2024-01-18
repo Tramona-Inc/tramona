@@ -1,4 +1,7 @@
 import MainLayout from "@/components/layouts/MainLayout";
+import { requireAuth } from "@/server/auth";
+
+export const getServerSideProps = requireAuth;
 
 export default function Page() {
   return (

@@ -5,6 +5,24 @@ import NavLink from "../utils/NavLink";
 import { cn } from "@/utils/utils";
 import HeaderTopRight from "./HeaderTopRight";
 
+function HeaderLink({ href, children }: PropsWithChildren<{ href: string }>) {
+  return (
+    <NavLink
+      href={href}
+      render={({ selected }) => (
+        <div
+          className={cn(
+            "rounded-lg px-5 py-2 font-medium",
+            selected ? "bg-black text-white" : "text-black hover:bg-zinc-200",
+          )}
+        >
+          {children}
+        </div>
+      )}
+    />
+  );
+}
+
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 flex items-center bg-white px-4 py-2 text-sm shadow-md sm:py-4 sm:text-base">
@@ -25,23 +43,5 @@ export default function Header() {
         <HeaderTopRight />
       </div>
     </header>
-  );
-}
-
-function HeaderLink({ href, children }: PropsWithChildren<{ href: string }>) {
-  return (
-    <NavLink
-      href={href}
-      render={({ selected }) => (
-        <div
-          className={cn(
-            "rounded-lg px-5 py-2 font-medium",
-            selected ? "bg-black text-white" : "text-black hover:bg-zinc-200",
-          )}
-        >
-          {children}
-        </div>
-      )}
-    />
   );
 }

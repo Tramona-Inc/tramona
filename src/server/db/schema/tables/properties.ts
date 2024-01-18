@@ -10,13 +10,16 @@ import {
   unique,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import { users } from "./auth";
+import { users } from "./users";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const propertyTypeEnum = pgEnum("property_type", [
   "house",
   "guesthouse",
   "apartment",
   "room",
+  "townhouse",
 ]);
 
 export const properties = pgTable(
@@ -45,3 +48,16 @@ export const properties = pgTable(
     uniqueAirbnbUrls: unique("unique_airbnb_urls").on(t.airbnbUrl),
   }),
 );
+
+export type Property = typeof properties.$inferSelect;
+export const propertySelectSchema = createSelectSchema(properties);
+export const propertyInsertSchema = createInsertSchema(properties, {
+  imageUrls: z.string().url().array(),
+  airbnbUrl: z.string().url(),
+  originalPrice: z.number().int().min(1),
+  numBedrooms: z.number().int().min(1),
+  numBeds: z.number().int().min(1),
+  numRatings: z.number().int().min(0),
+  maxNumGuests: z.number().int().min(1),
+  avgRating: z.number().min(0).max(5),
+});

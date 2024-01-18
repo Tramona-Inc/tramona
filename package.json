@@ -9,8 +9,12 @@
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate:pg",
     "dev": "next dev",
-    "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint --max-warnings=0",
+    "format": "prettier --write ./",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "chromatic": "npx chromatic --project-token=chpt_e09628bd7bc2d55"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^0.3.14",
@@ -49,8 +53,7 @@
     "drizzle-orm": "^0.29.3",
     "drizzle-zod": "^0.5.1",
     "embla-carousel-react": "8.0.0-rc19",
-    "eslint-plugin-drizzle": "^0.2.3",
-    "lucide-react": "^0.307.0",
+    "lucide-react": "^0.311.0",
     "next": "^14.0.4",
     "next-auth": "^4.24.5",
     "nodemailer": "^6.9.8",
@@ -67,6 +70,21 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "storybook": "7.6.8",
+    "storybook-addon-performance": "^0.17.1",
+    "@storybook/addon-a11y": "^7.6.3",
+    "@storybook/addon-essentials": "^7.6.3",
+    "@storybook/addon-interactions": "^7.6.3",
+    "@storybook/addon-links": "^7.6.3",
+    "@storybook/addon-onboarding": "^1.0.9",
+    "@storybook/addons": "^7.6.3",
+    "@storybook/blocks": "^7.6.3",
+    "@storybook/nextjs": "^7.6.3",
+    "@storybook/react": "^7.6.3",
+    "@storybook/test": "^7.6.3",
+    "chromatic": "^10.1.0",
+    "eslint-plugin-drizzle": "^0.2.3",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/eslint": "^8.44.7",
     "@types/node": "^18.17.0",
@@ -91,5 +109,7 @@
   "ct3aMetadata": {
     "initVersion": "7.25.1"
   },
-  "packageManager": "pnpm@8.11.0"
+  "packageManager": "pnpm@8.14.1",
+  "readme": "ERROR: No README data found!",
+  "_id": "tramona-trpc@0.1.0"
 }

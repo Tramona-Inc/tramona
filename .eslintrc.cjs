@@ -40,6 +40,13 @@ const config = {
     ],
     "drizzle/enforce-delete-with-where": ["error", { drizzleObjectName: "db" }],
     "drizzle/enforce-update-with-where": ["error", { drizzleObjectName: "db" }],
+    "@typescript-eslint/ban-types": "warn",
+    "@typescript-eslint/no-inferrable-types": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "no-console": "warn",
+    "prefer-const": "warn",
+    "react/no-deprecated": "error",
+    "react/jsx-no-target-blank": "error",
   },
 };
 

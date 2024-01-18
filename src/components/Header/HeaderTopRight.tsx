@@ -2,24 +2,6 @@ import { signIn, useSession } from "next-auth/react";
 import { Button } from "../ui/button";
 import AvatarDropdown from "./AvatarDropdown";
 
-export default function HeaderTopRight() {
-  const { data: session, status } = useSession();
-
-  switch (status) {
-    case "loading":
-      return <div className="h-10" />;
-    case "unauthenticated":
-      return (
-        <>
-          <LogInBtn />
-          <SignUpBtn />
-        </>
-      );
-    case "authenticated":
-      return <AvatarDropdown session={session} />;
-  }
-}
-
 function LogInBtn() {
   return (
     <Button
@@ -42,4 +24,22 @@ function SignUpBtn() {
       Sign up
     </Button>
   );
+}
+
+export default function HeaderTopRight() {
+  const { data: session, status } = useSession();
+
+  switch (status) {
+    case "loading":
+      return <div className="h-10" />;
+    case "unauthenticated":
+      return (
+        <>
+          <LogInBtn />
+          <SignUpBtn />
+        </>
+      );
+    case "authenticated":
+      return <AvatarDropdown session={session} />;
+  }
 }
