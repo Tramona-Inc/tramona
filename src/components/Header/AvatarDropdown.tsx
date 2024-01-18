@@ -79,6 +79,15 @@ export default function AvatarDropdown({ session }: { session: Session }) {
         <DropdownLink href="/requests">Your Requests</DropdownLink>
         <DropdownLink href="/profile">Profile</DropdownLink>
         <DropdownMenuSeparator />
+        {session.user.role === "guest" && (
+          <>
+            <DropdownLink href="/account">
+              Cashback Balance: <span className="text-primary">$112</span>
+            </DropdownLink>
+            <DropdownMenuSeparator />
+          </>
+        )}
+
         <DropdownMenuItem>
           <button
             onClick={() => signOut()}
