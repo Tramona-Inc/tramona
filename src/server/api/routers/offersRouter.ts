@@ -1,17 +1,24 @@
 import {
   createTRPCRouter,
   protectedProcedure,
+  publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
-import { offers, referralCodes, requests } from "@/server/db/schema";
+import {
+  offerInsertSchema,
+  offerSelectSchema,
+  offers,
+  referralCodes,
+  requestSelectSchema,
+  requests,
+} from "@/server/db/schema";
 import { formatArrayToString } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
-import { eq, sql } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
-    .input(createSelectSchema(offers).pick({ id: true }))
+    .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const offerDetails = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
@@ -52,6 +59,12 @@ export const offersRouter = createTRPCRouter({
             .set({ resolvedAt: new Date() })
             .where(eq(offers.id, offerDetails.request.id)),
 
+          // mark the offer as accepted
+          tx
+            .update(offers)
+            .set({ acceptedAt: new Date() })
+            .where(eq(offers.id, input.id)),
+
           // update referralCode
           ctx.user.referralCodeUsed &&
             tx
@@ -71,7 +84,7 @@ export const offersRouter = createTRPCRouter({
     }),
 
   getByRequestId: protectedProcedure
-    .input(createSelectSchema(requests).pick({ id: true }))
+    .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const requestDetails = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.id),
@@ -106,8 +119,62 @@ export const offersRouter = createTRPCRouter({
       return offersForRequest;
     }),
 
+  makePublic: roleRestrictedProcedure(["admin", "host"])
+    .input(offerSelectSchema.pick({ id: true }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role === "host") {
+        const request = await ctx.db.query.offers.findFirst({
+          where: eq(offers.id, input.id),
+          columns: {},
+          with: {
+            property: {
+              columns: {
+                hostId: true,
+              },
+            },
+          },
+        });
+
+        if (
+          ctx.user.role === "host" &&
+          request?.property.hostId !== ctx.user.id
+        ) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+      }
+
+      await ctx.db
+        .update(offers)
+        .set({ madePublicAt: new Date() })
+        .where(eq(offers.id, input.id));
+    }),
+
+  getAllPublicOffers: publicProcedure.query(async ({ ctx }) => {
+    return (
+      await ctx.db.query.offers.findMany({
+        where: and(
+          isNull(offers.acceptedAt),
+          lt(offers.madePublicAt, new Date()),
+        ),
+        columns: { acceptedAt: false },
+        with: {
+          property: {
+            with: {
+              host: { columns: { name: true, email: true, image: true } },
+            },
+          },
+          request: { columns: { checkIn: true, checkOut: true } },
+        },
+        orderBy: desc(offers.madePublicAt),
+      })
+    ).map((offer) => ({
+      ...offer,
+      madePublicAt: offer.madePublicAt ?? new Date(), // will never be null, just fixes types
+    }));
+  }),
+
   create: roleRestrictedProcedure(["admin", "host"])
-    .input(createInsertSchema(offers))
+    .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {
       const requestPromise = ctx.db.query.requests.findFirst({
         where: eq(offers.requestId, input.requestId),
@@ -189,11 +256,7 @@ export const offersRouter = createTRPCRouter({
     }),
 
   delete: roleRestrictedProcedure(["admin", "host"])
-    .input(
-      createSelectSchema(offers).pick({
-        id: true,
-      }),
-    )
+    .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "host") {
         const request = await ctx.db.query.offers.findFirst({
@@ -208,7 +271,10 @@ export const offersRouter = createTRPCRouter({
           },
         });
 
-        if (request?.property?.hostId !== ctx.user.id) {
+        if (
+          ctx.user.role === "host" &&
+          request?.property.hostId !== ctx.user.id
+        ) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }

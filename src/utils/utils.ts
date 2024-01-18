@@ -88,3 +88,13 @@ export function formatArrayToString(arr: string[]) {
     return `${joinedItems}, and ${lastItem}`;
   }
 }
+
+export async function retry<T>(f: Promise<T>, numRetries: number) {
+  for (let i = 0; i < numRetries; i++) {
+    try {
+      return await f.catch(() => {
+        throw new Error();
+      });
+    } catch (err) {}
+  }
+}

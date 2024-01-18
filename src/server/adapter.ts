@@ -1,74 +1,95 @@
 import { and, eq } from "drizzle-orm";
 import { type Adapter } from "next-auth/adapters";
 import { type PgDatabase } from "drizzle-orm/pg-core";
-import { sessions, users, accounts, verificationTokens } from "./db/schema";
+import {
+  sessions,
+  users,
+  accounts,
+  verificationTokens,
+  referralCodes,
+} from "./db/schema";
+import { generateReferralCode, retry } from "@/utils/utils";
 
 export function CustomPgDrizzleAdapter(
-  client: InstanceType<typeof PgDatabase>,
+  db: InstanceType<typeof PgDatabase>,
 ): Adapter {
   return {
-    async createUser(data) {
-      // TODO: add referral code generation 
-      return await client
-        .insert(users)
-        .values({ ...data, id: crypto.randomUUID() })
-        .returning()
-        .then((res) => res[0]!);
+    async createUser(user) {
+      return await db.transaction(async (tx) => {
+        const userId = crypto.randomUUID();
+
+        const ret = await tx
+          .insert(users)
+          .values({ ...user, id: userId })
+          .returning()
+          .then((res) => res[0]!);
+
+        await retry(
+          // will throw on collisions since postgres primary keys have the unique constraint
+          tx
+            .insert(referralCodes)
+            .values({ ownerId: userId, referralCode: generateReferralCode() })
+            .returning(),
+          3,
+        );
+
+        return ret;
+      });
     },
-    async getUser(data) {
-      return await client
+    async getUser(userId) {
+      return await db
         .select()
         .from(users)
-        .where(eq(users.id, data))
+        .where(eq(users.id, userId))
         .then((res) => res[0] ?? null);
     },
-    async getUserByEmail(data) {
-      return await client
+    async getUserByEmail(email) {
+      return await db
         .select()
         .from(users)
-        .where(eq(users.email, data))
+        .where(eq(users.email, email))
         .then((res) => res[0] ?? null);
     },
-    async createSession(data) {
-      return await client
+    async createSession(session) {
+      return await db
         .insert(sessions)
-        .values(data)
+        .values(session)
         .returning()
         .then((res) => res[0]!);
     },
-    async getSessionAndUser(data) {
-      return await client
+    async getSessionAndUser(sessionToken) {
+      return await db
         .select({
           session: sessions,
           user: users,
         })
         .from(sessions)
-        .where(eq(sessions.sessionToken, data))
+        .where(eq(sessions.sessionToken, sessionToken))
         .innerJoin(users, eq(users.id, sessions.userId))
         .then((res) => res[0] ?? null);
     },
-    async updateUser(data) {
-      if (!data.id) {
+    async updateUser(newUserData) {
+      if (!newUserData.id) {
         throw new Error("No user id.");
       }
 
-      return await client
+      return await db
         .update(users)
-        .set(data)
-        .where(eq(users.id, data.id))
+        .set(newUserData)
+        .where(eq(users.id, newUserData.id))
         .returning()
         .then((res) => res[0]!);
     },
-    async updateSession(data) {
-      return await client
+    async updateSession(newSessionData) {
+      return await db
         .update(sessions)
-        .set(data)
-        .where(eq(sessions.sessionToken, data.sessionToken))
+        .set(newSessionData)
+        .where(eq(sessions.sessionToken, newSessionData.sessionToken))
         .returning()
         .then((res) => res[0]);
     },
     async linkAccount(rawAccount) {
-      const updatedAccount = await client
+      const updatedAccount = await db
         .insert(accounts)
         .values(rawAccount)
         .returning()
@@ -89,7 +110,7 @@ export function CustomPgDrizzleAdapter(
     },
     async getUserByAccount(account) {
       const dbAccount =
-        (await client
+        (await db
           .select()
           .from(accounts)
           .where(
@@ -108,7 +129,7 @@ export function CustomPgDrizzleAdapter(
       return dbAccount.user;
     },
     async deleteSession(sessionToken) {
-      const session = await client
+      const session = await db
         .delete(sessions)
         .where(eq(sessions.sessionToken, sessionToken))
         .returning()
@@ -117,7 +138,7 @@ export function CustomPgDrizzleAdapter(
       return session;
     },
     async createVerificationToken(token) {
-      return await client
+      return await db
         .insert(verificationTokens)
         .values(token)
         .returning()
@@ -125,7 +146,7 @@ export function CustomPgDrizzleAdapter(
     },
     async useVerificationToken(token) {
       try {
-        return await client
+        return await db
           .delete(verificationTokens)
           .where(
             and(
@@ -140,14 +161,14 @@ export function CustomPgDrizzleAdapter(
       }
     },
     async deleteUser(id) {
-      await client
+      await db
         .delete(users)
         .where(eq(users.id, id))
         .returning()
         .then((res) => res[0] ?? null);
     },
     async unlinkAccount(account) {
-      const deletedAccount = await client
+      const deletedAccount = await db
         .delete(accounts)
         .where(
           and(

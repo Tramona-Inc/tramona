@@ -1,26 +1,15 @@
 import { createTRPCRouter, roleRestrictedProcedure } from "@/server/api/trpc";
-import { properties } from "@/server/db/schema";
+import {
+  properties,
+  propertyInsertSchema,
+  propertySelectSchema,
+} from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
-    .input(
-      createInsertSchema(properties, {
-        imageUrls: z.string().url().array(),
-        airbnbUrl: z.string().url(),
-        originalPrice: z.number().int().min(1),
-        numBedrooms: z.number().int().min(1),
-        numBeds: z.number().int().min(1),
-        numRatings: z.number().int().min(0),
-        maxNumGuests: z.number().int().min(1),
-        avgRating: z.number().min(0).max(5),
-      }).omit({
-        hostId: true,
-      }),
-    )
+    .input(propertyInsertSchema.omit({ hostId: true }))
     .mutation(async ({ ctx, input }) => {
       switch (ctx.user.role) {
         case "host":
@@ -43,11 +32,7 @@ export const propertiesRouter = createTRPCRouter({
     }),
 
   delete: roleRestrictedProcedure(["admin", "host"])
-    .input(
-      createSelectSchema(properties).pick({
-        id: true,
-      }),
-    )
+    .input(propertySelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "host") {
         const request = await ctx.db.query.properties.findFirst({

@@ -44,13 +44,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { type z } from "zod";
-import { insertRequestSchema } from "@/server/db/schema";
+import { requestInsertSchema } from "@/server/db/schema";
 
 export default function FormRequest() {
   const [open, setOpen] = useState(false);
 
-  const form = useForm<z.infer<typeof insertRequestSchema>>({
-    resolver: zodResolver(insertRequestSchema),
+  const form = useForm<z.infer<typeof requestInsertSchema>>({
+    resolver: zodResolver(requestInsertSchema),
     defaultValues: {
       maxTotalPrice: 1,
       location: "",
@@ -82,7 +82,7 @@ export default function FormRequest() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof insertRequestSchema>) {
+  function onSubmit(values: z.infer<typeof requestInsertSchema>) {
     mutate(values);
   }
 
