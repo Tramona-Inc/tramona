@@ -52,7 +52,7 @@
     "drizzle-orm": "^0.29.3",
     "drizzle-zod": "^0.5.1",
     "embla-carousel-react": "8.0.0-rc19",
-    "lucide-react": "^0.311.0",
+    "lucide-react": "^0.312.0",
     "next": "^14.0.4",
     "next-auth": "^4.24.5",
     "nodemailer": "^6.9.8",
