@@ -26,7 +26,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
-import MainLayout from "@/components/layouts/MainLayout";
+import Head from "next/head";
 
 const formSchema = z
   .object({
@@ -56,7 +56,10 @@ export default function SignIn({
   }
 
   return (
-    <MainLayout pageTitle="Sign in">
+    <>
+      <Head>
+        <title>Sign in | Tramona</title>
+      </Head>
       <div className="flex h-screen items-stretch">
         <div className="grid flex-1 place-items-center p-4">
           <div className="w-[20rem] space-y-4">
@@ -122,7 +125,7 @@ export default function SignIn({
           />
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }
 
