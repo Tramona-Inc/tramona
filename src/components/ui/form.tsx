@@ -47,6 +47,20 @@ const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue,
 );
 
+const FormItem = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  const id = React.useId();
+
+  return (
+    <FormItemContext.Provider value={{ id }}>
+      <div ref={ref} className={cn("space-y-1", className)} {...props} />
+    </FormItemContext.Provider>
+  );
+});
+FormItem.displayName = "FormItem";
+
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext);
   const itemContext = React.useContext(FormItemContext);
@@ -70,30 +84,20 @@ const useFormField = () => {
   };
 };
 
-const FormItem = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const id = React.useId();
-
-  return (
-    <FormItemContext.Provider value={{ id }}>
-      <div ref={ref} className={cn("space-y-2", className)} {...props} />
-    </FormItemContext.Provider>
-  );
-});
-FormItem.displayName = "FormItem";
-
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField();
+  const { formItemId } = useFormField();
 
   return (
     <Label
       ref={ref}
-      className={cn(error && "text-destructive", className)}
+      className={cn(
+        "text-muted-foreground",
+        // error ? 'text-destructive' : 'text-muted-foreground',
+        className,
+      )}
       htmlFor={formItemId}
       {...props}
     />
@@ -144,19 +148,19 @@ FormDescription.displayName = "FormDescription";
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
->(({ className, children, ...props }, ref) => {
+>(({ className, ...props }, ref) => {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message) : children;
-
-  if (!body) {
-    return null;
-  }
+  const body = error ? String(error?.message) : "";
 
   return (
     <p
       ref={ref}
       id={formMessageId}
-      className={cn("text-sm font-medium text-destructive", className)}
+      className={cn(
+        "text-sm font-medium text-destructive transition-all duration-150",
+        body === "" ? "h-0" : "h-4",
+        className,
+      )}
       {...props}
     >
       {body}
