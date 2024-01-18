@@ -3,9 +3,9 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: node:18.19.0
-    resource_class: large
-    parallelism: 10
+      - image: node:20.11.0
+    resource_class: medium
+    parallelism: 1
 
     steps:
       - checkout
