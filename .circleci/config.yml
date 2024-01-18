@@ -4,7 +4,7 @@ jobs:
   build:
     docker:
       - image: node:18.19.0
-    resource_class: small
+    resource_class: medium
     parallelism: 1
 
     steps:
