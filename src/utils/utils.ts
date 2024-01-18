@@ -97,6 +97,24 @@ export function getNumNights(from: Date, to: Date) {
   return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+/**
+ * @returns `now`, `10 minutes`, `5 hours`, `2 days`, `1 week`, `10 weeks`, etc
+ */
+export function formatInterval(ms: number) {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const weeks = Math.floor(days / 7);
+
+  if (weeks) return plural(weeks, "week");
+  if (days) return plural(days, "day");
+  if (hours > 18) return "1 day";
+  if (hours) return plural(hours, "hour");
+  if (minutes) return plural(minutes, "minute");
+  return "now";
+}
+
 export function formatArrayToString(arr: string[]) {
   if (arr.length === 0) {
     return "";
