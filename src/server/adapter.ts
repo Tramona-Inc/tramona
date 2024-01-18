@@ -8,6 +8,7 @@ export function CustomPgDrizzleAdapter(
 ): Adapter {
   return {
     async createUser(data) {
+      // TODO: add referral code generation 
       return await client
         .insert(users)
         .values({ ...data, id: crypto.randomUUID() })
