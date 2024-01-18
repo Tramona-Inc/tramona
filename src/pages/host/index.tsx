@@ -1,9 +1,10 @@
-import MainLayout from "@/components/layouts/MainLayout";
+import Head from "next/head";
 
 export default function Page() {
   return (
-    <MainLayout pageTitle="Host Dashboard">
+    <>
+      <Head>Host Dashboard | Tramona</Head>
       <p className="p-8">host dashboard</p>
-    </MainLayout>
+    </>
   );
 }
