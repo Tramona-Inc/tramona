@@ -82,9 +82,49 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+export async function getServerAuthSession(ctx: GetServerSidePropsContext) {
+  return await getServerSession(ctx.req, ctx.res, authOptions);
+}
+
+async function sendToSignIn(ctx: GetServerSidePropsContext) {
+  const baseUrl = process.env.NEXTAUTH_URL;
+  const callbackUrl = `${baseUrl}${ctx.resolvedUrl}`;
+  const urlSearchParams = new URLSearchParams({ callbackUrl });
+  return {
+    redirect: {
+      destination: `/auth/signin?${urlSearchParams.toString()}`,
+    },
+  };
+}
+
+/**
+ * Do `export const getServerSideProps = requireAuth;` at the bottom of
+ * any page to make it require authentication.
+ */
+export async function requireAuth(ctx: GetServerSidePropsContext) {
+  const session = await getServerAuthSession(ctx);
+  if (!session) {
+    return sendToSignIn(ctx);
+  }
+  return { props: {} };
+}
+
+/**
+ * Do `export const getServerSideProps = requireRole(["admin", "host"]);` to require
+ * the user to be signed in as either a admin or host for example
+ */
+export const requireRole = (allowedRoles: TramonaUser["role"][]) =>
+  async function (ctx: GetServerSidePropsContext) {
+    const session = await getServerAuthSession(ctx);
+    if (!session) {
+      return sendToSignIn(ctx);
+    }
+
+    if (!allowedRoles.includes(session.user.role)) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return { props: {} };
+  };
