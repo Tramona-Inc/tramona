@@ -27,7 +27,7 @@ export function optional<TZodType extends ZodType>(zodType: TZodType) {
   );
 }
 
-export function zodString({ minLen = -Infinity, maxLen = Infinity } = {}) {
+export function zodString({ minLen = 0, maxLen = 255 } = {}) {
   return z
     .string()
     .trim()

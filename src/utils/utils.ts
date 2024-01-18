@@ -37,6 +37,30 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
 }
 
 /**
+ * formats the price IN CENTS
+ *
+ * Examples:
+ * ```js
+ * formatCurrency(10) => '$0.10'
+ * formatCurrency(2000) => '$20.00'
+ * ```
+ */
+export function formatCurrency(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+/**
+ * Examples:
+ * ```js
+ * capitalize('apple') => 'Apple'
+ * capitalize('ASDF') => 'ASDF'
+ * ```
+ */
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
  * Example outputs:
  * ```js
  * 'Jan 1, 2021'
@@ -45,7 +69,7 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * 'Jan 1, 2021 – Feb 2, 2022'
  * ```
  */
-export function formatDateRange({ from, to }: { from: Date; to?: Date }) {
+export function formatDateRange(from: Date, to?: Date) {
   if (!to) {
     return format(from, "MMM d, yyyy");
   }
@@ -62,17 +86,15 @@ export function formatDateRange({ from, to }: { from: Date; to?: Date }) {
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
 }
 
-export function formatDateRangeFromStrs({
-  from,
-  to,
-}: {
-  from: string;
-  to?: string;
-}) {
+export function formatDateRangeFromStrs(from: string, to?: string) {
   const fromDate = new Date(from + "T00:00:00");
   const toDate = to ? new Date(to + "T00:00:00") : undefined;
 
-  return formatDateRange({ from: fromDate, to: toDate });
+  return formatDateRange(fromDate, toDate);
+}
+
+export function getNumNights(from: Date, to: Date) {
+  return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 export function formatArrayToString(arr: string[]) {
