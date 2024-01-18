@@ -1,18 +1,40 @@
 import { and, eq } from "drizzle-orm";
 import { type Adapter } from "next-auth/adapters";
 import { type PgDatabase } from "drizzle-orm/pg-core";
-import { sessions, users, accounts, verificationTokens } from "./db/schema";
+import {
+  sessions,
+  users,
+  accounts,
+  verificationTokens,
+  referralCodes,
+} from "./db/schema";
+import { generateReferralCode, retry } from "@/utils/utils";
 
 export function CustomPgDrizzleAdapter(
   db: InstanceType<typeof PgDatabase>,
 ): Adapter {
   return {
     async createUser(user) {
-      return await db
-        .insert(users)
-        .values({ ...user, id: crypto.randomUUID() })
-        .returning()
-        .then((res) => res[0]!);
+      return await db.transaction(async (tx) => {
+        const userId = crypto.randomUUID();
+
+        const ret = await tx
+          .insert(users)
+          .values({ ...user, id: userId })
+          .returning()
+          .then((res) => res[0]!);
+
+        await retry(
+          // will throw on collisions since postgres primary keys have the unique constraint
+          tx
+            .insert(referralCodes)
+            .values({ ownerId: userId, referralCode: generateReferralCode() })
+            .returning(),
+          3,
+        );
+
+        return ret;
+      });
     },
     async getUser(userId) {
       return await db
