@@ -82,3 +82,8 @@ export function formatArrayToString(arr: string[]) {
     return `${joinedItems}, and ${lastItem}`;
   }
 }
+
+/**
+ * A utility function to delay execution of main thread for ms milliseconds.
+ */
+export const delay = (ms: number): Promise<any> => new Promise(res => setTimeout(res, ms));

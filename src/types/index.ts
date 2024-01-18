@@ -20,3 +20,13 @@ export type OfferType = {
   updatedAt: string;
   address: string;
 };
+
+/**
+ * Represents the live deals type.
+ */
+export type LiveDeals = {
+  imageUrl: string | null;
+  minutesAgo: number | null;
+  tramonaPrice: number | null;
+  oldPrice: number | null;
+};

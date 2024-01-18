@@ -311,7 +311,7 @@ export default function HostWelcome() {
       <main>
         <div className="container flex flex-col items-center space-y-5 px-7 py-20 md:space-y-10 md:py-40">
           <h1 className="text-center text-2xl font-bold md:text-4xl">
-            We're currently working with Thousands of hosts
+            We&apos;re currently working with Thousands of hosts
           </h1>
           <h2 className="font-medium md:text-3xl">Think someone new might be interest?</h2>
           <Button
