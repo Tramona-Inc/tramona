@@ -82,7 +82,9 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export async function getServerAuthSession(ctx: GetServerSidePropsContext) {
+export async function getServerAuthSession(
+  ctx: Pick<GetServerSidePropsContext, "req" | "res">,
+) {
   return await getServerSession(ctx.req, ctx.res, authOptions);
 }
 
