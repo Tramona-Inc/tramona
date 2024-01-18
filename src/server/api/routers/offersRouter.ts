@@ -4,15 +4,21 @@ import {
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
-import { offers, referralCodes, requests } from "@/server/db/schema";
+import {
+  offerInsertSchema,
+  offerSelectSchema,
+  offers,
+  referralCodes,
+  requestSelectSchema,
+  requests,
+} from "@/server/db/schema";
 import { formatArrayToString } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
-    .input(createSelectSchema(offers).pick({ id: true }))
+    .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const offerDetails = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
@@ -78,7 +84,7 @@ export const offersRouter = createTRPCRouter({
     }),
 
   getByRequestId: protectedProcedure
-    .input(createSelectSchema(requests).pick({ id: true }))
+    .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const requestDetails = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.id),
@@ -114,11 +120,7 @@ export const offersRouter = createTRPCRouter({
     }),
 
   makePublic: roleRestrictedProcedure(["admin", "host"])
-    .input(
-      createSelectSchema(offers).pick({
-        id: true,
-      }),
-    )
+    .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "host") {
         const request = await ctx.db.query.offers.findFirst({
@@ -172,7 +174,7 @@ export const offersRouter = createTRPCRouter({
   }),
 
   create: roleRestrictedProcedure(["admin", "host"])
-    .input(createInsertSchema(offers))
+    .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {
       const requestPromise = ctx.db.query.requests.findFirst({
         where: eq(offers.requestId, input.requestId),
@@ -254,11 +256,7 @@ export const offersRouter = createTRPCRouter({
     }),
 
   delete: roleRestrictedProcedure(["admin", "host"])
-    .input(
-      createSelectSchema(offers).pick({
-        id: true,
-      }),
-    )
+    .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "host") {
         const request = await ctx.db.query.offers.findFirst({

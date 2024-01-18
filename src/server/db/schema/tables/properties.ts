@@ -11,6 +11,8 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const propertyTypeEnum = pgEnum("property_type", [
   "house",
@@ -48,3 +50,14 @@ export const properties = pgTable(
 );
 
 export type Property = typeof properties.$inferSelect;
+export const propertySelectSchema = createSelectSchema(properties);
+export const propertyInsertSchema = createInsertSchema(properties, {
+  imageUrls: z.string().url().array(),
+  airbnbUrl: z.string().url(),
+  originalPrice: z.number().int().min(1),
+  numBedrooms: z.number().int().min(1),
+  numBeds: z.number().int().min(1),
+  numRatings: z.number().int().min(0),
+  maxNumGuests: z.number().int().min(1),
+  avgRating: z.number().min(0).max(5),
+});

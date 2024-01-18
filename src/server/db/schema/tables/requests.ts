@@ -10,8 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { propertyTypeEnum } from "./properties";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from 'zod';
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
@@ -31,11 +30,6 @@ export const requests = pgTable("requests", {
   resolvedAt: timestamp("resolved_at"),
 });
 
-export const insertRequestSchema = createInsertSchema(requests).omit({
-  userId: true,
-  resolvedAt: true,
-});
-
-// type RequestForm = z.infer<typeof insertRequestSchema>
-
 export type Request = typeof requests.$inferSelect;
+export const requestSelectSchema = createSelectSchema(requests);
+export const requestInsertSchema = createInsertSchema(requests);

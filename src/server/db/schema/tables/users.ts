@@ -6,6 +6,7 @@ import {
   pgEnum,
   integer,
 } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
@@ -43,3 +44,5 @@ export const referralCodes = pgTable("referral_codes", {
 });
 
 export type ReferralCode = typeof referralCodes.$inferSelect;
+export const referralCodeSelectSchema = createSelectSchema(referralCodes);
+export const referralCodeInsertSchema = createInsertSchema(referralCodes);

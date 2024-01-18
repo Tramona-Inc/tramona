@@ -1,16 +1,15 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { referralCodes, users } from "@/server/db/schema";
+import {
+  referralCodeSelectSchema,
+  referralCodes,
+  users,
+} from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq, sql } from "drizzle-orm";
-import { createSelectSchema } from "drizzle-zod";
 
 export const referralCodesRouter = createTRPCRouter({
   startUsingCode: protectedProcedure
-    .input(
-      createSelectSchema(referralCodes).pick({
-        referralCode: true,
-      }),
-    )
+    .input(referralCodeSelectSchema.pick({ referralCode: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.referralCodeUsed) {
         throw new TRPCError({

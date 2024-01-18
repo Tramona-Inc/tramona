@@ -3,10 +3,13 @@ import {
   protectedProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
-import { requests } from "@/server/db/schema";
+import {
+  requestInsertSchema,
+  requestSelectSchema,
+  requests,
+} from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -84,11 +87,7 @@ export const requestsRouter = createTRPCRouter({
   }),
 
   create: protectedProcedure
-    .input(
-      createInsertSchema(requests).omit({
-        userId: true,
-      }),
-    )
+    .input(requestInsertSchema.omit({ userId: true }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(requests).values({
         ...input,
@@ -97,11 +96,7 @@ export const requestsRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure
-    .input(
-      createSelectSchema(requests).pick({
-        id: true,
-      }),
-    )
+    .input(requestSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.id),
