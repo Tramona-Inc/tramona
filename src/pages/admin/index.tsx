@@ -41,13 +41,17 @@ import { Badge } from "@/components/ui/badge";
 import { insertRequestSchema } from "@/server/db/schema";
 import { useSession } from "next-auth/react";
 import router from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/utils/api";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Page() {
+  const [open, setOpen] = useState(false);
+
   const form = useForm<z.infer<typeof insertRequestSchema>>({
     resolver: zodResolver(insertRequestSchema),
     defaultValues: {
-      maxPreferredPrice: 1,
+      maxTotalPrice: 1,
       location: "",
       numGuests: 1,
       minNumBeds: 1,
@@ -55,10 +59,6 @@ export default function Page() {
       note: "",
     },
   });
-
-  function onSubmit(values: z.infer<typeof insertRequestSchema>) {
-    console.log(values);
-  }
 
   const { data } = useSession();
 
@@ -73,11 +73,30 @@ export default function Page() {
     return null;
   }
 
+  const utils = api.useUtils(); // To allow to invalidate the data useContext depracated
+
+  const { mutate, isLoading } = api.requests.create.useMutation({
+    onSuccess: () => {
+      setOpen(false);
+      void utils.requests.getAll.invalidate(); // will revalidate the tasks array to see if there are any changes
+    },
+    onError: (error) => {
+      toast({
+        title: "Something went wrong",
+        description: error.message,
+      });
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof insertRequestSchema>) {
+    mutate(values);
+  }
+
   return (
     <MainLayout pageTitle="Admin Dashboard">
       <main className="container">
         <p className="p-8">admin dashboard</p>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>+ Create a request</Button>
           </DialogTrigger>
@@ -105,7 +124,7 @@ export default function Page() {
                 <section className="flex flex-row gap-5">
                   <FormField
                     control={form.control}
-                    name="maxPreferredPrice"
+                    name="maxTotalPrice"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Max Price</FormLabel>
@@ -336,7 +355,9 @@ export default function Page() {
                   )}
                 />
 
-                <Button type="submit">Submit</Button>
+                <Button type="submit" isLoading={isLoading}>
+                  Submit
+                </Button>
               </form>
             </Form>
           </DialogContent>
