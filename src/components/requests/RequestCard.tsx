@@ -13,6 +13,7 @@ import { Badge } from "../ui/badge";
 import { type inferRouterOutputs } from "@trpc/server";
 import { type AppRouter } from "@/server/api/root";
 import { MapPinIcon } from "lucide-react";
+import { Card, CardContent, CardFooter } from "../ui/card";
 
 type RequestWithDetails =
   inferRouterOutputs<AppRouter>["requests"]["getMyRequests"][
@@ -27,33 +28,29 @@ function getRequestStatus(request: RequestWithDetails) {
   return request.numOffers === 0 ? "pending" : "accepted";
 }
 
-function RequestCardTag({ request }: { request: RequestWithDetails }) {
+function RequestCardBadge({ request }: { request: RequestWithDetails }) {
   switch (getRequestStatus(request)) {
     case "pending":
-      return (
-        <Badge variant="yellow">
-          Pending ({formatInterval(Date.now() - request.createdAt.getTime())})
-        </Badge>
-      );
+      const msAgo = Date.now() - request.createdAt.getTime();
+      const showTimeAgo = msAgo > 1000 * 60 * 60;
+      const fmtdTimeAgo = showTimeAgo ? `(${formatInterval(msAgo)})` : "";
+      return <Badge variant="yellow">Pending {fmtdTimeAgo}</Badge>;
     case "accepted":
       return (
         <Badge variant="green" className="pr-1">
           {request.numOffers > 0 ? request.numOffers : "No"}{" "}
           {request.numOffers === 1 ? "offer" : "offers"}
           <div className="flex items-center -space-x-2">
-            {request.numOffers > 0 &&
-              Array.from({ length: Math.min(request.numOffers, 3) }).map(
-                (_, i) => (
-                  <Image
-                    key={i}
-                    src={`/assets/images/fake-pfps/1.png`}
-                    alt=""
-                    width={22}
-                    height={22}
-                    className="inline-block"
-                  />
-                ),
-              )}
+            {request.hostImages.map((imageUrl) => (
+              <Image
+                key={imageUrl}
+                src={imageUrl}
+                alt=""
+                width={22}
+                height={22}
+                className="inline-block"
+              />
+            ))}
           </div>
         </Badge>
       );
@@ -69,8 +66,6 @@ function RequestCardAction({ request }: { request: RequestWithDetails }) {
     case "pending":
       return null;
     case "accepted":
-      const numOffers = request.numOffers;
-      const buttonText = `View ${numOffers === 1 ? "Offer" : "Offers"}`;
       const primaryBtn = cn(
         buttonVariants({ size: "lg", variant: "default" }),
         "w-36 rounded-full",
@@ -78,7 +73,7 @@ function RequestCardAction({ request }: { request: RequestWithDetails }) {
 
       return (
         <Link href={`/requests/${request.id}`} className={primaryBtn}>
-          {buttonText} &rarr;
+          View ${plural(request.numOffers, "offer")} &rarr;
         </Link>
       );
     case "rejected":
@@ -108,18 +103,14 @@ export default function RequestCard({
   const fmtdNumGuests = plural(request.numGuests, "guest");
 
   return (
-    <article
-      key={request.id}
-      className="flex items-stretch gap-1 rounded-xl border border-zinc-100 bg-white p-4 shadow-md"
-    >
-      <div className="flex-1">
-        <h2 className="flex gap-1 text-lg font-semibold text-zinc-700">
-          <div className="opacity-25">
-            <MapPinIcon />
-          </div>
-          {request.location}
+    <Card key={request.id}>
+      <CardContent>
+        <h2 className="flex items-center gap-1 text-lg font-semibold text-zinc-700">
+          <MapPinIcon className="-translate-y-0.5 text-zinc-300" />
+          <div className="flex-1">{request.location}</div>
+          <RequestCardBadge request={request} />
         </h2>
-        <div className="pl-7 text-zinc-500">
+        <div className="text-zinc-500">
           <p>
             requested{" "}
             <strong className="text-lg text-zinc-600">{fmtdPrice}</strong>
@@ -130,16 +121,15 @@ export default function RequestCard({
           </p>
 
           {request.note && (
-            <div className="rounded-md bg-accent p-2 text-sm text-accent-foreground">
+            <div className="rounded-md bg-muted p-2 text-sm text-muted-foreground">
               <p>&ldquo;{request.note}&rdquo;</p>
             </div>
           )}
         </div>
-      </div>
-      <div className="flex flex-col items-end justify-between gap-2">
-        <RequestCardTag request={request} />
+      </CardContent>
+      <CardFooter>
         <RequestCardAction request={request} />
-      </div>
-    </article>
+      </CardFooter>
+    </Card>
   );
 }
