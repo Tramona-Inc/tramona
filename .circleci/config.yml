@@ -4,8 +4,8 @@ jobs:
   build:
     docker:
       - image: node:18.19.0
-    resource_class: large
-    parallelism: 10
+    resource_class: small
+    parallelism: 1
 
     steps:
       - checkout
