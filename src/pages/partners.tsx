@@ -104,7 +104,7 @@ function ExploreEarningsCard() {
             min={50}
             max={1000}
             step={10}
-            onValueChange={(value) => setReferrals(value[0] as number)}
+            onValueChange={(value) => setReferrals(value[0]!)}
           />
         </div>
       </div>
