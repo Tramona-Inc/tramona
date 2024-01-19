@@ -13,8 +13,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { type Request } from "@/server/db/schema/tables/requests";
-import { Button } from "../ui/button";
 import AdminFormOffer from "./AdminFormOffer";
+import { api } from "@/utils/api";
+import OfferInfo from "./Offers";
 
 type Props = {
   children?: React.ReactNode;
@@ -22,13 +23,17 @@ type Props = {
 };
 
 export default function RequestCard({ children, request }: Props) {
+  const { data: offers } = api.offers.getByRequestId.useQuery({
+    id: request.id,
+  });
+
   return (
     <Card key={request.id}>
       <CardHeader>
         <CardTitle className="capitalize">{request.location}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-row justify-between">
-        <div>
+      <CardContent>
+        <div className="space-y-2">
           <p>Price: ${request.maxTotalPrice}</p>
           <p>Location: {request.location}</p>
           {/* <p>Check-in: {request.checkIn}</p>
@@ -37,13 +42,16 @@ export default function RequestCard({ children, request }: Props) {
           <p>Beds: {request.minNumBeds}</p>
           <p>Bedrooms: {request.minNumBedrooms}</p>
           <p>Propety Type: {request.propertyType}</p>
-        </div>
-        <div>
-          {/* // TODO: Link to offer  */}
-          <AdminFormOffer requestId={request.id} />
-          {/* <Button>View Offer</Button> */}
+
+          <div className="flex gap-5">
+            <AdminFormOffer requestId={request.id} />
+
+            {/* Display if offer exist*/}
+            {offers && offers.length > 0 && <OfferInfo offers={offers} />}
+          </div>
         </div>
       </CardContent>
+
       <CardFooter>
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">

@@ -41,6 +41,8 @@ export default function AdminFormOffer({ requestId }: { requestId: number }) {
     },
   });
 
+  const utils = api.useUtils(); // To allow to invalidate the data useContext depracated
+
   const { mutate, isLoading } = api.offers.create.useMutation({
     onSuccess: () => {
       setOpen(false);
@@ -49,6 +51,7 @@ export default function AdminFormOffer({ requestId }: { requestId: number }) {
         title: "Offer sent sucessfully",
         variant: "default",
       });
+      void utils.requests.getAll.invalidate(); // revalidate the reuqest cards
     },
     onError: (error) => {
       toast({
@@ -60,7 +63,6 @@ export default function AdminFormOffer({ requestId }: { requestId: number }) {
   });
 
   function onSubmit(values: z.infer<typeof offerInsertSchema>) {
-    console.log(values);
     mutate(values);
   }
 
@@ -68,7 +70,7 @@ export default function AdminFormOffer({ requestId }: { requestId: number }) {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button>Offer</Button>
+          <Button>Make an Offer</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>

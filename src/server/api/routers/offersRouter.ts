@@ -87,34 +87,32 @@ export const offersRouter = createTRPCRouter({
   getByRequestId: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      const requestDetails = await ctx.db.query.requests.findFirst({
+      const requestPromise = ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.id),
-        columns: {},
-        with: {
-          madeByUser: {
-            columns: { id: true },
-          },
-        },
       });
 
-      if (requestDetails?.madeByUser?.id !== ctx.user.id) {
+      const [request] = await Promise.all([requestPromise]);
+
+      // request must exist,
+      if (!request) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
+          code: "BAD_REQUEST",
+          message: "That request doesn't exist",
         });
       }
 
       const offersForRequest = await ctx.db.query.offers.findMany({
-        where: eq(offers.id, input.id),
-        columns: {
-          createdAt: true,
-        },
-        with: {
-          property: {
-            with: {
-              host: true,
-            },
-          },
-        },
+        where: eq(offers.requestId, input.id),
+        // columns: {
+        //   createdAt: true,
+        // },
+        // with: {
+        //   property: {
+        //     with: {
+        //       host: true,
+        //     },
+        //   },
+        // },
       });
 
       return offersForRequest;
