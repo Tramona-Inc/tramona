@@ -1,5 +1,5 @@
-import DisplayRequests from "@/components/Admin/DisplayRequests";
-import FormRequest from "@/components/FormRequest";
+import Requests from "@/components/Admin/Requests";
+import FormRequest from "@/components/Admin/AdminFormRequest";
 import { requireRole } from "@/server/auth";
 import Head from "next/head";
 
@@ -16,7 +16,7 @@ export default function Page() {
         <div>
           <FormRequest />
         </div>
-        <DisplayRequests />
+        <Requests />
       </div>
     </>
   );
