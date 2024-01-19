@@ -127,10 +127,10 @@ function ExploreEarningsCard() {
 
 export default function Page() {
   return (
-    <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16 [&>*]:sm:py-32">
+    <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
       <section className="relative">
-        <div className="flex items-center space-x-20">
-          <div className="max-w-xl space-y-10">
+        <div className="flex flex-col-reverse items-center lg:flex-row lg:space-x-10 xl:space-x-20">
+          <div className="max-w-xl space-y-5 lg:space-y-10">
             <h1 className="font-semibold">TRAMONA PARTNERSHIP PROGRAM</h1>
             <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
               Earn money when your friends travel
@@ -144,13 +144,13 @@ export default function Page() {
               Sign Up Now
             </Button>
           </div>
-          <div>
+          <div className="py-10 md:py-5">
             <Image
-              src={"/assets/images/refer-and-earn-landing.png"}
+              src={"/assets/images/partners-landing.png"}
               width={500}
               height={500}
               alt="Refer and Earn"
-              className="rounded-lg"
+              className="w-full rounded-lg"
             />
           </div>
         </div>
