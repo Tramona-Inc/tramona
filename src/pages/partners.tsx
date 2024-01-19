@@ -55,12 +55,15 @@ function ExploreEarningsCard() {
   const [tab, setTab] = useState(0);
   const [referrals, setReferrals] = useState(200);
 
+  const currentTier = tiers[tab];
+  if (!currentTier) return <div>Loading...</div>;
+
   const earnings = Math.floor(
-    referrals * avgAnnualTravelSpendings * (tiers[tab].percent / 100),
+    referrals * avgAnnualTravelSpendings * (currentTier.percent / 100),
   );
 
   const fmtdEarnings = `$${earnings.toLocaleString()}${
-    tiers[tab].orMore ? "+" : ""
+    currentTier.orMore ? "+" : ""
   }`;
 
   return (
@@ -101,7 +104,7 @@ function ExploreEarningsCard() {
             min={50}
             max={1000}
             step={10}
-            onValueChange={(value) => setReferrals(value[0])}
+            onValueChange={(value) => setReferrals(value[0] as number)}
           />
         </div>
       </div>
