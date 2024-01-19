@@ -15,7 +15,7 @@ export default function Page() {
         <Link href="/support" className="underline underline-offset-2">
           contact support
         </Link>{" "}
-        if this was not expected
+        if you think this is an error
       </p>
     </>
   );
