@@ -13,68 +13,6 @@ import Image from 'next/image';
 import { cn, delay } from '@/utils/utils';
 import { useRouter } from 'next/router';
 
-const steps = [
-  { label: '', icon: <Undone />, children: <Step1 /> },
-  { label: '', icon: <Undone />, children: <Step2 /> },
-  { label: '', icon: <Undone />, children: <Step3 /> },
-  { label: '', icon: <Undone />, children: <Step4 /> },
-  { label: '', icon: <Undone />, children: <Step5 /> },
-] satisfies StepperConfig[];
-
-export default function Welcome() {
-  const { nextStep, prevStep, resetSteps, activeStep, isDisabledStep, isLastStep, isOptionalStep } = useStepper({
-    initialStep: 0,
-    steps,
-  });
-
-  const router = useRouter();
-
-  const startExploring = () => {
-    nextStep();
-    delay(2000)
-      .then(() => router.push('/'))
-      .catch(() => {
-        return;
-      });
-  };
-
-  return (
-    <>
-      <Head>Welcome</Head>
-      <header className="sticky top-0 z-50 flex items-center gap-4 bg-white px-4 py-2 text-sm shadow-md sm:px-8 sm:py-4 sm:text-base">
-        <Link href="/" className="mr-auto flex items-center gap-2 text-2xl font-bold">
-          <TramonaIcon /> Tramona
-        </Link>
-      </header>
-      <div className="mx-auto flex w-full flex-col gap-4 px-5 py-10 lg:px-80">
-        <Stepper activeStep={activeStep} responsive={false}>
-          {steps.map((step, index) => (
-            <StepperItem
-              index={index}
-              key={index}
-              {...step}
-              additionalClassName={{
-                button: 'bg-[#9CA3AF]',
-              }}
-            >
-              {step.children}
-            </StepperItem>
-          ))}
-        </Stepper>
-        <div className="flex items-center justify-center gap-2">
-          {activeStep === steps.length ? (
-            <Step5 />
-          ) : (
-            <Button onClick={isLastStep ? startExploring : nextStep} className="rounded-full px-8">
-              {isLastStep ? 'Start Exploring' : 'Continue'}
-            </Button>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
 function StepperContentLayout({
   children,
   className,
@@ -97,28 +35,22 @@ function Step1(): JSX.Element {
       <div className="mx-auto flex w-[85%] flex-col gap-4">
         <div className="flex flex-row items-center gap-4">
           <div className="h-30 w-30">
-            {' '}
             <Calender />
           </div>
-          <p className="">
-            {' '}
-            Tramona works by matching you with one of the many hosts in our network that has a vacancy
-          </p>
+          <p className="">Tramona works by matching you with one of the many hosts in our network that has a vacancy</p>
         </div>
         <div className="flex flex-row items-center gap-4">
           <div className="h-30 w-30">
-            {' '}
             <Piggy />
           </div>
           <p className="">
-            {' '}
             Because of this, we can guarantee you a price that is not available anywhere else.{' '}
             <span className="bg-[#FACF26] px-1">Make a request</span> and see for yourself
           </p>
         </div>
       </div>
       <div className="my-4 flex flex-1 flex-col gap-4 self-center rounded-lg bg-[#3843D0] p-4">
-        {fakeLiveDeals.slice(2).map(({ imageUrl, minutesAgo, tramonaPrice, oldPrice }, idx) => (
+        {fakeLiveDeals.slice(2).map(({ minutesAgo, tramonaPrice, oldPrice }, idx) => (
           <div className="flex flex-row gap-4 rounded-lg border-2 bg-white p-4 text-black" key={idx}>
             <Image
               src={'/assets/images/fake-properties/owners/2.png'}
@@ -223,5 +155,67 @@ function Step5(): JSX.Element {
         className="inset-0 my-5 border border-none object-contain object-center"
       />
     </StepperContentLayout>
+  );
+}
+
+const steps = [
+  { label: '', icon: <Undone />, children: <Step1 /> },
+  { label: '', icon: <Undone />, children: <Step2 /> },
+  { label: '', icon: <Undone />, children: <Step3 /> },
+  { label: '', icon: <Undone />, children: <Step4 /> },
+  { label: '', icon: <Undone />, children: <Step5 /> },
+] satisfies StepperConfig[];
+
+export default function Welcome() {
+  const { nextStep, activeStep, isLastStep } = useStepper({
+    initialStep: 0,
+    steps,
+  });
+
+  const router = useRouter();
+
+  const startExploring = () => {
+    nextStep();
+    delay(2000)
+      .then(() => router.push('/'))
+      .catch(() => {
+        return;
+      });
+  };
+
+  return (
+    <>
+      <Head>Welcome</Head>
+      <header className="sticky top-0 z-50 flex items-center gap-4 bg-white px-4 py-2 text-sm shadow-md sm:px-8 sm:py-4 sm:text-base">
+        <Link href="/" className="mr-auto flex items-center gap-2 text-2xl font-bold">
+          <TramonaIcon /> Tramona
+        </Link>
+      </header>
+      <div className="mx-auto flex w-full flex-col gap-4 px-5 py-10 lg:px-80">
+        <Stepper activeStep={activeStep} responsive={false}>
+          {steps.map((step, index) => (
+            <StepperItem
+              index={index}
+              key={index}
+              {...step}
+              additionalClassName={{
+                button: 'bg-[#9CA3AF]',
+              }}
+            >
+              {step.children}
+            </StepperItem>
+          ))}
+        </Stepper>
+        <div className="flex items-center justify-center gap-2">
+          {activeStep === steps.length ? (
+            <Step5 />
+          ) : (
+            <Button onClick={isLastStep ? startExploring : nextStep} className="rounded-full px-8">
+              {isLastStep ? 'Start Exploring' : 'Continue'}
+            </Button>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollArea, ScrollBar } from '../ui/scroll-area';
+import { ScrollArea } from '../ui/scroll-area';
 import FeedCardSm from './feed-card-sm';
 // import useGlobalFeed from '@/hooks/useGlobalFeed';
 import type { OfferType } from '@/types';
