@@ -66,14 +66,11 @@ function RequestCardAction({ request }: { request: RequestWithDetails }) {
     case "pending":
       return null;
     case "accepted":
-      const primaryBtn = cn(
-        buttonVariants({ size: "lg", variant: "default" }),
-        "w-36 rounded-full",
-      );
+      const primaryBtn = cn(buttonVariants(), "rounded-full");
 
       return (
         <Link href={`/requests/${request.id}`} className={primaryBtn}>
-          View ${plural(request.numOffers, "offer")} &rarr;
+          View {plural(request.numOffers, "offer")} &rarr;
         </Link>
       );
     case "rejected":
@@ -98,7 +95,7 @@ export default function RequestCard({
 }) {
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
-  const fmtdPrice = `${formatCurrency(pricePerNight)}`;
+  const fmtdPrice = formatCurrency(pricePerNight);
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
 
