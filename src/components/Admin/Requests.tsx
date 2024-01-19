@@ -7,7 +7,7 @@ export default function DisplayRequests() {
   const { data: requests } = api.requests.getAll.useQuery();
 
   return (
-    <section className="flex flex-col gap-5 md:grid md:grid-cols-2">
+    <section className="flex flex-col gap-5 lg:grid md:grid-cols-2">
       {requests?.map((request) => (
         <RequestCard key={request.id} request={request} />
       ))}

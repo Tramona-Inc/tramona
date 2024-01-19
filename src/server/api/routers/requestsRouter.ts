@@ -105,10 +105,11 @@ export const requestsRouter = createTRPCRouter({
         },
       });
 
-      if (request?.userId !== ctx.user.id) {
+      // Only users and admin can delete
+      if (ctx.user.role === "admin" || request?.userId === ctx.user.id) {
+        await ctx.db.delete(requests).where(eq(requests.id, input.id));
+      } else {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
-
-      await ctx.db.delete(requests).where(eq(requests.id, input.id));
     }),
 });
