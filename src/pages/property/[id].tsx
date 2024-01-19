@@ -1,7 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { api } from "@/utils/api";
-import { preconnect } from "react-dom";
 
 export default function Page() {
   const router = useRouter();

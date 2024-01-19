@@ -31,7 +31,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type z } from "zod";
 import {
   propertyInsertFormSchema,
-  type propertyInsertSchema,
 } from "@/server/db/schema";
 import { cn } from "@/utils/utils";
 import {

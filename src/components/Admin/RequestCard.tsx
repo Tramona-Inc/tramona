@@ -94,7 +94,7 @@ export default function RequestCard({ children, request }: Props) {
           </div>
 
           <div>
-            <AlertDialog>
+            <AlertDialog open={open} onOpenChange={setOpen}>
               <AlertDialogTrigger asChild>
                 <Button variant={"destructive"}>
                   <Icons iconName={"trash"} />

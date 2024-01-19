@@ -2,7 +2,6 @@ import Requests from "@/components/Admin/Requests";
 import AdminFormRequest from "@/components/Admin/AdminFormRequest";
 import { requireRole } from "@/server/auth";
 import Head from "next/head";
-import AdminFormOffer from "@/components/Admin/AdminFormOffer";
 import AdminFormProperty from "@/components/Admin/AdminFormProperty";
 
 export const getServerSideProps = requireRole(["admin"]);
