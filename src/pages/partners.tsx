@@ -230,32 +230,39 @@ export default function Page() {
           How it works
         </h2>
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6">
+          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
               1
             </div>
-            <h2 className="pt-6 text-xl font-bold sm:text-3xl">Sign Up</h2>
-            <p className="font-medium sm:text-xl">
-              Sign up, access our partner portal, and get your custom affiliate
-              link.
+            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+              Sign Up
+            </h2>
+            <p className="text-lg font-medium tracking-tight sm:text-xl">
+              Sign up, access our partner portal, and get your{" "}
+              <mark>custom affiliate link</mark>.
             </p>
           </div>
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6">
+          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
               2
             </div>
-            <h2 className="pt-6 text-xl font-bold sm:text-3xl">Share</h2>
-            <p className="font-medium sm:text-xl">
-              Share your link with your contacts and social media followers.
+            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+              Share
+            </h2>
+            <p className="text-lg font-medium tracking-tight sm:text-xl">
+              <mark>Share your link</mark> with your contacts and social media
+              followers.
             </p>
           </div>
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6">
+          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
               3
             </div>
-            <h2 className="pt-6 text-xl font-bold sm:text-3xl">Earn</h2>
-            <p className="font-medium sm:text-xl">
-              Earn $$ based on every persons travel you refer
+            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+              Earn
+            </h2>
+            <p className="text-lg font-medium tracking-tight sm:text-xl">
+              <mark>Earn $$</mark> based on every persons travel you refer
             </p>
           </div>
         </div>
