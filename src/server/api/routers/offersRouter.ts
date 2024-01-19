@@ -8,6 +8,7 @@ import {
   offerInsertSchema,
   offerSelectSchema,
   offers,
+  properties,
   referralCodes,
   requestSelectSchema,
   requests,
@@ -177,11 +178,11 @@ export const offersRouter = createTRPCRouter({
     .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {
       const requestPromise = ctx.db.query.requests.findFirst({
-        where: eq(offers.requestId, input.requestId),
+        where: eq(requests.id, input.requestId),
       });
 
       const propertyPromise = ctx.db.query.properties.findFirst({
-        where: eq(offers.propertyId, input.propertyId),
+        where: eq(properties.id, input.propertyId),
       });
 
       const [request, property] = await Promise.all([

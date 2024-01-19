@@ -46,7 +46,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type z } from "zod";
 import { requestInsertSchema } from "@/server/db/schema";
 
-export default function FormRequest() {
+export default function AdminFormRequest() {
   const [open, setOpen] = useState(false);
 
   const form = useForm<z.infer<typeof requestInsertSchema>>({

@@ -1,6 +1,7 @@
 import { api } from "@/utils/api";
 import React from "react";
 import RequestCard from "./RequestCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DisplayRequests() {
   const { data: requests } = api.requests.getAll.useQuery();

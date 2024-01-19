@@ -13,6 +13,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { type Request } from "@/server/db/schema/tables/requests";
+import { Button } from "../ui/button";
+import AdminFormOffer from "./AdminFormOffer";
 
 type Props = {
   children?: React.ReactNode;
@@ -23,17 +25,24 @@ export default function RequestCard({ children, request }: Props) {
   return (
     <Card key={request.id}>
       <CardHeader>
-        <CardTitle>{request.location}</CardTitle>
+        <CardTitle className="capitalize">{request.location}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <h1>Price: ${request.maxTotalPrice}</h1>
-        <h1>Location: {request.location}</h1>
-        {/* <h1>Check-in: {request.checkIn}</h1>
-              <h1>Check-out: {request.checkOut}</h1> */}
-        <h1>Guests: {request.numGuests}</h1>
-        <h1>Beds: {request.minNumBeds}</h1>
-        <h1>Bedrooms: {request.minNumBedrooms}</h1>
-        <h1>Propety Type: {request.propertyType}</h1>
+      <CardContent className="flex flex-row justify-between">
+        <div>
+          <p>Price: ${request.maxTotalPrice}</p>
+          <p>Location: {request.location}</p>
+          {/* <p>Check-in: {request.checkIn}</p>
+                <p>Check-out: {request.checkOut}</p> */}
+          <p>Guests: {request.numGuests}</p>
+          <p>Beds: {request.minNumBeds}</p>
+          <p>Bedrooms: {request.minNumBedrooms}</p>
+          <p>Propety Type: {request.propertyType}</p>
+        </div>
+        <div>
+          {/* // TODO: Link to offer  */}
+          <AdminFormOffer requestId={request.id} />
+          {/* <Button>View Offer</Button> */}
+        </div>
       </CardContent>
       <CardFooter>
         <Accordion type="single" collapsible className="w-full">
