@@ -12,8 +12,9 @@ import {
 import { Badge } from "../ui/badge";
 import { type inferRouterOutputs } from "@trpc/server";
 import { type AppRouter } from "@/server/api/root";
-import { MapPinIcon } from "lucide-react";
+import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import { Card, CardContent, CardFooter } from "../ui/card";
+import { getFmtdFilters } from "@/utils/formatters";
 
 type RequestWithDetails =
   inferRouterOutputs<AppRouter>["requests"]["getMyRequests"][
@@ -62,29 +63,25 @@ function RequestCardBadge({ request }: { request: RequestWithDetails }) {
 }
 
 function RequestCardAction({ request }: { request: RequestWithDetails }) {
+  const primaryBtn = cn(buttonVariants(), "rounded-full");
+  const secondaryBtn = cn(
+    buttonVariants({ variant: "outline" }),
+    "rounded-full",
+  );
+
   switch (getRequestStatus(request)) {
     case "pending":
       return null;
     case "accepted":
-      const primaryBtn = cn(buttonVariants(), "rounded-full");
-
       return (
         <Link href={`/requests/${request.id}`} className={primaryBtn}>
           View {plural(request.numOffers, "offer")} &rarr;
         </Link>
       );
     case "rejected":
-      return (
-        <Button size="lg" variant="outline" className="w-36 rounded-full">
-          Revise
-        </Button>
-      );
+      return <Button className={secondaryBtn}>Revise</Button>;
     case "booked":
-      return (
-        <Button size="lg" className="w-36 rounded-full">
-          Request again
-        </Button>
-      );
+      return <Button className={primaryBtn}>Request again</Button>;
   }
 }
 
@@ -99,9 +96,14 @@ export default function RequestCard({
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
 
+  const fmtdFilters = getFmtdFilters(request, {
+    withoutNote: true,
+    excludeDefaults: true,
+  });
+
   return (
     <Card key={request.id}>
-      <CardContent>
+      <CardContent className="space-y-2">
         <h2 className="flex items-center gap-1 text-lg font-semibold text-zinc-700">
           <MapPinIcon className="-translate-y-0.5 text-zinc-300" />
           <div className="flex-1">{request.location}</div>
@@ -113,16 +115,24 @@ export default function RequestCard({
             <strong className="text-lg text-zinc-600">{fmtdPrice}</strong>
             <span className="text-sm">/night</span>
           </p>
-          <p>
-            {fmtdDateRange} • {fmtdNumGuests}
-          </p>
-
-          {request.note && (
-            <div className="rounded-md bg-muted p-2 text-sm text-muted-foreground">
-              <p>&ldquo;{request.note}&rdquo;</p>
+          <div className="flex items-center gap-1">
+            <CalendarIcon className="size-4" />
+            <p className="mr-3">{fmtdDateRange}</p>
+            <UsersIcon className="size-4" />
+            <p>{fmtdNumGuests}</p>
+          </div>
+          {fmtdFilters && (
+            <div className="flex items-center gap-1">
+              <FilterIcon className="size-4" />
+              <p>{fmtdFilters}</p>
             </div>
           )}
         </div>
+        {request.note && (
+          <div className="rounded-md bg-muted p-2 text-sm text-muted-foreground">
+            <p>&ldquo;{request.note}&rdquo;</p>
+          </div>
+        )}
       </CardContent>
       <CardFooter>
         <RequestCardAction request={request} />

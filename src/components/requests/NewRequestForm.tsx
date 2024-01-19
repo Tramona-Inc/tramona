@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { capitalize } from "@/utils/utils";
+import { getFmtdFilters } from "@/utils/formatters";
 
 const formSchema = z
   .object({
@@ -41,7 +42,7 @@ const formSchema = z
       to: z.date(),
     }),
     numGuests: zodInteger({ min: 1 }),
-    propertyType: z.enum(ALL_PROPERTY_TYPES).optional(),
+    propertyType: z.enum([...ALL_PROPERTY_TYPES, "any"]).optional(),
     minNumBedrooms: optional(zodInteger()),
     minNumBeds: optional(zodInteger()),
     note: optional(zodString()),
@@ -56,35 +57,43 @@ type FormSchema = z.infer<typeof formSchema>;
 export default function NewRequestForm(props: { afterSubmit?: () => void }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      propertyType: "any",
+    },
   });
 
   const mutation = api.requests.create.useMutation();
+  const utils = api.useUtils();
 
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
-  const fmtdMinNumBedrooms =
-    (minNumBedrooms ?? "") === "" ? undefined : `${minNumBedrooms}+ bedrooms`;
-  const fmtdMinNumBeds =
-    (minNumBeds ?? "") === "" ? undefined : `${minNumBeds}+ beds`;
-  const filters = [
-    fmtdMinNumBedrooms,
-    fmtdMinNumBeds,
-    propertyType,
+  const fmtdFilters = getFmtdFilters({
+    minNumBedrooms,
+    minNumBeds,
+    propertyType: propertyType === "any" ? undefined : propertyType,
     note,
-  ].filter(Boolean);
-  const fmtdFilters = filters.length === 0 ? undefined : filters.join(" • ");
+  });
 
   async function onSubmit(data: FormSchema) {
     const { date: _date, maxTotalPriceUSD, ...restData } = data;
 
-    const newRequest = {
-      checkIn: data.date.from,
-      checkOut: data.date.to,
-      maxTotalPrice: maxTotalPriceUSD * 100,
-      ...restData,
-    };
-
     try {
-      await mutation.mutateAsync(newRequest);
+      const newRequest = {
+        checkIn: data.date.from,
+        checkOut: data.date.to,
+        maxTotalPrice: maxTotalPriceUSD * 100,
+        propertyType: propertyType === "any" ? undefined : propertyType,
+        ...restData,
+      };
+
+      await mutation
+        .mutateAsync({
+          ...newRequest,
+          propertyType: propertyType === "any" ? undefined : propertyType,
+        }) // ts is dumb i have no clue why this is needed jk i love ts
+        .catch(() => {
+          throw new Error();
+        });
+      await utils.requests.invalidate();
       successfulRequestToast(newRequest);
       props.afterSubmit?.();
     } catch (error) {
@@ -205,14 +214,18 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
                 control={form.control}
                 name="propertyType"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-full">
                     <FormLabel>Property Type</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder="Any" />
+                          <SelectValue placeholder="" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="any">Any</SelectItem>
                           {ALL_PROPERTY_TYPES.map((propertyType) => (
                             <SelectItem key={propertyType} value={propertyType}>
                               {capitalize(propertyType)}
