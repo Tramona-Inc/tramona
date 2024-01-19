@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -11,8 +12,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import PinkStarIcon from "@/components/icons/PinkStarIcon";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -48,11 +50,6 @@ function ExploreEarningsCard() {
       percent: 50,
       orMore: false,
     },
-    {
-      name: "Special Partnership",
-      percent: 80,
-      orMore: true,
-    },
   ] as const;
 
   const [tab, setTab] = useState(0);
@@ -81,7 +78,7 @@ function ExploreEarningsCard() {
           >
             {tier.name}{" "}
             <span className="hidden rounded-full bg-white/10 px-2 py-1 text-xs sm:inline">
-              {tier.percent}%{tier.orMore ? "+" : ""}
+              {tier.percent}%{tier.orMore}
             </span>
           </button>
         ))}
@@ -269,19 +266,36 @@ export default function Page() {
       </section>
 
       <section className="bg-slate-900">
-        <div className="grid gap-6 xl:grid-cols-2">
-          <div className="space-y-6">
-            <h2 className="text-center text-4xl font-bold text-white sm:text-left sm:text-6xl">
+        <div className="grid gap-6 md:gap-10 xl:grid-cols-2 xl:gap-16">
+          <div className="relative space-y-6 xl:max-w-2xl">
+            <div className="absolute -top-20 sm:-top-16 lg:-top-20">
+              <PinkStarIcon />
+            </div>
+            <h2 className="text-center text-4xl font-bold tracking-tight text-white sm:text-left sm:text-6xl">
               Explore how much you could earn
             </h2>
-            <p className="text-lg text-white/60 sm:text-2xl">
-              Earnings are <strong className="text-white/80">uncapped</strong>.
+            <p className="text-lg tracking-tight text-zinc-400 sm:text-2xl">
+              Earnings are <strong className="text-zinc-300">uncapped</strong>.
               The more people you refer, the more you earn.
             </p>
           </div>
-          <ExploreEarningsCard />
+
+          <div className="space-y-10">
+            <ExploreEarningsCard />
+            <Link
+              href=""
+              className={buttonVariants({
+                variant: "default",
+                size: "lg",
+                className: "rounded-xl lg:px-10 lg:py-6 lg:text-xl",
+              })}
+            >
+              Start earning now
+            </Link>
+          </div>
         </div>
       </section>
+
       <section className="bg-white">
         <h2 className="text-center text-4xl font-bold sm:text-6xl">
           Questions?
