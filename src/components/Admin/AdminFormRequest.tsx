@@ -104,7 +104,7 @@ export default function FormRequest() {
                 Admin
               </Badge>
             </DialogTitle>
-            <DialogDescription>Add personal request</DialogDescription>
+            <DialogDescription>Add personal equest</DialogDescription>
           </DialogHeader>
 
           {/* Ensure that the Form component wraps the relevant content */}
