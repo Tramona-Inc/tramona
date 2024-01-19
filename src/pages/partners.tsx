@@ -12,6 +12,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -165,43 +166,62 @@ export default function Page() {
           referral code!
         </p>
 
-        <div className="grid gap-5 py-10 lg:grid-cols-2">
-          <div className="relative max-w-md space-y-6 rounded-3xl border-2 border-black bg-white p-6">
+        <div className="grid gap-10 py-10 lg:grid-cols-2 lg:gap-5">
+          <Card className="relative max-w-md rounded-3xl border-black">
             <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
               TIER 1
             </div>
-            <h3 className="text-xl font-bold sm:text-3xl">Partner</h3>
-            <p className="font-medium tracking-tight sm:text-2xl">
-              Earn 30% of what we make off everyone you refer
-            </p>
 
-            <Link
-              href="/partners/apply"
-              className="self-center font-medium text-blue-400 underline underline-offset-2 hover:text-blue-300"
-            >
-              Learn More
-            </Link>
+            <CardContent className="flex flex-col space-y-5 lg:px-4 lg:py-2">
+              <div className="space-y-3">
+                <h3 className="text-2xl font-bold sm:text-3xl">Partner</h3>
+                <p className="sm:text-2xl">
+                  Earn 30% of what we make off everyone you refer
+                </p>
+              </div>
 
-            <Link
-              className="ml-auto block w-max rounded-lg border-2 border-black bg-blue-300 px-6 py-3 text-lg font-bold text-black hover:bg-blue-200"
-              href="/partners/apply"
-            >
-              Learn more &rarr;
-            </Link>
-          </div>
+              <Link
+                href="/partners/apply"
+                className="self-center font-medium text-blue-400 underline underline-offset-2 hover:text-blue-300 lg:text-lg"
+              >
+                Learn More
+              </Link>
+            </CardContent>
 
-          <div className="relative max-w-md space-y-6 rounded-3xl border-2 border-black bg-white p-6">
+            <CardFooter className="-mx-4 border-t-2 border-zinc-950">
+              <div className="w-full text-center font-semibold lg:text-lg">
+                QLDZSNV8
+              </div>
+              <Button
+                variant="darkPrimary"
+                className="w-full rounded-none lg:text-lg"
+              >
+                Share Code
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card className="relative max-w-md rounded-3xl border-black">
             <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
               TIER 2
             </div>
-            <h3 className="text-xl font-bold sm:text-3xl">Ambassador</h3>
-            <p className="font-medium sm:text-xl">
-              Earn 50% of what we make off everyone you refer
-            </p>
-            <div className="ml-auto block w-max rounded-lg border-2 border-black/40 bg-blue-200 px-6 py-3 text-lg font-bold text-black/40">
-              Coming soon
-            </div>
-          </div>
+
+            <CardContent className="flex flex-col space-y-5 lg:space-y-14 lg:px-4 lg:pt-2">
+              <div className="space-y-3">
+                <h3 className="text-2xl font-bold sm:text-3xl">Ambassador</h3>
+                <p className="sm:text-2xl">
+                  Earn 50% of what we make off everyone you refer
+                </p>
+              </div>
+
+              <Link
+                href="/partners/apply"
+                className="ml-auto rounded-lg border-2 border-zinc-950 bg-blue-300 px-10 py-2 text-lg font-semibold text-zinc-950 hover:bg-blue-200"
+              >
+                Apply
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
