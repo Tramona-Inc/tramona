@@ -33,7 +33,7 @@ import {
 
 export type Icon = LucideIcon;
 
-type IconProps = React.HTMLAttributes<SVGElement>;
+// type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
   dotHorizontal: MoreHorizontal,
@@ -132,7 +132,7 @@ export const Icons = {
       />
     </svg>
   ),
-  share: ({ ...props }) => (
+  share: () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
