@@ -64,7 +64,7 @@ function ExploreEarningsCard() {
   }`;
 
   return (
-    <div className="min-w-max space-y-6 rounded-3xl border-2 border-gray-700 bg-gray-800 p-6 text-white">
+    <div className="min-w-max space-y-6 rounded-3xl border-2 border-slate-700 bg-slate-800 p-6 text-slate-50">
       <div className="flex">
         {tiers.map((tier, i) => (
           <button
@@ -72,12 +72,12 @@ function ExploreEarningsCard() {
             onClick={() => setTab(i)}
             className={`border-b-4 px-2 py-3 text-xs font-semibold sm:px-4 sm:text-base ${
               i === tab
-                ? "border-pink-500 text-white"
-                : "border-transparent text-white/70 hover:border-pink-500/20"
+                ? "border-pink-500 text-slate-50"
+                : "border-transparent text-slate-400 hover:border-pink-500/20"
             }`}
           >
             {tier.name}{" "}
-            <span className="hidden rounded-full bg-white/10 px-2 py-1 text-xs sm:inline">
+            <span className="hidden rounded-full bg-slate-700 px-2 py-1 text-xs sm:inline">
               {tier.percent}%{tier.orMore}
             </span>
           </button>
@@ -88,11 +88,11 @@ function ExploreEarningsCard() {
           With
         </p>
         <div>
-          <div className="rounded-t-lg bg-gray-900 p-4 pb-2">
-            <span className="inline-block text-3xl font-extrabold text-white">
+          <div className="rounded-t-lg bg-zinc-900 p-4 pb-2">
+            <span className="inline-block text-3xl font-extrabold text-slate-50">
               {referrals}
             </span>{" "}
-            <span className="text-sm font-semibold text-white/50">
+            <span className="text-sm font-semibold text-slate-400">
               referrals
             </span>
           </div>
@@ -106,17 +106,17 @@ function ExploreEarningsCard() {
         </div>
       </div>
       <div className="space-y-1">
-        <p className="text-xs font-bold uppercase tracking-wide text-white/60">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
           You could earn
         </p>
         <p className="text-5xl font-extrabold">
           {fmtdEarnings}
-          <span className="pl-2 text-sm font-semibold text-white/50">
+          <span className="pl-2 text-sm font-semibold text-slate-400">
             /year
           </span>
         </p>
       </div>
-      <p className="text-right text-sm text-white/40">
+      <p className="text-right text-sm text-slate-400/75">
         *Based on average ARR of ${avgAnnualTravelSpendings.toFixed(2)}/user
       </p>
     </div>
@@ -126,6 +126,9 @@ function ExploreEarningsCard() {
 export default function Page() {
   return (
     <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
+      <Head>
+        <title>Partners | Tramona</title>
+      </Head>
       <section className="relative">
         <div className="flex flex-col-reverse items-center lg:flex-row lg:space-x-10 xl:space-x-20">
           <div className="max-w-xl space-y-5 lg:space-y-10">
