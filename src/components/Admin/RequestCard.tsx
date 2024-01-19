@@ -23,7 +23,7 @@ type Props = {
 };
 
 export default function RequestCard({ children, request }: Props) {
-  const { data: offers } = api.offers.getByRequestId.useQuery({
+  const { data: offers, isLoading } = api.offers.getByRequestId.useQuery({
     id: request.id,
   });
 
@@ -47,7 +47,11 @@ export default function RequestCard({ children, request }: Props) {
             <AdminFormOffer requestId={request.id} />
 
             {/* Display if offer exist*/}
-            {offers && offers.length > 0 && <OfferInfo offers={offers} />}
+            {isLoading ? (
+              <h1>Loading...</h1> // TODO: Add loading spiner
+            ) : (
+              offers && offers.length > 0 && <OfferInfo offers={offers} />
+            )}
           </div>
         </div>
       </CardContent>
