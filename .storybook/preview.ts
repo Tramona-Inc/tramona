@@ -1,7 +1,7 @@
-import { withPerformance } from 'storybook-addon-performance';
-import '../src/styles/tailwind-colors.css';
-import '../src/styles/globals.css';
-import { SessionProviderDecorator } from './decorators/withSessionProvider';
+import { withPerformance } from "storybook-addon-performance";
+import "../src/styles/tailwind-colors.css";
+import "../src/styles/globals.css";
+import { SessionProviderDecorator } from "./decorators/withSessionProvider";
 
 /** @type {NonNullable<import('@storybook/react').Story['decorators']>} */
 export const decorators = [SessionProviderDecorator, withPerformance];

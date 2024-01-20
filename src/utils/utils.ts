@@ -1,15 +1,15 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { format, isSameMonth, isSameYear } from 'date-fns';
-import { REFERRAL_CODE_LENGTH } from '@/server/db/schema';
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { format, isSameMonth, isSameYear } from "date-fns";
+import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function generateReferralCode() {
-  const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let randomString = '';
+  const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let randomString = "";
 
   for (let i = 0; i < REFERRAL_CODE_LENGTH; i++) {
     const randomIndex = Math.floor(Math.random() * characters.length);
@@ -20,7 +20,7 @@ export function generateReferralCode() {
 }
 
 export async function sleep(ms: number) {
-  return new Promise(res => setTimeout(res, ms));
+  return new Promise((res) => setTimeout(res, ms));
 }
 
 /**
@@ -33,7 +33,7 @@ export async function sleep(ms: number) {
  */
 export function plural(count: number, noun: string, pluralNoun?: string) {
   if (count === 1) return `1 ${noun}`;
-  return `${count} ${pluralNoun ? pluralNoun : noun + 's'}`;
+  return `${count} ${pluralNoun ? pluralNoun : noun + "s"}`;
 }
 
 /**
@@ -47,38 +47,44 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  */
 export function formatDateRange({ from, to }: { from: Date; to?: Date }) {
   if (!to) {
-    return format(from, 'MMM d, yyyy');
+    return format(from, "MMM d, yyyy");
   }
 
   const sameMonth = isSameMonth(from, to);
   const sameYear = isSameYear(from, to);
 
   if (sameMonth && sameYear) {
-    return `${format(from, 'MMM d')} – ${format(to, 'd, yyyy')}`;
+    return `${format(from, "MMM d")} – ${format(to, "d, yyyy")}`;
   }
   if (sameYear) {
-    return `${format(from, 'MMM d')} – ${format(to, 'MMM d, yyyy')}`;
+    return `${format(from, "MMM d")} – ${format(to, "MMM d, yyyy")}`;
   }
-  return `${format(from, 'MMM d, yyyy')} – ${format(to, 'MMM d, yyyy')}`;
+  return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
 }
 
-export function formatDateRangeFromStrs({ from, to }: { from: string; to?: string }) {
-  const fromDate = new Date(from + 'T00:00:00');
-  const toDate = to ? new Date(to + 'T00:00:00') : undefined;
+export function formatDateRangeFromStrs({
+  from,
+  to,
+}: {
+  from: string;
+  to?: string;
+}) {
+  const fromDate = new Date(from + "T00:00:00");
+  const toDate = to ? new Date(to + "T00:00:00") : undefined;
 
   return formatDateRange({ from: fromDate, to: toDate });
 }
 
 export function formatArrayToString(arr: string[]) {
   if (arr.length === 0) {
-    return '';
+    return "";
   } else if (arr.length === 1) {
     return arr[0]!;
   } else if (arr.length === 2) {
     return `${arr[0]} and ${arr[1]}`;
   } else {
     const lastItem = arr.pop();
-    const joinedItems = arr.join(', ');
+    const joinedItems = arr.join(", ");
     return `${joinedItems}, and ${lastItem}`;
   }
 }
@@ -86,4 +92,15 @@ export function formatArrayToString(arr: string[]) {
 /**
  * A utility function to delay execution of main thread for ms milliseconds.
  */
-export const delay = (ms: number): Promise<void> => new Promise(res => setTimeout(res, ms));
+export const delay = (ms: number): Promise<void> =>
+  new Promise((res) => setTimeout(res, ms));
+
+export async function retry<T>(f: Promise<T>, numRetries: number) {
+  for (let i = 0; i < numRetries; i++) {
+    try {
+      return await f.catch(() => {
+        throw new Error();
+      });
+    } catch (err) {}
+  }
+}
