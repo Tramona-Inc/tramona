@@ -107,7 +107,9 @@ export default function RequestCard({
         <h2 className="flex items-center gap-1 text-lg font-semibold text-zinc-700">
           <MapPinIcon className="-translate-y-0.5 text-zinc-300" />
           <div className="flex-1">{request.location}</div>
-          <RequestCardBadge request={request} />
+          <div className="mb-auto">
+            <RequestCardBadge request={request} />
+          </div>
         </h2>
         <div className="text-zinc-500">
           <p>

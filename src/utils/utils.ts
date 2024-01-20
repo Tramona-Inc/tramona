@@ -110,7 +110,7 @@ export function formatInterval(ms: number) {
   if (weeks) return plural(weeks, "week");
   if (days) return plural(days, "day");
   if (hours > 18) return "1 day";
-  if (hours) return plural(hours, "hour");
+  if (hours) return plural(hours, "hr");
   if (minutes) return plural(minutes, "minute");
   return "now";
 }
