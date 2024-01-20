@@ -13,15 +13,19 @@ import PasswordResetForm from "@/components/Profile/PasswordResetForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Page() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (!session || !session.user) {
-      router.push("/");
+    if (status === "loading") return;
+    else {
+      if (!session) {
+        void router.push("/");
+      }
     }
+
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [session]);
+  }, [session, status]);
 
   return (
     <>
