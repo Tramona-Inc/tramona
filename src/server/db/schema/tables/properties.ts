@@ -14,13 +14,15 @@ import { users } from "./users";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const propertyTypeEnum = pgEnum("property_type", [
+export const ALL_PROPERTY_TYPES = [
   "house",
   "guesthouse",
   "apartment",
   "room",
   "townhouse",
-]);
+] as const;
+
+export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
 
 export const properties = pgTable(
   "properties",

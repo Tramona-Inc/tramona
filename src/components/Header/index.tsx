@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import TramonaIcon from "../icons/TramonaIcon";
 import NavLink from "../utils/NavLink";
-import { cn } from "@/utils/utils";
 import HeaderTopRight from "./HeaderTopRight";
+import { cn } from "@/utils/utils";
 
 function HeaderLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (
