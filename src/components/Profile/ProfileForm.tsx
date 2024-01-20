@@ -14,20 +14,14 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { zodMMDDYYYY, zodString } from "@/utils/zod-utils";
+
+import { zodString } from "@/utils/zod-utils";
+import { api } from "@/utils/api";
+import { sleep } from "@/utils/utils";
 
 const formSchema = z.object({
   name: zodString(),
   email: zodString().email(),
-  dob: zodMMDDYYYY({ optional: true }),
-  gender: zodString(),
-  phoneNumber: zodString()
-    // only allow digits, dashes, parentheses, spaces, plus signs, and periods
-    .regex(/^[0-9-() \+\.]*$/, { message: "Invalid phone number" })
-    // require 10 digits with an optional leading +1
-    .regex(/^(\+1)?(\D*\d\D*){10}$/, { message: "Must be 10 digits" })
-    // remove all non-digits
-    .transform((value) => value.replace(/\D/g, "")),
 });
 
 export default function ProfileForm() {
@@ -36,91 +30,53 @@ export default function ProfileForm() {
 
   const { toast } = useToast();
 
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    const body = { id: user?.id, ...values };
+  // const utils = api.useUtils();
 
-    // const response = await fetch(
-    //   `${process.env.NEXT_PUBLIC_HOSTED_BACKEND_URL}/api/users/update`,
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(body),
-    //   },
-    // );
+  const { mutate, isLoading } = api.users.updateProfile.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Profile updated sucessfully! (Reloading)",
+        variant: "default",
+      });
 
-    // if (!response.ok) {
-    //   const error: ErrorResponse = await response.json();
+      // Reload the page after 2 sec
+      void sleep(2000).then(() => {
+        window.location.reload();
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Something went wrong!",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
-    //   if (error.message) {
-    //     toast({
-    //       title: "Error",
-    //       description: error.message,
-    //     });
-    //   }
-    // } else {
-    //   const data: User = await response.json();
-    //   localStorage.setItem("user", JSON.stringify(data));
-    //   // setUser(data);
-    //   toast({
-    //     title: "Changes saved",
-    //     description: "Your profile has been updated.",
-    //   });
-    //   // Refresh the page
-    //   location.reload();
-    // }
-  };
-
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: `${user?.name}`,
       email: `${user?.email}`,
-      dob: undefined,
-      gender: "",
-      phoneNumber: "",
     },
   });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    mutate(values);
+  };
 
   return (
     <Form {...form}>
       <form
-        className="grid w-full grid-cols-1 gap-4 lg:grid-cols-2"
-        onSubmit={form.handleSubmit(handleSubmit)}
+        className="grid w-full grid-cols-1 gap-4"
+        onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="lg:col-span-2">
               <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="dob"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date of birth</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="MM/DD/YYYY" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="gender"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Gender</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -141,22 +97,9 @@ export default function ProfileForm() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="phoneNumber"
-          render={({ field }) => (
-            <FormItem className="lg:col-span-2">
-              <FormLabel>Phone number</FormLabel>
-              <FormControl>
-                <Input type="tel" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <Button
-          isLoading={form.formState.isSubmitting}
+          isLoading={isLoading}
           size="lg"
           type="submit"
           className="lg:col-span-2"
