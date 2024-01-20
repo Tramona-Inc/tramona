@@ -25,7 +25,7 @@ TabsList.displayName = TabsPrimitive.List.displayName;
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
-    count?: number | " " | undefined;
+    count?: number | "blank" | undefined;
   }
 >(({ className, onClick, count, children, ...props }, ref) => {
   return (
@@ -46,8 +46,8 @@ const TabsTrigger = React.forwardRef<
     >
       {children}
       {count !== undefined && (
-        <div className="rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600 group-data-[state=active]:bg-primary/20 group-data-[state=active]:text-primary">
-          {count}
+        <div className="min-w-7 rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600 group-data-[state=active]:bg-primary/20 group-data-[state=active]:text-primary">
+          {count === "blank" ? <>&nbsp;</> : count}
         </div>
       )}
     </TabsPrimitive.Trigger>
