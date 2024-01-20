@@ -32,6 +32,7 @@ import {
 } from "../ui/select";
 import { capitalize } from "@/utils/utils";
 import { getFmtdFilters } from "@/utils/formatters";
+import { TRPCClientError } from "@trpc/client";
 
 const formSchema = z
   .object({
@@ -90,8 +91,10 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
           ...newRequest,
           propertyType: propertyType === "any" ? undefined : propertyType,
         }) // ts is dumb i have no clue why this is needed jk i love ts
-        .catch(() => {
-          throw new Error();
+        .catch((error) => {
+          if (error instanceof TRPCClientError) {
+            throw new Error(error.message);
+          }
         });
       await utils.requests.invalidate();
       successfulRequestToast(newRequest);
@@ -132,8 +135,9 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="Total budget ($USD)"
                   inputMode="decimal"
+                  prefix="$"
+                  suffix="/night"
                 />
               </FormControl>
               <FormMessage />
@@ -191,7 +195,7 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
                   <FormItem>
                     <FormLabel>Number of Bedrooms</FormLabel>
                     <FormControl>
-                      <Input {...field} inputMode="numeric" />
+                      <Input {...field} inputMode="numeric" suffix="or more" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,7 +208,7 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
                   <FormItem>
                     <FormLabel>Number of Beds</FormLabel>
                     <FormControl>
-                      <Input {...field} inputMode="numeric" />
+                      <Input {...field} inputMode="numeric" suffix="or more" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
