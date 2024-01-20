@@ -1,7 +1,7 @@
-import { useSession } from "next-auth/react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+// import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,8 +28,8 @@ const formSchema = z
   });
 
 export default function PasswordResetForm() {
-  const { data: session } = useSession();
-  const user = session?.user;
+  // const { data: session } = useSession();
+  // const user = session?.user;
 
   const { toast } = useToast();
 
@@ -51,37 +51,7 @@ export default function PasswordResetForm() {
       return;
     }
 
-    const body = {
-      userId: user?.id,
-      oldPassword: values.oldPassword,
-      newPassword: values.password,
-    };
-
-    // const response = await fetch(`${process.env.NEXT_PUBLIC_HOSTED_BACKEND_URL}/api/users/updatePassword`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(body),
-    // });
-
-    // if (!response.ok) {
-    //   const error: ErrorResponse = await response.json();
-
-    //   if (error.message) {
-    //     toast({
-    //       title: 'Error',
-    //       description: error.message,
-    //     });
-    //   }
-    // } else {
-    //   toast({
-    //     title: 'Changes saved',
-    //     description: 'Your password has been updated.',
-    //   });
-
-    //   form.reset();
-    // }
+    // TODO: handle password change request (only for credential users)
   };
 
   return (

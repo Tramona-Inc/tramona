@@ -14,7 +14,7 @@ export default function ProfileSidebar() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={
-              session?.user?.image ||
+              session?.user?.image ??
               "https://cdn1.vectorstock.com/i/1000x1000/51/05/male-profile-avatar-with-brown-hair-vector-12055105.jpg"
             }
             className="h-44 w-44 rounded-full"
