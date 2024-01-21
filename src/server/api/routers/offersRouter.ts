@@ -8,6 +8,7 @@ import {
   offerInsertSchema,
   offerSelectSchema,
   offers,
+  properties,
   referralCodes,
   requestSelectSchema,
   requests,
@@ -86,6 +87,7 @@ export const offersRouter = createTRPCRouter({
   getByRequestId: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
+<<<<<<< HEAD
       const requestDetails = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.id),
         columns: {},
@@ -99,10 +101,24 @@ export const offersRouter = createTRPCRouter({
       if (requestDetails?.madeByUser?.id !== ctx.user.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
+=======
+      const requestPromise = ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+      });
+
+      const [request] = await Promise.all([requestPromise]);
+
+      // request must exist,
+      if (!request) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That request doesn't exist",
+>>>>>>> dev
         });
       }
 
       const offersForRequest = await ctx.db.query.offers.findMany({
+<<<<<<< HEAD
         where: eq(offers.id, input.id),
         columns: {
           createdAt: true,
@@ -114,6 +130,19 @@ export const offersRouter = createTRPCRouter({
             },
           },
         },
+=======
+        where: eq(offers.requestId, input.id),
+        // columns: {
+        //   createdAt: true,
+        // },
+        // with: {
+        //   property: {
+        //     with: {
+        //       host: true,
+        //     },
+        //   },
+        // },
+>>>>>>> dev
       });
 
       return offersForRequest;
@@ -177,11 +206,19 @@ export const offersRouter = createTRPCRouter({
     .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {
       const requestPromise = ctx.db.query.requests.findFirst({
+<<<<<<< HEAD
         where: eq(offers.requestId, input.requestId),
       });
 
       const propertyPromise = ctx.db.query.properties.findFirst({
         where: eq(offers.propertyId, input.propertyId),
+=======
+        where: eq(requests.id, input.requestId),
+      });
+
+      const propertyPromise = ctx.db.query.properties.findFirst({
+        where: eq(properties.id, input.propertyId),
+>>>>>>> dev
       });
 
       const [request, property] = await Promise.all([

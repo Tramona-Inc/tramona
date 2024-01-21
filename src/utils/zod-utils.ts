@@ -54,6 +54,14 @@ export function zodInteger({ min = -Infinity, max = Infinity } = {}) {
   });
 }
 
+export function zodUrls() {
+  return z.array(
+    z.object({
+      value: z.string().url({ message: "Please enter a valid URL." }),
+    }),
+  );
+}
+
 export function zodMMDDYYYY() {
   return zodString()
     .refine((s) => /^\d{2}\/\d{2}\/\d{4}$/.test(s), {

@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Github, Menu, Star, User } from "lucide-react";
+import { Github, Menu, Star, User, Trash } from "lucide-react";
 import * as React from "react"; // Import React
 
 type Icons = Record<string, LucideIcon>;
@@ -9,7 +9,7 @@ const iconComponents: Icons = {
   menu: Menu,
   user: User,
   star: Star,
-
+  trash: Trash,
   // Add more icons as needed
 };
 

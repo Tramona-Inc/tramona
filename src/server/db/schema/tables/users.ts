@@ -27,6 +27,7 @@ export const users = pgTable("user", {
     length: REFERRAL_CODE_LENGTH,
   }),
   role: roleEnum("role").notNull().default("guest"),
+  phoneNumber: varchar("phone_number", { length: 20 }),
 });
 
 export type User = typeof users.$inferSelect;
