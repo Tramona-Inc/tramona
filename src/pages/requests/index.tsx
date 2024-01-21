@@ -77,7 +77,7 @@ export default function Page() {
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center">
             <h1 className="flex-1 py-4 text-3xl font-bold text-black">
-              Your requests
+              Your Requests
             </h1>
             <NewRequestButton />
           </div>

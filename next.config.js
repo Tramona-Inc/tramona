@@ -19,6 +19,16 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "a0.muscache.com",
+        port: "",
+        pathname: "/im/pictures/**",
+      },
+    ],
+  },
 };
 
 export default withHydrationOverlay()(config);

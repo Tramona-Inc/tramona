@@ -16,22 +16,13 @@ export const requestsRouter = createTRPCRouter({
     const myRequests = await ctx.db.query.requests
       .findMany({
         where: eq(requests.userId, ctx.user.id),
-        columns: {
-          userId: false,
-        },
         with: {
           offers: {
             columns: {},
             with: {
               property: {
                 columns: {},
-                with: {
-                  host: {
-                    columns: {
-                      image: true,
-                    },
-                  },
-                },
+                with: { host: { columns: { image: true } } },
               },
             },
           },
