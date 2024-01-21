@@ -3,8 +3,11 @@ import Head from "next/head";
 import AccountSidebar from "@/components/account/AccountSidebar";
 import CashbackAccount from "@/components/account/CashbackAccount";
 import ReferFolks from "@/components/account/ReferFolks";
+import { useSession } from "next-auth/react";
 
 export default function MyAccount() {
+  useSession({ required: true });
+
   return (
     <>
       <Head>My Account | Tramona</Head>

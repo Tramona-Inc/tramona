@@ -1,13 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { requireAuth } from "@/server/auth";
 import { HistoryIcon, Loader2Icon, Plus, TagIcon } from "lucide-react";
 import Head from "next/head";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
 import RequestCard from "@/components/requests/RequestCard";
 import { api } from "@/utils/api";
-
-export const getServerSideProps = requireAuth;
+import { useSession } from "next-auth/react";
 
 function NewRequestButton() {
   return (
@@ -65,6 +63,8 @@ function RequestsTabs() {
 }
 
 export default function Page() {
+  useSession({ required: true });
+
   return (
     <>
       <Head>
