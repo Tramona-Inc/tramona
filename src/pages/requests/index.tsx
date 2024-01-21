@@ -56,10 +56,27 @@ function RequestsTabs() {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="activeRequests">
-        <RequestCards requests={requests?.activeRequests} />
+        {requests?.activeRequests.length !== 0 ? (
+          <RequestCards requests={requests?.activeRequests} />
+        ) : (
+          <div className="flex flex-col items-center gap-4 pt-32">
+            <p className="text-center text-muted-foreground">
+              No requests yet, make a request to get started
+            </p>
+            <NewRequestButton />
+          </div>
+        )}
       </TabsContent>
       <TabsContent value="inactiveRequests">
-        <RequestCards requests={requests?.inactiveRequests} />
+        {requests?.inactiveRequests.length !== 0 ? (
+          <RequestCards requests={requests?.inactiveRequests} />
+        ) : (
+          <div className="flex flex-col items-center gap-4 pt-32">
+            <p className="text-center text-muted-foreground">
+              Your past requests will show up here
+            </p>
+          </div>
+        )}
       </TabsContent>
     </Tabs>
   );
