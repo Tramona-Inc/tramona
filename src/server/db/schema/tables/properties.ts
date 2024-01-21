@@ -43,7 +43,7 @@ export const properties = pgTable(
     airbnbUrl: varchar("airbnb_url").notNull(),
     imageUrls: varchar("image_url").array().notNull(),
     propertyType: propertyTypeEnum("property_type").notNull(),
-    originalPrice: integer("original_price"), // in cents
+    originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
