@@ -1,7 +1,9 @@
+import LargeRequestCard from "@/components/LargeRequestCard";
 import OfferCard from "@/components/OfferCard";
 import { api } from "@/utils/api";
 import { Loader2Icon, TagIcon } from "lucide-react";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 export default function Page() {
@@ -22,7 +24,23 @@ export default function Page() {
       <Head>
         <title>Your Requests | Tramona</title>
       </Head>
-      <div className="px-4 pb-64 pt-16">
+      <div className="relative">
+        <div className="absolute inset-0 bg-primary">
+          <div className="relative top-1/2 h-1/2 rounded-t-3xl bg-background"></div>
+        </div>
+        <div className="px-4 py-16">
+          <div className="mx-auto max-w-xl">
+            <LargeRequestCard request={request} />
+          </div>
+        </div>
+        <Link
+          href="/requests"
+          className="absolute left-4 top-4 rounded-full px-4 py-2 font-medium text-white hover:bg-white/10"
+        >
+          &larr; Back to all requests
+        </Link>
+      </div>
+      <div className="px-4 pb-64">
         <div className="mx-auto max-w-5xl">
           <h1 className="flex flex-1 items-center gap-2 py-4 text-3xl font-bold text-black">
             <TagIcon /> Offers for you{" "}
