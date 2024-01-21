@@ -1,8 +1,15 @@
-import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
-import { requests } from '@/server/db/schema';
-import { TRPCError } from '@trpc/server';
-import { eq } from 'drizzle-orm';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  roleRestrictedProcedure,
+} from "@/server/api/trpc";
+import {
+  requestInsertSchema,
+  requestSelectSchema,
+  requests,
+} from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -30,9 +37,11 @@ export const requestsRouter = createTRPCRouter({
           },
         },
       })
-      .then(res =>
-        res.map(request => {
-          const hostImages = request.offers.map(offer => offer.property.host?.image).filter(Boolean);
+      .then((res) =>
+        res.map((request) => {
+          const hostImages = request.offers
+            .map((offer) => offer.property.host?.image)
+            .filter(Boolean);
 
           const numOffers = request.offers.length;
 
@@ -43,13 +52,17 @@ export const requestsRouter = createTRPCRouter({
       );
 
     const activeRequests = myRequests
-      .filter(request => request.resolvedAt === null)
-      .map(request => ({ ...request, resolvedAt: null })) // because ts is dumb
-      .sort((a, b) => b.numOffers - a.numOffers || b.createdAt.getTime() - a.createdAt.getTime());
+      .filter((request) => request.resolvedAt === null)
+      .map((request) => ({ ...request, resolvedAt: null })) // because ts is dumb
+      .sort(
+        (a, b) =>
+          b.numOffers - a.numOffers ||
+          b.createdAt.getTime() - a.createdAt.getTime(),
+      );
 
     const inactiveRequests = myRequests
-      .filter(request => request.resolvedAt !== null)
-      .map(request => ({
+      .filter((request) => request.resolvedAt !== null)
+      .map((request) => ({
         ...request,
         resolvedAt: request.resolvedAt ?? new Date(),
       })) // because ts is dumb, new Date will never actually happen
@@ -67,12 +80,14 @@ export const requestsRouter = createTRPCRouter({
   //   },
   // ),
 
+  getAll: roleRestrictedProcedure(["admin"]).query(async ({ ctx }) => {
+    return await ctx.db.query.requests.findMany(
+      { orderBy: (requests, { desc }) => [desc(requests.createdAt)] }, // filter from most recent
+    );
+  }),
+
   create: protectedProcedure
-    .input(
-      createInsertSchema(requests).omit({
-        userId: true,
-      }),
-    )
+    .input(requestInsertSchema.omit({ userId: true }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(requests).values({
         ...input,
@@ -81,11 +96,7 @@ export const requestsRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure
-    .input(
-      createSelectSchema(requests).pick({
-        id: true,
-      }),
-    )
+    .input(requestSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.id),
@@ -94,10 +105,11 @@ export const requestsRouter = createTRPCRouter({
         },
       });
 
-      if (request?.userId !== ctx.user.id) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' });
+      // Only users and admin can delete
+      if (ctx.user.role === "admin" || request?.userId === ctx.user.id) {
+        await ctx.db.delete(requests).where(eq(requests.id, input.id));
+      } else {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
-
-      await ctx.db.delete(requests).where(eq(requests.id, input.id));
     }),
 });

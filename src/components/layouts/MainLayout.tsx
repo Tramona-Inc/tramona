@@ -1,13 +1,9 @@
-import Header from '../Header';
-import Footer from '../Footer';
-import Head from 'next/head';
+import Header from "../Header";
+import Footer from "../Footer";
 
-export default function MainLayout({ children, pageTitle }: React.PropsWithChildren<{ pageTitle?: string }>) {
+export default function MainLayout({ children }: React.PropsWithChildren) {
   return (
     <>
-      <Head>
-        <title>{pageTitle ? `${pageTitle} | Tramona` : 'Tramona'}</title>
-      </Head>
       <div className="flex min-h-screen flex-col">
         <Header />
         <main className="flex-1 bg-background">{children}</main>

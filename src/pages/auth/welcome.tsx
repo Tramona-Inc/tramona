@@ -1,9 +1,12 @@
-import MainLayout from '@/components/layouts/MainLayout';
+import Head from "next/head";
 
 export default function Page() {
   return (
-    <MainLayout pageTitle="Welcome">
+    <>
+      <Head>
+        <title>Welcome | Tramona</title>
+      </Head>
       <p className="p-8">welcome</p>
-    </MainLayout>
+    </>
   );
 }

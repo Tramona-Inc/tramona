@@ -1,0 +1,111 @@
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+// import { useSession } from "next-auth/react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { zodString } from "@/utils/zod-utils";
+
+const formSchema = z
+  .object({
+    oldPassword: zodString(),
+    password: zodString({ minLen: 3 }),
+    confirmPassword: zodString({ minLen: 3 }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "The passwords didn't match, please try again",
+    path: ["confirmPassword"],
+  });
+
+export default function PasswordResetForm() {
+  // const { data: session } = useSession();
+  // const user = session?.user;
+
+  const { toast } = useToast();
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      oldPassword: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (values.password !== values.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "The passwords didn't match, please try again",
+      });
+      return;
+    }
+
+    // TODO: handle password change request (only for credential users)
+  };
+
+  return (
+    <Form {...form}>
+      <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
+        <FormField
+          control={form.control}
+          name="oldPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Old Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm New Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button
+          isLoading={form.formState.isSubmitting}
+          size="lg"
+          type="submit"
+          className="w-full"
+        >
+          Submit
+        </Button>
+      </form>
+    </Form>
+  );
+}
