@@ -53,8 +53,6 @@ export const propertiesRouter = createTRPCRouter({
 
       await ctx.db.delete(properties).where(eq(properties.id, input.id));
     }),
-<<<<<<< HEAD
-=======
 
   getById: publicProcedure
     .input(propertySelectSchema.pick({ id: true }))
@@ -63,5 +61,4 @@ export const propertiesRouter = createTRPCRouter({
         where: eq(properties.id, input.id),
       });
     }),
->>>>>>> dev
 });
