@@ -37,6 +37,30 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
 }
 
 /**
+ * formats the price IN CENTS
+ *
+ * Examples:
+ * ```js
+ * formatCurrency(10) => '$0.10'
+ * formatCurrency(2000) => '$20.00'
+ * ```
+ */
+export function formatCurrency(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+/**
+ * Examples:
+ * ```js
+ * capitalize('apple') => 'Apple'
+ * capitalize('ASDF') => 'ASDF'
+ * ```
+ */
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
  * Example outputs:
  * ```js
  * 'Jan 1, 2021'
@@ -45,7 +69,7 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * 'Jan 1, 2021 – Feb 2, 2022'
  * ```
  */
-export function formatDateRange({ from, to }: { from: Date; to?: Date }) {
+export function formatDateRange(from: Date, to?: Date) {
   if (!to) {
     return format(from, "MMM d, yyyy");
   }
@@ -62,17 +86,33 @@ export function formatDateRange({ from, to }: { from: Date; to?: Date }) {
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
 }
 
-export function formatDateRangeFromStrs({
-  from,
-  to,
-}: {
-  from: string;
-  to?: string;
-}) {
+export function formatDateRangeFromStrs(from: string, to?: string) {
   const fromDate = new Date(from + "T00:00:00");
   const toDate = to ? new Date(to + "T00:00:00") : undefined;
 
-  return formatDateRange({ from: fromDate, to: toDate });
+  return formatDateRange(fromDate, toDate);
+}
+
+export function getNumNights(from: Date, to: Date) {
+  return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * @returns `now`, `10 minutes`, `5 hours`, `2 days`, `1 week`, `10 weeks`, etc
+ */
+export function formatInterval(ms: number) {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const weeks = Math.floor(days / 7);
+
+  if (weeks) return plural(weeks, "week");
+  if (days) return plural(days, "day");
+  if (hours > 18) return "1 day";
+  if (hours) return plural(hours, "hr");
+  if (minutes) return plural(minutes, "minute");
+  return "now";
 }
 
 export function formatArrayToString(arr: string[]) {
@@ -92,8 +132,7 @@ export function formatArrayToString(arr: string[]) {
 /**
  * A utility function to delay execution of main thread for ms milliseconds.
  */
-export const delay = (ms: number): Promise<void> =>
-  new Promise((res) => setTimeout(res, ms));
+export const delay = (ms: number): Promise<void> => new Promise(res => setTimeout(res, ms));
 
 export async function retry<T>(f: Promise<T>, numRetries: number) {
   for (let i = 0; i < numRetries; i++) {

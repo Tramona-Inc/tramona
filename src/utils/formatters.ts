@@ -1,0 +1,36 @@
+import { type Request } from "@/server/db/schema";
+import { capitalize } from "./utils";
+
+/**
+ * This file is for miscellaneous helper functions that format data.
+ * The difference from utils.ts is that these functions are specific
+ * to our data, whereas utils.ts are small functions that you could
+ * copy paste between projects
+ */
+
+export function getFmtdFilters(
+  filters: Partial<
+    Pick<Request, "minNumBedrooms" | "minNumBeds" | "propertyType" | "note">
+  >,
+  { withoutNote = false, excludeDefaults = false } = {},
+  // this is getting to be convoluted but oh well
+) {
+  const fmtdMinNumBedrooms =
+    (filters.minNumBedrooms ?? "") === ""
+      ? undefined
+      : `${filters.minNumBedrooms}+ bedrooms`;
+
+  const fmtdMinNumBeds =
+    (filters.minNumBeds ?? "") === ""
+      ? undefined
+      : `${filters.minNumBeds}+ beds`;
+
+  const fmtdFiltersList = [
+    !(filters.minNumBedrooms === 1 && excludeDefaults) && fmtdMinNumBedrooms,
+    !(filters.minNumBeds === 1 && excludeDefaults) && fmtdMinNumBeds,
+    filters.propertyType && capitalize(filters.propertyType),
+    !withoutNote && filters.note,
+  ].filter(Boolean);
+
+  return fmtdFiltersList.length === 0 ? undefined : fmtdFiltersList.join(" • ");
+}

@@ -27,7 +27,7 @@ export function optional<TZodType extends ZodType>(zodType: TZodType) {
   );
 }
 
-export function zodString({ minLen = -Infinity, maxLen = Infinity } = {}) {
+export function zodString({ minLen = 0, maxLen = 255 } = {}) {
   return z
     .string()
     .trim()
@@ -52,6 +52,14 @@ export function zodInteger({ min = -Infinity, max = Infinity } = {}) {
   return zodNumber({ min, max }).refine((n) => Number.isInteger(n), {
     message: "Must be an integer",
   });
+}
+
+export function zodUrls() {
+  return z.array(
+    z.object({
+      value: z.string().url({ message: "Please enter a valid URL." }),
+    }),
+  );
 }
 
 export function zodMMDDYYYY() {
