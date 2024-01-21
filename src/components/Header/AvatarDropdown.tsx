@@ -119,21 +119,19 @@ export default function AvatarDropdown({ session }: { session: Session }) {
         <DropdownLink href="/" Icon={HomeIcon}>
           Home
         </DropdownLink>
-        <DropdownLink href="/profile" Icon={UserCogIcon}>
-          Profile
-        </DropdownLink>
         <DropdownLink href="/requests" Icon={TagIcon}>
           Your Requests
         </DropdownLink>
+        <DropdownLink href="/profile" Icon={UserCogIcon}>
+          Profile
+        </DropdownLink>
         <DropdownMenuSeparator />
-        {session.user.role === "guest" && (
-          <>
-            <DropdownLink href="/account" Icon={DollarSignIcon}>
-              Cashback Balance: <span className="text-primary">$112</span>
-            </DropdownLink>
-            <DropdownMenuSeparator />
-          </>
-        )}
+        {/* <>
+          <DropdownLink href="/account" Icon={DollarSignIcon}>
+            Cashback Balance: <span className="text-primary">$112</span>
+          </DropdownLink>
+          <DropdownMenuSeparator />
+        </> */}
 
         <DropdownMenuItem>
           <button
