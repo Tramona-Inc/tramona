@@ -46,6 +46,7 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * ```
  */
 export function formatCurrency(cents: number) {
+  if (cents % 100 === 0) return `$${cents / 100}`;
   return `$${(cents / 100).toFixed(2)}`;
 }
 
@@ -132,7 +133,8 @@ export function formatArrayToString(arr: string[]) {
 /**
  * A utility function to delay execution of main thread for ms milliseconds.
  */
-export const delay = (ms: number): Promise<void> => new Promise(res => setTimeout(res, ms));
+export const delay = (ms: number): Promise<void> =>
+  new Promise((res) => setTimeout(res, ms));
 
 export async function retry<T>(f: Promise<T>, numRetries: number) {
   for (let i = 0; i < numRetries; i++) {

@@ -91,9 +91,9 @@ export const offersRouter = createTRPCRouter({
         where: eq(requests.id, input.id),
       });
 
-      const [request] = await Promise.all([requestPromise]);
+      const request = await requestPromise;
 
-      // request must exist,
+      // request must exist
       if (!request) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -101,21 +101,45 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
-      const offersForRequest = await ctx.db.query.offers.findMany({
+      return await ctx.db.query.offers.findMany({
         where: eq(offers.requestId, input.id),
-        // columns: {
-        //   createdAt: true,
-        // },
-        // with: {
-        //   property: {
-        //     with: {
-        //       host: true,
-        //     },
-        //   },
-        // },
+      });
+    }),
+
+  getByRequestIdWithProperty: protectedProcedure
+    .input(requestSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const requestPromise = ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
       });
 
-      return offersForRequest;
+      const request = await requestPromise;
+
+      // request must exist
+      if (!request) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That request doesn't exist",
+        });
+      }
+
+      return await ctx.db.query.offers.findMany({
+        where: eq(offers.requestId, input.id),
+        columns: {
+          createdAt: true,
+          totalPrice: true,
+          id: true,
+        },
+        with: {
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
     }),
 
   makePublic: roleRestrictedProcedure(["admin", "host"])

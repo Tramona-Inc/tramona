@@ -20,7 +20,7 @@ export default function UserAvatar(props: {
   return (
     <Avatar className="h-10 w-10">
       {props.image && <AvatarImage src={props.image} alt="" />}
-      <AvatarFallback delayMs={600}>{fallback}</AvatarFallback>
+      <AvatarFallback>{fallback}</AvatarFallback>
     </Avatar>
   );
 }
