@@ -1,7 +1,9 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { users } from "@/server/db/schema";
-import { z } from "zod";
 import { eq } from "drizzle-orm";
+
+import { z } from "zod";
+import { zodString } from "@/utils/zod-utils";
 
 export const usersRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -19,11 +21,21 @@ export const usersRouter = createTRPCRouter({
     };
   }),
   updateProfile: protectedProcedure
-    .input(z.object({ name: z.string(), email: z.string().email() }))
+    .input(
+      z.object({
+        name: zodString(),
+        email: zodString().email(),
+        phoneNumber: zodString({ maxLen: 20 }),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const updatedUser = await ctx.db
         .update(users)
-        .set({ name: input.name, email: input.email })
+        .set({
+          name: input.name,
+          email: input.email,
+          phoneNumber: input.phoneNumber,
+        })
         .where(eq(users.id, ctx.user.id))
         .returning();
 

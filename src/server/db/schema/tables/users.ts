@@ -5,7 +5,6 @@ import {
   varchar,
   pgEnum,
   integer,
-  date,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
@@ -28,7 +27,6 @@ export const users = pgTable("user", {
     length: REFERRAL_CODE_LENGTH,
   }),
   role: roleEnum("role").notNull().default("guest"),
-  dob: date("dob", { mode: "date" }),
   phoneNumber: varchar("phone_number", { length: 20 }),
 });
 

@@ -17,32 +17,28 @@ import { Button } from "@/components/ui/button";
 
 import { zodString } from "@/utils/zod-utils";
 import { api } from "@/utils/api";
-import { sleep } from "@/utils/utils";
 
 const formSchema = z.object({
   name: zodString(),
   email: zodString().email(),
+  phoneNumber: zodString({ maxLen: 20 }),
 });
 
 export default function ProfileForm() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const user = session?.user;
 
   const { toast } = useToast();
 
-  // const utils = api.useUtils();
-
   const { mutate, isLoading } = api.users.updateProfile.useMutation({
-    onSuccess: () => {
+    onSuccess: (res) => {
       toast({
-        title: "Profile updated sucessfully! (Reloading)",
+        title: "Profile updated sucessfully!",
         variant: "default",
       });
 
-      // Reload the page after 2 sec
-      void sleep(2000).then(() => {
-        window.location.reload();
-      });
+      // Update the session object with response data
+      void update((prev: typeof session) => ({ ...prev, user: res }));
     },
     onError: (error) => {
       toast({
@@ -58,6 +54,7 @@ export default function ProfileForm() {
     defaultValues: {
       name: `${user?.name}`,
       email: `${user?.email}`,
+      phoneNumber: `${user?.phoneNumber}`,
     },
   });
 
@@ -92,6 +89,19 @@ export default function ProfileForm() {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input type="email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phoneNumber"
+          render={({ field }) => (
+            <FormItem className="lg:col-span-2">
+              <FormLabel>Phone</FormLabel>
+              <FormControl>
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
