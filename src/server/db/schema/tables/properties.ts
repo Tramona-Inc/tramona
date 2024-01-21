@@ -53,13 +53,15 @@ export const properties = pgTable(
 
 export type Property = typeof properties.$inferSelect;
 export const propertySelectSchema = createSelectSchema(properties);
+
 export const propertyInsertSchema = createInsertSchema(properties, {
-  imageUrls: z.string().url().array(),
+  imageUrls: z.array(z.string().url({ message: "Please enter a valid URL." })),
+});
+export const propertyInsertFormSchema = createInsertSchema(properties, {
+  imageUrls: z.array(
+    z.object({
+      value: z.string().url({ message: "Please enter a valid URL." }),
+    }),
+  ),
   airbnbUrl: z.string().url(),
-  originalPrice: z.number().int().min(1),
-  numBedrooms: z.number().int().min(1),
-  numBeds: z.number().int().min(1),
-  numRatings: z.number().int().min(0),
-  maxNumGuests: z.number().int().min(1),
-  avgRating: z.number().min(0).max(5),
 });

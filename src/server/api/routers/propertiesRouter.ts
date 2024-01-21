@@ -1,4 +1,8 @@
-import { createTRPCRouter, roleRestrictedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  roleRestrictedProcedure,
+} from "@/server/api/trpc";
 import {
   properties,
   propertyInsertSchema,
@@ -48,5 +52,13 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       await ctx.db.delete(properties).where(eq(properties.id, input.id));
+    }),
+
+  getById: publicProcedure
+    .input(propertySelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.properties.findFirst({
+        where: eq(properties.id, input.id),
+      });
     }),
 });
