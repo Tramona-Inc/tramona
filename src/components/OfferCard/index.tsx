@@ -81,13 +81,14 @@ export default function OfferCard({
             </p>
             <p className="text-lg font-semibold">{property.name}</p>
           </div>
-          <div className="text-xl font-bold">
-            <Badge variant="secondary" className="pl-1 pr-2">
-              ★ {property.avgRating} ({property.numRatings})
-            </Badge>
-          </div>
         </div>
-        <div className="flex flex-row gap-6">
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">{property.propertyType}</Badge>
+          <Badge variant="secondary" className="pl-1 pr-2">
+            ★ {property.avgRating} ({property.numRatings})
+          </Badge>
+        </div>
+        <div className="flex gap-6">
           <div className="flex w-72 flex-row gap-5">
             <div>
               <p className="text-sm text-muted-foreground">Beds</p>
