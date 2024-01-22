@@ -27,6 +27,18 @@ const config = {
         port: "",
         pathname: "/im/pictures/**",
       },
+      {
+        // protocol: "https",
+        hostname: "archziner.com",
+        // port: "",
+        // pathname: "/im/pictures/**",
+      },
+
+      {
+        hostname: "www.iwantthatdoor.com",
+        // port: "",
+        // pathname: "/im/pictures/**",
+      },
     ],
   },
 };
