@@ -43,7 +43,7 @@ const formSchema = z
       to: z.date(),
     }),
     numGuests: zodInteger({ min: 1 }),
-    propertyType: z.enum([...ALL_PROPERTY_TYPES, "any"]).optional(),
+    propertyType: z.enum([...ALL_PROPERTY_TYPES, "any"]),
     minNumBedrooms: optional(zodInteger()),
     minNumBeds: optional(zodInteger()),
     note: optional(zodString()),
@@ -55,7 +55,11 @@ const formSchema = z
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function NewRequestForm(props: { afterSubmit?: () => void }) {
+export default function NewRequestForm({
+  afterSubmit,
+}: {
+  afterSubmit?: () => void;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -75,7 +79,7 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
   });
 
   async function onSubmit(data: FormSchema) {
-    const { date: _date, maxTotalPriceUSD, ...restData } = data;
+    const { date: _date, maxTotalPriceUSD, propertyType, ...restData } = data;
 
     try {
       const newRequest = {
@@ -86,19 +90,14 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
         ...restData,
       };
 
-      await mutation
-        .mutateAsync({
-          ...newRequest,
-          propertyType: propertyType === "any" ? undefined : propertyType,
-        }) // ts is dumb i have no clue why this is needed jk i love ts
-        .catch((error) => {
-          if (error instanceof TRPCClientError) {
-            throw new Error(error.message);
-          }
-        });
+      await mutation.mutateAsync(newRequest).catch((error) => {
+        if (error instanceof TRPCClientError) {
+          throw new Error(error.message);
+        }
+      });
       await utils.requests.invalidate();
       successfulRequestToast(newRequest);
-      props.afterSubmit?.();
+      afterSubmit?.();
     } catch (error) {
       if (error instanceof Error) {
         errorToast(error.message);
@@ -265,7 +264,7 @@ export default function NewRequestForm(props: { afterSubmit?: () => void }) {
         </FormItem>
 
         <Button
-          isLoading={form.formState.isSubmitting}
+          disabled={form.formState.isSubmitting}
           size="lg"
           type="submit"
           className="col-span-full"
