@@ -1,14 +1,22 @@
-import * as React from 'react';
+import * as React from "react";
 
-/**
- * Component for the home page video background.
- */
 const LandingVideo = () => {
   const [videoLoaded, setVideoLoaded] = React.useState(false);
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
 
   React.useEffect(() => {
-    videoRef.current?.load();
+    const loadVideo = async () => {
+      try {
+        videoRef.current?.load();
+        // Optional: You can perform additional actions after the video is loaded.
+        setVideoLoaded(true);
+        return videoRef?.current?.play();
+      } catch (error) {
+        console.error("Error loading video:", error);
+      }
+    };
+
+    void loadVideo(); // Explicitly mark the promise as ignored
   }, []);
 
   return (
@@ -17,7 +25,7 @@ const LandingVideo = () => {
         ref={videoRef}
         onLoadedData={() => {
           setVideoLoaded(true);
-          videoRef?.current?.play();
+          return videoRef?.current?.play();
         }}
         src="/assets/videos/tramonalandingstock.mp4"
         loop
@@ -25,7 +33,11 @@ const LandingVideo = () => {
         playsInline
         className="h-full w-[100vw] object-cover"
       />
-      <div className={`absolute inset-0 [transition-duration:7000ms] ${videoLoaded ? 'bg-black/0' : 'bg-black'}`} />
+      <div
+        className={`transition-duration-7000ms absolute inset-0 ${
+          videoLoaded ? "bg-black/0" : "bg-black"
+        }`}
+      />
     </>
   );
 };

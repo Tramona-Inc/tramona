@@ -13,7 +13,7 @@ import {
   requestSelectSchema,
   requests,
 } from "@/server/db/schema";
-import { formatArrayToString } from "@/utils/utils";
+// import { formatArrayToString } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 

@@ -1,43 +1,46 @@
-import React from 'react';
+import React from "react";
 
-import FeedLanding from '../feeds/feed-landing';
+import FeedLanding from "../feeds/feed-landing";
 // import DesktopSearchBar from '../../search-bar/desktop-search-bar';
 // import MobileSearchBar from '@/common/components/search-bar/mobile-search-bar';
-import { useToast } from '../ui/use-toast';
+// import { useToast } from "../ui/use-toast";
 // import type { NewRequest } from '/common/lib/new-request-utils';
 // import { getSuccessfulRequestToast, makeRequest } from '/common/lib/new-request-utils';
 // import { useUserInfo } from '@/hooks/useUserInfo';
-import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+// import { useEffect, useState } from 'react';
+import dynamic from "next/dynamic";
 
-const LandingVideo = dynamic(() => import('@/components/LandingPage/LandingVideo'), { ssr: false });
+const LandingVideo = dynamic(
+  () => import("@/components/LandingPage/LandingVideo"),
+  { ssr: false },
+);
 
 export default function MastHead() {
-  const { toast } = useToast();
+  //   const { toast } = useToast();
 
-//   const [user, setUser, isLoggedIn, setIsLoggedIn] = useUserInfo();
-  const [referralCode, setReferralCode] = useState<string>('');
-  const [isCopied, setIsCopied] = useState(false);
+  //   const [user, setUser, isLoggedIn, setIsLoggedIn] = useUserInfo();
+  //   const [referralCode, setReferralCode] = useState<string>("");
+  //   const [isCopied, setIsCopied] = useState(false);
 
-//   useEffect(() => {
-//     const unsentRequest = localStorage.getItem('unsentRequest');
+  //   useEffect(() => {
+  //     const unsentRequest = localStorage.getItem('unsentRequest');
 
-//     if (unsentRequest && user) {
-//       const request = JSON.parse(unsentRequest) as NewRequest;
-//       request.checkIn = new Date(request.checkIn);
-//       request.checkOut = new Date(request.checkOut);
-//       // console.log(request.checkIn, request.checkIn instanceof Date);
-//       makeRequest(request, user?.id);
-//       toast(getSuccessfulRequestToast(request));
-//       localStorage.removeItem('unsentRequest');
-//     }
-//   }, [user]);
+  //     if (unsentRequest && user) {
+  //       const request = JSON.parse(unsentRequest) as NewRequest;
+  //       request.checkIn = new Date(request.checkIn);
+  //       request.checkOut = new Date(request.checkOut);
+  //       // console.log(request.checkIn, request.checkIn instanceof Date);
+  //       makeRequest(request, user?.id);
+  //       toast(getSuccessfulRequestToast(request));
+  //       localStorage.removeItem('unsentRequest');
+  //     }
+  //   }, [user]);
 
-//   useEffect(() => {
-//     if (user != null && isLoggedIn) {
-//       setReferralCode(user.referral?.referralCode || '');
-//     }
-//   }, [user, isLoggedIn]);
+  //   useEffect(() => {
+  //     if (user != null && isLoggedIn) {
+  //       setReferralCode(user.referral?.referralCode || '');
+  //     }
+  //   }, [user, isLoggedIn]);
 
   // const handleShareButtonClick = () => {
   //   if (isLoggedIn) {
@@ -80,7 +83,8 @@ export default function MastHead() {
                     </h1>
                   </div>
                   <div className="mx-10  w-fit rounded bg-black/30 p-2 text-center text-white backdrop-blur-md md:text-3xl lg:text-xl">
-                    We match you with vacant dates from top performing Airbnb hosts, so you get better travel deals
+                    We match you with vacant dates from top performing Airbnb
+                    hosts, so you get better travel deals
                   </div>
                 </div>
               </div>

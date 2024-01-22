@@ -1,7 +1,9 @@
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
-import { formatCurrency, formatDateRange, getNumNights, plural } from "./utils";
-import { Property, type Request } from "@/server/db/schema";
+// import { formatCurrency, formatDateRange, getNumNights, plural } from "./utils";
+import { formatCurrency, formatDateRange, getNumNights } from "./utils";
+// import { Property, type Request } from "@/server/db/schema";
+// import { Property, type Request } from "@/server/db/schema";
 
 export function errorToast(error = "Something went wrong, please try again") {
   return toast({
@@ -19,23 +21,23 @@ export function errorToast(error = "Something went wrong, please try again") {
   });
 }
 
-export function successfulRequestToast(
-  request: Pick<
-    Request,
-    "checkIn" | "checkOut" | "maxTotalPrice" | "numGuests" | "location"
-  >,
-) {
-  const pricePerNight =
-    request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
-  const fmtdPrice = `${formatCurrency(pricePerNight)}/night`;
-  const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-  const fmtdNumGuests = plural(request.numGuests, "guest");
+// export function successfulRequestToast(
+//   request: Pick<
+//     Request,
+//     "checkIn" | "checkOut" | "maxTotalPrice" | "numGuests" | "location"
+//   >,
+// ) {
+//   const pricePerNight =
+//     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
+//   const fmtdPrice = `${formatCurrency(pricePerNight)}/night`;
+//   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
+//   const fmtdNumGuests = plural(request.numGuests, "guest");
 
-  return toast({
-    title: `Request sent: ${request.location}`,
-    description: `${fmtdPrice} • ${fmtdDateRange} • ${fmtdNumGuests}`,
-  });
-}
+//   return toast({
+//     title: `Request sent: ${request.location}`,
+//     description: `${fmtdPrice} • ${fmtdDateRange} • ${fmtdNumGuests}`,
+//   });
+// }
 
 export function successfulAdminOfferToast({
   propertyName,

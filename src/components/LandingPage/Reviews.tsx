@@ -3,8 +3,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
   CarouselPrevious,
+  CarouselNext,
 } from "../ui/carousel";
 import { Card, CardContent } from "../ui/card";
 import Image from "next/legacy/image";
