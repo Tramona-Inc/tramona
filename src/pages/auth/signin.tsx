@@ -100,17 +100,24 @@ export default function SignIn({
                 </Form>
               </div>
 
-              <div className="my-5">
+              <div className="my-5 flex flex-row gap-5">
                 {providers &&
-                  Object.values(providers).map((provider) => {
-                    return (
-                      <div key={provider.name}>
-                        <button onClick={() => signIn(provider.id)}>
-                          {provider.name && <Icons iconName={provider.name} />}
-                        </button>
-                      </div>
-                    );
-                  })}
+                  Object.values(providers)
+                    .slice(1) // remove the email provider
+                    .map((provider) => {
+                      return (
+                        <div key={provider.name}>
+                          <Button
+                            variant={"ghost"}
+                            onClick={() => signIn(provider.id)}
+                          >
+                            {provider.name && (
+                              <Icons iconName={provider.name} />
+                            )}
+                          </Button>
+                        </div>
+                      );
+                    })}
               </div>
             </section>
           </div>
