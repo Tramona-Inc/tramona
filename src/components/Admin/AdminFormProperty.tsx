@@ -29,9 +29,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { type z } from "zod";
-import {
-  propertyInsertFormSchema,
-} from "@/server/db/schema";
+import { propertyInsertFormSchema } from "@/server/db/schema";
 import { cn } from "@/utils/utils";
 import {
   Select,
@@ -48,7 +46,7 @@ export default function AdminFormProperty() {
     resolver: zodResolver(propertyInsertFormSchema),
     defaultValues: {
       name: "",
-      originalPrice: 1,
+      originalNightlyPrice: 1,
       hostName: "",
       maxNumGuests: 1,
       numBeds: 1,
@@ -210,7 +208,7 @@ export default function AdminFormProperty() {
               <section className="flex flex-row gap-5">
                 <FormField
                   control={form.control}
-                  name="originalPrice"
+                  name="originalNightlyPrice"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Beds</FormLabel>
