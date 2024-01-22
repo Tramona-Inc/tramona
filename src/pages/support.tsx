@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import MainLayout from "@/components/layouts/MainLayout";
 import {
   Form,
   FormControl,
@@ -121,7 +120,7 @@ export default function Page() {
           >
             info@tramona.com
           </a>
-          .
+         .
         </p>
       </section>
       <section className="space-y-4 rounded-xl border p-4 shadow-md">
