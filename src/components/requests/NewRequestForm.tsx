@@ -219,24 +219,24 @@ export default function NewRequestForm({
                 render={({ field }) => (
                   <FormItem className="col-span-full">
                     <FormLabel>Property Type</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="any">Any</SelectItem>
-                          {ALL_PROPERTY_TYPES.map((propertyType) => (
-                            <SelectItem key={propertyType} value={propertyType}>
-                              {capitalize(propertyType)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="any">Any</SelectItem>
+                        {ALL_PROPERTY_TYPES.map((propertyType) => (
+                          <SelectItem key={propertyType} value={propertyType}>
+                            {capitalize(propertyType)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

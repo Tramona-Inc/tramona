@@ -17,21 +17,27 @@ export const propertiesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       switch (ctx.user.role) {
         case "host":
-          await ctx.db.insert(properties).values({
-            ...input,
-            hostId: ctx.user.id,
-          });
-          return;
+          return await ctx.db
+            .insert(properties)
+            .values({
+              ...input,
+              hostId: ctx.user.id,
+            })
+            .returning({ id: properties.id })
+            .then((res) => res[0]?.id);
         case "admin":
           if (!input.hostName) {
             throw new TRPCError({ code: "BAD_REQUEST" });
           }
 
-          await ctx.db.insert(properties).values({
-            ...input,
-            hostId: null, // unnecessary, just for clarity
-          });
-          return;
+          return await ctx.db
+            .insert(properties)
+            .values({
+              ...input,
+              hostId: null, // unnecessary, just for clarity
+            })
+            .returning({ id: properties.id })
+            .then((res) => res[0]?.id);
       }
     }),
 

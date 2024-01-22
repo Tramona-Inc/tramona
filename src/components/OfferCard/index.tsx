@@ -43,7 +43,7 @@ export default function OfferCard({
             </div>
             <p className="absolute left-4 top-10 w-24 text-center font-semibold text-primary">
               {Math.round(
-                100 * (1 - offer.totalPrice / property.originalPrice!),
+                100 * (1 - offer.totalPrice / property.originalNightlyPrice),
               )}
               % off
             </p>
@@ -53,7 +53,7 @@ export default function OfferCard({
               <p className="text-xs font-semibold uppercase">Original Price</p>
               <p>
                 <span className="text-3xl font-bold">
-                  {formatCurrency(property.originalPrice!)}
+                  {formatCurrency(property.originalNightlyPrice)}
                 </span>
                 <span className="text-sm">/night</span>
               </p>

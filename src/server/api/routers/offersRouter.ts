@@ -212,67 +212,69 @@ export const offersRouter = createTRPCRouter({
         propertyPromise,
       ]);
 
-      // request must exist,
-      if (!request) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "That request doesn't exist",
-        });
-      }
+      // TODO
 
-      // ...be unresolved,
-      if (request?.resolvedAt) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "That request was already resolved",
-        });
-      }
+      // // request must exist,
+      // if (!request) {
+      //   throw new TRPCError({
+      //     code: "BAD_REQUEST",
+      //     message: "That request doesn't exist",
+      //   });
+      // }
 
-      // ...host must own property (or its an admin),
-      if (ctx.user.role === "host" && property?.hostId !== ctx.user.id) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+      // // ...be unresolved,
+      // if (request?.resolvedAt) {
+      //   throw new TRPCError({
+      //     code: "BAD_REQUEST",
+      //     message: "That request was already resolved",
+      //   });
+      // }
 
-      // ...and the property must fulfill the request
-      const notEnoughSpace =
-        property?.maxNumGuests != null &&
-        request.numGuests > property.maxNumGuests;
+      // // ...host must own property (or its an admin),
+      // if (ctx.user.role === "host" && property?.hostId !== ctx.user.id) {
+      //   throw new TRPCError({ code: "UNAUTHORIZED" });
+      // }
 
-      const tooFewBeds =
-        request.minNumBeds != null &&
-        property?.numBeds != null &&
-        request.minNumBeds < property.numBeds;
+      // // ...and the property must fulfill the request
+      // const notEnoughSpace =
+      //   property?.maxNumGuests != null &&
+      //   request.numGuests > property.maxNumGuests;
 
-      const tooFewBedrooms =
-        request.minNumBedrooms != null &&
-        property?.numBedrooms != null &&
-        request.minNumBedrooms < property.numBedrooms;
+      // const tooFewBeds =
+      //   request.minNumBeds != null &&
+      //   property?.numBeds != null &&
+      //   request.minNumBeds < property.numBeds;
 
-      const wrongPropertyType =
-        request.propertyType != null &&
-        property?.propertyType != null &&
-        request.propertyType !== property.propertyType;
+      // const tooFewBedrooms =
+      //   request.minNumBedrooms != null &&
+      //   property?.numBedrooms != null &&
+      //   request.minNumBedrooms < property.numBedrooms;
 
-      const tooExpensive = input.totalPrice > request.maxTotalPrice;
+      // const wrongPropertyType =
+      //   request.propertyType != null &&
+      //   property?.propertyType != null &&
+      //   request.propertyType !== property.propertyType;
 
-      if (notEnoughSpace || tooFewBeds || tooFewBedrooms || wrongPropertyType) {
-        const messagesMap = [
-          ["doesn't accomodate enough guests", notEnoughSpace],
-          ["doesn't have enough beds", tooFewBeds],
-          ["doesn't have enough bedrooms", tooFewBedrooms],
-          ["is the wrong type", wrongPropertyType],
-          ["is too expensive", tooExpensive],
-        ] as const;
+      // const tooExpensive = input.totalPrice > request.maxTotalPrice;
 
-        const errorMessage = formatArrayToString(
-          messagesMap.filter((x) => x[1]).map((x) => x[0]),
-        );
+      // if (notEnoughSpace || tooFewBeds || tooFewBedrooms || wrongPropertyType) {
+      //   const messagesMap = [
+      //     ["doesn't accomodate enough guests", notEnoughSpace],
+      //     ["doesn't have enough beds", tooFewBeds],
+      //     ["doesn't have enough bedrooms", tooFewBedrooms],
+      //     ["is the wrong type", wrongPropertyType],
+      //     ["is too expensive", tooExpensive],
+      //   ] as const;
 
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `That property ${errorMessage}`,
-        });
-      }
+      //   const errorMessage = formatArrayToString(
+      //     messagesMap.filter((x) => x[1]).map((x) => x[0]),
+      //   );
+
+      //   throw new TRPCError({
+      //     code: "BAD_REQUEST",
+      //     message: `That property ${errorMessage}`,
+      //   });
+      // }
 
       // yay
       await ctx.db.insert(offers).values(input);
