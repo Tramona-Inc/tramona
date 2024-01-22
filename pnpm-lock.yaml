@@ -123,8 +123,8 @@ dependencies:
     specifier: 8.0.0-rc19
     version: 8.0.0-rc19(react@18.2.0)
   lucide-react:
-    specifier: ^0.311.0
-    version: 0.311.0(react@18.2.0)
+    specifier: ^0.312.0
+    version: 0.312.0(react@18.2.0)
   next:
     specifier: ^14.0.4
     version: 14.0.4(@babel/core@7.23.7)(react-dom@18.2.0)(react@18.2.0)
@@ -260,8 +260,8 @@ devDependencies:
     specifier: ^0.5.7
     version: 0.5.11(prettier@3.1.1)
   storybook:
-    specifier: 7.6.8
-    version: 7.6.8
+    specifier: 7.6.9
+    version: 7.6.9
   storybook-addon-performance:
     specifier: ^0.17.1
     version: 0.17.1(@types/react@18.2.47)(react-dom@18.2.0)(react@18.2.0)
@@ -4116,7 +4116,6 @@ packages:
       puppeteer-core: 2.1.1
       read-pkg-up: 7.0.1
       semver: 7.5.4
-      simple-update-notifier: 2.0.0
       strip-json-comments: 3.1.1
       tempy: 1.0.1
       ts-dedent: 2.2.0
