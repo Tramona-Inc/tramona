@@ -14,7 +14,6 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/utils/utils";
 import { type ForwardRefExoticComponent } from "react";
 import {
-  DollarSignIcon,
   HomeIcon,
   LogOutIcon,
   TagIcon,
