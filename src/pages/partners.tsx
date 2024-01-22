@@ -160,7 +160,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="bg-blue-400">
+      <section className="w-full bg-blue-400">
         <h2 className="text-center text-4xl font-bold sm:text-5xl">
           Introducing the Tramona way
         </h2>
@@ -169,15 +169,15 @@ export default function Page() {
           referral code!
         </p>
 
-        <div className="grid gap-10 py-10 lg:grid-cols-2 lg:gap-5">
-          <Card className="relative max-w-md rounded-3xl border-black">
+        <div className="flex flex-col gap-5 lg:flex-row">
+          <Card className="relative w-[400px] max-w-lg rounded-3xl border-black xl:w-[500px]">
             <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
               TIER 1
             </div>
 
             <CardContent className="flex flex-col space-y-5 lg:px-4 lg:py-2">
               <div className="space-y-3">
-                <h3 className="text-2xl font-bold sm:text-3xl">Partner</h3>
+                <h3 className="text-2xl font-bold md:text-3xl">Partner</h3>
                 <p className="sm:text-2xl">
                   Earn 30% of what we make off everyone you refer
                 </p>
@@ -204,14 +204,14 @@ export default function Page() {
             </CardFooter>
           </Card>
 
-          <Card className="relative max-w-md rounded-3xl border-black">
+          <Card className="relative w-[400px] max-w-lg rounded-3xl border-black xl:w-[500px]">
             <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
               TIER 2
             </div>
 
             <CardContent className="flex flex-col space-y-5 lg:space-y-14 lg:px-4 lg:pt-2">
               <div className="space-y-3">
-                <h3 className="text-2xl font-bold sm:text-3xl">Ambassador</h3>
+                <h3 className="text-2xl font-bold md:text-3xl">Ambassador</h3>
                 <p className="sm:text-2xl">
                   Earn 50% of what we make off everyone you refer
                 </p>
