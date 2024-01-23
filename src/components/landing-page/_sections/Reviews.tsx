@@ -5,10 +5,10 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
-} from "../ui/carousel";
-import { Card, CardContent } from "../ui/card";
+} from "../../ui/carousel";
+import { Card, CardContent } from "../../ui/card";
 import Image from "next/legacy/image";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 
 export default function Reviews() {
   return (

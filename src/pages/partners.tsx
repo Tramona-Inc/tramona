@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import PinkStarIcon from "@/components/icons/PinkStarIcon";
+import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,

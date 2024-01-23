@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import CopyToClipboardBtn from "@/components/utils/CopyToClipboardBtn";
+import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 
 const defaultMessage = `Hey! Join this new travel platform. They let people travel at any price they want. You name the price and they'll find a bnb out of your budget and make it work with your price. Here's the link, check it out:`;
 

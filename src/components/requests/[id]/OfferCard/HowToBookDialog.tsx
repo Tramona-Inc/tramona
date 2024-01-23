@@ -9,7 +9,7 @@ import {
 import { Button, buttonVariants } from "../../../ui/button";
 import Link from "next/link";
 import { cn, formatCurrency, formatDateRange } from "@/utils/utils";
-import CopyToClipboardBtn from "../../../utils/CopyToClipboardBtn";
+import CopyToClipboardBtn from "../../../_utils/CopyToClipboardBtn";
 
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{

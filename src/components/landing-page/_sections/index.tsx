@@ -1,12 +1,12 @@
-import CurrentState from "@/components/landing-page/CurrentState";
-import Hosts from "@/components/landing-page/Hosts";
-import How from "@/components/landing-page/How";
-import Jungle from "@/components/landing-page/Jungle";
-import MastHead from "@/components/landing-page/MastHead";
-import Reviews from "@/components/landing-page/Reviews";
-import TramonaLoop from "@/components/landing-page/TramonaLoop";
-import Gift from "@/components/landing-page/Gift";
-import Save from "@/components/landing-page/Save";
+import CurrentState from "@/components/landing-page/_sections/CurrentState";
+import Hosts from "@/components/landing-page/_sections/Hosts";
+import How from "@/components/landing-page/_sections/How";
+import Jungle from "@/components/landing-page/_sections/Jungle";
+import MastHead from "@/components/landing-page/_sections/MastHead";
+import Reviews from "@/components/landing-page/_sections/Reviews";
+import TramonaLoop from "@/components/landing-page/_sections/TramonaLoop";
+import Gift from "@/components/landing-page/_sections/Gift";
+import Save from "@/components/landing-page/_sections/Save";
 import Head from "next/head";
 // import MainLayout from '@/common/components/layouts/main';
 

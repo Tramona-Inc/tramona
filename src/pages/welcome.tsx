@@ -1,13 +1,13 @@
 import Head from "next/head";
-import TramonaIcon from "@/components/icons/TramonaIcon";
+import TramonaIcon from "@/components/_icons/TramonaIcon";
 import Link from "next/link";
 import { Stepper, StepperItem } from "@/components/ui/stepper";
 import { useStepper } from "@/components/ui/use-stepper";
 import type { StepperConfig } from "@/components/ui/stepper";
 import { Button } from "@/components/ui/button";
-import Undone from "@/components/icons/UndoneIcon";
-import Calender from "@/components/icons/CalenderIcon";
-import Piggy from "@/components/icons/PiggyIcon";
+import Undone from "@/components/_icons/UndoneIcon";
+import Calender from "@/components/_icons/CalenderIcon";
+import Piggy from "@/components/_icons/PiggyIcon";
 import { fakeLiveDeals } from "@/fake-data/live-deals";
 import Image from "next/image";
 import { cn, delay } from "@/utils/utils";

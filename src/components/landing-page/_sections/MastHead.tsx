@@ -1,6 +1,6 @@
 import React from "react";
 
-import FeedLanding from "../feeds/feed-landing";
+import FeedLanding from "../FeedLanding";
 // import DesktopSearchBar from '../../search-bar/desktop-search-bar';
 // import MobileSearchBar from '@/common/components/search-bar/mobile-search-bar';
 // import { useToast } from "../ui/use-toast";

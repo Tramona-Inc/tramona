@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Icons } from "../icons/icons";
+import { Icons } from "../_icons/icons";
 import Link from "next/link";
 import type { OfferType } from "@/types";
 

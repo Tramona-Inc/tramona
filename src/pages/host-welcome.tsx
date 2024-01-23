@@ -2,7 +2,7 @@ import MainLayout from "@/components/_common/MainLayout";
 import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import FeedLanding from "@/components/feeds/feed-landing";
+import FeedLanding from "@/components/landing-page/FeedLanding";
 import {
   Carousel,
   CarouselContent,

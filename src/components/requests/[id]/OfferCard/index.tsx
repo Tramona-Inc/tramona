@@ -5,7 +5,7 @@ import PaywallDialog from "../PaywallDialog";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
 import UserAvatar from "../../../_common/UserAvatar";
 import HowToBookDialog from "./HowToBookDialog";
-import SaleTagIcon from "../../../icons/SaleTagIcon";
+import SaleTagIcon from "../../../_icons/SaleTagIcon";
 import { Badge } from "../../../ui/badge";
 import { Card, CardFooter } from "../../../ui/card";
 import { cn, formatCurrency } from "@/utils/utils";

@@ -2,8 +2,8 @@ import * as React from "react";
 
 import { cn } from "@/utils/utils";
 import { useState } from "react";
-import VisibleIcon from "../icons/VisibleIcon";
-import HiddenIcon from "../icons/HiddenIcon";
+import VisibleIcon from "../_icons/VisibleIcon";
+import HiddenIcon from "../_icons/HiddenIcon";
 import { useMeasure } from "@uidotdev/usehooks";
 
 // I customized this input component to support prefixes and suffixes.

@@ -4,12 +4,12 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 
 import { Share2Icon, Edit2Icon } from "lucide-react";
-import SecurityIcon from "@/components/icons/SecurityIcon";
+import SecurityIcon from "@/components/_icons/SecurityIcon";
 
-import ProfileSidebar from "@/components/profile_/ProfileSidebar";
-import ReferralDashboard from "@/components/profile_/ReferralDashboard";
-import ProfileForm from "@/components/profile_/ProfileForm";
-import PasswordResetForm from "@/components/profile_/PasswordResetForm";
+import ProfileSidebar from "@/components/profile/ProfileSidebar";
+import ReferralDashboard from "@/components/profile/ReferralDashboard";
+import ProfileForm from "@/components/profile/ProfileForm";
+import PasswordResetForm from "@/components/profile/PasswordResetForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Page() {

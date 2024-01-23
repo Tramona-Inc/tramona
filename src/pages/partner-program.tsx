@@ -1,7 +1,7 @@
 import MainLayout from "@/components/_common/MainLayout";
 import Link from "next/link";
 import React from "react";
-import PartnerProgram from "@/components/icons/PartnerProgramIcon";
+import PartnerProgram from "@/components/_icons/PartnerProgramIcon";
 
 export default function Page() {
   return (
