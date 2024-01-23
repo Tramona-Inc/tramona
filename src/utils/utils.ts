@@ -130,12 +130,6 @@ export function formatArrayToString(arr: string[]) {
   }
 }
 
-/**
- * A utility function to delay execution of main thread for ms milliseconds.
- */
-export const delay = (ms: number): Promise<void> =>
-  new Promise((res) => setTimeout(res, ms));
-
 export async function retry<T>(f: Promise<T>, numRetries: number) {
   for (let i = 0; i < numRetries; i++) {
     try {

@@ -1,6 +1,4 @@
 import Head from "next/head";
-import TramonaIcon from "@/components/_icons/TramonaIcon";
-import Link from "next/link";
 import { Stepper, StepperItem } from "@/components/ui/stepper";
 import { useStepper } from "@/components/ui/use-stepper";
 import type { StepperConfig } from "@/components/ui/stepper";
@@ -10,7 +8,7 @@ import Calender from "@/components/_icons/CalenderIcon";
 import Piggy from "@/components/_icons/PiggyIcon";
 import { fakeLiveDeals } from "@/fake-data/live-deals";
 import Image from "next/image";
-import { cn, delay } from "@/utils/utils";
+import { cn, sleep } from "@/utils/utils";
 import { useRouter } from "next/router";
 
 function StepperContentLayout({
@@ -130,7 +128,7 @@ function Step2(): JSX.Element {
 function Step3(): JSX.Element {
   return (
     <StepperContentLayout
-      className={"text-l items-center text-center text-center font-bold"}
+      className={"text-l items-center text-center font-bold"}
     >
       <p>We have a global feed and a personal feed.</p>
       <p>
@@ -151,7 +149,7 @@ function Step3(): JSX.Element {
 function Step4(): JSX.Element {
   return (
     <StepperContentLayout className={"items-center text-center"}>
-      <p className="text-3xl font-bold">Let’s Grow & Earn Together</p>
+      <p className="text-3xl font-bold">Let&apos;s Grow & Earn Together</p>
       <p className="text-l font-bold">
         We built Tramona for the sole benefit of travelers and hosts, our
         referral program is no different.
@@ -210,7 +208,7 @@ export default function Welcome() {
 
   const startExploring = () => {
     nextStep();
-    delay(2000)
+    sleep(2000)
       .then(() => router.push("/"))
       .catch(() => {
         return;
