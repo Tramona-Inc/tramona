@@ -153,7 +153,7 @@ export default function AdminOfferForm({
           name="originalNightlyPrice"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Property&apos;s original nightly price</FormLabel>
+              <FormLabel>Property&apos;s original price (nightly)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
