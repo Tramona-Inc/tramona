@@ -2,10 +2,14 @@ import MainLayout from "@/components/_common/MainLayout";
 import Link from "next/link";
 import React from "react";
 import PartnerProgram from "@/components/_icons/PartnerProgramIcon";
+import Head from "next/head";
 
 export default function Page() {
   return (
-    <MainLayout>
+    <>
+      <Head>
+        <title>Partners | Tramona</title>
+      </Head>
       <div className="bg-blue-300 px-10 py-20">
         <div className="flex flex-col gap-4 md:flex-row md:justify-around">
           <div className="flex flex-col gap-4">
@@ -61,6 +65,6 @@ export default function Page() {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }
