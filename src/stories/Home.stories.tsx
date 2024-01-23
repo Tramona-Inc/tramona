@@ -1,4 +1,4 @@
-import Home from "../components/landing-page/_sections/index";
+import Home from "../pages/index";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const HomeExample = () => {
