@@ -199,7 +199,6 @@ export default function AdminOfferForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="any">Any</SelectItem>
                   {ALL_PROPERTY_TYPES.map((propertyType) => (
                     <SelectItem key={propertyType} value={propertyType}>
                       {capitalize(propertyType)}
