@@ -220,14 +220,6 @@ export default function Welcome() {
   return (
     <>
       <Head>Welcome</Head>
-      <header className="sticky top-0 z-50 flex items-center gap-4 bg-white px-4 py-2 text-sm shadow-md sm:px-8 sm:py-4 sm:text-base">
-        <Link
-          href="/"
-          className="mr-auto flex items-center gap-2 text-2xl font-bold"
-        >
-          <TramonaIcon /> Tramona
-        </Link>
-      </header>
       <div className="mx-auto flex w-full flex-col gap-4 px-5 py-10 lg:px-80">
         <Stepper activeStep={activeStep} responsive={false}>
           {steps.map((step, index) => (
