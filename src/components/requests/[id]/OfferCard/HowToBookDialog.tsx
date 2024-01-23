@@ -19,7 +19,7 @@ export default function HowToBookDialog(
     checkOut: Date;
   }>,
 ) {
-  const message = `Hi, I was offerd your property on Tramona for ${formatCurrency(
+  const message = `Hi, I was offered your property on Tramona for ${formatCurrency(
     props.totalPrice,
   )} total for ${formatDateRange(
     props.checkIn,
