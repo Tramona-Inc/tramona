@@ -6,14 +6,6 @@ import {
 } from "@/components/ui/accordion";
 import Head from "next/head";
 
-// function Question({ children }: { children: ReactNode }) {
-// 	return <p className='pt-8 text-lg font-semibold text-black'>{children}</p>;
-// }
-
-// function Answer({ children }: { children: ReactNode }) {
-// 	return <p className='text-base text-zinc-600'>{children}</p>;
-// }
-
 export default function FAQ() {
   return (
     <>

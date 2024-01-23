@@ -1,18 +1,19 @@
-import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from '../ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Icons } from '../icons/icons';
-import Link from 'next/link';
-import type { OfferType } from '@/types';
+import React from "react";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Icons } from "../icons/icons";
+import Link from "next/link";
+import type { OfferType } from "@/types";
 
 type Props = {
   offer: OfferType;
 };
 
 export default function FeedCard({ offer }: Props) {
-  const name = offer.hostName.split(' ');
+  const name = offer.hostName.split(" ");
   const firstName = name[0];
-  const lastNameCensored = name.length > 1 ? '*'.repeat(name[1]!.length) : '******';
+  const lastNameCensored =
+    name.length > 1 ? "*".repeat(name[1]!.length) : "******";
 
   return (
     <Card>
@@ -23,18 +24,20 @@ export default function FeedCard({ offer }: Props) {
               <AvatarImage src="" />
               <AvatarFallback>
                 {offer.hostName
-                  .split(' ')
-                  .map(word => word[0])
-                  .join('')}
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
           </Link>
 
-          <h1 className="font-bold">{firstName + ' ' + lastNameCensored}</h1>
+          <h1 className="font-bold">{firstName + " " + lastNameCensored}</h1>
           {/* <p className='text-secondary-foreground/60'>@{offers.user.username}</p> */}
         </div>
 
-        <p className="text-sm text-secondary-foreground/60">{/* {offers.posting.date} */}</p>
+        <p className="text-sm text-secondary-foreground/60">
+          {/* {offers.posting.date} */}
+        </p>
       </CardHeader>
       <CardContent className="space-y-5">
         <h1 className="text-center text-2xl font-bold">{offer.propertyName}</h1>

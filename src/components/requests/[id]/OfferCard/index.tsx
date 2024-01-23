@@ -1,13 +1,13 @@
 import { type inferRouterOutputs } from "@trpc/server";
 import { type AppRouter } from "@/server/api/root";
-import { Button } from "../ui/button";
+import { Button } from "../../../ui/button";
 import PaywallDialog from "../PaywallDialog";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
-import UserAvatar from "../UserAvatar";
+import UserAvatar from "../../../_common/UserAvatar";
 import HowToBookDialog from "./HowToBookDialog";
-import SaleTagIcon from "../icons/SaleTagIcon";
-import { Badge } from "../ui/badge";
-import { Card, CardFooter } from "../ui/card";
+import SaleTagIcon from "../../../icons/SaleTagIcon";
+import { Badge } from "../../../ui/badge";
+import { Card, CardFooter } from "../../../ui/card";
 import { cn, formatCurrency } from "@/utils/utils";
 
 export type OfferWithProperty =
@@ -43,7 +43,7 @@ export default function OfferCard({
             </div>
             <p className="absolute left-4 top-10 w-24 text-center font-semibold text-primary">
               {Math.round(
-                100 * (1 - offer.totalPrice / property.originalNightlyPrice),
+                100 * (1 - offer.totalPrice / property.originalNightlyPrice), // TODO fix
               )}
               % off
             </p>

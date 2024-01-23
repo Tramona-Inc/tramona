@@ -1,5 +1,5 @@
 import { signIn, useSession } from "next-auth/react";
-import { Button } from "../ui/button";
+import { Button } from "../../../ui/button";
 import AvatarDropdown from "./AvatarDropdown";
 
 function LogInBtn() {

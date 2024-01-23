@@ -5,11 +5,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { Button, buttonVariants } from "../ui/button";
+} from "../../../ui/dialog";
+import { Button, buttonVariants } from "../../../ui/button";
 import Link from "next/link";
 import { cn, formatCurrency, formatDateRange } from "@/utils/utils";
-import CopyToClipboardBtn from "../utils/CopyToClipboardBtn";
+import CopyToClipboardBtn from "../../../utils/CopyToClipboardBtn";
 
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{

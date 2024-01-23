@@ -11,7 +11,7 @@ import FeedLanding from "../feeds/feed-landing";
 import dynamic from "next/dynamic";
 
 const LandingVideo = dynamic(
-  () => import("@/components/LandingPage/LandingVideo"),
+  () => import("@/components/landing-page/LandingVideo"),
   { ssr: false },
 );
 

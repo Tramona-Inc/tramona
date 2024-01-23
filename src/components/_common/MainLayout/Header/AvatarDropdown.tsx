@@ -5,11 +5,11 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import UserAvatar from "../UserAvatar";
+} from "../../../ui/dropdown-menu";
+import UserAvatar from "../../UserAvatar";
 import { type Session } from "next-auth";
 import Link from "next/link";
-import { Badge } from "../ui/badge";
+import { Badge } from "../../../ui/badge";
 import { usePathname } from "next/navigation";
 import { cn } from "@/utils/utils";
 import { type ForwardRefExoticComponent } from "react";

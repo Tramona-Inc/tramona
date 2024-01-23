@@ -6,10 +6,10 @@ import { useSession } from "next-auth/react";
 import { Share2Icon, Edit2Icon } from "lucide-react";
 import SecurityIcon from "@/components/icons/SecurityIcon";
 
-import ProfileSidebar from "@/components/Profile/ProfileSidebar";
-import ReferralDashboard from "@/components/Profile/ReferralDashboard";
-import ProfileForm from "@/components/Profile/ProfileForm";
-import PasswordResetForm from "@/components/Profile/PasswordResetForm";
+import ProfileSidebar from "@/components/profile_/ProfileSidebar";
+import ReferralDashboard from "@/components/profile_/ReferralDashboard";
+import ProfileForm from "@/components/profile_/ProfileForm";
+import PasswordResetForm from "@/components/profile_/PasswordResetForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Page() {

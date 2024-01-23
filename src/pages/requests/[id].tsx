@@ -1,5 +1,5 @@
-import LargeRequestCard from "@/components/LargeRequestCard";
-import OfferCard from "@/components/OfferCard";
+import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
+import OfferCard from "@/components/requests/[id]/OfferCard";
 import { api } from "@/utils/api";
 import { Loader2Icon, TagIcon } from "lucide-react";
 import Head from "next/head";

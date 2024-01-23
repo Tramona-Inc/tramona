@@ -1,4 +1,4 @@
-import VideoDisplay from "@/components/VideoDisplay";
+import VideoDisplay from "@/components/_common/VideoDisplay";
 import { Button } from "@/components/ui/button";
 import Share from "@/components/icons/ShareIcon";
 import Image from "next/image";

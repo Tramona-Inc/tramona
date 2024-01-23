@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getFmtdFilters } from "@/utils/formatters";
-import { getRequestStatus, type RequestWithDetails } from "./requests/utils";
+import { getRequestStatus, type RequestWithDetails } from "../utils";
 
 export default function LargeRequestCard({
   request,

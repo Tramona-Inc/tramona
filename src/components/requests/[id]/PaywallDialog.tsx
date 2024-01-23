@@ -4,11 +4,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
-import { Stepper, StepperItem, type StepperConfig } from "./ui/stepper";
-import { useStepper } from "./ui/use-stepper";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
+} from "../../ui/dialog";
+import { Stepper, StepperItem, type StepperConfig } from "../../ui/stepper";
+import { useStepper } from "../../ui/use-stepper";
+import { Button } from "../../ui/button";
+import { Separator } from "../../ui/separator";
 import Link from "next/link";
 
 const steps = [

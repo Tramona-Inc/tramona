@@ -7,10 +7,10 @@ import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
 
-import TailwindIndicator from "@/components/TailwindIndicator";
+import TailwindIndicator from "@/components/_common/TailwindIndicator";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
-import MainLayout from "@/components/layouts/MainLayout";
+import MainLayout from "@/components/_common/MainLayout";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
