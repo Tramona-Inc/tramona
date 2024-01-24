@@ -6,6 +6,7 @@
 // import StarIcon from "@/common/components/icons/star";
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
+import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -171,12 +172,10 @@ export default function Listings() {
                 {/** Host */}
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-row items-center gap-4">
-                    <Image
-                      src={"/assets/images/fake-properties/owners/2.png"}
-                      alt=""
-                      className="inset-0 border border-none object-cover object-center"
-                      width={60}
-                      height={60}
+                    <UserAvatar
+                      name={offer.property.hostName}
+                      email={undefined}
+                      image={offer.property.host?.image}
                     />
                     <p className="text-m font-bold text-zinc-800">
                       Hosted by {offer.property.hostName}
