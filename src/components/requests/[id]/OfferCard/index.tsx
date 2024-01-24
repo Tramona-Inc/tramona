@@ -115,7 +115,7 @@ export default function OfferCard({
         </div>
         <CardFooter>
           <Button size="lg" variant="outline" className="rounded-full">
-            <Link href={`/listings/${property.id}`}>See Listing</Link>
+            <Link href={`/listings/${offer.id}`}>See Listing</Link>
           </Button>
           {lisa ? (
             <PaywallDialog>

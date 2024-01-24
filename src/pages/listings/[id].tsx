@@ -15,67 +15,67 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Amenity, Baths, OfferDetailType } from "@/types";
+import type { OfferDetailType } from "@/types";
 import { api } from "@/utils/api";
+import { formatCurrency } from "@/utils/utils";
 import { StarIcon } from "lucide-react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useState } from "react";
 
 function Divider(): JSX.Element {
   return <div className="mb-6 mt-6 border border-slate-300"></div>;
 }
 
-function AmenityTemplate({ amenity }: { amenity: Amenity }): JSX.Element {
-  const style =
-    "flex flex-initial flex-col items-center justify-center rounded-xl border border-slate-300 p-4 text-sm font-bold text-zinc-800";
-  switch (amenity.type) {
-    case "Baths":
-      return (
-        <div className={style}>
-          {/* <BathBoldIcon /> */}
-          {(amenity as Baths).count} Bath
-        </div>
-      );
-    case "Beds":
-      return (
-        <div className={style}>
-          {/* <BedBoldIcon /> {(amenity as Beds).count} Bed */}
-        </div>
-      );
-    case "Ocean":
-      return <div className={style}>{/* <OceanIcon /> Ocean View */}</div>;
-  }
-}
+// function AmenityTemplate({ amenity }: { amenity: Amenity }): JSX.Element {
+//   const style =
+//     "flex flex-initial flex-col items-center justify-center rounded-xl border border-slate-300 p-4 text-sm font-bold text-zinc-800";
+//   switch (amenity.type) {
+//     case "Baths":
+//       return (
+//         <div className={style}>
+//           {/* <BathBoldIcon /> */}
+//           {(amenity as Baths).count} Bath
+//         </div>
+//       );
+//     case "Beds":
+//       return (
+//         <div className={style}>
+//           {/* <BedBoldIcon /> {(amenity as Beds).count} Bed */}
+//         </div>
+//       );
+//     case "Ocean":
+//       return <div className={style}>{/* <OceanIcon /> Ocean View */}</div>;
+//   }
+// }
 
-function ReadMore({ paragraph }: { paragraph: string }): JSX.Element {
-  const [open, setOpen] = useState<boolean>(false);
+// function ReadMore({ paragraph }: { paragraph: string }): JSX.Element {
+//   const [open, setOpen] = useState<boolean>(false);
 
-  return (
-    <>
-      {open ? (
-        <>
-          {" "}
-          <p className="text-justify">{paragraph}</p>{" "}
-          <Button variant="link" className="p-0" onClick={() => setOpen(!open)}>
-            Close
-          </Button>
-        </>
-      ) : (
-        <>
-          {" "}
-          <p className="text-justify">
-            {paragraph.substring(0, 200) + "..."}
-          </p>{" "}
-          <Button variant="link" className="p-0" onClick={() => setOpen(!open)}>
-            Read More
-          </Button>
-        </>
-      )}
-    </>
-  );
-}
+//   return (
+//     <>
+//       {open ? (
+//         <>
+//           {" "}
+//           <p className="text-justify">{paragraph}</p>{" "}
+//           <Button variant="link" className="p-0" onClick={() => setOpen(!open)}>
+//             Close
+//           </Button>
+//         </>
+//       ) : (
+//         <>
+//           {" "}
+//           <p className="text-justify">
+//             {paragraph.substring(0, 200) + "..."}
+//           </p>{" "}
+//           <Button variant="link" className="p-0" onClick={() => setOpen(!open)}>
+//             Read More
+//           </Button>
+//         </>
+//       )}
+//     </>
+//   );
+// }
 
 interface ListingsProps {
   offer: OfferDetailType;
@@ -84,10 +84,14 @@ interface ListingsProps {
 export default function Listings() {
   const router = useRouter();
 
-  const propertyId = parseInt(router.query.id as string);
+  const offerId = parseInt(router.query.id as string);
 
   const { data: property } = api.properties.getById.useQuery({
-    id: propertyId,
+    id: 12,
+  });
+
+  const { data: offer } = api.offers.getOfferWithRequestAndProperty.useQuery({
+    id: offerId,
   });
 
   return (
@@ -95,27 +99,29 @@ export default function Listings() {
       <Head>
         <title>Listings Property Preview | Tramona</title>
       </Head>
-      {property && (
+      {offer && (
         <div className="bg-zinc-100 px-4 pb-64 pt-8">
           <div className="mx-auto max-w-3xl xl:max-w-6xl">
-            <div className="mb-4 flex flex-row flex-wrap gap-4 text-3xl font-bold text-zinc-700">
-              {property.name}
+            <div className="mb-4 flex flex-row flex-wrap items-center justify-center gap-4 text-3xl font-bold text-zinc-700">
+              {offer.property.name}
               {/* // TODO: Get the offer price from redirection  */}
               <div className="flex flex-row items-center justify-center rounded-full bg-[#2F5BF6] px-8 text-sm text-white">
-                {/* {Math.round(
-                  100 * (1 - (offer.price || 0) / (offer.originalPrice || 0)),
+                {Math.round(
+                  100 *
+                    (1 -
+                      (offer.totalPrice || 0) /
+                        (offer.property.originalNightlyPrice || 0)),
                 )}
-                % off */}
-                {property.originalNightlyPrice}
+                % off
               </div>
               <s className="text-sm font-bold">
-                Original Price: ${property.originalNightlyPrice}/night
+                Original Price: ${offer.property.originalNightlyPrice}/night
               </s>
             </div>
             <div className="mb-4 grid grid-cols-2 gap-4">
               <div className="relative overflow-clip rounded-xl">
                 <Image
-                  src={property.imageUrls?.[0] ?? "default"}
+                  src={offer.property.imageUrls?.[0] ?? "default"}
                   alt=""
                   className="inset-0 border object-cover object-center"
                   width={616}
@@ -123,7 +129,7 @@ export default function Listings() {
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                {property.imageUrls?.slice(1).map((url, idx) => (
+                {offer.property.imageUrls?.slice(1).map((url, idx) => (
                   <div className="relative overflow-clip rounded-xl" key={idx}>
                     <Image
                       src={url}
@@ -163,14 +169,14 @@ export default function Listings() {
                       height={60}
                     />
                     <p className="text-m font-bold text-zinc-800">
-                      Hosted by {property.hostName}
+                      Hosted by {offer.property.hostName}
                     </p>
                   </div>
                   <div className="flex flex-row items-center gap-12">
                     <div className="flex flex-row items-center">
                       <StarIcon />{" "}
                       <p className="text-zinc-1200 ml-1 text-sm">
-                        {property.numRatings} Reviews
+                        {offer.property.numRatings} Reviews
                       </p>
                     </div>
                     {/* {offer.verified ? <IdentityVerifiedIcon /> : null}
@@ -205,7 +211,7 @@ export default function Listings() {
                 <div className="flex justify-center">
                   <div className="rounded-xl p-10 shadow-xl">
                     <span className="text-zinc-1000 text-3xl font-bold">
-                      ${property.originalNightlyPrice}{" "}
+                      {formatCurrency(offer.property.originalNightlyPrice)}{" "}
                       <span className="text-2xl font-light"> / night</span>
                     </span>
                     <div className="my-6 grid grid-cols-2 rounded-xl border border-slate-300">
@@ -228,7 +234,9 @@ export default function Listings() {
                         <Select>
                           <SelectTrigger className="w-full border-none p-0 text-lg font-bold text-zinc-800 shadow-none focus:ring-0">
                             <SelectValue
-                              placeholder={property.maxNumGuests + " Guests"}
+                              placeholder={
+                                offer.property.maxNumGuests + " Guests"
+                              }
                             />
                           </SelectTrigger>
                           <SelectContent className="border-none text-xl font-bold text-zinc-800">

@@ -142,6 +142,49 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
+  getOfferWithRequestAndProperty: protectedProcedure
+    .input(requestSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const requestPromise = ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+      });
+
+      const request = await requestPromise;
+
+      // request must exist
+      if (!request) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That request doesn't exist",
+        });
+      }
+
+      return await ctx.db.query.offers.findFirst({
+        where: eq(offers.requestId, input.id),
+        columns: {
+          createdAt: true,
+          totalPrice: true,
+          id: true,
+        },
+        with: {
+          request: {
+            with: {
+              madeByUser: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
+    }),
+
   makePublic: roleRestrictedProcedure(["admin", "host"])
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
