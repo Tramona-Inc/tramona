@@ -1,14 +1,15 @@
-import { type inferRouterOutputs } from "@trpc/server";
 import { type AppRouter } from "@/server/api/root";
-import { Button } from "../../../ui/button";
-import PaywallDialog from "../PaywallDialog";
+import { cn, formatCurrency } from "@/utils/utils";
+import { type inferRouterOutputs } from "@trpc/server";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
+import Link from "next/link";
 import UserAvatar from "../../../_common/UserAvatar";
-import HowToBookDialog from "./HowToBookDialog";
 import SaleTagIcon from "../../../_icons/SaleTagIcon";
 import { Badge } from "../../../ui/badge";
+import { Button } from "../../../ui/button";
 import { Card, CardFooter } from "../../../ui/card";
-import { cn, formatCurrency } from "@/utils/utils";
+import PaywallDialog from "../PaywallDialog";
+import HowToBookDialog from "./HowToBookDialog";
 
 export type OfferWithProperty =
   inferRouterOutputs<AppRouter>["offers"]["getByRequestIdWithProperty"][number];
@@ -113,9 +114,9 @@ export default function OfferCard({
           </div>
         </div>
         <CardFooter>
-          {/* <Button size="lg" variant="outline" className="rounded-full">
+          <Button size="lg" variant="outline" className="rounded-full">
             <Link href={`/listings/${property.id}`}>See Listing</Link>
-          </Button> */}
+          </Button>
           {lisa ? (
             <PaywallDialog>
               <Button
