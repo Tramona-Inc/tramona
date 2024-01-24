@@ -118,7 +118,8 @@ export default function Listings() {
                 % off
               </div>
               <s className="text-sm font-bold">
-                Original Price: ${offer.property.originalNightlyPrice}/night
+                Original Price:{" "}
+                {formatCurrency(offer.property.originalNightlyPrice)}/night
               </s>
             </div>
             <div
@@ -208,12 +209,12 @@ export default function Listings() {
                 </>
                 <Divider />
                 {/** Guests Review */}
-                <>
+                {/* <>
                   <h2 className="text-zinc-1000 mb-4 text-2xl font-semibold">
                     Guest Reviews
                   </h2>
                 </>
-                <Divider />
+                <Divider /> */}
               </div>
 
               <div className="col-span-3">
@@ -232,13 +233,12 @@ export default function Listings() {
                       </div>
                       <div className="col-span-1 border border-slate-300 p-4">
                         Check-out
-                        {/* <p>{offer.checkOut}</p> */}
                         <p className="text-xl font-bold text-zinc-800">
                           {formatDateMonthDay(offer.request.checkOut)}
                         </p>
                       </div>
                       <div className="col-span-2 border border-slate-300 p-4">
-                        Guests
+                        Guests (max {offer.property.maxNumGuests})
                         <Select>
                           <SelectTrigger className="w-full border-none p-0 text-lg font-bold text-zinc-800 shadow-none focus:ring-0">
                             <SelectValue
@@ -249,10 +249,17 @@ export default function Listings() {
                           </SelectTrigger>
                           <SelectContent className="border-none text-xl font-bold text-zinc-800">
                             <SelectGroup>
-                              {/* <SelectLabel>Fruits</SelectLabel> */}
-                              <SelectItem value="one">1 Guests</SelectItem>
-                              <SelectItem value="two">2 Guests</SelectItem>
-                              <SelectItem value="three">3 Guests</SelectItem>
+                              {Array.from(
+                                { length: offer.property.maxNumGuests },
+                                (_, index) => (
+                                  <SelectItem
+                                    key={index + 1}
+                                    value={`${index + 1}`}
+                                  >
+                                    {index + 1}
+                                  </SelectItem>
+                                ),
+                              )}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
