@@ -182,7 +182,7 @@ export const offersRouter = createTRPCRouter({
             },
           },
         },
-      });
+     });
     }),
 
   makePublic: roleRestrictedProcedure(["admin", "host"])
