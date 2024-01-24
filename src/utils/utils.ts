@@ -1,7 +1,7 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { format, isSameMonth, isSameYear } from "date-fns";
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { clsx, type ClassValue } from "clsx";
+import { format, isSameMonth, isSameYear } from "date-fns";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -85,6 +85,28 @@ export function formatDateRange(from: Date, to?: Date) {
     return `${format(from, "MMM d")} – ${format(to, "MMM d, yyyy")}`;
   }
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
+}
+
+export function formatDateMonthDay(date: Date) {
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const month = monthNames[date.getMonth()];
+  const day = date.getDay();
+
+  return `${month} ${day}`;
 }
 
 export function formatDateRangeFromStrs(from: string, to?: string) {

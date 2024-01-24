@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import type { OfferDetailType } from "@/types";
 import { api } from "@/utils/api";
-import { formatCurrency } from "@/utils/utils";
+import { cn, formatCurrency, formatDateMonthDay } from "@/utils/utils";
 import { StarIcon } from "lucide-react";
 import Head from "next/head";
 import Image from "next/image";
@@ -94,6 +94,8 @@ export default function Listings() {
     id: offerId,
   });
 
+  const imagesLength = offer?.property.imageUrls.length;
+
   return (
     <>
       <Head>
@@ -118,25 +120,33 @@ export default function Listings() {
                 Original Price: ${offer.property.originalNightlyPrice}/night
               </s>
             </div>
-            <div className="mb-4 grid grid-cols-2 gap-4">
-              <div className="relative overflow-clip rounded-xl">
+            <div
+              className={cn(
+                imagesLength === 1 ? "grid-cols-1" : "grid-cols-2 ",
+                "mb-4 grid  gap-4",
+              )}
+            >
+              <div className="relative h-[350px] w-full overflow-clip rounded-xl">
                 <Image
                   src={offer.property.imageUrls?.[0] ?? "default"}
-                  alt=""
-                  className="inset-0 border object-cover object-center"
-                  width={616}
-                  height={521}
+                  alt="airbnb image"
+                  objectFit="cover"
+                  fill
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div
+                className={cn(
+                  imagesLength === 2 ? "grid-cols-1" : "grid-cols-2",
+                  "grid gap-4",
+                )}
+              >
                 {offer.property.imageUrls?.slice(1).map((url, idx) => (
                   <div className="relative overflow-clip rounded-xl" key={idx}>
                     <Image
                       src={url}
-                      alt=""
-                      className="inset-0 border object-cover object-center"
-                      width={271}
-                      height={255}
+                      alt="airbnb image"
+                      objectFit="cover"
+                      fill
                     />
                   </div>
                 ))}
@@ -217,16 +227,15 @@ export default function Listings() {
                     <div className="my-6 grid grid-cols-2 rounded-xl border border-slate-300">
                       <div className="col-span-1 border border-slate-300 p-4">
                         Check-in
-                        {/* <p>{offer.checkIn}</p> */}
                         <p className="text-xl font-bold text-zinc-800">
-                          November 25 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          {formatDateMonthDay(offer.request.checkIn)}
                         </p>
                       </div>
                       <div className="col-span-1 border border-slate-300 p-4">
                         Check-out
                         {/* <p>{offer.checkOut}</p> */}
                         <p className="text-xl font-bold text-zinc-800">
-                          November 28
+                          {formatDateMonthDay(offer.request.checkOut)}
                         </p>
                       </div>
                       <div className="col-span-2 border border-slate-300 p-4">
