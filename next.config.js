@@ -41,6 +41,9 @@ const config = {
       },
     ],
   },
+  experimental: {
+    scrollRestoration: true,
+  },
 };
 
 export default withHydrationOverlay()(config);
