@@ -7,6 +7,7 @@
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
 import UserAvatar from "@/components/_common/UserAvatar";
+import EmailIcon from "@/components/_icons/EmailIcon";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -189,18 +190,20 @@ export default function Listings() {
                         {offer.property.numRatings} Reviews
                       </p>
                     </div>
-                    {/* {offer.verified ? <IdentityVerifiedIcon /> : null}
-                    {offer.superHost ? <SuperHostIcon /> : null} */}
+                    {/* // TODO: get the host and is verified */}
+                    {/* {offer.verified ? <IdentityVerifiedIcon /> : null} */}
+                    {/* {offer.superHost ? <SuperHostIcon /> : null} */}
                   </div>
                   <Button
                     variant="outline"
                     className="mt-2 gap-2 border-zinc-500 text-zinc-800 sm:w-fit"
                   >
-                    {/* <EmailIcon /> Contact Host */}
+                    <EmailIcon /> Contact Host
                   </Button>
                 </div>
                 <Divider />
-                {/** About this property */}
+
+                {/* * About this property */}
                 <>
                   <h2 className="text-zinc-1000 mb-4 text-2xl font-semibold">
                     About this property
