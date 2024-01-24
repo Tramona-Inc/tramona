@@ -151,9 +151,6 @@ export default function HostWelcome() {
               <span className="bg-[#FCD34D]"> less vacancies.</span> Increasing
               your month over month profit
             </p>
-            <div className="text-lg font-bold underline underline-offset-2">
-              Learn more
-            </div>
           </div>
           <span className="hidden w-4/12 p-10 lg:block xl:p-20">
             <SqwiggleIcon />
@@ -183,9 +180,6 @@ export default function HostWelcome() {
                 <span className="bg-[#C4B5FD]">host first approach.</span> Our
                 goal is to make sure your property is always booked.
               </p>
-              <div className="text-lg font-bold underline underline-offset-2">
-                Learn more
-              </div>
             </div>
           </div>
 
