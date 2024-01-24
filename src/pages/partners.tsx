@@ -144,9 +144,12 @@ export default function Page() {
               that, we have created one of the most generous partnership
               programs.
             </p>
-            <Button variant="darkPrimary" size="lg">
+            <Link
+              href="/signup"
+              className={buttonVariants({ variant: "darkPrimary", size: "lg" })}
+            >
               Sign Up Now
-            </Button>
+            </Link>
           </div>
           <div className="py-10 md:py-5">
             <Image
@@ -289,7 +292,7 @@ export default function Page() {
           <div className="space-y-10">
             <ExploreEarningsCard />
             <Link
-              href=""
+              href="/profile"
               className={buttonVariants({
                 variant: "default",
                 size: "lg",
