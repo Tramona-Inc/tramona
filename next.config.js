@@ -1,5 +1,3 @@
-import { withHydrationOverlay } from "@builder.io/react-hydration-overlay/next";
-
 /**
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
  * for Docker builds.
@@ -19,6 +17,28 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "a0.muscache.com",
+        port: "",
+        pathname: "/im/pictures/**",
+      },
+      {
+        // protocol: "https",
+        hostname: "archziner.com",
+        // port: "",
+        // pathname: "/im/pictures/**",
+      },
+
+      {
+        hostname: "www.iwantthatdoor.com",
+        // port: "",
+        // pathname: "/im/pictures/**",
+      },
+    ],
+  },
 };
 
-export default withHydrationOverlay()(config);
+export default config;

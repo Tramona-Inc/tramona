@@ -1,30 +1,34 @@
 import {
   createTRPCRouter,
   protectedProcedure,
+  publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
-import { offers, referralCodes, requests } from "@/server/db/schema";
-import { formatArrayToString } from "@/utils/utils";
+import {
+  offerInsertSchema,
+  offerSelectSchema,
+  offers,
+  properties,
+  referralCodes,
+  requestSelectSchema,
+  requests,
+} from "@/server/db/schema";
+
 import { TRPCError } from "@trpc/server";
-import { eq, sql } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
-    .input(createSelectSchema(offers).pick({ id: true }))
+    .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const offerDetails = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
         columns: { totalPrice: true },
         with: {
           request: {
-            columns: {
-              id: true,
-            },
+            columns: { id: true },
             with: {
-              madeByUser: {
-                columns: { id: true },
-              },
+              madeByUser: { columns: { id: true } },
             },
           },
         },
@@ -52,6 +56,12 @@ export const offersRouter = createTRPCRouter({
             .set({ resolvedAt: new Date() })
             .where(eq(offers.id, offerDetails.request.id)),
 
+          // mark the offer as accepted
+          tx
+            .update(offers)
+            .set({ acceptedAt: new Date() })
+            .where(eq(offers.id, input.id)),
+
           // update referralCode
           ctx.user.referralCodeUsed &&
             tx
@@ -71,58 +81,15 @@ export const offersRouter = createTRPCRouter({
     }),
 
   getByRequestId: protectedProcedure
-    .input(createSelectSchema(requests).pick({ id: true }))
+    .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      const requestDetails = await ctx.db.query.requests.findFirst({
-        where: eq(requests.id, input.id),
-        columns: {},
-        with: {
-          madeByUser: {
-            columns: { id: true },
-          },
-        },
-      });
-
-      if (requestDetails?.madeByUser?.id !== ctx.user.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-        });
-      }
-
-      const offersForRequest = await ctx.db.query.offers.findMany({
-        where: eq(offers.id, input.id),
-        columns: {
-          createdAt: true,
-        },
-        with: {
-          property: {
-            with: {
-              host: true,
-            },
-          },
-        },
-      });
-
-      return offersForRequest;
-    }),
-
-  create: roleRestrictedProcedure(["admin", "host"])
-    .input(createInsertSchema(offers))
-    .mutation(async ({ ctx, input }) => {
       const requestPromise = ctx.db.query.requests.findFirst({
-        where: eq(offers.requestId, input.requestId),
+        where: eq(requests.id, input.id),
       });
 
-      const propertyPromise = ctx.db.query.properties.findFirst({
-        where: eq(offers.propertyId, input.propertyId),
-      });
+      const request = await requestPromise;
 
-      const [request, property] = await Promise.all([
-        requestPromise,
-        propertyPromise,
-      ]);
-
-      // request must exist,
+      // request must exist
       if (!request) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -130,85 +97,122 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
-      // ...be unresolved,
-      if (request?.resolvedAt) {
+      return await ctx.db.query.offers.findMany({
+        where: eq(offers.requestId, input.id),
+      });
+    }),
+
+  getByRequestIdWithProperty: protectedProcedure
+    .input(requestSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const request = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+      });
+
+      // request must exist
+      if (!request) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "That request was already resolved",
+          message: "That request doesn't exist",
         });
       }
 
-      // ...host must own property (or its an admin),
-      if (ctx.user.role === "host" && property?.hostId !== ctx.user.id) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+      return await ctx.db.query.offers.findMany({
+        where: eq(offers.requestId, input.id),
+        columns: {
+          createdAt: true,
+          totalPrice: true,
+          id: true,
+        },
+        with: {
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
+    }),
 
-      // ...and the property must fulfill the request
-      const notEnoughSpace =
-        property?.maxNumGuests != null &&
-        request.numGuests > property.maxNumGuests;
-
-      const tooFewBeds =
-        request.minNumBeds != null &&
-        property?.numBeds != null &&
-        request.minNumBeds < property.numBeds;
-
-      const tooFewBedrooms =
-        request.minNumBedrooms != null &&
-        property?.numBedrooms != null &&
-        request.minNumBedrooms < property.numBedrooms;
-
-      const wrongPropertyType =
-        request.propertyType != null &&
-        property?.propertyType != null &&
-        request.propertyType !== property.propertyType;
-
-      const tooExpensive = input.totalPrice > request.maxTotalPrice;
-
-      if (notEnoughSpace || tooFewBeds || tooFewBedrooms || wrongPropertyType) {
-        const messagesMap = [
-          ["doesn't accomodate enough guests", notEnoughSpace],
-          ["doesn't have enough beds", tooFewBeds],
-          ["doesn't have enough bedrooms", tooFewBedrooms],
-          ["is the wrong type", wrongPropertyType],
-          ["is too expensive", tooExpensive],
-        ] as const;
-
-        const errorMessage = formatArrayToString(
-          messagesMap.filter((x) => x[1]).map((x) => x[0]),
-        );
-
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `That property ${errorMessage}`,
+  makePublic: roleRestrictedProcedure(["admin", "host"])
+    .input(offerSelectSchema.pick({ id: true }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role === "host") {
+        const offer = await ctx.db.query.offers.findFirst({
+          where: eq(offers.id, input.id),
+          columns: {},
+          with: {
+            property: { columns: { hostId: true } },
+          },
         });
+
+        if (offer?.property.hostId !== ctx.user.id) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
       }
 
-      // yay
+      await ctx.db
+        .update(offers)
+        .set({ madePublicAt: new Date() })
+        .where(eq(offers.id, input.id));
+    }),
+
+  getAllPublicOffers: publicProcedure.query(async ({ ctx }) => {
+    return (
+      await ctx.db.query.offers.findMany({
+        where: and(
+          isNull(offers.acceptedAt),
+          lt(offers.madePublicAt, new Date()),
+        ),
+        columns: { acceptedAt: false },
+        with: {
+          property: {
+            with: {
+              host: { columns: { name: true, email: true, image: true } },
+            },
+          },
+          request: { columns: { checkIn: true, checkOut: true } },
+        },
+        orderBy: desc(offers.madePublicAt),
+      })
+    ).map((offer) => ({
+      ...offer,
+      madePublicAt: offer.madePublicAt ?? new Date(), // will never be null, just fixes types
+    }));
+  }),
+
+  create: roleRestrictedProcedure(["admin", "host"])
+    .input(offerInsertSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role === "host") {
+        const property = await ctx.db.query.properties.findFirst({
+          where: eq(properties.id, input.propertyId),
+          columns: { hostId: true },
+        });
+
+        if (ctx.user.role === "host" && property?.hostId !== ctx.user.id) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+      }
+
       await ctx.db.insert(offers).values(input);
     }),
 
   delete: roleRestrictedProcedure(["admin", "host"])
-    .input(
-      createSelectSchema(offers).pick({
-        id: true,
-      }),
-    )
+    .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "host") {
         const request = await ctx.db.query.offers.findFirst({
           where: eq(offers.id, input.id),
           columns: {},
           with: {
-            property: {
-              columns: {
-                hostId: true,
-              },
-            },
+            property: { columns: { hostId: true } },
           },
         });
 
-        if (request?.property?.hostId !== ctx.user.id) {
+        if (request?.property.hostId !== ctx.user.id) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }

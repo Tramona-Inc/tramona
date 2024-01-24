@@ -11,13 +11,18 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
-export const propertyTypeEnum = pgEnum("property_type", [
+export const ALL_PROPERTY_TYPES = [
   "house",
   "guesthouse",
   "apartment",
   "room",
-]);
+  "townhouse",
+] as const;
+
+export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
 
 export const properties = pgTable(
   "properties",
@@ -38,7 +43,7 @@ export const properties = pgTable(
     airbnbUrl: varchar("airbnb_url").notNull(),
     imageUrls: varchar("image_url").array().notNull(),
     propertyType: propertyTypeEnum("property_type").notNull(),
-    originalPrice: integer("original_price"), // in cents
+    originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
@@ -47,3 +52,16 @@ export const properties = pgTable(
 );
 
 export type Property = typeof properties.$inferSelect;
+export const propertySelectSchema = createSelectSchema(properties);
+
+export const propertyInsertSchema = createInsertSchema(properties, {
+  imageUrls: z.array(z.string().url({ message: "Please enter a valid URL." })),
+});
+export const propertyInsertFormSchema = createInsertSchema(properties, {
+  imageUrls: z.array(
+    z.object({
+      value: z.string().url({ message: "Please enter a valid URL." }),
+    }),
+  ),
+  airbnbUrl: z.string().url(),
+});

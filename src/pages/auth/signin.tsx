@@ -1,19 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // https://next-auth.js.org/configuration/pages
 
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import { getProviders, signIn } from "next-auth/react";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/server/auth";
-import Link from "next/link";
-import Image from "next/image";
-import * as z from "zod";
-import { useRouter } from "next/router";
-import { Input } from "@/components/ui/input";
-import Icons from "@/components/ui/icons";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -22,11 +10,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
+import Icons from "@/components/ui/icons";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import MainLayout from "@/components/layouts/MainLayout";
+import { authOptions } from "@/server/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type {
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+} from "next";
+import { getServerSession } from "next-auth/next";
+import { getProviders, signIn } from "next-auth/react";
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 const formSchema = z
   .object({
@@ -56,7 +56,10 @@ export default function SignIn({
   }
 
   return (
-    <MainLayout pageTitle="Sign in">
+    <>
+      <Head>
+        <title>Sign in | Tramona</title>
+      </Head>
       <div className="flex h-screen items-stretch">
         <div className="grid flex-1 place-items-center p-4">
           <div className="w-[20rem] space-y-4">
@@ -97,17 +100,24 @@ export default function SignIn({
                 </Form>
               </div>
 
-              <div className="my-5">
+              <div className="my-5 flex flex-row gap-5">
                 {providers &&
-                  Object.values(providers).map((provider) => {
-                    return (
-                      <div key={provider.name}>
-                        <button onClick={() => signIn(provider.id)}>
-                          {provider.name && <Icons iconName={provider.name} />}
-                        </button>
-                      </div>
-                    );
-                  })}
+                  Object.values(providers)
+                    .slice(1) // remove the email provider
+                    .map((provider) => {
+                      return (
+                        <div key={provider.name}>
+                          <Button
+                            variant={"ghost"}
+                            onClick={() => signIn(provider.id)}
+                          >
+                            {provider.name && (
+                              <Icons iconName={provider.name} />
+                            )}
+                          </Button>
+                        </div>
+                      );
+                    })}
               </div>
             </section>
           </div>
@@ -122,7 +132,7 @@ export default function SignIn({
           />
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }
 

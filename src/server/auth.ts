@@ -5,6 +5,7 @@ import {
   getServerSession,
 } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -36,29 +37,8 @@ export const authOptions: NextAuthOptions = {
     session: ({ session, user }) => {
       return { ...session, user };
     },
-    // TODO: generate code when on new user is created (Maybe generate only when sharing the code)
-    // async signIn({ user }) {
-    //   const newReferralCode = generateReferralCode(); // Implement your logic to generate a new referral code
-
-    //   if (user) {
-    //     const result = await db.query.referralCodes.findMany({
-    //       where: (referralCodes, { eq }) => eq(referralCodes.ownerId, user.id),
-    //     });
-
-    //     if (!result || result.length === 0) {
-    //       // If result is null or empty, generate a new row
-    //       await db.insert(referralCodes).values({
-    //         referral_code: newReferralCode,
-    //         ownerId: user.id,
-    //       });
-    //     }
-    //   }
-
-    //   return Promise.resolve(true);
-    // },
   },
-  // adapter: DrizzleAdapter(db, pgTable) as Adapter,
-  adapter: CustomPgDrizzleAdapter(db), // New custom adapter
+  adapter: CustomPgDrizzleAdapter(db), // custom adapter
   providers: [
     // DiscordProvider({
     //   clientId: env.DISCORD_CLIENT_ID,
@@ -89,6 +69,10 @@ export const authOptions: NextAuthOptions = {
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
     }),
+    GoogleProvider({
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
   ],
   pages: {
     signIn: "/auth/signin",
@@ -103,9 +87,8 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+export async function getServerAuthSession(
+  ctx: Pick<GetServerSidePropsContext, "req" | "res">,
+) {
+  return await getServerSession(ctx.req, ctx.res, authOptions);
+}
