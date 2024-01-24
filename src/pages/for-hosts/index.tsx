@@ -1,3 +1,7 @@
+import { useState } from "react";
+import Head from "next/head";
+import Image from "next/image";
+
 import FeedLanding from "@/components/landing-page/FeedLanding";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +13,8 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/utils/utils";
 import Autoplay, { type AutoplayOptionsType } from "embla-carousel-autoplay";
-import Head from "next/head";
-import Image from "next/image";
-import { useState } from "react";
+import PinkStarIcon from "@/components/_icons/PinkStarIcon";
+import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
 
 type Tabs = {
   id: number;
@@ -87,13 +90,9 @@ export default function HostWelcome() {
               Tramona is a travel service built specifically to decrease your
               vacancies
             </div>
-            <Image
-              src="/assets/images/star.png"
-              width={100}
-              height={100}
-              alt={"Star"}
-              className="absolute -right-10 -top-10 max-md:h-20 max-md:w-20 md:-right-12 md:-top-12 "
-            />
+            <span className="absolute -right-10 -top-10 max-md:size-20 md:-right-10 md:-top-10">
+              <PinkStarIcon />
+            </span>
           </div>
         </div>
       </div>
@@ -146,20 +145,16 @@ export default function HostWelcome() {
             </h3>
             <p className="text-2xl font-bold md:text-4xl">
               Just like that you now have{" "}
-              <span className="bg-[#FCD34D]"> less vacancies. </span>
-              Increasing your month over month profit
+              <span className="bg-[#FCD34D]"> less vacancies.</span> Increasing
+              your month over month profit
             </p>
             <div className="text-lg font-bold underline underline-offset-2">
               Learn more
             </div>
           </div>
-          <Image
-            src="/assets/images/sqwiggly.png"
-            width={4000}
-            height={4000}
-            alt={"sqwiggle"}
-            className="hidden w-4/12 p-10 lg:block xl:p-20"
-          />
+          <span className="hidden w-4/12 p-10 lg:block xl:p-20">
+            <SqwiggleIcon />
+          </span>
           <div className="flex w-4/12 justify-center pt-10 md:pt-0">
             <Button
               variant="outline"
