@@ -40,7 +40,6 @@ export default function SignIn({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  console.log(providers);
 
   const { query } = useRouter();
 
@@ -148,7 +147,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   const providers = await getProviders();
-  console.log(providers);
 
   return {
     props: { providers: providers ?? [] },
