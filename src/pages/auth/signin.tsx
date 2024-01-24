@@ -40,6 +40,7 @@ export default function SignIn({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+  console.log(providers);
 
   const { query } = useRouter();
 
