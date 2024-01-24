@@ -10,8 +10,12 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    DEV_URL: z.string().url(),
-    PROD_URL: z.string().url(),
+
+    NEXTAUTH_SECRET:
+      process.env.NODE_ENV === "production"
+        ? z.string()
+        : z.string().optional(),
+    NEXTAUTH_URL: z.string().url(),
 
     DATABASE_URL: z
       .string()
@@ -20,18 +24,6 @@ export const env = createEnv({
         (str) => !str.includes("YOUR_POSTGRESQL_URL_HERE"),
         "You forgot to change the default URL",
       ),
-
-    NEXTAUTH_SECRET:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().optional(),
-    NEXTAUTH_URL: z.preprocess(
-      () =>
-        process.env.NODE_ENV === "development"
-          ? process.env.DEV_URL
-          : process.env.PROD_URL,
-      z.string().url(),
-    ),
 
     SMTP_USER: z.string(),
     SMTP_PASSWORD: z.string(),
@@ -61,12 +53,10 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
-    DEV_URL: process.env.DEV_URL,
-    PROD_URL: process.env.PROD_URL,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 
     DATABASE_URL: process.env.DATABASE_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     SMTP_USER: process.env.SMTP_USER,
