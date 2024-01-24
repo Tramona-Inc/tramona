@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 import FeedLanding from "@/components/landing-page/FeedLanding";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,9 @@ export default function HostWelcome() {
     }, 500);
   };
 
+  // Handle navigation
+  const router = useRouter();
+
   return (
     <>
       <Head>
@@ -80,7 +84,6 @@ export default function HostWelcome() {
               TRAMONA HOST
             </h3>
             <h1 className="text-4xl font-extrabold md:text-5xl lg:text-7xl">
-              {" "}
               Welcome Hosts!
             </h1>
           </div>
@@ -158,6 +161,7 @@ export default function HostWelcome() {
           <div className="flex w-4/12 justify-center pt-10 md:pt-0">
             <Button
               variant="outline"
+              onClick={() => router.push("/signup")}
               className=" border border-black  bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl"
             >
               Sign Up Now
@@ -214,6 +218,7 @@ export default function HostWelcome() {
             <div className="md:self-start">
               <Button
                 variant="outline"
+                onClick={() => router.push("/feed")}
                 className=" border bg-[#2563EB] px-16 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-xl lg:px-20 lg:py-7"
               >
                 Learn More
@@ -253,7 +258,7 @@ export default function HostWelcome() {
           <div className="flex-row-3 flex space-x-10 lg:space-x-32">
             {contents.map((content) => (
               <div
-                className="w-1/3 md:space-y-16 lg:space-y-20 xl:space-y-10"
+                className="w-1/3 hover:cursor-pointer md:space-y-16 lg:space-y-20 xl:space-y-10"
                 key={content.id}
                 onClick={() => handleTabChange(content)}
               >
@@ -293,7 +298,7 @@ export default function HostWelcome() {
           className="w-full md:hidden"
           plugins={[
             Autoplay({
-              delay: 2000,
+              delay: 5000,
             } as AutoplayOptionsType),
           ]}
         >
@@ -344,6 +349,7 @@ export default function HostWelcome() {
         </h2>
         <Button
           variant="outline"
+          onClick={() => router.push("/profile")}
           className=" border bg-[#2563EB] px-12 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-2xl"
         >
           Invite your friends
