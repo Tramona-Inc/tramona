@@ -1,4 +1,7 @@
-import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
+import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
@@ -6,16 +9,13 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { getFmtdFilters } from "@/utils/formatters";
-import { getRequestStatus, type RequestWithDetails } from "../utils";
+import Image from "next/image";
 
 export default function LargeRequestCard({
   request,
 }: {
-  request: RequestWithDetails | undefined;
+  request: DetailedRequest | undefined;
 }) {
   if (!request) {
     return <Card size="lg" className="h-64" />;
@@ -71,7 +71,7 @@ export default function LargeRequestCard({
   );
 }
 
-function LargeRequestCardBadge({ request }: { request: RequestWithDetails }) {
+function LargeRequestCardBadge({ request }: { request: DetailedRequest }) {
   switch (getRequestStatus(request)) {
     case "pending":
       const msAgo = Date.now() - request.createdAt.getTime();

@@ -1,4 +1,5 @@
-import Image from "next/image";
+import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
+import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
@@ -6,16 +7,15 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { Badge } from "../ui/badge";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
+import Image from "next/image";
+import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import { getFmtdFilters } from "@/utils/formatters";
-import { type RequestWithDetails, getRequestStatus } from "./utils";
 
 export default function RequestCard({
   request,
   children,
-}: React.PropsWithChildren<{ request: RequestWithDetails }>) {
+}: React.PropsWithChildren<{ request: DetailedRequest }>) {
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
@@ -67,7 +67,7 @@ export default function RequestCard({
   );
 }
 
-function RequestCardBadge({ request }: { request: RequestWithDetails }) {
+function RequestCardBadge({ request }: { request: DetailedRequest }) {
   switch (getRequestStatus(request)) {
     case "pending":
       const msAgo = Date.now() - request.createdAt.getTime();

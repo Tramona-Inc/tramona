@@ -1,7 +1,7 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { format, isSameMonth, isSameYear } from "date-fns";
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { clsx, type ClassValue } from "clsx";
+import { format, isSameMonth, isSameYear } from "date-fns";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -138,4 +138,21 @@ export async function retry<T>(f: Promise<T>, numRetries: number) {
       });
     } catch (err) {}
   }
+}
+
+export function group<T, K extends PropertyKey>(
+  arr: T[],
+  getGroup: (item: T) => K,
+) {
+  return arr.reduce(
+    (groups, item) => {
+      const group = getGroup(item);
+      if (!groups[group]) {
+        groups[group] = [];
+      }
+      groups[group].push(item);
+      return groups;
+    },
+    {} as Record<K, T[]>,
+  );
 }
