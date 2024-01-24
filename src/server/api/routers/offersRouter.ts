@@ -13,7 +13,7 @@ import {
   requestSelectSchema,
   requests,
 } from "@/server/db/schema";
-// import { formatArrayToString } from "@/utils/utils";
+
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 
@@ -26,13 +26,9 @@ export const offersRouter = createTRPCRouter({
         columns: { totalPrice: true },
         with: {
           request: {
-            columns: {
-              id: true,
-            },
+            columns: { id: true },
             with: {
-              madeByUser: {
-                columns: { id: true },
-              },
+              madeByUser: { columns: { id: true } },
             },
           },
         },
@@ -109,11 +105,9 @@ export const offersRouter = createTRPCRouter({
   getByRequestIdWithProperty: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      const requestPromise = ctx.db.query.requests.findFirst({
+      const request = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.id),
       });
-
-      const request = await requestPromise;
 
       // request must exist
       if (!request) {
@@ -146,22 +140,15 @@ export const offersRouter = createTRPCRouter({
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "host") {
-        const request = await ctx.db.query.offers.findFirst({
+        const offer = await ctx.db.query.offers.findFirst({
           where: eq(offers.id, input.id),
           columns: {},
           with: {
-            property: {
-              columns: {
-                hostId: true,
-              },
-            },
+            property: { columns: { hostId: true } },
           },
         });
 
-        if (
-          ctx.user.role === "host" &&
-          request?.property.hostId !== ctx.user.id
-        ) {
+        if (offer?.property.hostId !== ctx.user.id) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
@@ -199,84 +186,17 @@ export const offersRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
     .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {
-      const requestPromise = ctx.db.query.requests.findFirst({
-        where: eq(requests.id, input.requestId),
-      });
+      if (ctx.user.role === "host") {
+        const property = await ctx.db.query.properties.findFirst({
+          where: eq(properties.id, input.propertyId),
+          columns: { hostId: true },
+        });
 
-      const propertyPromise = ctx.db.query.properties.findFirst({
-        where: eq(properties.id, input.propertyId),
-      });
+        if (ctx.user.role === "host" && property?.hostId !== ctx.user.id) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+      }
 
-      const [request, property] = await Promise.all([
-        requestPromise,
-        propertyPromise,
-      ]);
-
-      // TODO
-
-      // // request must exist,
-      // if (!request) {
-      //   throw new TRPCError({
-      //     code: "BAD_REQUEST",
-      //     message: "That request doesn't exist",
-      //   });
-      // }
-
-      // // ...be unresolved,
-      // if (request?.resolvedAt) {
-      //   throw new TRPCError({
-      //     code: "BAD_REQUEST",
-      //     message: "That request was already resolved",
-      //   });
-      // }
-
-      // // ...host must own property (or its an admin),
-      // if (ctx.user.role === "host" && property?.hostId !== ctx.user.id) {
-      //   throw new TRPCError({ code: "UNAUTHORIZED" });
-      // }
-
-      // // ...and the property must fulfill the request
-      // const notEnoughSpace =
-      //   property?.maxNumGuests != null &&
-      //   request.numGuests > property.maxNumGuests;
-
-      // const tooFewBeds =
-      //   request.minNumBeds != null &&
-      //   property?.numBeds != null &&
-      //   request.minNumBeds < property.numBeds;
-
-      // const tooFewBedrooms =
-      //   request.minNumBedrooms != null &&
-      //   property?.numBedrooms != null &&
-      //   request.minNumBedrooms < property.numBedrooms;
-
-      // const wrongPropertyType =
-      //   request.propertyType != null &&
-      //   property?.propertyType != null &&
-      //   request.propertyType !== property.propertyType;
-
-      // const tooExpensive = input.totalPrice > request.maxTotalPrice;
-
-      // if (notEnoughSpace || tooFewBeds || tooFewBedrooms || wrongPropertyType) {
-      //   const messagesMap = [
-      //     ["doesn't accomodate enough guests", notEnoughSpace],
-      //     ["doesn't have enough beds", tooFewBeds],
-      //     ["doesn't have enough bedrooms", tooFewBedrooms],
-      //     ["is the wrong type", wrongPropertyType],
-      //     ["is too expensive", tooExpensive],
-      //   ] as const;
-
-      //   const errorMessage = formatArrayToString(
-      //     messagesMap.filter((x) => x[1]).map((x) => x[0]),
-      //   );
-
-      //   throw new TRPCError({
-      //     code: "BAD_REQUEST",
-      //     message: `That property ${errorMessage}`,
-      //   });
-      // }
-
-      // yay
       await ctx.db.insert(offers).values(input);
     }),
 
@@ -288,18 +208,11 @@ export const offersRouter = createTRPCRouter({
           where: eq(offers.id, input.id),
           columns: {},
           with: {
-            property: {
-              columns: {
-                hostId: true,
-              },
-            },
+            property: { columns: { hostId: true } },
           },
         });
 
-        if (
-          ctx.user.role === "host" &&
-          request?.property.hostId !== ctx.user.id
-        ) {
+        if (request?.property.hostId !== ctx.user.id) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
