@@ -1,8 +1,5 @@
-import MainLayout from "@/components/_common/MainLayout";
-import React, { useState } from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import FeedLanding from "@/components/landing-page/FeedLanding";
+import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -13,6 +10,8 @@ import {
 import { cn } from "@/utils/utils";
 import Autoplay, { type AutoplayOptionsType } from "embla-carousel-autoplay";
 import Head from "next/head";
+import Image from "next/image";
+import { useState } from "react";
 
 type Tabs = {
   id: number;
