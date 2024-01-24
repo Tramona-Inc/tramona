@@ -3,7 +3,7 @@ import RequestCard from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
-import { HistoryIcon, Loader2Icon, TagIcon } from "lucide-react";
+import { HistoryIcon, InboxIcon, Loader2Icon } from "lucide-react";
 
 function AdminRequestCards({
   requests,
@@ -35,7 +35,7 @@ export default function AdminRequestsTabs() {
           value="activeRequests"
           count={requests?.activeRequests.length ?? "blank"}
         >
-          <TagIcon /> Incoming Requests
+          <InboxIcon /> Incoming Requests
         </TabsTrigger>
         <TabsTrigger
           value="inactiveRequests"
