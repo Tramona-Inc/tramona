@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.3.14
     version: 0.3.14(nodemailer@6.9.8)
   '@builder.io/react-hydration-overlay':
-    specifier: ^0.0.7
-    version: 0.0.7(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0)
+    specifier: ^0.0.8
+    version: 0.0.8(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0)
   '@hookform/resolvers':
     specifier: ^3.3.4
     version: 3.3.4(react-hook-form@7.49.3)
@@ -108,8 +108,8 @@ dependencies:
     specifier: ^0.5.1
     version: 0.5.1(drizzle-orm@0.29.3)(zod@3.22.4)
   embla-carousel-react:
-    specifier: 8.0.0-rc19
-    version: 8.0.0-rc19(react@18.2.0)
+    specifier: 8.0.0-rc20
+    version: 8.0.0-rc20(react@18.2.0)
   lucide-react:
     specifier: ^0.314.0
     version: 0.314.0(react@18.2.0)
@@ -221,8 +221,8 @@ devDependencies:
     specifier: ^0.20.13
     version: 0.20.13
   embla-carousel:
-    specifier: 8.0.0-rc19
-    version: 8.0.0-rc19
+    specifier: 8.0.0-rc20
+    version: 8.0.0-rc20
   eslint:
     specifier: ^8.54.0
     version: 8.56.0
@@ -1645,8 +1645,8 @@ packages:
     resolution: {integrity: sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==}
     dev: true
 
-  /@builder.io/react-hydration-overlay@0.0.7(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0):
-    resolution: {integrity: sha512-Ph5/N5WVKBhZeU5uWm+1G+ql62PhJU7odXg2M2Or73wSoXkxa5p04FrGGN6FAKIB47Euj29h8JuewgCxeNwiZw==}
+  /@builder.io/react-hydration-overlay@0.0.8(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0):
+    resolution: {integrity: sha512-iybjiiI3b2Fud9H0LWXrBL0V9v9QZ09GY1UjGM1z3q2lzvXutA4YsK+5yXCoJM1rGDGN43MzVG98NLLFIfB+1Q==}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
@@ -7424,26 +7424,26 @@ packages:
       minimalistic-crypto-utils: 1.0.1
     dev: true
 
-  /embla-carousel-react@8.0.0-rc19(react@18.2.0):
-    resolution: {integrity: sha512-4BBj1HvlUqhWXFyDJOL/JbQ74jtekfdH646B1wQzM9QmWn6CEcbD/SmovKqc6B5jYTKaaGEGEEw7bpUJRajA8w==}
+  /embla-carousel-react@8.0.0-rc20(react@18.2.0):
+    resolution: {integrity: sha512-02xhtl/qd5VQtzRbG3jQKVXy/YzP4J3nxQcJhz7cIY73nK3aPwxoZL+Fjk0VdS5eUIWowRBH5qIv3nVNsqeYZQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.1 || ^18.0.0
     dependencies:
-      embla-carousel: 8.0.0-rc19
-      embla-carousel-reactive-utils: 8.0.0-rc19(embla-carousel@8.0.0-rc19)
+      embla-carousel: 8.0.0-rc20
+      embla-carousel-reactive-utils: 8.0.0-rc20(embla-carousel@8.0.0-rc20)
       react: 18.2.0
     dev: false
 
-  /embla-carousel-reactive-utils@8.0.0-rc19(embla-carousel@8.0.0-rc19):
-    resolution: {integrity: sha512-ed9NppY0OxTtrSIwTCYNcMLlQfSNcNy8Zsw8uIG0te3qrhvQ2ePPsbcElK2SRAV8VMU6G7JQweQIb6amzYMDXA==}
+  /embla-carousel-reactive-utils@8.0.0-rc20(embla-carousel@8.0.0-rc20):
+    resolution: {integrity: sha512-fE7IeSS8HqwDnTDMP8eo0i4pcYQAemmJq53zCLXnp3Yj/p5+IpB1nC7aKQjd2ug1dGOSwwNRFaPI3shlAVVW/A==}
     peerDependencies:
-      embla-carousel: 8.0.0-rc19
+      embla-carousel: 8.0.0-rc20
     dependencies:
-      embla-carousel: 8.0.0-rc19
+      embla-carousel: 8.0.0-rc20
     dev: false
 
-  /embla-carousel@8.0.0-rc19:
-    resolution: {integrity: sha512-PAChVyYoVZo8subkBN8LjZ7+0vk4CmVvMnxH0Y2ux76VUEUBl1wk5xDo8+MUhH5MXU6ZrgkBpMe++bKob1Z+2g==}
+  /embla-carousel@8.0.0-rc20:
+    resolution: {integrity: sha512-fhzhbIAcsjSpUsg5jWsg0+zVyJhY5x2SPXtuS4MPAWQWoVQpvkcbX9r0FvPBn6emTbgNFRtAcWczstJy2msdUw==}
 
   /emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
