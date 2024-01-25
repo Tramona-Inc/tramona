@@ -17,7 +17,19 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, value, defaultValue, prefix, suffix, ...props }, ref) => {
+  (
+    {
+      className,
+      type,
+      value,
+      defaultValue,
+      prefix,
+      suffix,
+      placeholder,
+      ...props
+    },
+    ref,
+  ) => {
     const inputClassNames =
       "flex h-10 w-full rounded-md border border-input bg-primary-foreground py-2 text-sm text-black file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-auto";
 
@@ -73,9 +85,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           value={defaultValue ?? value ?? ""} // removes the need for lots of empty-string defaults for react-hook-form
           autoComplete="off"
+          placeholder={placeholder ?? ""} // so i can use placeholder-shown
           {...props}
         />
-        <div className="pointer-events-none absolute inset-0 hidden items-center justify-between px-3 py-2 peer-focus:flex">
+        <div className="pointer-events-none absolute inset-0 hidden items-center justify-between px-3 py-2 peer-[&:focus]:flex peer-[&:not(:placeholder-shown)]:flex">
           {prefixEl}
           {suffixEl}
         </div>
