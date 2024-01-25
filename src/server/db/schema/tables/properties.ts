@@ -1,18 +1,18 @@
 import {
-  serial,
   doublePrecision,
   integer,
+  pgEnum,
   pgTable,
+  serial,
   smallint,
   text,
   timestamp,
-  varchar,
   unique,
-  pgEnum,
+  varchar,
 } from "drizzle-orm/pg-core";
-import { users } from "./users";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+import { users } from "./users";
 
 export const ALL_PROPERTY_TYPES = [
   "house",
@@ -56,12 +56,4 @@ export const propertySelectSchema = createSelectSchema(properties);
 
 export const propertyInsertSchema = createInsertSchema(properties, {
   imageUrls: z.array(z.string().url({ message: "Please enter a valid URL." })),
-});
-export const propertyInsertFormSchema = createInsertSchema(properties, {
-  imageUrls: z.array(
-    z.object({
-      value: z.string().url({ message: "Please enter a valid URL." }),
-    }),
-  ),
-  airbnbUrl: z.string().url(),
 });

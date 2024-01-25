@@ -12,10 +12,10 @@ import { ALL_PROPERTY_TYPES, type Request } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
 import { capitalize } from "@/utils/utils";
-import { zodInteger, zodNumber, zodString } from "@/utils/zod-utils";
+import { zodInteger, zodNumber, zodString, zodUrl } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TRPCClientError } from "@trpc/client";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import {
   Select,
@@ -32,30 +32,33 @@ export default function AdminOfferForm({
   afterSubmit?: () => void;
   request: Request;
 }) {
-  const formSchema = z
-    .object({
-      propertyName: zodString(),
-      offeredPriceUSD: zodInteger({ min: 1 }),
-      hostName: zodString(),
-      maxNumGuests: zodInteger({ min: 1 }),
-      numBeds: zodInteger({ min: 1 }),
-      numBedrooms: zodInteger({ min: 1 }),
-      propertyType: z.enum(ALL_PROPERTY_TYPES),
-      originalNightlyPrice: zodInteger(), // in cents
-      avgRating: zodNumber({ min: 0, max: 5 }),
-      numRatings: zodInteger({ min: 1 }),
-      airbnbUrl: zodString({ maxLen: Infinity }).url(),
-      imageUrl: zodString({ maxLen: Infinity }).url(),
-    })
-    .refine((data) => data.maxNumGuests >= request.numGuests, {
-      message: `Must accomodate at least ${request.numGuests} guests`,
-      path: ["maxNumGuests"],
-    }); // TODO
+  const formSchema = z.object({
+    propertyName: zodString(),
+    offeredPriceUSD: zodInteger({ min: 1 }),
+    hostName: zodString(),
+    maxNumGuests: zodInteger({ min: 1 }),
+    numBeds: zodInteger({ min: 1 }),
+    numBedrooms: zodInteger({ min: 1 }),
+    propertyType: z.enum(ALL_PROPERTY_TYPES),
+    originalNightlyPrice: zodInteger(), // in cents
+    avgRating: zodNumber({ min: 0, max: 5 }),
+    numRatings: zodInteger({ min: 1 }),
+    airbnbUrl: zodString({ maxLen: Infinity }).url(),
+    imageUrls: z.object({ value: zodUrl() }).array(),
+  });
 
   type FormSchema = z.infer<typeof formSchema>;
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      imageUrls: [{ value: "" }, { value: "" }, { value: "" }],
+    },
+  });
+
+  const imageUrlInputs = useFieldArray({
+    name: "imageUrls",
+    control: form.control,
   });
 
   const propertiesMutation = api.properties.create.useMutation();
@@ -70,7 +73,7 @@ export default function AdminOfferForm({
       ...propertyData,
       name: propertyData.propertyName,
       type: propertyData.propertyType,
-      imageUrls: [propertyData.imageUrl],
+      imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
     };
 
     try {
@@ -295,19 +298,72 @@ export default function AdminOfferForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="imageUrl"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input {...field} inputMode="url" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <FormItem className="col-span-full space-y-1">
+          <FormLabel>Image URLs</FormLabel>
+          <div className="space-y-2 rounded-md border bg-secondary p-2">
+            {imageUrlInputs.fields.map((field, i) => (
+              <FormField
+                control={form.control}
+                key={field.id}
+                name={`imageUrls.${i}.value`} // Update this line
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        inputMode="url"
+                        placeholder={`Image URL ${i + 1} (${
+                          i === 0
+                            ? "primary image"
+                            : i < 3
+                              ? "required"
+                              : "optional"
+                        })`}
+                        onKeyDown={(e) => {
+                          const n = imageUrlInputs.fields.length;
+
+                          switch (e.key) {
+                            case "Enter":
+                              imageUrlInputs.insert(i + 1, {
+                                value: "",
+                              });
+                              e.preventDefault();
+                              break;
+                            case "ArrowDown":
+                              form.setFocus(`imageUrls.${(i + 1) % n}.value`);
+                              break;
+                            case "ArrowUp":
+                              form.setFocus(
+                                `imageUrls.${(i + n - 1) % n}.value`,
+                              );
+                              break;
+                            case "Backspace":
+                              if (n > 3 && e.currentTarget.value === "") {
+                                imageUrlInputs.remove(i);
+                                form.setFocus(
+                                  `imageUrls.${i === n - 1 ? i - 1 : i}.value`,
+                                );
+                              }
+                              break;
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
+            <Button
+              type="button"
+              variant="emptyInput"
+              className="w-full"
+              onClick={() => imageUrlInputs.append({ value: "" })}
+            >
+              Add another image (optional)
+            </Button>
+          </div>
+        </FormItem>
 
         <Button
           disabled={form.formState.isSubmitting}

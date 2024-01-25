@@ -1,17 +1,17 @@
-import * as React from "react";
 import type * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
+import * as React from "react";
 import {
   Controller,
+  FormProvider,
+  useFormContext,
   type ControllerProps,
   type FieldPath,
   type FieldValues,
-  FormProvider,
-  useFormContext,
 } from "react-hook-form";
 
-import { cn } from "@/utils/utils";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/utils/utils";
 
 const Form = FormProvider;
 
@@ -55,7 +55,7 @@ const FormItem = React.forwardRef<
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div ref={ref} className={cn("space-y-1", className)} {...props} />
+      <div ref={ref} className={cn("", className)} {...props} />
     </FormItemContext.Provider>
   );
 });
@@ -157,7 +157,7 @@ const FormMessage = React.forwardRef<
       ref={ref}
       id={formMessageId}
       className={cn(
-        "text-sm font-medium text-destructive transition-all duration-150",
+        "text-sm font-medium text-destructive transition-[height] duration-150",
         body === "" ? "h-0" : "h-4",
         className,
       )}
@@ -170,12 +170,12 @@ const FormMessage = React.forwardRef<
 FormMessage.displayName = "FormMessage";
 
 export {
-  useFormField,
   Form,
-  FormItem,
-  FormLabel,
   FormControl,
   FormDescription,
-  FormMessage,
   FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
 };
