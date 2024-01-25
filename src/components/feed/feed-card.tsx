@@ -6,11 +6,11 @@ import {
 } from "@/components/ui/card";
 
 import { Icons } from "@/components/_icons/icons";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { type AppRouter } from "@/server/api/root";
 import { formatCurrency } from "@/utils/utils";
 import { inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
+import UserAvatar from "../_common/UserAvatar";
 
 export type FeedWithInfo =
   inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
@@ -20,6 +20,8 @@ type Props = {
 };
 
 export default function FeedCard({ offer }: Props) {
+  const name = offer.request.madeByUser.name?.split(" ") ?? [""];
+
   // const lastNameCensored =
   //   name.length > 1 ? "*".repeat(name[1].length) : "******";
 
@@ -28,30 +30,22 @@ export default function FeedCard({ offer }: Props) {
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-2">
           <Link href="/general-profile">
-            <Avatar>
-              <AvatarImage src="" />
-              <AvatarFallback>
-                {/* // TODO: get the request that the user  */}
-                {/* {offer.hostName
-                  .split(" ")
-                  .map((word) => word[0])
-                  .join("")} */}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar name={name[0]} email={undefined} image={undefined} />
           </Link>
 
-          {/* <h1 className="font-bold">{firstName + " " + lastNameCensored}</h1> */}
-          {/* <h1 className="font-bold">{firstName}</h1> */}
+          <h1 className="font-bold">{name[0]}</h1>
+          {/* //TODO: add username */}
           {/* <p className='text-secondary-foreground/60'>@{offers.user.username}</p> */}
         </div>
 
+        {/* // TODO: when offer is accepted display date*/}
         <p className="text-sm text-secondary-foreground/60">
           {/* {offers.posting.date} */}
         </p>
       </CardHeader>
       <CardContent className="space-y-5">
         <h1 className="text-center text-2xl font-bold">
-          {offer.request.madeByUser.name}
+          {offer.property.name}
         </h1>
         <section className="grid h-[175px] grid-cols-2 place-items-center space-x-5">
           {/* Photos */}

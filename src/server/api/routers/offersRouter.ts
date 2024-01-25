@@ -192,7 +192,7 @@ export const offersRouter = createTRPCRouter({
             with: {
               host: { columns: { name: true, email: true, image: true } },
             },
-            columns: { originalNightlyPrice: true },
+            columns: { name: true, originalNightlyPrice: true },
           },
           request: {
             columns: { userId: true, checkIn: true, checkOut: true },
