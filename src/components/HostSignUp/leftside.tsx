@@ -44,38 +44,26 @@ const contents: Reviews[] = [
 ];
 
 export default function Leftside() {
-  const [tab, setTab] = useState<number>(0);
+  const [tab, setTab] = useState<number>(1);
   return (
-    <div className="container flex h-full w-1/3 flex-col justify-center bg-[#4F46E5] text-white ">
+    <div className="flex h-full w-1/3 flex-col justify-center bg-[#4F46E5] p-3 text-white ">
       <div className="flex flex-col space-y-5 py-10 ">
-        <div className=" text-center text-4xl font-bold">
+        <div className=" text-center text-3xl font-bold">
           <h1>Hello 👋</h1>
           <h1>Welcome to Hosting</h1>
         </div>
         <h3 className="text-center text-xl font-light">Let's get you setup.</h3>
       </div>
 
-      <div className="px-20">
+      <div className="px-10">
         {contents.map((content) => (
-          <div key={content.id} className="space-y-10">
+          <div
+            key={content.id}
+            className={cn("space-y-10", content.id === tab ? "" : "hidden")}
+          >
             <div className="space-y-10">
-              <h1
-                className={cn(
-                  "text-2xl font-bold",
-                  content.id === tab ? "" : "hidden",
-                )}
-              >
-                {content.message}
-              </h1>
-
-              <h2
-                className={cn(
-                  "text-lg font-bold italic",
-                  content.id === tab ? "" : "hidden",
-                )}
-              >
-                "{content.quote}"
-              </h2>
+              <h1 className="text-2xl font-bold">{content.message}</h1>
+              <h2 className="text-lg font-bold italic">"{content.quote}"</h2>
             </div>
 
             <div className="flex flex-row">
@@ -90,21 +78,9 @@ export default function Leftside() {
                     className="rounded-circle"
                   /> */}
               <div>
-                <h1
-                  className={cn(
-                    "text-2xl font-bold",
-                    content.id === tab ? "" : "hidden",
-                  )}
-                >
-                  {content.user_name}
-                </h1>
+                <h1 className="text-2xl font-bold">{content.user_name}</h1>
 
-                <h2
-                  className={cn(
-                    "text-xl font-bold italic",
-                    content.id === tab ? "" : "hidden",
-                  )}
-                >
+                <h2 className="text-xl font-bold italic">
                   "{content.user_title}"
                 </h2>
               </div>
