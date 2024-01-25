@@ -1,3 +1,8 @@
+import { useState } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import { useRouter } from "next/router";
+
 import FeedLanding from "@/components/landing-page/FeedLanding";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +14,8 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/utils/utils";
 import Autoplay, { type AutoplayOptionsType } from "embla-carousel-autoplay";
-import Head from "next/head";
-import Image from "next/image";
-import { useState } from "react";
+import PinkStarIcon from "@/components/_icons/PinkStarIcon";
+import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
 
 type Tabs = {
   id: number;
@@ -64,6 +68,9 @@ export default function HostWelcome() {
     }, 500);
   };
 
+  // Handle navigation
+  const router = useRouter();
+
   return (
     <>
       <Head>
@@ -77,7 +84,6 @@ export default function HostWelcome() {
               TRAMONA HOST
             </h3>
             <h1 className="text-4xl font-extrabold md:text-5xl lg:text-7xl">
-              {" "}
               Welcome Hosts!
             </h1>
           </div>
@@ -87,13 +93,9 @@ export default function HostWelcome() {
               Tramona is a travel service built specifically to decrease your
               vacancies
             </div>
-            <Image
-              src="/assets/images/star.png"
-              width={100}
-              height={100}
-              alt={"Star"}
-              className="absolute -right-10 -top-10 max-md:h-20 max-md:w-20 md:-right-12 md:-top-12 "
-            />
+            <span className="absolute -right-10 -top-10 max-md:size-20 md:-right-10 md:-top-10">
+              <PinkStarIcon />
+            </span>
           </div>
         </div>
       </div>
@@ -146,23 +148,17 @@ export default function HostWelcome() {
             </h3>
             <p className="text-2xl font-bold md:text-4xl">
               Just like that you now have{" "}
-              <span className="bg-[#FCD34D]"> less vacancies. </span>
-              Increasing your month over month profit
+              <span className="bg-[#FCD34D]"> less vacancies.</span> Increasing
+              your month over month profit
             </p>
-            <div className="text-lg font-bold underline underline-offset-2">
-              Learn more
-            </div>
           </div>
-          <Image
-            src="/assets/images/sqwiggly.png"
-            width={4000}
-            height={4000}
-            alt={"sqwiggle"}
-            className="hidden w-4/12 p-10 lg:block xl:p-20"
-          />
+          <span className="hidden w-4/12 p-10 lg:block xl:p-20">
+            <SqwiggleIcon />
+          </span>
           <div className="flex w-4/12 justify-center pt-10 md:pt-0">
             <Button
               variant="outline"
+              onClick={() => router.push("/signup")}
               className=" border border-black  bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl"
             >
               Sign Up Now
@@ -184,9 +180,6 @@ export default function HostWelcome() {
                 <span className="bg-[#C4B5FD]">host first approach.</span> Our
                 goal is to make sure your property is always booked.
               </p>
-              <div className="text-lg font-bold underline underline-offset-2">
-                Learn more
-              </div>
             </div>
           </div>
 
@@ -219,6 +212,7 @@ export default function HostWelcome() {
             <div className="md:self-start">
               <Button
                 variant="outline"
+                onClick={() => router.push("/feed")}
                 className=" border bg-[#2563EB] px-16 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-xl lg:px-20 lg:py-7"
               >
                 Learn More
@@ -258,7 +252,7 @@ export default function HostWelcome() {
           <div className="flex-row-3 flex space-x-10 lg:space-x-32">
             {contents.map((content) => (
               <div
-                className="w-1/3 md:space-y-16 lg:space-y-20 xl:space-y-10"
+                className="w-1/3 hover:cursor-pointer md:space-y-16 lg:space-y-20 xl:space-y-10"
                 key={content.id}
                 onClick={() => handleTabChange(content)}
               >
@@ -298,7 +292,7 @@ export default function HostWelcome() {
           className="w-full md:hidden"
           plugins={[
             Autoplay({
-              delay: 2000,
+              delay: 5000,
             } as AutoplayOptionsType),
           ]}
         >
@@ -349,6 +343,7 @@ export default function HostWelcome() {
         </h2>
         <Button
           variant="outline"
+          onClick={() => router.push("/profile")}
           className=" border bg-[#2563EB] px-12 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-2xl"
         >
           Invite your friends
