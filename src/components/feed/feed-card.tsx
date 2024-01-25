@@ -24,7 +24,7 @@ export default function FeedCard({ offer }: Props) {
   //   name.length > 1 ? "*".repeat(name[1].length) : "******";
 
   return (
-    <Card>
+    <Card className="flex flex-col justify-between">
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-2">
           <Link href="/general-profile">
