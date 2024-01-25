@@ -9,6 +9,7 @@ import { Icons } from "@/components/_icons/icons";
 import { type AppRouter } from "@/server/api/root";
 import { formatCurrency } from "@/utils/utils";
 import { inferRouterOutputs } from "@trpc/server";
+import Image from "next/image";
 import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
 
@@ -49,19 +50,29 @@ export default function FeedCard({ offer }: Props) {
         </h1>
         <section className="grid h-[175px] grid-cols-2 place-items-center space-x-5">
           {/* Photos */}
-          <div className="grid grid-cols-2 gap-5">
-            {/* {offer.posting.images_url.map((index, url) => (
-							<div
-								key={`image_${index}_${url}`}
-								className='h-[75px] w-[75px] rounded-lg bg-black'
-							/>
-						))} */}
-
-            <div className="h-[50px] w-[50px] rounded-lg bg-black lg:h-[75px] lg:w-[75px]" />
-            <div className="h-[50px] w-[50px] rounded-lg bg-black lg:h-[75px] lg:w-[75px]" />
-            <div className="h-[50px] w-[50px] rounded-lg bg-black lg:h-[75px] lg:w-[75px]" />
-            <div className="h-[50px] w-[50px] rounded-lg bg-black lg:h-[75px] lg:w-[75px]" />
-          </div>
+          {offer.property.imageUrls.length === 1 ? (
+            <div className="relative h-[170px] w-[170px]">
+              <Image
+                src={offer.property.imageUrls[0] ?? "default"}
+                alt="Single Image"
+                objectFit="cover"
+                layout="fill"
+              />
+            </div>
+          ) : (
+            <div className="grid h-[170px] w-[170px] grid-cols-2 gap-5">
+              {offer.property.imageUrls.map((image, index) => (
+                <div key={image} className="relative">
+                  <Image
+                    src={image}
+                    alt={`${index}`}
+                    objectFit="cover"
+                    layout="fill"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Price */}
           <div className="space-y-5 text-center">
