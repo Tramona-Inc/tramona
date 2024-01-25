@@ -59,33 +59,26 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       </div>
     );
 
-    const normalizedValue = defaultValue ?? value ?? ""; // removes the need for lots of empty-string defaults for react-hook-form
-    const showingPrefixAndSuffix = normalizedValue !== "";
-    const leftIndent = showingPrefixAndSuffix ? prefixWidth ?? 0 : 0;
-    const rightIndent = showingPrefixAndSuffix ? suffixWidth ?? 0 : 0;
-
     return (
       <div className="relative">
         <input
           type={
             type === "password" ? (showingPassword ? "text" : "password") : type
           }
-          className={cn(inputClassNames, className)}
+          className={cn("peer", inputClassNames, className)}
           style={{
-            paddingLeft: 12 + leftIndent,
-            paddingRight: 12 + rightIndent,
+            paddingLeft: 12 + (prefixWidth ?? 0),
+            paddingRight: 12 + (suffixWidth ?? 0),
           }}
           ref={ref}
-          value={normalizedValue}
+          value={defaultValue ?? value ?? ""} // removes the need for lots of empty-string defaults for react-hook-form
           autoComplete="off"
           {...props}
         />
-        {showingPrefixAndSuffix && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-3 py-2">
-            {prefixEl}
-            {suffixEl}
-          </div>
-        )}
+        <div className="pointer-events-none absolute inset-0 hidden items-center justify-between px-3 py-2 peer-focus:flex">
+          {prefixEl}
+          {suffixEl}
+        </div>
       </div>
     );
   },
