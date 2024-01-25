@@ -40,7 +40,7 @@ export default function AdminOfferForm({
     numBeds: zodInteger({ min: 1 }),
     numBedrooms: zodInteger({ min: 1 }),
     propertyType: z.enum(ALL_PROPERTY_TYPES),
-    originalNightlyPrice: zodInteger(), // in cents
+    originalNightlyPriceUSD: zodInteger(),
     avgRating: zodNumber({ min: 0, max: 5 }),
     numRatings: zodInteger({ min: 1 }),
     airbnbUrl: zodString({ maxLen: Infinity }).url(),
@@ -73,6 +73,7 @@ export default function AdminOfferForm({
       ...propertyData,
       name: propertyData.propertyName,
       type: propertyData.propertyType,
+      originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
     };
 
@@ -153,7 +154,7 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
-          name="originalNightlyPrice"
+          name="originalNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Property&apos;s original price (nightly)</FormLabel>

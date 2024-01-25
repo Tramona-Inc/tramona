@@ -156,3 +156,10 @@ export function group<T, K extends PropertyKey>(
     {} as Record<K, T[]>,
   );
 }
+
+export function getDiscountPercentage(
+  originalPrice: number,
+  discountPrice: number,
+) {
+  return Math.round((1 - discountPrice / originalPrice) * 100);
+}

@@ -1,14 +1,19 @@
-import { type inferRouterOutputs } from "@trpc/server";
 import { type AppRouter } from "@/server/api/root";
-import { Button } from "../../../ui/button";
-import PaywallDialog from "../PaywallDialog";
+import {
+  cn,
+  formatCurrency,
+  getDiscountPercentage,
+  getNumNights,
+} from "@/utils/utils";
+import { type inferRouterOutputs } from "@trpc/server";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
 import UserAvatar from "../../../_common/UserAvatar";
-import HowToBookDialog from "./HowToBookDialog";
 import SaleTagIcon from "../../../_icons/SaleTagIcon";
 import { Badge } from "../../../ui/badge";
+import { Button } from "../../../ui/button";
 import { Card, CardFooter } from "../../../ui/card";
-import { cn, formatCurrency } from "@/utils/utils";
+import PaywallDialog from "../PaywallDialog";
+import HowToBookDialog from "./HowToBookDialog";
 
 export type OfferWithProperty =
   inferRouterOutputs<AppRouter>["offers"]["getByRequestIdWithProperty"][number];
@@ -24,6 +29,7 @@ export default function OfferCard({
 }) {
   const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
+  const offerNightlyPrice = offer.totalPrice / getNumNights(checkIn, checkOut);
 
   return (
     <Card className={cn(lisa && "p-0", "overflow-clip")}>
@@ -42,8 +48,9 @@ export default function OfferCard({
               <SaleTagIcon />
             </div>
             <p className="absolute left-4 top-10 w-24 text-center font-semibold text-primary">
-              {Math.round(
-                100 * (1 - offer.totalPrice / property.originalNightlyPrice), // TODO fix
+              {getDiscountPercentage(
+                property.originalNightlyPrice,
+                offerNightlyPrice,
               )}
               % off
             </p>
@@ -62,7 +69,7 @@ export default function OfferCard({
               <p className="text-xs font-semibold uppercase">Tramona Price</p>
               <p>
                 <span className="text-3xl font-bold text-primary">
-                  {formatCurrency(offer.totalPrice)}
+                  {formatCurrency(offerNightlyPrice)}
                 </span>
                 <span className="text-sm">/night</span>
               </p>
