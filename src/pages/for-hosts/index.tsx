@@ -1,10 +1,11 @@
-import { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { useState } from "react";
 
+import PinkStarIcon from "@/components/_icons/PinkStarIcon";
+import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
 import FeedLanding from "@/components/landing-page/FeedLanding";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -14,8 +15,8 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/utils/utils";
 import Autoplay, { type AutoplayOptionsType } from "embla-carousel-autoplay";
-import PinkStarIcon from "@/components/_icons/PinkStarIcon";
-import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 type Tabs = {
   id: number;
@@ -68,16 +69,13 @@ export default function HostWelcome() {
     }, 500);
   };
 
-  // Handle navigation
-  const router = useRouter();
-
   return (
     <>
       <Head>
         <title>Hosts | Tramona</title>
       </Head>
       {/** Welcome */}
-      <div className="h-full w-screen bg-[#3843D0]">
+      <div className="h-full bg-[#3843D0]">
         <div className="container flex flex-col  space-y-12 px-16 py-20 text-white md:space-y-14 md:px-32 lg:px-40 xl:px-52">
           <div className="space-y-4">
             <h3 className="md:text-md text-sm font-bold lg:text-lg">
@@ -101,12 +99,12 @@ export default function HostWelcome() {
       </div>
 
       {/** How */}
-      <div className="flex w-screen flex-col items-center p-10">
+      <div className="flex flex-col items-center p-10">
         <h1 className="py-10 text-4xl font-bold text-[#2563EB] md:p-20 md:text-5xl lg:text-7xl">
           <p>How It Works</p>
         </h1>
-        <div>
-          <div className="flex flex-col items-center space-x-0 rounded-md border-2 border-[#818CF8] bg-[#F9FAFB] p-8 font-semibold text-[#2563EB] md:flex-row md:space-x-10 md:p-16">
+        <div className="space-y-4">
+          <div className="flex flex-col items-center rounded-md border-2 border-[#818CF8] bg-[#F9FAFB] p-8 font-semibold text-[#2563EB] md:flex-row md:space-x-10 md:p-16">
             <div className="text-7xl font-extrabold sm:text-8xl lg:text-9xl">
               1
             </div>
@@ -116,7 +114,7 @@ export default function HostWelcome() {
             </p>
           </div>
 
-          <div className="flex flex-col items-center space-x-0 rounded-md border-2 border-[#F472B6] bg-[#FBCFE8] p-8 text-3xl font-semibold text-[#9D174D] md:flex-row md:space-x-10 md:p-16">
+          <div className="flex flex-col items-center rounded-md border-2 border-[#F472B6] bg-[#FBCFE8] p-8 text-3xl font-semibold text-[#9D174D] md:flex-row md:space-x-10 md:p-16">
             <div className="text-7xl font-extrabold sm:text-8xl lg:text-9xl">
               2
             </div>
@@ -127,7 +125,7 @@ export default function HostWelcome() {
             </p>
           </div>
 
-          <div className="flex flex-col items-center space-x-0 rounded-md border-2 border-[#60A5FA] bg-[#BFDBFE] p-8 text-3xl font-semibold text-[#1E40AF] md:flex-row md:space-x-10 md:p-16">
+          <div className="flex flex-col items-center rounded-md border-2 border-[#60A5FA] bg-[#BFDBFE] p-8 text-3xl font-semibold text-[#1E40AF] md:flex-row md:space-x-10 md:p-16">
             <div className="text-7xl font-extrabold sm:text-8xl lg:text-9xl">
               3
             </div>
@@ -140,7 +138,7 @@ export default function HostWelcome() {
       </div>
 
       {/** Grow */}
-      <div className="w-screen bg-[#C4B5FD] px-10 py-20 md:h-fit md:py-40">
+      <div className="bg-[#C4B5FD] px-10 py-20 md:h-fit md:py-40">
         <div className="container flex flex-col items-center pt-5 sm:pt-0 lg:flex-row">
           <div className="space-y-5 lg:w-[33rem]">
             <h3 className="text-md font-semibold sm:text-xl">
@@ -157,9 +155,9 @@ export default function HostWelcome() {
           </span>
           <div className="flex w-4/12 justify-center pt-10 md:pt-0">
             <Button
+              onClick={() => signIn()}
               variant="outline"
-              onClick={() => router.push("/signup")}
-              className=" border border-black  bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl"
+              className="border border-black bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl"
             >
               Sign Up Now
             </Button>
@@ -168,7 +166,7 @@ export default function HostWelcome() {
       </div>
 
       {/** Help */}
-      <div className="flex w-screen flex-row p-5 pb-10 sm:p-10 md:h-fit md:py-32 lg:h-[70vh]">
+      <div className="flex flex-row p-5 pb-10 sm:p-10 md:h-fit md:py-32 lg:h-[70vh]">
         <div className="container flex flex-col items-center space-y-5 lg:flex-row">
           <div className="pt-10 sm:pt-0 lg:pr-24">
             <div className="space-y-5">
@@ -176,7 +174,7 @@ export default function HostWelcome() {
                 WE WANT TO HELP YOU WIN
               </h3>
               <p className="text-2xl font-bold md:text-4xl">
-                At Tramona we take a{" "}
+                At Tramona, we take a{" "}
                 <span className="bg-[#C4B5FD]">host first approach.</span> Our
                 goal is to make sure your property is always booked.
               </p>
@@ -210,13 +208,15 @@ export default function HostWelcome() {
             </div>
 
             <div className="md:self-start">
-              <Button
-                variant="outline"
-                onClick={() => router.push("/feed")}
-                className=" border bg-[#2563EB] px-16 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-xl lg:px-20 lg:py-7"
+              <Link
+                href="/feed"
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "border bg-[#2563EB] px-16 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-xl lg:px-20 lg:py-7",
+                )}
               >
                 Learn More
-              </Button>
+              </Link>
             </div>
           </div>
 
@@ -251,8 +251,8 @@ export default function HostWelcome() {
 
           <div className="flex-row-3 flex space-x-10 lg:space-x-32">
             {contents.map((content) => (
-              <div
-                className="w-1/3 hover:cursor-pointer md:space-y-16 lg:space-y-20 xl:space-y-10"
+              <button
+                className="w-1/3 md:space-y-16 lg:space-y-20 xl:space-y-10"
                 key={content.id}
                 onClick={() => handleTabChange(content)}
               >
@@ -283,7 +283,7 @@ export default function HostWelcome() {
                 >
                   {content.info}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -336,18 +336,20 @@ export default function HostWelcome() {
       {/** Invite */}
       <div className="container flex flex-col items-center space-y-5 px-7 py-20 md:space-y-10 md:py-40">
         <h1 className="text-center text-2xl font-bold md:text-4xl">
-          We&apos;re currently working with Thousands of hosts
+          We&apos;re currently working with thousands of hosts
         </h1>
         <h2 className="font-medium md:text-3xl">
-          Think someone new might be interest?
+          Think someone new might be interested?
         </h2>
-        <Button
-          variant="outline"
-          onClick={() => router.push("/profile")}
-          className=" border bg-[#2563EB] px-12 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-2xl"
+        <Link
+          href="/profile"
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "border bg-[#2563EB] px-12 py-7 text-lg font-bold text-white transition duration-300 md:text-2xl",
+          )}
         >
           Invite your friends
-        </Button>
+        </Link>
       </div>
     </>
   );
