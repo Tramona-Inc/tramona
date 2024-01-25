@@ -183,6 +183,29 @@ export const offersRouter = createTRPCRouter({
     }));
   }),
 
+  getAllOffers: publicProcedure.query(async ({ ctx }) => {
+    return (
+      await ctx.db.query.offers.findMany({
+        columns: { acceptedAt: false },
+        with: {
+          property: {
+            with: {
+              host: { columns: { name: true, email: true, image: true } },
+            },
+            columns: { originalNightlyPrice: true },
+          },
+          request: {
+            columns: { userId: true, checkIn: true, checkOut: true },
+            with: {
+              madeByUser: { columns: { name: true } }, // Fetch user name
+            },
+          },
+        },
+        orderBy: desc(offers.createdAt),
+      })
+    )
+  }),
+
   create: roleRestrictedProcedure(["admin", "host"])
     .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {
