@@ -11,7 +11,6 @@ interface Props {
 
 const Rightside: React.FC<Props> = ({ onValueChange }) => {
   const [tab, setTab] = useState<number>(1);
-  const [progress, setProgress] = React.useState(1);
 
   let currentForm;
 
@@ -30,8 +29,20 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
   }
 
   function handleTab() {
-    setTab(tab + 1);
-    onValueChange(tab);
+    setTab((prevTab) => {
+      const newTab = prevTab + 1;
+      onValueChange(newTab);
+      console.log(newTab + " CHILD");
+      return newTab;
+    });
+  }
+  function prevTab() {
+    setTab((prevTab) => {
+      const newTab = prevTab - 1;
+      onValueChange(newTab);
+      console.log(newTab + " CHILD");
+      return newTab;
+    });
   }
 
   return (
@@ -42,10 +53,18 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
       </div>
       {currentForm}
 
+      {tab === 1 ? (
+        <div className="hidden" />
+      ) : (
+        <Button className="mt-10 px-16" onClick={() => prevTab()}>
+          {"Previous"}
+        </Button>
+      )}
+
       {tab === 3 ? (
         <Button className="mt-10 px-16">Finished</Button>
       ) : (
-        <Button className="mt-10 px-16" onClick={() => handleTab()}>
+        <Button className="mt-10 w-1/6 px-16" onClick={() => handleTab()}>
           Next{" "}
         </Button>
       )}

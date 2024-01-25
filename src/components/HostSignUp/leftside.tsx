@@ -1,6 +1,6 @@
 import { cn } from "@/utils/utils";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type Reviews = {
   id: number;
@@ -13,7 +13,7 @@ type Reviews = {
 
 const contents: Reviews[] = [
   {
-    id: 0,
+    id: 1,
     message:
       "We work with thousands of hosts and property managers around the world.",
     quote:
@@ -24,7 +24,7 @@ const contents: Reviews[] = [
   },
 
   {
-    id: 1,
+    id: 2,
     message: "The First Tool Enabling Hosts to Proactively Book Their Rentals.",
     quote:
       "Actively searching for guests through Tramona has been a game-changer, allowing me to fill openings in my calendar for all of my properties.",
@@ -33,7 +33,7 @@ const contents: Reviews[] = [
     user_title: "Property manager, 13 properties",
   },
   {
-    id: 2,
+    id: 3,
     message: "Make more revenue with Tramona",
     quote:
       "Tramona turned things around for me; during months when breaking even seemed challenging, the platform helped me secure additional bookings for my two properties, ensuring financial stability and peace of mind.",
@@ -43,13 +43,24 @@ const contents: Reviews[] = [
   },
 ];
 
-export default function Leftside() {
+interface Props {
+  newtab: number;
+}
+
+const Leftside: React.FC<Props> = ({ newtab }) => {
   const [tab, setTab] = useState<number>(1);
+
+  useEffect(() => {
+    setTab(newtab);
+    console.log(newtab + "LEFTSIDE");
+  }, [newtab, tab]);
+
   return (
     <div className="flex h-full w-1/3 flex-col justify-center bg-[#4F46E5] p-3 text-white ">
       <div className="flex flex-col space-y-5 py-10 ">
         <div className=" text-center text-3xl font-bold">
           <h1>Hello 👋</h1>
+          <div className="text-4xl">{newtab}</div>
           <h1>Welcome to Hosting</h1>
         </div>
         <h3 className="text-center text-xl font-light">Let's get you setup.</h3>
@@ -90,4 +101,6 @@ export default function Leftside() {
       </div>
     </div>
   );
-}
+};
+
+export default Leftside;
