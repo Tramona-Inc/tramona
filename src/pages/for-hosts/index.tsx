@@ -1,5 +1,11 @@
+import Head from "next/head";
+import Image from "next/image";
+import { useState } from "react";
+
+import PinkStarIcon from "@/components/_icons/PinkStarIcon";
+import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
 import FeedLanding from "@/components/landing-page/FeedLanding";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -9,9 +15,8 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/utils/utils";
 import Autoplay, { type AutoplayOptionsType } from "embla-carousel-autoplay";
-import Head from "next/head";
-import Image from "next/image";
-import { useState } from "react";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 type Tabs = {
   id: number;
@@ -70,14 +75,13 @@ export default function HostWelcome() {
         <title>Hosts | Tramona</title>
       </Head>
       {/** Welcome */}
-      <div className="h-full w-screen bg-[#3843D0]">
+      <div className="h-full bg-[#3843D0]">
         <div className="container flex flex-col  space-y-12 px-16 py-20 text-white md:space-y-14 md:px-32 lg:px-40 xl:px-52">
           <div className="space-y-4">
             <h3 className="md:text-md text-sm font-bold lg:text-lg">
               TRAMONA HOST
             </h3>
             <h1 className="text-4xl font-extrabold md:text-5xl lg:text-7xl">
-              {" "}
               Welcome Hosts!
             </h1>
           </div>
@@ -87,24 +91,20 @@ export default function HostWelcome() {
               Tramona is a travel service built specifically to decrease your
               vacancies
             </div>
-            <Image
-              src="/assets/images/star.png"
-              width={100}
-              height={100}
-              alt={"Star"}
-              className="absolute -right-10 -top-10 max-md:h-20 max-md:w-20 md:-right-12 md:-top-12 "
-            />
+            <span className="absolute -right-10 -top-10 max-md:size-20 md:-right-10 md:-top-10">
+              <PinkStarIcon />
+            </span>
           </div>
         </div>
       </div>
 
       {/** How */}
-      <div className="flex w-screen flex-col items-center p-10">
+      <div className="flex flex-col items-center p-10">
         <h1 className="py-10 text-4xl font-bold text-[#2563EB] md:p-20 md:text-5xl lg:text-7xl">
           <p>How It Works</p>
         </h1>
-        <div>
-          <div className="flex flex-col items-center space-x-0 rounded-md border-2 border-[#818CF8] bg-[#F9FAFB] p-8 font-semibold text-[#2563EB] md:flex-row md:space-x-10 md:p-16">
+        <div className="space-y-4">
+          <div className="flex flex-col items-center rounded-md border-2 border-[#818CF8] bg-[#F9FAFB] p-8 font-semibold text-[#2563EB] md:flex-row md:space-x-10 md:p-16">
             <div className="text-7xl font-extrabold sm:text-8xl lg:text-9xl">
               1
             </div>
@@ -114,7 +114,7 @@ export default function HostWelcome() {
             </p>
           </div>
 
-          <div className="flex flex-col items-center space-x-0 rounded-md border-2 border-[#F472B6] bg-[#FBCFE8] p-8 text-3xl font-semibold text-[#9D174D] md:flex-row md:space-x-10 md:p-16">
+          <div className="flex flex-col items-center rounded-md border-2 border-[#F472B6] bg-[#FBCFE8] p-8 text-3xl font-semibold text-[#9D174D] md:flex-row md:space-x-10 md:p-16">
             <div className="text-7xl font-extrabold sm:text-8xl lg:text-9xl">
               2
             </div>
@@ -125,7 +125,7 @@ export default function HostWelcome() {
             </p>
           </div>
 
-          <div className="flex flex-col items-center space-x-0 rounded-md border-2 border-[#60A5FA] bg-[#BFDBFE] p-8 text-3xl font-semibold text-[#1E40AF] md:flex-row md:space-x-10 md:p-16">
+          <div className="flex flex-col items-center rounded-md border-2 border-[#60A5FA] bg-[#BFDBFE] p-8 text-3xl font-semibold text-[#1E40AF] md:flex-row md:space-x-10 md:p-16">
             <div className="text-7xl font-extrabold sm:text-8xl lg:text-9xl">
               3
             </div>
@@ -138,7 +138,7 @@ export default function HostWelcome() {
       </div>
 
       {/** Grow */}
-      <div className="w-screen bg-[#C4B5FD] px-10 py-20 md:h-fit md:py-40">
+      <div className="bg-[#C4B5FD] px-10 py-20 md:h-fit md:py-40">
         <div className="container flex flex-col items-center pt-5 sm:pt-0 lg:flex-row">
           <div className="space-y-5 lg:w-[33rem]">
             <h3 className="text-md font-semibold sm:text-xl">
@@ -146,24 +146,18 @@ export default function HostWelcome() {
             </h3>
             <p className="text-2xl font-bold md:text-4xl">
               Just like that you now have{" "}
-              <span className="bg-[#FCD34D]"> less vacancies. </span>
-              Increasing your month over month profit
+              <span className="bg-[#FCD34D]"> less vacancies.</span> Increasing
+              your month over month profit
             </p>
-            <div className="text-lg font-bold underline underline-offset-2">
-              Learn more
-            </div>
           </div>
-          <Image
-            src="/assets/images/sqwiggly.png"
-            width={4000}
-            height={4000}
-            alt={"sqwiggle"}
-            className="hidden w-4/12 p-10 lg:block xl:p-20"
-          />
+          <span className="hidden w-4/12 p-10 lg:block xl:p-20">
+            <SqwiggleIcon />
+          </span>
           <div className="flex w-4/12 justify-center pt-10 md:pt-0">
             <Button
+              onClick={() => signIn()}
               variant="outline"
-              className=" border border-black  bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl"
+              className="border border-black bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl"
             >
               Sign Up Now
             </Button>
@@ -172,7 +166,7 @@ export default function HostWelcome() {
       </div>
 
       {/** Help */}
-      <div className="flex w-screen flex-row p-5 pb-10 sm:p-10 md:h-fit md:py-32 lg:h-[70vh]">
+      <div className="flex flex-row p-5 pb-10 sm:p-10 md:h-fit md:py-32 lg:h-[70vh]">
         <div className="container flex flex-col items-center space-y-5 lg:flex-row">
           <div className="pt-10 sm:pt-0 lg:pr-24">
             <div className="space-y-5">
@@ -180,13 +174,10 @@ export default function HostWelcome() {
                 WE WANT TO HELP YOU WIN
               </h3>
               <p className="text-2xl font-bold md:text-4xl">
-                At Tramona we take a{" "}
+                At Tramona, we take a{" "}
                 <span className="bg-[#C4B5FD]">host first approach.</span> Our
                 goal is to make sure your property is always booked.
               </p>
-              <div className="text-lg font-bold underline underline-offset-2">
-                Learn more
-              </div>
             </div>
           </div>
 
@@ -217,12 +208,15 @@ export default function HostWelcome() {
             </div>
 
             <div className="md:self-start">
-              <Button
-                variant="outline"
-                className=" border bg-[#2563EB] px-16 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-xl lg:px-20 lg:py-7"
+              <Link
+                href="/feed"
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "border bg-[#2563EB] px-16 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-xl lg:px-20 lg:py-7",
+                )}
               >
                 Learn More
-              </Button>
+              </Link>
             </div>
           </div>
 
@@ -257,7 +251,7 @@ export default function HostWelcome() {
 
           <div className="flex-row-3 flex space-x-10 lg:space-x-32">
             {contents.map((content) => (
-              <div
+              <button
                 className="w-1/3 md:space-y-16 lg:space-y-20 xl:space-y-10"
                 key={content.id}
                 onClick={() => handleTabChange(content)}
@@ -289,7 +283,7 @@ export default function HostWelcome() {
                 >
                   {content.info}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -298,7 +292,7 @@ export default function HostWelcome() {
           className="w-full md:hidden"
           plugins={[
             Autoplay({
-              delay: 2000,
+              delay: 5000,
             } as AutoplayOptionsType),
           ]}
         >
@@ -342,17 +336,20 @@ export default function HostWelcome() {
       {/** Invite */}
       <div className="container flex flex-col items-center space-y-5 px-7 py-20 md:space-y-10 md:py-40">
         <h1 className="text-center text-2xl font-bold md:text-4xl">
-          We&apos;re currently working with Thousands of hosts
+          We&apos;re currently working with thousands of hosts
         </h1>
         <h2 className="font-medium md:text-3xl">
-          Think someone new might be interest?
+          Think someone new might be interested?
         </h2>
-        <Button
-          variant="outline"
-          className=" border bg-[#2563EB] px-12 py-7 text-lg font-bold text-white transition duration-300 ease-in-out md:text-2xl"
+        <Link
+          href="/profile"
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "border bg-[#2563EB] px-12 py-7 text-lg font-bold text-white transition duration-300 md:text-2xl",
+          )}
         >
           Invite your friends
-        </Button>
+        </Link>
       </div>
     </>
   );
