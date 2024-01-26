@@ -8,7 +8,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ALL_PROPERTY_TYPES, type Request } from "@/server/db/schema";
+import {
+  ALL_PROPERTY_AMENITIES,
+  ALL_PROPERTY_SAFETY_ITEMS,
+  ALL_PROPERTY_STANDOUT_AMENITIES,
+  ALL_PROPERTY_TYPES,
+  type Request,
+} from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
 import { capitalize } from "@/utils/utils";
@@ -24,6 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import TagSelect from "../_common/TagSelect";
+import { Textarea } from "../ui/textarea";
 
 export default function AdminOfferForm({
   afterSubmit,
@@ -43,6 +51,10 @@ export default function AdminOfferForm({
     originalNightlyPriceUSD: zodInteger(),
     avgRating: zodNumber({ min: 0, max: 5 }),
     numRatings: zodInteger({ min: 1 }),
+    amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
+    standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
+    safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
+    about: zodString({ maxLen: Infinity }),
     airbnbUrl: zodString({ maxLen: Infinity }).url(),
     imageUrls: z.object({ value: zodUrl() }).array(),
   });
@@ -53,6 +65,9 @@ export default function AdminOfferForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       imageUrls: [{ value: "" }, { value: "" }, { value: "" }],
+      amenities: [],
+      standoutAmenities: [],
+      safetyItems: [],
     },
   });
 
@@ -279,6 +294,74 @@ export default function AdminOfferForm({
               <FormLabel>Number of ratings</FormLabel>
               <FormControl>
                 <Input {...field} inputMode="numeric" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="amenities"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Amenities</FormLabel>
+              <FormControl>
+                <TagSelect
+                  options={ALL_PROPERTY_AMENITIES}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="standoutAmenities"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Standout Amenities</FormLabel>
+              <FormControl>
+                <TagSelect
+                  options={ALL_PROPERTY_STANDOUT_AMENITIES}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="safetyItems"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Safety Items</FormLabel>
+              <FormControl>
+                <TagSelect
+                  options={ALL_PROPERTY_SAFETY_ITEMS}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="about"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>About property</FormLabel>
+              <FormControl>
+                <Textarea {...field} className="resize-y" rows={10} />
               </FormControl>
               <FormMessage />
             </FormItem>
