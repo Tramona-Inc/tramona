@@ -22,7 +22,6 @@ import type {
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
@@ -93,43 +92,32 @@ export default function SignIn({
                     />
                     <FormMessage />
                     <Button type="submit" className="w-full">
-                      {/* <Button isLoading={form.formState.isSubmitting} type="submit" className="w-full"> */}
-                      Sign in with Email
+                      Log In
                     </Button>
                   </form>
                 </Form>
               </div>
 
-              <div className="my-5 flex flex-row gap-5">
+              <div className="my-5 flex flex-col gap-5">
                 {providers &&
                   Object.values(providers)
                     .slice(1) // remove the email provider
                     .map((provider) => {
                       return (
-                        <div key={provider.name}>
-                          <Button
-                            variant={"ghost"}
-                            onClick={() => signIn(provider.id)}
-                          >
-                            {provider.name && (
-                              <Icons iconName={provider.name} />
-                            )}
-                          </Button>
-                        </div>
+                        <Button
+                          key={provider.name}
+                          variant={"darkOutline"}
+                          onClick={() => signIn(provider.id)}
+                          className="w-full gap-5"
+                        >
+                          <Icons iconName={provider.name} />
+                          {provider.name}
+                        </Button>
                       );
                     })}
               </div>
             </section>
           </div>
-        </div>
-        <div className="relative hidden flex-1 lg:block">
-          <Image
-            src="/assets/images/house.jpg"
-            alt=""
-            fill
-            priority
-            className="absolute hidden object-cover lg:block"
-          />
         </div>
       </div>
     </>
