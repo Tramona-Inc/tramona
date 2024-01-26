@@ -1,11 +1,12 @@
-import React, { useState } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import React, { useState } from "react";
 
 import { cn } from "@/utils/utils";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 
+import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/accordion";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -187,7 +187,7 @@ export default function Page() {
               </div>
 
               <Link
-                href="/partners/apply"
+                href="/program/partner"
                 className="self-center font-medium text-blue-400 underline underline-offset-2 hover:text-blue-300 lg:text-lg"
               >
                 Learn More
@@ -221,7 +221,7 @@ export default function Page() {
               </div>
 
               <Link
-                href="/partners/apply"
+                href="/program/ambassador"
                 className="ml-auto rounded-lg border-2 border-zinc-950 bg-blue-300 px-10 py-2 text-lg font-semibold text-zinc-950 hover:bg-blue-200"
               >
                 Apply

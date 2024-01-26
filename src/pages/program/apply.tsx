@@ -12,7 +12,8 @@ export default function Page() {
               Ambassador Program
             </h2>
             <p className="mb-6 text-2xl font-bold sm:text-2xl">
-              Please fill in the application form and someone from our partnership team will get in touch with you soon.
+              Please fill in the application form and someone from our
+              partnership team will get in touch with you soon.
             </p>
           </div>
 
@@ -21,6 +22,8 @@ export default function Page() {
           </div>
         </div>
       </div>
+
+      <div>Hello</div>
     </div>
   );
 }
