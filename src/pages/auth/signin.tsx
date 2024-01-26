@@ -57,68 +57,81 @@ export default function SignIn({
   return (
     <>
       <Head>
-        <title>Sign in | Tramona</title>
+        <title>Log in | Tramona</title>
       </Head>
-      <div className="flex h-screen items-stretch">
-        <div className="grid flex-1 place-items-center p-4">
-          <div className="w-[20rem] space-y-4">
-            <h1 className="text-4xl font-bold tracking-wide">Log in</h1>
-            <Link
-              href="/signup"
-              className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline"
-            >
-              Don&apos;t have an account? Sign up
-            </Link>
+      <div className="flex h-screen flex-col items-center justify-center space-y-10">
+        <h1 className="text-5xl font-bold tracking-tight">Log in to Tramona</h1>
 
-            <section className="flex flex-col items-center justify-center">
-              <div className="w-full space-y-5">
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(handleSubmit)}
-                    className="space-y-4"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} autoFocus />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormMessage />
-                    <Button type="submit" className="w-full">
-                      Log In
-                    </Button>
-                  </form>
-                </Form>
-              </div>
-
-              <div className="my-5 flex flex-col gap-5">
-                {providers &&
-                  Object.values(providers)
-                    .slice(1) // remove the email provider
-                    .map((provider) => {
-                      return (
-                        <Button
-                          key={provider.name}
-                          variant={"darkOutline"}
-                          onClick={() => signIn(provider.id)}
-                          className="w-full gap-5"
-                        >
-                          <Icons iconName={provider.name} />
-                          {provider.name}
-                        </Button>
-                      );
-                    })}
-              </div>
-            </section>
+        <section className="flex flex-col items-center justify-center space-y-5">
+          <div className="w-full space-y-5">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email address</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder={"name@domain.com"}
+                          autoFocus
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormMessage />
+                <Button type="submit" className="w-full">
+                  Log In
+                </Button>
+              </form>
+            </Form>
           </div>
-        </div>
+
+          <div className="item-center flex w-full justify-center gap-2">
+            <div className="flex flex-1 items-center justify-center">
+              <div className="h-[1px] w-full border border-black" />
+            </div>
+            <p>or</p>
+            <div className="flex flex-1 items-center justify-center">
+              <div className="h-[1px] w-full border border-black" />
+            </div>
+          </div>
+
+          <div className="my-5 flex w-full flex-col gap-5">
+            {providers &&
+              Object.values(providers)
+                .slice(1) // remove the email provider
+                .map((provider) => {
+                  return (
+                    <Button
+                      key={provider.name}
+                      variant={"darkOutline"}
+                      onClick={() => signIn(provider.id)}
+                      className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
+                    >
+                      <Icons iconName={provider.name} />
+                      <span className="col-span-3 text-lg font-extrabold tracking-tight">
+                        Log in with
+                        {" " + provider.name}
+                      </span>
+                    </Button>
+                  );
+                })}
+          </div>
+        </section>
+        <Link
+          href="/signup"
+          className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline"
+        >
+          Don&apos;t have an account? Sign up
+        </Link>
       </div>
     </>
   );
