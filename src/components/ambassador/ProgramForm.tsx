@@ -16,6 +16,7 @@ import { zodUrl } from "@/utils/zod-utils";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Textarea } from "../ui/textarea";
+import { toast } from "../ui/use-toast";
 
 const phoneRegex = new RegExp(
   /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/,
@@ -82,9 +83,6 @@ const formSchema = z.object({
     }),
   question4: z
     .string()
-    .min(2, {
-      message: "Response must be greater than 2 characters",
-    })
     .max(1000, {
       message: "Response must be less than 1000 characters",
     })
@@ -110,13 +108,25 @@ export function ProgramFrom() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Submit data somewhere to store and review
-    const mailtoLink = `mailto:info@tramona.com?subject=Form Submission&body=${encodeURIComponent(
-      JSON.stringify(values),
-    )}`;
-    window.location.href = mailtoLink;
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+
+    try {
+      await fetch("/api/email/send", {
+        method: "POST",
+        body: JSON.stringify(values),
+      });
+      toast({
+        title: "Application successfully sent.",
+        description: "We've received your application",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+      });
+    }
   }
 
   return (
@@ -281,7 +291,9 @@ export function ProgramFrom() {
           name="question1"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Why do you want Ambassador status?</FormLabel>
+              <FormLabel>
+                Why do you want Ambassador status? <RequriedIcon />
+              </FormLabel>
               <FormControl>
                 <Textarea {...field} className="resize-y" rows={10} />
               </FormControl>
