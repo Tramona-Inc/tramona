@@ -4,6 +4,7 @@ import {
   formatCurrency,
   getDiscountPercentage,
   getNumNights,
+  plural,
 } from "@/utils/utils";
 import { type inferRouterOutputs } from "@trpc/server";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
@@ -96,7 +97,7 @@ export default function OfferCard({
             ★ {property.avgRating} ({property.numRatings})
           </Badge>
           <Badge variant="secondary">{property.propertyType}</Badge>
-          <Badge variant="secondary">{numAmenities} amenities</Badge>
+          <Badge variant="secondary">{plural(numAmenities, "amenities")}</Badge>
         </div>
         <div className="flex gap-6">
           <div className="flex w-72 flex-row gap-5">

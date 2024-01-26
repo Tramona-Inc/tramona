@@ -26,9 +26,9 @@ export async function sleep(ms: number) {
 /**
  * Examples:
  * ```js
- * plural(1, 'apple') => '1 apple'
- * plural(2, 'apple') => '2 apples'
- * plural(2, 'octopus', 'octopi') => '2 octopi'
+ * plural(1, "apple") => "1 apple"
+ * plural(2, "apple") => "2 apples"
+ * plural(2, "octopus", "octopi") => "2 octopi"
  * ```
  */
 export function plural(count: number, noun: string, pluralNoun?: string) {
@@ -41,8 +41,8 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  *
  * Examples:
  * ```js
- * formatCurrency(10) => '$0.10'
- * formatCurrency(2000) => '$20.00'
+ * formatCurrency(10) => "$0.10"
+ * formatCurrency(2000) => "$20.00"
  * ```
  */
 export function formatCurrency(cents: number) {
@@ -53,8 +53,8 @@ export function formatCurrency(cents: number) {
 /**
  * Examples:
  * ```js
- * capitalize('apple') => 'Apple'
- * capitalize('ASDF') => 'ASDF'
+ * capitalize("apple") => "Apple"
+ * capitalize("ASDF") => "ASDF"
  * ```
  */
 export function capitalize(str: string) {
@@ -64,10 +64,10 @@ export function capitalize(str: string) {
 /**
  * Example outputs:
  * ```js
- * 'Jan 1, 2021'
- * 'Jan 1 – 2, 2021'
- * 'Jan 1 – Feb 2, 2021'
- * 'Jan 1, 2021 – Feb 2, 2022'
+ * "Jan 1, 2021"
+ * "Jan 1 – 2, 2021"
+ * "Jan 1 – Feb 2, 2021"
+ * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
 export function formatDateRange(from: Date, to?: Date) {
