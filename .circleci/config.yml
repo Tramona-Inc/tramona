@@ -20,7 +20,7 @@ jobs:
             corepack prepare pnpm@latest-8 --activate
       - run:
           name: Install dependencies
-          command: pnpm install
+          command: CI=true pnpm install
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
