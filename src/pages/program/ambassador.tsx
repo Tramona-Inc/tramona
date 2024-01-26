@@ -23,11 +23,9 @@ const steps = [
 function Card({
   id,
   info,
-  displayStar,
 }: {
   id: number;
   info: string;
-  displayStar: boolean;
 }) {
   return (
     <div className="infline-flex relative max-w-[500px] items-center justify-center space-y-5 rounded-xl border border-black p-10 max-sm:mt-10 max-sm:w-[350px]">
