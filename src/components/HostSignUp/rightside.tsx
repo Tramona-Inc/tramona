@@ -46,7 +46,7 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
   }
 
   return (
-    <div className="container flex w-2/3 flex-col justify-center text-black">
+    <div className="container flex w-2/3 flex-col  p-20 text-black">
       <div className="mb-10 space-y-5">
         <h3>Step {tab} of 3</h3>
         <Progress value={Math.ceil(tab * 33.25)} className="full" />

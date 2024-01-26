@@ -56,29 +56,31 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
   }, [newtab, tab]);
 
   return (
-    <div className="flex h-full w-1/3 flex-col justify-center bg-[#4F46E5] p-3 text-white ">
-      <div className="flex flex-col space-y-5 py-10 ">
-        <div className=" text-center text-3xl font-bold">
+    <div className=" flex w-1/3 flex-col items-center bg-[#4F46E5]  text-white ">
+      <div className="mt-20 flex flex-col space-y-5">
+        <div className=" text-center text-5xl font-bold">
           <h1>Hello 👋</h1>
-          <div className="text-4xl">{newtab}</div>
-          <h1>Welcome to Hosting</h1>
+          <h1>Welcome to Hosting!</h1>
         </div>
         <h3 className="text-center text-xl font-light">Let's get you setup.</h3>
       </div>
 
-      <div className="px-10">
-        {contents.map((content) => (
-          <div
-            key={content.id}
-            className={cn("space-y-10", content.id === tab ? "" : "hidden")}
-          >
-            <div className="space-y-10">
-              <h1 className="text-2xl font-bold">{content.message}</h1>
-              <h2 className="text-lg font-bold italic">"{content.quote}"</h2>
-            </div>
+      <div className="p-5">
+        <div className="relative px-20 pt-20">
+          {contents.map((content) => (
+            <div
+              key={content.id}
+              className={cn("space-y-10", content.id === tab ? "" : "hidden")}
+            >
+              <div className="space-y-8">
+                <h1 className="text-xl font-bold">{content.message}</h1>
+                <h2 className="text-md font-semi-bold italic">
+                  "{content.quote}"
+                </h2>
+              </div>
 
-            <div className="flex flex-row">
-              {/* <Image
+              <div className="flex flex-row">
+                {/* <Image
                     src={cn(
                       "text-2xl font-bold",
                       content.id === tab ? "" : "hidden",
@@ -88,16 +90,25 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
                     height={50}
                     className="rounded-circle"
                   /> */}
-              <div>
-                <h1 className="text-2xl font-bold">{content.user_name}</h1>
+                <div>
+                  <h1 className="text-2xl font-bold">{content.user_name}</h1>
 
-                <h2 className="text-xl font-bold italic">
-                  "{content.user_title}"
-                </h2>
+                  <h2 className="text-xl font-bold italic">
+                    {content.user_title}
+                  </h2>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+
+          <Image
+            src="/assets/images/host-sign-up-props/star.png"
+            width={75}
+            height={75}
+            alt={"Star"}
+            className="absolute left-5 top-5"
+          />
+        </div>
       </div>
     </div>
   );
