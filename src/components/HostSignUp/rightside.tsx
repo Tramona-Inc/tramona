@@ -51,23 +51,25 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
         <h3>Step {tab} of 3</h3>
         <Progress value={Math.ceil(tab * 33.25)} className="full" />
       </div>
-      {currentForm}
+      <div>{currentForm}</div>
 
-      {tab === 1 ? (
-        <div className="hidden" />
-      ) : (
-        <Button className="mt-10 px-16" onClick={() => prevTab()}>
-          {"Previous"}
-        </Button>
-      )}
+      <div className="pt-16">
+        {tab === 1 || tab === 3 ? (
+          <div className="hidden" />
+        ) : (
+          <Button className="px-16" onClick={() => prevTab()}>
+            {"<"}
+          </Button>
+        )}
 
-      {tab === 3 ? (
-        <Button className="mt-10 px-16">Finished</Button>
-      ) : (
-        <Button className="mt-10 w-1/6 px-16" onClick={() => handleTab()}>
-          Next{" "}
-        </Button>
-      )}
+        {tab === 3 ? (
+          <Button className="px-16">Finished</Button>
+        ) : (
+          <Button className="w-1/6 px-16" onClick={() => handleTab()}>
+            Next{" "}
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

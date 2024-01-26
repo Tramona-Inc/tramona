@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Form1() {
   return (
-    <div className="h-1/2">
+    <div className="h-2/5">
       <h1 className="text-4xl font-bold">
         Enter the link to your listings below to get started setting up!
       </h1>

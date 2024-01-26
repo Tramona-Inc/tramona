@@ -6,7 +6,7 @@ import React, { useState } from "react";
 
 export default function Form1() {
   return (
-    <div className="h-1/2">
+    <div className="h-2/5">
       <div>
         <h1 className="text-4xl font-bold">
           When we recieve offers for your property, where should we send them?
