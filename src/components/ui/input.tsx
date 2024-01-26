@@ -17,7 +17,19 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, value, defaultValue, prefix, suffix, ...props }, ref) => {
+  (
+    {
+      className,
+      type,
+      value,
+      defaultValue,
+      prefix,
+      suffix,
+      placeholder,
+      ...props
+    },
+    ref,
+  ) => {
     const inputClassNames =
       "flex h-10 w-full rounded-md border border-input bg-primary-foreground py-2 text-sm text-black file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-auto";
 
@@ -59,33 +71,27 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       </div>
     );
 
-    const normalizedValue = defaultValue ?? value ?? ""; // removes the need for lots of empty-string defaults for react-hook-form
-    const showingPrefixAndSuffix = normalizedValue !== "";
-    const leftIndent = showingPrefixAndSuffix ? prefixWidth ?? 0 : 0;
-    const rightIndent = showingPrefixAndSuffix ? suffixWidth ?? 0 : 0;
-
     return (
       <div className="relative">
         <input
           type={
             type === "password" ? (showingPassword ? "text" : "password") : type
           }
-          className={cn(inputClassNames, className)}
+          className={cn("peer", inputClassNames, className)}
           style={{
-            paddingLeft: 12 + leftIndent,
-            paddingRight: 12 + rightIndent,
+            paddingLeft: 12 + (prefixWidth ?? 0),
+            paddingRight: 12 + (suffixWidth ?? 0),
           }}
           ref={ref}
-          value={normalizedValue}
+          value={defaultValue ?? value ?? ""} // removes the need for lots of empty-string defaults for react-hook-form
           autoComplete="off"
+          placeholder={placeholder ?? ""} // so i can use placeholder-shown
           {...props}
         />
-        {showingPrefixAndSuffix && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-3 py-2">
-            {prefixEl}
-            {suffixEl}
-          </div>
-        )}
+        <div className="pointer-events-none absolute inset-0 hidden items-center justify-between px-3 py-2 peer-[&:focus]:flex peer-[&:not(:placeholder-shown)]:flex">
+          {prefixEl}
+          {suffixEl}
+        </div>
       </div>
     );
   },
