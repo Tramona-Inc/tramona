@@ -10,7 +10,6 @@ import {
   requests,
 } from "@/server/db/schema";
 import { getRequestStatus } from "@/utils/formatters";
-import { group } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
@@ -78,11 +77,14 @@ export const requestsRouter = createTRPCRouter({
 
   getAll: roleRestrictedProcedure(["admin"]).query(async () => {
     const allRequests = await getDetailedRequests();
-    return group(allRequests, (request) =>
-      getRequestStatus(request) === "pending"
-        ? "incomingRequests"
-        : "pastRequests",
-    );
+    return {
+      incomingRequests: allRequests.filter(
+        (req) => getRequestStatus(req) === "pending",
+      ),
+      pastRequests: allRequests.filter(
+        (req) => getRequestStatus(req) !== "pending",
+      ),
+    };
   }),
 
   // getAllIncoming: roleRestrictedProcedure(["host", "admin"]).query(

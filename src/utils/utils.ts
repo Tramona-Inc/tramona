@@ -148,23 +148,6 @@ export async function retry<T>(f: Promise<T>, numRetries: number) {
   }
 }
 
-export function group<T, K extends PropertyKey>(
-  arr: T[],
-  getGroup: (item: T) => K,
-) {
-  return arr.reduce(
-    (groups, item) => {
-      const group = getGroup(item);
-      if (!groups[group]) {
-        groups[group] = [];
-      }
-      groups[group].push(item);
-      return groups;
-    },
-    {} as Record<K, T[]>,
-  );
-}
-
 export function getDiscountPercentage(
   originalPrice: number,
   discountPrice: number,
