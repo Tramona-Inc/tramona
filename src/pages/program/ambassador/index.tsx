@@ -1,6 +1,7 @@
 import StarIcon from "@/components/_icons/StarIcon";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
+import Link from "next/link";
 
 const steps = [
   {
@@ -20,13 +21,7 @@ const steps = [
   },
 ];
 
-function Card({
-  id,
-  info,
-}: {
-  id: number;
-  info: string;
-}) {
+function Card({ id, info }: { id: number; info: string }) {
   return (
     <div className="infline-flex relative max-w-[500px] items-center justify-center space-y-5 rounded-xl border border-black p-10 max-sm:mt-10 max-sm:w-[350px]">
       <div className="inline-flex rounded-2xl bg-black px-4 py-1 font-bold uppercase text-white">
@@ -81,9 +76,11 @@ export default function Page() {
           page
         </p>
 
-        <Button className="rounded-xl bg-[#3843D0] px-10 py-6 text-lg font-bold">
-          Apply here
-        </Button>
+        <Link href={"ambassador/apply"}>
+          <Button className="rounded-xl bg-[#3843D0] px-10 py-6 text-lg font-bold">
+            Apply here
+          </Button>
+        </Link>
       </div>
     </>
   );
