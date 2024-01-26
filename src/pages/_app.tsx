@@ -10,6 +10,7 @@ import MainLayout from "@/components/_common/MainLayout";
 import TailwindIndicator from "@/components/_common/TailwindIndicator";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Head from "next/head";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -20,6 +21,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
     <TooltipProvider delayDuration={50}>
       <SessionProvider session={session}>
         <MainLayout>
+          <Head>
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1, maximum-scale=1"
+            />
+          </Head>
           <Component {...pageProps} />
         </MainLayout>
 
