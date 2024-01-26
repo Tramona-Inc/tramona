@@ -1,22 +1,21 @@
 import StarIcon from "@/components/_icons/StarIcon";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
-import Image from "next/image";
 
 const steps = [
   {
     id: 1,
-    info: "By having an account, you already have a code.",
-    displayStar: true,
+    info: "Fill out the application below to see if you are eligible for ambassador status.",
+    displayStar: false,
   },
   {
     id: 2,
-    info: "Send your link to a friend, and when they sign up you will automatically start to earn when they book a trip.",
+    info: "If you aren’t accepted you are still eligible for the partner program and will make a 30% commission of profit.",
     displayStar: false,
   },
   {
     id: 3,
-    info: "What are you waiting for? Start earning passive income.",
+    info: "Send your link to a friend, and when they sign up you will automatically start to earn when they book a trip.",
     displayStar: false,
   },
 ];
@@ -36,12 +35,6 @@ function Card({
         Step {id}
       </div>
       <p className="text-xl font-bold">{info}</p>
-
-      {displayStar && (
-        <div className="absolute -right-[56px] -top-[80px] z-20">
-          <StarIcon />
-        </div>
-      )}
     </div>
   );
 }
@@ -50,29 +43,28 @@ export default function Page() {
   return (
     <>
       <Head>
-        <title>Partners | Tramona</title>
+        <title>Ambassador | Tramona</title>
       </Head>
-      <div className="bg-blue-300 py-20">
+      <div className="bg-[#C4B5FD] py-20">
         <div className="container flex max-w-[1000px] flex-col items-center justify-between gap-10 lg:flex-row">
           {/* Partner Program */}
           <div className="flex flex-col gap-4">
             <p className="font-bold">LET&apos;S EARN TOGETHER</p>
-            <h2 className="text-4xl font-bold sm:text-6xl">Partner Program</h2>
+            <h2 className="text-4xl font-bold sm:text-6xl">
+              Ambassador Program
+            </h2>
             <p className="mb-6 text-2xl font-bold sm:text-2xl">
+              Complete the application below to see if you are eligible
               <span className="inline-block bg-yellow-200 shadow-sm">
-                Earn 30% commission of revenue{" "}
+                for 50% commission of profit for
               </span>{" "}
-              for 12 months by simply introducing new customers to Tramona
+              12 months, by simply introducing new customers to Tramona.
             </p>
           </div>
 
-          {/* Image */}
-          <Image
-            src={"/assets/images/partner-program.png"}
-            height={301}
-            width={325}
-            alt="partner program"
-          />
+          <div>
+            <StarIcon />
+          </div>
         </div>
       </div>
 
@@ -91,8 +83,8 @@ export default function Page() {
           page
         </p>
 
-        <Button className="rounded-xl px-10 py-6 text-lg font-bold">
-          Start referring
+        <Button className="rounded-xl bg-[#3843D0] px-10 py-6 text-lg font-bold">
+          Apply here
         </Button>
       </div>
     </>
