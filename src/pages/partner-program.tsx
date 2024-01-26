@@ -47,16 +47,17 @@ function Card({
   displayStar: boolean;
 }) {
   return (
-    <div className="infline-flex relative max-w-[500px] items-center justify-center space-y-5 rounded-xl border border-black p-10">
-      {displayStar && (
-        <div className="absolute -right-[55px] -top-[60px]">
-          <Star />
-        </div>
-      )}
+    <div className="infline-flex relative max-w-[500px] items-center justify-center space-y-5 rounded-xl border border-black p-10 max-sm:mt-10 max-sm:w-[350px]">
       <div className="inline-flex rounded-2xl bg-black px-4 py-1 font-bold uppercase text-white">
         Step {id}
       </div>
       <p className="text-xl font-bold">{info}</p>
+
+      {displayStar && (
+        <div className="absolute -right-[56px] -top-[80px] z-20">
+          <Star />
+        </div>
+      )}
     </div>
   );
 }
