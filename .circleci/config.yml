@@ -26,6 +26,7 @@ jobs:
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - node_modules
+            - .next/cache
       - run:
           name: Build
           command: pnpm run build
