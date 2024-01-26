@@ -1,6 +1,31 @@
-import PartnerProgram from "@/components/_icons/PartnerProgramIcon";
 import Head from "next/head";
-import Link from "next/link";
+import Image from "next/image";
+
+const steps = [
+  {
+    id: 1,
+    info: "By having an account, you already have a code.",
+  },
+  {
+    id: 2,
+    info: "Send your link to a friend, and when they sign up you will automatically start to earn when they book a trip.",
+  },
+  {
+    id: 3,
+    info: "What are you waiting for? Start earning passive income.",
+  },
+];
+
+function Card({ id, info }: { id: number; info: string }) {
+  return (
+    <div className="infline-flex max-w-[500px] items-center justify-center space-y-5 rounded-xl border border-black p-10">
+      <div className="inline-flex rounded-2xl bg-black px-4 py-1 font-bold uppercase text-white">
+        Step {id}
+      </div>
+      <p className="text-xl font-bold">{info}</p>
+    </div>
+  );
+}
 
 export default function Page() {
   return (
@@ -8,8 +33,9 @@ export default function Page() {
       <Head>
         <title>Partners | Tramona</title>
       </Head>
-      <div className="bg-blue-300 px-10 py-20">
-        <div className="flex flex-col gap-4 md:flex-row md:justify-around">
+      <div className="bg-blue-300 px-[200px] py-20">
+        <div className="container flex flex-row justify-between">
+          {/* Partner Program */}
           <div className="flex flex-col gap-4">
             <p className="font-bold">LET&apos;S EARN TOGETHER</p>
             <h2 className="text-4xl font-bold sm:text-6xl">Partner Program</h2>
@@ -17,50 +43,28 @@ export default function Page() {
               <span className="inline-block bg-yellow-200 shadow-sm">
                 Earn 30% commission of revenue{" "}
               </span>{" "}
-              for 12 months
-              <br /> by simply introducing new customers to Tramona
+              for 12 months by simply introducing new customers to Tramona
             </p>
           </div>
-          <PartnerProgram />
+
+          {/* Image */}
+          <Image
+            src={"/assets/images/partner-program.png"}
+            height={301}
+            width={325}
+            alt="partner program"
+          />
         </div>
       </div>
 
-      <div className="bg-white p-10">
-        <h2 className="text-center text-4xl font-bold sm:text-6xl">
+      <div className="container flex flex-col items-center justify-center space-y-10 p-10">
+        <h2 className="text-center text-4xl font-bold">
           What you need to know
         </h2>
-        <div className="mt-10 grid gap-10 lg:grid-cols-3">
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-gray-200 p-6">
-            <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
-              STEP 1
-            </div>
-            <p className="font-medium sm:text-xl">
-              By having an account, you will earn a referral code
-            </p>
-            <Link
-              className="text-md ml-auto block w-max rounded-lg border-2 border-black bg-blue-200 px-4 py-2 font-bold text-black hover:bg-blue-300"
-              href="/profile"
-            >
-              Take me to my referral page &rarr;
-            </Link>
-          </div>
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-gray-200 p-6">
-            <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
-              STEP 2
-            </div>
-            <p className="font-medium sm:text-xl">
-              Send your link to a friend, and when they sign up you will
-              automatically start to earn when they book a trip
-            </p>
-          </div>
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-gray-200 p-6">
-            <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
-              STEP 3
-            </div>
-            <p className="font-medium sm:text-xl">
-              What are you waiting for ? Start earning you passive income now !
-            </p>
-          </div>
+        <div className="flex flex-col space-y-5 ">
+          {steps.map((step) => (
+            <Card key={step.id} {...step} />
+          ))}
         </div>
       </div>
     </>
