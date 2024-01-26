@@ -19,7 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FilterIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-// import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
@@ -96,12 +96,10 @@ export default function NewRequestForm({
         }
       });
       await utils.requests.invalidate();
-      //   successfulRequestToast(newRequest);
+      successfulRequestToast(newRequest);
       afterSubmit?.();
     } catch (error) {
-      if (error instanceof Error) {
-        // errorToast(error.message);
-      }
+      errorToast();
     }
   }
 
