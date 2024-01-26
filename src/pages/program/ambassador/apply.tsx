@@ -1,4 +1,5 @@
 import StartIcon2 from "@/components/_icons/StartIcon2";
+import { ProgramFrom } from "@/components/ambassador/ProgramForm";
 
 export default function Page() {
   return (
@@ -23,7 +24,9 @@ export default function Page() {
         </div>
       </div>
 
-      <div>Hello</div>
+      <div className="container flex max-w-2xl flex-col py-10">
+        <ProgramFrom />
+      </div>
     </div>
   );
 }
