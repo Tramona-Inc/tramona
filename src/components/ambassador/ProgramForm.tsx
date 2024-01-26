@@ -112,7 +112,11 @@ export function ProgramFrom() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     // TODO: Submit data somewhere to store and review
-    // console.log(values);
+    const mailtoLink = `mailto:info@tramona.com?subject=Form Submission&body=${encodeURIComponent(
+      JSON.stringify(values),
+    )}`;
+    window.location.href = mailtoLink;
+    console.log(values);
   }
 
   return (
