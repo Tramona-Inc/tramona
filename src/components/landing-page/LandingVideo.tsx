@@ -12,7 +12,7 @@ const LandingVideo = () => {
         setVideoLoaded(true);
         return videoRef?.current?.play();
       } catch (error) {
-        console.error("Error loading video:", error);
+        // oh well
       }
     };
 

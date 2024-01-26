@@ -1,3 +1,7 @@
+import { cn, formatCurrency, formatDateRange } from "@/utils/utils";
+import Link from "next/link";
+import CopyToClipboardBtn from "../../../_utils/CopyToClipboardBtn";
+import { Button, buttonVariants } from "../../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,10 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../../ui/dialog";
-import { Button, buttonVariants } from "../../../ui/button";
-import Link from "next/link";
-import { cn, formatCurrency, formatDateRange } from "@/utils/utils";
-import CopyToClipboardBtn from "../../../_utils/CopyToClipboardBtn";
 
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{
@@ -19,7 +19,7 @@ export default function HowToBookDialog(
     checkOut: Date;
   }>,
 ) {
-  const message = `Hi, I was offerd your property on Tramona for ${formatCurrency(
+  const message = `Hi, I was offered your property on Tramona for ${formatCurrency(
     props.totalPrice,
   )} total for ${formatDateRange(
     props.checkIn,

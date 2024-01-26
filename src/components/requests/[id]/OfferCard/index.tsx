@@ -1,5 +1,11 @@
 import { type AppRouter } from "@/server/api/root";
-import { cn, formatCurrency } from "@/utils/utils";
+import {
+  cn,
+  formatCurrency,
+  getDiscountPercentage,
+  getNumNights,
+  plural,
+} from "@/utils/utils";
 import { type inferRouterOutputs } from "@trpc/server";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
 import Link from "next/link";
@@ -25,6 +31,9 @@ export default function OfferCard({
 }) {
   const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
+  const offerNightlyPrice = offer.totalPrice / getNumNights(checkIn, checkOut);
+  const numAmenities =
+    property.amenities.length + property.standoutAmenities.length;
 
   return (
     <Card className={cn(lisa && "p-0", "overflow-clip")}>
@@ -43,8 +52,9 @@ export default function OfferCard({
               <SaleTagIcon />
             </div>
             <p className="absolute left-4 top-10 w-24 text-center font-semibold text-primary">
-              {Math.round(
-                100 * (1 - offer.totalPrice / property.originalNightlyPrice), // TODO fix
+              {getDiscountPercentage(
+                property.originalNightlyPrice,
+                offerNightlyPrice,
               )}
               % off
             </p>
@@ -63,7 +73,7 @@ export default function OfferCard({
               <p className="text-xs font-semibold uppercase">Tramona Price</p>
               <p>
                 <span className="text-3xl font-bold text-primary">
-                  {formatCurrency(offer.totalPrice)}
+                  {formatCurrency(offerNightlyPrice)}
                 </span>
                 <span className="text-sm">/night</span>
               </p>
@@ -83,10 +93,13 @@ export default function OfferCard({
             <p className="text-lg font-semibold">{property.name}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">{property.propertyType}</Badge>
+        <div className="flex flex-wrap items-center gap-1">
           <Badge variant="secondary" className="pl-1 pr-2">
             ★ {property.avgRating} ({property.numRatings})
+          </Badge>
+          <Badge variant="secondary">{property.propertyType}</Badge>
+          <Badge variant="secondary">
+            {plural(numAmenities, "amenity", "amenities")}
           </Badge>
         </div>
         <div className="flex gap-6">
