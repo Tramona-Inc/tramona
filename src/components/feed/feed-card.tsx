@@ -5,9 +5,9 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 
-import { Icons } from "@/components/_icons/icons";
+// import { Icons } from "@/components/_icons/icons";
 import { type AppRouter } from "@/server/api/root";
-import { formatCurrency } from "@/utils/utils";
+import { formatCurrency, formatInterval } from "@/utils/utils";
 import { inferRouterOutputs } from "@trpc/server";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,8 +26,13 @@ export default function FeedCard({ offer }: Props) {
   // const lastNameCensored =
   //   name.length > 1 ? "*".repeat(name[1].length) : "******";
 
+  // Format the time when the offer was created
+  const msAgo = Date.now() - offer.createdAt.getTime();
+  const showTimeAgo = msAgo > 1000 * 60 * 60;
+  const fmtdTimeAgo = showTimeAgo ? `${formatInterval(msAgo)}` : "";
+
   return (
-    <Card className="flex flex-col justify-between">
+    <Card className="flex flex-col justify-between py-6">
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-2">
           <Link href="/general-profile">
@@ -40,12 +45,10 @@ export default function FeedCard({ offer }: Props) {
         </div>
 
         {/* // TODO: when offer is accepted display date*/}
-        <p className="text-sm text-secondary-foreground/60">
-          {/* {offers.posting.date} */}
-        </p>
+        <p className="text-sm text-secondary-foreground/60">{fmtdTimeAgo}</p>
       </CardHeader>
       <CardContent className="space-y-5">
-        <h1 className="text-center text-2xl font-bold">
+        <h1 className="py-3 text-center text-2xl font-bold">
           {offer.property.name}
         </h1>
         <section className="grid h-[175px] grid-cols-2 place-items-center space-x-5">
@@ -76,29 +79,33 @@ export default function FeedCard({ offer }: Props) {
 
           {/* Price */}
           <div className="space-y-5 text-center">
-            <div className="space-y-2">
+            <div className="lg:space-y-1">
               <h1 className="text-xl font-bold">Tramona Price</h1>
-              <h3 className="text-2xl font-bold text-primary">
+              <h3 className="text-3xl font-bold text-primary">
                 {formatCurrency(offer.totalPrice)}
-                <span className="text-secondary-foreground">/night</span>
+                <span className="text-sm font-medium text-muted-foreground">
+                  /night
+                </span>
               </h3>
             </div>
-            <div className="space-y-2">
+            <div className="lg:space-y-1">
               <h1 className="text-xl font-bold">Original Price</h1>
-              <h3 className="text-2xl font-bold text-primary">
+              <h3 className="text-3xl font-bold text-primary">
                 {formatCurrency(offer.property.originalNightlyPrice)}
-                <span className="text-secondary-foreground">/night</span>
+                <span className="text-sm font-medium text-muted-foreground">
+                  /night
+                </span>
               </h3>
             </div>
           </div>
         </section>
       </CardContent>
-      <CardFooter className="flex flex-row justify-end space-x-5">
+      {/* <CardFooter className="flex flex-row justify-end space-x-5">
         <Icons.comment />
         <Icons.heart />
         <Icons.share />
         <Icons.bookmark />
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
 }
