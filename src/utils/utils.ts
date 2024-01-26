@@ -1,7 +1,7 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { format, isSameMonth, isSameYear } from "date-fns";
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { clsx, type ClassValue } from "clsx";
+import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -71,18 +71,26 @@ export function capitalize(str: string) {
  * ```
  */
 export function formatDateRange(from: Date, to?: Date) {
-  if (!to) {
-    return format(from, "MMM d, yyyy");
+  const isCurYear = isSameYear(from, new Date());
+
+  if (!to || isSameDay(from, to)) {
+    return format(from, isCurYear ? "MMM d" : "MMM d, yyyy");
   }
 
   const sameMonth = isSameMonth(from, to);
   const sameYear = isSameYear(from, to);
 
   if (sameMonth && sameYear) {
-    return `${format(from, "MMM d")} – ${format(to, "d, yyyy")}`;
+    return `${format(from, "MMM d")} – ${format(
+      to,
+      isCurYear ? "d" : "d, yyyy",
+    )}`;
   }
   if (sameYear) {
-    return `${format(from, "MMM d")} – ${format(to, "MMM d, yyyy")}`;
+    return `${format(from, "MMM d")} – ${format(
+      to,
+      isCurYear ? "MMM d" : "MMM d, yyyy",
+    )}`;
   }
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
 }
@@ -138,4 +146,11 @@ export async function retry<T>(f: Promise<T>, numRetries: number) {
       });
     } catch (err) {}
   }
+}
+
+export function getDiscountPercentage(
+  originalPrice: number,
+  discountPrice: number,
+) {
+  return Math.round((1 - discountPrice / originalPrice) * 100);
 }

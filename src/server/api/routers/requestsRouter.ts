@@ -9,11 +9,12 @@ import {
   requestSelectSchema,
   requests,
 } from "@/server/db/schema";
+import { getRequestStatus } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
 async function getDetailedRequests({ userId }: { userId?: string } = {}) {
-  const myRequests = await db.query.requests
+  return await db.query.requests
     .findMany({
       where: userId ? eq(requests.userId, userId) : undefined,
       with: {
@@ -41,37 +42,49 @@ async function getDetailedRequests({ userId }: { userId?: string } = {}) {
         return { ...requestExceptOffers, hostImages, numOffers };
       }),
     );
-
-  const activeRequests = myRequests
-    .filter((request) => request.resolvedAt === null)
-    .map((request) => ({ ...request, resolvedAt: null })) // because ts is dumb
-    .sort(
-      (a, b) =>
-        b.numOffers - a.numOffers ||
-        b.createdAt.getTime() - a.createdAt.getTime(),
-    );
-
-  const inactiveRequests = myRequests
-    .filter((request) => request.resolvedAt !== null)
-    .map((request) => ({
-      ...request,
-      resolvedAt: request.resolvedAt ?? new Date(),
-    })) // because ts is dumb, new Date will never actually happen
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-  return {
-    activeRequests,
-    inactiveRequests,
-  };
 }
+
+export type DetailedRequest = Awaited<
+  ReturnType<typeof getDetailedRequests>
+>[number];
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
-    return await getDetailedRequests({ userId: ctx.user.id });
+    const myRequests = await getDetailedRequests({ userId: ctx.user.id });
+
+    const activeRequests = myRequests
+      .filter((request) => request.resolvedAt === null)
+      .map((request) => ({ ...request, resolvedAt: null })) // because ts is dumb
+      .sort(
+        (a, b) =>
+          b.numOffers - a.numOffers ||
+          b.createdAt.getTime() - a.createdAt.getTime(),
+      );
+
+    const inactiveRequests = myRequests
+      .filter((request) => request.resolvedAt !== null)
+      .map((request) => ({
+        ...request,
+        resolvedAt: request.resolvedAt ?? new Date(),
+      })) // because ts is dumb, new Date will never actually happen
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    return {
+      activeRequests,
+      inactiveRequests,
+    };
   }),
 
   getAll: roleRestrictedProcedure(["admin"]).query(async () => {
-    return await getDetailedRequests();
+    const allRequests = await getDetailedRequests();
+    return {
+      incomingRequests: allRequests.filter(
+        (req) => getRequestStatus(req) === "pending",
+      ),
+      pastRequests: allRequests.filter(
+        (req) => getRequestStatus(req) !== "pending",
+      ),
+    };
   }),
 
   // getAllIncoming: roleRestrictedProcedure(["host", "admin"]).query(

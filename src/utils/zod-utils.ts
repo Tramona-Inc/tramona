@@ -1,5 +1,5 @@
 import { parseISO } from "date-fns";
-import { type ZodType, z } from "zod";
+import { z, type ZodType } from "zod";
 
 /**
  * Zod wasn't meant for forms, so these utilities make it a lot less weird to write
@@ -54,12 +54,8 @@ export function zodInteger({ min = -Infinity, max = Infinity } = {}) {
   });
 }
 
-export function zodUrls() {
-  return z.array(
-    z.object({
-      value: z.string().url({ message: "Please enter a valid URL." }),
-    }),
-  );
+export function zodUrl() {
+  return zodString().url({ message: "Must be a valid URL" });
 }
 
 export function zodMMDDYYYY() {
