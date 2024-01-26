@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import Head from "next/head";
 import Image from "next/image";
 
@@ -66,8 +67,8 @@ export default function Page() {
       <Head>
         <title>Partners | Tramona</title>
       </Head>
-      <div className="bg-blue-300 px-[200px] py-20">
-        <div className="container flex flex-row justify-between">
+      <div className="bg-blue-300 py-20">
+        <div className="container flex max-w-[1000px] flex-col items-center justify-between gap-10 lg:flex-row">
           {/* Partner Program */}
           <div className="flex flex-col gap-4">
             <p className="font-bold">LET&apos;S EARN TOGETHER</p>
@@ -99,6 +100,15 @@ export default function Page() {
             <Card key={step.id} {...step} />
           ))}
         </div>
+
+        <p>
+          * You can withdraw and check on your funds on the cash back balance
+          page
+        </p>
+
+        <Button className="rounded-xl px-10 py-6 text-lg font-bold">
+          Start referring
+        </Button>
       </div>
     </>
   );
