@@ -37,6 +37,10 @@ const config = {
         // port: "",
         // pathname: "/im/pictures/**",
       },
+      {
+        protocol: "https",
+        hostname: "asdf.asdf",
+      },
     ],
   },
   experimental: {
