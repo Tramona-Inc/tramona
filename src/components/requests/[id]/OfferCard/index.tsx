@@ -97,7 +97,9 @@ export default function OfferCard({
             ★ {property.avgRating} ({property.numRatings})
           </Badge>
           <Badge variant="secondary">{property.propertyType}</Badge>
-          <Badge variant="secondary">{plural(numAmenities, "amenities")}</Badge>
+          <Badge variant="secondary">
+            {plural(numAmenities, "amenity", "amenities")}
+          </Badge>
         </div>
         <div className="flex gap-6">
           <div className="flex w-72 flex-row gap-5">
