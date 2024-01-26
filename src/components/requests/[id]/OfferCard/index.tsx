@@ -30,6 +30,8 @@ export default function OfferCard({
   const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
   const offerNightlyPrice = offer.totalPrice / getNumNights(checkIn, checkOut);
+  const numAmenities =
+    property.amenities.length + property.standoutAmenities.length;
 
   return (
     <Card className={cn(lisa && "p-0", "overflow-clip")}>
@@ -89,11 +91,12 @@ export default function OfferCard({
             <p className="text-lg font-semibold">{property.name}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">{property.propertyType}</Badge>
+        <div className="flex flex-wrap items-center gap-1">
           <Badge variant="secondary" className="pl-1 pr-2">
             ★ {property.avgRating} ({property.numRatings})
           </Badge>
+          <Badge variant="secondary">{property.propertyType}</Badge>
+          <Badge variant="secondary">{numAmenities} amenities</Badge>
         </div>
         <div className="flex gap-6">
           <div className="flex w-72 flex-row gap-5">
