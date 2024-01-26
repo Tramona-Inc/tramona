@@ -22,17 +22,17 @@ const steps = [
   {
     id: 1,
     info: "By having an account, you already have a code.",
-    displayStar: true
+    displayStar: true,
   },
   {
     id: 2,
     info: "Send your link to a friend, and when they sign up you will automatically start to earn when they book a trip.",
-    displayStar: false
+    displayStar: false,
   },
   {
     id: 3,
     info: "What are you waiting for? Start earning passive income.",
-    displayStar: false
+    displayStar: false,
   },
 ];
 
@@ -43,7 +43,7 @@ function Card({
 }: {
   id: number;
   info: string;
-  displayStar?: false;
+  displayStar: boolean;
 }) {
   return (
     <div className="infline-flex relative max-w-[500px] items-center justify-center space-y-5 rounded-xl border border-black p-10">
