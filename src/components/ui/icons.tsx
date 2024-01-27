@@ -1,5 +1,5 @@
 import type { LucideIcon, LucideProps } from "lucide-react";
-import { Menu, ShieldAlert, Star, Trash, User } from "lucide-react";
+import { BadgeCheck, Menu, ShieldAlert, Star, Trash, User } from "lucide-react";
 import * as React from "react"; // Import React
 
 type Icons = Record<
@@ -14,6 +14,7 @@ const iconComponents: Icons = {
   user: User,
   star: Star,
   trash: Trash,
+  success: BadgeCheck, 
   google: () => {
     return (
       <svg
