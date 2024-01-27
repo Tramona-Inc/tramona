@@ -158,7 +158,7 @@ export function ProgramFrom() {
 
   if (sent) {
     return (
-      <div className="mt-[150px] h-full">
+      <div className="my-[150px] h-full">
         <Card>
           <CardHeader></CardHeader>
           <CardContent className="flex flex-col items-center justify-center space-y-10">
@@ -406,7 +406,7 @@ export function ProgramFrom() {
             </form>
           </Form>
         ) : (
-          <div className="mt-[150px] h-full">
+          <div className="my-[150px] h-full">
             <Card>
               <CardHeader></CardHeader>
               <CardContent className="flex flex-col items-center justify-center space-y-10">
