@@ -1,7 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,6 +9,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodUrl } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import Icons from "../ui/icons";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Textarea } from "../ui/textarea";
@@ -108,12 +118,16 @@ export function ProgramFrom() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const { data: session } = useSession();
+  const router = useRouter();
 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await fetch("/api/email/send", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(values),
       });
       toast({
@@ -130,228 +144,257 @@ export function ProgramFrom() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <h2 className="text-2xl font-bold">How can we reach you?</h2>
-        <FormField
-          control={form.control}
-          name="firstName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                First name <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="John" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <>
+      {session ? (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <h2 className="text-2xl font-bold">How can we reach you?</h2>
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    First name <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="John" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="lastName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Last name <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="Doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Last name <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="college"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Are you in college? <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex gap-5"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id="yes" />
-                    <Label htmlFor="yes">Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="no" />
-                    <Label htmlFor="no">No</Label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="college"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Are you in college? <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex gap-5"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="yes" />
+                        <Label htmlFor="yes">Yes</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="no" />
+                        <Label htmlFor="no">No</Label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="schoolName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                School Name <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="University of ..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="schoolName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    School Name <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="University of ..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Telephone <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="+1 (123)-123-1234" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Telephone <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="+1 (123)-123-1234" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="linkedInUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                LinkedIn URL <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="www.linkedin.com/in/" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="linkedInUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    LinkedIn URL <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="www.linkedin.com/in/" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="instagram"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Instagram (optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="@username" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="instagram"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Instagram (optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="@username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="twitter"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Twitter (optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="@username" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="twitter"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Twitter (optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="@username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="otherSocialMedia"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Other applicable social medias (optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="@username" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="otherSocialMedia"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Other applicable social medias (optional)
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="@username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <h2 className="text-2xl font-bold">Tell us a bit about yourself</h2>
+            <h2 className="text-2xl font-bold">Tell us a bit about yourself</h2>
 
-        <FormField
-          control={form.control}
-          name="question1"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Why do you want Ambassador status? <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-y" rows={10} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="question1"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Why do you want Ambassador status? <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-y" rows={10} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="question2"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                What is your growth strategy? <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-y" rows={10} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="question2"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    What is your growth strategy? <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-y" rows={10} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="question3"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Where do you plan to post your code? <RequriedIcon />
-              </FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-y" rows={10} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="question3"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Where do you plan to post your code? <RequriedIcon />
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-y" rows={10} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="question4"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Anything else you think we should know? (optional)
-              </FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-y" rows={10} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="question4"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Anything else you think we should know? (optional)
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-y" rows={10} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
+      ) : (
+        <>
+          <Card>
+            <CardHeader></CardHeader>
+            <CardContent className="flex flex-col items-center justify-center space-y-10">
+              <CardTitle>We need your account info</CardTitle>
+              <Icons iconName="shield" className="h-[100px] w-[100px]" />
+              <Button
+                onClick={() =>
+                  signIn()
+                }
+              >
+                Log in / Sign up
+              </Button>
+            </CardContent>
+            <CardFooter>
+              <CardDescription>
+                In order to be able to fill in the form please create an account
+                or log in to apply for the program
+              </CardDescription>
+            </CardFooter>
+          </Card>
+        </>
+      )}
+    </>
   );
 }

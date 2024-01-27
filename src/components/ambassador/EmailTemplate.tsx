@@ -7,6 +7,7 @@ export type EmailTemplateProps = {
   schoolName: string;
   phone: string;
   linkedInUrl: string;
+  instagram: string;
   twitter: string;
   otherSocialMedia: string;
   question1: string;
@@ -22,6 +23,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
   schoolName,
   phone,
   linkedInUrl,
+  instagram,
   twitter,
   otherSocialMedia,
   question1,
@@ -42,8 +44,11 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
     <p>
       Linked In: <a>{linkedInUrl}</a>
     </p>
-    <p>Twitter: {twitter}</p>
-    <p>Other social media: {otherSocialMedia}</p>
+    <p>Instagram: {instagram !== "" ? instagram : "none"}</p>
+    <p>Twitter: {twitter !== "" ? twitter : "none"}</p>
+    <p>
+      Other social media: {otherSocialMedia !== "" ? otherSocialMedia : "none"}
+    </p>
 
     <h1>Questions</h1>
     <h3>Why do you want Ambassador Status?</h3>
@@ -56,6 +61,6 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
     <p>{question3}</p>
 
     <h3>Anything else you think we should know?</h3>
-    <p>{question4}</p>
+    <p>{question4 !== "" ? question4 : "none"}</p>
   </div>
 );

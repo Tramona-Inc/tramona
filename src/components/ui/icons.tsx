@@ -1,5 +1,5 @@
 import type { LucideIcon, LucideProps } from "lucide-react";
-import { Menu, Star, User, Trash } from "lucide-react";
+import { Menu, ShieldAlert, Star, Trash, User } from "lucide-react";
 import * as React from "react"; // Import React
 
 type Icons = Record<
@@ -9,6 +9,7 @@ type Icons = Record<
 
 const iconComponents: Icons = {
   // github: Github,
+  shield: ShieldAlert,
   menu: Menu,
   user: User,
   star: Star,
@@ -96,14 +97,21 @@ const iconComponents: Icons = {
   },
 };
 
+
 const NoIconFound: React.FC = () => {
   return null;
 };
 
-const Icons: React.FC<{ iconName: string }> = ({ iconName }) => {
+interface IconsProps {
+  iconName: string;
+  className?: string; // Add className prop
+}
+
+const Icons: React.FC<IconsProps> = ({ iconName, className }) => {
   const iconComponent = iconComponents[iconName.toLowerCase()] ?? NoIconFound;
 
-  return <>{React.createElement(iconComponent)}</>;
+  // Pass the className prop to the underlying icon component if it accepts props
+  return <>{React.createElement(iconComponent, { className })}</>;
 };
 
 export default Icons;
