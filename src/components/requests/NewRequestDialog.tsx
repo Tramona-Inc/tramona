@@ -21,7 +21,7 @@ export default function NewRequestDialog({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogClose className="hidden" />
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="space-y-4">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Make a new request</DialogTitle>
           <DialogDescription>

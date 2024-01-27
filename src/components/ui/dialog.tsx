@@ -2,109 +2,181 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import * as React from "react";
 
-import { cn } from "@/utils/utils";
+import { cn, useIsDesktop } from "@/utils/utils";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
+} from "./drawer";
 
-const Dialog = DialogPrimitive.Root;
+// const Dialog = DialogPrimitive.Root;
 
-const DialogTrigger = DialogPrimitive.Trigger;
+function Dialog(
+  props: React.ComponentProps<typeof DialogPrimitive.Root> &
+    React.ComponentProps<typeof Drawer>,
+) {
+  return useIsDesktop() ? (
+    <DialogPrimitive.Root {...props} />
+  ) : (
+    <Drawer {...props} />
+  );
+}
+// Dialog.displayName = DialogPrimitive.Root.displayName;
 
-const DialogPortal = DialogPrimitive.Portal;
+// const DialogTrigger = DialogPrimitive.Trigger;
 
-const DialogClose = DialogPrimitive.Close;
+function DialogTrigger(
+  props: React.ComponentProps<typeof DialogPrimitive.Trigger>,
+) {
+  return useIsDesktop() ? (
+    <DialogPrimitive.Trigger {...props} />
+  ) : (
+    <DrawerTrigger {...props} />
+  );
+}
+
+// DialogTrigger.displayName = DialogPrimitive.Trigger.displayName;
+
+// const DialogPortal = DialogPrimitive.Portal;
+
+function DialogPortal(
+  props: React.ComponentProps<typeof DialogPrimitive.Portal>,
+) {
+  return useIsDesktop() ? (
+    <DialogPrimitive.Portal {...props} />
+  ) : (
+    <DrawerPortal {...props} />
+  );
+}
+
+// DialogPortal.displayName = DialogPrimitive.Portal.displayName;
+
+// const DialogClose = DialogPrimitive.Close;
+
+function DialogClose(
+  props: React.ComponentProps<typeof DialogPrimitive.Close>,
+) {
+  return useIsDesktop() ? (
+    <DialogPrimitive.Close {...props} />
+  ) : (
+    <DrawerClose {...props} />
+  );
+}
+
+// DialogClose.displayName = DialogPrimitive.Close.displayName;
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      "fixed inset-0 z-50 grid place-items-center overflow-auto bg-background/70 px-4 py-16 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className,
-    )}
-    {...props}
-  />
-));
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
-
-const DialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay>
-      <DialogPrimitive.Content
+>(
+  ({ className, ...props }, ref) =>
+    useIsDesktop() ? (
+      <DialogPrimitive.Overlay
         ref={ref}
         className={cn(
-          "relative w-full max-w-xl rounded-xl border bg-background p-6 pb-6 shadow-lg duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+          "fixed inset-0 z-50 grid place-items-center overflow-auto bg-background/70 px-4 py-16 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
           className,
         )}
         {...props}
-      >
-        {children}
-        <DialogPrimitive.Close className="absolute right-4 top-0 rounded-full p-1.5 opacity-70 ring-offset-background hover:bg-accent hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <Cross2Icon className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
-      </DialogPrimitive.Content>
-    </DialogOverlay>
-  </DialogPortal>
-));
+      />
+    ) : null, // <DrawerOverlay ref={ref} {...props} /> // its a long story
+);
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content & typeof DrawerContent>,
+  React.ComponentPropsWithoutRef<
+    typeof DialogPrimitive.Content & typeof DrawerContent
+  >
+>(({ className, children, ...props }, ref) =>
+  useIsDesktop() ? (
+    <DialogPortal>
+      <DialogOverlay>
+        <DialogPrimitive.Content
+          ref={ref}
+          className={cn(
+            "relative w-full max-w-xl rounded-xl border bg-background p-6 shadow-lg duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            className,
+          )}
+          {...props}
+        >
+          <div className="space-y-4">{children}</div>
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1.5 opacity-70 ring-offset-background hover:bg-accent hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <Cross2Icon className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        </DialogPrimitive.Content>
+      </DialogOverlay>
+    </DialogPortal>
+  ) : (
+    <DrawerContent className={className} ref={ref} {...props}>
+      {children}
+    </DrawerContent>
+  ),
+);
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className,
-    )}
-    {...props}
-  />
-);
+}: React.HTMLAttributes<HTMLDivElement>) =>
+  useIsDesktop() ? (
+    <div className={cn("space-y-1.5 text-left", className)} {...props} />
+  ) : (
+    <DrawerHeader className={className} {...props} />
+  );
 DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className,
-    )}
-    {...props}
-  />
-);
+}: React.HTMLAttributes<HTMLDivElement>) =>
+  useIsDesktop() ? (
+    <div className={cn("flex justify-end gap-2", className)} {...props} />
+  ) : (
+    <DrawerFooter className={className} {...props} />
+  );
 DialogFooter.displayName = "DialogFooter";
 
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    className={cn(
-      "text-xl font-semibold leading-none tracking-tight",
-      className,
-    )}
-    {...props}
-  />
-));
+>(({ className, ...props }, ref) =>
+  useIsDesktop() ? (
+    <DialogPrimitive.Title
+      ref={ref}
+      className={cn(
+        "text-xl font-semibold leading-none tracking-tight",
+        className,
+      )}
+      {...props}
+    />
+  ) : (
+    <DrawerTitle className={className} ref={ref} {...props} />
+  ),
+);
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    className={cn("text-muted-foreground", className)}
-    {...props}
-  />
-));
+>(({ className, ...props }, ref) =>
+  useIsDesktop() ? (
+    <DialogPrimitive.Description
+      ref={ref}
+      className={cn("text-muted-foreground", className)}
+      {...props}
+    />
+  ) : (
+    <DrawerDescription className={className} ref={ref} {...props} />
+  ),
+);
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 export {
