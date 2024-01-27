@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { zodUrl } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import {
@@ -119,16 +118,20 @@ export function ProgramFrom() {
   });
 
   const { data: session } = useSession();
-  const router = useRouter();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const data = {
+      values: values,
+      user: session?.user,
+    };
+
     try {
       await fetch("/api/email/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(data),
       });
       toast({
         title: "Application successfully sent.",

@@ -1,10 +1,6 @@
-import {
-  EmailTemplate,
-  type EmailTemplateProps,
-} from "@/components/ambassador/EmailTemplate";
+import { type EmailTemplateProps, EmailTemplate } from "@/components/ambassador/EmailTemplate";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Resend } from "resend";
-
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // eslint-disable-next-line import/no-anonymous-default-export
@@ -14,13 +10,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { data, error } = await resend.emails.send({
       from: `${
-        bodyData.firstName + " " + bodyData.lastName
+        bodyData.values.firstName + " " + bodyData.values.lastName
       } - Ambassador Application <onboarding@resend.dev>`,
       to: ["info@tramona.com"],
       subject: "New Ambassador Program Application",
       text: "Applications",
-      react: EmailTemplate(bodyData),
-    });
+      react: EmailTemplate(bodyData)
+    })
 
     if (error) {
       return res.status(400).json(error);
