@@ -372,28 +372,23 @@ export function ProgramFrom() {
           </form>
         </Form>
       ) : (
-        <>
+        <div className="mt-[150px] h-full">
           <Card>
             <CardHeader></CardHeader>
             <CardContent className="flex flex-col items-center justify-center space-y-10">
               <CardTitle>We need your account info</CardTitle>
               <Icons iconName="shield" className="h-[100px] w-[100px]" />
-              <Button
-                onClick={() =>
-                  signIn()
-                }
-              >
-                Log in / Sign up
-              </Button>
+              <Button onClick={() => signIn()}>Log in / Sign up</Button>
             </CardContent>
             <CardFooter>
-              <CardDescription>
-                In order to be able to fill in the form please create an account
-                or log in to apply for the program
+              <CardDescription className="flex flex-col items-center justify-center">
+                To proceed with your application, please create an account or
+                log in. Your journey begins here – let&apos;s get started
+                together!
               </CardDescription>
             </CardFooter>
           </Card>
-        </>
+        </div>
       )}
     </>
   );
