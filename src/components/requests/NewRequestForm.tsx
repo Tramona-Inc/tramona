@@ -116,7 +116,7 @@ export default function NewRequestForm({
             <FormItem className="col-span-full sm:col-span-1">
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} autoFocus />
               </FormControl>
               <FormMessage />
             </FormItem>

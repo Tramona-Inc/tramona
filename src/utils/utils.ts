@@ -1,4 +1,5 @@
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
 import { twMerge } from "tailwind-merge";
@@ -175,4 +176,8 @@ export function getDiscountPercentage(
   discountPrice: number,
 ) {
   return Math.round((1 - discountPrice / originalPrice) * 100);
+}
+
+export function useIsDesktop() {
+  return (useWindowSize()?.width ?? 0) >= 640;
 }

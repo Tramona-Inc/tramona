@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
 import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
@@ -64,9 +64,9 @@ export default function LargeRequestCard({
           </div>
         )}
       </CardContent>
-      <CardFooter>
+      <div className="flex justify-end">
         <LargeRequestCardBadge request={request} />
-      </CardFooter>
+      </div>
     </Card>
   );
 }

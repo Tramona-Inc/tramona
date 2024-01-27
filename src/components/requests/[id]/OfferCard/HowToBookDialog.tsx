@@ -29,7 +29,7 @@ export default function HowToBookDialog(
   return (
     <Dialog>
       <DialogTrigger asChild>{props.children}</DialogTrigger>
-      <DialogContent className="space-y-4">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>How To Book:</DialogTitle>
           <DialogDescription>

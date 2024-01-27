@@ -146,7 +146,7 @@ export default function AdminOfferForm({
             <FormItem>
               <FormLabel>Property name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} autoFocus />
               </FormControl>
               <FormMessage />
             </FormItem>

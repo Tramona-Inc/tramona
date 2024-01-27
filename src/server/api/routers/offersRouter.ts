@@ -15,7 +15,7 @@ import {
 } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, isNotNull, lt, sql } from "drizzle-orm";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -224,6 +224,28 @@ export const offersRouter = createTRPCRouter({
       ...offer,
       madePublicAt: offer.madePublicAt ?? new Date(), // will never be null, just fixes types
     }));
+  }),
+
+  getAllOffers: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.offers.findMany({
+      // where: isNotNull(offers.acceptedAt),
+      columns: { acceptedAt: false },
+      with: {
+        property: {
+          with: {
+            host: { columns: { name: true, email: true, image: true } },
+          },
+          columns: { name: true, originalNightlyPrice: true, imageUrls: true },
+        },
+        request: {
+          columns: { userId: true, checkIn: true, checkOut: true },
+          with: {
+            madeByUser: { columns: { name: true } }, // Fetch user name
+          },
+        },
+      },
+      orderBy: desc(offers.createdAt),
+    });
   }),
 
   create: roleRestrictedProcedure(["admin", "host"])
