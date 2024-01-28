@@ -13,13 +13,13 @@ export const stripe = new Stripe(env.STRIPE_TEST_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
 
-export const paymentsRouter = createTRPCRouter({
-  createCheckout: protectedProcedure
+export const stripeRouter = createTRPCRouter({
+  createCheckoutSession: protectedProcedure
     .input(z.object({ name: z.string(), price: z.number() }))
     .mutation(({ input }) => {
       return stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card", "us_bank_account"],
+        payment_method_types: ["card"],
         line_items: [
           {
             price_data: {
@@ -29,7 +29,7 @@ export const paymentsRouter = createTRPCRouter({
                 name: input.name,
               },
             },
-            quantity: 1
+            quantity: 1,
           },
         ],
         success_url: `${env.NEXTAUTH_URL}/payment/success?session_ID={CHECKOUT_SESSION_ID}`,

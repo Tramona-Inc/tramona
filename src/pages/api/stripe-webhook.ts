@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { stripe } from "@/server/api/routers/paymentsRouter";
+import { stripe } from "@/server/api/routers/stripeRouter";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { buffer } from "stream/consumers";
 
