@@ -20,6 +20,17 @@ export const usersRouter = createTRPCRouter({
       referralCodeUsed: res?.referralCodeUsed ?? null,
     };
   }),
+  myReferralCode: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {},
+        with: {
+          referralCode: true,
+        },
+      })
+      .then((res) => res?.referralCode ?? null);
+  }),
   updateProfile: protectedProcedure
     .input(
       z.object({
