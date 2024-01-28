@@ -13,6 +13,10 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const REFERRAL_CODE_LENGTH = 7;
 export const roleEnum = pgEnum("role", ["guest", "host", "admin"]);
+export const referralTierEnum = pgEnum("referral_tier", [
+  "Partner",
+  "Ambassador",
+]);
 
 export const users = pgTable("user", {
   // nextauth fields
@@ -27,6 +31,7 @@ export const users = pgTable("user", {
     length: REFERRAL_CODE_LENGTH,
   }),
   role: roleEnum("role").notNull().default("guest"),
+  referralTier: referralTierEnum("referral_tier").notNull().default("Partner"),
   phoneNumber: varchar("phone_number", { length: 20 }),
 });
 
