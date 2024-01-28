@@ -6,6 +6,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+
+import { api } from "@/utils/api";
+import { formatCurrency } from "@/utils/utils";
 import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 
 const defaultMessage = `Hey! Join this new travel platform. They let people travel at any price they want. You name the price and they'll find a bnb out of your budget and make it work with your price. Here's the link, check it out:`;
@@ -14,14 +17,17 @@ export default function ReferralDashboard() {
   const { data: session } = useSession();
   const user = session?.user;
 
+  const { data, isLoading } = api.users.myReferralCode.useQuery();
+
   const [message, setMessage] = useState(
     typeof window === "undefined"
       ? ""
       : localStorage.getItem("referralMessage") ?? defaultMessage,
   );
 
-  const code = user?.referralCodeUsed ?? "";
-  const url = code === "" ? "" : `https://tramona.com/sign-up?code=${code}`;
+  const code =
+    user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
+  const url = `https://tramona.com/auth/signin?code=${code}`;
 
   const messageWithLink = `${message}\n\n${url}`;
 
@@ -37,14 +43,22 @@ export default function ReferralDashboard() {
     toast({ title: "Message saved!", description: "Copy it & share" });
   }
 
+  if (isLoading) {
+    return (
+      <Button variant="ghost" disabled isLoading>
+        Loading
+      </Button>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <section className="rounded-xl bg-zinc-100 p-4">
         <p className="text-base text-muted-foreground">Referral Status</p>
         <p className="text-3xl font-bold">
-          Partner
+          {user?.referralTier}
           <Link
-            href="/partners"
+            href="/program"
             target="_blank"
             rel="noopener noreferrer"
             className="ml-2 text-sm font-medium text-muted-foreground underline underline-offset-2"
@@ -55,20 +69,25 @@ export default function ReferralDashboard() {
         <div className="my-2 h-px bg-zinc-300"></div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <p className="text-center text-4xl font-bold">{"-"}</p>
-            {/* <p className="text-center text-4xl font-bold">{user?.numReferred ?? '-'}</p> */}
+            <p className="text-center text-4xl font-bold">
+              {data?.numSignUpsUsingCode ?? "-"}
+            </p>
             <p className="text-center text-base text-muted-foreground">
               referred
             </p>
           </div>
           <div>
-            <p className="text-center text-4xl font-bold">$867.22</p>
+            <p className="text-center text-4xl font-bold">
+              {formatCurrency(data?.totalBookingVolume ?? 0)}
+            </p>
             <p className="text-center text-base text-muted-foreground">
               total earnings
             </p>
           </div>
           <div>
-            <p className="text-center text-4xl font-bold">30</p>
+            <p className="text-center text-4xl font-bold">
+              {data?.numBookingsUsingCode ?? 0}
+            </p>
             <p className="text-center text-base text-muted-foreground">
               bookings
             </p>
