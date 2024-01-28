@@ -15,7 +15,7 @@ import {
 } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, isNotNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -68,6 +68,14 @@ export const offersRouter = createTRPCRouter({
               .update(referralCodes)
               .set({
                 totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
+              })
+              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+
+          ctx.user.referralCodeUsed &&
+            tx
+              .update(referralCodes)
+              .set({
+                numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
               })
               .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
         ]);

@@ -33,9 +33,9 @@ export default function Page() {
               <TabsTrigger value="profile">
                 <Edit2Icon /> Edit Profile
               </TabsTrigger>
-              <TabsTrigger value="editPassword">
+              {/* <TabsTrigger value="editPassword">
                 <SecurityIcon /> Change password
-              </TabsTrigger>
+              </TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="referralDashboard">
@@ -44,9 +44,9 @@ export default function Page() {
             <TabsContent value="profile">
               <ProfileForm />
             </TabsContent>
-            <TabsContent value="editPassword">
+            {/* <TabsContent value="editPassword">
               <PasswordResetForm />
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </div>
       </div>
