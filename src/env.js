@@ -38,12 +38,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string(),
     RESEND_API_KEY: z.string(),
 
-    STRIPE_LIVE_SECRET_KEY: z.string(),
-    NEXTPUBLIC_STRIPE_TEST_PUBLIC_KEY: z.string(),
+    STRIPE_PUBLISHABLE_KEY: z.string(),
     STRIPE_TEST_SECRET_KEY: z.string(),
-    LISA_YEARLY_PRICE_ID: z.string(),
-    LISA_MONTHLY_PRICE_ID: z.string(),
-    TRAMONA_FEE_PRODUCT_ID: z.string(),
+    STRIPE_LIVE_SECRET_KEY: z.string(),
   },
 
   /**
@@ -77,13 +74,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
-    STRIPE_LIVE_SECRET_KEY: process.env.STRIPE_LIVE_SECRET_KEY,
-    NEXTPUBLIC_STRIPE_TEST_PUBLIC_KEY:
-      process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLIC_KEY,
+    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
     STRIPE_TEST_SECRET_KEY: process.env.STRIPE_TEST_SECRET_KEY,
-    LISA_YEARLY_PRICE_ID: process.env.LISA_YEARLY_PRICE_ID,
-    LISA_MONTHLY_PRICE_ID: process.env.LISA_MONTHLY_PRICE_ID,
-    TRAMONA_FEE_PRODUCT_ID: process.env.TRAMONA_FEE_PRODUCT_ID,
+    STRIPE_LIVE_SECRET_KEY: process.env.STRIPE_LIVE_SECRET_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
