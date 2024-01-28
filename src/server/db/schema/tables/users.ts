@@ -46,6 +46,7 @@ export const referralCodes = pgTable("referral_codes", {
     .references(() => users.id, { onDelete: "cascade" }),
   totalBookingVolume: integer("total_booking_volume").notNull().default(0),
   numSignUpsUsingCode: integer("num_sign_ups_using_code").notNull().default(0),
+  numBookingsUsingCode: integer("num_bookings_using_code").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
