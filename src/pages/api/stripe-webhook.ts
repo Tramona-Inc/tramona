@@ -1,7 +1,8 @@
 import { env } from "@/env";
 import { stripe } from "@/server/api/routers/stripeRouter";
+import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { buffer } from "stream/consumers";
+
 
 export default async function webhook(
   req: NextApiRequest,

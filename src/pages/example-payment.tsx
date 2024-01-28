@@ -20,7 +20,7 @@ export default function ExamplePayment() {
   async function checkout() {
     const response = await createCheckout.mutateAsync({
       name: "hello",
-      price: 2000,
+      price: 1000,
     });
 
     const stripe = await stripePromise;
