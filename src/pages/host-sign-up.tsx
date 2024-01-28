@@ -14,7 +14,7 @@ export default function HostSignUp() {
 
   return (
     <>
-      <div className="flex h-screen w-full flex-row">
+      <div className="flex min-h-screen w-full flex-row">
         <Leftside newtab={tab} />
         <Rightside onValueChange={handleTabValueChange} />
       </div>

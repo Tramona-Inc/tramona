@@ -63,7 +63,7 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
   }, [newtab, tab]);
 
   return (
-    <div className=" flex w-1/3 flex-col items-center bg-[#4F46E5]  text-white ">
+    <div className="flex w-1/3 flex-col items-center bg-[#4F46E5]  text-white ">
       <div className="mt-20 flex flex-col space-y-5">
         <div className=" text-center text-4xl font-bold">
           <h1>Hello 👋</h1>
