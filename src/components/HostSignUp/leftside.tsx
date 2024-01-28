@@ -63,17 +63,17 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
   }, [newtab, tab]);
 
   return (
-    <div className="flex w-1/3 flex-col items-center bg-[#4F46E5]  text-white ">
-      <div className="mt-20 flex flex-col space-y-5">
-        <div className=" text-center text-4xl font-bold">
+    <div className="flex flex-col items-center bg-[#4F46E5] text-white  lg:w-1/3 ">
+      <div className="mb-5 mt-10 flex flex-col space-y-5 lg:mb-0 lg:mt-40">
+        <div className=" px-5 text-center text-3xl font-bold xl:text-4xl">
           <h1>Hello 👋</h1>
           <h1>Welcome to Hosting!</h1>
         </div>
         <h3 className="text-center text-xl font-light">Let's get you setup.</h3>
       </div>
 
-      <div className="p-5">
-        <div className="relative px-20 pt-20">
+      <div className="hidden p-12 lg:block lg:p-10">
+        <div className="relative pt-20 lg:pl-12 lg:pr-2 xl:pr-0">
           {contents.map((content) => (
             <div
               key={content.id}
@@ -81,7 +81,7 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
             >
               <div className="space-y-8">
                 <h1 className="text-xl font-bold">{content.message}</h1>
-                <h2 className="text-md font-semi-bold italic">
+                <h2 className="font-semi-bold text-md italic 2xl:text-lg">
                   "{content.quote}"
                 </h2>
               </div>
@@ -105,9 +105,11 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
                 </div>
 
                 <div>
-                  <h1 className="text-lg font-bold">{content.user_name}</h1>
+                  <h1 className="text-lg font-bold 2xl:text-xl">
+                    {content.user_name}
+                  </h1>
 
-                  <h2 className="text-md font-bold italic">
+                  <h2 className="text-xs font-bold italic 2xl:text-lg">
                     {content.user_title}
                   </h2>
                 </div>
@@ -120,7 +122,7 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
             width={75}
             height={75}
             alt={"Star"}
-            className="absolute left-5 top-5"
+            className=" absolute top-0 flex items-center lg:-left-2 lg:top-6"
           />
         </div>
       </div>

@@ -13,14 +13,10 @@ import {
 
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { toast } from "src/components/ui/use-toast";
-
 import { Input } from "@/components/ui/input";
-
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/utils/utils";
 
 const Form1Schema = z.object({
   listings: z
@@ -86,11 +82,11 @@ export default function Form1({ nextTab }: Form1Props) {
 
   return (
     <>
-      <div className="pb-10">
-        <h1 className="text-4xl font-bold">
+      <div className="pb-5 md:pb-10">
+        <h1 className="text-2xl font-bold md:text-3xl xl:text-4xl">
           Enter the link to your listings below to get started setting up!
         </h1>
-        <h2 className="pt-20 text-2xl font-semibold">
+        <h2 className="pt-10 text-lg font-semibold md:pt-20 md:text-2xl">
           Where do you currently list? (Please include all websites)
         </h2>
       </div>
@@ -100,9 +96,9 @@ export default function Form1({ nextTab }: Form1Props) {
             <div className=" space-y-5">
               {listingsFields.map((field, index) => (
                 <>
-                  <div className="flex flex-row">
+                  <div className="flex flex-col md:flex-row">
                     <div className="w-full">
-                      <div className="flex flex-row space-x-2">
+                      <div className="flex flex-row space-x-2 pb-7">
                         <div className="w-1/4">
                           <FormField
                             control={form.control}
@@ -111,7 +107,7 @@ export default function Form1({ nextTab }: Form1Props) {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel
-                                  className={cn(index !== 0 && "sr-only")}
+                                //   className={cn(index !== 0 && "sr-only")}
                                 >
                                   Type
                                 </FormLabel>
@@ -137,7 +133,7 @@ export default function Form1({ nextTab }: Form1Props) {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel
-                                  className={cn(index !== 0 && "sr-only")}
+                                //   className={cn(index !== 0 && "sr-only")}
                                 >
                                   URLs
                                 </FormLabel>
@@ -160,7 +156,9 @@ export default function Form1({ nextTab }: Form1Props) {
                         name={`listings.${index}.details`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className={cn(index !== 0 && "sr-only")}>
+                            <FormLabel
+                            // className={cn(index !== 0 && "sr-only")}
+                            >
                               Details
                             </FormLabel>
 
@@ -177,9 +175,10 @@ export default function Form1({ nextTab }: Form1Props) {
                       />
                     </div>
 
-                    <div className="m-7 w-fit">
+                    <div className="flex justify-center  pt-7 md:w-fit md:p-7">
                       <Button
                         type="button"
+                        className="rounded-2xl"
                         variant="outline"
                         size="sm"
                         //   className="mt-2"
@@ -194,21 +193,24 @@ export default function Form1({ nextTab }: Form1Props) {
                 </>
               ))}
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() =>
-                  appendListings({ type: "", url: "", details: "" })
-                }
-              >
-                + Add
-              </Button>
+              <div className="flex justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 w-1/6"
+                  onClick={() =>
+                    appendListings({ type: "", url: "", details: "" })
+                  }
+                >
+                  + Add
+                </Button>
+
+                <Button type="submit" className="w-1/6 ">
+                  Next
+                </Button>
+              </div>
             </div>
-            <Button type="submit" className="w-1/6">
-              Next
-            </Button>
           </form>
         </Form>
       </div>

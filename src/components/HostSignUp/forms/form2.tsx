@@ -63,10 +63,10 @@ export default function Form2({ nextTab, prevTab }: Form2Props) {
   return (
     <>
       <div className="pb-10">
-        <h1 className="text-4xl font-bold">
+        <h1 className="text-2xl font-bold md:text-4xl">
           When we recieve offers for your property, where should we send them?
         </h1>
-        <h2 className="pt-20 text-2xl font-semibold">
+        <h2 className="pt-10 text-lg font-semibold md:pt-20 md:text-2xl">
           We recomomend both phone number and email as the requests are first
           come first serve.
         </h2>
@@ -102,10 +102,14 @@ export default function Form2({ nextTab, prevTab }: Form2Props) {
             )}
           />
 
-          <Button onClick={prevTab}>Back</Button>
-          <Button type="submit" className="w-1/6">
-            Next
-          </Button>
+          <div className="flex justify-between">
+            <Button onClick={prevTab} className="w-1/6">
+              Back
+            </Button>
+            <Button type="submit" className="w-1/6">
+              Next
+            </Button>
+          </div>
         </form>
       </Form>
     </>
