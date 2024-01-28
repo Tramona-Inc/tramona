@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Form1 from "./forms/from1";
+import Form1 from "./forms/form1";
 import Form2 from "./forms/form2";
 import Form3 from "./forms/form3";
 import { Button } from "../ui/button";
@@ -16,10 +16,10 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
 
   switch (tab) {
     case 1:
-      currentForm = <Form1 />;
+      currentForm = <Form1 nextTab={nextTab} />;
       break;
     case 2:
-      currentForm = <Form2 />;
+      currentForm = <Form2 nextTab={nextTab} prevTab={prevTab} />;
       break;
     case 3:
       currentForm = <Form3 />;
@@ -28,7 +28,7 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
       currentForm = null;
   }
 
-  function handleTab() {
+  function nextTab() {
     setTab((prevTab) => {
       const newTab = prevTab + 1;
       onValueChange(newTab);
@@ -53,7 +53,7 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
       </div>
       <div>{currentForm}</div>
 
-      <div className="pt-16">
+      {/* <div className="pt-16">
         {tab === 1 || tab === 3 ? (
           <div className="hidden" />
         ) : (
@@ -65,11 +65,11 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
         {tab === 3 ? (
           <Button className="px-16">Finished</Button>
         ) : (
-          <Button className="w-1/6 px-16" onClick={() => handleTab()}>
+          <Button className="w-1/6 px-16" onClick={() => nextTab()}>
             Next{" "}
           </Button>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };
