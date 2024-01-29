@@ -6,6 +6,7 @@
 // import StarIcon from "@/common/components/icons/star";
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
+import Image from "next/image";
 import Spinner from "@/components/_common/Spinner";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
@@ -36,8 +37,10 @@ import { CalendarIcon, CheckIcon, UsersIcon, XIcon } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 export default function Listings() {
+  useSession({ required: true });
   const router = useRouter();
   const offerId = parseInt(router.query.id as string);
 
@@ -92,51 +95,27 @@ function OfferPage({
         &larr; Back to all offers
       </Link>
       <div className="grid h-[50vh] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
-        {/* <Image
+        <div className="relative col-span-2 row-span-2 bg-accent">
+          <Image
             src={property.imageUrls[0]!}
             alt=""
-            className="col-span-2 row-span-2"
-            layout="fill"
+            fill
             objectFit="cover"
-            objectPosition="center"
+            priority
           />
-          <Image
-            src={property.imageUrls[1]!}
-            alt=""
-            className="col-span-1 row-span-1"
-            layout="fill"
-            objectFit="cover"
-            objectPosition="center"
-          />
-          <Image
-            src={property.imageUrls[2]!}
-            alt=""
-            className="col-span-1 row-span-1"
-            layout="fill"
-            objectFit="cover"
-            objectPosition="center"
-          />
-          <Image
-            src={property.imageUrls[3]!}
-            alt=""
-            className="col-span-1 row-span-1"
-            layout="fill"
-            objectFit="cover"
-            objectPosition="center"
-          />
-          <Image
-            src={property.imageUrls[4]!}
-            alt=""
-            className="col-span-1 row-span-1"
-            layout="fill"
-            objectFit="cover"
-            objectPosition="center"
-          /> */}
-        <div className="col-span-2 row-span-2 bg-blue-500"></div>
-        <div className="col-span-1 row-span-1 bg-blue-500"></div>
-        <div className="col-span-1 row-span-1 bg-blue-500"></div>
-        <div className="col-span-1 row-span-1 bg-blue-500"></div>
-        <div className="col-span-1 row-span-1 bg-blue-500"></div>
+        </div>
+        <div className="relative col-span-1 row-span-1 bg-accent">
+          <Image src={property.imageUrls[1]!} alt="" fill objectFit="cover" />
+        </div>
+        <div className="relative col-span-1 row-span-1 bg-accent">
+          <Image src={property.imageUrls[2]!} alt="" fill objectFit="cover" />
+        </div>
+        <div className="relative col-span-1 row-span-1 bg-accent">
+          <Image src={property.imageUrls[3]!} alt="" fill objectFit="cover" />
+        </div>
+        <div className="relative col-span-1 row-span-1 bg-accent">
+          <Image src={property.imageUrls[4]!} alt="" fill objectFit="cover" />
+        </div>
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-4">
