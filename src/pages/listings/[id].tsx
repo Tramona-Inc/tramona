@@ -29,7 +29,7 @@ export default function Listings() {
 
   const offerId = parseInt(router.query.id as string);
 
-  const { data: offer } = api.offers.getOfferWithRequestAndProperty.useQuery({
+  const { data: offer } = api.offers.getByIdWithDetails.useQuery({
     id: offerId,
   });
 

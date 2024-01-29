@@ -136,7 +136,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-  getOfferWithRequestAndProperty: protectedProcedure
+  getByIdWithDetails: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const offer = await ctx.db.query.offers.findFirst({
