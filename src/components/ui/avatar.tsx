@@ -2,17 +2,33 @@ import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "@/utils/utils";
+import { type VariantProps, cva } from "class-variance-authority";
+
+const avatarVariants = cva(
+  "relative flex shrink-0 overflow-hidden rounded-full",
+  {
+    variants: {
+      size: {
+        sm: "size-8 text-xs",
+        md: "size-10 text-base",
+        lg: "size-14 text-lg",
+      },
+    },
+    defaultVariants: {
+      size: "md",
+    },
+  },
+);
+
+export type AvatarVariants = VariantProps<typeof avatarVariants>;
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarVariants
+>(({ className, size, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
-    className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
-      className,
-    )}
+    className={cn(avatarVariants({ size }), className)}
     {...props}
   />
 ));

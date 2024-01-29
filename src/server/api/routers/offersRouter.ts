@@ -137,10 +137,10 @@ export const offersRouter = createTRPCRouter({
     }),
 
   getByIdWithDetails: protectedProcedure
-    .input(requestSelectSchema.pick({ id: true }))
+    .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const offer = await ctx.db.query.offers.findFirst({
-        where: eq(offers.requestId, input.id),
+        where: eq(offers.id, input.id),
         columns: {
           createdAt: true,
           totalPrice: true,
