@@ -124,38 +124,45 @@ function OfferPage({
           <div className="col-span-1 row-span-1 bg-blue-500"></div>
         </div>
         <h1 className="text-lg font-semibold sm:text-3xl">{property.name}</h1>
-        <div className="flex flex-wrap items-center gap-1">
-          <Badge variant="secondary" className="pl-1" icon={<StarFilledIcon />}>
-            {property.avgRating} ({property.numRatings})
-          </Badge>
-          <Badge variant="secondary">{property.propertyType}</Badge>
-          {property.amenities.map((amenity) => (
-            <Badge variant="secondary" key={amenity}>
-              {amenity}
-            </Badge>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-1">
-          {property.standoutAmenities.map((amenity) => (
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-1">
             <Badge
               variant="secondary"
-              icon={<CheckIcon className="size-4" />}
-              key={amenity}
+              className="pl-1"
+              icon={<StarFilledIcon />}
             >
-              {amenity}
+              {property.avgRating} ({property.numRatings})
             </Badge>
-          ))}
-          {lackingSafetyItems.map((amenity) => (
-            <Badge
-              variant="secondary"
-              icon={<XIcon className="size-4" />}
-              key={amenity}
-            >
-              {amenity}
-            </Badge>
-          ))}
+            <Badge variant="secondary">{property.propertyType}</Badge>
+            {property.amenities.map((amenity) => (
+              <Badge variant="secondary" key={amenity}>
+                {amenity}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-1">
+            {property.standoutAmenities.map((amenity) => (
+              <Badge
+                variant="secondary"
+                icon={<CheckIcon className="size-4" />}
+                key={amenity}
+              >
+                {amenity}
+              </Badge>
+            ))}
+            {lackingSafetyItems.map((amenity) => (
+              <Badge
+                variant="secondary"
+                icon={<XIcon className="size-4" />}
+                key={amenity}
+              >
+                {amenity}
+              </Badge>
+            ))}
+          </div>
         </div>
       </section>
+
       <section>
         <div className="flex items-center gap-2">
           <UserAvatar
@@ -163,9 +170,10 @@ function OfferPage({
             email={property.host?.email}
             image={property.host?.image}
           />
-          <p className="text-muted-foreground">
-            Hosted by <span className="font-semibold">{hostName}</span>
-          </p>
+          <div className="-space-y-1.5">
+            <p className="text-sm text-muted-foreground">Hosted by</p>
+            <p className="text-lg font-semibold">{hostName}</p>
+          </div>
         </div>
       </section>
     </div>
