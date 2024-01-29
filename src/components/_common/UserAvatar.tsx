@@ -1,9 +1,8 @@
-import { VariantProps } from "class-variance-authority";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-  AvatarVariants,
+  type AvatarVariants,
 } from "../ui/avatar";
 
 function getInitials(name: string) {

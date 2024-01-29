@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HistoryIcon, Loader2Icon, Plus, TagIcon } from "lucide-react";
+import { HistoryIcon, Plus, TagIcon } from "lucide-react";
 import Head from "next/head";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
 import RequestCard from "@/components/requests/RequestCard";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
+import Spinner from "@/components/_common/Spinner";
 
 function NewRequestButton() {
   return (
@@ -23,16 +24,16 @@ function RequestCards({
 }: {
   requests: React.ComponentProps<typeof RequestCard>["request"][] | undefined;
 }) {
-  return (
+  return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
-      {requests?.map((request) => (
+      {requests.map((request) => (
         <RequestCard key={request.id} request={request}>
           <RequestCardAction request={request} />
         </RequestCard>
-      )) ?? (
-        <Loader2Icon className="col-span-full mx-auto mt-16 size-12 animate-spin text-accent" />
-      )}
+      ))}
     </div>
+  ) : (
+    <Spinner />
   );
 }
 

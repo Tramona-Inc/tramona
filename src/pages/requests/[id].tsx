@@ -1,7 +1,8 @@
+import Spinner from "@/components/_common/Spinner";
 import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
 import OfferCard from "@/components/requests/[id]/OfferCard";
 import { api } from "@/utils/api";
-import { Loader2Icon, TagIcon } from "lucide-react";
+import { TagIcon } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -56,7 +57,7 @@ export default function Page() {
               ))}
             </div>
           ) : (
-            <Loader2Icon className="col-span-full mx-auto mt-16 size-12 animate-spin text-accent" />
+            <Spinner />
           )}
         </div>
       </div>
