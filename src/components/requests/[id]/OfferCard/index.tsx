@@ -12,7 +12,7 @@ import Link from "next/link";
 import UserAvatar from "../../../_common/UserAvatar";
 import SaleTagIcon from "../../../_icons/SaleTagIcon";
 import { Badge } from "../../../ui/badge";
-import { Button } from "../../../ui/button";
+import { Button, buttonVariants } from "../../../ui/button";
 import { Card, CardFooter } from "../../../ui/card";
 import PaywallDialog from "../PaywallDialog";
 import HowToBookDialog from "./HowToBookDialog";
@@ -127,9 +127,15 @@ export default function OfferCard({
           </div>
         </div>
         <CardFooter>
-          <Button size="lg" variant="outline" className="rounded-full">
-            <Link href={`/listings/${offer.id}`}>See Listing</Link>
-          </Button>
+          <Link
+            href={`/listings/${offer.id}`}
+            className={cn(
+              buttonVariants({ size: "lg", variant: "outline" }),
+              "rounded-full",
+            )}
+          >
+            See Listing
+          </Link>
           {lisa ? (
             <PaywallDialog>
               <Button
