@@ -34,11 +34,15 @@ export default function OfferCard({
   const offerNightlyPrice = offer.totalPrice / getNumNights(checkIn, checkOut);
   const numAmenities =
     property.amenities.length + property.standoutAmenities.length;
+  const discountPercentage = getDiscountPercentage(
+    property.originalNightlyPrice,
+    offerNightlyPrice,
+  );
 
   return (
     <Card className={cn(lisa && "p-0", "overflow-clip")}>
       {lisa && (
-        <div className="bg-gold mb-2 p-2.5 text-center text-sm font-medium text-black">
+        <div className="mb-2 bg-gold p-2.5 text-center text-sm font-medium text-black">
           Must be a Tramona Lisa member to book this deal!
         </div>
       )}
@@ -52,11 +56,7 @@ export default function OfferCard({
               <SaleTagIcon />
             </div>
             <p className="absolute left-4 top-10 w-24 text-center font-semibold text-primary">
-              {getDiscountPercentage(
-                property.originalNightlyPrice,
-                offerNightlyPrice,
-              )}
-              % off
+              {discountPercentage}% off
             </p>
           </div>
           <div className="flex flex-1 gap-4 text-muted-foreground sm:flex-col">
