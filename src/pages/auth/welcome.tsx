@@ -50,9 +50,8 @@ function Step1(): JSX.Element {
           </div>
           <p className="">
             Because of this, we can guarantee you a price that is not available
-            anywhere else.{" "}
-            <span className="bg-[#FACF26] px-1">Make a request</span> and see
-            for yourself
+            anywhere else. <span className="bg-gold px-1">Make a request</span>{" "}
+            and see for yourself
           </p>
         </div>
       </div>
@@ -105,9 +104,9 @@ function Step2(): JSX.Element {
   return (
     <StepperContentLayout className={"items-center text-center"}>
       <p className="text-l text-center font-bold">
-        We have the <span className="bg-[#FACF26] px-1">same hosts</span> that
-        are on sites like Airbnb, VRBO, or Bookings.com, <br /> we just match
-        you with one of their vacant dates.
+        We have the <span className="bg-gold px-1">same hosts</span> that are on
+        sites like Airbnb, VRBO, or Bookings.com, <br /> we just match you with
+        one of their vacant dates.
       </p>
       <p>Its basically free money. Try it for yourself.</p>
       <p>
@@ -156,8 +155,8 @@ function Step4(): JSX.Element {
       </p>
       <p>
         To show this, we offer a generous{" "}
-        <span className="bg-[#FACF26] px-1">30%</span> base revenue split with
-        people you bring to the platform.
+        <span className="bg-gold px-1">30%</span> base revenue split with people
+        you bring to the platform.
       </p>
       <Image
         src={"/assets/images/welcome/welcome-step4.png"}
@@ -176,9 +175,7 @@ function Step5(): JSX.Element {
       <p className="text-l font-bold">
         We want to increase the the amount people travel, its that simple.
       </p>
-      <p className="bg-[#FACF26] px-1">
-        Submit a request and see how it works.{" "}
-      </p>
+      <p className="bg-gold px-1">Submit a request and see how it works. </p>
       <Image
         src={"/assets/images/welcome/welcome-step5.png"}
         width={202}

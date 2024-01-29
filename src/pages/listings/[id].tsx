@@ -271,7 +271,7 @@ export default function Listings() {
 
                     <div className="flex flex-col gap-4">
                       {/* <PaywallDialog> */}
-                      <Button className="w-full bg-[#FACF26] text-[#000000] hover:bg-[#FACF26]/90">
+                      <Button variant="gold">
                         Join Tramona Lisa To Book This Stay!
                       </Button>
                       {/* </PaywallDialog> */}

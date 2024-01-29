@@ -38,7 +38,7 @@ export default function OfferCard({
   return (
     <Card className={cn(lisa && "p-0", "overflow-clip")}>
       {lisa && (
-        <div className="mb-2 bg-[#FACF26] p-2.5 text-center text-sm font-medium text-black">
+        <div className="bg-gold mb-2 p-2.5 text-center text-sm font-medium text-black">
           Must be a Tramona Lisa member to book this deal!
         </div>
       )}
@@ -138,10 +138,7 @@ export default function OfferCard({
           </Link>
           {lisa ? (
             <PaywallDialog>
-              <Button
-                size="lg"
-                className="rounded-full bg-[#FACF26] text-black hover:bg-[#FACF26]/90"
-              >
+              <Button size="lg" variant="gold" className="rounded-lg">
                 Join Tramona Lisa
               </Button>
             </PaywallDialog>
