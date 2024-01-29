@@ -22,7 +22,7 @@ export default function AdminOfferDialog({
       <DialogClose className="hidden" />
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="space-y-4">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Make an offer</DialogTitle>
           <DialogDescription>

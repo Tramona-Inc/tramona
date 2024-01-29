@@ -33,6 +33,27 @@ import {
 import TagSelect from "../_common/TagSelect";
 import { Textarea } from "../ui/textarea";
 
+const formSchema = z.object({
+  propertyName: zodString(),
+  offeredPriceUSD: zodInteger({ min: 1 }),
+  hostName: zodString(),
+  maxNumGuests: zodInteger({ min: 1 }),
+  numBeds: zodInteger({ min: 1 }),
+  numBedrooms: zodInteger({ min: 1 }),
+  propertyType: z.enum(ALL_PROPERTY_TYPES),
+  originalNightlyPriceUSD: zodInteger(),
+  avgRating: zodNumber({ min: 0, max: 5 }),
+  numRatings: zodInteger({ min: 1 }),
+  amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
+  standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
+  safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
+  about: zodString({ maxLen: Infinity }),
+  airbnbUrl: zodString({ maxLen: Infinity }).url(),
+  imageUrls: z.object({ value: zodUrl() }).array(),
+});
+
+type FormSchema = z.infer<typeof formSchema>;
+
 export default function AdminOfferForm({
   afterSubmit,
   request,
@@ -40,31 +61,16 @@ export default function AdminOfferForm({
   afterSubmit?: () => void;
   request: Request;
 }) {
-  const formSchema = z.object({
-    propertyName: zodString(),
-    offeredPriceUSD: zodInteger({ min: 1 }),
-    hostName: zodString(),
-    maxNumGuests: zodInteger({ min: 1 }),
-    numBeds: zodInteger({ min: 1 }),
-    numBedrooms: zodInteger({ min: 1 }),
-    propertyType: z.enum(ALL_PROPERTY_TYPES),
-    originalNightlyPriceUSD: zodInteger(),
-    avgRating: zodNumber({ min: 0, max: 5 }),
-    numRatings: zodInteger({ min: 1 }),
-    amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
-    standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
-    safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
-    about: zodString({ maxLen: Infinity }),
-    airbnbUrl: zodString({ maxLen: Infinity }).url(),
-    imageUrls: z.object({ value: zodUrl() }).array(),
-  });
-
-  type FormSchema = z.infer<typeof formSchema>;
-
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      imageUrls: [{ value: "" }, { value: "" }, { value: "" }],
+      imageUrls: [
+        { value: "" },
+        { value: "" },
+        { value: "" },
+        { value: "" },
+        { value: "" },
+      ],
       amenities: [],
       standoutAmenities: [],
       safetyItems: [],
@@ -146,7 +152,7 @@ export default function AdminOfferForm({
             <FormItem>
               <FormLabel>Property name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} autoFocus />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -399,7 +405,7 @@ export default function AdminOfferForm({
                         placeholder={`Image URL ${i + 1} (${
                           i === 0
                             ? "primary image"
-                            : i < 3
+                            : i < 5
                               ? "required"
                               : "optional"
                         })`}

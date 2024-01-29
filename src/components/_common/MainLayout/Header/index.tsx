@@ -1,9 +1,9 @@
+import { cn } from "@/utils/utils";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import TramonaIcon from "../../../_icons/TramonaIcon";
 import NavLink from "../../../_utils/NavLink";
 import HeaderTopRight from "./HeaderTopRight";
-import { cn } from "@/utils/utils";
 
 function HeaderLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (
@@ -33,7 +33,7 @@ export default function Header() {
       </div>
 
       <div className="hidden items-center justify-center gap-2 lg:flex">
-        <HeaderLink href="/partners">Refer and Earn</HeaderLink>
+        <HeaderLink href="/program">Refer and Earn</HeaderLink>
         <HeaderLink href="/for-hosts">For Hosts</HeaderLink>
         <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
         <HeaderLink href="/feed">Social Feed</HeaderLink>

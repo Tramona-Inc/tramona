@@ -26,7 +26,7 @@ export default function ProfileSidebar() {
             <p className="text-3xl font-bold">{session?.user?.name}</p>
             <p className="text-base">Member since 10/22/2023</p>
           </div>
-          <div className="my-8 space-y-4">
+          {/* <div className="my-8 space-y-4">
             <div>
               <p className="text-sm text-zinc-500">Average review given</p>
               <p className="text-xl font-bold">3.17</p>
@@ -39,7 +39,7 @@ export default function ProfileSidebar() {
               <p className="text-sm text-zinc-500">Total experiences made</p>
               <p className="text-xl font-bold">3</p>
             </div>
-          </div>
+          </div> */}
         </div>
         <div>
           <Button

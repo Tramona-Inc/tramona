@@ -1,4 +1,5 @@
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
 import { twMerge } from "tailwind-merge";
@@ -26,9 +27,9 @@ export async function sleep(ms: number) {
 /**
  * Examples:
  * ```js
- * plural(1, 'apple') => '1 apple'
- * plural(2, 'apple') => '2 apples'
- * plural(2, 'octopus', 'octopi') => '2 octopi'
+ * plural(1, "apple") => "1 apple"
+ * plural(2, "apple") => "2 apples"
+ * plural(2, "octopus", "octopi") => "2 octopi"
  * ```
  */
 export function plural(count: number, noun: string, pluralNoun?: string) {
@@ -41,8 +42,8 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  *
  * Examples:
  * ```js
- * formatCurrency(10) => '$0.10'
- * formatCurrency(2000) => '$20.00'
+ * formatCurrency(10) => "$0.10"
+ * formatCurrency(2000) => "$20.00"
  * ```
  */
 export function formatCurrency(cents: number) {
@@ -53,8 +54,8 @@ export function formatCurrency(cents: number) {
 /**
  * Examples:
  * ```js
- * capitalize('apple') => 'Apple'
- * capitalize('ASDF') => 'ASDF'
+ * capitalize("apple") => "Apple"
+ * capitalize("ASDF") => "ASDF"
  * ```
  */
 export function capitalize(str: string) {
@@ -64,10 +65,10 @@ export function capitalize(str: string) {
 /**
  * Example outputs:
  * ```js
- * 'Jan 1, 2021'
- * 'Jan 1 – 2, 2021'
- * 'Jan 1 – Feb 2, 2021'
- * 'Jan 1, 2021 – Feb 2, 2022'
+ * "Jan 1, 2021"
+ * "Jan 1 – 2, 2021"
+ * "Jan 1 – Feb 2, 2021"
+ * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
 export function formatDateRange(from: Date, to?: Date) {
@@ -93,6 +94,28 @@ export function formatDateRange(from: Date, to?: Date) {
     )}`;
   }
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
+}
+
+export function formatDateMonthDay(date: Date) {
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const month = monthNames[date.getMonth()];
+  const day = date.getDay();
+
+  return `${month} ${day}`;
 }
 
 export function formatDateRangeFromStrs(from: string, to?: string) {
@@ -153,4 +176,8 @@ export function getDiscountPercentage(
   discountPrice: number,
 ) {
   return Math.round((1 - discountPrice / originalPrice) * 100);
+}
+
+export function useIsDesktop() {
+  return (useWindowSize()?.width ?? 0) >= 640;
 }

@@ -70,6 +70,14 @@ export const offersRouter = createTRPCRouter({
                 totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
               })
               .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+
+          ctx.user.referralCodeUsed &&
+            tx
+              .update(referralCodes)
+              .set({
+                numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
+              })
+              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
         ]);
 
         if (results.some((result) => result.status === "rejected")) {
@@ -136,6 +144,43 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
+  getByIdWithDetails: protectedProcedure
+    .input(offerSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const offer = await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.id),
+        columns: {
+          createdAt: true,
+          totalPrice: true,
+          id: true,
+        },
+        with: {
+          request: {
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+              id: true,
+            },
+            with: { madeByUser: { columns: { id: true } } },
+          },
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (offer?.request.madeByUser.id !== ctx.user.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return offer;
+    }),
+
   makePublic: roleRestrictedProcedure(["admin", "host"])
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
@@ -181,6 +226,28 @@ export const offersRouter = createTRPCRouter({
       ...offer,
       madePublicAt: offer.madePublicAt ?? new Date(), // will never be null, just fixes types
     }));
+  }),
+
+  getAllOffers: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.offers.findMany({
+      // where: isNotNull(offers.acceptedAt),
+      columns: { acceptedAt: false },
+      with: {
+        property: {
+          with: {
+            host: { columns: { name: true, email: true, image: true } },
+          },
+          columns: { name: true, originalNightlyPrice: true, imageUrls: true },
+        },
+        request: {
+          columns: { userId: true, checkIn: true, checkOut: true },
+          with: {
+            madeByUser: { columns: { name: true } }, // Fetch user name
+          },
+        },
+      },
+      orderBy: desc(offers.createdAt),
+    });
   }),
 
   create: roleRestrictedProcedure(["admin", "host"])
