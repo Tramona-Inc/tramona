@@ -20,7 +20,7 @@ const contents: Reviews[] = [
     message:
       "We work with thousands of hosts and property managers around the world.",
     quote:
-      "Since joining Tramona, my property vacancies have significantly decreased – the platform's simple system to connect with travelers has kept my space consistently booked.",
+      "Since joining Tramona, my property vacancies have significantly decreased – the platform&aposs simple system to connect with travelers has kept my space consistently booked.",
     // profile_pic: "/assets/images/host-sign-up-props/user1.jpg",
     profile_pic: "",
     fall_back: "CK",
@@ -59,7 +59,7 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
 
   useEffect(() => {
     setTab(newtab);
-    console.log(newtab + "LEFTSIDE");
+    // console.log(newtab + "LEFTSIDE");
   }, [newtab, tab]);
 
   return (
@@ -69,7 +69,9 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
           <h1>Hello 👋</h1>
           <h1>Welcome to Hosting!</h1>
         </div>
-        <h3 className="text-center text-xl font-light">Let's get you setup.</h3>
+        <h3 className="text-center text-xl font-light">
+          Let&aposs get you setup.
+        </h3>
       </div>
 
       <div className="hidden p-12 lg:block lg:p-10">
@@ -82,7 +84,7 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
               <div className="space-y-8">
                 <h1 className="text-xl font-bold">{content.message}</h1>
                 <h2 className="font-semi-bold text-md italic 2xl:text-lg">
-                  "{content.quote}"
+                  &quote{content.quote}&quote
                 </h2>
               </div>
 

@@ -207,10 +207,10 @@ export const offersRouter = createTRPCRouter({
         where: eq(properties.id, input.propertyId),
       });
 
-      const [request, property] = await Promise.all([
-        requestPromise,
-        propertyPromise,
-      ]);
+      //   const [request, property] = await Promise.all([
+      //     requestPromise,
+      //     propertyPromise,
+      //   ]);
 
       // TODO
 

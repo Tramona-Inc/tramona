@@ -7,9 +7,10 @@ export default function HostSignUp() {
 
   const handleTabValueChange = (value: number) => {
     setTab(value);
-    console.log(tab + " PARENT");
+    // console.log(tab + " PARENT");
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   useEffect(() => {}, [tab]);
 
   return (

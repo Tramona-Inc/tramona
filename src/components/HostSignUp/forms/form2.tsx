@@ -1,8 +1,4 @@
-import { Label } from "@/components/ui/label";
-
 import React from "react";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 
 import {
   Form,
@@ -13,7 +9,7 @@ import {
   FormMessage,
 } from "src/components/ui/form";
 
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { toast } from "src/components/ui/use-toast";
@@ -22,7 +18,6 @@ import { Input } from "@/components/ui/input";
 
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/utils/utils";
 
 // type: z.string().min(1, { message: "Input required" }),
 const Form2Schema = z.object({

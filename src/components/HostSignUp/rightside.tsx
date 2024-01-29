@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Form1 from "./forms/form1";
 import Form2 from "./forms/form2";
 import Form3 from "./forms/form3";
-import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
 
 interface Props {
@@ -32,7 +31,7 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
     setTab((prevTab) => {
       const newTab = prevTab + 1;
       onValueChange(newTab);
-      console.log(newTab + " CHILD");
+      //   console.log(newTab + " CHILD");
       return newTab;
     });
   }
@@ -40,7 +39,7 @@ const Rightside: React.FC<Props> = ({ onValueChange }) => {
     setTab((prevTab) => {
       const newTab = prevTab - 1;
       onValueChange(newTab);
-      console.log(newTab + " CHILD");
+      //   console.log(newTab + " CHILD");
       return newTab;
     });
   }
