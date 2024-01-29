@@ -6,13 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -56,10 +50,10 @@ export default function Menu_Bar() {
                 Profile
                 {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
               </DropdownMenuItem>
-              <DropdownMenuItem disabled>
+              {/* <DropdownMenuItem disabled>
                 Cash Back Balance: $112
-                {/* <DropdownMenuShortcut>⌘K</DropdownMenuShortcut> */}
-              </DropdownMenuItem>
+                <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             {/* <DropdownMenuSeparator /> 
             <DropdownMenuGroup>
