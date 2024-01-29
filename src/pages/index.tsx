@@ -8,12 +8,14 @@ import TramonaLoop from "@/components/LandingPage/TramonaLoop";
 import Gift from "@/components/LandingPage/Gift";
 import Save from "@/components/LandingPage/Save";
 import Head from "next/head";
+import Menu_Bar from "@/components/menu-bar/menu_bar";
 // import MainLayout from '@/common/components/layouts/main';
 
 export default function Home() {
   return (
     <>
       <div className="relative overflow-x-hidden">
+        <Menu_Bar />
         <Head>
           <title>Tramona</title>
         </Head>
