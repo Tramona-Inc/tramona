@@ -142,7 +142,9 @@ function OfferPage({
         <div className="flex-[2] space-y-4">
           <h1 className="items-center text-lg font-semibold sm:text-3xl">
             {property.name}{" "}
-            <Badge className=" -translate-y-1">{discountPercentage}% off</Badge>
+            <Badge className=" -translate-y-1 bg-primary text-white">
+              {discountPercentage}% off
+            </Badge>
           </h1>
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-1">
