@@ -144,6 +144,43 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
+  getByIdWithDetails: protectedProcedure
+    .input(offerSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const offer = await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.id),
+        columns: {
+          createdAt: true,
+          totalPrice: true,
+          id: true,
+        },
+        with: {
+          request: {
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+              id: true,
+            },
+            with: { madeByUser: { columns: { id: true } } },
+          },
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (offer?.request.madeByUser.id !== ctx.user.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return offer;
+    }),
+
   makePublic: roleRestrictedProcedure(["admin", "host"])
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {

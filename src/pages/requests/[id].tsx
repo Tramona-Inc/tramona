@@ -1,15 +1,15 @@
+import Spinner from "@/components/_common/Spinner";
 import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
 import OfferCard from "@/components/requests/[id]/OfferCard";
 import { api } from "@/utils/api";
-import { Loader2Icon, TagIcon } from "lucide-react";
+import { TagIcon } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 export default function Page() {
   const router = useRouter();
-  const requestId =
-    typeof router.query.id === "string" ? parseInt(router.query.id) : NaN;
+  const requestId = parseInt(router.query.id as string);
 
   const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery({
     id: requestId,
@@ -22,7 +22,7 @@ export default function Page() {
   return (
     <>
       <Head>
-        <title>Your Requests | Tramona</title>
+        <title>Offers for you | Tramona</title>
       </Head>
       <div className="relative">
         <div className="absolute inset-0 bg-primary">
@@ -57,7 +57,7 @@ export default function Page() {
               ))}
             </div>
           ) : (
-            <Loader2Icon className="col-span-full mx-auto mt-16 size-12 animate-spin text-accent" />
+            <Spinner />
           )}
         </div>
       </div>

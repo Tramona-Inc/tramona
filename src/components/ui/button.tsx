@@ -26,7 +26,7 @@ const buttonVariants = cva(
         darkPrimary: "bg-black text-white hover:bg-black/80",
         darkOutline: "border-2 border-black hover:bg-zinc-200",
         darkOutlineWhite: "border-2 border-white text-white",
-        follow: "bg-red-500 text-white rounded-3xl",
+        gold: "bg-gold text-black hover:bg-gold/90",
       },
       size: {
         default: "h-10 px-4 py-2",

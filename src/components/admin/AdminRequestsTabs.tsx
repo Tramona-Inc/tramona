@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
 import { api } from "@/utils/api";
-import { HistoryIcon, InboxIcon, Loader2Icon } from "lucide-react";
+import { HistoryIcon, InboxIcon } from "lucide-react";
+import Spinner from "../_common/Spinner";
 
 function IncomingRequestCards({
   requests,
@@ -22,7 +23,7 @@ function IncomingRequestCards({
       ))}
     </div>
   ) : (
-    <Loader2Icon className="col-span-full mx-auto mt-16 size-12 animate-spin text-accent" />
+    <Spinner />
   );
 }
 
@@ -42,7 +43,7 @@ function PastRequestCards({
       ))}
     </div>
   ) : (
-    <Loader2Icon className="col-span-full mx-auto mt-16 size-12 animate-spin text-accent" />
+    <Spinner />
   );
 }
 
