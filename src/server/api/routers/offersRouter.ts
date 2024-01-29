@@ -15,7 +15,7 @@ import {
 } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, isNotNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -139,21 +139,7 @@ export const offersRouter = createTRPCRouter({
   getOfferWithRequestAndProperty: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      const requestPromise = ctx.db.query.requests.findFirst({
-        where: eq(requests.id, input.id),
-      });
-
-      const request = await requestPromise;
-
-      // request must exist
-      if (!request) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "That request doesn't exist",
-        });
-      }
-
-      return await ctx.db.query.offers.findFirst({
+      const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.requestId, input.id),
         columns: {
           createdAt: true,
@@ -162,11 +148,8 @@ export const offersRouter = createTRPCRouter({
         },
         with: {
           request: {
-            with: {
-              madeByUser: {
-                columns: { id: true, name: true, email: true, image: true },
-              },
-            },
+            columns: { checkIn: true, checkOut: true },
+            with: { madeByUser: { columns: { id: true } } },
           },
           property: {
             with: {
@@ -176,7 +159,13 @@ export const offersRouter = createTRPCRouter({
             },
           },
         },
-     });
+      });
+
+      if (offer?.request.madeByUser.id !== ctx.user.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return offer;
     }),
 
   makePublic: roleRestrictedProcedure(["admin", "host"])

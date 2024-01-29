@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { OfferDetailType } from "@/types";
 import { api } from "@/utils/api";
 import { cn, formatCurrency, formatDateMonthDay } from "@/utils/utils";
 import { StarIcon } from "lucide-react";
@@ -25,78 +24,14 @@ import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
-function Divider(): JSX.Element {
-  return <div className="mb-6 mt-6 border border-slate-300"></div>;
-}
-
-// function AmenityTemplate({ amenity }: { amenity: Amenity }): JSX.Element {
-//   const style =
-//     "flex flex-initial flex-col items-center justify-center rounded-xl border border-slate-300 p-4 text-sm font-bold text-zinc-800";
-//   switch (amenity.type) {
-//     case "Baths":
-//       return (
-//         <div className={style}>
-//           {/* <BathBoldIcon /> */}
-//           {(amenity as Baths).count} Bath
-//         </div>
-//       );
-//     case "Beds":
-//       return (
-//         <div className={style}>
-//           {/* <BedBoldIcon /> {(amenity as Beds).count} Bed */}
-//         </div>
-//       );
-//     case "Ocean":
-//       return <div className={style}>{/* <OceanIcon /> Ocean View */}</div>;
-//   }
-// }
-
-// function ReadMore({ paragraph }: { paragraph: string }): JSX.Element {
-//   const [open, setOpen] = useState<boolean>(false);
-
-//   return (
-//     <>
-//       {open ? (
-//         <>
-//           {" "}
-//           <p className="text-justify">{paragraph}</p>{" "}
-//           <Button variant="link" className="p-0" onClick={() => setOpen(!open)}>
-//             Close
-//           </Button>
-//         </>
-//       ) : (
-//         <>
-//           {" "}
-//           <p className="text-justify">
-//             {paragraph.substring(0, 200) + "..."}
-//           </p>{" "}
-//           <Button variant="link" className="p-0" onClick={() => setOpen(!open)}>
-//             Read More
-//           </Button>
-//         </>
-//       )}
-//     </>
-//   );
-// }
-
-interface ListingsProps {
-  offer: OfferDetailType;
-}
-
 export default function Listings() {
   const router = useRouter();
 
   const offerId = parseInt(router.query.id as string);
 
-  const { data: property } = api.properties.getById.useQuery({
-    id: 12,
-  });
-
   const { data: offer } = api.offers.getOfferWithRequestAndProperty.useQuery({
     id: offerId,
   });
-
-  const imagesLength = offer?.property.imageUrls.length;
 
   return (
     <>
