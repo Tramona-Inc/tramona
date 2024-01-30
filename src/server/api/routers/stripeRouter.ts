@@ -55,7 +55,7 @@ export const stripeRouter = createTRPCRouter({
           name: input.name,
           price: input.price,
           description: input.description,
-          confirmed_at: currentDate.toUTCString(),
+          confirmed_at: currentDate.toISOString(),
         },
       });
     }),
