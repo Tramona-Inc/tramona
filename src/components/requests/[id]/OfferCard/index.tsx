@@ -147,7 +147,6 @@ export default function OfferCard({
             <HowToBookDialog
               listingId={offer.id}
               propertyName={property.name}
-              // TODO: add description
               offerNightlyPrice={offerNightlyPrice}
               originalNightlyPrice={property.originalNightlyPrice}
               airbnbUrl={property.airbnbUrl}

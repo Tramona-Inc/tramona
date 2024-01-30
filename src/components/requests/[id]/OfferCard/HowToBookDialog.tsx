@@ -50,7 +50,9 @@ export default function HowToBookDialog(
       listingId: props.listingId,
       name: props.propertyName,
       price: props.offerNightlyPrice,
-      description: "asdfadf",
+      description:
+        formatDateRange(props.checkIn, props.checkOut) +
+        `/ Listing ID: ${props.listingId}` + "",
       images: [
         "https://a0.muscache.com/im/pictures/prohost-api/Hosting-53368683/original/342a02dc-d6ae-4aa1-b519-8d10ecc8ba96.jpeg?im_w=1200",
       ],
@@ -86,6 +88,12 @@ export default function HowToBookDialog(
                 <p className="font-extrabold">
                   {formatCurrency(props.originalNightlyPrice)}
                   <span className="font-normal">/night</span>
+                </p>
+              </div>
+              <div className="font-bold">
+                <h1 className="font-bold">From</h1>
+                <p className="font-normal">
+                  {formatDateRange(props.checkIn, props.checkOut)}
                 </p>
               </div>
             </div>
