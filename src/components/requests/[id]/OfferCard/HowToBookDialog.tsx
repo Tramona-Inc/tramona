@@ -13,14 +13,15 @@ import {
 
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{
-    totalPrice: number;
+    offerNightlyPrice: number;
+    originalNightlyPrice: number;
     airbnbUrl: string;
     checkIn: Date;
     checkOut: Date;
   }>,
 ) {
   const message = `Hi, I was offered your property on Tramona for ${formatCurrency(
-    props.totalPrice,
+    props.offerNightlyPrice,
   )} total for ${formatDateRange(
     props.checkIn,
     props.checkOut,
@@ -35,6 +36,26 @@ export default function HowToBookDialog(
           <DialogDescription>
             Here&apos;s how to secure your booking.
           </DialogDescription>
+          <div className="flex flex-row items-center justify-center gap-5">
+            <div>
+              <h1 className="font-bold">Tramona Price</h1>
+              <p className="font-extrabold text-primary">
+                {formatCurrency(props.offerNightlyPrice)}
+                <span className="font-normal text-secondary-foreground">
+                  /night
+                </span>
+              </p>
+            </div>
+            <div>
+              <h1 className="font-bold">Original Price</h1>
+              <p className="font-extrabold text-primary">
+                {formatCurrency(props.originalNightlyPrice)}
+                <span className="font-normal text-secondary-foreground">
+                  /night
+                </span>
+              </p>
+            </div>
+          </div>
         </DialogHeader>
         <ol className="list-decimal space-y-1 px-4 marker:text-muted-foreground">
           <li>

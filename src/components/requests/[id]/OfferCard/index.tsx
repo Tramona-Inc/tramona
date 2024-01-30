@@ -145,7 +145,8 @@ export default function OfferCard({
             </PaywallDialog>
           ) : (
             <HowToBookDialog
-              totalPrice={offer.totalPrice}
+              offerNightlyPrice={offerNightlyPrice}
+              originalNightlyPrice={property.originalNightlyPrice}
               airbnbUrl={property.airbnbUrl}
               checkIn={checkIn}
               checkOut={checkOut}
