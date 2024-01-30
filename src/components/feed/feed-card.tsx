@@ -1,14 +1,13 @@
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
 } from "@/components/ui/card";
 
 // import { Icons } from "@/components/_icons/icons";
 import { type AppRouter } from "@/server/api/root";
 import { formatCurrency, formatInterval } from "@/utils/utils";
-import { inferRouterOutputs } from "@trpc/server";
+import type { inferRouterOutputs } from "@trpc/server";
 import Image from "next/image";
 import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
