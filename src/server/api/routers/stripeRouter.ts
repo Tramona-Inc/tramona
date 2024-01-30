@@ -27,6 +27,7 @@ export const stripeRouter = createTRPCRouter({
               unit_amount: input.price,
               product_data: {
                 name: input.name,
+                description: "",
               },
             },
             quantity: 1,
@@ -35,5 +36,17 @@ export const stripeRouter = createTRPCRouter({
         success_url: `${env.NEXTAUTH_URL}/payment/success?session_ID={CHECKOUT_SESSION_ID}`,
         cancel_url: `${env.NEXTAUTH_URL}`,
       });
+    }),
+  getStripeSession: protectedProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+      return {
+        email: session.customer_details?.email,
+      };
     }),
 });
