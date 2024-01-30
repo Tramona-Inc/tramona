@@ -7,7 +7,7 @@ export default function AccountSidebar() {
 
   return (
     <div className="space-y-5">
-      <div className="space-y-3 divide-y-2 divide-zinc-100 rounded-xl bg-white shadow-md">
+      <div className="flex divide-x-2 divide-zinc-100 rounded-xl bg-white shadow-md lg:w-[300px] lg:flex-col lg:space-y-3 lg:divide-x-0 lg:divide-y-2">
         <div className="w-full space-y-3 px-14 py-6 text-center">
           <p className="text-muted-foreground">Welcome,</p>
           <p className="text-3xl font-bold">Kierra</p>

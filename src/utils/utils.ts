@@ -1,7 +1,8 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { format, isSameMonth, isSameYear } from "date-fns";
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { useWindowSize } from "@uidotdev/usehooks";
+import { clsx, type ClassValue } from "clsx";
+import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,9 +27,9 @@ export async function sleep(ms: number) {
 /**
  * Examples:
  * ```js
- * plural(1, 'apple') => '1 apple'
- * plural(2, 'apple') => '2 apples'
- * plural(2, 'octopus', 'octopi') => '2 octopi'
+ * plural(1, "apple") => "1 apple"
+ * plural(2, "apple") => "2 apples"
+ * plural(2, "octopus", "octopi") => "2 octopi"
  * ```
  */
 export function plural(count: number, noun: string, pluralNoun?: string) {
@@ -41,8 +42,8 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  *
  * Examples:
  * ```js
- * formatCurrency(10) => '$0.10'
- * formatCurrency(2000) => '$20.00'
+ * formatCurrency(10) => "$0.10"
+ * formatCurrency(2000) => "$20.00"
  * ```
  */
 export function formatCurrency(cents: number) {
@@ -53,8 +54,8 @@ export function formatCurrency(cents: number) {
 /**
  * Examples:
  * ```js
- * capitalize('apple') => 'Apple'
- * capitalize('ASDF') => 'ASDF'
+ * capitalize("apple") => "Apple"
+ * capitalize("ASDF") => "ASDF"
  * ```
  */
 export function capitalize(str: string) {
@@ -64,27 +65,57 @@ export function capitalize(str: string) {
 /**
  * Example outputs:
  * ```js
- * 'Jan 1, 2021'
- * 'Jan 1 – 2, 2021'
- * 'Jan 1 – Feb 2, 2021'
- * 'Jan 1, 2021 – Feb 2, 2022'
+ * "Jan 1, 2021"
+ * "Jan 1 – 2, 2021"
+ * "Jan 1 – Feb 2, 2021"
+ * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
 export function formatDateRange(from: Date, to?: Date) {
-  if (!to) {
-    return format(from, "MMM d, yyyy");
+  const isCurYear = isSameYear(from, new Date());
+
+  if (!to || isSameDay(from, to)) {
+    return format(from, isCurYear ? "MMM d" : "MMM d, yyyy");
   }
 
   const sameMonth = isSameMonth(from, to);
   const sameYear = isSameYear(from, to);
 
   if (sameMonth && sameYear) {
-    return `${format(from, "MMM d")} – ${format(to, "d, yyyy")}`;
+    return `${format(from, "MMM d")} – ${format(
+      to,
+      isCurYear ? "d" : "d, yyyy",
+    )}`;
   }
   if (sameYear) {
-    return `${format(from, "MMM d")} – ${format(to, "MMM d, yyyy")}`;
+    return `${format(from, "MMM d")} – ${format(
+      to,
+      isCurYear ? "MMM d" : "MMM d, yyyy",
+    )}`;
   }
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
+}
+
+export function formatDateMonthDay(date: Date) {
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const month = monthNames[date.getMonth()];
+  const day = date.getDay();
+
+  return `${month} ${day}`;
 }
 
 export function formatDateRangeFromStrs(from: string, to?: string) {
@@ -130,12 +161,6 @@ export function formatArrayToString(arr: string[]) {
   }
 }
 
-/**
- * A utility function to delay execution of main thread for ms milliseconds.
- */
-export const delay = (ms: number): Promise<void> =>
-  new Promise((res) => setTimeout(res, ms));
-
 export async function retry<T>(f: Promise<T>, numRetries: number) {
   for (let i = 0; i < numRetries; i++) {
     try {
@@ -144,4 +169,15 @@ export async function retry<T>(f: Promise<T>, numRetries: number) {
       });
     } catch (err) {}
   }
+}
+
+export function getDiscountPercentage(
+  originalPrice: number,
+  discountPrice: number,
+) {
+  return Math.round((1 - discountPrice / originalPrice) * 100);
+}
+
+export function useIsDesktop() {
+  return (useWindowSize()?.width ?? 0) >= 640;
 }

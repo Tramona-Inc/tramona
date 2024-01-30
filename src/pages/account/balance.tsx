@@ -10,13 +10,13 @@ export default function CashbackBalance() {
   return (
     <>
       <Head>Cashback Balance | Tramona</Head>
-      <div className="flex min-h-[calc(100vh-5.25rem)] gap-10 bg-zinc-100 px-5 pt-5">
+      <div className="min-h-[calc(100vh-5rem)] gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
         <AccountSidebar />
         <div className="w-full space-y-5">
           <CashbackBalanceDetails />
 
           <div className="rounded-xl bg-zinc-50 shadow-md">
-            <h2 className="px-10 py-6 text-3xl font-bold">
+            <h2 className="px-5 py-6 text-2xl font-bold lg:px-10 lg:text-3xl">
               Cash Back on Referral
             </h2>
             <ReferralTable data={referrals} columns={referralColumns} />

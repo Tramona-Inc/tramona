@@ -1,19 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // https://next-auth.js.org/configuration/pages
 
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import { getProviders, signIn } from "next-auth/react";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/server/auth";
-import Link from "next/link";
-import Image from "next/image";
-import * as z from "zod";
-import { useRouter } from "next/router";
-import { Input } from "@/components/ui/input";
-import Icons from "@/components/ui/icons";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -22,11 +10,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
+import Icons from "@/components/ui/icons";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { authOptions } from "@/server/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type {
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+} from "next";
+import { getServerSession } from "next-auth/next";
+import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 const formSchema = z
   .object({
@@ -139,11 +139,14 @@ export default function SignIn({
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getServerSession(context.req, context.res, authOptions);
 
+  // * Allows user to redirect back to original page
+  const callbackUrl = context.query.callbackUrl ?? "/";
+
   // If the user is already logged in, redirect.
   // Note: Make sure not to redirect to the same page
   // To avoid an infinite loop!
   if (session) {
-    return { redirect: { destination: "/" } };
+    return { redirect: { destination: callbackUrl } };
   }
 
   const providers = await getProviders();

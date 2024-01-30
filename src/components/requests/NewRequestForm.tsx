@@ -1,8 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FilterIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,10 +14,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-// import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { optional, zodInteger, zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FilterIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import DateRangePicker from "../form-utils/DateRangePicker";
+import { getFmtdFilters } from "@/utils/formatters";
+import { capitalize } from "@/utils/utils";
+import { TRPCClientError } from "@trpc/client";
+import DateRangePicker from "../_common/DateRangePicker";
 import {
   Select,
   SelectContent,
@@ -30,9 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { capitalize } from "@/utils/utils";
-import { getFmtdFilters } from "@/utils/formatters";
-import { TRPCClientError } from "@trpc/client";
 
 const formSchema = z
   .object({
@@ -96,12 +96,10 @@ export default function NewRequestForm({
         }
       });
       await utils.requests.invalidate();
-      //   successfulRequestToast(newRequest);
+      successfulRequestToast(newRequest);
       afterSubmit?.();
     } catch (error) {
-      if (error instanceof Error) {
-        // errorToast(error.message);
-      }
+      errorToast();
     }
   }
 
@@ -118,7 +116,7 @@ export default function NewRequestForm({
             <FormItem className="col-span-full sm:col-span-1">
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} autoFocus />
               </FormControl>
               <FormMessage />
             </FormItem>

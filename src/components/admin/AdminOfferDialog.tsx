@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -8,8 +7,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import AdminOfferForm from "./AdminOfferForm";
 import { type Request } from "@/server/db/schema";
+import { useState } from "react";
+import AdminOfferForm from "./AdminOfferForm";
 
 export default function AdminOfferDialog({
   children,
@@ -21,7 +21,8 @@ export default function AdminOfferDialog({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogClose className="hidden" />
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-[90vh] space-y-4 overflow-y-scroll">
+
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Make an offer</DialogTitle>
           <DialogDescription>

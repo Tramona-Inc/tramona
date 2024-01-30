@@ -10,24 +10,28 @@ export default function ReferFolks() {
     // Handle sending invite here
   };
   return (
-    <div className="space-y-4 rounded-xl bg-white px-10 py-6 shadow-md">
-      <h2 className="text-4xl font-bold">Refer the folks you know</h2>
-      <p className="text-xl text-primary">
-        Earn <strong className="text-2xl">30%</strong> of what we make off
-        everyone you refer
+    <div className="space-y-4 rounded-xl bg-white px-5 py-6 shadow-md lg:px-10">
+      <h2 className="text-3xl font-bold lg:text-4xl">
+        Refer the folks you know
+      </h2>
+      <p className="text-md text-primary lg:text-xl">
+        Earn <strong className="text-lg lg:text-2xl">30%</strong> of what we
+        make off everyone you refer
       </p>
       <div className="flex flex-col space-y-8 rounded-xl bg-white px-8 py-4 shadow-md">
         <form onSubmit={handleSubmit} className="space-y-2">
           <Label htmlFor="email">Email your friend</Label>
-          <div className="flex space-x-3">
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Friend's Email"
-            />
-            <Button type="submit">Send Invite</Button>
-          </div>
+
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Friend's Email"
+            className=" basis-full"
+          />
+          <Button type="submit" className="flex-grow-0">
+            Send Invite
+          </Button>
 
           <p className="py-2">or</p>
 

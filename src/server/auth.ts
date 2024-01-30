@@ -1,14 +1,14 @@
-import { type GetServerSidePropsContext } from "next";
-import {
-  type DefaultSession,
-  type NextAuthOptions,
-  getServerSession,
-} from "next-auth";
-import GithubProvider from "next-auth/providers/github";
-import GoogleProvider from "next-auth/providers/google";
-import EmailProvider from "next-auth/providers/email";
 import { env } from "@/env";
 import { db } from "@/server/db";
+import { type GetServerSidePropsContext } from "next";
+import {
+  getServerSession,
+  type DefaultSession,
+  type NextAuthOptions,
+} from "next-auth";
+import EmailProvider from "next-auth/providers/email";
+import GithubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
 import { CustomPgDrizzleAdapter } from "./adapter";
 import { type User as TramonaUser } from "./db/schema";
 

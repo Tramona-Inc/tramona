@@ -19,7 +19,7 @@ export const offers = pgTable(
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id),
-    totalPrice: integer("total_price").notNull(), // in cents
+   totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
     madePublicAt: timestamp("made_public_at"),
     acceptedAt: timestamp("accepted_at"),

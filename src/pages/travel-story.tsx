@@ -1,6 +1,6 @@
-import VideoDisplay from "@/components/VideoDisplay";
+import VideoDisplay from "@/components/_common/VideoDisplay";
 import { Button } from "@/components/ui/button";
-import Share from "@/components/icons/ShareIcon";
+import Share from "@/components/_icons/ShareIcon";
 import Image from "next/image";
 import Turkey from "public/assets/images/travel-story/turkey.png";
 import Japan from "public/assets/images/travel-story/japan.png";

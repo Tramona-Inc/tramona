@@ -1,31 +1,17 @@
-import { useEffect } from "react";
-import Head from "next/head";
-import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import Head from "next/head";
 
-import { Share2Icon, Edit2Icon } from "lucide-react";
-import SecurityIcon from "@/components/icons/SecurityIcon";
+import SecurityIcon from "@/components/_icons/SecurityIcon";
+import { Edit2Icon, Share2Icon } from "lucide-react";
 
-import ProfileSidebar from "@/components/Profile/ProfileSidebar";
-import ReferralDashboard from "@/components/Profile/ReferralDashboard";
-import ProfileForm from "@/components/Profile/ProfileForm";
-import PasswordResetForm from "@/components/Profile/PasswordResetForm";
+import PasswordResetForm from "@/components/profile/PasswordResetForm";
+import ProfileForm from "@/components/profile/ProfileForm";
+import ProfileSidebar from "@/components/profile/ProfileSidebar";
+import ReferralDashboard from "@/components/profile/ReferralDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Page() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "loading") return;
-    else {
-      if (!session) {
-        void router.push("/");
-      }
-    }
-
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [session, status]);
+  useSession({ required: true });
 
   return (
     <>
@@ -47,9 +33,9 @@ export default function Page() {
               <TabsTrigger value="profile">
                 <Edit2Icon /> Edit Profile
               </TabsTrigger>
-              <TabsTrigger value="editPassword">
+              {/* <TabsTrigger value="editPassword">
                 <SecurityIcon /> Change password
-              </TabsTrigger>
+              </TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="referralDashboard">
@@ -58,9 +44,9 @@ export default function Page() {
             <TabsContent value="profile">
               <ProfileForm />
             </TabsContent>
-            <TabsContent value="editPassword">
+            {/* <TabsContent value="editPassword">
               <PasswordResetForm />
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </div>
       </div>
