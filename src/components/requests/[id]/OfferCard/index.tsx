@@ -152,6 +152,7 @@ export default function OfferCard({
               airbnbUrl={property.airbnbUrl}
               checkIn={checkIn}
               checkOut={checkOut}
+              offer={{property, ...offer}}
             >
               <Button size="lg" className="min-w-32 rounded-full">
                 Book

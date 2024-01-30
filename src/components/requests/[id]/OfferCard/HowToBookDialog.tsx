@@ -7,6 +7,7 @@ import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
+import { OfferWithProperty } from ".";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ export default function HowToBookDialog(
     airbnbUrl: string;
     checkIn: Date;
     checkOut: Date;
+    offer: OfferWithProperty;
   }>,
 ) {
   const message = `Hi, I was offered your property on Tramona for ${formatCurrency(
@@ -50,17 +52,13 @@ export default function HowToBookDialog(
 
   async function checkout() {
     const response = await createCheckout.mutateAsync({
-      listingId: props.listingId,
-      name: props.propertyName,
+      listingId: props.offer.id,
+      propertyId: props.offer.property.id,
+      name: props.offer.property.name,
       price: props.offerNightlyPrice,
-      description:
-        `Listing ID: ${props.listingId}/ ` +
-        "From: " +
-        formatDateRange(props.checkIn, props.checkOut),
+      description: "From: " + formatDateRange(props.checkIn, props.checkOut),
       cancelUrl: cancelUrl,
-      images: [
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-53368683/original/342a02dc-d6ae-4aa1-b519-8d10ecc8ba96.jpeg?im_w=1200",
-      ],
+      images: props.offer.property.imageUrls,
     });
 
     const stripe = await stripePromise;

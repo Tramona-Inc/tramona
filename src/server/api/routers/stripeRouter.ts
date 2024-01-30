@@ -18,6 +18,7 @@ export const stripeRouter = createTRPCRouter({
     .input(
       z.object({
         listingId: z.number(),
+        propertyId: z.number(),
         name: z.string(),
         price: z.number(),
         description: z.string(),
@@ -26,6 +27,8 @@ export const stripeRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) => {
+      const currentDate = new Date(); // Get the current date and time
+
       return stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
@@ -44,10 +47,15 @@ export const stripeRouter = createTRPCRouter({
           },
         ],
         success_url: `${env.NEXTAUTH_URL}/listings/success/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
-        // success_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}/?session_ID={CHECKOUT_SESSION_ID}`,
         cancel_url: `${env.NEXTAUTH_URL}/${input.cancelUrl}`,
+        // metadata that can be called on success
         metadata: {
+          listing_id: input.listingId,
+          property_id: input.propertyId,
+          name: input.name,
+          price: input.price,
           description: input.description,
+          confirmed_at: currentDate.toUTCString(),
         },
       });
     }),
@@ -62,7 +70,14 @@ export const stripeRouter = createTRPCRouter({
 
       return {
         email: session.customer_details?.email,
-        description: session.metadata?.description,
+        metadata: {
+          listing_id: session.metadata?.listing_id,
+          property_id: session.metadata?.property_id,
+          name: session.metadata?.name,
+          price: session.metadata?.price,
+          description: session.metadata?.description,
+          confirmed_d: session.metadata?.confirmed_at,
+        },
       };
     }),
 });

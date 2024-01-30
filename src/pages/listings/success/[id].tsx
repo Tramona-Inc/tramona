@@ -2,13 +2,10 @@ import { api } from "@/utils/api";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 
 const Success: NextPage = () => {
   const router = useRouter();
   const sessionId = useRouter().query.session_id as string;
-  const [description, setDescription] = useState("");
-  const [email, setEmail] = useState("");
 
   const session = api.stripe.getStripeSession.useQuery(
     { sessionId },
@@ -16,13 +13,6 @@ const Success: NextPage = () => {
       enabled: router.isReady,
     },
   );
-
-  useEffect(() => {
-    if (session.data?.email && session.data?.description) {
-      setEmail(session.data?.email);
-      setDescription(session.data?.description);
-    }
-  }, [session.data, router]);
 
   return (
     <>
@@ -32,11 +22,20 @@ const Success: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
-        Validating payment...
-        <h1>Email</h1>
-        <p>{email}</p>
-        <h1>Description</h1>
-        <p>{description}</p>
+        {session.data ? (
+          <>
+            {session.data.metadata ? (
+              <>
+                <h1>Payment Successful!</h1>
+                <pre>{JSON.stringify(session.data.metadata, null, 2)}</pre>
+              </>
+            ) : (
+              <h1>Validating payment...</h1>
+            )}
+          </>
+        ) : (
+          <h1>Loading...</h1>
+        )}
       </main>
     </>
   );
