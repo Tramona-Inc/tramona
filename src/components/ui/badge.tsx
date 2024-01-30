@@ -45,7 +45,14 @@ function Badge({
   ...props
 }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant, size }), className)} {...props}>
+    <div
+      className={cn(
+        badgeVariants({ variant, size }),
+        icon && "pl-1.5",
+        className,
+      )}
+      {...props}
+    >
       {icon}
       {children}
     </div>

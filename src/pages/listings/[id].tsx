@@ -127,11 +127,7 @@ function OfferPage({
           </h1>
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-1">
-              <Badge
-                variant="secondary"
-                className="pl-1"
-                icon={<StarFilledIcon />}
-              >
+              <Badge variant="secondary" icon={<StarFilledIcon />}>
                 {property.avgRating} ({property.numRatings})
               </Badge>
               <Badge variant="secondary">{property.propertyType}</Badge>
