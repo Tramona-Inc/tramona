@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.3.16
     version: 0.3.16(nodemailer@6.9.8)
   '@builder.io/react-hydration-overlay':
-    specifier: ^0.0.8
-    version: 0.0.8(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0)
+    specifier: ^0.0.7
+    version: 0.0.7(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0)
   '@hookform/resolvers':
     specifier: ^3.3.4
     version: 3.3.4(react-hook-form@7.49.3)
@@ -1678,8 +1678,8 @@ packages:
     resolution: {integrity: sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==}
     dev: true
 
-  /@builder.io/react-hydration-overlay@0.0.8(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0):
-    resolution: {integrity: sha512-iybjiiI3b2Fud9H0LWXrBL0V9v9QZ09GY1UjGM1z3q2lzvXutA4YsK+5yXCoJM1rGDGN43MzVG98NLLFIfB+1Q==}
+  /@builder.io/react-hydration-overlay@0.0.7(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0):
+    resolution: {integrity: sha512-Ph5/N5WVKBhZeU5uWm+1G+ql62PhJU7odXg2M2Or73wSoXkxa5p04FrGGN6FAKIB47Euj29h8JuewgCxeNwiZw==}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
@@ -3797,6 +3797,16 @@ packages:
     resolution: {integrity: sha512-fyrgCaedtvMg9NK3en0pnOYJdtfwxUcNolezkNPUsoX57X8oQk+NkqcvzHXD2uKNij6GXmWU9NDru2IWjrO4BQ==}
     dependencies:
       '@babel/runtime': 7.23.8
+
+  /@react-email/render@0.0.12:
+    resolution: {integrity: sha512-S8WRv/PqECEi6x0QJBj0asnAb5GFtJaHlnByxLETLkgJjc76cxMYDH4r9wdbuJ4sjkcbpwP3LPnVzwS+aIjT7g==}
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      html-to-text: 9.0.5
+      js-beautify: 1.14.11
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
 
   /@rushstack/eslint-patch@1.7.0:
     resolution: {integrity: sha512-Jh4t/593gxs0lJZ/z3NnasKlplXT2f+4y/LZYuaKZW5KAaiVFL/fThhs+17EbUd53jUVJ0QudYCBGbN/psvaqg==}
