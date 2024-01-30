@@ -6,7 +6,6 @@
 // import StarIcon from "@/common/components/icons/star";
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
-import Image from "next/image";
 import Spinner from "@/components/_common/Spinner";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
@@ -34,10 +33,11 @@ import {
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { type inferRouterOutputs } from "@trpc/server";
 import { CalendarIcon, CheckIcon, UsersIcon, XIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 
 export default function Listings() {
   useSession({ required: true });
@@ -70,7 +70,7 @@ function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
-  const lisa = false; // temporary until we add payments
+  // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
   const lackingSafetyItems = ALL_PROPERTY_SAFETY_ITEMS.filter(
     (i) => !property.safetyItems.includes(i),
@@ -127,11 +127,7 @@ function OfferPage({
           </h1>
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-1">
-              <Badge
-                variant="secondary"
-                className="pl-1"
-                icon={<StarFilledIcon />}
-              >
+              <Badge variant="secondary" icon={<StarFilledIcon />}>
                 {property.avgRating} ({property.numRatings})
               </Badge>
               <Badge variant="secondary">{property.propertyType}</Badge>

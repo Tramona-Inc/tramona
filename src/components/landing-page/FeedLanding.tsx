@@ -1,9 +1,8 @@
-import React from "react";
-import { ScrollArea } from "../ui/scroll-area";
 import FeedCardSm from "../_common/FeedCardSm";
+import { ScrollArea } from "../ui/scroll-area";
 // import useGlobalFeed from '@/hooks/useGlobalFeed';
-import type { OfferType } from "@/types";
 import { fakeOffers } from "@/fake-data/offers";
+import type { OfferType } from "@/types";
 
 export default function FeedLanding() {
   /**
@@ -39,7 +38,7 @@ export default function FeedLanding() {
               <FeedCardSm key={offer.id} offer={offer} />
             ))}
           </div>
-          <div className='aria-hidden="true" animate-loop-scroll flex flex-col gap-5 group-hover:paused'>
+          <div className='aria-hidden="true" animate-loop-scroll mt-2 flex flex-col gap-5 group-hover:paused'>
             {/* {isLoading && <h1>Loading</h1>} */}
             {feed?.map((offer: OfferType) => (
               <FeedCardSm key={offer.id} offer={offer} />

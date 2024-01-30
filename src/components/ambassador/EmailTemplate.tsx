@@ -1,4 +1,4 @@
-import { User } from "@/server/db/schema";
+import type { User } from "@/server/db/schema";
 import * as React from "react";
 
 export type EmailTemplateProps = {

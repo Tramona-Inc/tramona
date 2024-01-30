@@ -1,10 +1,8 @@
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
-import SecurityIcon from "@/components/_icons/SecurityIcon";
 import { Edit2Icon, Share2Icon } from "lucide-react";
 
-import PasswordResetForm from "@/components/profile/PasswordResetForm";
 import ProfileForm from "@/components/profile/ProfileForm";
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import ReferralDashboard from "@/components/profile/ReferralDashboard";

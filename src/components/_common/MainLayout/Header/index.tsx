@@ -1,9 +1,18 @@
-import { cn } from "@/utils/utils";
-import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import TramonaIcon from "../../../_icons/TramonaIcon";
-import NavLink from "../../../_utils/NavLink";
+import Link from "next/link";
+
+import TramonaIcon from "@/components/_icons/TramonaIcon";
+import { Menu } from "lucide-react";
 import HeaderTopRight from "./HeaderTopRight";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import NavLink from "@/components/_utils/NavLink";
+import { cn } from "@/utils/utils";
+import { Button } from "@/components/ui/button";
 
 function HeaderLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (
@@ -39,7 +48,20 @@ export default function Header() {
         <HeaderLink href="/feed">Social Feed</HeaderLink>
       </div>
 
-      <div className="flex flex-1 items-center justify-end gap-2">
+      <div className="flex flex-1 items-center justify-end gap-5">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild className="lg:hidden">
+            <Button variant="darkOutline" size="sm">
+              <Menu />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <HeaderLink href="/program">Refer and Earn</HeaderLink>
+            <HeaderLink href="/for-hosts">For Hosts</HeaderLink>
+            <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
+            <HeaderLink href="/feed">Social Feed</HeaderLink>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <HeaderTopRight />
       </div>
     </header>

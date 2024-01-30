@@ -16,6 +16,7 @@ import { Button, buttonVariants } from "../../../ui/button";
 import { Card, CardFooter } from "../../../ui/card";
 import PaywallDialog from "../PaywallDialog";
 import HowToBookDialog from "./HowToBookDialog";
+import { StarFilledIcon } from "@radix-ui/react-icons";
 
 export type OfferWithProperty =
   inferRouterOutputs<AppRouter>["offers"]["getByRequestIdWithProperty"][number];
@@ -94,8 +95,8 @@ export default function OfferCard({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1">
-          <Badge variant="secondary" className="pl-1 pr-2">
-            ★ {property.avgRating} ({property.numRatings})
+          <Badge variant="secondary" icon={<StarFilledIcon />}>
+            {property.avgRating} ({property.numRatings})
           </Badge>
           <Badge variant="secondary">{property.propertyType}</Badge>
           <Badge variant="secondary">
