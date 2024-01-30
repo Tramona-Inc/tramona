@@ -15,7 +15,15 @@ export const stripe = new Stripe(env.STRIPE_TEST_SECRET_KEY, {
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
-    .input(z.object({ name: z.string(), price: z.number() }))
+    .input(
+      z.object({
+        listingId: z.number(),
+        name: z.string(),
+        price: z.number(),
+        description: z.string(),
+        images: z.array(z.string().url()),
+      }),
+    )
     .mutation(({ input }) => {
       return stripe.checkout.sessions.create({
         mode: "payment",
@@ -27,13 +35,14 @@ export const stripeRouter = createTRPCRouter({
               unit_amount: input.price,
               product_data: {
                 name: input.name,
-                description: "",
+                description: input.description,
+                images: input.images,
               },
             },
             quantity: 1,
           },
         ],
-        success_url: `${env.NEXTAUTH_URL}/payment/success?session_ID={CHECKOUT_SESSION_ID}`,
+        success_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}/?session_ID={CHECKOUT_SESSION_ID}`,
         cancel_url: `${env.NEXTAUTH_URL}`,
       });
     }),

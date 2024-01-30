@@ -1,7 +1,11 @@
+import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { env } from "@/env";
+import { api } from "@/utils/api";
 import { cn, formatCurrency, formatDateRange } from "@/utils/utils";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import Link from "next/link";
-import CopyToClipboardBtn from "../../../_utils/CopyToClipboardBtn";
-import { Button, buttonVariants } from "../../../ui/button";
+import { useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,10 +15,21 @@ import {
   DialogTrigger,
 } from "../../../ui/dialog";
 
+const useStripe = () => {
+  const stripe = useMemo<Promise<Stripe | null>>(
+    () => loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY),
+    [],
+  );
+
+  return stripe;
+};
+
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{
+    listingId: number;
     offerNightlyPrice: number;
     originalNightlyPrice: number;
+    propertyName: string;
     airbnbUrl: string;
     checkIn: Date;
     checkOut: Date;
@@ -27,37 +42,72 @@ export default function HowToBookDialog(
     props.checkOut,
   )} and I'd like to book it at that price.`;
 
+  const createCheckout = api.stripe.createCheckoutSession.useMutation();
+  const stripePromise = useStripe();
+
+  async function checkout() {
+    const response = await createCheckout.mutateAsync({
+      listingId: props.listingId,
+      name: props.propertyName,
+      price: props.offerNightlyPrice,
+      description: "asdfadf",
+      images: [
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-53368683/original/342a02dc-d6ae-4aa1-b519-8d10ecc8ba96.jpeg?im_w=1200",
+      ],
+    });
+
+    const stripe = await stripePromise;
+
+    if (stripe !== null) {
+      await stripe.redirectToCheckout({
+        sessionId: response.id,
+      });
+    }
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>{props.children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
+          <div className="mb-10 flex flex-col space-y-5">
+            <div className="flex flex-row items-center justify-center gap-5">
+              <div>
+                <h1 className="font-bold">Tramona Price</h1>
+                <p className="font-extrabold text-primary">
+                  {formatCurrency(props.offerNightlyPrice)}
+                  <span className="font-normal text-secondary-foreground">
+                    /night
+                  </span>
+                </p>
+              </div>
+              <div className="text-muted-foreground">
+                <h1 className="font-bold">Original Price</h1>
+                <p className="font-extrabold">
+                  {formatCurrency(props.originalNightlyPrice)}
+                  <span className="font-normal">/night</span>
+                </p>
+              </div>
+            </div>
+            <Button
+              className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
+              onClick={() => checkout()}
+            >
+              Pay now
+            </Button>
+          </div>
           <DialogTitle>How To Book:</DialogTitle>
           <DialogDescription>
             Here&apos;s how to secure your booking.
           </DialogDescription>
-          <div className="flex flex-row items-center justify-center gap-5">
-            <div>
-              <h1 className="font-bold">Tramona Price</h1>
-              <p className="font-extrabold text-primary">
-                {formatCurrency(props.offerNightlyPrice)}
-                <span className="font-normal text-secondary-foreground">
-                  /night
-                </span>
-              </p>
-            </div>
-            <div>
-              <h1 className="font-bold">Original Price</h1>
-              <p className="font-extrabold text-primary">
-                {formatCurrency(props.originalNightlyPrice)}
-                <span className="font-normal text-secondary-foreground">
-                  /night
-                </span>
-              </p>
-            </div>
-          </div>
         </DialogHeader>
         <ol className="list-decimal space-y-1 px-4 marker:text-muted-foreground">
+          <li>
+            First please pay by clicking{" "}
+            <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
+              Pay now
+            </span>
+          </li>
           <li>
             Once you click{" "}
             <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">

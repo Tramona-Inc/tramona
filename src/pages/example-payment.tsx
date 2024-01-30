@@ -19,8 +19,13 @@ export default function ExamplePayment() {
 
   async function checkout() {
     const response = await createCheckout.mutateAsync({
+      listingId: 1,
       name: "hello",
       price: 1000,
+      description: "this is the description \n hello world \n yessir",
+      images: [
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-53368683/original/342a02dc-d6ae-4aa1-b519-8d10ecc8ba96.jpeg?im_w=1200",
+      ],
     });
 
     const stripe = await stripePromise;

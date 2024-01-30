@@ -6,6 +6,7 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
+import { StarFilledIcon } from "@radix-ui/react-icons";
 import { type inferRouterOutputs } from "@trpc/server";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
 import Link from "next/link";
@@ -16,7 +17,6 @@ import { Button, buttonVariants } from "../../../ui/button";
 import { Card, CardFooter } from "../../../ui/card";
 import PaywallDialog from "../PaywallDialog";
 import HowToBookDialog from "./HowToBookDialog";
-import { StarFilledIcon } from "@radix-ui/react-icons";
 
 export type OfferWithProperty =
   inferRouterOutputs<AppRouter>["offers"]["getByRequestIdWithProperty"][number];
@@ -145,6 +145,9 @@ export default function OfferCard({
             </PaywallDialog>
           ) : (
             <HowToBookDialog
+              listingId={offer.id}
+              propertyName={property.name}
+              // TODO: add description
               offerNightlyPrice={offerNightlyPrice}
               originalNightlyPrice={property.originalNightlyPrice}
               airbnbUrl={property.airbnbUrl}
