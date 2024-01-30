@@ -154,13 +154,15 @@ export default function HostWelcome() {
             <SqwiggleIcon />
           </span>
           <div className="flex w-4/12 justify-center pt-10 md:pt-0">
-            <Button
-              onClick={() => signIn()}
-              variant="outline"
-              className="border border-black bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl"
+            <Link
+              href="/for-hosts/sign-up"
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "border border-black bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl",
+              )}
             >
               Sign Up Now
-            </Button>
+            </Link>
           </div>
         </div>
       </div>
