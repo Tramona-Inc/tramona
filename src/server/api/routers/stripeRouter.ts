@@ -47,7 +47,7 @@ export const stripeRouter = createTRPCRouter({
           },
         ],
         success_url: `${env.NEXTAUTH_URL}/listings/success/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${env.NEXTAUTH_URL}/${input.cancelUrl}`,
+        cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
         // metadata that can be called on success
         metadata: {
           listing_id: input.listingId,
@@ -76,7 +76,7 @@ export const stripeRouter = createTRPCRouter({
           name: session.metadata?.name,
           price: session.metadata?.price,
           description: session.metadata?.description,
-          confirmed_d: session.metadata?.confirmed_at,
+          confirmed_at: session.metadata?.confirmed_at,
         },
       };
     }),
