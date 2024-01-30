@@ -5,6 +5,7 @@ import { api } from "@/utils/api";
 import { cn, formatCurrency, formatDateRange } from "@/utils/utils";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import {
   Dialog,
@@ -45,6 +46,8 @@ export default function HowToBookDialog(
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
   const stripePromise = useStripe();
 
+  const cancelUrl = usePathname();
+
   async function checkout() {
     const response = await createCheckout.mutateAsync({
       listingId: props.listingId,
@@ -52,7 +55,9 @@ export default function HowToBookDialog(
       price: props.offerNightlyPrice,
       description:
         formatDateRange(props.checkIn, props.checkOut) +
-        `/ Listing ID: ${props.listingId}` + "",
+        `, Listing ID: ${props.listingId}` +
+        "",
+      cancelUrl: cancelUrl,
       images: [
         "https://a0.muscache.com/im/pictures/prohost-api/Hosting-53368683/original/342a02dc-d6ae-4aa1-b519-8d10ecc8ba96.jpeg?im_w=1200",
       ],

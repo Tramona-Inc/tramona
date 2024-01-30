@@ -21,6 +21,7 @@ export const stripeRouter = createTRPCRouter({
         name: z.string(),
         price: z.number(),
         description: z.string(),
+        cancelUrl: z.string(),
         images: z.array(z.string().url()),
       }),
     )
@@ -43,7 +44,7 @@ export const stripeRouter = createTRPCRouter({
           },
         ],
         success_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}/?session_ID={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${env.NEXTAUTH_URL}`,
+        cancel_url: `${env.NEXTAUTH_URL}/${input.cancelUrl}`,
       });
     }),
   getStripeSession: protectedProcedure
