@@ -1,8 +1,17 @@
 import { env } from "@/env";
-import { stripe } from "@/server/api/routers/stripeRouter";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import Stripe from "stripe";
 
+export const stripe = new Stripe(env.STRIPE_TEST_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export default async function webhook(
   req: NextApiRequest,
@@ -36,7 +45,9 @@ export default async function webhook(
           id: string;
           receipt_email: string;
         };
-        // TODO: can logic right here to store into your own database
+        console.log("PaymentIntent was successful!");
+        console.log({ ...paymentIntentSucceeded });
+
         break;
 
       default:
