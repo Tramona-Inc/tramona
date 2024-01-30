@@ -115,6 +115,14 @@ export default function AvatarDropdown({ session }: { session: Session }) {
             <DropdownMenuSeparator />
           </>
         )}
+        {session.user.role === "guest" && (
+          <>
+            <DropdownLink href="/for-hosts/sign-up" Icon={UserCheck2Icon}>
+              Become a host
+            </DropdownLink>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownLink href="/" Icon={HomeIcon}>
           Home
         </DropdownLink>
