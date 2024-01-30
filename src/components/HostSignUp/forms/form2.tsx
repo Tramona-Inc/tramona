@@ -62,7 +62,7 @@ export default function Form2({ nextTab, prevTab }: Form2Props) {
           When we recieve offers for your property, where should we send them?
         </h1>
         <h2 className="pt-10 text-lg font-semibold md:pt-20 md:text-2xl">
-          We recomomend both phone number and email as the requests are first
+          We recommend both phone number and email as the requests are first
           come first serve.
         </h2>
       </div>

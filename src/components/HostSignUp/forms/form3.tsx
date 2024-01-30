@@ -4,7 +4,7 @@ export default function Form1() {
   return (
     <div>
       <h1 className="text-2xl font-bold md:text-4xl">
-        Thank you! You&aposre all set!
+        Thank you! You&apos;re all set!
       </h1>
       <h2 className="pt-10 text-2xl font-semibold md:pt-20">
         Welcome to Tramona, if you have any questions please send us an email

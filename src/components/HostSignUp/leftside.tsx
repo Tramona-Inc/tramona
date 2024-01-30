@@ -70,7 +70,7 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
           <h1>Welcome to Hosting!</h1>
         </div>
         <h3 className="text-center text-xl font-light">
-          Let&aposs get you setup.
+          Let&apos;s get you setup.
         </h3>
       </div>
 
@@ -84,7 +84,7 @@ const Leftside: React.FC<Props> = ({ newtab }) => {
               <div className="space-y-8">
                 <h1 className="text-xl font-bold">{content.message}</h1>
                 <h2 className="font-semi-bold text-md italic 2xl:text-lg">
-                  &quote{content.quote}&quote
+                  &ldquo;{content.quote}&rdquo;
                 </h2>
               </div>
 
