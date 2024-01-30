@@ -54,9 +54,9 @@ export default function HowToBookDialog(
       name: props.propertyName,
       price: props.offerNightlyPrice,
       description:
-        formatDateRange(props.checkIn, props.checkOut) +
-        `, Listing ID: ${props.listingId}` +
-        "",
+        `Listing ID: ${props.listingId}/ ` +
+        "From: " +
+        formatDateRange(props.checkIn, props.checkOut),
       cancelUrl: cancelUrl,
       images: [
         "https://a0.muscache.com/im/pictures/prohost-api/Hosting-53368683/original/342a02dc-d6ae-4aa1-b519-8d10ecc8ba96.jpeg?im_w=1200",
