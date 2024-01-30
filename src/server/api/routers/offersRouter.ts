@@ -8,7 +8,6 @@ import {
   offerInsertSchema,
   offerSelectSchema,
   offers,
-  properties,
   referralCodes,
   requestSelectSchema,
   requests,
