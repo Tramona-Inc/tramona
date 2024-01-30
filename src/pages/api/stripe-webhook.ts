@@ -42,8 +42,9 @@ export default async function webhook(
           id: string;
           receipt_email: string;
         };
-        console.log("PaymentIntent was successful!");
-        console.log({ ...paymentIntentSucceeded });
+        // console.log("PaymentIntent was successful!");
+        // console.log({ ...paymentIntentSucceeded });
+        console.log(event.data.object.metadata.description);
 
         break;
 

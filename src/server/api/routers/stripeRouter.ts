@@ -43,8 +43,12 @@ export const stripeRouter = createTRPCRouter({
             quantity: 1,
           },
         ],
-        success_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}/?session_ID={CHECKOUT_SESSION_ID}`,
+        success_url: `${env.NEXTAUTH_URL}/listings/success/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
+        // success_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}/?session_ID={CHECKOUT_SESSION_ID}`,
         cancel_url: `${env.NEXTAUTH_URL}/${input.cancelUrl}`,
+        metadata: {
+          description: input.description,
+        },
       });
     }),
   getStripeSession: protectedProcedure
@@ -55,8 +59,10 @@ export const stripeRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+
       return {
         email: session.customer_details?.email,
+        description: session.metadata?.description,
       };
     }),
 });
