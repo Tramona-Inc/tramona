@@ -67,14 +67,14 @@ export default async function webhook(
               parseInt(paymentIntentSucceeded.metadata.request_id!),
             ),
           );
-        console.log("PaymentIntent was successful!");
+        // console.log("PaymentIntent was successful!");
 
         break;
 
       case "checkout.session.completed":
         const checkoutSessionCompleted = event.data.object;
 
-        // Make sure to check listing_id isnt' null
+        // * Make sure to check listing_id isnt' null
         if (
           checkoutSessionCompleted.metadata &&
           checkoutSessionCompleted.metadata.listing_id !== null
@@ -90,14 +90,14 @@ export default async function webhook(
             })
             .where(eq(offers.id, listing_id));
 
-          console.log("Checkout session was successful!");
+          // console.log("Checkout session was successful!");
         } else {
-          console.error("Metadata or listing_id is null or undefined");
+          // console.error("Metadata or listing_id is null or undefined");
         }
         break;
 
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        // console.log(`Unhandled event type ${event.type}`);
     }
 
     res.json({ received: true });
