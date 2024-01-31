@@ -202,7 +202,7 @@ export default function OfferPage({
               offer={{ property, ...offer }}
             >
               <Button size="lg" className="w-full">
-                {isBooked ? "Booked!" : "Book Now"}
+                {isBooked ? "Booked ✓" : "Book Now"}
               </Button>
             </HowToBookDialog>
           </div>
