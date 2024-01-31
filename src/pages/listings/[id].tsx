@@ -7,8 +7,8 @@
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
 import Spinner from "@/components/_common/Spinner";
-import OfferPage from '@/components/listings/OfferPage';
-import { api } from '@/utils/api';
+import OfferPage from "@/components/listings/OfferPage";
+import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -38,4 +38,3 @@ export default function Listings() {
     </>
   );
 }
-
