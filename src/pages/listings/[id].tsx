@@ -8,6 +8,7 @@
 // import PaywallDialog from "@/common/components/paywall-dialog";
 import Spinner from "@/components/_common/Spinner";
 import UserAvatar from "@/components/_common/UserAvatar";
+import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -215,9 +216,21 @@ function OfferPage({
               <UsersIcon className="size-4" />
               <p>{fmtdNumGuests}</p>
             </div>
-            <Button size="lg" className="w-full">
-              Book ({formatCurrency(offer.totalPrice)} total)
-            </Button>
+            <HowToBookDialog
+              listingId={offer.id}
+              propertyName={property.name}
+              offerNightlyPrice={offerNightlyPrice}
+              originalNightlyPrice={property.originalNightlyPrice}
+              airbnbUrl={property.airbnbUrl}
+              checkIn={request.checkIn}
+              checkOut={request.checkOut}
+              requestId={request.id}
+              offer={{ property, ...offer }}
+            >
+              <Button size="lg" className="w-full">
+                Book ({formatCurrency(offer.totalPrice)} total)
+              </Button>
+            </HowToBookDialog>
           </div>
         </Card>
       </div>
