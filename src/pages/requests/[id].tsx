@@ -51,6 +51,7 @@ export default function Page() {
                 <OfferCard
                   key={offer.id}
                   offer={offer}
+                  requestId={requestId}
                   checkIn={request.checkIn}
                   checkOut={request.checkOut}
                 />

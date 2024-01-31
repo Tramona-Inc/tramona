@@ -4,10 +4,11 @@ import { env } from "@/env";
 import { api } from "@/utils/api";
 import { cn, formatCurrency, formatDateRange } from "@/utils/utils";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
-import { OfferWithProperty } from ".";
+import { type OfferWithProperty } from ".";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ export default function HowToBookDialog(
     checkIn: Date;
     checkOut: Date;
     offer: OfferWithProperty;
+    requestId: number;
   }>,
 ) {
   const message = `Hi, I was offered your property on Tramona for ${formatCurrency(
@@ -50,15 +52,19 @@ export default function HowToBookDialog(
 
   const cancelUrl = usePathname();
 
+  const session = useSession({ required: true });
+
   async function checkout() {
     const response = await createCheckout.mutateAsync({
       listingId: props.offer.id,
       propertyId: props.offer.property.id,
+      requestId: props.requestId,
       name: props.offer.property.name,
       price: props.offerNightlyPrice,
       description: "From: " + formatDateRange(props.checkIn, props.checkOut),
       cancelUrl: cancelUrl,
       images: props.offer.property.imageUrls,
+      userId: session.data?.user.id ?? "",
     });
 
     const stripe = await stripePromise;

@@ -25,10 +25,12 @@ export default function OfferCard({
   offer: { property, ...offer },
   checkIn,
   checkOut,
+  requestId,
 }: {
   offer: OfferWithProperty;
   checkIn: Date;
   checkOut: Date;
+  requestId: number;
 }) {
   const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
@@ -152,7 +154,8 @@ export default function OfferCard({
               airbnbUrl={property.airbnbUrl}
               checkIn={checkIn}
               checkOut={checkOut}
-              offer={{property, ...offer}}
+              requestId={requestId}
+              offer={{ property, ...offer }}
             >
               <Button size="lg" className="min-w-32 rounded-full">
                 Book
