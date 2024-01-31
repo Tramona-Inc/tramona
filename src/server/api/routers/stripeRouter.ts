@@ -58,7 +58,8 @@ export const stripeRouter = createTRPCRouter({
             quantity: 1,
           },
         ],
-        success_url: `${env.NEXTAUTH_URL}/listings/success/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
+        // success_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}`,
         cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
         metadata: metadata, // metadata access for checkout session
         payment_intent_data: {
@@ -66,6 +67,7 @@ export const stripeRouter = createTRPCRouter({
         },
       });
     }),
+
   getStripeSession: protectedProcedure
     .input(
       z.object({
