@@ -1,10 +1,11 @@
+import { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import { signIn } from "next-auth/react";
 
 import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
-import FeedLanding from "@/components/landing-page/FeedLanding";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Carousel,
@@ -13,10 +14,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
+import { liveFeedOffers } from "@/components/offer-card/data";
+
 import { cn } from "@/utils/utils";
 import Autoplay, { type AutoplayOptionsType } from "embla-carousel-autoplay";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
 
 type Tabs = {
   id: number;
@@ -68,6 +70,11 @@ export default function HostWelcome() {
       setImageOpacity(1);
     }, 500);
   };
+
+  // Offers with discount greater than 25%
+  const selectedOffers = liveFeedOffers.filter(
+    (offer) => offer.discountPercent > 25,
+  );
 
   return (
     <>
@@ -195,16 +202,16 @@ export default function HostWelcome() {
       </div>
 
       {/** Social Feed */}
-      <div className="  bg-[#EC4899] text-white sm:p-16 ">
+      <div className="bg-[#EC4899] text-white sm:p-16">
         <div className="container flex h-fit flex-row p-5 text-white sm:p-0 md:space-x-5 md:py-24 lg:space-x-20 lg:p-10">
-          <div className=" flex flex-col  items-center space-y-5 py-10 md:w-5/12 md:justify-center md:space-y-10 lg:w-1/2">
+          <div className=" flex flex-col items-center space-y-10 py-10 md:w-5/12 md:justify-center lg:w-1/2">
             <h3 className="w-full text-xl font-semibold">SOCIAL FEED</h3>
             <p className="text-3xl font-bold lg:text-4xl xl:self-start">
               Share & Discover Other Amazing Deals with Our Social Feed
             </p>
 
             <div className="md:hidden">
-              <FeedLanding />
+              <OfferCardsFeed offers={selectedOffers} />
             </div>
 
             <div className="md:self-start">
@@ -221,7 +228,7 @@ export default function HostWelcome() {
           </div>
 
           <div className="hidden md:block md:w-7/12 lg:w-1/2">
-            <FeedLanding />
+            <OfferCardsFeed offers={selectedOffers} />
           </div>
         </div>
       </div>
