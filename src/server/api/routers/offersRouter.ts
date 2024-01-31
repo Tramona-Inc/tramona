@@ -250,6 +250,14 @@ export const offersRouter = createTRPCRouter({
     });
   }),
 
+  getStripePaymentIntentAndCheckoutSessionId: protectedProcedure
+    .input(offerSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.id),
+        columns: { paymentIntentId: true, checkoutSessionId: true },
+      });
+    }),
   create: roleRestrictedProcedure(["admin", "host"])
     .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {
