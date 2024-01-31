@@ -163,6 +163,8 @@ export default function HowToBookDialog(
               </Button>
             )}
           />
+          {/* Default is booked is false in request Page */}
+          {props.isBooked ? (
             <Link
               className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
               href={props.airbnbUrl}
@@ -170,6 +172,14 @@ export default function HowToBookDialog(
             >
               Contact Host &rarr;
             </Link>
+          ) : (
+            <Button
+              disabled={true}
+              className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
+            >
+              Contact Host &rarr;
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
