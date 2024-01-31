@@ -11,9 +11,12 @@ export default function Page() {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
 
-  const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery({
-    id: requestId,
-  });
+  const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery(
+    { id: requestId },
+    {
+      enabled: router.isReady,
+    },
+  );
 
   const { data: requests } = api.requests.getMyRequests.useQuery();
 

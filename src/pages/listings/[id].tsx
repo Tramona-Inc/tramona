@@ -6,7 +6,6 @@
 // import StarIcon from "@/common/components/icons/star";
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
-import Image from "next/image";
 import Spinner from "@/components/_common/Spinner";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
@@ -34,19 +33,23 @@ import {
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { type inferRouterOutputs } from "@trpc/server";
 import { CalendarIcon, CheckIcon, UsersIcon, XIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 
 export default function Listings() {
   useSession({ required: true });
   const router = useRouter();
   const offerId = parseInt(router.query.id as string);
 
-  const { data: offer } = api.offers.getByIdWithDetails.useQuery({
-    id: offerId,
-  });
+  const { data: offer } = api.offers.getByIdWithDetails.useQuery(
+    { id: offerId },
+    {
+      enabled: router.isReady,
+    },
+  );
 
   return (
     <>
