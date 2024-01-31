@@ -7,7 +7,7 @@ import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { type OfferWithProperty } from ".";
 import {
   Dialog,
@@ -29,6 +29,7 @@ const useStripe = () => {
 
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{
+    isBooked: boolean;
     listingId: number;
     offerNightlyPrice: number;
     originalNightlyPrice: number;
@@ -76,55 +77,63 @@ export default function HowToBookDialog(
     }
   }
 
+  const [open, setOpen] = useState<boolean>(props.isBooked);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{props.children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <div className="mb-10 flex flex-col space-y-5">
-            <div className="flex flex-row items-center justify-center gap-5">
-              <div>
-                <h1 className="font-bold">Tramona Price</h1>
-                <p className="font-extrabold text-primary">
-                  {formatCurrency(props.offerNightlyPrice)}
-                  <span className="font-normal text-secondary-foreground">
-                    /night
-                  </span>
-                </p>
+          {!props.isBooked && (
+            <>
+              <div className="mb-10 flex flex-col space-y-5">
+                <div className="flex flex-row items-center justify-center gap-5">
+                  <div>
+                    <h1 className="font-bold">Tramona Price</h1>
+                    <p className="font-extrabold text-primary">
+                      {formatCurrency(props.offerNightlyPrice)}
+                      <span className="font-normal text-secondary-foreground">
+                        /night
+                      </span>
+                    </p>
+                  </div>
+                  <div className="text-muted-foreground">
+                    <h1 className="font-bold">Original Price</h1>
+                    <p className="font-extrabold">
+                      {formatCurrency(props.originalNightlyPrice)}
+                      <span className="font-normal">/night</span>
+                    </p>
+                  </div>
+                  <div className="font-bold">
+                    <h1 className="font-bold">From</h1>
+                    <p className="font-normal">
+                      {formatDateRange(props.checkIn, props.checkOut)}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
+                  onClick={() => checkout()}
+                >
+                  Pay now
+                </Button>
               </div>
-              <div className="text-muted-foreground">
-                <h1 className="font-bold">Original Price</h1>
-                <p className="font-extrabold">
-                  {formatCurrency(props.originalNightlyPrice)}
-                  <span className="font-normal">/night</span>
-                </p>
-              </div>
-              <div className="font-bold">
-                <h1 className="font-bold">From</h1>
-                <p className="font-normal">
-                  {formatDateRange(props.checkIn, props.checkOut)}
-                </p>
-              </div>
-            </div>
-            <Button
-              className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
-              onClick={() => checkout()}
-            >
-              Pay now
-            </Button>
-          </div>
+            </>
+          )}
           <DialogTitle>How To Book:</DialogTitle>
           <DialogDescription>
             Here&apos;s how to secure your booking.
           </DialogDescription>
         </DialogHeader>
         <ol className="list-decimal space-y-1 px-4 marker:text-muted-foreground">
-          <li>
-            First please pay by clicking{" "}
-            <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
-              Pay now
-            </span>
-          </li>
+          {!props.isBooked && (
+            <li>
+              First please pay by clicking{" "}
+              <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
+                Pay now
+              </span>
+            </li>
+          )}
           <li>
             Once you click{" "}
             <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">

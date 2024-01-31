@@ -147,6 +147,7 @@ export default function OfferCard({
             </PaywallDialog>
           ) : (
             <HowToBookDialog
+              isBooked={false} // default will always be false in request page
               listingId={offer.id}
               propertyName={property.name}
               offerNightlyPrice={offerNightlyPrice}
