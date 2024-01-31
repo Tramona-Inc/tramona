@@ -66,7 +66,7 @@ export default function OfferPage({
   return (
     <div className="space-y-4">
       <Link
-        href={`/requests/${request.id}`}
+        href={isBooked ? "/requests" : `/requests/${request.id}`}
         className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
       >
         &larr; Back to all offers
@@ -202,7 +202,7 @@ export default function OfferPage({
               offer={{ property, ...offer }}
             >
               <Button size="lg" className="w-full">
-                Book Now
+                {isBooked ? "Booked!" : "Book Now"}
               </Button>
             </HowToBookDialog>
           </div>
