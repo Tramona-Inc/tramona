@@ -137,7 +137,7 @@ export default function HowToBookDialog(
           <li>
             Once you click{" "}
             <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
-              Book &rarr;
+              Contact Host &rarr;
             </span>{" "}
             below, you will be taken to the listing page on Airbnb.
           </li>
@@ -163,13 +163,13 @@ export default function HowToBookDialog(
               </Button>
             )}
           />
-          <Link
-            className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
-            href={props.airbnbUrl}
-            target="_blank"
-          >
-            Book &rarr;
-          </Link>
+            <Link
+              className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
+              href={props.airbnbUrl}
+              target="_blank"
+            >
+              Contact Host &rarr;
+            </Link>
         </div>
       </DialogContent>
     </Dialog>
