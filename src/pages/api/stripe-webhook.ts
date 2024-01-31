@@ -42,12 +42,12 @@ export default async function webhook(
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
-        console.log(paymentIntentSucceeded.metadata);
 
         await db
           .update(offers)
           .set({
             acceptedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
+            paymentIntentId: paymentIntentSucceeded.id,
           })
           .where(
             eq(
@@ -72,7 +72,28 @@ export default async function webhook(
         break;
 
       case "checkout.session.completed":
-        console.log("Checkout session was successful!");
+        const checkoutSessionCompleted = event.data.object;
+
+        // Make sure to check listing_id isnt' null
+        if (
+          checkoutSessionCompleted.metadata &&
+          checkoutSessionCompleted.metadata.listing_id !== null
+        ) {
+          const listing_id = parseInt(
+            checkoutSessionCompleted.metadata.listing_id!,
+          );
+
+          await db
+            .update(offers)
+            .set({
+              checkoutSessionId: checkoutSessionCompleted.id,
+            })
+            .where(eq(offers.id, listing_id));
+
+          console.log("Checkout session was successful!");
+        } else {
+          console.error("Metadata or listing_id is null or undefined");
+        }
         break;
 
       default:
