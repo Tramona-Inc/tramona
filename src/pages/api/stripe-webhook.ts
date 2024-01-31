@@ -1,5 +1,8 @@
 import { env } from "@/env";
 import { stripe } from "@/server/api/routers/stripeRouter";
+import { db } from "@/server/db";
+import { offers, requests } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 
@@ -38,14 +41,38 @@ export default async function webhook(
     // * You can add other event types to catch
     switch (event.type) {
       case "payment_intent.succeeded":
-        const paymentIntentSucceeded = event.data.object as {
-          id: string;
-          receipt_email: string;
-        };
-        // console.log("PaymentIntent was successful!");
-        // console.log({ ...paymentIntentSucceeded });
-        console.log(event.data.object.metadata.description);
+        const paymentIntentSucceeded = event.data.object;
+        console.log(paymentIntentSucceeded.metadata);
 
+        await db
+          .update(offers)
+          .set({
+            acceptedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
+          })
+          .where(
+            eq(
+              offers.id,
+              parseInt(paymentIntentSucceeded.metadata.listing_id!),
+            ),
+          );
+
+        await db
+          .update(requests)
+          .set({
+            resolvedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
+          })
+          .where(
+            eq(
+              requests.id,
+              parseInt(paymentIntentSucceeded.metadata.request_id!),
+            ),
+          );
+        console.log("PaymentIntent was successful!");
+
+        break;
+
+      case "checkout.session.completed":
+        console.log("Checkout session was successful!");
         break;
 
       default:

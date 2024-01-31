@@ -19,15 +19,27 @@ export const stripeRouter = createTRPCRouter({
       z.object({
         listingId: z.number(),
         propertyId: z.number(),
+        requestId: z.number(),
         name: z.string(),
         price: z.number(),
         description: z.string(),
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
+        userId: z.string(),
       }),
     )
     .mutation(({ input }) => {
       const currentDate = new Date(); // Get the current date and time
+
+      // Object that can be access through webhook and client
+      const metadata = {
+        user_id: input.userId,
+        listing_id: input.listingId,
+        property_id: input.propertyId,
+        request_id: input.requestId,
+        price: input.price,
+        confirmed_at: currentDate.toISOString(),
+      };
 
       return stripe.checkout.sessions.create({
         mode: "payment",
@@ -48,14 +60,9 @@ export const stripeRouter = createTRPCRouter({
         ],
         success_url: `${env.NEXTAUTH_URL}/listings/success/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
-        // metadata that can be called on success
-        metadata: {
-          listing_id: input.listingId,
-          property_id: input.propertyId,
-          name: input.name,
-          price: input.price,
-          description: input.description,
-          confirmed_at: currentDate.toISOString(),
+        metadata: metadata, // metadata access for checkout session
+        payment_intent_data: {
+          metadata: metadata, // metadata access for payment intent (webhook access)
         },
       });
     }),
@@ -69,13 +76,15 @@ export const stripeRouter = createTRPCRouter({
       const session = await stripe.checkout.sessions.retrieve(input.sessionId);
 
       return {
-        email: session.customer_details?.email,
         metadata: {
+          user_id: session.metadata?.user_id,
+          stripe_email_used: session.customer_details?.email,
+          stripe_phone_used: session.customer_details?.phone,
+          price: session.metadata?.price,
           listing_id: session.metadata?.listing_id,
           property_id: session.metadata?.property_id,
-          name: session.metadata?.name,
-          price: session.metadata?.price,
-          description: session.metadata?.description,
+          request_id: session.metadata?.request_id,
+          checkout_session_id: session.id,
           confirmed_at: session.metadata?.confirmed_at,
         },
       };
