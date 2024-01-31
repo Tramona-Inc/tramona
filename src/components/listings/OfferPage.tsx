@@ -27,6 +27,7 @@ import { type inferRouterOutputs } from "@trpc/server";
 import { CalendarIcon, CheckIcon, UsersIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import Spinner from "../_common/Spinner";
 
 export type OfferWithDetails =
   inferRouterOutputs<AppRouter>["offers"]["getByIdWithDetails"];
@@ -38,7 +39,7 @@ export default function OfferPage({
 }) {
   let isBooked = false;
 
-  const { data } =
+  const { data, isLoading } =
     api.offers.getStripePaymentIntentAndCheckoutSessionId.useQuery({
       id: offer.id,
     });
@@ -189,22 +190,27 @@ export default function OfferPage({
               <UsersIcon className="size-4" />
               <p>{fmtdNumGuests}</p>
             </div>
-            <HowToBookDialog
-              isBooked={isBooked}
-              listingId={offer.id}
-              propertyName={property.name}
-              offerNightlyPrice={offerNightlyPrice}
-              originalNightlyPrice={property.originalNightlyPrice}
-              airbnbUrl={property.airbnbUrl}
-              checkIn={request.checkIn}
-              checkOut={request.checkOut}
-              requestId={request.id}
-              offer={{ property, ...offer }}
-            >
-              <Button size="lg" className="w-full">
-                {isBooked ? "Booked ✓" : "Book Now"}
-              </Button>
-            </HowToBookDialog>
+            {/* // ! isLoading stops dialog from openning on inital render b/c of isBooked */}
+            {!isLoading ? (
+              <HowToBookDialog
+                isBooked={isBooked}
+                listingId={offer.id}
+                propertyName={property.name}
+                offerNightlyPrice={offerNightlyPrice}
+                originalNightlyPrice={property.originalNightlyPrice}
+                airbnbUrl={property.airbnbUrl}
+                checkIn={request.checkIn}
+                checkOut={request.checkOut}
+                requestId={request.id}
+                offer={{ property, ...offer }}
+              >
+                <Button size="lg" className="w-full">
+                  {isBooked ? "Booked ✓" : "Book Now"}
+                </Button>
+              </HowToBookDialog>
+            ) : (
+              <Spinner />
+            )}
           </div>
         </Card>
       </div>
