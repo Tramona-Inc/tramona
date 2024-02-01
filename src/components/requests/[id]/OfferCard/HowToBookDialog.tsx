@@ -262,8 +262,11 @@ export default function HowToBookDialog(
                   confirmed.
                 </li>
                 <li>
-                  You will be able to see the trip under “my trips” and see
-                  confirmation, check-in instructions and more.
+                  You will be able to see the trip under{" "}
+                  <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
+                    My Trips &rarr;
+                  </span>{" "}
+                  and see confirmation, check-in instructions and more.
                 </li>
                 <li>
                   A copy of your booking confirmation, check-in instructions and
@@ -273,12 +276,27 @@ export default function HowToBookDialog(
             </div>
 
             <DialogFooter className="flex items-center justify-center">
-              <Button
-                className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
-                onClick={() => checkout()}
-              >
-                Pay now
-              </Button>
+              {props.isBooked ? (
+                <>
+                  <Link
+                    className={cn(
+                      buttonVariants({ size: "lg" }),
+                      "rounded-full",
+                    )}
+                    href={""} // TODO: href to my listing
+                    target="_blank"
+                  >
+                    My Trips &rarr;
+                  </Link>
+                </>
+              ) : (
+                <Button
+                  className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
+                  onClick={() => checkout()}
+                >
+                  Pay now
+                </Button>
+              )}
             </DialogFooter>
           </>
         )}

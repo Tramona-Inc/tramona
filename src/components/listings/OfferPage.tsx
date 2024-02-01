@@ -210,7 +210,7 @@ export default function OfferPage({
                 offer={{ property, ...offer }}
                 totalPrice={offer.totalPrice}
                 offerNightlyPrice={offerNightlyPrice}
-                isAirbnb={true} // ! TODO: identify it's an airbnb (Change database)
+                isAirbnb={false} // ! TODO: identify it's an airbnb (Change database)
               >
                 <Button size="lg" className="w-full">
                   {isBooked ? "Booked ✓" : "Book Now"}
