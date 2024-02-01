@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Head from "next/head";
 
 import { Form1Values } from "@/components/HostSignUp/forms/form1";
 import { Form2Values } from "@/components/HostSignUp/forms/form2";
@@ -27,6 +28,9 @@ export default function HostSignUp() {
 
   return (
     <>
+      <Head>
+        <title>Host Onboarding | Tramona</title>
+      </Head>
       <div className="flex w-full flex-col md:min-h-screen lg:flex-row">
         <Leftside newtab={tab} />
         <Rightside
