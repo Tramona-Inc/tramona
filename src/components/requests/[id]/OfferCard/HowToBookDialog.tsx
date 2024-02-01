@@ -99,7 +99,7 @@ export default function HowToBookDialog(
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{props.children}</DialogTrigger>
       <DialogContent>
-        {!props.isBooked && (
+        {!props.isBooked ? (
           <>
             <DialogHeader>
               <DialogTitle className="text-center text-5xl">
@@ -162,6 +162,20 @@ export default function HowToBookDialog(
                 </div>
               </div>
             )}
+          </>
+        ) : props.isAirbnb ? (
+          <DialogHeader>
+            <DialogTitle className="text-center text-5xl">
+              One Last Step!
+            </DialogTitle>
+          </DialogHeader>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-center text-5xl">
+                Thank you for Booking!
+              </DialogTitle>
+            </DialogHeader>
           </>
         )}
 
@@ -257,10 +271,12 @@ export default function HowToBookDialog(
           <>
             <div className="container flex flex-col px-10 py-5">
               <ol className="flex list-decimal flex-col text-start marker:text-muted-foreground">
-                <li>
-                  Once you click pay now and pay the total, your booking is
-                  confirmed.
-                </li>
+                {!props.isBooked && (
+                  <li>
+                    Once you click pay now and pay the total, your booking is
+                    confirmed.
+                  </li>
+                )}
                 <li>
                   You will be able to see the trip under{" "}
                   <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
