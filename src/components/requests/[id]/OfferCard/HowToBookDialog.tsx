@@ -38,12 +38,21 @@ type PriceDetailsProps = {
   title: string;
   value: number;
   color: string;
+  isNight?: boolean;
 };
 
-const PriceDetails: React.FC<PriceDetailsProps> = ({ title, value, color }) => (
+const PriceDetails: React.FC<PriceDetailsProps> = ({
+  title,
+  value,
+  color,
+  isNight = false,
+}) => (
   <div className="text-center">
     <h1 className="text-md">{title}</h1>
-    <p className={`text-lg ${color}`}>{formatCurrency(value)}</p>
+    <div className="flex items-center justify-center">
+      <p className={`text-lg ${color}`}>{formatCurrency(value)}</p>
+      {isNight && <span className="text-sm">/night</span>}
+    </div>
   </div>
 );
 
@@ -108,16 +117,18 @@ export default function HowToBookDialog(
 
     if (isAirbnb) {
       return (
-        <div className="flex flex-row items-center justify-center gap-10 font-bold">
+        <div className="flex flex-row items-center justify-center gap-5 font-bold sm:gap-10">
           <PriceDetails
             title="Tramona Price"
             value={offerNightlyPrice}
             color="font-extrabold text-primary"
+            isNight={true}
           />
           <PriceDetails
             title="Original Price"
             value={originalNightlyPrice}
             color="text-muted-foreground"
+            isNight={true}
           />
           <PriceDetails
             title="Savings"
@@ -161,7 +172,7 @@ export default function HowToBookDialog(
       return (
         <DialogHeader>
           <DialogTitle className="text-center text-5xl">
-            {isBooked ? "One Last Step!" : "How To Book:"}
+            {isBooked ? "One Last Step!" : "Confirm Booking"}
           </DialogTitle>
         </DialogHeader>
       );
