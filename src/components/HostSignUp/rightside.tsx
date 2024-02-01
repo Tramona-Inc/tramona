@@ -1,24 +1,33 @@
 import React, { useState } from "react";
-import Form1 from "./forms/form1";
-import Form2 from "./forms/form2";
+import Form1, { Form1Values } from "./forms/form1";
+import Form2, { Form2Values } from "./forms/form2";
 import Form3 from "./forms/form3";
 import { Progress } from "../ui/progress";
 
 interface Props {
   onValueChange: (value: number) => void;
+  onHandleFormData: (value: Form1Values | Form2Values) => void;
 }
 
-const Rightside: React.FC<Props> = ({ onValueChange }) => {
+const Rightside: React.FC<Props> = ({ onValueChange, onHandleFormData }) => {
   const [tab, setTab] = useState<number>(1);
 
   let currentForm;
 
   switch (tab) {
     case 1:
-      currentForm = <Form1 nextTab={nextTab} />;
+      currentForm = (
+        <Form1 nextTab={nextTab} handleFormData={onHandleFormData} />
+      );
       break;
     case 2:
-      currentForm = <Form2 nextTab={nextTab} prevTab={prevTab} />;
+      currentForm = (
+        <Form2
+          nextTab={nextTab}
+          prevTab={prevTab}
+          handleFormData={onHandleFormData}
+        />
+      );
       break;
     case 3:
       currentForm = <Form3 />;

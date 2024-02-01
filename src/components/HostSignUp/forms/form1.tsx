@@ -35,13 +35,14 @@ const Form1Schema = z.object({
     .optional(),
 });
 
-type Form1Values = z.infer<typeof Form1Schema>;
+export type Form1Values = z.infer<typeof Form1Schema>;
 
 type Form1Props = {
   nextTab: () => void;
+  handleFormData: (value: Form1Values) => void;
 };
 
-export default function Form1({ nextTab }: Form1Props) {
+export default function Form1({ nextTab, handleFormData }: Form1Props) {
   // This can come from your database or API.
   const defaultValues: Partial<Form1Values> = {
     listings: [
@@ -70,6 +71,7 @@ export default function Form1({ nextTab }: Form1Props) {
 
   function onSubmit(data: Form1Values) {
     nextTab();
+    handleFormData(data);
     toast({
       title: "You submitted the following values:",
       description: (
