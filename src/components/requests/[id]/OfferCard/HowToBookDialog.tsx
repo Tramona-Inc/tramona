@@ -34,6 +34,19 @@ const useStripe = () => {
   return stripe;
 };
 
+type PriceDetailsProps = {
+  title: string;
+  value: number;
+  color: string;
+};
+
+const PriceDetails: React.FC<PriceDetailsProps> = ({ title, value, color }) => (
+  <div className="text-center">
+    <h1 className="text-md">{title}</h1>
+    <p className={`text-lg ${color}`}>{formatCurrency(value)}</p>
+  </div>
+);
+
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{
     isBooked: boolean;
@@ -59,18 +72,12 @@ export default function HowToBookDialog(
 
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
   const stripePromise = useStripe();
-
   const cancelUrl = usePathname();
-
   const session = useSession({ required: true });
-
   const [open, setOpen] = useState<boolean>(props.isBooked);
-
   const originalTotalPrice =
     props.originalNightlyPrice * getNumNights(props.checkIn, props.checkOut);
-
   const totalSavings = originalTotalPrice - props.totalPrice;
-
   const tramonafee = getTramonaFeeTotal(totalSavings);
 
   async function checkout() {
@@ -79,7 +86,7 @@ export default function HowToBookDialog(
       propertyId: props.offer.property.id,
       requestId: props.requestId,
       name: props.offer.property.name,
-      price: props.isAirbnb ? tramonafee : props.totalPrice,
+      price: props.isAirbnb ? tramonafee : props.totalPrice, // Set's price for checkout
       description: "From: " + formatDateRange(props.checkIn, props.checkOut),
       cancelUrl: cancelUrl,
       images: props.offer.property.imageUrls,
@@ -95,92 +102,93 @@ export default function HowToBookDialog(
     }
   }
 
+  const renderPriceDetails = () => {
+    const { isAirbnb, offerNightlyPrice, originalNightlyPrice, totalPrice } =
+      props;
+
+    if (isAirbnb) {
+      return (
+        <div className="flex flex-row items-center justify-center gap-10 font-bold">
+          <PriceDetails
+            title="Tramona Price"
+            value={offerNightlyPrice}
+            color="font-extrabold text-primary"
+          />
+          <PriceDetails
+            title="Original Price"
+            value={originalNightlyPrice}
+            color="text-muted-foreground"
+          />
+          <PriceDetails
+            title="Savings"
+            value={totalSavings}
+            color="text-primary"
+          />
+          <PriceDetails
+            title="Tramona Fee"
+            value={tramonafee}
+            color="text-primary"
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex flex-row items-center justify-center gap-10 font-bold">
+          <PriceDetails
+            title="Tramona Price"
+            value={totalPrice}
+            color="font-extrabold text-primary"
+          />
+          <PriceDetails
+            title="Original Price"
+            value={originalTotalPrice}
+            color="text-muted-foreground"
+          />
+          <PriceDetails
+            title="Savings"
+            value={originalTotalPrice - totalPrice}
+            color="text-primary"
+          />
+        </div>
+      );
+    }
+  };
+
+  const renderBookingDetails = () => {
+    const { isAirbnb, isBooked } = props;
+
+    if (isAirbnb) {
+      return (
+        <DialogHeader>
+          <DialogTitle className="text-center text-5xl">
+            {isBooked ? "One Last Step!" : "How To Book:"}
+          </DialogTitle>
+        </DialogHeader>
+      );
+    } else {
+      return (
+        <>
+          <DialogHeader>
+            <DialogTitle className="text-center text-5xl">
+              {isBooked ? "Thank you for Booking!" : "Confirm Booking:"}
+            </DialogTitle>
+          </DialogHeader>
+        </>
+      );
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{props.children}</DialogTrigger>
       <DialogContent>
-        {!props.isBooked ? (
-          <>
-            <DialogHeader>
-              <DialogTitle className="text-center text-5xl">
-                Confirm Booking:
-              </DialogTitle>
-            </DialogHeader>
-
-            {props.isAirbnb ? (
-              <div className="flex flex-row items-center justify-center gap-10 font-bold">
-                <div className="text-center">
-                  <h1 className="text-md">Tramona Price</h1>
-                  <p className="text-lg font-extrabold text-primary">
-                    {formatCurrency(props.offerNightlyPrice)}
-                    <span className="font-normal text-secondary-foreground">
-                      /night
-                    </span>
-                  </p>
-                </div>
-                <div className="text-center">
-                  <h1 className="text-md">Original Price</h1>
-                  <p className="text-lg text-muted-foreground">
-                    {formatCurrency(props.originalNightlyPrice)}
-                    <span className="font-normal text-secondary-foreground">
-                      /night
-                    </span>
-                  </p>
-                </div>
-                <div className="text-center">
-                  <h1 className="text-md">Savings</h1>
-                  <p className="text-lg text-primary">
-                    {formatCurrency(totalSavings)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <h1 className="text-md">Tramona Fee</h1>
-                  <p className="text-lg text-primary">
-                    {formatCurrency(tramonafee)}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-row items-center justify-center gap-10 font-bold">
-                <div className="text-center">
-                  <h1 className="text-lg">Tramona Price</h1>
-                  <p className="text-xl font-extrabold text-primary">
-                    {formatCurrency(props.totalPrice)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <h1 className="text-lg">Original Price</h1>
-                  <p className="text-xl text-muted-foreground">
-                    {formatCurrency(originalTotalPrice)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <h1 className="text-lg">Savings</h1>
-                  <p className="text-xl text-primary">
-                    {formatCurrency(originalTotalPrice - props.totalPrice)}
-                  </p>
-                </div>
-              </div>
-            )}
-          </>
-        ) : props.isAirbnb ? (
-          <DialogHeader>
-            <DialogTitle className="text-center text-5xl">
-              One Last Step!
-            </DialogTitle>
-          </DialogHeader>
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle className="text-center text-5xl">
-                Thank you for Booking!
-              </DialogTitle>
-            </DialogHeader>
-          </>
-        )}
+        {/* Displaying Prices when not booked*/}
+        {renderBookingDetails()}
+        {!props.isBooked && <>{renderPriceDetails()}</>}
 
         {props.isAirbnb ? (
           <>
+            {/* Airbnb and display pay button */}
             {!props.isBooked && (
               <>
                 <div className="flex flex-col">
@@ -200,6 +208,8 @@ export default function HowToBookDialog(
                 </p>
               </>
             )}
+
+            {/* Airbnb flow and instructions */}
             <DialogHeader>
               <DialogTitle>How To Book:</DialogTitle>
               <DialogDescription>
@@ -248,7 +258,8 @@ export default function HowToBookDialog(
                   </Button>
                 )}
               />
-              {/* Default is booked is false in request Page */}
+
+              {/* Enable contact host once paid */}
               {props.isBooked ? (
                 <Link
                   className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
@@ -268,6 +279,7 @@ export default function HowToBookDialog(
             </div>
           </>
         ) : (
+          // Direct booking flow and instructions
           <>
             <div className="container flex flex-col px-10 py-5">
               <ol className="flex list-decimal flex-col text-start marker:text-muted-foreground">
@@ -293,19 +305,16 @@ export default function HowToBookDialog(
 
             <DialogFooter className="flex items-center justify-center">
               {props.isBooked ? (
-                <>
-                  <Link
-                    className={cn(
-                      buttonVariants({ size: "lg" }),
-                      "rounded-full",
-                    )}
-                    href={""} // TODO: href to my listing
-                    target="_blank"
-                  >
-                    My Trips &rarr;
-                  </Link>
-                </>
+                // Direct Booking once paid link to trip
+                <Link
+                  className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
+                  href={""} // TODO: href to my listing
+                  target="_blank"
+                >
+                  My Trips &rarr;
+                </Link>
               ) : (
+                // Direct Booking pay first
                 <Button
                   className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
                   onClick={() => checkout()}
