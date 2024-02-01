@@ -184,6 +184,12 @@ export default function OfferPage({
                 /night ({discountPercentage}% off)
               </p>
             </div>
+            <div>
+              <h1 className="text-lg font-extrabold text-black">Total Price</h1>
+              <p className="text-2xl text-primary">
+                {formatCurrency(offer.totalPrice)}
+              </p>
+            </div>
             <div className="flex items-center gap-1">
               <CalendarIcon className="size-4" />
               <p className="mr-3">{fmtdDateRange}</p>
@@ -196,13 +202,15 @@ export default function OfferPage({
                 isBooked={isBooked}
                 listingId={offer.id}
                 propertyName={property.name}
-                offerNightlyPrice={offerNightlyPrice}
                 originalNightlyPrice={property.originalNightlyPrice}
                 airbnbUrl={property.airbnbUrl}
                 checkIn={request.checkIn}
                 checkOut={request.checkOut}
                 requestId={request.id}
                 offer={{ property, ...offer }}
+                totalPrice={offer.totalPrice}
+                offerNightlyPrice={offerNightlyPrice}
+                isAirbnb={true} // ! TODO: identify it's an airbnb (Change database)
               >
                 <Button size="lg" className="w-full">
                   {isBooked ? "Booked ✓" : "Book Now"}

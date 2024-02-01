@@ -62,7 +62,7 @@ export default function OfferCard({
               {discountPercentage}% off
             </p>
           </div>
-          <div className="flex flex-1 gap-4 text-muted-foreground sm:flex-col">
+          <div className="flex flex-1 items-center gap-4 text-muted-foreground sm:flex-col">
             <div>
               <p className="text-xs font-semibold uppercase">Original Price</p>
               <p>
@@ -73,12 +73,24 @@ export default function OfferCard({
               </p>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase">Tramona Price</p>
+              <p className="text-center text-xs font-semibold uppercase">
+                Tramona Price
+              </p>
               <p>
                 <span className="text-3xl font-bold text-primary">
                   {formatCurrency(offerNightlyPrice)}
                 </span>
                 <span className="text-sm">/night</span>
+              </p>
+            </div>
+            <div>
+              <p className="text-md font-bold uppercase text-black text-primary">
+                Total Cost
+              </p>
+              <p>
+                <span className="text-3xl font-bold text-primary">
+                  {formatCurrency(offer.totalPrice)}
+                </span>
               </p>
             </div>
           </div>
@@ -151,12 +163,14 @@ export default function OfferCard({
               listingId={offer.id}
               propertyName={property.name}
               offerNightlyPrice={offerNightlyPrice}
+              totalPrice={offer.totalPrice}
               originalNightlyPrice={property.originalNightlyPrice}
               airbnbUrl={property.airbnbUrl}
               checkIn={checkIn}
               checkOut={checkOut}
               requestId={requestId}
               offer={{ property, ...offer }}
+              isAirbnb={true}  // ! TODO: identify it's an airbnb (Change database) 
             >
               <Button size="lg" className="min-w-32 rounded-full">
                 Book
