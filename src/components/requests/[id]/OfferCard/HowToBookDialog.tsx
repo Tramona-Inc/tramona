@@ -112,13 +112,13 @@ export default function HowToBookDialog(
   }
 
   const renderPriceDetails = () => {
-    const { isAirbnb, offerNightlyPrice, originalNightlyPrice, totalPrice } =
-      props;
+    // const { isAirbnb, offerNightlyPrice, originalNightlyPrice, totalPrice } = props;
+    const { isAirbnb, totalPrice } = props;
 
     if (isAirbnb) {
       return (
         <div className="flex flex-row items-center justify-center gap-5 font-bold sm:gap-10">
-          <PriceDetails
+          {/* <PriceDetails
             title="Tramona Price"
             value={offerNightlyPrice}
             color="font-extrabold text-primary"
@@ -129,9 +129,9 @@ export default function HowToBookDialog(
             value={originalNightlyPrice}
             color="text-muted-foreground"
             isNight={true}
-          />
+          /> */}
           <PriceDetails
-            title="Savings"
+            title="Total Savings"
             value={totalSavings}
             color="text-primary"
           />
