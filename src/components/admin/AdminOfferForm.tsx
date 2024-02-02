@@ -379,8 +379,8 @@ export default function AdminOfferForm({
         />
 
         <div className="col-span-full flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm text-muted-foreground">Listing type </h1>
+          <div>
+            <h1 className="text-sm text-muted-foreground">Listing Type </h1>
             <p>{isAirbnb ? "Airbnb" : "Direct"}</p>
           </div>
           <Switch
