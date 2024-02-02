@@ -2,11 +2,10 @@ import { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 
 import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
