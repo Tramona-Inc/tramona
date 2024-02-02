@@ -21,8 +21,10 @@ import { capitalize } from "@/utils/utils";
 import { zodInteger, zodNumber, zodString, zodUrl } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TRPCClientError } from "@trpc/client";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import TagSelect from "../_common/TagSelect";
 import {
   Select,
   SelectContent,
@@ -30,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import TagSelect from "../_common/TagSelect";
+import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
@@ -138,6 +140,8 @@ export default function AdminOfferForm({
       }
     }
   }
+
+  const [isAirbnb, setIsAirbnb] = useState<boolean>(true);
 
   return (
     <Form {...form}>
@@ -374,19 +378,32 @@ export default function AdminOfferForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="airbnbUrl"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Airbnb URL</FormLabel>
-              <FormControl>
-                <Input {...field} inputMode="url" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="col-span-full flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm text-muted-foreground">Listing type </h1>
+            <p>{isAirbnb ? "Airbnb" : "Direct"}</p>
+          </div>
+          <Switch
+            checked={isAirbnb}
+            onCheckedChange={() => setIsAirbnb(!isAirbnb)}
+          />
+        </div>
+
+        {isAirbnb && (
+          <FormField
+            control={form.control}
+            name="airbnbUrl"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>Airbnb URL</FormLabel>
+                <FormControl>
+                  <Input {...field} inputMode="url" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormItem className="col-span-full space-y-1">
           <FormLabel>Image URLs</FormLabel>
