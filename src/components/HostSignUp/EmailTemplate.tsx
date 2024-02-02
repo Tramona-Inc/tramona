@@ -1,15 +1,23 @@
 import type { User } from "@/server/db/schema";
 import * as React from "react";
-import { Form1Values } from "./forms/form1";
-import { Form2Values } from "./forms/form2";
 
 export type EmailTemplateProps = {
-  values: Partial<Form1Values & Form2Values>;
+  listings:
+    | {
+        type: string;
+        details: string;
+        url: string;
+      }[]
+    | undefined;
+  email: string;
+  phone_num: string;
   user: User;
 };
 
 export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
-  values,
+  listings,
+  email,
+  phone_num,
   user,
 }) => (
   <div>
@@ -17,13 +25,13 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
     <h2>Applicant Name: {user.name}</h2>
 
     <h3>Personal Info</h3>
-    <p>Email: {values.email}</p>
-    <p>Phone: {values.phone_num}</p>
+    <p>Email: {email}</p>
+    <p>Phone: {phone_num}</p>
 
     <h3>Listings</h3>
-    {values.listings ? (
+    {listings ? (
       <>
-        {values.listings.map((listing) => (
+        {listings.map((listing) => (
           <div key={listing.url}>
             <strong>Type: {listing.type}</strong>
             <p>{listing.details}</p>
