@@ -119,9 +119,9 @@ function OfferPage({
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-4">
-          <h1 className="items-center text-lg font-semibold sm:text-3xl">
+          <h1 className="items-center text-xl font-semibold sm:text-3xl">
             {property.name}{" "}
-            <Badge className=" -translate-y-1 bg-primary text-white">
+            <Badge className=" -translate-y-0.5 bg-primary text-white sm:-translate-y-1">
               {discountPercentage}% off
             </Badge>
           </h1>
