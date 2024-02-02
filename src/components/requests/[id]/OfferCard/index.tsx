@@ -168,7 +168,7 @@ export default function OfferCard({
               offerNightlyPrice={offerNightlyPrice}
               totalPrice={offer.totalPrice}
               originalNightlyPrice={property.originalNightlyPrice}
-              airbnbUrl={property.airbnbUrl}
+              airbnbUrl={property.airbnbUrl ?? ""}
               checkIn={checkIn}
               checkOut={checkOut}
               requestId={requestId}

@@ -205,7 +205,7 @@ export default function OfferPage({
                 listingId={offer.id}
                 propertyName={property.name}
                 originalNightlyPrice={property.originalNightlyPrice}
-                airbnbUrl={property.airbnbUrl}
+                airbnbUrl={property.airbnbUrl ?? ""}
                 checkIn={request.checkIn}
                 checkOut={request.checkOut}
                 requestId={request.id}

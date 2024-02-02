@@ -64,7 +64,7 @@ export default function HowToBookDialog(
     offerNightlyPrice: number;
     originalNightlyPrice: number;
     propertyName: string;
-    airbnbUrl: string | undefined;
+    airbnbUrl: string;
     checkIn: Date;
     checkOut: Date;
     offer: OfferWithProperty;
