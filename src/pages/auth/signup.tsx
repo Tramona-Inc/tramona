@@ -30,7 +30,6 @@ import * as z from "zod";
 const formSchema = z
   .object({
     email: z.string().email(),
-    password: z.string(),
   })
   .required();
 
@@ -43,11 +42,8 @@ export default function SignIn({
 
   const { query } = useRouter();
 
-  const handleSubmit = async ({
-    email,
-    password,
-  }: z.infer<typeof formSchema>) => {
-    await signIn("credentials", { email: email, password: password });
+  const handleSubmit = async ({ email }: z.infer<typeof formSchema>) => {
+    await signIn("email", { email: email });
   };
 
   if (query.error) {
@@ -80,23 +76,9 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={"Email"} autoFocus />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
                         <Input
-                          type="password"
                           {...field}
-                          placeholder="Password"
+                          placeholder={"name@domain.com"}
                           autoFocus
                         />
                       </FormControl>

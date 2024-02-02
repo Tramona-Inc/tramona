@@ -3,10 +3,10 @@ import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { type GetServerSidePropsContext } from "next";
 import {
-  type User,
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  type User,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -138,7 +138,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   pages: {
-    // signIn: "/auth/signin",
+    signIn: "/auth/signin",
     error: "/auth/error",
     newUser: "/auth/welcome",
     signOut: "/",
