@@ -50,7 +50,7 @@ const formSchema = z.object({
   standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
   safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
   about: zodString({ maxLen: Infinity }),
-  airbnbUrl: zodString({ maxLen: Infinity }).url(),
+  airbnbUrl: zodString({ maxLen: Infinity }).url().optional(),
   imageUrls: z.object({ value: zodUrl() }).array(),
 });
 
