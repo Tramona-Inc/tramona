@@ -145,7 +145,7 @@ export default function SignIn({
           </div>
         </section>
         <Link
-          href="/signup"
+          href="/auth/signup"
           className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline"
         >
           Don&apos;t have an account? Sign up
