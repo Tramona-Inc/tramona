@@ -1,15 +1,22 @@
 import React, { useState } from "react";
-import Form1, { Form1Values } from "./forms/form1";
-import Form2, { Form2Values } from "./forms/form2";
+import Form1, { type Form1Values } from "./forms/form1";
+import Form2, { type Form2Values } from "./forms/form2";
 import Form3 from "./forms/form3";
 import { Progress } from "../ui/progress";
 
 interface Props {
   onValueChange: (value: number) => void;
   onHandleFormData: (value: Form1Values | Form2Values) => void;
+  onSendEmail: () => void;
+  isSubmitting: boolean;
 }
 
-const Rightside: React.FC<Props> = ({ onValueChange, onHandleFormData }) => {
+const Rightside: React.FC<Props> = ({
+  onValueChange,
+  onHandleFormData,
+  onSendEmail,
+  isSubmitting,
+}) => {
   const [tab, setTab] = useState<number>(1);
 
   let currentForm;
@@ -30,7 +37,9 @@ const Rightside: React.FC<Props> = ({ onValueChange, onHandleFormData }) => {
       );
       break;
     case 3:
-      currentForm = <Form3 />;
+      currentForm = (
+        <Form3 onSendEmail={onSendEmail} isSubmitting={isSubmitting} />
+      );
       break;
     default:
       currentForm = null;

@@ -13,7 +13,6 @@ import {
 
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "src/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -72,14 +71,6 @@ export default function Form1({ nextTab, handleFormData }: Form1Props) {
   function onSubmit(data: Form1Values) {
     nextTab();
     handleFormData(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
   }
 
   return (

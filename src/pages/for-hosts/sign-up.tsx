@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 
-import { Form1Values } from "@/components/HostSignUp/forms/form1";
-import { Form2Values } from "@/components/HostSignUp/forms/form2";
+import { type Form1Values } from "@/components/HostSignUp/forms/form1";
+import { type Form2Values } from "@/components/HostSignUp/forms/form2";
 import Leftside from "@/components/HostSignUp/leftside";
 import Rightside from "@/components/HostSignUp/rightside";
+import { useSession } from "next-auth/react";
+import { toast } from "@/components/ui/use-toast";
+import { useRouter } from "next/router";
 
 export default function HostSignUp() {
   const [tab, setTab] = useState<number>(1);
-  const [formContent, setFormContent] = useState<Record<string, object> | {}>(
-    {},
-  );
+  const [formContent, setFormContent] = useState<
+    Record<string, object> | object
+  >({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const router = useRouter();
+
+  const { data: session } = useSession();
 
   const handleTabValueChange = (value: number) => {
     setTab(value);
@@ -26,6 +34,37 @@ export default function HostSignUp() {
     setFormContent((prevData) => ({ ...prevData, ...value }));
   };
 
+  const handleEmailSend = async () => {
+    try {
+      setIsSubmitting(true);
+
+      const data = { ...formContent, user: session?.user };
+
+      await fetch("/api/email/host-onboarding", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      setIsSubmitting(false);
+      toast({
+        title: "Email sent!",
+        description:
+          "We will review your application for onboarding as a Tramona Host.",
+      });
+      void router.push("/");
+    } catch (error) {
+      setIsSubmitting(false);
+      toast({
+        title: "Oops!",
+        description: "Something went wrong! Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <>
       <Head>
@@ -36,6 +75,8 @@ export default function HostSignUp() {
         <Rightside
           onValueChange={handleTabValueChange}
           onHandleFormData={handleFormData}
+          onSendEmail={handleEmailSend}
+          isSubmitting={isSubmitting}
         />
       </div>
     </>

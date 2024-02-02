@@ -12,7 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from "src/components/ui/form";
-import { toast } from "src/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -48,14 +47,6 @@ export default function Form2({
   function onSubmit(data: Form2Values) {
     nextTab();
     handleFormData(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
   }
 
   return (
