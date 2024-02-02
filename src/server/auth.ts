@@ -3,13 +3,12 @@ import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { type GetServerSidePropsContext } from "next";
 import {
-  User,
+  type User,
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import EmailProvider from "next-auth/providers/email";
 import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 import { CustomPgDrizzleAdapter } from "./adapter";
@@ -38,6 +37,7 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     session: ({ session, token }) => {
+      // return {...session, user}}
       return {
         ...session,
         user: {
@@ -82,15 +82,12 @@ export const authOptions: NextAuthOptions = {
         },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials, req) => {
+      authorize: async (credentials) => {
         if (
           credentials?.email === undefined || // no email or username
-          credentials?.password === undefined || // no password
-          credentials?.password // password too short
+          credentials?.password === undefined // no password
         )
           return Promise.resolve(null);
-
-        console.log(credentials);
 
         let user = null;
 
@@ -113,17 +110,17 @@ export const authOptions: NextAuthOptions = {
         return Promise.resolve(user as User);
       },
     }),
-    EmailProvider({
-      server: {
-        host: env.SMTP_HOST,
-        port: env.SMTP_PORT,
-        auth: {
-          user: env.SMTP_USER,
-          pass: env.SMTP_PASSWORD,
-        },
-      },
-      from: process.env.EMAIL_FROM,
-    }),
+    // EmailProvider({
+    //   server: {
+    //     host: env.SMTP_HOST,
+    //     port: env.SMTP_PORT,
+    //     auth: {
+    //       user: env.SMTP_USER,
+    //       pass: env.SMTP_PASSWORD,
+    //     },
+    //   },
+    //   from: process.env.EMAIL_FROM,
+    // }),
     FacebookProvider({
       clientId: env.FACEBOOK_CLIENT_ID,
       clientSecret: env.FACEBOOK_CLIENT_SECRET,
