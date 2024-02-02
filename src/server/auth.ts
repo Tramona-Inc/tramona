@@ -1,16 +1,19 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
 import { type GetServerSidePropsContext } from "next";
 import {
+  User,
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import EmailProvider from "next-auth/providers/email";
 import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 import { CustomPgDrizzleAdapter } from "./adapter";
-import { type User as TramonaUser } from "./db/schema";
+import { users, type User as TramonaUser } from "./db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -34,8 +37,23 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => {
-      return { ...session, user };
+    session: ({ session, token }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+        },
+      };
+    },
+    jwt({ token, user }) {
+      if (user) {
+        return {
+          ...token,
+          id: user.id,
+        };
+      }
+      return token;
     },
   },
   adapter: CustomPgDrizzleAdapter(db), // custom adapter
@@ -54,6 +72,47 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
     // -- You can use the credential with another service like etherum, oAuth, etc.
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "name@domain.com",
+        },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials, req) => {
+        if (
+          credentials?.email === undefined || // no email or username
+          credentials?.password === undefined || // no password
+          credentials?.password // password too short
+        )
+          return Promise.resolve(null);
+
+        console.log(credentials);
+
+        let user = null;
+
+        if (credentials?.email !== undefined) {
+          user = await db.query.users.findFirst({
+            where: eq(users.email, credentials?.email),
+          });
+        }
+
+        if (user === undefined || user === null) {
+          return Promise.resolve(null); // user not found
+        } else if (user.password === undefined || user.password === null) {
+          return Promise.resolve(null); // users created with google auth
+        }
+
+        const isPasswordValid = credentials?.password === user.password;
+
+        if (!isPasswordValid) return Promise.resolve(null);
+
+        return Promise.resolve(user as User);
+      },
+    }),
     EmailProvider({
       server: {
         host: env.SMTP_HOST,
@@ -78,8 +137,11 @@ export const authOptions: NextAuthOptions = {
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  session: {
+    strategy: "jwt",
+  },
   pages: {
-    signIn: "/auth/signin",
+    // signIn: "/auth/signin",
     error: "/auth/error",
     newUser: "/auth/welcome",
     signOut: "/",
