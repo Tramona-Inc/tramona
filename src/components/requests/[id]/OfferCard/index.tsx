@@ -42,6 +42,9 @@ export default function OfferCard({
     offerNightlyPrice,
   );
 
+  const isAirbnb =
+    property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
+
   return (
     <Card className={cn(lisa && "p-0", "overflow-clip")}>
       {lisa && (
@@ -170,7 +173,7 @@ export default function OfferCard({
               checkOut={checkOut}
               requestId={requestId}
               offer={{ property, ...offer }}
-              isAirbnb={true} // ! TODO: identify it's an airbnb (Change database)
+              isAirbnb={isAirbnb} 
             >
               <Button size="lg" className="min-w-32 rounded-full">
                 Book

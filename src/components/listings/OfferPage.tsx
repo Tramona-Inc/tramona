@@ -48,6 +48,9 @@ export default function OfferPage({
     isBooked = true;
   }
 
+  const isAirbnb =
+    property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
+
   const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
   const lackingSafetyItems = ALL_PROPERTY_SAFETY_ITEMS.filter(
@@ -196,7 +199,6 @@ export default function OfferPage({
               <UsersIcon className="size-4" />
               <p>{fmtdNumGuests}</p>
             </div>
-            {/* // ! isLoading stops dialog from openning on inital render b/c of isBooked */}
             {!isLoading ? (
               <HowToBookDialog
                 isBooked={isBooked}
@@ -210,7 +212,7 @@ export default function OfferPage({
                 offer={{ property, ...offer }}
                 totalPrice={offer.totalPrice}
                 offerNightlyPrice={offerNightlyPrice}
-                isAirbnb={true} // ! TODO: identify it's an airbnb (Change database)
+                isAirbnb={isAirbnb} 
               >
                 <Button size="lg" className="w-full">
                   {isBooked ? "Booked ✓" : "Book Now"}
