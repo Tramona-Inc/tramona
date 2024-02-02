@@ -1,4 +1,5 @@
 import { signIn, useSession } from "next-auth/react";
+import Link from "next/link";
 import { Button } from "../../../ui/button";
 import AvatarDropdown from "./AvatarDropdown";
 
@@ -19,9 +20,8 @@ function SignUpBtn() {
     <Button
       className="rounded-full"
       variant="darkPrimary"
-      onClick={() => signIn()}
     >
-      Sign up
+      <Link href={"/auth/signup"}>Sign up</Link>
     </Button>
   );
 }

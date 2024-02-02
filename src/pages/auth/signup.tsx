@@ -30,8 +30,14 @@ import * as z from "zod";
 const formSchema = z
   .object({
     email: z.string().email(),
+    password: z.string().min(4),
+    confirm: z.string().min(4),
   })
-  .required();
+  .required()
+  .refine((data) => data.password === data.confirm, {
+    message: "Passwords don't match",
+    path: ["confirm"],
+  });
 
 export default function SignIn({
   providers,
@@ -57,10 +63,12 @@ export default function SignIn({
   return (
     <>
       <Head>
-        <title>Log in | Tramona</title>
+        <title>Sign up | Tramona</title>
       </Head>
       <div className="flex h-screen flex-col items-center justify-center space-y-10">
-        <h1 className="text-5xl font-bold tracking-tight">Log in to Tramona</h1>
+        <h1 className="text-5xl font-bold tracking-tight">
+          Sign up to start traveling
+        </h1>
 
         <section className="flex flex-col items-center justify-center space-y-5">
           <div className="w-full space-y-5">
@@ -81,6 +89,33 @@ export default function SignIn({
                           placeholder={"name@domain.com"}
                           autoFocus
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="password" autoFocus />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormMessage />
+                <FormField
+                  control={form.control}
+                  name="confirm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Verify Password</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="password" autoFocus />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
