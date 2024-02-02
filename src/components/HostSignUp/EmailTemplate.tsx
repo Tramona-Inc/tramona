@@ -37,7 +37,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
             <p>{listing.details}</p>
             <p>
               Link:{" "}
-              <a href={listing.url} target="_blank">
+              <a href={listing.url} target="_blank" rel="noreferrer">
                 {listing.url}
               </a>
             </p>
