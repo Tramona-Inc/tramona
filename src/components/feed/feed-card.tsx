@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import UserAvatar from "@/components/_common/UserAvatar";
@@ -7,14 +8,14 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import { Share } from "lucide-react";
 
 import type { AppRouter } from "@/server/api/root";
 import type { inferRouterOutputs } from "@trpc/server";
 import {
+  cn,
   formatCurrency,
   formatInterval,
   getDiscountPercentage,
@@ -27,7 +28,49 @@ type Props = {
   offer: FeedWithInfo;
 };
 
+function Dot({ isCurrent }: { isCurrent: boolean }) {
+  return (
+    <div
+      className={cn(
+        "h-1.5 w-1.5 rounded-full",
+        isCurrent ? "h-2.5 w-2.5 bg-white" : "bg-zinc-400",
+      )}
+    ></div>
+  );
+}
+
+function CarouselDots({ count, current }: { count: number; current: number }) {
+  return (
+    <div className="absolute bottom-2 flex w-full justify-center">
+      <div className=" flex items-center gap-2 rounded-full bg-zinc-950/50 px-3 py-1">
+        {Array(count)
+          .fill(null)
+          .map((_, idx) => (
+            <Dot key={idx} isCurrent={idx === current - 1} />
+          ))}
+      </div>
+    </div>
+  );
+}
+
 export default function FeedCard({ offer }: Props) {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
   const name = offer.request.madeByUser.name?.split(" ") ?? [""];
 
   // Format the time when the offer was created
@@ -53,7 +96,7 @@ export default function FeedCard({ offer }: Props) {
       </CardHeader>
 
       <CardContent>
-        <Carousel className="-mx-4">
+        <Carousel setApi={setApi} className="-mx-4">
           <CarouselContent>
             {offer.property.imageUrls.map((image, idx) => (
               <CarouselItem key={idx} className="flex justify-center">
@@ -67,8 +110,7 @@ export default function FeedCard({ offer }: Props) {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious variant="darkPrimary" className="absolute left-3" />
-          <CarouselNext variant="darkPrimary" className="absolute right-3" />
+          {count !== 0 && <CarouselDots count={count} current={current} />}
         </Carousel>
 
         <div className="mx-2 mb-1 mt-4 flex items-center justify-between">
