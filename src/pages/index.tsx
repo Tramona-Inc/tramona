@@ -1,3 +1,5 @@
+import Head from "next/head";
+
 import CurrentState from "@/components/landing-page/_sections/CurrentState";
 import Hosts from "@/components/landing-page/_sections/Hosts";
 import How from "@/components/landing-page/_sections/How";
@@ -7,8 +9,6 @@ import Reviews from "@/components/landing-page/_sections/Reviews";
 import TramonaLoop from "@/components/landing-page/_sections/TramonaLoop";
 import Gift from "@/components/landing-page/_sections/Gift";
 import Save from "@/components/landing-page/_sections/Save";
-import Head from "next/head";
-// import MainLayout from '@/common/components/layouts/main';
 
 export default function Home() {
   return (

@@ -1,17 +1,25 @@
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-
-// import { Icons } from "@/components/_icons/icons";
-import { type AppRouter } from "@/server/api/root";
-import { formatCurrency, formatInterval } from "@/utils/utils";
-import { inferRouterOutputs } from "@trpc/server";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import UserAvatar from "../_common/UserAvatar";
+
+import UserAvatar from "@/components/_common/UserAvatar";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { Share } from "lucide-react";
+
+import type { AppRouter } from "@/server/api/root";
+import type { inferRouterOutputs } from "@trpc/server";
+import {
+  cn,
+  formatCurrency,
+  formatInterval,
+  getDiscountPercentage,
+} from "@/utils/utils";
 
 export type FeedWithInfo =
   inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
@@ -20,11 +28,50 @@ type Props = {
   offer: FeedWithInfo;
 };
 
-export default function FeedCard({ offer }: Props) {
-  const name = offer.request.madeByUser.name?.split(" ") ?? [""];
+function Dot({ isCurrent }: { isCurrent: boolean }) {
+  return (
+    <div
+      className={cn(
+        "h-1.5 w-1.5 rounded-full",
+        isCurrent ? "h-2.5 w-2.5 bg-white" : "bg-zinc-400",
+      )}
+    ></div>
+  );
+}
 
-  // const lastNameCensored =
-  //   name.length > 1 ? "*".repeat(name[1].length) : "******";
+function CarouselDots({ count, current }: { count: number; current: number }) {
+  return (
+    <div className="absolute bottom-2 flex w-full justify-center">
+      <div className=" flex items-center gap-2 rounded-full bg-zinc-950/50 px-3 py-1">
+        {Array(count)
+          .fill(null)
+          .map((_, idx) => (
+            <Dot key={idx} isCurrent={idx === current - 1} />
+          ))}
+      </div>
+    </div>
+  );
+}
+
+export default function FeedCard({ offer }: Props) {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
+  const name = offer.request.madeByUser.name?.split(" ") ?? [""];
 
   // Format the time when the offer was created
   const msAgo = Date.now() - offer.createdAt.getTime();
@@ -32,80 +79,64 @@ export default function FeedCard({ offer }: Props) {
   const fmtdTimeAgo = showTimeAgo ? `${formatInterval(msAgo)}` : "";
 
   return (
-    <Card className="flex flex-col justify-between py-6">
+    <Card className="w-[450px] lg:w-[500px]">
       <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Link href="/general-profile">
-            <UserAvatar name={name[0]} email={undefined} image={undefined} />
-          </Link>
-
-          <h1 className="font-bold">{name[0]}</h1>
-          {/* //TODO: add username */}
-          {/* <p className='text-secondary-foreground/60'>@{offers.user.username}</p> */}
-        </div>
-
-        {/* // TODO: when offer is accepted display date*/}
-        <p className="text-sm text-secondary-foreground/60">{fmtdTimeAgo}</p>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <h1 className="py-3 text-center text-2xl font-bold">
-          {offer.property.name}
-        </h1>
-        <section className="grid h-[175px] grid-cols-2 place-items-center space-x-5">
-          {/* Photos */}
-          {offer.property.imageUrls.length === 1 ? (
-            <div className="relative h-[170px] w-[170px]">
-              <Image
-                src={offer.property.imageUrls[0] ?? "default"}
-                alt="Single Image"
-                objectFit="cover"
-                layout="fill"
-              />
-            </div>
-          ) : (
-            <div className="grid h-[170px] w-[170px] grid-cols-2 gap-5">
-              {offer.property.imageUrls.map((image, index) => (
-                <div key={image} className="relative">
-                  <Image
-                    src={image}
-                    alt={`${index}`}
-                    objectFit="cover"
-                    layout="fill"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Price */}
-          <div className="space-y-5 text-center">
-            <div className="lg:space-y-1">
-              <h1 className="text-xl font-bold">Tramona Price</h1>
-              <h3 className="text-3xl font-bold text-primary">
-                {formatCurrency(offer.totalPrice)}
-                <span className="text-sm font-medium text-muted-foreground">
-                  /night
-                </span>
-              </h3>
-            </div>
-            <div className="lg:space-y-1">
-              <h1 className="text-xl font-bold">Original Price</h1>
-              <h3 className="text-3xl font-bold text-primary">
-                {formatCurrency(offer.property.originalNightlyPrice)}
-                <span className="text-sm font-medium text-muted-foreground">
-                  /night
-                </span>
-              </h3>
-            </div>
+        <div className="flex gap-3">
+          <UserAvatar name={name[0]} email={undefined} image={undefined} />
+          <div>
+            <p className="font-semibold">Booked by {name[0]}</p>
+            <p className="text-sm text-secondary-foreground/50">
+              {offer.property.name} - {fmtdTimeAgo}
+            </p>
           </div>
-        </section>
+        </div>
+        <Button variant="ghost" size="sm">
+          <Share className="size-4" />
+        </Button>
+      </CardHeader>
+
+      <CardContent>
+        <Carousel setApi={setApi} className="-mx-4">
+          <CarouselContent>
+            {offer.property.imageUrls.map((image, idx) => (
+              <CarouselItem key={idx} className="flex justify-center">
+                <Image
+                  src={image}
+                  alt={`${idx}`}
+                  width={500}
+                  height={500}
+                  style={{ objectFit: "cover" }}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {count !== 0 && <CarouselDots count={count} current={current} />}
+        </Carousel>
+
+        <div className="mx-2 mb-1 mt-4 flex items-center justify-between">
+          <div className="text-center text-secondary-foreground/50">
+            <p className="text-2xl font-semibold line-through lg:text-3xl">
+              {formatCurrency(offer.property.originalNightlyPrice)}
+            </p>
+            <p className="text-sm tracking-tight">Airbnb price</p>
+          </div>
+          <div className="text-center text-secondary-foreground/50">
+            <p className="text-2xl font-semibold text-primary lg:text-3xl">
+              {formatCurrency(offer.totalPrice)}
+            </p>
+            <p className="text-sm tracking-tight">Our price</p>
+          </div>
+          <div className="bg-primary px-4 py-2 text-zinc-50 lg:px-5 lg:py-3">
+            <p className="text-lg font-semibold lg:text-xl">
+              {getDiscountPercentage(
+                offer.property.originalNightlyPrice,
+                offer.totalPrice,
+              )}
+              % OFF
+            </p>
+          </div>
+        </div>
       </CardContent>
-      {/* <CardFooter className="flex flex-row justify-end space-x-5">
-        <Icons.comment />
-        <Icons.heart />
-        <Icons.share />
-        <Icons.bookmark />
-      </CardFooter> */}
     </Card>
   );
 }
