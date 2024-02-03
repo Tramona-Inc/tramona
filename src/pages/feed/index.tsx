@@ -19,21 +19,23 @@ export default function Dashboard() {
           Social Feed
         </h1>
 
-        {isLoading ? (
-          <Button variant="ghost" isLoading disabled>
-            Loading...
-          </Button>
-        ) : (
-          <div className="grid grid-cols-1 place-items-center gap-5">
-            {offers?.length ? (
-              offers.map((offer) => {
-                return <FeedCard key={offer.id} offer={offer} />;
-              })
-            ) : (
-              <h2 className="text-xl">No offers to show</h2>
-            )}
-          </div>
-        )}
+        <div className="grid grid-cols-1 place-items-center gap-5">
+          {isLoading ? (
+            <Button variant="ghost" isLoading disabled>
+              Loading...
+            </Button>
+          ) : (
+            <>
+              {offers?.length ? (
+                offers.map((offer) => {
+                  return <FeedCard key={offer.id} offer={offer} />;
+                })
+              ) : (
+                <h2 className="text-xl">No offers to show</h2>
+              )}
+            </>
+          )}
+        </div>
       </section>
     </>
   );
