@@ -29,8 +29,26 @@ import * as z from "zod";
 const formSchema = z
   .object({
     email: z.string().email(),
-    password: z.string().min(4),
-    confirm: z.string().min(4),
+    password: z
+      .string()
+      .min(8, { message: "The password must be at least 8 characters long" })
+      .max(32, { message: "The password must be a maximum of 32 characters" })
+      .refine((value) => /[a-z]/.test(value), {
+        message: "Password must contain at least one lowercase letter",
+      })
+      .refine((value) => /[A-Z]/.test(value), {
+        message: "Password must contain at least one uppercase letter",
+      })
+      .refine((value) => /\d/.test(value), {
+        message: "Password must contain at least one digit",
+      })
+      .refine((value) => /[!@#$%^&*]/.test(value), {
+        message: "Password must contain at least one special character",
+      })
+      .refine((value) => /\S+$/.test(value), {
+        message: "Password must not contain any whitespace characters",
+      }),
+    confirm: z.string(),
   })
   .required()
   .refine((data) => data.password === data.confirm, {
@@ -47,7 +65,10 @@ export default function SignIn({
 
   const { query } = useRouter();
 
-  const handleSubmit = async ({ email }: z.infer<typeof formSchema>) => {
+  const handleSubmit = async ({
+    email,
+    password,
+  }: z.infer<typeof formSchema>) => {
     await signIn("email", { email: email });
   };
 
@@ -122,7 +143,7 @@ export default function SignIn({
                 />
                 <FormMessage />
                 <Button type="submit" className="w-full">
-                  Log In
+                  Sign up
                 </Button>
               </form>
             </Form>
