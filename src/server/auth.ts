@@ -106,7 +106,7 @@ export const authOptions: NextAuthOptions = {
 
         const isPasswordValid = await bycrypt.compare(
           credentials?.password,
-          user.password!,
+          user.password,
         );
 
         if (!isPasswordValid) return Promise.resolve(null);
