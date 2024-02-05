@@ -1,5 +1,6 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
+import * as bycrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import { type GetServerSidePropsContext } from "next";
 import {
@@ -103,7 +104,10 @@ export const authOptions: NextAuthOptions = {
           return Promise.resolve(null); // users created with google auth
         }
 
-        const isPasswordValid = credentials?.password === user.password;
+        const isPasswordValid = await bycrypt.compare(
+          credentials?.password,
+          user.password!,
+        );
 
         if (!isPasswordValid) return Promise.resolve(null);
 

@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/form";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { authOptions } from "@/server/auth";
+import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type {
   GetServerSidePropsContext,
@@ -22,7 +23,7 @@ import type {
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import { useRouter } from "next/router";
+import router from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -63,22 +64,34 @@ export default function SignIn({
     resolver: zodResolver(formSchema),
   });
 
-  const { query } = useRouter();
+  const { toast } = useToast();
+
+  const { mutate } = api.auth.createUser.useMutation({
+    onSuccess: () => {
+      void router.push("/auth/signin");
+
+      toast({
+        title: "Account created successfully!",
+        variant: "default",
+      });
+    },
+    onError: (error: { message: any }) => {
+      toast({
+        title: "Something went wrong!",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleSubmit = async ({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
-    await signIn("email", { email: email });
+    // await signIn("email", { email: email });
+    // Todo Create User route
+    mutate({ email: email, password: password });
   };
-
-  if (query.error) {
-    toast({
-      title:
-        "Could not login. Please check your e-mail or password or third-party application.",
-      variant: "destructive",
-    });
-  }
 
   return (
     <>
