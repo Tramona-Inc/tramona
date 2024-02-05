@@ -101,7 +101,7 @@ export default function SpecialDealsCard({ deal }: Props) {
             <p className="text-sm">Our price</p>
           </div>
           <Link
-            href={"/"}
+            href={`/listings/${deal.id}`}
             className={buttonVariants({
               variant: "default",
               className:
