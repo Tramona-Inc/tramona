@@ -72,10 +72,11 @@ export default function SignIn({
 
       toast({
         title: "Account created successfully!",
+        description: "Please sign in.",
         variant: "default",
       });
     },
-    onError: (error: { message: any }) => {
+    onError: (error) => {
       toast({
         title: "Something went wrong!",
         description: error.message,
