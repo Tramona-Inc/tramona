@@ -209,6 +209,6 @@ export type OffersPage = {
 /**
  * Represents the payment intent type.
  */
-export type PaymentIntentCreateRequest = {
-  amount: Number;
-};
+// export type PaymentIntentCreateRequest = {
+//   amount: Number;
+// };

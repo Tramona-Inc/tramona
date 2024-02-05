@@ -51,7 +51,7 @@ export default function OfferPage({
   const isAirbnb =
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
 
-  const lisa = false; // temporary until we add payments
+  // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
   const lackingSafetyItems = ALL_PROPERTY_SAFETY_ITEMS.filter(
     (i) => !property.safetyItems.includes(i),
