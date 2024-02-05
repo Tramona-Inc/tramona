@@ -189,12 +189,12 @@ function ProgramTiers() {
               </p>
             </div>
 
-            <Link
+            {/* <Link
               href="/program/partner"
               className="self-center font-medium text-blue-400 underline underline-offset-2 hover:text-blue-300 lg:text-lg"
             >
               Learn More
-            </Link>
+            </Link> */}
           </CardContent>
 
           {status === "loading" && (
@@ -208,7 +208,7 @@ function ProgramTiers() {
               href="/program/partner"
               className="ml-auto rounded-lg border-2 border-zinc-950 bg-blue-300 px-10 py-2 text-lg font-semibold text-zinc-950 hover:bg-blue-200"
             >
-              Apply
+              Learn More
             </Link>
           )}
 
