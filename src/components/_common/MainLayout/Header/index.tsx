@@ -44,7 +44,7 @@ export default function Header() {
       <div className="hidden items-center justify-center gap-2 lg:flex">
         <HeaderLink href="/program">Refer and Earn</HeaderLink>
         <HeaderLink href="/for-hosts">For Hosts</HeaderLink>
-        <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
+        <HeaderLink href="/exclusive-offers">Exclusive Offers</HeaderLink>
         <HeaderLink href="/feed">Social Feed</HeaderLink>
       </div>
 
@@ -58,7 +58,7 @@ export default function Header() {
           <DropdownMenuContent align="end">
             <HeaderLink href="/program">Refer and Earn</HeaderLink>
             <HeaderLink href="/for-hosts">For Hosts</HeaderLink>
-            <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
+            <HeaderLink href="/exclusive-offers">Exclusive Offers</HeaderLink>
             <HeaderLink href="/feed">Social Feed</HeaderLink>
           </DropdownMenuContent>
         </DropdownMenu>
