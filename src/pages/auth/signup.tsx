@@ -30,6 +30,8 @@ import * as z from "zod";
 const formSchema = z
   .object({
     email: z.string().email(),
+    username: z.string().max(60),
+    name: z.string().max(32),
     password: z
       .string()
       .min(8, { message: "The password must be at least 8 characters long" })
@@ -88,10 +90,12 @@ export default function SignIn({
   const handleSubmit = async ({
     email,
     password,
+    username,
+    name,
   }: z.infer<typeof formSchema>) => {
     // await signIn("email", { email: email });
     // Todo Create User route
-    mutate({ email: email, password: password });
+    mutate({ email: email, password: password, username: username, name: name });
   };
 
   return (
@@ -130,6 +134,32 @@ export default function SignIn({
                 />
                 <FormField
                   control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="text" autoFocus />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="text" autoFocus />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
@@ -141,7 +171,6 @@ export default function SignIn({
                     </FormItem>
                   )}
                 />
-                <FormMessage />
                 <FormField
                   control={form.control}
                   name="confirm"

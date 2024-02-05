@@ -12,21 +12,21 @@ export const authRouter = createTRPCRouter({
   createUser: publicProcedure
     .input(
       z.object({
-        // name: z.string().min(2, { message: "NameLengthError" }),
-        // username: z.string().min(2, { message: "UsernameLengthError" }),
+        name: z.string().min(2, { message: "NameLengthError" }),
+        username: z.string().min(2, { message: "UsernameLengthError" }),
         email: z.string().email({ message: "EmailInvalidError" }),
         password: z.string(), // validated within the client
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // const userQueriedWUsername = await db.query.users.findFirst({
-      //   where: eq(users.username, input.username),
-      // });
-      // if (userQueriedWUsername)
-      //   throw new TRPCError({
-      //     code: "BAD_REQUEST",
-      //     message: "User with this username already exists",
-      //   });
+      const userQueriedWUsername = await ctx.db.query.users.findFirst({
+        where: eq(users.username, input.username),
+      });
+      if (userQueriedWUsername)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User with this username already exists",
+        });
       const userQueriedWEmail = await ctx.db.query.users.findFirst({
         where: eq(users.email, input.email),
       });
@@ -40,9 +40,9 @@ export const authRouter = createTRPCRouter({
         const user = await ctx.db
           .insert(users)
           .values({
-            // name: input.name,
+            name: input.name,
             email: input.email,
-            // username: input.username,
+            username: input.username,
             password: hashedPassword,
             role: "guest",
             id: crypto.randomUUID(),
