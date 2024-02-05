@@ -78,7 +78,7 @@ export default function MastHead() {
                 </div> */}
                 <div className="mx-auto flex max-w-3xl flex-col items-center justify-center space-y-5 py-16">
                   <div className=" p-1 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
-                    <h1 className="rounded bg-black/30 p-2 text-2xl font-extrabold text-white backdrop-blur-md md:text-3xl lg:text-4xl">
+                    <h1 className="rounded bg-black/30 p-2 text-center text-2xl font-extrabold text-white backdrop-blur-md md:text-3xl lg:text-4xl">
                       Tramona is name your own price tool
                     </h1>
                   </div>
