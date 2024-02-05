@@ -1,13 +1,14 @@
 import {
-  serial,
+  index,
   integer,
   pgTable,
+  serial,
   timestamp,
-  index,
+  varchar,
 } from "drizzle-orm/pg-core";
-import { requests } from "./requests";
-import { properties } from "./properties";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { properties } from "./properties";
+import { requests } from "./requests";
 
 export const offers = pgTable(
   "offers",
@@ -19,10 +20,12 @@ export const offers = pgTable(
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id),
-   totalPrice: integer("total_price").notNull(), // in cents
+    totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
     madePublicAt: timestamp("made_public_at"),
     acceptedAt: timestamp("accepted_at"),
+    paymentIntentId: varchar("payment_intent_id"),
+    checkoutSessionId: varchar("checkout_session_id"),
   },
   (t) => ({
     madePublicAtIndex: index("made_public_at_index").on(t.madePublicAt),
