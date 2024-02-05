@@ -71,7 +71,7 @@ function DropdownLink({
       <Link
         href={href}
         className={cn(
-          "flex w-full items-center gap-2 py-2 pl-3",
+          "flex items-center gap-2 py-2 pl-3",
           isSelected
             ? "pointer-events-none border-2 border-l-black bg-accent"
             : "",
@@ -115,6 +115,14 @@ export default function AvatarDropdown({ session }: { session: Session }) {
             <DropdownMenuSeparator />
           </>
         )}
+        {session.user.role === "guest" && (
+          <>
+            <DropdownLink href="/for-hosts/sign-up" Icon={UserCheck2Icon}>
+              Become a Host
+            </DropdownLink>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownLink href="/" Icon={HomeIcon}>
           Home
         </DropdownLink>
@@ -132,14 +140,12 @@ export default function AvatarDropdown({ session }: { session: Session }) {
           <DropdownMenuSeparator />
         </> */}
 
-        <DropdownMenuItem>
-          <button
-            onClick={() => signOut()}
-            className="group flex w-full cursor-pointer items-center gap-2 py-2 pl-3 text-destructive hover:bg-destructive hover:text-white"
-          >
-            <LogOutIcon className="opacity-50 group-hover:opacity-100" />
-            Log out
-          </button>
+        <DropdownMenuItem
+          onClick={() => signOut()}
+          className="group flex w-full cursor-pointer items-center gap-2 py-2 pl-3 text-destructive focus:bg-destructive focus:text-white"
+        >
+          <LogOutIcon className="opacity-50 group-focus:opacity-100" />
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

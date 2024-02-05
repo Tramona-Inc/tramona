@@ -34,10 +34,10 @@ export default function HeaderTopRight() {
       return <div className="h-10" />;
     case "unauthenticated":
       return (
-        <>
+        <div className="flex gap-2">
           <LogInBtn />
           <SignUpBtn />
-        </>
+        </div>
       );
     case "authenticated":
       return <AvatarDropdown session={session} />;
