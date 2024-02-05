@@ -1,9 +1,18 @@
-import { cn } from "@/utils/utils";
-import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import TramonaIcon from "../../../_icons/TramonaIcon";
-import NavLink from "../../../_utils/NavLink";
+import Link from "next/link";
+
+import TramonaIcon from "@/components/_icons/TramonaIcon";
+import { MenuIcon } from "lucide-react";
 import HeaderTopRight from "./HeaderTopRight";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import NavLink from "@/components/_utils/NavLink";
+import { cn } from "@/utils/utils";
+import { Button } from "@/components/ui/button";
 
 function HeaderLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (
@@ -23,23 +32,69 @@ function HeaderLink({ href, children }: PropsWithChildren<{ href: string }>) {
   );
 }
 
+function TramonaLogo() {
+  return (
+    <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
+      <TramonaIcon />
+      Tramona
+    </Link>
+  );
+}
+
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 flex items-center bg-white px-4 py-2 text-sm shadow-md sm:py-4 sm:text-base">
+    <>
+      <div className="contents lg:hidden">
+        <SmallHeader />
+      </div>
+      <div className="hidden lg:contents">
+        <LargeHeader />
+      </div>
+    </>
+  );
+}
+
+function LargeHeader() {
+  return (
+    <header className="sticky top-0 z-50 flex items-center bg-white p-4 shadow-md">
       <div className="flex flex-1 gap-4">
-        <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
-          <TramonaIcon /> Tramona
-        </Link>
+        <TramonaLogo />
       </div>
 
-      <div className="hidden items-center justify-center gap-2 lg:flex">
+      <div className="flex items-center justify-center gap-2">
         <HeaderLink href="/program">Refer and Earn</HeaderLink>
         <HeaderLink href="/for-hosts">For Hosts</HeaderLink>
         <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
         <HeaderLink href="/feed">Social Feed</HeaderLink>
       </div>
 
-      <div className="flex flex-1 items-center justify-end gap-2">
+      <div className="flex flex-1 justify-end">
+        <HeaderTopRight />
+      </div>
+    </header>
+  );
+}
+
+function SmallHeader() {
+  return (
+    <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild className="lg:hidden">
+          <Button variant="ghost" size="icon">
+            <MenuIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="p-2">
+          <HeaderLink href="/program">Refer and Earn</HeaderLink>
+          <HeaderLink href="/for-hosts">For Hosts</HeaderLink>
+          <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
+          <HeaderLink href="/feed">Social Feed</HeaderLink>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <TramonaLogo />
+
+      <div className="flex flex-1 justify-end">
         <HeaderTopRight />
       </div>
     </header>

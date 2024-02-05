@@ -14,6 +14,7 @@ import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { authOptions } from "@/server/auth";
+import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type {
   GetServerSidePropsContext,
@@ -28,22 +29,22 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const formSchema = z
-  .object({
-    email: z.string().email(),
-  })
-  .required();
+const formSchema = z.object({
+  email: zodString().email(),
+});
+
+type FormSchema = z.infer<typeof formSchema>;
 
 export default function SignIn({
   providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
 
   const { query } = useRouter();
 
-  const handleSubmit = async ({ email }: z.infer<typeof formSchema>) => {
+  const handleSubmit = async ({ email }: FormSchema) => {
     await signIn("email", { email: email });
   };
 
@@ -76,7 +77,7 @@ export default function SignIn({
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(handleSubmit)}
-                    className="space-y-4"
+                    className="space-y-2"
                   >
                     <FormField
                       control={form.control}
@@ -85,15 +86,14 @@ export default function SignIn({
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input {...field} autoFocus />
+                            <Input {...field} autoFocus type="email" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                     <FormMessage />
-                    <Button type="submit" className="w-full">
-                      {/* <Button isLoading={form.formState.isSubmitting} type="submit" className="w-full"> */}
+                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                       Sign in with Email
                     </Button>
                   </form>

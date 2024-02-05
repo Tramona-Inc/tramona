@@ -31,15 +31,16 @@ export default function Reviews() {
               <div className="p-1">
                 <Card className="bg-[#D7F6E7]">
                   <CardContent className="flex aspect-square items-center justify-center p-6">
-                    <span className="text-2xl font-semibold">
+                    <div className="text-2xl font-semibold">
                       {/* {index + 1} */}
-                      <Image
-                        src="/assets/images/landing-page-props/review_pic.png"
-                        className="rounded-md border-2 border-black"
-                        alt={"review image"}
-                        width={400}
-                        height={400}
-                      />
+                      <div className="relative h-[250px]">
+                        <Image
+                          src="/assets/images/landing-page-props/review_pic.png"
+                          alt={"review image"}
+                          objectFit="contain"
+                          layout="fill"
+                        />
+                      </div>
 
                       <div className="mt-5 flex flex-col items-center justify-center space-y-2 text-sm">
                         <h1 className="font-bold">Panama With Jack and Jon</h1>
@@ -58,7 +59,7 @@ export default function Reviews() {
                           </Button>
                         </div>
                       </div>
-                    </span>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

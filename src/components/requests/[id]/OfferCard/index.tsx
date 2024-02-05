@@ -152,7 +152,7 @@ export default function OfferCard({
               "rounded-full",
             )}
           >
-            See Listing
+            More details
           </Link>
           {lisa ? (
             <PaywallDialog>

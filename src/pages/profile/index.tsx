@@ -1,6 +1,8 @@
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
+import { Edit2Icon, Share2Icon } from "lucide-react";
+
 import ProfileForm from "@/components/profile/ProfileForm";
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import ReferralDashboard from "@/components/profile/ReferralDashboard";
