@@ -30,7 +30,7 @@ import * as z from "zod";
 const formSchema = z
   .object({
     email: z.string().email(),
-    username: z.string().max(60),
+    // username: z.string().max(60),
     name: z.string().max(32),
     password: z
       .string()
@@ -90,12 +90,16 @@ export default function SignIn({
   const handleSubmit = async ({
     email,
     password,
-    username,
+    // username,
     name,
   }: z.infer<typeof formSchema>) => {
     // await signIn("email", { email: email });
-    // Todo Create User route
-    mutate({ email: email, password: password, username: username, name: name });
+    mutate({
+      email: email,
+      password: password,
+      // username: username,
+      name: name,
+    });
   };
 
   return (
@@ -132,7 +136,7 @@ export default function SignIn({
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="username"
                   render={({ field }) => (
@@ -144,7 +148,7 @@ export default function SignIn({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
                 <FormField
                   control={form.control}
                   name="name"
