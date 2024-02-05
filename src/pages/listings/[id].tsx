@@ -7,7 +7,13 @@
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
 import Spinner from "@/components/_common/Spinner";
-import OfferPage from "@/components/listings/OfferPage";
+import UserAvatar from '@/components/_common/UserAvatar';
+import { Badge } from '@/components/ui/badge';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { type AppRouter } from '@/server/api/root';
+import { ALL_PROPERTY_SAFETY_ITEMS } from '@/server/db/schema';
 import { api } from "@/utils/api";
 
 import {
