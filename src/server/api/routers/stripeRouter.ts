@@ -9,7 +9,7 @@ export const config = {
   },
 };
 
-export const stripe = new Stripe(env.STRIPE_LIVE_SECRET_KEY, {
+export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
 
