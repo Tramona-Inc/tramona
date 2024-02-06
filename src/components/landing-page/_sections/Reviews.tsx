@@ -23,45 +23,39 @@ export default function Reviews() {
       <Carousel className="w-full max-w-4xl">
         <CarouselContent className="-ml-1 ">
           {Array.from({ length: 5 }).map((_, index) => (
-            <CarouselItem
-             key={index}
-              className="pl-1 md:basis-1/2 lg:basis-1/3"
-            >
-              <div className="p-1">
-                <Card className="bg-[#D7F6E7]">
-                  <CardContent className="aspect-square items-center justify-center">
-                    <div className="text-2xl font-semibold">
-                      {/* {index + 1} */}
-                      <div className="relative h-[250px]">
-                        <Image
-                          src="/assets/images/landing-page-props/review_pic.png"
-                          alt={"review image"}
-                          objectFit="contain"
-                          layout="fill"
-                        />
-                      </div>
+            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+              <Card className="bg-[#D7F6E7]">
+                <CardContent className="aspect-square items-center justify-center">
+                  <div className="text-2xl font-semibold">
+                    <div className="relative h-[250px]">
+                      <Image
+                        src="/assets/images/landing-page-props/review_pic.png"
+                        alt={"review image"}
+                        objectFit="contain"
+                        layout="fill"
+                      />
+                    </div>
 
-                      <div className="mt-5 flex flex-col items-center justify-center space-y-2 text-sm">
-                        <h1 className="font-bold">Panama With Jack and Jon</h1>
-                        <p> 📍 Panama City, Panama</p>
+                    <div className="mt-5 flex flex-col items-center justify-center space-y-2 text-sm">
+                      <h1 className="font-bold">Panama With Jack and Jon</h1>
+                      <p>📍 Panama City, Panama</p>
 
-                        <div className="flex justify-center font-bold">
-                          {/* <p className="w-fit flex-row rounded-lg bg-[#09786C] p-3 text-white">
+                      <div className="flex justify-center font-bold">
+                        {/* <p className="w-fit flex-row rounded-lg bg-[#09786C] p-3 text-white">
                             Create an account
                           </p> */}
 
-                          <Button
-                            variant="outline"
-                            className=" w-fit border border-[#09786C] bg-[#09786C] text-sm font-bold text-black transition duration-300 ease-in-out"
-                          >
-                            Create an account
-                          </Button>
-                        </div>
+                        <Button
+                          variant="outline"
+                          className=" w-fit border border-[#09786C] bg-[#09786C] text-sm font-bold text-black transition duration-300 ease-in-out"
+                        >
+                          Create an account
+                        </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                  </div>
+                </CardContent>
+              </Card>
             </CarouselItem>
           ))}
         </CarouselContent>
