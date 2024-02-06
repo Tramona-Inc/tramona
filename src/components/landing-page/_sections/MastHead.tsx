@@ -101,10 +101,10 @@ export default function MastHead() {
         </div>
       </section>
       <section className="-translate-y-1/2">
-        <Card className="mx-auto hidden max-w-2xl [box-shadow:0_0_30px_hsl(var(--blue-300))] md:block">
+        <Card className="mx-auto hidden max-w-2xl [box-shadow:0_0_30px_#000a] md:block">
           <NewRequestForm />
         </Card>
-        <div className="flex -translate-y-20 flex-col items-center md:hidden">
+        <div className="flex -translate-y-32 flex-col items-center md:hidden">
           <NewRequestDialog>
             <Button
               variant="white"
