@@ -1,5 +1,4 @@
-import React from "react";
-
+import { Card } from "@/components/ui/card";
 import FeedLanding from "../FeedLanding";
 // import DesktopSearchBar from '../../search-bar/desktop-search-bar';
 // import MobileSearchBar from '@/common/components/search-bar/mobile-search-bar';
@@ -9,6 +8,10 @@ import FeedLanding from "../FeedLanding";
 // import { useUserInfo } from '@/hooks/useUserInfo';
 // import { useEffect, useState } from 'react';
 import dynamic from "next/dynamic";
+import NewRequestForm from "@/components/requests/NewRequestForm";
+import NewRequestDialog from "@/components/requests/NewRequestDialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const LandingVideo = dynamic(
   () => import("@/components/landing-page/LandingVideo"),
@@ -63,7 +66,7 @@ export default function MastHead() {
 
   return (
     <>
-      <section className="relative flex h-screen flex-col">
+      <section className="relative flex h-[calc(100vh-4rem)] flex-col">
         <LandingVideo />
         <div className="absolute inset-0 flex flex-col items-center justify-between transition-colors [transition-duration:300ms] focus-within:bg-black/50">
           <div className="flex h-full w-full flex-row justify-center lg:flex-row">
@@ -95,6 +98,23 @@ export default function MastHead() {
               <FeedLanding />
             </div> */}
           </div>
+        </div>
+      </section>
+      <section className="-translate-y-1/2">
+        <Card className="mx-auto hidden max-w-2xl [box-shadow:0_0_30px_hsl(var(--blue-300))] md:block">
+          <NewRequestForm />
+        </Card>
+        <div className="flex -translate-y-20 flex-col items-center md:hidden">
+          <NewRequestDialog>
+            <Button
+              variant="white"
+              size="lg"
+              className="rounded-full pl-3 pr-5"
+            >
+              <Plus />
+              Make a request
+            </Button>
+          </NewRequestDialog>
         </div>
       </section>
       <section className="h-[45vh] bg-blue-800 xl:hidden">
