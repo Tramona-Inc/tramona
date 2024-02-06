@@ -23,7 +23,7 @@ import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
-import { capitalize, getNumNights } from "@/utils/utils";
+import { capitalize, getNumNights, useIsDesktop } from "@/utils/utils";
 import { TRPCClientError } from "@trpc/client";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
@@ -34,6 +34,13 @@ import {
   SelectValue,
 } from "../ui/select";
 import { forwardRef } from "react";
+import {
+  NestedDrawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerFooter,
+} from "../ui/drawer";
+import { DialogClose } from "../ui/dialog";
 
 const formSchema = z
   .object({
@@ -61,6 +68,8 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
+  const isDesktop = useIsDesktop();
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -169,14 +178,30 @@ export default function NewRequestForm({
 
         <FormItem className="col-span-full">
           <FormLabel>Filters (optional)</FormLabel>
-          <Popover>
-            <PopoverTrigger asChild>
-              <FiltersButton fmtdFilters={fmtdFilters} />
-            </PopoverTrigger>
-            <PopoverContent align="start" side="top" className="w-96 p-2">
-              <FiltersSection form={form} />
-            </PopoverContent>
-          </Popover>
+          {isDesktop ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <FiltersButton fmtdFilters={fmtdFilters} />
+              </PopoverTrigger>
+              <PopoverContent align="start" side="top" className="w-96 p-2">
+                <FiltersSection form={form} />
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <NestedDrawer>
+              <DrawerTrigger asChild>
+                <FiltersButton fmtdFilters={fmtdFilters} />
+              </DrawerTrigger>
+              <DrawerContent>
+                <FiltersSection form={form} />
+                <DrawerFooter>
+                  <DialogClose asChild>
+                    <Button>Done</Button>
+                  </DialogClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </NestedDrawer>
+          )}
         </FormItem>
 
         <Button
@@ -219,7 +244,7 @@ function FiltersSection({
 }) {
   return (
     <div className="grid grid-cols-2 gap-4">
-      <p className="col-span-full pt-1 text-lg font-semibold">
+      <p className="col-span-full pt-1 text-center text-lg font-semibold sm:text-left">
         Add filters (optional)
       </p>
       <FormField

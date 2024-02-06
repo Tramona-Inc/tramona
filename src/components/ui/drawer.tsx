@@ -15,6 +15,8 @@ const Drawer = ({
 );
 Drawer.displayName = "Drawer";
 
+const NestedDrawer = DrawerPrimitive.NestedRoot;
+
 const DrawerTrigger = DrawerPrimitive.Trigger;
 
 const DrawerPortal = DrawerPrimitive.Portal;
@@ -27,7 +29,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn("fixed inset-0 z-50 bg-black/80", className)}
+    className={cn("fixed inset-0 z-50 bg-black/60", className)}
     {...props}
   />
 ));
@@ -48,7 +50,7 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       <div className="mx-auto h-1.5 w-20 rounded-full bg-accent" />
-      <ScrollArea className="max-h-[calc(100vh-8rem)] px-2">
+      <ScrollArea data-asdf className="max-h-[calc(100vh-8rem)] px-2">
         {children}
       </ScrollArea>
     </DrawerPrimitive.Content>
@@ -68,7 +70,10 @@ const DrawerFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col-reverse gap-2", className)} {...props} />
+  <div
+    className={cn("flex flex-col-reverse gap-2 pt-4", className)}
+    {...props}
+  />
 );
 DrawerFooter.displayName = "DrawerFooter";
 
@@ -101,6 +106,7 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
+  NestedDrawer,
   DrawerPortal,
   DrawerOverlay,
   DrawerTrigger,
