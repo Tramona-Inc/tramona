@@ -10,18 +10,15 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { Share } from "lucide-react";
 
 import type { AppRouter } from "@/server/api/root";
 import type { inferRouterOutputs } from "@trpc/server";
-import {
-  cn,
-  formatCurrency,
-  formatInterval,
-  getDiscountPercentage,
-} from "@/utils/utils";
+import { cn, formatCurrency, getDiscountPercentage } from "@/utils/utils";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
@@ -78,15 +75,8 @@ export default function FeedCard({ offer }: Props) {
 
   const name = offer.request.madeByUser.name?.split(" ") ?? [""];
 
-  // Format the time when the offer was created
-  const msAgo = Date.now() - offer.createdAt.getTime();
-  const showTimeAgo = msAgo > 1000 * 60 * 60;
-  const fmtdTimeAgo = showTimeAgo ? `${formatInterval(msAgo)}` : "";
-
-  const today = dayjs();
-  const offerDate = offer.request.resolvedAt
-    ? dayjs(offer.request.resolvedAt).fromNow()
-    : "";
+  // Format the time when the offer was completed at
+  const offerDate = dayjs(offer.request.resolvedAt).fromNow();
 
   return (
     <Card className="w-[450px] lg:w-[500px]">
@@ -111,20 +101,28 @@ export default function FeedCard({ offer }: Props) {
 
       <CardContent>
         <Carousel setApi={setApi} className="-mx-4">
-          <CarouselContent>
+          <CarouselContent className="max-h-[500px] min-h-[500px]">
             {offer.property.imageUrls.map((image, idx) => (
               <CarouselItem key={idx} className="flex justify-center">
                 <Image
                   src={image}
                   alt={`${idx}`}
-                  width={500}
-                  height={500}
+                  width={750}
+                  height={750}
                   style={{ objectFit: "cover" }}
                 />
               </CarouselItem>
             ))}
           </CarouselContent>
           {count !== 0 && <CarouselDots count={count} current={current} />}
+          <CarouselNext
+            className="absolute right-1.5 hidden lg:flex"
+            variant="secondary"
+          />
+          <CarouselPrevious
+            className="absolute left-1.5 hidden lg:flex"
+            variant="secondary"
+          />
         </Carousel>
 
         <div className="mx-2 mb-1 mt-4 flex items-center justify-between">

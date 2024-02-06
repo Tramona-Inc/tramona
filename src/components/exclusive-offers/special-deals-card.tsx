@@ -10,6 +10,8 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
 
 import type { AppRouter } from "@/server/api/root";
@@ -95,6 +97,14 @@ export default function SpecialDealsCard({ deal }: Props) {
             ))}
           </CarouselContent>
           {count !== 0 && <CarouselDots count={count} current={current} />}
+          <CarouselNext
+            className="absolute right-1.5 hidden lg:flex"
+            variant="secondary"
+          />
+          <CarouselPrevious
+            className="absolute left-1.5 hidden lg:flex"
+            variant="secondary"
+          />
         </Carousel>
 
         {/* Price comparison */}
