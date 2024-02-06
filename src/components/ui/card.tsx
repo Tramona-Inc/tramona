@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/utils/utils";
-import { cva, type VariantProps } from "class-variance-authority";
+import { type VariantProps, cva } from "class-variance-authority";
 
 const cardVariants = cva(
   "@container border text-card-foreground flex flex-col shadow-md bg-card border-zinc-100",
@@ -70,8 +70,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("flex", className)} {...props} />
-  // <div ref={ref} className={cn("", className)} {...props} />
+  <div ref={ref} className={cn("flex-1", className)} {...props} />
 ));
 CardContent.displayName = "CardContent";
 
@@ -92,9 +91,9 @@ CardFooter.displayName = "CardFooter";
 
 export {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
+  CardFooter,
   CardTitle,
+  CardDescription,
+  CardContent,
 };
