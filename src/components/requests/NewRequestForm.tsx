@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { forwardRef } from "react";
 
 const formSchema = z
   .object({
@@ -170,96 +171,10 @@ export default function NewRequestForm({
           <FormLabel>Filters (optional)</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant={fmtdFilters ? "filledInput" : "emptyInput"}
-                className="pl-3"
-              >
-                <p className="overflow-clip text-ellipsis">
-                  {fmtdFilters ?? "Add filters"}
-                </p>
-                <FilterIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
-              </Button>
+              <FiltersButton fmtdFilters={fmtdFilters} />
             </PopoverTrigger>
-            <PopoverContent
-              align="start"
-              side="top"
-              className="grid w-screen max-w-sm grid-cols-2 gap-4 p-2"
-            >
-              <p className="col-span-full pt-1 text-lg font-semibold">
-                Add filters (optional)
-              </p>
-              <FormField
-                control={form.control}
-                name="minNumBedrooms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Bedrooms</FormLabel>
-                    <FormControl>
-                      <Input {...field} inputMode="numeric" suffix="or more" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="minNumBeds"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Beds</FormLabel>
-                    <FormControl>
-                      <Input {...field} inputMode="numeric" suffix="or more" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="propertyType"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>Property Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="any">Any</SelectItem>
-                        {ALL_PROPERTY_TYPES.map((propertyType) => (
-                          <SelectItem key={propertyType} value={propertyType}>
-                            {capitalize(propertyType)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="note"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>Additional notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        className="resize-none"
-                        placeholder="e.g. Pet friendly, close to the ocean"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <PopoverContent align="start" side="top" className="w-96 p-2">
+              <FiltersSection form={form} />
             </PopoverContent>
           </Popover>
         </FormItem>
@@ -274,5 +189,108 @@ export default function NewRequestForm({
         </Button>
       </form>
     </Form>
+  );
+}
+
+const FiltersButton = forwardRef<
+  HTMLButtonElement,
+  { fmtdFilters: string | undefined }
+>(({ fmtdFilters, ...props }, ref) => (
+  <Button
+    type="button"
+    variant={fmtdFilters ? "filledInput" : "emptyInput"}
+    className="pl-3"
+    {...props}
+    ref={ref}
+  >
+    <p className="overflow-clip text-ellipsis">
+      {fmtdFilters ?? "Add filters"}
+    </p>
+    <FilterIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+  </Button>
+));
+
+FiltersButton.displayName = "FiltersButton";
+
+function FiltersSection({
+  form,
+}: {
+  form: ReturnType<typeof useForm<FormSchema>>;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <p className="col-span-full pt-1 text-lg font-semibold">
+        Add filters (optional)
+      </p>
+      <FormField
+        control={form.control}
+        name="minNumBedrooms"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Number of Bedrooms</FormLabel>
+            <FormControl>
+              <Input {...field} inputMode="numeric" suffix="or more" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="minNumBeds"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Number of Beds</FormLabel>
+            <FormControl>
+              <Input {...field} inputMode="numeric" suffix="or more" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="propertyType"
+        render={({ field }) => (
+          <FormItem className="col-span-full">
+            <FormLabel>Property Type</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="any">Any</SelectItem>
+                {ALL_PROPERTY_TYPES.map((propertyType) => (
+                  <SelectItem key={propertyType} value={propertyType}>
+                    {capitalize(propertyType)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="note"
+        render={({ field }) => (
+          <FormItem className="col-span-full">
+            <FormLabel>Additional notes</FormLabel>
+            <FormControl>
+              <Textarea
+                {...field}
+                className="resize-none"
+                placeholder="e.g. Pet friendly, close to the ocean"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   );
 }

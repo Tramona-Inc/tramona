@@ -48,7 +48,7 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       <div className="mx-auto h-1.5 w-20 rounded-full bg-accent" />
-      <ScrollArea className="max-h-[calc(100vh-10rem)] px-2">
+      <ScrollArea className="max-h-[calc(100vh-8rem)] px-2">
         {children}
       </ScrollArea>
     </DrawerPrimitive.Content>
