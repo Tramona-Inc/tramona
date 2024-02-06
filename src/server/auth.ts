@@ -44,6 +44,11 @@ export const authOptions: NextAuthOptions = {
         user: {
           ...session.user,
           id: token.id,
+          role: token.role,
+          username: token.username,
+          referralCodeUse: token.referralCodeUsed,
+          referralTier: token.referralTier,
+          phoneNumber: token.phoneNumber,
         },
       };
     },
@@ -52,6 +57,11 @@ export const authOptions: NextAuthOptions = {
         return {
           ...token,
           id: user.id,
+          role: user.role,
+          username: user.username,
+          referralCodeUse: user.referralCodeUsed,
+          referralTier: user.referralTier,
+          phoneNumber: user.phoneNumber,
         };
       }
       return token;
