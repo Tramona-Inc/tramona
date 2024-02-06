@@ -16,7 +16,7 @@ export default function ExclusiveOffersPage() {
 
       <section className="container pt-10">
         <h1 className="pb-5 text-4xl font-bold lg:text-5xl">
-          Today's <mark className="bg-gold px-2">Special Deals</mark>
+          Today&apos;s <mark className="bg-gold px-2">Special Deals</mark>
         </h1>
         <p className="text-pretty pb-10 pt-2 text-xl font-semibold tracking-tight lg:tracking-normal">
           Welcome to our exclusive offers. These are deals from our host network

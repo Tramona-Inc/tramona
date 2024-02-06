@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -14,7 +14,7 @@ import {
 
 import type { AppRouter } from "@/server/api/root";
 import type { inferRouterOutputs } from "@trpc/server";
-import { cn, formatCurrency, formatInterval } from "@/utils/utils";
+import { cn, formatCurrency } from "@/utils/utils";
 import Link from "next/link";
 
 // Plugin for relative time
@@ -70,10 +70,9 @@ export default function SpecialDealsCard({ deal }: Props) {
     });
   }, [api]);
 
-  // Format expiration date with days, hours, minutes, seconds
+  // Get date difference for expiration timer
   const today = dayjs();
   const dealExpiration = dayjs(dayjs(deal.request.checkIn).diff(today, "date"));
-  console.log(dayjs(dealExpiration));
 
   return (
     <Card className="w-[400px] overflow-clip pb-0 md:w-full">
