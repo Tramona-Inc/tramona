@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -14,6 +16,9 @@ import type { AppRouter } from "@/server/api/root";
 import type { inferRouterOutputs } from "@trpc/server";
 import { cn, formatCurrency, formatInterval } from "@/utils/utils";
 import Link from "next/link";
+
+// Plugin for relative time
+dayjs.extend(relativeTime);
 
 export type OfferWithInfo =
   inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
@@ -65,9 +70,15 @@ export default function SpecialDealsCard({ deal }: Props) {
     });
   }, [api]);
 
+  // Format expiration date with days, hours, minutes, seconds
+  const today = dayjs();
+  const dealExpiration = dayjs(dayjs(deal.request.checkIn).diff(today, "date"));
+  console.log(dayjs(dealExpiration));
+
   return (
-    <Card className="w-[400px] overflow-clip md:w-full">
+    <Card className="w-[400px] overflow-clip pb-0 md:w-full">
       <CardContent>
+        {/* Image carousel */}
         <Carousel setApi={setApi} className="-mx-4 -mt-4">
           <CarouselContent className="max-h-[400px] min-h-[400px] md:max-h-[350px] md:min-h-[350px]">
             {deal.property.imageUrls.map((image, idx) => (
@@ -87,6 +98,7 @@ export default function SpecialDealsCard({ deal }: Props) {
           {count !== 0 && <CarouselDots count={count} current={current} />}
         </Carousel>
 
+        {/* Price comparison */}
         <div className="mx-2 mb-1 mt-4 flex items-center justify-between">
           <div className="text-center text-secondary-foreground/50">
             <p className="text-2xl line-through lg:text-xl xl:text-2xl">
@@ -110,6 +122,34 @@ export default function SpecialDealsCard({ deal }: Props) {
           >
             View Deal
           </Link>
+        </div>
+
+        {/* Countdown timer */}
+        <div className="-mx-4 mt-4 flex items-center justify-evenly bg-primary py-3 text-center text-zinc-50">
+          <div>
+            <p className="text-2xl font-bold xl:text-3xl">
+              {dealExpiration.format("DD")}
+            </p>
+            <p className="text-xs font-semibold xl:text-sm">Days</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold xl:text-3xl">
+              {dealExpiration.format("HH")}
+            </p>
+            <p className="text-xs font-semibold xl:text-sm">Hours</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold xl:text-3xl">
+              {dealExpiration.format("mm")}
+            </p>
+            <p className="text-xs font-semibold xl:text-sm">Minutes</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold xl:text-3xl">
+              {dealExpiration.format("ss")}
+            </p>
+            <p className="text-xs font-semibold xl:text-sm">Seconds</p>
+          </div>
         </div>
       </CardContent>
     </Card>
