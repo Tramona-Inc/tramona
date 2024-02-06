@@ -22,9 +22,11 @@ export default function ExclusiveOffersPage() {
           Welcome to our exclusive offers. These are deals from our host network
           that you won&apos;t find anywhere else. Book these before they expire!
         </p>
+
+        <p className="text-3xl font-bold lg:text-4xl">Coming soon!</p>
       </section>
 
-      <div className="grid grid-cols-1 place-items-center gap-5 px-5 md:grid-cols-2 md:px-7 lg:grid-cols-3 2xl:grid-cols-4 2xl:px-10">
+      {/* <div className="grid grid-cols-1 place-items-center gap-5 px-5 md:grid-cols-2 md:px-7 lg:grid-cols-3 2xl:grid-cols-4 2xl:px-10">
         {isLoading ? (
           <Button variant="ghost" isLoading disabled>
             Loading...
@@ -40,7 +42,7 @@ export default function ExclusiveOffersPage() {
             )}
           </>
         )}
-      </div>
+      </div> */}
     </>
   );
 }
