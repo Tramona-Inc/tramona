@@ -24,12 +24,12 @@ export default function Reviews() {
         <CarouselContent className="-ml-1 ">
           {Array.from({ length: 5 }).map((_, index) => (
             <CarouselItem
-              key={index}
+             key={index}
               className="pl-1 md:basis-1/2 lg:basis-1/3"
             >
               <div className="p-1">
                 <Card className="bg-[#D7F6E7]">
-                  <CardContent className="aspect-square items-center justify-center p-6 ">
+                  <CardContent className="aspect-square items-center justify-center">
                     <div className="text-2xl font-semibold">
                       {/* {index + 1} */}
                       <div className="relative h-[250px]">
