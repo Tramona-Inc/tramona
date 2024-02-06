@@ -1,3 +1,4 @@
+import Image from "next/legacy/image";
 import { Button } from "../../ui/button";
 import { Card, CardContent } from "../../ui/card";
 import {
@@ -24,16 +25,16 @@ export default function Reviews() {
           {Array.from({ length: 5 }).map((_, index) => (
             <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
               <Card className="bg-[#D7F6E7]">
-                <CardContent className="aspect-square items-center justify-center">
+                <CardContent className="flex items-center justify-center">
                   <div className="text-2xl font-semibold">
-                    {/* <div className="relative h-[250px]">
+                    <div className="relative h-[100px] sm:h-[200px] md:h-[250px]">
                       <Image
                         src="/assets/images/landing-page-props/review_pic.png"
                         alt={"review image"}
-                        objectFit="cover"
+                        objectFit="contain"
                         layout="fill"
                       />
-                    </div> */}
+                    </div>
 
                     <div className="mt-5 flex flex-col items-center justify-center space-y-2 text-sm">
                       <h1 className="font-bold">Panama With Jack and Jon</h1>
