@@ -23,7 +23,7 @@ import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
-import { capitalize } from "@/utils/utils";
+import { capitalize, getNumNights } from "@/utils/utils";
 import { TRPCClientError } from "@trpc/client";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
@@ -37,7 +37,7 @@ import {
 const formSchema = z
   .object({
     location: zodString(),
-    maxTotalPriceUSD: zodInteger({ min: 1 }),
+    maxNightlyPriceUSD: zodInteger({ min: 1 }),
     date: z.object({
       from: z.date(),
       to: z.date(),
@@ -79,13 +79,16 @@ export default function NewRequestForm({
   });
 
   async function onSubmit(data: FormSchema) {
-    const { date: _date, maxTotalPriceUSD, propertyType, ...restData } = data;
+    const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
+    const checkIn = data.date.from;
+    const checkOut = data.date.to;
+    const numNights = getNumNights(checkIn, checkOut);
 
     try {
       const newRequest = {
-        checkIn: data.date.from,
-        checkOut: data.date.to,
-        maxTotalPrice: maxTotalPriceUSD * 100,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
         propertyType: propertyType === "any" ? undefined : propertyType,
         ...restData,
       };
@@ -125,7 +128,7 @@ export default function NewRequestForm({
 
         <FormField
           control={form.control}
-          name="maxTotalPriceUSD"
+          name="maxNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Name your price</FormLabel>
