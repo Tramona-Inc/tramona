@@ -1,14 +1,13 @@
-import React from "react";
+import Image from "next/legacy/image";
+import { Button } from "../../ui/button";
+import { Card, CardContent } from "../../ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
   CarouselNext,
+  CarouselPrevious,
 } from "../../ui/carousel";
-import { Card, CardContent } from "../../ui/card";
-import Image from "next/legacy/image";
-import { Button } from "../../ui/button";
 
 export default function Reviews() {
   return (
@@ -30,7 +29,7 @@ export default function Reviews() {
             >
               <div className="p-1">
                 <Card className="bg-[#D7F6E7]">
-                  <CardContent className="flex aspect-square items-center justify-center p-6">
+                  <CardContent className="aspect-square items-center justify-center p-6 ">
                     <div className="text-2xl font-semibold">
                       {/* {index + 1} */}
                       <div className="relative h-[250px]">
