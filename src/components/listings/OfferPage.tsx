@@ -1,21 +1,19 @@
-// import BathBoldIcon from "@/common/components/icons/bath-bold";
-// import BedBoldIcon from "@/common/components/icons/bed-bold";
-// import EmailIcon from "@/common/components/icons/email";
-// import IdentityVerifiedIcon from "@/common/components/icons/identiy-verified";
-// import OceanIcon from "@/common/components/icons/ocean";
-// import StarIcon from "@/common/components/icons/star";
-// import SuperHostIcon from "@/common/components/icons/superhost";
-// import PaywallDialog from "@/common/components/paywall-dialog";
-import Spinner from "@/components/_common/Spinner";
-import UserAvatar from '@/components/_common/UserAvatar';
-import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { type AppRouter } from '@/server/api/root';
-import { ALL_PROPERTY_SAFETY_ITEMS } from '@/server/db/schema';
+import UserAvatar from "@/components/_common/UserAvatar";
+import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { type AppRouter } from "@/server/api/root";
+import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
-
 import {
   cn,
   formatCurrency,
@@ -27,46 +25,32 @@ import {
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { type inferRouterOutputs } from "@trpc/server";
 import { CalendarIcon, CheckIcon, UsersIcon, XIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
-import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/router";
-
-export default function Listings() {
-  useSession({ required: true });
-  const router = useRouter();
-  const offerId = parseInt(router.query.id as string);
-
-  const { data: offer } = api.offers.getByIdWithDetails.useQuery(
-    { id: offerId },
-    {
-      enabled: router.isReady,
-    },
-  );
-
-  return (
-    <>
-      <Head>
-        <title>Listings Property Preview | Tramona</title>
-      </Head>
-      <div className="px-4 pb-64 pt-16">
-        <div className="mx-auto max-w-5xl">
-          {offer ? <OfferPage offer={offer} /> : <Spinner />}
-        </div>
-      </div>
-    </>
-  );
-}
+import Spinner from "../_common/Spinner";
 
 export type OfferWithDetails =
   inferRouterOutputs<AppRouter>["offers"]["getByIdWithDetails"];
 
-function OfferPage({
+export default function OfferPage({
   offer: { property, request, ...offer },
 }: {
   offer: OfferWithDetails;
 }) {
+  let isBooked = false;
+
+  const { data, isLoading } =
+    api.offers.getStripePaymentIntentAndCheckoutSessionId.useQuery({
+      id: offer.id,
+    });
+
+  if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
+    isBooked = true;
+  }
+
+  const isAirbnb =
+    property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
+
   // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
   const lackingSafetyItems = ALL_PROPERTY_SAFETY_ITEMS.filter(
@@ -86,7 +70,7 @@ function OfferPage({
   return (
     <div className="space-y-4">
       <Link
-        href={`/requests/${request.id}`}
+        href={isBooked ? "/requests" : `/requests/${request.id}`}
         className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
       >
         &larr; Back to all offers
@@ -116,9 +100,9 @@ function OfferPage({
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-4">
-          <h1 className="items-center text-xl font-semibold sm:text-3xl">
+          <h1 className="items-center text-lg font-semibold sm:text-3xl">
             {property.name}{" "}
-            <Badge className=" -translate-y-0.5 bg-primary text-white sm:-translate-y-1">
+            <Badge className=" -translate-y-1 bg-primary text-white">
               {discountPercentage}% off
             </Badge>
           </h1>
@@ -203,15 +187,40 @@ function OfferPage({
                 /night ({discountPercentage}% off)
               </p>
             </div>
+            <div>
+              <h1 className="text-lg font-extrabold text-black">Total Price</h1>
+              <p className="text-2xl text-primary">
+                {formatCurrency(offer.totalPrice)}
+              </p>
+            </div>
             <div className="flex items-center gap-1">
               <CalendarIcon className="size-4" />
               <p className="mr-3">{fmtdDateRange}</p>
               <UsersIcon className="size-4" />
               <p>{fmtdNumGuests}</p>
             </div>
-            <Button size="lg" className="w-full">
-              Book ({formatCurrency(offer.totalPrice)} total)
-            </Button>
+            {!isLoading ? (
+              <HowToBookDialog
+                isBooked={isBooked}
+                listingId={offer.id}
+                propertyName={property.name}
+                originalNightlyPrice={property.originalNightlyPrice}
+                airbnbUrl={property.airbnbUrl ?? ""}
+                checkIn={request.checkIn}
+                checkOut={request.checkOut}
+                requestId={request.id}
+                offer={{ property, ...offer }}
+                totalPrice={offer.totalPrice}
+                offerNightlyPrice={offerNightlyPrice}
+                isAirbnb={isAirbnb} 
+              >
+                <Button size="lg" className="w-full">
+                  {isBooked ? "Booked ✓" : "Book Now"}
+                </Button>
+              </HowToBookDialog>
+            ) : (
+              <Spinner />
+            )}
           </div>
         </Card>
       </div>

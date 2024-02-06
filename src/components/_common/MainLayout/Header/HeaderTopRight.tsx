@@ -1,4 +1,5 @@
 import { signIn, useSession } from "next-auth/react";
+import Link from "next/link";
 import { Button } from "../../../ui/button";
 import AvatarDropdown from "./AvatarDropdown";
 
@@ -19,9 +20,8 @@ function SignUpBtn() {
     <Button
       className="rounded-full"
       variant="darkPrimary"
-      onClick={() => signIn()}
     >
-      Sign up
+      <Link href={"/auth/signup"}>Sign up</Link>
     </Button>
   );
 }
@@ -34,10 +34,10 @@ export default function HeaderTopRight() {
       return <div className="h-10" />;
     case "unauthenticated":
       return (
-        <>
+        <div className="flex gap-2">
           <LogInBtn />
           <SignUpBtn />
-        </>
+        </div>
       );
     case "authenticated":
       return <AvatarDropdown session={session} />;
