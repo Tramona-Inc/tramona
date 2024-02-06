@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../../ui/dialog";
+import { ArrowRightIcon } from "lucide-react";
 
 const useStripe = () => {
   const stripe = useMemo<Promise<Stripe | null>>(
@@ -193,16 +194,150 @@ export default function HowToBookDialog(
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{props.children}</DialogTrigger>
       <DialogContent>
-        {/* Displaying Prices when not booked*/}
-        {renderBookingDetails()}
-        {!props.isBooked && <>{renderPriceDetails()}</>}
-
-        {props.isAirbnb ? (
-          <>
-            {/* Airbnb and display pay button */}
-            {!props.isBooked && (
-              <>
-                <div className="flex flex-col">
+        <div className="space-y-4">
+          {/* Displaying Prices when not booked*/}
+          {renderBookingDetails()}
+          {!props.isBooked && <>{renderPriceDetails()}</>}
+          {props.isAirbnb ? (
+            <>
+              {/* Airbnb and display pay button */}
+              {!props.isBooked && (
+                <>
+                  <div className="flex flex-col">
+                    <Button
+                      className={cn(
+                        buttonVariants({ size: "lg" }),
+                        "rounded-full",
+                      )}
+                      onClick={() => checkout()}
+                    >
+                      Pay now
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    *Note: paying the Tramona fee does not mean the property is
+                    booked for you. You must complete all the steps.
+                  </p>
+                </>
+              )}
+              {/* Airbnb flow and instructions */}
+              <DialogHeader>
+                <DialogTitle>How To Book:</DialogTitle>
+                <DialogDescription>
+                  Here&apos;s how to secure your booking.
+                </DialogDescription>
+              </DialogHeader>
+              <ol className="list-decimal space-y-1 px-4 marker:text-muted-foreground">
+                <li>We charge a 20% fee of your total savings.</li>
+                {!props.isBooked && (
+                  <li>
+                    Once you click{" "}
+                    <span className="inline-block rounded-full bg-primary px-2 text-white">
+                      Pay now
+                    </span>{" "}
+                    and pay the Tramona Fee, you will be given the specific
+                    instructions on how to book your stay on Airbnb.
+                  </li>
+                )}
+                <li>
+                  Once you click{" "}
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary pl-2 pr-1 text-white">
+                    Contact Host
+                    <ArrowRightIcon className="size-5" />
+                  </span>{" "}
+                  below, you will be taken to the listing page on Airbnb.
+                </li>
+                <li>
+                  Scroll to the bottom of the listing where it says “Contact
+                  Host”.
+                </li>
+                <li>Click “Contact Host” and send them this message:</li>
+              </ol>
+              <p className="border-l-2 border-primary bg-primary/10 p-2">
+                ”{message}”
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <CopyToClipboardBtn
+                  message={message}
+                  render={({ justCopied, copyMessage }) => (
+                    <Button
+                      className="rounded-full"
+                      size="lg"
+                      variant="outline"
+                      onClick={copyMessage}
+                    >
+                      {justCopied ? "Copied!" : "Copy message"}
+                    </Button>
+                  )}
+                />
+                {/* Enable contact host once paid */}
+                {props.isBooked ? (
+                  <Link
+                    className={cn(
+                      buttonVariants({ size: "lg" }),
+                      "rounded-full",
+                    )}
+                    href={props.airbnbUrl}
+                    target="_blank"
+                  >
+                    Contact Host
+                    <ArrowRightIcon />
+                  </Link>
+                ) : (
+                  <Button
+                    disabled={true}
+                    className={cn(
+                      buttonVariants({ size: "lg" }),
+                      "rounded-full",
+                    )}
+                  >
+                    Contact Host
+                    <ArrowRightIcon />
+                  </Button>
+                )}
+              </div>
+            </>
+          ) : (
+            // Direct booking flow and instructions
+            <>
+              <div className="container flex flex-col px-10 py-5">
+                <ol className="flex list-decimal flex-col text-start marker:text-muted-foreground">
+                  {!props.isBooked && (
+                    <li>
+                      Once you click pay now and pay the total, your booking is
+                      confirmed.
+                    </li>
+                  )}
+                  <li>
+                    You will be able to see the trip under{" "}
+                    <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
+                      My Trips
+                      <ArrowRightIcon />
+                    </span>{" "}
+                    and see confirmation, check-in instructions and more.
+                  </li>
+                  <li>
+                    A copy of your booking confirmation, check-in instructions
+                    and host contact info will be emailed to you.
+                  </li>
+                </ol>
+              </div>
+              <DialogFooter className="flex items-center justify-center">
+                {props.isBooked ? (
+                  // Direct Booking once paid link to trip
+                  <Link
+                    className={cn(
+                      buttonVariants({ size: "lg" }),
+                      "rounded-full",
+                    )}
+                    href={""} // TODO: href to my listing
+                    target="_blank"
+                  >
+                    My Trips
+                    <ArrowRightIcon />
+                  </Link>
+                ) : (
+                  // Direct Booking pay first
                   <Button
                     className={cn(
                       buttonVariants({ size: "lg" }),
@@ -212,130 +347,11 @@ export default function HowToBookDialog(
                   >
                     Pay now
                   </Button>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  * Note: paying the Tramona fee does not mean the property is
-                  booked for you. You must complete all the steps
-                </p>
-              </>
-            )}
-
-            {/* Airbnb flow and instructions */}
-            <DialogHeader>
-              <DialogTitle>How To Book:</DialogTitle>
-              <DialogDescription>
-                Here&apos;s how to secure your booking.
-              </DialogDescription>
-            </DialogHeader>
-            <ol className="list-decimal space-y-1 px-4 marker:text-muted-foreground">
-              <li>We charge a 20% fee of your total savings.</li>
-              {!props.isBooked && (
-                <li>
-                  Once you click{" "}
-                  <span className="inline-block rounded-full bg-primary px-3 pr-2 text-white">
-                    Pay now
-                  </span>{" "}
-                  and pay the Tramona Fee, you will be given the specific
-                  instructions on how to book your stay on Airbnb.
-                </li>
-              )}
-              <li>
-                Once you click{" "}
-                <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
-                  Contact Host &rarr;
-                </span>{" "}
-                below, you will be taken to the listing page on Airbnb.
-              </li>
-              <li>
-                Scroll to the bottom of the listing where it says “Contact
-                Host”.
-              </li>
-              <li>Click “Contact Host” and send them this message:</li>
-            </ol>
-            <p className="border-l-2 border-primary bg-primary/10 p-2">
-              ”{message}”
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <CopyToClipboardBtn
-                message={message}
-                render={({ justCopied, copyMessage }) => (
-                  <Button
-                    className="rounded-full"
-                    size="lg"
-                    variant="outline"
-                    onClick={copyMessage}
-                  >
-                    {justCopied ? "Copied!" : "Copy message"}
-                  </Button>
                 )}
-              />
-
-              {/* Enable contact host once paid */}
-              {props.isBooked ? (
-                <Link
-                  className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
-                  href={props.airbnbUrl}
-                  target="_blank"
-                >
-                  Contact Host &rarr;
-                </Link>
-              ) : (
-                <Button
-                  disabled={true}
-                  className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
-                >
-                  Contact Host &rarr;
-                </Button>
-              )}
-            </div>
-          </>
-        ) : (
-          // Direct booking flow and instructions
-          <>
-            <div className="container flex flex-col px-10 py-5">
-              <ol className="flex list-decimal flex-col text-start marker:text-muted-foreground">
-                {!props.isBooked && (
-                  <li>
-                    Once you click pay now and pay the total, your booking is
-                    confirmed.
-                  </li>
-                )}
-                <li>
-                  You will be able to see the trip under{" "}
-                  <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
-                    My Trips &rarr;
-                  </span>{" "}
-                  and see confirmation, check-in instructions and more.
-                </li>
-                <li>
-                  A copy of your booking confirmation, check-in instructions and
-                  host contact info will be emailed to you.
-                </li>
-              </ol>
-            </div>
-
-            <DialogFooter className="flex items-center justify-center">
-              {props.isBooked ? (
-                // Direct Booking once paid link to trip
-                <Link
-                  className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
-                  href={""} // TODO: href to my listing
-                  target="_blank"
-                >
-                  My Trips &rarr;
-                </Link>
-              ) : (
-                // Direct Booking pay first
-                <Button
-                  className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
-                  onClick={() => checkout()}
-                >
-                  Pay now
-                </Button>
-              )}
-            </DialogFooter>
-          </>
-        )}
+              </DialogFooter>
+            </>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

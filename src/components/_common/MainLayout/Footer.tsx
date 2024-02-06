@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -53,9 +54,9 @@ export default function Footer() {
               />
               <button
                 type="submit"
-                className="absolute inset-y-1 right-1 h-10 w-10 rounded-full bg-black text-xl text-white"
+                className="absolute inset-y-1 right-1 grid h-10 w-10 place-items-center rounded-full bg-black text-xl text-white"
               >
-                &rarr;
+                <ArrowRightIcon />
               </button>
             </form>
           </div>

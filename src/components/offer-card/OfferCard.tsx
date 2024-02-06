@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { LiveFeedOffer } from "./data";
+import { ArrowRightIcon } from "lucide-react";
 
 type Props = {
   offer: LiveFeedOffer;
@@ -42,7 +43,9 @@ export default function OfferCard({ offer }: Props) {
           </span>
         </div>
 
-        <p className="text-3xl">&rarr;</p>
+        <p className="text-3xl">
+          <ArrowRightIcon />
+        </p>
 
         <div className="flex flex-col text-center text-2xl md:text-3xl">
           <span className="text-primary">${offer.tramonaPrice}</span>{" "}
