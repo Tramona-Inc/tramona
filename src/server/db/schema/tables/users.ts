@@ -1,10 +1,10 @@
 import {
+  integer,
+  pgEnum,
   pgTable,
   text,
   timestamp,
   varchar,
-  pgEnum,
-  integer,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
@@ -27,6 +27,8 @@ export const users = pgTable("user", {
   image: text("image"),
 
   // custom fields
+  password: varchar("password", { length: 510 }),
+  username: varchar("username", { length: 60 }),
   referralCodeUsed: varchar("referral_code_used", {
     length: REFERRAL_CODE_LENGTH,
   }),
