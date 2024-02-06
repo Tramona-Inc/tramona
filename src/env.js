@@ -24,23 +24,21 @@ export const env = createEnv({
         (str) => !str.includes("YOUR_POSTGRESQL_URL_HERE"),
         "You forgot to change the default URL",
       ),
-
     SMTP_USER: z.string(),
     SMTP_PASSWORD: z.string(),
     SMTP_HOST: z.string(),
     SMTP_PORT: z.string(),
     EMAIL_FROM: z.string(),
-
     GITHUB_CLIENT_ID: z.string(),
     GITHUB_CLIENT_SECRET: z.string(),
-
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     RESEND_API_KEY: z.string(),
-
     STRIPE_TEST_SECRET_KEY: z.string(),
     STRIPE_LIVE_SECRET_KEY: z.string(),
     STRIPE_WEBHOOK_SECRET: z.string(),
+    FACEBOOK_CLIENT_ID: z.string(),
+    FACEBOOK_CLIENT_SECRET: z.string(),
   },
 
   /**
@@ -60,11 +58,8 @@ export const env = createEnv({
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-
     DATABASE_URL: process.env.DATABASE_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
-    // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     SMTP_USER: process.env.SMTP_USER,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
     SMTP_HOST: process.env.SMTP_HOST,
@@ -80,6 +75,8 @@ export const env = createEnv({
     STRIPE_TEST_SECRET_KEY: process.env.STRIPE_TEST_SECRET_KEY,
     STRIPE_LIVE_SECRET_KEY: process.env.STRIPE_LIVE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
+    FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
