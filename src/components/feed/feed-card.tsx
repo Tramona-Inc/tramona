@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -20,6 +22,9 @@ import {
   formatInterval,
   getDiscountPercentage,
 } from "@/utils/utils";
+
+// Plugin for relative time
+dayjs.extend(relativeTime);
 
 export type FeedWithInfo =
   inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
@@ -78,15 +83,24 @@ export default function FeedCard({ offer }: Props) {
   const showTimeAgo = msAgo > 1000 * 60 * 60;
   const fmtdTimeAgo = showTimeAgo ? `${formatInterval(msAgo)}` : "";
 
+  const today = dayjs();
+  const offerDate = offer.request.resolvedAt
+    ? dayjs(offer.request.resolvedAt).fromNow()
+    : "";
+
   return (
     <Card className="w-[450px] lg:w-[500px]">
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex gap-3">
-          <UserAvatar name={name[0]} email={undefined} image={undefined} />
+          <UserAvatar
+            name={name[0]}
+            email={undefined}
+            image={offer.request.madeByUser.image}
+          />
           <div>
             <p className="font-semibold">Booked by {name[0]}</p>
             <p className="text-sm text-secondary-foreground/50">
-              {offer.property.name} - {fmtdTimeAgo}
+              {offer.request.madeByUser.name} - {offerDate}
             </p>
           </div>
         </div>
