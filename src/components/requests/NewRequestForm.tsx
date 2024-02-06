@@ -39,6 +39,8 @@ import {
   DrawerContent,
   DrawerTrigger,
   DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
 } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
 
@@ -184,6 +186,9 @@ export default function NewRequestForm({
                 <FiltersButton fmtdFilters={fmtdFilters} />
               </PopoverTrigger>
               <PopoverContent align="start" side="top" className="w-96 p-2">
+                <p className="pb-4 pt-1 text-center text-lg font-semibold sm:text-left">
+                  Add filters (optional)
+                </p>
                 <FiltersSection form={form} />
               </PopoverContent>
             </Popover>
@@ -193,6 +198,9 @@ export default function NewRequestForm({
                 <FiltersButton fmtdFilters={fmtdFilters} />
               </DrawerTrigger>
               <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Add filters (optional)</DrawerTitle>
+                </DrawerHeader>
                 <FiltersSection form={form} />
                 <DrawerFooter>
                   <DialogClose asChild>
@@ -244,9 +252,6 @@ function FiltersSection({
 }) {
   return (
     <div className="grid grid-cols-2 gap-4">
-      <p className="col-span-full pt-1 text-center text-lg font-semibold sm:text-left">
-        Add filters (optional)
-      </p>
       <FormField
         control={form.control}
         name="minNumBedrooms"
