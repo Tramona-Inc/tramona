@@ -175,7 +175,7 @@ export default function NewRequestForm({
                 className="pl-3"
               >
                 <p className="overflow-clip text-ellipsis">
-                  {fmtdFilters ? fmtdFilters : "Add filters"}
+                  {fmtdFilters ?? "Add filters"}
                 </p>
                 <FilterIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
               </Button>
