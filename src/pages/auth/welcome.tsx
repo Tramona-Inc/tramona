@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Image from "next/image";
 import { useRouter } from "next/router";
 
 import { Stepper, StepperItem } from "@/components/ui/stepper";
@@ -22,7 +21,7 @@ function StepperContentLayout({
   className?: string | null;
 }): JSX.Element {
   return (
-    <div className={cn("mt-2 flex flex-col gap-4 self-center", className)}>
+    <div className={cn("mt-5 flex flex-col gap-4 self-center", className)}>
       {children}
     </div>
   );
@@ -121,63 +120,19 @@ function Step2(): JSX.Element {
 
 function Step3(): JSX.Element {
   return (
-    <StepperContentLayout
-      className={"text-l items-center text-center font-bold"}
-    >
-      <p>We have a global feed and a personal feed.</p>
-      <p>
-        You can see where your friends are going, deals other people have
-        gotten, <br /> or just find inspiration for yourself
-      </p>
-      <Image
-        src={"/assets/images/welcome/welcome-step3.png"}
-        width={325}
-        height={214}
-        alt=""
-        className="inset-0 my-5 border border-none object-contain object-center"
-      />
-    </StepperContentLayout>
-  );
-}
-
-function Step4(): JSX.Element {
-  return (
-    <StepperContentLayout className={"items-center text-center"}>
-      <p className="text-3xl font-bold">Let&apos;s Grow & Earn Together</p>
-      <p className="text-l font-bold">
-        We built Tramona for the sole benefit of travelers and hosts, our
-        referral program is no different.
-      </p>
-      <p>
-        To show this, we offer a generous{" "}
-        <span className="bg-gold px-1">30%</span> base revenue split with people
-        you bring to the platform.
-      </p>
-      <Image
-        src={"/assets/images/welcome/welcome-step4.png"}
-        width={330}
-        height={118}
-        alt=""
-        className="inset-0 my-5 border border-none object-contain object-center"
-      />
-    </StepperContentLayout>
-  );
-}
-
-function Step5(): JSX.Element {
-  return (
-    <StepperContentLayout className={"items-center text-center"}>
-      <p className="text-l font-bold">
-        We want to increase the the amount people travel, its that simple.
-      </p>
-      <p className="bg-gold px-1">Submit a request and see how it works. </p>
-      <Image
-        src={"/assets/images/welcome/welcome-step5.png"}
-        width={202}
-        height={300}
-        alt=""
-        className="inset-0 my-5 border border-none object-contain object-center"
-      />
+    <StepperContentLayout className="container gap-4 text-balance text-center">
+      <h1 className="text-4xl font-bold lg:text-5xl">Become a host</h1>
+      <div className="my-10 space-y-10 self-center font-medium lg:max-w-[600px]">
+        <p className="text-xl lg:text-2xl">
+          Sign up in the menu to start to get offers sent directly to you,
+          however you prefer.
+        </p>
+        <p className="text-lg lg:text-xl">
+          You will get requests in your area sent directly to you.{" "}
+          <mark className="bg-gold px-1">Make more money</mark> and{" "}
+          <mark className="bg-gold px-1">reduce vacancies!</mark>
+        </p>
+      </div>
     </StepperContentLayout>
   );
 }
@@ -186,8 +141,6 @@ const steps = [
   { label: "", icon: <Undone />, children: <Step1 /> },
   { label: "", icon: <Undone />, children: <Step2 /> },
   { label: "", icon: <Undone />, children: <Step3 /> },
-  { label: "", icon: <Undone />, children: <Step4 /> },
-  { label: "", icon: <Undone />, children: <Step5 /> },
 ] satisfies StepperConfig[];
 
 export default function Welcome() {
@@ -200,7 +153,7 @@ export default function Welcome() {
 
   const startExploring = () => {
     nextStep();
-    sleep(2000)
+    sleep(1500)
       .then(() => router.push("/"))
       .catch(() => {
         return;
@@ -220,7 +173,7 @@ export default function Welcome() {
               key={index}
               {...step}
               additionalClassName={{
-                button: "bg-[#9CA3AF]",
+                button: "bg-zinc-200",
               }}
             >
               {step.children}
@@ -229,13 +182,13 @@ export default function Welcome() {
         </Stepper>
         <div className="flex items-center justify-center gap-2">
           {activeStep === steps.length ? (
-            <Step5 />
+            <Step3 />
           ) : (
             <Button
               onClick={isLastStep ? startExploring : nextStep}
               className="rounded-full px-8"
             >
-              {isLastStep ? "Start Exploring" : "Continue"}
+              {isLastStep ? "Make a request now" : "Continue"}
             </Button>
           )}
         </div>
