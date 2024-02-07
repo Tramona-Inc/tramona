@@ -1,12 +1,12 @@
 import Head from "next/head";
 
-import { Button } from "@/components/ui/button";
-import SpecialDealsCard from "@/components/exclusive-offers/special-deals-card";
+// import { Button } from "@/components/ui/button";
+// import SpecialDealsCard from "@/components/exclusive-offers/special-deals-card";
 
-import { api } from "@/utils/api";
+// import { api } from "@/utils/api";
 
 export default function ExclusiveOffersPage() {
-  const { data: deals, isLoading } = api.offers.getAllOffers.useQuery();
+  // const { data: deals, isLoading } = api.offers.getAllOffers.useQuery();
 
   return (
     <>
