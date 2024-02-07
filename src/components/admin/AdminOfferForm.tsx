@@ -18,11 +18,15 @@ import {
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
 import { capitalize } from "@/utils/utils";
-import { zodInteger, zodNumber, zodString, zodUrl } from "@/utils/zod-utils";
+import { zodInteger, zodNumber, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRef } from "react";
 import { TRPCClientError } from "@trpc/client";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
+import TagSelect from "../_common/TagSelect";
+import { Dropzone } from "../_utils/Dropzone";
+import type { DropzoneRef } from "../_utils/Dropzone";
 import {
   Select,
   SelectContent,
@@ -30,8 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import TagSelect from "../_common/TagSelect";
 import { Textarea } from "../ui/textarea";
+import { env } from "@/env";
 
 export default function AdminOfferForm({
   afterSubmit,
@@ -40,6 +44,8 @@ export default function AdminOfferForm({
   afterSubmit?: () => void;
   request: Request;
 }) {
+  const ref = useRef<DropzoneRef>(null);
+
   const formSchema = z.object({
     propertyName: zodString(),
     offeredPriceUSD: zodInteger({ min: 1 }),
@@ -56,7 +62,6 @@ export default function AdminOfferForm({
     safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
     about: zodString({ maxLen: Infinity }),
     airbnbUrl: zodString({ maxLen: Infinity }).url(),
-    imageUrls: z.object({ value: zodUrl() }).array(),
   });
 
   type FormSchema = z.infer<typeof formSchema>;
@@ -64,16 +69,10 @@ export default function AdminOfferForm({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      imageUrls: [{ value: "" }, { value: "" }, { value: "" }],
       amenities: [],
       standoutAmenities: [],
       safetyItems: [],
     },
-  });
-
-  const imageUrlInputs = useFieldArray({
-    name: "imageUrls",
-    control: form.control,
   });
 
   const propertiesMutation = api.properties.create.useMutation();
@@ -84,12 +83,23 @@ export default function AdminOfferForm({
   async function onSubmit(data: FormSchema) {
     const { offeredPriceUSD, ...propertyData } = data;
 
+    try {
+      await ref.current!.uploadS3();
+    } catch (error) {
+      if (error instanceof Error) {
+        errorToast(error.message);
+      }
+    }
+
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
       type: propertyData.propertyType,
       originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
-      imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
+      imageUrls: ref.current!.hashKeys.map(
+        (key) =>
+          `https://${env.NEXT_PUBLIC_BUCKET_NAME}.s3.amazonaws.com/${key}`,
+      ),
     };
 
     try {
@@ -382,72 +392,7 @@ export default function AdminOfferForm({
           )}
         />
 
-        <FormItem className="col-span-full space-y-1">
-          <FormLabel>Image URLs</FormLabel>
-          <div className="space-y-2 rounded-md border bg-secondary p-2">
-            {imageUrlInputs.fields.map((field, i) => (
-              <FormField
-                control={form.control}
-                key={field.id}
-                name={`imageUrls.${i}.value`} // Update this line
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        inputMode="url"
-                        placeholder={`Image URL ${i + 1} (${
-                          i === 0
-                            ? "primary image"
-                            : i < 3
-                              ? "required"
-                              : "optional"
-                        })`}
-                        onKeyDown={(e) => {
-                          const n = imageUrlInputs.fields.length;
-
-                          switch (e.key) {
-                            case "Enter":
-                              imageUrlInputs.insert(i + 1, {
-                                value: "",
-                              });
-                              e.preventDefault();
-                              break;
-                            case "ArrowDown":
-                              form.setFocus(`imageUrls.${(i + 1) % n}.value`);
-                              break;
-                            case "ArrowUp":
-                              form.setFocus(
-                                `imageUrls.${(i + n - 1) % n}.value`,
-                              );
-                              break;
-                            case "Backspace":
-                              if (n > 3 && e.currentTarget.value === "") {
-                                imageUrlInputs.remove(i);
-                                form.setFocus(
-                                  `imageUrls.${i === n - 1 ? i - 1 : i}.value`,
-                                );
-                              }
-                              break;
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-            <Button
-              type="button"
-              variant="emptyInput"
-              className="w-full"
-              onClick={() => imageUrlInputs.append({ value: "" })}
-            >
-              Add another image (optional)
-            </Button>
-          </div>
-        </FormItem>
+        <Dropzone ref={ref} />
 
         <Button
           disabled={form.formState.isSubmitting}

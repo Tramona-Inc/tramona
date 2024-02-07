@@ -15,7 +15,7 @@ import {
 } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, isNotNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
