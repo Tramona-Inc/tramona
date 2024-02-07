@@ -12,6 +12,7 @@ import OfferCard from "@/components/offer-card/OfferCard";
 import { liveFeedOffers } from "@/components/offer-card/data";
 
 import { cn, sleep } from "@/utils/utils";
+import { api } from "@/utils/api";
 
 function StepperContentLayout({
   children,
@@ -88,25 +89,32 @@ function Step1(): JSX.Element {
 }
 
 function Step2(): JSX.Element {
+  const { data } = api.users.myReferralCode.useQuery();
+
   return (
-    <StepperContentLayout className={"items-center text-center"}>
-      <p className="text-l text-center font-bold">
-        We have the <span className="bg-gold px-1">same hosts</span> that are on
-        sites like Airbnb, VRBO, or Bookings.com, <br /> we just match you with
-        one of their vacant dates.
-      </p>
-      <p>Its basically free money. Try it for yourself.</p>
-      <p>
-        We will never ask for a credit card or any form of payment, until its
-        time to checkout
-      </p>
-      <Image
-        src={"/assets/images/welcome/welcome-step2.png"}
-        width={299}
-        height={295}
-        alt=""
-        className="inset-0 my-5 border border-none object-contain object-center"
-      />
+    <StepperContentLayout className="container gap-4 text-balance">
+      <div className="flex flex-col gap-10 text-center">
+        <h1 className="text-4xl font-bold lg:text-5xl">Invite your friends!</h1>
+        <p className="text-lg font-medium lg:text-xl">
+          We offer a generous <mark className="bg-gold px-1">30%</mark> base
+          profit split with people you bring to the platform.
+        </p>
+      </div>
+
+      <div className="my-10 flex flex-col items-center gap-4 font-medium text-zinc-500">
+        <p className="text-lg lg:text-xl">Here is your referral code</p>
+        <p className="text-sm font-normal lg:text-base">
+          Share your code and start earning on other peoples travel
+        </p>
+
+        <p className="my-4 rounded-md border-2 px-10 py-4 text-5xl tracking-widest lg:text-7xl">
+          {data?.referralCode ?? "..."}
+        </p>
+
+        <p className="lg:text-lg">
+          This can also be found in your profile page
+        </p>
+      </div>
     </StepperContentLayout>
   );
 }
