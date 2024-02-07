@@ -6,6 +6,14 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+// import {
+//   Dialog,
+//   DialogHeader,
+//   DialogContent,
+//   DialogTrigger,
+//   DialogClose,
+//   DialogTitle,
+// } from "@/components/ui/dialog";
 import {
   Carousel,
   CarouselContent,
@@ -14,7 +22,10 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Share } from "lucide-react";
+import {
+  Share,
+  // Link, MessageCircle, Mail, LucideIcon
+} from "lucide-react";
 import CarouselDots from "./carousel-dots";
 
 import type { AppRouter } from "@/server/api/root";
@@ -30,6 +41,40 @@ export type FeedWithInfo =
 type Props = {
   offer: FeedWithInfo;
 };
+
+// function ModalButton({ icon, text }: { icon: ReactNode; text: string }) {
+//   return (
+//     <div className="flex flex-col items-center">
+//       <Button variant="secondary" size="icon" className="rounded-full">
+//         {icon}
+//       </Button>
+//       <p className="text-sm">{text}</p>
+//     </div>
+//   );
+// }
+
+// function ShareModal() {
+//   return (
+//     <Dialog>
+//       <DialogTrigger asChild>
+//         <Button variant="ghost" size="sm">
+//           <Share className="size-4" />
+//         </Button>
+//       </DialogTrigger>
+
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle>Share with</DialogTitle>
+//         </DialogHeader>
+//         <div className="grid grid-cols-4">
+//           <ModalButton icon={<Link className="size-20" />} text="Copy link" />
+//           <ModalButton icon={<MessageCircle />} text="Message" />
+//           <ModalButton icon={<Mail />} text="Email" />
+//         </div>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
 
 export default function FeedCard({ offer }: Props) {
   const [api, setApi] = useState<CarouselApi>();
@@ -70,7 +115,7 @@ export default function FeedCard({ offer }: Props) {
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" disabled>
           <Share className="size-4" />
         </Button>
       </CardHeader>
