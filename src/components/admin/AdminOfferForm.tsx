@@ -98,7 +98,7 @@ export default function AdminOfferForm({
       originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
       imageUrls: ref.current!.hashKeys.map(
         (key) =>
-          `https://${env.NEXT_PUBLIC_BUCKET_NAME}.s3.amazonaws.com/${key}`,
+          `https://${env.NEXT_PUBLIC_UPLOADER_BUCKET_NAME}.s3.amazonaws.com/${key}`,
       ),
     };
 
