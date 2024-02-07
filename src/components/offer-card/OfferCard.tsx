@@ -35,7 +35,7 @@ export default function OfferCard({ offer }: Props) {
       </div>
 
       {/* Original price vs Tramona price */}
-      <div className="flex space-x-1 font-bold text-zinc-950">
+      <div className="flex items-center gap-1 font-bold text-zinc-950 md:gap-2 xl:gap-3">
         <div className="flex flex-col text-center text-2xl md:text-3xl">
           <span className="line-through">${offer.originalPrice}</span>{" "}
           <span className="text-sm font-medium text-muted-foreground md:text-base">
@@ -43,9 +43,7 @@ export default function OfferCard({ offer }: Props) {
           </span>
         </div>
 
-        <p className="text-3xl">
-          <ArrowRightIcon />
-        </p>
+        <ArrowRightIcon className="size-5 md:size-7 xl:size-8" />
 
         <div className="flex flex-col text-center text-2xl md:text-3xl">
           <span className="text-primary">${offer.tramonaPrice}</span>{" "}
