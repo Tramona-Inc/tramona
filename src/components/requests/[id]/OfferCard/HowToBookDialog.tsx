@@ -10,6 +10,7 @@ import {
   getTramonaFeeTotal,
 } from "@/utils/utils";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { ArrowRightIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,7 +25,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../../ui/dialog";
-import { ArrowRightIcon } from "lucide-react";
 
 const useStripe = () => {
   const stripe = useMemo<Promise<Stripe | null>>(
@@ -310,7 +310,7 @@ export default function HowToBookDialog(
                   )}
                   <li>
                     You will be able to see the trip under{" "}
-                    <span className="inline-block rounded-full bg-primary pl-3 pr-2 text-white">
+                    <span className="inline-flex rounded-full bg-primary pl-3 pr-2 text-white">
                       My Trips
                       <ArrowRightIcon />
                     </span>{" "}
