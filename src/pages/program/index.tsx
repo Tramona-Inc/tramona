@@ -378,8 +378,8 @@ function FAQ() {
               How long do the payouts last for?
             </AccordionTrigger>
             <AccordionContent>
-              You will receive payouts for as long as the person you referred
-              uses Tramona.
+              You are eligible for payouts for individuals you refer, provided
+              they take a trip within one year from the date of your referral.
             </AccordionContent>
           </AccordionItem>
 
@@ -388,8 +388,9 @@ function FAQ() {
               What if I refer someone and they dont travel?
             </AccordionTrigger>
             <AccordionContent>
-              That&apos;s okay! You will still receive a payout whenever they do
-              use Tramona.
+              That&apos;s alright! You will still receive a payout whenever they
+              use Tramona, as long as they travel within one year from the date
+              you referred them.
             </AccordionContent>
           </AccordionItem>
 
