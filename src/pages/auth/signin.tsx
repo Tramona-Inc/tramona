@@ -24,6 +24,7 @@ import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -43,6 +44,8 @@ export default function SignIn({
 
   const { query } = useRouter();
 
+  const [toastDisplayed, setToastDisplayed] = useState(false);
+
   const handleSubmit = async ({
     email,
     password,
@@ -50,12 +53,14 @@ export default function SignIn({
     await signIn("credentials", { email: email, password: password });
   };
 
-  if (query.error) {
+  if (query.error && !toastDisplayed) {
     toast({
       title:
         "Could not login. Please check your e-mail or password or third-party application.",
       variant: "destructive",
     });
+
+    setToastDisplayed(true); // Set the state to true after displaying the toast
   }
 
   return (

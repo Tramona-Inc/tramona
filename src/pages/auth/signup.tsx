@@ -220,7 +220,7 @@ export default function SignIn({
                     >
                       <Icons iconName={provider.name} />
                       <span className="col-span-3 text-lg font-extrabold tracking-tight">
-                        Log in with
+                        Sign up with
                         {" " + provider.name}
                       </span>
                     </Button>
