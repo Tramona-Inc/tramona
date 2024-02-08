@@ -50,7 +50,13 @@ export default function SignIn({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
-    await signIn("credentials", { email: email, password: password });
+    await signIn("credentials", {
+      email: email,
+      password: password,
+      callbackUrl: query.isNewUser
+        ? `${window.location.origin}/auth/welcome`
+        : `${window.location.origin}`,
+    });
   };
 
   if (query.error && !toastDisplayed) {

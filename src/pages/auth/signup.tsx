@@ -70,7 +70,10 @@ export default function SignIn({
 
   const { mutate } = api.auth.createUser.useMutation({
     onSuccess: () => {
-      void router.push("/auth/signin");
+      void router.push({
+        pathname: "/auth/signin",
+        query: { isNewUser: true },
+      });
 
       toast({
         title: "Account created successfully!",
