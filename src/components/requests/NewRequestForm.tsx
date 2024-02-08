@@ -23,7 +23,7 @@ import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
-import { capitalize } from "@/utils/utils";
+import { capitalize, getNumNights, useIsDesktop } from "@/utils/utils";
 import { TRPCClientError } from "@trpc/client";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
@@ -33,11 +33,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { forwardRef } from "react";
+import {
+  NestedDrawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "../ui/drawer";
+import { DialogClose } from "../ui/dialog";
 
 const formSchema = z
   .object({
     location: zodString(),
-    maxTotalPriceUSD: zodInteger({ min: 1 }),
+    maxNightlyPriceUSD: zodInteger({ min: 1 }),
     date: z.object({
       from: z.date(),
       to: z.date(),
@@ -60,6 +70,8 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
+  const isDesktop = useIsDesktop();
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -79,13 +91,16 @@ export default function NewRequestForm({
   });
 
   async function onSubmit(data: FormSchema) {
-    const { date: _date, maxTotalPriceUSD, propertyType, ...restData } = data;
+    const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
+    const checkIn = data.date.from;
+    const checkOut = data.date.to;
+    const numNights = getNumNights(checkIn, checkOut);
 
     try {
       const newRequest = {
-        checkIn: data.date.from,
-        checkOut: data.date.to,
-        maxTotalPrice: maxTotalPriceUSD * 100,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
         propertyType: propertyType === "any" ? undefined : propertyType,
         ...restData,
       };
@@ -125,7 +140,7 @@ export default function NewRequestForm({
 
         <FormField
           control={form.control}
-          name="maxTotalPriceUSD"
+          name="maxNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Name your price</FormLabel>
@@ -165,100 +180,36 @@ export default function NewRequestForm({
 
         <FormItem className="col-span-full">
           <FormLabel>Filters (optional)</FormLabel>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={fmtdFilters ? "filledInput" : "emptyInput"}
-                className="pl-3"
-              >
-                <p className="overflow-clip text-ellipsis">
-                  {fmtdFilters ? fmtdFilters : "Add filters"}
+          {isDesktop ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <FiltersButton fmtdFilters={fmtdFilters} />
+              </PopoverTrigger>
+              <PopoverContent align="start" side="top" className="w-96 p-2">
+                <p className="pb-4 pt-1 text-center text-lg font-semibold sm:text-left">
+                  Add filters (optional)
                 </p>
-                <FilterIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="start"
-              side="top"
-              className="grid w-screen max-w-sm grid-cols-2 gap-4 p-2"
-            >
-              <p className="col-span-full pt-1 text-lg font-semibold">
-                Add filters (optional)
-              </p>
-              <FormField
-                control={form.control}
-                name="minNumBedrooms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Bedrooms</FormLabel>
-                    <FormControl>
-                      <Input {...field} inputMode="numeric" suffix="or more" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="minNumBeds"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Beds</FormLabel>
-                    <FormControl>
-                      <Input {...field} inputMode="numeric" suffix="or more" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="propertyType"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>Property Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="any">Any</SelectItem>
-                        {ALL_PROPERTY_TYPES.map((propertyType) => (
-                          <SelectItem key={propertyType} value={propertyType}>
-                            {capitalize(propertyType)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="note"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>Additional notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        className="resize-none"
-                        placeholder="e.g. Pet friendly, close to the ocean"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </PopoverContent>
-          </Popover>
+                <FiltersSection form={form} />
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <NestedDrawer>
+              <DrawerTrigger asChild>
+                <FiltersButton fmtdFilters={fmtdFilters} />
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Add filters (optional)</DrawerTitle>
+                </DrawerHeader>
+                <FiltersSection form={form} />
+                <DrawerFooter>
+                  <DialogClose asChild>
+                    <Button>Done</Button>
+                  </DialogClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </NestedDrawer>
+          )}
         </FormItem>
 
         <Button
@@ -271,5 +222,105 @@ export default function NewRequestForm({
         </Button>
       </form>
     </Form>
+  );
+}
+
+const FiltersButton = forwardRef<
+  HTMLButtonElement,
+  { fmtdFilters: string | undefined }
+>(({ fmtdFilters, ...props }, ref) => (
+  <Button
+    type="button"
+    variant={fmtdFilters ? "filledInput" : "emptyInput"}
+    className="pl-3"
+    {...props}
+    ref={ref}
+  >
+    <p className="overflow-clip text-ellipsis">
+      {fmtdFilters ?? "Add filters"}
+    </p>
+    <FilterIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+  </Button>
+));
+
+FiltersButton.displayName = "FiltersButton";
+
+function FiltersSection({
+  form,
+}: {
+  form: ReturnType<typeof useForm<FormSchema>>;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <FormField
+        control={form.control}
+        name="minNumBedrooms"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Number of Bedrooms</FormLabel>
+            <FormControl>
+              <Input {...field} inputMode="numeric" suffix="or more" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="minNumBeds"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Number of Beds</FormLabel>
+            <FormControl>
+              <Input {...field} inputMode="numeric" suffix="or more" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="propertyType"
+        render={({ field }) => (
+          <FormItem className="col-span-full">
+            <FormLabel>Property Type</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="any">Any</SelectItem>
+                {ALL_PROPERTY_TYPES.map((propertyType) => (
+                  <SelectItem key={propertyType} value={propertyType}>
+                    {capitalize(propertyType)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="note"
+        render={({ field }) => (
+          <FormItem className="col-span-full">
+            <FormLabel>Additional notes</FormLabel>
+            <FormControl>
+              <Textarea
+                {...field}
+                className="resize-none"
+                placeholder="e.g. Pet friendly, close to the ocean"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   );
 }

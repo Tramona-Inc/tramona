@@ -15,6 +15,8 @@ const Drawer = ({
 );
 Drawer.displayName = "Drawer";
 
+const NestedDrawer = DrawerPrimitive.NestedRoot;
+
 const DrawerTrigger = DrawerPrimitive.Trigger;
 
 const DrawerPortal = DrawerPrimitive.Portal;
@@ -27,7 +29,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn("fixed inset-0 z-50 bg-black/80", className)}
+    className={cn("fixed inset-0 z-50 bg-black/60", className)}
     {...props}
   />
 ));
@@ -42,13 +44,15 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col space-y-4 rounded-t-2xl border bg-background p-6 pt-3",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex !h-auto flex-col space-y-4 rounded-t-2xl bg-background px-4 py-6 pt-3",
         className,
       )}
       {...props}
     >
       <div className="mx-auto h-1.5 w-20 rounded-full bg-accent" />
-      <ScrollArea className="max-h-[calc(100vh-10rem)]">{children}</ScrollArea>
+      <ScrollArea data-asdf className="max-h-[calc(100vh-8rem)] px-2">
+        {children}
+      </ScrollArea>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));
@@ -58,7 +62,7 @@ const DrawerHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("space-y-1.5 text-center", className)} {...props} />
+  <div className={cn("space-y-1.5 pb-5 text-center", className)} {...props} />
 );
 DrawerHeader.displayName = "DrawerHeader";
 
@@ -66,7 +70,10 @@ const DrawerFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col-reverse gap-2", className)} {...props} />
+  <div
+    className={cn("flex flex-col-reverse gap-2 pt-4", className)}
+    {...props}
+  />
 );
 DrawerFooter.displayName = "DrawerFooter";
 
@@ -99,6 +106,7 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
+  NestedDrawer,
   DrawerPortal,
   DrawerOverlay,
   DrawerTrigger,

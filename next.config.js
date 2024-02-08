@@ -39,7 +39,7 @@ const config = {
       },
       {
         protocol: "https",
-        hostname: "asdf.asdf",
+        hostname: "trpc-test.s3.amazonaws.com",
       },
     ],
   },

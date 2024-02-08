@@ -1,4 +1,8 @@
 import React from "react";
+import * as z from "zod";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
   Form,
@@ -8,15 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "src/components/ui/form";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { toast } from "src/components/ui/use-toast";
-
 import { Input } from "@/components/ui/input";
-
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 
 // type: z.string().min(1, { message: "Input required" }),
@@ -25,13 +21,18 @@ const Form2Schema = z.object({
   phone_num: z.string().min(10, { message: "Invalid phone number" }),
 });
 
-type Form2Values = z.infer<typeof Form2Schema>;
+export type Form2Values = z.infer<typeof Form2Schema>;
 type Form2Props = {
   nextTab: () => void;
   prevTab: () => void;
+  handleFormData: (value: Form2Values) => void;
 };
 
-export default function Form2({ nextTab, prevTab }: Form2Props) {
+export default function Form2({
+  nextTab,
+  prevTab,
+  handleFormData,
+}: Form2Props) {
   const defaultValues: Partial<Form2Values> = {
     email: "",
     phone_num: "",
@@ -45,14 +46,7 @@ export default function Form2({ nextTab, prevTab }: Form2Props) {
 
   function onSubmit(data: Form2Values) {
     nextTab();
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    handleFormData(data);
   }
 
   return (

@@ -2,8 +2,8 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
-import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
+import { z } from "zod";
 
 export const usersRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {

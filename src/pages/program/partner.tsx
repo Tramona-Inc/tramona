@@ -11,8 +11,7 @@ const steps = [
   },
   {
     id: 2,
-    info: "Send your link to a friend, and when they sign up you will automatically start to earn when they book a trip.",
-    displayStar: false,
+    info: "Send your link to a friend, and when they sign up you will automatically start to earn when they book a trip.", displayStar: false,
   },
   {
     id: 3,

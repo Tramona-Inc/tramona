@@ -12,8 +12,9 @@ import Spinner from "@/components/_common/Spinner";
 function NewRequestButton() {
   return (
     <NewRequestDialog>
-      <Button className="flex gap-2 pl-2">
-        <Plus /> New request
+      <Button className="pl-2">
+        <Plus />
+        New request
       </Button>
     </NewRequestDialog>
   );
