@@ -19,51 +19,6 @@ const LandingVideo = dynamic(
 );
 
 export default function MastHead() {
-  //   const { toast } = useToast();
-
-  //   const [user, setUser, isLoggedIn, setIsLoggedIn] = useUserInfo();
-  //   const [referralCode, setReferralCode] = useState<string>("");
-  //   const [isCopied, setIsCopied] = useState(false);
-
-  //   useEffect(() => {
-  //     const unsentRequest = localStorage.getItem('unsentRequest');
-
-  //     if (unsentRequest && user) {
-  //       const request = JSON.parse(unsentRequest) as NewRequest;
-  //       request.checkIn = new Date(request.checkIn);
-  //       request.checkOut = new Date(request.checkOut);
-  //       // console.log(request.checkIn, request.checkIn instanceof Date);
-  //       makeRequest(request, user?.id);
-  //       toast(getSuccessfulRequestToast(request));
-  //       localStorage.removeItem('unsentRequest');
-  //     }
-  //   }, [user]);
-
-  //   useEffect(() => {
-  //     if (user != null && isLoggedIn) {
-  //       setReferralCode(user.referral?.referralCode || '');
-  //     }
-  //   }, [user, isLoggedIn]);
-
-  // const handleShareButtonClick = () => {
-  //   if (isLoggedIn) {
-  //     navigator.clipboard
-  //       .writeText('https://tramona.com/sign-up?code=' + referralCode)
-  //       .then(() => {
-  //         // console.log('Referral code copied to clipboard');
-  //         setIsCopied(true);
-  //         setTimeout(() => setIsCopied(false), 500);
-  //         // You can also show a success message or perform other actions
-  //       })
-  //       .catch(error => {
-  //         // console.error('Error copying to clipboard:', error);
-  //         // Handle any errors that may occur during the copy
-  //       });
-  //   } else {
-  //     // console.log('User is not logged in');
-  //   }
-  // };
-
   return (
     <>
       <section className="relative flex h-[calc(100vh-4rem)] flex-col">
