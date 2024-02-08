@@ -4,7 +4,7 @@ import Image from "next/legacy/image";
 export default function Hosts() {
   return (
     <section className="flex h-full bg-[#3843D0] py-20">
-      <div className="container flex flex-col-reverse items-center justify-between gap-10 lg:flex-row">
+      <div className="container flex flex-col md:flex-col-reverse items-center justify-between gap-10 lg:flex-row">
         <div className="flex flex-col items-center space-y-5 text-center text-white lg:items-start lg:text-start">
           <div className="text-5xl font-bold uppercase xl:text-7xl">
             Hey Hosts!
