@@ -68,11 +68,8 @@ export default function FAQ() {
               budget? Do I have other options?
             </AccordionTrigger>
             <AccordionContent>
-              That's okay! You will still recieve a payout whenever they do use
-              Tramona, as long as they travel within one year of the date you
-              referred them.That's okay! You will still recieve a payout
-              whenever they do use Tramona, as long as they travel within one
-              year of the date you referred them.
+              If you&apos;re not receiving offers, adjusting your desired
+              nightly price slightly higher might yield suitable options.
             </AccordionContent>
           </AccordionItem>
 
