@@ -281,7 +281,7 @@ export const StepperItem = React.forwardRef<HTMLDivElement, StepperItemProps>(
             data-clickable={isClickable}
             disabled={!hasVisited}
             className={cn(
-              "aspect-square rounded-full data-[highlighted=true]:bg-[#2F5BF6] data-[highlighted=true]:text-white lg:h-12 lg:w-12",
+              "aspect-square rounded-full aria-[current=step]:border-2 aria-[current=step]:border-primary data-[highlighted=true]:bg-primary data-[highlighted=true]:text-white lg:h-12 lg:w-12",
               isCompletedStep ?? typeof RenderIcon !== "number"
                 ? "px-3 py-2"
                 : "",
@@ -422,7 +422,7 @@ const StepperItemConnector = React.memo(
     return (
       <Separator
         data-highlighted={isCompletedStep}
-        className="flex h-[2px] min-h-[auto] flex-1 self-auto data-[highlighted=true]:bg-[#2F5BF6]"
+        className="flex h-[3px] min-h-[auto] flex-1 self-auto data-[highlighted=true]:bg-primary"
         orientation={isVertical ? "vertical" : "horizontal"}
       />
     );

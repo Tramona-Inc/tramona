@@ -10,11 +10,14 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
+import CarouselDots from "@/components/feed/carousel-dots";
 
 import type { AppRouter } from "@/server/api/root";
 import type { inferRouterOutputs } from "@trpc/server";
-import { cn, formatCurrency } from "@/utils/utils";
+import { formatCurrency } from "@/utils/utils";
 import Link from "next/link";
 
 // Plugin for relative time
@@ -26,31 +29,6 @@ export type OfferWithInfo =
 type Props = {
   deal: OfferWithInfo;
 };
-
-function Dot({ isCurrent }: { isCurrent: boolean }) {
-  return (
-    <div
-      className={cn(
-        "h-1.5 w-1.5 rounded-full",
-        isCurrent ? "h-2.5 w-2.5 bg-white" : "bg-zinc-400",
-      )}
-    ></div>
-  );
-}
-
-function CarouselDots({ count, current }: { count: number; current: number }) {
-  return (
-    <div className="absolute bottom-2 flex w-full justify-center">
-      <div className=" flex items-center gap-2 rounded-full bg-zinc-950/50 px-3 py-1">
-        {Array(count)
-          .fill(null)
-          .map((_, idx) => (
-            <Dot key={idx} isCurrent={idx === current - 1} />
-          ))}
-      </div>
-    </div>
-  );
-}
 
 export default function SpecialDealsCard({ deal }: Props) {
   const [api, setApi] = useState<CarouselApi>();
@@ -95,6 +73,14 @@ export default function SpecialDealsCard({ deal }: Props) {
             ))}
           </CarouselContent>
           {count !== 0 && <CarouselDots count={count} current={current} />}
+          <CarouselNext
+            className="absolute right-1.5 hidden lg:flex"
+            variant="secondary"
+          />
+          <CarouselPrevious
+            className="absolute left-1.5 hidden lg:flex"
+            variant="secondary"
+          />
         </Carousel>
 
         {/* Price comparison */}
