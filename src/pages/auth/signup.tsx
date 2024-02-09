@@ -108,7 +108,7 @@ export default function SignIn({
         <title>Sign up | Tramona</title>
       </Head>
       <div className="flex h-screen flex-col items-center justify-center space-y-10">
-        <h1 className="text-5xl font-bold tracking-tight">
+        <h1 className="text-center text-5xl font-bold tracking-tight">
           Sign up to start traveling
         </h1>
 
