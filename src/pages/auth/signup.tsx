@@ -23,9 +23,11 @@ import type {
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import router from "next/router";
+import router, { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+
+
 
 const formSchema = z
   .object({
@@ -33,7 +35,9 @@ const formSchema = z
     // username: z.string().max(60),
     name: z.string().max(32),
     password: z
-      .string()
+      .string(),
+      /*     
+      UNCOMMENT WHEN WE GO LIVE
       .min(8, { message: "The password must be at least 8 characters long" })
       .max(32, { message: "The password must be a maximum of 32 characters" })
       .refine((value) => /[a-z]/.test(value), {
@@ -49,9 +53,11 @@ const formSchema = z
         message: "Password must contain at least one special character",
       })
       .refine((value) => /\S+$/.test(value), {
-        message: "Password must not contain any whitespace characters",
-      }),
+        message: "Password must not contain any whitespace characters", 
+      }), 
+      */
     confirm: z.string(),
+    referralCode: z.string().default("jo"),
   })
   .required()
   .refine((data) => data.password === data.confirm, {
@@ -62,11 +68,22 @@ const formSchema = z
 export default function SignIn({
   providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  
+  const { toast } = useToast();
+  const router = useRouter()
+  const { ref } = router.query
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      // username: "",
+      name: "",
+      password: "",
+      confirm: "",
+      referralCode: ref as string,
+    }
   });
-
-  const { toast } = useToast();
 
   const { mutate } = api.auth.createUser.useMutation({
     onSuccess: () => {
@@ -87,11 +104,14 @@ export default function SignIn({
     },
   });
 
+
+
   const handleSubmit = async ({
     email,
     password,
     // username,
     name,
+    referralCode,
   }: z.infer<typeof formSchema>) => {
     // await signIn("email", { email: email });
     mutate({
@@ -99,6 +119,7 @@ export default function SignIn({
       password: password,
       // username: username,
       name: name,
+      referralCode: referralCode,
     });
   };
 
@@ -183,6 +204,19 @@ export default function SignIn({
                       <FormLabel>Verify Password</FormLabel>
                       <FormControl>
                         <Input {...field} type="password" autoFocus />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="referralCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Referral code</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="text" autoFocus />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
