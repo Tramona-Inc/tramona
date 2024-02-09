@@ -1,8 +1,8 @@
 import { env } from "@/env";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
-import { offers, requests } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { offers, referralCodes, requests, users } from "@/server/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 
