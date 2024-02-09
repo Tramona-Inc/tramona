@@ -31,6 +31,16 @@ export const usersRouter = createTRPCRouter({
       })
       .then((res) => res?.referralCode ?? null);
   }),
+  insertReferralCode: protectedProcedure
+    .input(
+    z.object({
+      referralCode: zodString(),
+    }),
+  )
+  .mutation(async ({ ctx, input }) => {
+
+    return null;
+  }),
   updateProfile: protectedProcedure
     .input(
       z.object({
