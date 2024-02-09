@@ -33,14 +33,24 @@ export const usersRouter = createTRPCRouter({
   }),
   insertReferralCode: protectedProcedure
     .input(
-    z.object({
-      referralCode: zodString(),
-    }),
-  )
-  .mutation(async ({ ctx, input }) => {
+      z.object({
+        referralCode: z
+          .string()
+          .min(7, { message: "Invalid Code" })
+          .max(7, { message: "Invalid Code" }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const insertedReferral = await ctx.db
+        .update(users)
+        .set({
+          referralCodeUsed: input.referralCode,
+        })
+        .where(eq(users.id, ctx.user.id))
+        .returning();
 
-    return null;
-  }),
+      return insertedReferral;
+    }),
   updateProfile: protectedProcedure
     .input(
       z.object({

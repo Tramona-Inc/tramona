@@ -1,3 +1,4 @@
+import { useToast } from "@/components/ui/use-toast";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -156,6 +157,7 @@ const steps = [
 
 export default function Welcome() {
   const [open, setOpen] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const { nextStep, activeStep, isLastStep } = useStepper({
     initialStep: 0,
@@ -173,21 +175,31 @@ export default function Welcome() {
       });
   };
 
-  const { data, mutate } = api.users.insertReferralCode.useMutation({});
+  const { toast } = useToast();
+
+  const { mutate } = api.users.insertReferralCode.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Sucessfully applied referral code!",
+        variant: "default",
+      });
+
+      setOpen(false);
+    },
+    onError: () => {
+      setError('Invalid Code');
+    },
+  });
 
   const [referralCode, setReferralCode] = useState("");
 
   function handleReferralCode() {
     // TODO: logic to update there referral code
-    mutate(referralCode);
+    mutate({ referralCode: referralCode });
   }
 
   return (
     <>
-      <Head>
-        <title>Welcome | Tramona</title>
-      </Head>
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger className="hidden">Open</DialogTrigger>
         <DialogContent>
@@ -196,17 +208,25 @@ export default function Welcome() {
             <DialogDescription>
               Please input their referral code!
             </DialogDescription>
-            <Input
-              type={"text"}
-              onChange={(e) => setReferralCode(e.target.value)}
-              placeholder="Referral code"
-            />
+            <div>
+              <Input
+                type={"text"}
+                onChange={(e) => setReferralCode(e.target.value)}
+                value={referralCode}
+                placeholder="Referral code"
+              />
+              {error && <h1 className="text-red-500">{error}</h1>}
+            </div>
           </DialogHeader>
           <DialogFooter>
-            <Button onSubmit={() => handleReferralCode()}>Submit</Button>
+            <Button onClick={() => handleReferralCode()}>Submit</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Head>
+        <title>Welcome | Tramona</title>
+      </Head>
+
       <div className="mx-auto flex w-full flex-col gap-4 px-5 py-10 lg:px-80">
         <Stepper activeStep={activeStep} responsive={false}>
           {steps.map((step, index) => (
