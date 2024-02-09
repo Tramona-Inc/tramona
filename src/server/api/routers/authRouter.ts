@@ -4,8 +4,8 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 // import nodemailler from "nodemailer";
 // import { render } from "@react-email/render";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
-import { users } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { referralCodes, users } from "@/server/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const authRouter = createTRPCRouter({
@@ -16,6 +16,7 @@ export const authRouter = createTRPCRouter({
         // username: z.string().min(2, { message: "UsernameLengthError" }),
         email: z.string().email({ message: "EmailInvalidError" }),
         password: z.string(), // validated within the client
+        referralCode: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -27,6 +28,34 @@ export const authRouter = createTRPCRouter({
       //     code: "BAD_REQUEST",
       //     message: "User with this username already exists",
       //   });
+      
+      try {
+        if (input.referralCode) {
+          const referralCode = await ctx.db.query.referralCodes.findFirst({
+            where: eq(referralCodes.referralCode, input.referralCode),
+            columns: {
+              ownerId: true,
+            },
+          });
+
+          if (referralCode) {
+            await ctx.db
+              .update(referralCodes)
+              .set({
+                numSignUpsUsingCode: sql`${referralCodes.numSignUpsUsingCode} + 1`,
+              })
+              .where(eq(referralCodes.referralCode, input.referralCode));
+          } else {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Invalid referral code",
+            });
+          }
+        }
+      } catch (error) {
+        throw error;
+      }
+
       const userQueriedWEmail = await ctx.db.query.users.findFirst({
         where: eq(users.email, input.email),
       });
@@ -46,9 +75,12 @@ export const authRouter = createTRPCRouter({
             password: hashedPassword,
             role: "guest",
             id: crypto.randomUUID(),
+            referralCodeUsed: input.referralCode,
           })
           .returning()
           .then((res) => res[0] ?? null);
+        
+    
 
         if (user) {
           await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
