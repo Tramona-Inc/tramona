@@ -8,6 +8,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
 import Spinner from "@/components/_common/Spinner";
+import { useMaybeSendUnsentRequest } from "@/utils/useMaybeSendUnsentRequest";
 
 function NewRequestButton() {
   return (
@@ -86,6 +87,7 @@ function RequestsTabs() {
 
 export default function Page() {
   useSession({ required: true });
+  useMaybeSendUnsentRequest();
 
   return (
     <>
