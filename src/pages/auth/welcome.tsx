@@ -173,8 +173,13 @@ export default function Welcome() {
       });
   };
 
+  const { data, mutate } = api.users.insertReferralCode.useMutation({});
+
+  const [referralCode, setReferralCode] = useState("");
+
   function handleReferralCode() {
     // TODO: logic to update there referral code
+    mutate(referralCode);
   }
 
   return (
@@ -191,7 +196,11 @@ export default function Welcome() {
             <DialogDescription>
               Please input their referral code!
             </DialogDescription>
-            <Input type={"text"} placeholder="Referral code" />
+            <Input
+              type={"text"}
+              onChange={(e) => setReferralCode(e.target.value)}
+              placeholder="Referral code"
+            />
           </DialogHeader>
           <DialogFooter>
             <Button onSubmit={() => handleReferralCode()}>Submit</Button>
