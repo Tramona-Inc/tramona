@@ -6,7 +6,9 @@ type Props = {
   name: string;
   hostName: string;
   hostImage: string;
+  checkIn: string;
   propertyAddress: string;
+  propertyImage: string;
 };
 
 export default function UpcomingCard({}) {
