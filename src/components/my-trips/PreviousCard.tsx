@@ -1,6 +1,13 @@
 import Image from "next/image";
 
-export default function PreviousCard() {
+type PreviousCardProps = {
+  image: string;
+  name: string;
+  checkIn: string;
+  checkOut: string;
+};
+
+export default function PreviousCard( props: PreviousCardProps ) {
   return (
     <div className="border-2xl rounded-lg border shadow-xl">
       <Image

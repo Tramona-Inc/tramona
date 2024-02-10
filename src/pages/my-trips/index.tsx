@@ -1,5 +1,13 @@
-import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
+
+const offer = {
+  name: "Tropical getaway in Mexico",
+  hostName: "Kaiya Culhane",
+  hostImage: "",
+  date: "Nov 6 - 11, 2024",
+  address: "6243 Sand crest Circle Orlando, Florida United States",
+  propertyImage: "/assets/images/fake-properties/3.png",
+};
 
 export default function MyTrips() {
   return (
@@ -9,12 +17,12 @@ export default function MyTrips() {
         <div className="col-span-2 flex flex-col gap-8">
           <p className="text-2xl font-bold">Upcoming</p>
 
-          <UpcomingCard />
+          <UpcomingCard {...offer} />
         </div>
 
         <div className="col-span-1">
           <p className="mt-8 text-2xl font-bold lg:mt-0">Previous</p>
-          <PreviousCard />
+          {/* <PreviousCard /> */}
         </div>
       </div>
     </div>
