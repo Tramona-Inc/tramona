@@ -41,7 +41,7 @@ export default function UpcomingCard(props: UpcomingCardProps) {
             Refund info
           </Button>
           <Button variant={"outline"} size={"sm"}>
-            Check in instruction
+            Check-in instruction
           </Button>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 
 const offer = {
@@ -9,20 +10,31 @@ const offer = {
   propertyImage: "/assets/images/fake-properties/3.png",
 };
 
+const previous = {
+  name: "Private Cozy Clean, close to EVERYTHING",
+  date: "Nov 6 - 11, 2024",
+  image: "/assets/images/fake-properties/1.png",
+};
+
 export default function MyTrips() {
   return (
-    <div className="px-6 py-10 sm:px-16">
+    <div className="container flex flex-col gap-10 py-10">
       <h1 className="text-4xl font-bold">My Trips</h1>
-      <div className="grid grid-cols-1 py-8 lg:grid-cols-3 lg:gap-8">
-        <div className="col-span-2 flex flex-col gap-8">
-          <p className="text-2xl font-bold">Upcoming</p>
 
+      <div className="flex w-full flex-col gap-10 lg:flex-row">
+        <div className="flex flex-col gap-8 lg:w-2/3">
+          <h2 className="text-2xl font-bold">Upcoming</h2>
+
+          <UpcomingCard {...offer} />
           <UpcomingCard {...offer} />
         </div>
 
-        <div className="col-span-1">
-          <p className="mt-8 text-2xl font-bold lg:mt-0">Previous</p>
-          {/* <PreviousCard /> */}
+        <div className="flex flex-col gap-8 lg:w-1/3">
+          <h2 className="text-2xl font-bold ">Previous</h2>
+          <div className="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex lg:flex-col">
+            <PreviousCard {...previous} />
+            <PreviousCard {...previous} />
+          </div>
         </div>
       </div>
     </div>
