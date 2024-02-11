@@ -20,10 +20,10 @@ export default function MyTrips() {
 
       <div className="flex w-full flex-col gap-10 lg:flex-row">
         <div className="flex flex-col gap-8 lg:w-2/3">
-          <h2 className="text-2xl font-bold">
+          <h2 className="flex items-center text-2xl font-bold">
             Upcoming
             {!isLoading && (
-              <span className="ml-2 min-w-7 rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600">
+              <span className="ml-2 rounded-full bg-zinc-200 px-3 py-0.5 text-sm font-semibold text-zinc-600">
                 {upcomingTotal}
               </span>
             )}
@@ -57,10 +57,10 @@ export default function MyTrips() {
         </div>
 
         <div className="flex flex-col gap-8 lg:w-1/3">
-          <h2 className="gap-5 text-2xl font-bold">
+          <h2 className="flex items-center text-2xl font-bold">
             Previous
             {!isLoading && (
-              <span className="ml-2 min-w-7 rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600 group-data-[state=active]:bg-primary/20 group-data-[state=active]:text-primary">
+              <span className="ml-2 rounded-full bg-zinc-200 px-3 py-0.5 text-sm font-semibold text-zinc-600">
                 {previousTotal}
               </span>
             )}
