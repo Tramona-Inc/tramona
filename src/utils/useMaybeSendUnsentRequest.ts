@@ -16,6 +16,7 @@ export function useMaybeSendUnsentRequest() {
 
     const unsentRequestJSON = localStorage.getItem("unsentRequest");
     if (!unsentRequestJSON) return;
+    localStorage.removeItem("unsentRequest");
 
     const res = requestInsertSchema
       .omit({ userId: true })
@@ -23,10 +24,7 @@ export function useMaybeSendUnsentRequest() {
       .extend({ checkIn: z.coerce.date(), checkOut: z.coerce.date() })
       .safeParse(JSON.parse(unsentRequestJSON));
 
-    if (!res.success) {
-      localStorage.removeItem("unsentRequest");
-      return;
-    }
+    if (!res.success) return;
 
     const { data: unsentRequest } = res;
 
@@ -36,13 +34,13 @@ export function useMaybeSendUnsentRequest() {
           throw new Error();
         });
         await utils.requests.invalidate();
-        localStorage.removeItem("unsentRequest");
         successfulRequestToast({
           ...unsentRequest,
           numGuests: unsentRequest.numGuests ?? 1,
         });
       } catch (e) {
         errorToast();
+        localStorage.setItem("unsentRequest", unsentRequestJSON);
       }
     })();
   }, [mutation, status, utils.requests]);

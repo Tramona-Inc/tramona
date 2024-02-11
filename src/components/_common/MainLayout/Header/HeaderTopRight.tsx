@@ -1,27 +1,20 @@
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "../../../ui/button";
 import AvatarDropdown from "./AvatarDropdown";
 
 function LogInBtn() {
   return (
-    <Button
-      className="rounded-full"
-      variant="darkOutline"
-      onClick={() => signIn()}
-    >
-      Log in
+    <Button asChild className="rounded-full" variant="darkOutline">
+      <Link href="/auth/signin">Log in</Link>
     </Button>
   );
 }
 
 function SignUpBtn() {
   return (
-    <Button
-      className="rounded-full"
-      variant="darkPrimary"
-    >
-      <Link href={"/auth/signup"}>Sign up</Link>
+    <Button asChild className="rounded-full" variant="darkPrimary">
+      <Link href="/auth/signup">Sign up</Link>
     </Button>
   );
 }
