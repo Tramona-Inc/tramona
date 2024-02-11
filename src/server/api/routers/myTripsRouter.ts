@@ -52,6 +52,7 @@ export const myTripsRouter = createTRPCRouter({
         },
       });
 
+      // Later add pagination
       const upcomingTrips = allTrips.filter(
         (trip) =>
           trip.request.checkIn && new Date(trip.request.checkOut) > input.date,
