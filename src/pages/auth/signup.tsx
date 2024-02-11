@@ -23,6 +23,7 @@ import type {
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
+import Link from "next/link";
 import router from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -228,16 +229,15 @@ export default function SignIn({
                 })}
           </div>
         </section>
-        <div className="flex flex-row items-center gap-1 text-sm">
-          <h1>Already have an account? </h1>
-          <Button
-            variant={"link"}
-            onClick={() => signIn()}
-            className="-p-1 text-sm font-medium text-blue-600 underline underline-offset-2"
+        <p className="text-sm">
+          Already have an account?{" "}
+          <Link
+            href="/auth/signin"
+            className="font-medium text-primary underline underline-offset-2"
           >
-            Log in here.
-          </Button>
-        </div>
+            Log in
+          </Link>
+        </p>
       </div>
     </>
   );

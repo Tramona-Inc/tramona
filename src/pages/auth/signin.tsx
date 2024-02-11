@@ -149,12 +149,15 @@ export default function SignIn({
                 })}
           </div>
         </section>
-        <Link
-          href="/auth/signup"
-          className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline"
-        >
-          Don&apos;t have an account? Sign up
-        </Link>
+        <p className="text-sm">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/auth/signup"
+            className="font-medium text-primary underline underline-offset-2"
+          >
+            Sign up
+          </Link>
+        </p>
       </div>
     </>
   );
