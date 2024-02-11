@@ -38,6 +38,7 @@ export default function MyTrips() {
                     <UpcomingCard
                       key={trip.id}
                       name={trip.property.name}
+                      offerId={trip.id}
                       hostName={trip.property.host?.name ?? ""}
                       hostImage={trip.property.host?.image ?? ""}
                       date={formatDateRange(

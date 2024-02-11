@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
 import { Button } from "../ui/button";
 import {
@@ -12,6 +13,7 @@ import { Separator } from "../ui/separator";
 
 type UpcomingCardProps = {
   name: string;
+  offerId: number;
   hostName: string;
   hostImage: string;
   date: string;
@@ -61,9 +63,7 @@ export default function UpcomingCard(props: UpcomingCardProps) {
                 </p>
               </DialogHeader>
               <DialogHeader>
-                <h1 className={"font-bold"}>
-                  How you’ll get your money
-                </h1>
+                <h1 className={"font-bold"}>How you’ll get your money</h1>
                 <p>
                   Need to request a refund before or after a trip or Experience?
                   First, discuss the amount with your Host in the message
@@ -80,7 +80,10 @@ export default function UpcomingCard(props: UpcomingCardProps) {
         </div>
       </div>
 
-      <div className="relative w-full max-md:h-[300px] md:w-1/2">
+      <Link
+        href={`/listings/${props.offerId}`}
+        className="relative w-full max-md:h-[300px] md:w-1/2"
+      >
         <Image
           src={props.propertyImage}
           alt=""
@@ -88,7 +91,7 @@ export default function UpcomingCard(props: UpcomingCardProps) {
           fill
           objectFit="cover"
         />
-      </div>
+      </Link>
     </div>
   );
 }
