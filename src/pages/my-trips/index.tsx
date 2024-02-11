@@ -11,13 +11,23 @@ export default function MyTrips() {
     date: date,
   });
 
+  const upcomingTotal = data?.upcomingTrips.length;
+  const previousTotal = data?.previousTrips.length;
+
   return (
     <div className="container flex flex-col gap-10 py-10">
       <h1 className="text-4xl font-bold">My Trips</h1>
 
       <div className="flex w-full flex-col gap-10 lg:flex-row">
         <div className="flex flex-col gap-8 lg:w-2/3">
-          <h2 className="text-2xl font-bold">Upcoming</h2>
+          <h2 className="text-2xl font-bold">
+            Upcoming
+            {!isLoading && (
+              <span className="ml-2 min-w-7 rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600">
+                {upcomingTotal}
+              </span>
+            )}
+          </h2>
           {isLoading ? (
             <>Loading ...</>
           ) : (
@@ -47,7 +57,14 @@ export default function MyTrips() {
         </div>
 
         <div className="flex flex-col gap-8 lg:w-1/3">
-          <h2 className="text-2xl font-bold ">Previous</h2>
+          <h2 className="gap-5 text-2xl font-bold">
+            Previous
+            {!isLoading && (
+              <span className="ml-2 min-w-7 rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600 group-data-[state=active]:bg-primary/20 group-data-[state=active]:text-primary">
+                {previousTotal}
+              </span>
+            )}
+          </h2>
           <div className="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex lg:flex-col">
             {isLoading ? (
               <>Loading ...</>
