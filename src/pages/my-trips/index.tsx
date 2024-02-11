@@ -1,6 +1,8 @@
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { api } from "@/utils/api";
+import { formatDateRange } from "@/utils/utils";
+import { useMemo } from "react";
 
 const offer = {
   name: "Tropical getaway in Mexico",
@@ -18,9 +20,11 @@ const previous = {
 };
 
 export default function MyTrips() {
-  const { data } = api.myTrips.mostRecentTrips.useQuery();
+  const date = useMemo(() => new Date(), []); // useMemo from React
 
-  console.log(data);
+  const { data } = api.myTrips.mostRecentTrips.useQuery({
+    date: date,
+  });
 
   return (
     <div className="container flex flex-col gap-10 py-10">
@@ -29,16 +33,35 @@ export default function MyTrips() {
       <div className="flex w-full flex-col gap-10 lg:flex-row">
         <div className="flex flex-col gap-8 lg:w-2/3">
           <h2 className="text-2xl font-bold">Upcoming</h2>
-
-          <UpcomingCard {...offer} />
-          <UpcomingCard {...offer} />
+          {data && data.upcomingTrips.length > 0 ? (
+            data?.upcomingTrips.map((trip) => {
+              return <UpcomingCard key={trip.id} {...offer} />;
+            })
+          ) : (
+            <h1>No upcoming trips</h1>
+          )}
         </div>
 
         <div className="flex flex-col gap-8 lg:w-1/3">
           <h2 className="text-2xl font-bold ">Previous</h2>
           <div className="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex lg:flex-col">
-            <PreviousCard {...previous} />
-            <PreviousCard {...previous} />
+            {data && data.previousTrips.length > 0 ? (
+              data?.previousTrips.map((trip) => {
+                return (
+                  <PreviousCard
+                    key={trip.id}
+                    name={trip.property.name}
+                    date={formatDateRange(
+                      trip.request.checkIn,
+                      trip.request.checkOut,
+                    )}
+                    image={trip.property.imageUrls[0] ?? ""}
+                  />
+                );
+              })
+            ) : (
+              <h1>No upcoming trips</h1>
+            )}
           </div>
         </div>
       </div>

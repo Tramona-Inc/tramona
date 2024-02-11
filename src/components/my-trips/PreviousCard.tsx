@@ -19,6 +19,7 @@ export default function PreviousCard(props: PreviousCardProps) {
         />
       </div>
       <p className="p-2 text-sm font-bold">{props.name}</p>
+      <p className="p-2 text-sm font-bold">{props.date}</p>
     </div>
   );
 }
