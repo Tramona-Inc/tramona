@@ -53,12 +53,12 @@ export const myTripsRouter = createTRPCRouter({
 
       const upcomingTrips = allTrips.filter(
         (trip) =>
-          trip.request.checkIn && new Date(trip.request.checkIn) > input.date,
+          trip.request.checkIn && new Date(trip.request.checkOut) > input.date,
       );
 
       const previousTrips = allTrips.filter(
         (trip) =>
-          trip.request.checkIn && new Date(trip.request.checkIn) <= input.date,
+          trip.request.checkIn && new Date(trip.request.checkOut) <= input.date,
       );
 
       return { upcomingTrips, previousTrips };

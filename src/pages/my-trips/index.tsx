@@ -22,7 +22,7 @@ const previous = {
 export default function MyTrips() {
   const date = useMemo(() => new Date(), []); // useMemo from React
 
-  const { data } = api.myTrips.mostRecentTrips.useQuery({
+  const { data, isLoading } = api.myTrips.mostRecentTrips.useQuery({
     date: date,
   });
 
@@ -33,34 +33,60 @@ export default function MyTrips() {
       <div className="flex w-full flex-col gap-10 lg:flex-row">
         <div className="flex flex-col gap-8 lg:w-2/3">
           <h2 className="text-2xl font-bold">Upcoming</h2>
-          {data && data.upcomingTrips.length > 0 ? (
-            data?.upcomingTrips.map((trip) => {
-              return <UpcomingCard key={trip.id} {...offer} />;
-            })
+          {isLoading ? (
+            <>Loading ...</>
           ) : (
-            <h1>No upcoming trips</h1>
+            <>
+              {data && data.upcomingTrips.length > 0 ? (
+                data?.upcomingTrips.map((trip) => {
+                  return (
+                    <UpcomingCard
+                      key={trip.id}
+                      name={trip.property.name}
+                      hostName={trip.property.host?.name ?? ""}
+                      hostImage={trip.property.host?.image ?? ""}
+                      date={formatDateRange(
+                        trip.request.checkIn,
+                        trip.request.checkOut,
+                      )}
+                      address={""}
+                      propertyImage={trip.property.imageUrls[0] ?? ""}
+                    />
+                  );
+                })
+              ) : (
+                <h1>No upcoming trips</h1>
+              )}
+            </>
           )}
         </div>
 
         <div className="flex flex-col gap-8 lg:w-1/3">
           <h2 className="text-2xl font-bold ">Previous</h2>
           <div className="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex lg:flex-col">
-            {data && data.previousTrips.length > 0 ? (
-              data?.previousTrips.map((trip) => {
-                return (
-                  <PreviousCard
-                    key={trip.id}
-                    name={trip.property.name}
-                    date={formatDateRange(
-                      trip.request.checkIn,
-                      trip.request.checkOut,
-                    )}
-                    image={trip.property.imageUrls[0] ?? ""}
-                  />
-                );
-              })
+            {isLoading ? (
+              <>Loading ...</>
             ) : (
-              <h1>No upcoming trips</h1>
+              <>
+                {data && data.previousTrips.length > 0 ? (
+                  data?.previousTrips.map((trip) => {
+                    return (
+                      <PreviousCard
+                        key={trip.id}
+                        name={trip.property.name}
+                        date={formatDateRange(
+                          trip.request.checkIn,
+                          trip.request.checkOut,
+                        )}
+                        image={trip.property.imageUrls[0] ?? ""}
+                        offerId={trip.id}
+                      />
+                    );
+                  })
+                ) : (
+                  <h1>No previous trips</h1>
+                )}
+              </>
             )}
           </div>
         </div>
