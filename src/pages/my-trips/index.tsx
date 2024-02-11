@@ -4,21 +4,6 @@ import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
 import { useMemo } from "react";
 
-const offer = {
-  name: "Tropical getaway in Mexico",
-  hostName: "Kaiya Culhane",
-  hostImage: "",
-  date: "Nov 6 - 11, 2024",
-  address: "6243 Sand crest Circle Orlando, Florida United States",
-  propertyImage: "/assets/images/fake-properties/3.png",
-};
-
-const previous = {
-  name: "Private Cozy Clean, close to EVERYTHING",
-  date: "Nov 6 - 11, 2024",
-  image: "/assets/images/fake-properties/1.png",
-};
-
 export default function MyTrips() {
   const date = useMemo(() => new Date(), []); // useMemo from React
 
@@ -49,7 +34,7 @@ export default function MyTrips() {
                         trip.request.checkIn,
                         trip.request.checkOut,
                       )}
-                      address={""}
+                      address={trip.property.address ?? ""}
                       propertyImage={trip.property.imageUrls[0] ?? ""}
                     />
                   );

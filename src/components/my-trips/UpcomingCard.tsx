@@ -1,6 +1,13 @@
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
 import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import { Separator } from "../ui/separator";
 
 type UpcomingCardProps = {
@@ -29,7 +36,7 @@ export default function UpcomingCard(props: UpcomingCardProps) {
         <Separator />
 
         <p>{props.date}</p>
-        <p>{props.address}</p>
+        {props.address !== "" && <p>{props.address}</p>}
 
         <Separator />
 
@@ -37,9 +44,36 @@ export default function UpcomingCard(props: UpcomingCardProps) {
           <Button variant={"outline"} size={"sm"}>
             Message host
           </Button>
-          <Button variant={"outline"} size={"sm"}>
-            Refund info
-          </Button>
+          <Dialog>
+            <DialogTrigger>
+              <Button variant={"outline"} size={"sm"}>
+                Refund info
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Refund info</DialogTitle>
+                <p>
+                  Do you need a refund? Your first step is to message your Host
+                  to make it right. If they can’t fix it, they can offer you a
+                  partial refund through the Resolution Center. Here’s how
+                  refunds work when things don’t go just as planned.
+                </p>
+              </DialogHeader>
+              <DialogHeader>
+                <h1 className={"font-bold"}>
+                  How you’ll get your money
+                </h1>
+                <p>
+                  Need to request a refund before or after a trip or Experience?
+                  First, discuss the amount with your Host in the message
+                  thread, and if they agree, go to the Resolution Center to
+                  request money. If they don’t agree to the amount within 72
+                  hours, reach out to us for help mediating. 
+                </p>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
           <Button variant={"outline"} size={"sm"}>
             Check-in instruction
           </Button>

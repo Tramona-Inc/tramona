@@ -35,6 +35,7 @@ export const myTripsRouter = createTRPCRouter({
             columns: {
               name: true,
               imageUrls: true,
+              address: true,
             },
           },
           request: {
