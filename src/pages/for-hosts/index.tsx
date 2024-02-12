@@ -17,7 +17,7 @@ import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
 import { liveFeedOffers } from "@/components/offer-card/data";
 
 import { cn } from "@/utils/utils";
-import Autoplay, { type AutoplayOptionsType } from "embla-carousel-autoplay";
+import Autoplay from "embla-carousel-autoplay";
 
 type Tabs = {
   id: number;
@@ -161,7 +161,7 @@ export default function HostWelcome() {
           </span>
           <div className="flex w-4/12 justify-center pt-10 md:pt-0">
             <Link
-              href="/for-hosts/sign-up"
+              href="/auth/signup"
               className={cn(
                 buttonVariants({ variant: "outline" }),
                 "border border-black bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl",
@@ -300,8 +300,9 @@ export default function HostWelcome() {
           className="w-full md:hidden"
           plugins={[
             Autoplay({
-              delay: 5000,
-            } as AutoplayOptionsType),
+              delay: 2500,
+              stopOnInteraction: true,
+            }),
           ]}
         >
           <CarouselContent>
@@ -317,22 +318,14 @@ export default function HostWelcome() {
                   // onTransitionEnd={handleImageTransitionEnd}
                 />
 
-                <div
-                  className="text-black"
-                  key={content.id}
-                  onClick={() => handleTabChange(content)}
-                >
-                  <div className="space-y-8 ">
-                    <h1 className="rounded-md border-2 border-black transition-colors duration-500" />
-                    <h1 className="h-20 text-2xl font-bold transition-colors duration-1000 lg:text-4xl">
-                      {content.title}
-                    </h1>
-                  </div>
+                {/* <h1 className="rounded-md border-2 border-black transition-colors duration-500" /> */}
+                <h1 className="h-20 text-2xl font-bold transition-colors duration-1000 lg:text-4xl">
+                  {content.title}
+                </h1>
 
-                  <p className="text-lg  transition-colors duration-1000 ">
-                    {content.info}
-                  </p>
-                </div>
+                <p className="text-lg  transition-colors duration-1000 ">
+                  {content.info}
+                </p>
               </CarouselItem>
             ))}
           </CarouselContent>
