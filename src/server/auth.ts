@@ -15,6 +15,9 @@ import GoogleProvider from "next-auth/providers/google";
 import { CustomPgDrizzleAdapter } from "./adapter";
 import { users, type User as TramonaUser } from "./db/schema";
 
+const THIRTY_DAYS = 30 * 24 * 60 * 60;
+const THIRTY_MINUTES = 30 * 60;
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -150,6 +153,8 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: THIRTY_DAYS,
+    updateAge: THIRTY_MINUTES,
   },
   pages: {
     signIn: "/auth/signin",
