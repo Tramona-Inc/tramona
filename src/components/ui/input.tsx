@@ -41,7 +41,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const passwordEyeballButton = (
       <button
         type="button"
-        tabIndex={0}
+        tabIndex={-1}
         onClick={(e) => {
           e.stopPropagation();
           setShowingPassword(!showingPassword);
