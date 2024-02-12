@@ -6,9 +6,30 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { referralCodes, users } from "@/server/db/schema";
 import { eq, sql } from "drizzle-orm";
+import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { env } from "@/env";
 
 export const authRouter = createTRPCRouter({
+  verifyEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const token = jwt.sign(
+        {
+          user: 1,
+        },
+        env.NEXTAUTH_SECRET,
+        {
+          expiresIn: '30m'
+        },
+      );
+
+      return token;
+    }),
   createUser: publicProcedure
     .input(
       z.object({
@@ -28,7 +49,7 @@ export const authRouter = createTRPCRouter({
       //     code: "BAD_REQUEST",
       //     message: "User with this username already exists",
       //   });
-      
+
       try {
         if (input.referralCode) {
           const referralCode = await ctx.db.query.referralCodes.findFirst({
@@ -79,8 +100,6 @@ export const authRouter = createTRPCRouter({
           })
           .returning()
           .then((res) => res[0] ?? null);
-        
-    
 
         if (user) {
           await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
