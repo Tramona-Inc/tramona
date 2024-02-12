@@ -23,6 +23,7 @@ import type {
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
+import router from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -68,19 +69,15 @@ export default function SignIn({
   const { toast } = useToast();
 
   const { mutate } = api.auth.createUser.useMutation({
-    onSuccess: async () => {
-      const formData = form.getValues();
-      const { email, password } = formData;
-
-      await signIn("credentials", {
-        email: email,
-        password: password,
-        callbackUrl: `${window.location.origin}/auth/welcome`,
+    onSuccess: () => {
+      void router.push({
+        pathname: "/auth/signin",
+        query: { isNewUser: true },
       });
 
       toast({
         title: "Account created successfully!",
-        description: "Please sign in.",
+        description: "Please verify email first to login.",
         variant: "default",
       });
     },
