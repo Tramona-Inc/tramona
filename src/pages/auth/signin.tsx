@@ -53,9 +53,6 @@ export default function SignIn({
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: query.isNewUser
-        ? `${window.location.origin}/auth/welcome`
-        : `${window.location.origin}`,
     });
   };
 
