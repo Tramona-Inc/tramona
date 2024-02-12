@@ -24,8 +24,10 @@ export const authRouter = createTRPCRouter({
         },
         env.NEXTAUTH_SECRET,
         {
-          expiresIn: '30m'
+          expiresIn: '30m',
+          (err, emaiToken)
         },
+
       );
 
       return token;
