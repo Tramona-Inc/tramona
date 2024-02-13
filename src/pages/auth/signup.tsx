@@ -46,7 +46,7 @@ const formSchema = z
         message: "Password must contain at least one digit",
       })
       .refine((value) => /[!@#$%^&*]/.test(value), {
-        message: "Password must contain at least one special character",
+        message: "Password must contain at least one special character '!@#$%^&*'",
       })
       .refine((value) => /\S+$/.test(value), {
         message: "Password must not contain any whitespace characters",

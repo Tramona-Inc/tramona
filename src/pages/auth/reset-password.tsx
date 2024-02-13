@@ -32,7 +32,8 @@ const formSchema = z
         message: "Password must contain at least one digit",
       })
       .refine((value) => /[!@#$%^&*]/.test(value), {
-        message: "Password must contain at least one special character",
+        message:
+          "Password must contain at least one special character '!@#$%^&*'",
       })
       .refine((value) => /\S+$/.test(value), {
         message: "Password must not contain any whitespace characters",
@@ -60,8 +61,8 @@ export default function ResetPassword() {
       },
       onError: (error) => {
         toast({
-          title: "Invalid reset password link!",
-          description: error.message,
+          title: error.message,
+          description: "Please request a new reset password link!",
           variant: "destructive",
         });
 
@@ -92,6 +93,7 @@ export default function ResetPassword() {
     void verifyResetPasswordToken();
   }, [query.id, query.token, verifyTokenMutateAsync]);
 
+  // Verify new password
   const { mutateAsync: resetPasswordMutateAsync } =
     api.auth.resetPassword.useMutation({
       onSuccess: () => {
@@ -113,11 +115,15 @@ export default function ResetPassword() {
     });
 
   const handleSubmit = async ({ newPassword }: z.infer<typeof formSchema>) => {
-    await resetPasswordMutateAsync({
-      id: query.id as string,
-      token: query.token as string,
-      newPassword: newPassword,
-    });
+    try {
+      await resetPasswordMutateAsync({
+        id: query.id as string,
+        token: query.token as string,
+        newPassword: newPassword,
+      });
+    } catch (error) {
+      return null;
+    }
   };
 
   return (
