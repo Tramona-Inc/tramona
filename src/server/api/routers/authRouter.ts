@@ -1,36 +1,24 @@
 import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-// import nodemailler from "nodemailer";
 // import { render } from "@react-email/render";
+import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { referralCodes, users } from "@/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 import jwt from "jsonwebtoken";
+import nodemailler, { type TransportOptions } from "nodemailer";
 import { z } from "zod";
-import { env } from "@/env";
 
 export const authRouter = createTRPCRouter({
-  verifyEmail: publicProcedure
+  sendEmail: publicProcedure
     .input(
       z.object({
         email: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const token = jwt.sign(
-        {
-          user: 1,
-        },
-        env.NEXTAUTH_SECRET,
-        {
-          expiresIn: '30m',
-          (err, emaiToken)
-        },
-
-      );
-
-      return token;
+    .mutation(async ({ input }) => {
+      // Verify Email Address
     }),
   createUser: publicProcedure
     .input(
@@ -104,13 +92,53 @@ export const authRouter = createTRPCRouter({
           .then((res) => res[0] ?? null);
 
         if (user) {
+          // Link user account
           await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
             provider: "credentials",
             providerAccountId: user.id,
             userId: user.id,
             type: "email",
           });
+
+          // Create transporter
+          const transporter = nodemailler.createTransport({
+            host: env.SMTP_HOST,
+            port: env.SMTP_PORT,
+            // debug: true,
+            auth: {
+              user: env.SMTP_USER,
+              pass: env.SMTP_PASSWORD,
+            },
+          } as TransportOptions);
+
+          // Create token
+          const token = jwt.sign({ email: input.email }, env.NEXTAUTH_SECRET!, {
+            expiresIn: "30m",
+          });
+
+          const url = `${env.NEXTAUTH_URL}/confirmation/${token}`;
+
+          await new Promise((resolve, reject) => {
+            transporter.sendMail(
+              {
+                from: env.EMAIL_FROM,
+                to: input.email,
+                subject: "Verify email | Tramona",
+                html: `Please click this email to confirm your email: <a href="${url}">${url}</a>`,
+              },
+              (err, info) => {
+                if (err) {
+                  // console.error(err);
+                  reject(err);
+                } else {
+                  // console.log(info);
+                  resolve(info);
+                }
+              },
+            );
+          });
         }
+
         return user;
       } catch (error) {
         throw new TRPCError({
