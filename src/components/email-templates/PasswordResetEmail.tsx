@@ -1,5 +1,4 @@
 import {
-  Button,
   Container,
   Head,
   Heading,
@@ -34,12 +33,13 @@ export function PasswordResetEmail({
             </i>
           </Text>
           <Section className="mb-[32px] mt-[32px] text-center">
-            <Button
+            {/* <Button
               className="rounded bg-[#7C3AED] text-center text-lg text-white no-underline"
               href={url}
             >
               Reset Password
-            </Button>
+            </Button> */}
+            {url}
           </Section>
           <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
           <Text>

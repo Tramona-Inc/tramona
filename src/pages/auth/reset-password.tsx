@@ -60,24 +60,32 @@ export default function ResetPassword() {
       },
       onError: (error) => {
         toast({
-          title: "Please request a new rest password link!",
+          title: "Invalid reset password link!",
           description: error.message,
           variant: "destructive",
         });
 
-        void router.push("/auth/forgot-password");
+        // void router.push("/auth/forgot-password");
       },
     });
 
   useEffect(() => {
     const verifyResetPasswordToken = async () => {
-      try {
-        await verifyTokenMutateAsync({
-          id: query.id as string,
-          token: query.token as string,
+      if (query.id && query.token) {
+        try {
+          await verifyTokenMutateAsync({
+            id: query.id as string,
+            token: query.token as string,
+          });
+        } catch (error) {
+          return error;
+        }
+      } else {
+        toast({
+          title: "Id or token is undefined",
+          description: "Not able to reset your password",
+          variant: "destructive",
         });
-      } catch (error) {
-        return error;
       }
     };
 

@@ -267,7 +267,7 @@ export const authRouter = createTRPCRouter({
       }
 
       try {
-        const payload = jwt.verify(input.token, process.env.NEXTAUTH_SECRET!);
+        const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET!);
         return payload;
       } catch (error) {
         throw new TRPCError({
