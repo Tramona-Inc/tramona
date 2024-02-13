@@ -21,6 +21,8 @@ import {
   UserCheckIcon,
   UserCogIcon,
   type LucideProps,
+  // MessageSquareText,
+  // DollarSignIcon,
 } from "lucide-react";
 
 function DropdownTop({ session }: { session: Session }) {
@@ -129,6 +131,12 @@ export default function AvatarDropdown({ session }: { session: Session }) {
         <DropdownLink href="/requests" Icon={TagIcon}>
           Your Requests
         </DropdownLink>
+        {/* <DropdownLink href="/messages" Icon={MessageSquareText}>
+          Messages
+          <Badge variant="secondary" size="sm">
+            5
+          </Badge>
+        </DropdownLink> */}
         <DropdownLink href="/profile" Icon={UserCogIcon}>
           Profile
         </DropdownLink>
