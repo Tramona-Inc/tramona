@@ -65,7 +65,7 @@ export default function ResetPassword() {
           variant: "destructive",
         });
 
-        // void router.push("/auth/forgot-password");
+        void router.push("/auth/forgot-password");
       },
     });
 
