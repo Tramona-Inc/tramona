@@ -69,6 +69,16 @@ export default function SignIn({
     setToastDisplayed(true); // Set the state to true after displaying the toast
   }
 
+  if (query.isVerified && !toastDisplayed) {
+    toast({
+      title: "Account successfully verified!",
+      description: "You are now able to login.",
+      variant: "default",
+    });
+
+    setToastDisplayed(true); // Set the state to true after displaying the toast
+  }
+
   return (
     <>
       <Head>
