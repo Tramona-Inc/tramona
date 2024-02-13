@@ -76,8 +76,8 @@ export default function SignIn({
       });
 
       toast({
-        title: "Account created successfully!",
-        description: "Please verify email first to login.",
+        title: "Please verify email first to login!",
+        description: "Account was created successfully!",
         variant: "default",
       });
     },
@@ -129,7 +129,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                       <Input
+                        <Input
                           {...field}
                           placeholder={"name@domain.com"}
                           autoFocus

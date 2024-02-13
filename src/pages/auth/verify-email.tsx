@@ -20,7 +20,10 @@ export default function VerifyEmail() {
 
   const { mutateAsync, isLoading } = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
-      void router.push("/auth/signin");
+      void router.push({
+        pathname: "/auth/signin",
+        query: { isNewUser: true },
+      });
     },
     onError: (error) => {
       setError(error.message);
