@@ -8,14 +8,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z
   .object({
-    oldPassword: z.string(),
     newPassword: z
       .string()
       .min(8, { message: "The password must be at least 8 characters long" })
@@ -45,30 +47,72 @@ const formSchema = z
 
 export default function ResetPassword() {
   const { query } = useRouter();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
-  const handleSubmit = async ({
-    oldPassword,
-    newPassword,
-    verifyPassword,
-  }: z.infer<typeof formSchema>) => {
-    // mutate({
-    //   oldPassword: oldPassword,
-    //   newPassword: newPassword,
-    //   verifyPassword: verifyPassword,
-    // });
+  const { mutateAsync: verifyTokenMutateAsync } =
+    api.auth.verifyResetPasswordToken.useMutation({
+      onSuccess: () => {
+        return null;
+      },
+      onError: (error) => {
+        toast({
+          title: "Please request a new rest password link!",
+          description: error.message,
+          variant: "destructive",
+        });
+
+        void router.push("/auth/forgot-password");
+      },
+    });
+
+  useEffect(() => {
+    const verifyResetPasswordToken = async () => {
+      try {
+        await verifyTokenMutateAsync({
+          id: query.id as string,
+          token: query.token as string,
+        });
+      } catch (error) {
+        return error;
+      }
+    };
+
+    void verifyResetPasswordToken();
+  }, [query.id, query.token, verifyTokenMutateAsync]);
+
+  const { mutateAsync: resetPasswordMutateAsync } =
+    api.auth.resetPassword.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Successfully updated password.",
+          description: "Please login with your new password!",
+          variant: "default",
+        });
+
+        void router.push("/auth/signin");
+      },
+      onError: (error) => {
+        toast({
+          title: "Failed to reset password",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+
+  const handleSubmit = async ({ newPassword }: z.infer<typeof formSchema>) => {
+    await resetPasswordMutateAsync({
+      id: query.id as string,
+      token: query.token as string,
+      newPassword: newPassword,
+    });
   };
 
   return (
-    // <div>
-    //   <h1>Reset Password</h1>
-    //   <p>ID: {query.id as string}</p>
-    //   <p>String {query.token as string}</p>
-    // </div>
-
     <div className="flex h-screen flex-col items-center justify-center">
       <section className="flex max-w-sm flex-col space-y-5">
         <h1 className="text-4xl font-bold tracking-tight">
@@ -84,19 +128,6 @@ export default function ResetPassword() {
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"
           >
-            <FormField
-              control={form.control}
-              name="oldPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Old Password</FormLabel>
-                  <FormControl>
-                    <Input {...field} type={"password"} autoFocus />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="newPassword"

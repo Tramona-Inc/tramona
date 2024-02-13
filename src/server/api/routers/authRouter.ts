@@ -191,7 +191,7 @@ export const authRouter = createTRPCRouter({
       if (user && !user.password)
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "User created with an auth provider (password less)",
+          message: "User created with an auth provider (passwordless)",
         });
 
       const payload = {
@@ -232,5 +232,107 @@ export const authRouter = createTRPCRouter({
 
       return null;
     }),
-  
+  verifyResetPasswordToken: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        token: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      let user;
+      try {
+        user = await ctx.db.query.users.findFirst({
+          where: eq(users.id, input.id),
+        });
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid token or user does not exist",
+        });
+      }
+
+      if (!user) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid token or user does not exist",
+        });
+      }
+
+      if (user && !user.password) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User created with an auth provider (passwordless)",
+        });
+      }
+
+      try {
+        const payload = jwt.verify(input.token, process.env.NEXTAUTH_SECRET!);
+        return payload;
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid token or user does not exist",
+        });
+      }
+    }),
+  resetPassword: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        token: z.string(),
+        newPassword: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, input.id),
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid token or user does not exist",
+        });
+      }
+
+      if (user && !user.password) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User created with google auth",
+        });
+      }
+
+      try {
+        jwt.verify(input.token, process.env.NEXTAUTH_SECRET!);
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid token or user does not exist",
+        });
+      }
+
+      const isPasswordSame = await bycrypt.compare(
+        input.newPassword,
+        user.password!,
+      );
+
+      if (isPasswordSame) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "New password cannot be the same as the old password",
+        });
+      }
+
+      const newHashedPassword = await bycrypt.hash(input.newPassword, 10);
+
+      await ctx.db
+        .update(users)
+        .set({ password: newHashedPassword })
+        .where(eq(users.id, input.id));
+
+      return {
+        message: "Password changed successfully",
+      };
+    }),
 });
