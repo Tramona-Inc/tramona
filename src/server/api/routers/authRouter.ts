@@ -2,13 +2,26 @@ import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 // import { render } from "@react-email/render";
+import { PasswordResetEmail } from "@/components/email-templates/PasswordResetEmail";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { users, type User } from "@/server/db/schema";
+import { render } from "@react-email/render";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailler, { type TransportOptions } from "nodemailer";
 import { z } from "zod";
+
+// Init transproter for nodemailer
+const transporter = nodemailler.createTransport({
+  host: env.SMTP_HOST,
+  port: env.SMTP_PORT,
+  // debug: true,
+  auth: {
+    user: env.SMTP_USER,
+    pass: env.SMTP_PASSWORD,
+  },
+} as TransportOptions);
 
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
@@ -79,17 +92,6 @@ export const authRouter = createTRPCRouter({
 
         // Send email verification token
         if (user) {
-          // Create transporter
-          const transporter = nodemailler.createTransport({
-            host: env.SMTP_HOST,
-            port: env.SMTP_PORT,
-            // debug: true,
-            auth: {
-              user: env.SMTP_USER,
-              pass: env.SMTP_PASSWORD,
-            },
-          } as TransportOptions);
-
           const payload = {
             email: user.email,
             id: user.id,
@@ -168,5 +170,68 @@ export const authRouter = createTRPCRouter({
           });
         }
       }
+    }),
+  createUniqueForgotPasswordLink: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      console.log(input.email);
+
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.email, input.email),
+      });
+
+      if (!user)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User with this email does not exist",
+        });
+
+      if (user && !user.password)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User created with an auth provider (password less)",
+        });
+
+      const payload = {
+        email: user.email,
+        id: user.id,
+      };
+
+      // Create token
+      const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+        expiresIn: "30m",
+      });
+
+      const url = `${env.NEXTAUTH_URL}/auth/reset-password?id=${user.id}&token=${token}`;
+
+      const emailHtml = render(
+        PasswordResetEmail({ url: url, name: user.name ?? user.email }),
+      );
+
+      await new Promise((resolve, reject) => {
+        transporter.sendMail(
+          {
+            from: env.EMAIL_FROM,
+            to: input.email,
+            subject: "Reset Password | Tramona",
+            html: emailHtml,
+          },
+          (err, info) => {
+            if (err) {
+              // console.error(err);
+              reject(err);
+            } else {
+              // console.log(info);
+              resolve(info);
+            }
+          },
+        );
+      });
+
+      return null;
     }),
 });

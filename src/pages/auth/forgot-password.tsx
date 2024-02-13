@@ -8,8 +8,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -24,8 +27,29 @@ export default function ForgotPassword() {
     resolver: zodResolver(formSchema),
   });
 
+  const router = useRouter();
+
+  const { mutate } = api.auth.createUniqueForgotPasswordLink.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Email Sent!",
+        description: "Please check your email to reset your password.",
+        variant: "default",
+      });
+
+      void router.push("/auth/signin");
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to send reset link.",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = async ({ email }: z.infer<typeof formSchema>) => {
-    return null;
+    mutate({ email: email });
   };
 
   return (
