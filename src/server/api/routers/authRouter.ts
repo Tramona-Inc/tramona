@@ -4,22 +4,13 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 // import { render } from "@react-email/render";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
-import { referralCodes, users } from "@/server/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailler, { type TransportOptions } from "nodemailer";
 import { z } from "zod";
 
 export const authRouter = createTRPCRouter({
-  sendEmail: publicProcedure
-    .input(
-      z.object({
-        email: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      // Verify Email Address
-    }),
   createUser: publicProcedure
     .input(
       z.object({
@@ -31,50 +22,19 @@ export const authRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // const userQueriedWUsername = await ctx.db.query.users.findFirst({
-      //   where: eq(users.username, input.username),
-      // });
-      // if (userQueriedWUsername)
-      //   throw new TRPCError({
-      //     code: "BAD_REQUEST",
-      //     message: "User with this username already exists",
-      //   });
-
-      try {
-        if (input.referralCode) {
-          const referralCode = await ctx.db.query.referralCodes.findFirst({
-            where: eq(referralCodes.referralCode, input.referralCode),
-            columns: {
-              ownerId: true,
-            },
-          });
-
-          if (referralCode) {
-            await ctx.db
-              .update(referralCodes)
-              .set({
-                numSignUpsUsingCode: sql`${referralCodes.numSignUpsUsingCode} + 1`,
-              })
-              .where(eq(referralCodes.referralCode, input.referralCode));
-          } else {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "Invalid referral code",
-            });
-          }
-        }
-      } catch (error) {
-        throw error;
-      }
-
       const userQueriedWEmail = await ctx.db.query.users.findFirst({
         where: eq(users.email, input.email),
       });
-      if (userQueriedWEmail)
+
+      // TODO: if user doesn't ever verify/ sign up again but check if the email is not verified
+      // ! if it exist update instead of insert
+      if (userQueriedWEmail) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "User with this email already exists",
         });
+      }
+
       try {
         const hashedPassword: string = await bycrypt.hash(input.password, 10);
         const user = await ctx.db
@@ -146,5 +106,15 @@ export const authRouter = createTRPCRouter({
           message: "Something went wrong",
         });
       }
+    }),
+  verifyEmailToken: publicProcedure
+    .input(
+      z.object({
+        token: z.string(),
+        email: z.string().email({ message: "EmailInvalidError" }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return null;
     }),
 });
