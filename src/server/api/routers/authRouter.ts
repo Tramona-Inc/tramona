@@ -178,8 +178,6 @@ export const authRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      console.log(input.email);
-
       const user = await ctx.db.query.users.findFirst({
         where: eq(users.email, input.email),
       });
@@ -234,4 +232,5 @@ export const authRouter = createTRPCRouter({
 
       return null;
     }),
+  
 });

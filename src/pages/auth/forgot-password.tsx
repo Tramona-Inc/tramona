@@ -56,7 +56,7 @@ export default function ForgotPassword() {
     <div className="flex h-screen flex-col items-center justify-center">
       <section className="flex max-w-sm flex-col space-y-5">
         <h1 className="text-4xl font-bold tracking-tight">
-          Forgot your password?
+          Reset your password
         </h1>
         <p>
           Enter your email address, and we&apos;ll send you a link to get back
