@@ -24,7 +24,6 @@ import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import router from "next/router";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -106,10 +105,6 @@ export default function SignIn({
     });
   };
 
-  const [verifyEmail, setVerifyEmail] = useState("");
-
-  const { mutate: mutateEmail } = api.auth.sendEmail.useMutation();
-
   return (
     <>
       <Head>
@@ -119,21 +114,6 @@ export default function SignIn({
         <h1 className="text-5xl font-bold tracking-tight">
           Sign up to start traveling
         </h1>
-
-        <div>
-          <Input
-            type=""
-            value={verifyEmail}
-            onChange={(e) => setVerifyEmail(e.target.value)}
-          />
-          <Button
-            onClick={() => {
-              mutateEmail({ email: verifyEmail });
-            }}
-          >
-            Send Email Password
-          </Button>
-        </div>
 
         <section className="flex flex-col items-center justify-center space-y-5">
           <div className="w-full space-y-5">
@@ -149,7 +129,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input
+                       <Input
                           {...field}
                           placeholder={"name@domain.com"}
                           autoFocus

@@ -71,12 +71,17 @@ export const authRouter = createTRPCRouter({
             },
           } as TransportOptions);
 
+          const payload = {
+            email: user.email,
+            id: user.id,
+          };
+
           // Create token
-          const token = jwt.sign({ email: input.email }, env.NEXTAUTH_SECRET!, {
+          const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
             expiresIn: "30m",
           });
 
-          const url = `${env.NEXTAUTH_URL}/confirmation/${token}`;
+          const url = `${env.NEXTAUTH_URL}/auth/verify-email?id=${user.id}&token=${token}`;
 
           await new Promise((resolve, reject) => {
             transporter.sendMail(
@@ -110,11 +115,39 @@ export const authRouter = createTRPCRouter({
   verifyEmailToken: publicProcedure
     .input(
       z.object({
+        id: z.string(),
         token: z.string(),
-        email: z.string().email({ message: "EmailInvalidError" }),
+        date: z.date(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      return null;
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, input.id),
+      });
+
+      // Check if user exist
+      if (!user) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User doesn't exist",
+        });
+      } else {
+        // Verify the token
+        try {
+          const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET!);
+
+          await ctx.db
+            .update(users)
+            .set({ emailVerified: input.date })
+            .where(eq(users.id, input.id));
+
+          return payload;
+        } catch (error) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid token or user does not exist",
+          });
+        }
+      }
     }),
 });
