@@ -160,17 +160,32 @@ export default function SignIn({
                         Log in with
                         {" " + provider.name}
                       </span>
-                    </Button>
+                   </Button>
                   );
                 })}
           </div>
+
+          <Link
+            href="/auth/forgot-password"
+            className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-300"
+          >
+            Forgot your password?
+          </Link>
+
+          <div className="flex w-full flex-1 items-center justify-center">
+            <div className="h-[1px] w-full border border-black" />
+          </div>
         </section>
-        <Link
-          href="/auth/signup"
-          className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline"
-        >
-          Don&apos;t have an account? Sign up
-        </Link>
+
+        <div className="inline-flex gap-2">
+          Don&apos;t have an account?
+          <Link
+            href="/auth/signup"
+            className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-300"
+          >
+            Sign up for Tramona
+          </Link>
+        </div>
       </div>
     </>
   );

@@ -4,7 +4,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 // import { render } from "@react-email/render";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
-import { users } from "@/server/db/schema";
+import { users, type User } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailler, { type TransportOptions } from "nodemailer";
@@ -26,40 +26,59 @@ export const authRouter = createTRPCRouter({
         where: eq(users.email, input.email),
       });
 
-      // TODO: if user doesn't ever verify/ sign up again but check if the email is not verified
-      // ! if it exist update instead of insert
-      if (userQueriedWEmail) {
+      if (userQueriedWEmail?.emailVerified) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "User with this email already exists",
         });
       }
 
+      const hashedPassword: string = await bycrypt.hash(input.password, 10);
+
       try {
-        const hashedPassword: string = await bycrypt.hash(input.password, 10);
-        const user = await ctx.db
-          .insert(users)
-          .values({
-            name: input.name,
-            email: input.email,
-            // username: input.username,
-            password: hashedPassword,
-            role: "guest",
-            id: crypto.randomUUID(),
-            referralCodeUsed: input.referralCode,
-          })
-          .returning()
-          .then((res) => res[0] ?? null);
+        let user: User | null;
 
-        if (user) {
+        // Users signed up but didn't verify email
+        if (userQueriedWEmail?.emailVerified === null) {
+          user = await ctx.db
+            .update(users)
+            .set({
+              name: input.name,
+              email: input.email,
+              // username: input.username,
+              password: hashedPassword,
+            })
+            .where(eq(users.id, userQueriedWEmail.id))
+            .returning()
+            .then((res) => res[0] ?? null);
+        } else {
+          // Initial sign up insert the user info
+          user = await ctx.db
+            .insert(users)
+            .values({
+              id: crypto.randomUUID(),
+              name: input.name,
+              email: input.email,
+              // username: input.username,
+              password: hashedPassword,
+              role: "guest",
+            })
+            .returning()
+            .then((res) => res[0] ?? null);
+
           // Link user account
-          await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
-            provider: "credentials",
-            providerAccountId: user.id,
-            userId: user.id,
-            type: "email",
-          });
+          if (user) {
+            await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
+              provider: "credentials",
+              providerAccountId: user.id,
+              userId: user.id,
+              type: "email",
+            });
+          }
+        }
 
+        // Send email verification token
+        if (user) {
           // Create transporter
           const transporter = nodemailler.createTransport({
             host: env.SMTP_HOST,

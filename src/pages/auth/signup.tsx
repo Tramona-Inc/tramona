@@ -231,12 +231,12 @@ export default function SignIn({
                 })}
           </div>
         </section>
-        <div className="flex flex-row items-center gap-1 text-sm">
+        <div className="flex flex-row items-center gap-1">
           <h1>Already have an account? </h1>
           <Button
             variant={"link"}
             onClick={() => signIn()}
-            className="-p-1 text-sm font-medium text-blue-600 underline underline-offset-2"
+            className="-p-1 text-md font-medium text-blue-600 underline underline-offset-2"
           >
             Log in here.
           </Button>
