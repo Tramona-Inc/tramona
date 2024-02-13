@@ -1,15 +1,14 @@
 import Head from "next/head";
 
 import CurrentState from "@/components/landing-page/_sections/CurrentState";
-import Gift from "@/components/landing-page/_sections/Gift";
 import Hosts from "@/components/landing-page/_sections/Hosts";
 import How from "@/components/landing-page/_sections/How";
 import Jungle from "@/components/landing-page/_sections/Jungle";
 import MastHead from "@/components/landing-page/_sections/MastHead";
 import Reviews from "@/components/landing-page/_sections/Reviews";
-import Save from "@/components/landing-page/_sections/Save";
 import TramonaLoop from "@/components/landing-page/_sections/TramonaLoop";
-import { Input } from "@/components/ui/input";
+import Gift from "@/components/landing-page/_sections/Gift";
+import Save from "@/components/landing-page/_sections/Save";
 
 export default function Home() {
   return (
@@ -18,7 +17,6 @@ export default function Home() {
         <Head>
           <title>Tramona</title>
         </Head>
-
         {/* Section 1: hero & form */}
         <MastHead />
 

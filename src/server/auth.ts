@@ -124,6 +124,11 @@ export const authOptions: NextAuthOptions = {
 
         if (!isPasswordValid) return Promise.resolve(null);
 
+        // Check if email is verified
+        if (user.emailVerified === null) {
+          return Promise.resolve(null);
+        }
+
         return Promise.resolve(user as User);
       },
     }),
