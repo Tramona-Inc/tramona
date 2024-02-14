@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 // import {
 //   Dialog,
 //   DialogHeader,
@@ -22,10 +22,7 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import {
-  Share,
-  // Link, MessageCircle, Mail, LucideIcon
-} from "lucide-react";
+import { Share } from "lucide-react";
 import CarouselDots from "./carousel-dots";
 
 // import type { AppRouter } from "@/server/api/root";
@@ -133,25 +130,24 @@ export default function FeedCard({ offer }: Props) {
         <Carousel setApi={setApi} className="-mx-4">
           {/* <CarouselContent className="max-h-[500px] min-h-[500px]"> */}
           <CarouselContent>
-            {offer.property.imageUrls.map((image, idx) => (
-              // <CarouselItem key={idx} className="flex justify-center -pl-4">
-              <CarouselItem key={idx} className=" -pl-5 -pt-5">
-                <div className="relative flex h-[500px]">
-                  <Image
-                    src={image}
-                    alt={`${idx}`}
-                    // width={2000}
-                    // height={2000}
-                    layout="fill"
-                    style={{
-                      objectFit: 'cover',
-                    }}
-                  />
-                </div>
-                
-              </CarouselItem>
+            {/* {offer.property.imageUrls.map((image, idx) => ( */}
+            {/* // <CarouselItem key={idx} className="flex justify-center -pl-4"> */}
+            <CarouselItem key={0} className=" -pl-5 -pt-5">
+              <div className="relative flex h-[500px]">
+                <Image
+                  src={offer.imageUrl}
+                  alt={`${0}`}
+                  // width={2000}
+                  // height={2000}
+                  layout="fill"
+                  style={{
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
+            </CarouselItem>
 
-            ))}
+            {/* ))} */}
           </CarouselContent>
           {count !== 0 && <CarouselDots count={count} current={current} />}
           <CarouselNext
