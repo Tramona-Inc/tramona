@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
+import React from "react";
 import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
 import { liveFeedOffers } from "@/components/offer-card/data";
@@ -51,6 +53,7 @@ export default function HostWelcome() {
   // State to track selected tab and image opacity
   const [tab, setTab] = useState<number>(0);
   const [imageOpacity, setImageOpacity] = useState<number>(1);
+  const [api, setApi] = React.useState<CarouselApi>();
 
   // Filter the selected content based on the tab
   const selectedContent = contents.find((content) => content.id === tab);
@@ -74,6 +77,18 @@ export default function HostWelcome() {
   const selectedOffers = liveFeedOffers.filter(
     (offer) => offer.discountPercent > 25,
   );
+
+  React.useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setTab(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setTab(api.selectedScrollSnap());
+    });
+  }, [api]);
 
   return (
     <>
@@ -235,12 +250,12 @@ export default function HostWelcome() {
       </div>
 
       {/** Why */}
-      <div className="container h-fit space-y-5 py-10 md:space-y-10 md:py-20 ">
+      <div className="container h-fit space-y-5 py-10 md:py-20 ">
         <h1 className="flex justify-center text-3xl font-bold sm:text-4xl md:text-5xl">
           Why Tramona works
         </h1>
         {/* Tabs section */}
-        <div className="hidden space-y-10 md:block ">
+        <div className="hidden md:block ">
           {/* Image section */}
           <div className="flex h-[50vh]  w-full justify-center">
             {/* Image with fade transition */}
@@ -257,14 +272,14 @@ export default function HostWelcome() {
             )}
           </div>
 
-          <div className="flex-row-3 flex space-x-10 lg:space-x-32">
+          <div className="flex">
             {contents.map((content) => (
               <button
-                className="w-1/3 md:space-y-16 lg:space-y-20 xl:space-y-10"
+                className="items-cente flex w-1/3 flex-col gap-5 space-y-10 p-10 xl:space-y-0  "
                 key={content.id}
                 onClick={() => handleTabChange(content)}
               >
-                <div className="space-y-10 lg:space-y-5">
+                <div className="space-y-10 md:space-y-5">
                   <h1
                     className={cn(
                       "rounded-md border-4 transition-colors duration-500",
@@ -297,6 +312,7 @@ export default function HostWelcome() {
         </div>
 
         <Carousel
+          setApi={setApi}
           className="w-full md:hidden"
           plugins={[
             Autoplay({
@@ -306,32 +322,28 @@ export default function HostWelcome() {
         >
           <CarouselContent>
             {contents.map((content) => (
-              <CarouselItem key={content.id} className="space-y-5">
+              <CarouselItem key={content.id}>
                 <Image
                   src={content.image}
                   width={4000}
                   height={4000}
                   alt="Picture of the author"
                   style={{ opacity: imageOpacity }}
-                  className="h-[35vh] rounded-xl object-cover transition-opacity duration-300"
+                  className="h-[35vh] rounded-t-xl object-cover transition-opacity duration-300"
                   // onTransitionEnd={handleImageTransitionEnd}
                 />
-
                 <div
-                  className="text-black"
+                  className={cn(
+                    "itmes-center flex h-fit flex-col gap-5 rounded-b-xl p-10 text-left transition-colors duration-1000",
+                    content.id === tab
+                      ? "bg-[#EC4899] text-white"
+                      : "text-black",
+                  )}
                   key={content.id}
-                  onClick={() => handleTabChange(content)}
+                  onChange={() => handleTabChange(content)}
                 >
-                  <div className="space-y-8 ">
-                    <h1 className="rounded-md border-2 border-black transition-colors duration-500" />
-                    <h1 className="h-20 text-2xl font-bold transition-colors duration-1000 lg:text-4xl">
-                      {content.title}
-                    </h1>
-                  </div>
-
-                  <p className="text-lg  transition-colors duration-1000 ">
-                    {content.info}
-                  </p>
+                  <h1 className="text-xl font-bold ">{content.title}</h1>
+                  <p className="text-md md:text-2xl">{content.info}</p>
                 </div>
               </CarouselItem>
             ))}
