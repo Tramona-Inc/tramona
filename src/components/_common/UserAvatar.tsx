@@ -17,7 +17,7 @@ export default function UserAvatar({
   name,
   email,
   image,
-  ...props
+  size,
 }: {
   name: string | null | undefined;
   email: string | null | undefined;
@@ -26,7 +26,7 @@ export default function UserAvatar({
   const fallback = name ? getInitials(name) : email?.[0] ?? "?";
 
   return (
-    <Avatar {...props}>
+    <Avatar size={size}>
       {image && <AvatarImage src={image} alt="" />}
       <AvatarFallback>{fallback}</AvatarFallback>
     </Avatar>
