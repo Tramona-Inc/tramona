@@ -12,9 +12,6 @@ export default function MyTrips() {
     date: date,
   });
 
-  const upcomingTotal = data?.upcomingTrips.length;
-  const previousTotal = data?.previousTrips.length;
-
   return (
     <div className="container flex flex-col gap-10 py-10">
       <h1 className="text-4xl font-bold">My Trips</h1>
@@ -26,7 +23,7 @@ export default function MyTrips() {
               <h1 className="text-2xl font-bold">Upcoming</h1>
               {!isLoading && (
                 <span className="ml-2 rounded-full bg-zinc-200 px-3 py-0.5 text-sm font-semibold text-zinc-600">
-                  {upcomingTotal}
+                  {data?.totalUpcomingTrips}
                 </span>
               )}
             </div>
@@ -37,8 +34,8 @@ export default function MyTrips() {
             <>Loading ...</>
           ) : (
             <>
-              {data && data.upcomingTrips.length > 0 ? (
-                data?.upcomingTrips.map((trip) => {
+              {data && data.displayUpcomingTrips.length > 0 ? (
+                data?.displayUpcomingTrips.map((trip) => {
                   return (
                     <UpcomingCard
                       key={trip.id}
@@ -68,7 +65,7 @@ export default function MyTrips() {
               <h1 className="text-2xl font-bold">Previous</h1>
               {!isLoading && (
                 <span className="ml-2 rounded-full bg-zinc-200 px-3 py-0.5 text-sm font-semibold text-zinc-600">
-                  {previousTotal}
+                  {data?.totalPreviousTrips}
                 </span>
               )}
             </div>
@@ -80,8 +77,8 @@ export default function MyTrips() {
               <>Loading ...</>
             ) : (
               <>
-                {data && data.previousTrips.length > 0 ? (
-                  data?.previousTrips.map((trip) => {
+                {data && data.displayPreviousTrips.length > 0 ? (
+                  data?.displayPreviousTrips.map((trip) => {
                     return (
                       <PreviousCard
                         key={trip.id}
