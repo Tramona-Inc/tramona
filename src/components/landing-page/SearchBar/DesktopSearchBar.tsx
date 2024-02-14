@@ -230,7 +230,7 @@ function FiltersSection({
             name="minNumBedrooms"
             render={({ field }) => (
               <LPFormItem>
-                <LPFormLabel>Number of Bedrooms</LPFormLabel>
+                <LPFormLabel>Bedrooms</LPFormLabel>
                 <FormControl>
                   <LPInput {...field} inputMode="numeric" suffix="or more" />
                 </FormControl>
@@ -243,7 +243,7 @@ function FiltersSection({
             name="minNumBeds"
             render={({ field }) => (
               <LPFormItem>
-                <LPFormLabel>Number of Beds</LPFormLabel>
+                <LPFormLabel>Beds</LPFormLabel>
                 <FormControl>
                   <LPInput {...field} inputMode="numeric" suffix="or more" />
                 </FormControl>
@@ -255,7 +255,7 @@ function FiltersSection({
             control={form.control}
             name="propertyType"
             render={({ field }) => (
-              <LPFormItem>
+              <LPFormItem className="col-span-full lg:col-span-1">
                 <FormLabel
                   className={classNames.buttonLabel({
                     isFocused: propertyTypeDDIsOpen,
@@ -303,9 +303,8 @@ function FiltersSection({
               <LPFormItem className="col-span-2">
                 <LPFormLabel>Additional notes</LPFormLabel>
                 <FormControl>
-                  <LPTextArea
+                  <LPInput
                     {...field}
-                    className="resize-none"
                     placeholder="e.g. Pet friendly, close to the ocean"
                   />
                 </FormControl>
@@ -317,6 +316,7 @@ function FiltersSection({
       )}
       <div className="flex justify-center p-2">
         <button
+          type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
           className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white hover:bg-white/20"
         >
