@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "../../ui/button";
-// import Link from "next/link";
+import Link from "next/link";
 
 export default function Save() {
   return (
@@ -16,13 +16,14 @@ export default function Save() {
         </div>
 
         {/* <Link href="/sign-up">Create an Account</Link> */}
-
-        <Button
-          variant="outline"
-          className="border border-[#EC4899] bg-[#EC4899] p-6 text-sm  font-bold text-white transition duration-300 ease-in-out md:text-2xl"
-        >
-          Create an account
-        </Button>
+        <Link href="/auth/signup">
+          <Button
+            variant="outline"
+            className="border border-[#EC4899] bg-[#EC4899] p-6 text-sm  font-bold text-white transition duration-300 ease-in-out md:text-2xl"
+          >
+            Create an account
+          </Button>
+        </Link>
       </div>
     </section>
   );

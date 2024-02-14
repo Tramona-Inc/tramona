@@ -161,7 +161,7 @@ export default function HostWelcome() {
           </span>
           <div className="flex w-4/12 justify-center pt-10 md:pt-0">
             <Link
-              href="/for-hosts/sign-up"
+              href="/auth/signup"
               className={cn(
                 buttonVariants({ variant: "outline" }),
                 "border border-black bg-black px-20 py-7 text-sm font-bold text-white transition duration-300 ease-in-out md:text-2xl",

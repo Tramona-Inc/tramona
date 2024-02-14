@@ -143,7 +143,7 @@ function IntroSection() {
             that, we have created one of the most generous partnership programs.
           </p>
           <Link
-            href="/auth/signin"
+            href="/auth/signup"
             className={buttonVariants({ variant: "darkPrimary", size: "lg" })}
           >
             Sign Up Now

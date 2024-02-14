@@ -1,5 +1,7 @@
 import React from "react";
 import Image from "next/legacy/image";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Hosts() {
   return (
@@ -17,7 +19,11 @@ export default function Hosts() {
             into bookings!
           </div>
 
-          <div className="px-2 text-2xl">👋 Join today!</div>
+          <Link href="/for-hosts">
+            <Button className="px-2 text-2xl text-white" variant="link">
+              👋 Join today!
+            </Button>
+          </Link>
         </div>
         <div className="relative aspect-square h-[350px] w-auto md:h-[500px]">
           <Image
