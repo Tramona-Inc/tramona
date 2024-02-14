@@ -24,7 +24,6 @@ import type {
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import router from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -273,8 +272,8 @@ export default function SignIn({
             className="-p-1 text-md font-medium text-blue-600 underline underline-offset-2"
           >
             Log in
-          </Link>
-        </p>
+          </Button>
+        </div>
       </div>
     </>
   );
