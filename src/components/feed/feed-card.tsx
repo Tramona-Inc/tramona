@@ -133,26 +133,25 @@ export default function FeedCard({ offer }: Props) {
         <Carousel setApi={setApi} className="-mx-4">
           {/* <CarouselContent className="max-h-[500px] min-h-[500px]"> */}
           <CarouselContent>
-            {/* {offer.property.imageUrls.map((image, idx) => (
-              <CarouselItem key={idx} className="flex justify-center">
-                <Image
-                  src={image}
-                  alt={`${idx}`}
-                  width={750}
-                  height={750}
-                  style={{ objectFit: "cover" }}
-                />
+            {offer.property.imageUrls.map((image, idx) => (
+              // <CarouselItem key={idx} className="flex justify-center -pl-4">
+              <CarouselItem key={idx} className=" -pl-5 -pt-5">
+                <div className="relative flex h-[500px]">
+                  <Image
+                    src={image}
+                    alt={`${idx}`}
+                    // width={2000}
+                    // height={2000}
+                    layout="fill"
+                    style={{
+                      objectFit: 'cover',
+                    }}
+                  />
+                </div>
+                
               </CarouselItem>
-            ))} */}
-            <CarouselItem>
-              <Image
-                src={offer.imageUrl}
-                alt={`${offer.hostName}'s property`}
-                width={750}
-                height={750}
-                style={{ objectFit: "cover" }}
-              />
-            </CarouselItem>
+
+            ))}
           </CarouselContent>
           {count !== 0 && <CarouselDots count={count} current={current} />}
           <CarouselNext
