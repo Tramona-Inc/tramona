@@ -242,7 +242,7 @@ export default function SignIn({
             </div>
           </div>
 
-          <div className="my-5 flex w-full flex-col gap-5">
+          <div className="my-5 flex w-full flex-col gap-5 items-center justify-center">
             {providers &&
               Object.values(providers)
                 .slice(1) // remove the email provider
