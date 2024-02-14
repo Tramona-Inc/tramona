@@ -8,12 +8,14 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
 import Spinner from "@/components/_common/Spinner";
+import { useMaybeSendUnsentRequest } from "@/utils/useMaybeSendUnsentRequest";
 
 function NewRequestButton() {
   return (
     <NewRequestDialog>
-      <Button className="flex gap-2 pl-2">
-        <Plus /> New request
+      <Button className="pl-2">
+        <Plus />
+        New request
       </Button>
     </NewRequestDialog>
   );
@@ -85,6 +87,7 @@ function RequestsTabs() {
 
 export default function Page() {
   useSession({ required: true });
+  useMaybeSendUnsentRequest();
 
   return (
     <>

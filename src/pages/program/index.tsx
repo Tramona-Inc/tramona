@@ -4,9 +4,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 
-import { cn } from "@/utils/utils";
 import * as SliderPrimitive from "@radix-ui/react-slider";
-
 import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import {
   Accordion,
@@ -17,6 +15,9 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
+
+import { cn } from "@/utils/utils";
+import { api } from "@/utils/api";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -163,7 +164,8 @@ function IntroSection() {
 }
 
 function ProgramTiers() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const { data } = api.users.myReferralCode.useQuery();
 
   return (
     <section className="w-full bg-blue-400">
@@ -214,16 +216,16 @@ function ProgramTiers() {
 
           {status === "authenticated" && (
             <CardFooter className="-mx-4 border-t-2 border-zinc-950">
-              <div className="w-full text-center font-semibold lg:text-lg">
-                {session?.user.referralCodeUsed}
-              </div>
+              <p className="w-full text-center font-semibold lg:text-lg">
+                {data?.referralCode}
+              </p>
               <CopyToClipboardBtn
-                message={session?.user.referralCodeUsed ?? ""}
+                message={data?.referralCode ?? ""}
                 render={({ justCopied, copyMessage }) => (
                   <Button
                     variant="darkPrimary"
                     onClick={copyMessage}
-                    className="w-full rounded-none lg:text-lg"
+                    className="w-full rounded-none py-5 lg:text-lg"
                   >
                     {justCopied ? "Copied!" : "Share Code"}
                   </Button>

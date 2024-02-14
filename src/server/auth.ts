@@ -1,16 +1,22 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
+import * as bycrypt from "bcrypt";
+import { eq } from "drizzle-orm";
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  type User,
 } from "next-auth";
-import EmailProvider from "next-auth/providers/email";
-import GithubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
+import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 import { CustomPgDrizzleAdapter } from "./adapter";
-import { type User as TramonaUser } from "./db/schema";
+import { users, type User as TramonaUser } from "./db/schema";
+
+const THIRTY_DAYS = 30 * 24 * 60 * 60;
+const THIRTY_MINUTES = 30 * 60;
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -34,8 +40,34 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => {
-      return { ...session, user };
+    session: ({ session, token }) => {
+      // return {...session, user}}
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+          role: token.role,
+          username: token.username,
+          referralCodeUse: token.referralCodeUsed,
+          referralTier: token.referralTier,
+          phoneNumber: token.phoneNumber,
+        },
+      };
+    },
+    jwt({ token, user }) {
+      if (user) {
+        return {
+          ...token,
+          id: user.id,
+          role: user.role,
+          username: user.username,
+          referralCodeUse: user.referralCodeUsed,
+          referralTier: user.referralTier,
+          phoneNumber: user.phoneNumber,
+        };
+      }
+      return token;
     },
   },
   adapter: CustomPgDrizzleAdapter(db), // custom adapter
@@ -54,26 +86,81 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
     // -- You can use the credential with another service like etherum, oAuth, etc.
-    EmailProvider({
-      server: {
-        host: env.SMTP_HOST,
-        port: env.SMTP_PORT,
-        auth: {
-          user: env.SMTP_USER,
-          pass: env.SMTP_PASSWORD,
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "name@domain.com",
         },
+        password: { label: "Password", type: "password" },
       },
-      from: process.env.EMAIL_FROM,
+      authorize: async (credentials) => {
+        if (
+          credentials?.email === undefined || // no email or username
+          credentials?.password === undefined // no password
+        )
+          return Promise.resolve(null);
+
+        let user = null;
+
+        if (credentials?.email !== undefined) {
+          user = await db.query.users.findFirst({
+            where: eq(users.email, credentials?.email),
+          });
+        }
+
+        if (user === undefined || user === null) {
+          return Promise.resolve(null); // user not found
+        } else if (user.password === undefined || user.password === null) {
+          return Promise.resolve(null); // users created with google auth
+        }
+
+        const isPasswordValid = await bycrypt.compare(
+          credentials?.password,
+          user.password,
+        );
+
+        if (!isPasswordValid) return Promise.resolve(null);
+
+        // Check if email is verified
+        if (user.emailVerified === null) {
+          return Promise.resolve(null);
+        }
+
+        return Promise.resolve(user as User);
+      },
     }),
-    GithubProvider({
-      clientId: env.GITHUB_CLIENT_ID,
-      clientSecret: env.GITHUB_CLIENT_SECRET,
+    // EmailProvider({
+    //   server: {
+    //     host: env.SMTP_HOST,
+    //     port: env.SMTP_PORT,
+    //     auth: {
+    //       user: env.SMTP_USER,
+    //       pass: env.SMTP_PASSWORD,
+    //     },
+    //   },
+    //   from: process.env.EMAIL_FROM,
+    // }),
+    FacebookProvider({
+      clientId: env.FACEBOOK_CLIENT_ID,
+      clientSecret: env.FACEBOOK_CLIENT_SECRET,
     }),
+    // GithubProvider({
+    //   clientId: env.GITHUB_CLIENT_ID,
+    //   clientSecret: env.GITHUB_CLIENT_SECRET,
+    // }),
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: THIRTY_DAYS,
+    updateAge: THIRTY_MINUTES,
+  },
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",

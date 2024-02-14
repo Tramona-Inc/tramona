@@ -45,7 +45,27 @@ const config = {
       },
       {
         protocol: "https",
-        hostname: "asdf.asdf",
+        hostname: "trpc-test.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.vrbo.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.trvl-media.com",
+      },
+      {
+        protocol: "https",
+        hostname: "orbirental-images.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "hallson.co",
+      },
+      {
+        protocol: "https",
+        hostname: "www.killingtongroup.com",
       },
     ],
   },

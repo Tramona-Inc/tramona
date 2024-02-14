@@ -64,10 +64,10 @@ function LargeHeader() {
       <div className="flex items-center justify-center gap-2">
         <HeaderLink href="/program">Refer and Earn</HeaderLink>
         <HeaderLink href="/for-hosts">For Hosts</HeaderLink>
-        <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
+        <HeaderLink href="/exclusive-offers">Exclusive Offers</HeaderLink>
         <HeaderLink href="/feed">Social Feed</HeaderLink>
       </div>
-
+      
       <div className="flex flex-1 justify-end">
         <HeaderTopRight />
       </div>
@@ -87,7 +87,7 @@ function SmallHeader() {
         <DropdownMenuContent align="start" className="p-2">
           <HeaderLink href="/program">Refer and Earn</HeaderLink>
           <HeaderLink href="/for-hosts">For Hosts</HeaderLink>
-          <HeaderLink href="/offers">Exclusive Offers</HeaderLink>
+          <HeaderLink href="/exclusive-offers">Exclusive Offers</HeaderLink>
           <HeaderLink href="/feed">Social Feed</HeaderLink>
         </DropdownMenuContent>
       </DropdownMenu>

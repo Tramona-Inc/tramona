@@ -27,7 +27,7 @@ const LandingVideo = () => {
           setVideoLoaded(true);
           return videoRef?.current?.play();
         }}
-        src="/assets/videos/tramonalandingstock.mp4"
+        src="/assets/videos/landing-bg.mp4"
         loop
         muted
         playsInline

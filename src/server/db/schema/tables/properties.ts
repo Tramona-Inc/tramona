@@ -85,12 +85,13 @@ export const properties = pgTable(
     hostName: varchar("host_name", { length: 255 }),
 
     // how many guests does this property accomodate at most?
+    address: varchar("address", { length: 1000 }),
     maxNumGuests: smallint("max_num_guests").notNull(),
     numBeds: smallint("num_beds").notNull(),
     numBedrooms: smallint("num_bedrooms").notNull(),
     avgRating: doublePrecision("avg_rating").notNull(),
     numRatings: integer("num_ratings").notNull(),
-    airbnbUrl: varchar("airbnb_url").notNull(),
+    airbnbUrl: varchar("airbnb_url"),
     imageUrls: varchar("image_url").array().notNull(),
     originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
     propertyType: propertyTypeEnum("property_type").notNull(),

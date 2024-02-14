@@ -15,7 +15,7 @@ import {
 } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull, lt, sql } from "drizzle-orm";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -230,8 +230,6 @@ export const offersRouter = createTRPCRouter({
 
   getAllOffers: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.offers.findMany({
-      // where: isNotNull(offers.acceptedAt),
-      columns: { acceptedAt: false },
       with: {
         property: {
           with: {
@@ -240,16 +238,50 @@ export const offersRouter = createTRPCRouter({
           columns: { name: true, originalNightlyPrice: true, imageUrls: true },
         },
         request: {
-          columns: { userId: true, checkIn: true, checkOut: true },
+          columns: {
+            userId: true,
+            checkIn: true,
+            checkOut: true,
+            resolvedAt: true,
+          },
           with: {
-            madeByUser: { columns: { name: true } }, // Fetch user name
+            madeByUser: { columns: { name: true, image: true } }, // Fetch user name
           },
         },
       },
+      where: and(
+        isNotNull(offers.acceptedAt),
+        isNotNull(offers.paymentIntentId),
+        isNotNull(offers.checkoutSessionId),
+      ),
       orderBy: desc(offers.createdAt),
     });
+
+    // return await ctx.db.query.requests.findMany({
+    //   with: {
+    //     offers: {
+    //       with: {
+    //         property: {
+    //           with: {
+    //             host: { columns: { name: true, email: true, image: true } },
+    //           },
+    //         },
+    //       },
+    //     },
+    //     madeByUser: { columns: { name: true, image: true } },
+    //   },
+    //   orderBy: desc(requests.createdAt),
+    // });
   }),
 
+  getStripePaymentIntentAndCheckoutSessionId: protectedProcedure
+    .input(offerSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.id),
+        columns: { paymentIntentId: true, checkoutSessionId: true },
+      });
+    }),
   create: roleRestrictedProcedure(["admin", "host"])
     .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {
