@@ -41,7 +41,7 @@ const contents: Tabs[] = [
   },
 ];
 
-export default function how_tramona() {
+export default function HowTramona() {
   // State to track selected tab and image opacity
   const [tab, setTab] = useState<number>(0);
   const [imageOpacity, setImageOpacity] = useState<number>(1);
