@@ -26,6 +26,7 @@ const buttonVariants = cva(
         darkOutline: "border-2 border-black hover:bg-zinc-200",
         darkOutlineWhite: "border-2 border-white text-white",
         gold: "bg-gold text-black hover:bg-gold/90",
+        white: "bg-white text-black hover:bg-zinc-200",
       },
       size: {
         default: "h-10 px-4 py-2",

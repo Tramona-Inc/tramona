@@ -31,5 +31,6 @@ export const requests = pgTable("requests", {
 });
 
 export type Request = typeof requests.$inferSelect;
+export type NewRequest = typeof requests.$inferInsert;
 export const requestSelectSchema = createSelectSchema(requests);
 export const requestInsertSchema = createInsertSchema(requests);

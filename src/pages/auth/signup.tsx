@@ -24,6 +24,7 @@ import type {
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
+import Link from "next/link";
 import router from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -119,7 +120,7 @@ export default function SignIn({
         <title>Sign up | Tramona</title>
       </Head>
       <div className="flex h-screen flex-col items-center justify-center space-y-10">
-        <h1 className="text-5xl font-bold tracking-tight">
+        <h1 className="text-center text-5xl font-bold tracking-tight">
           Sign up to start traveling
         </h1>
 
@@ -271,9 +272,9 @@ export default function SignIn({
             onClick={() => signIn()}
             className="-p-1 text-md font-medium text-blue-600 underline underline-offset-2"
           >
-            Log in here.
-          </Button>
-        </div>
+            Log in
+          </Link>
+        </p>
       </div>
     </>
   );

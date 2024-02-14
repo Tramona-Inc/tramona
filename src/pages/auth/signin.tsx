@@ -176,7 +176,7 @@ export default function SignIn({
             <div className="h-[1px] w-full border border-black" />
           </div>
         </section>
-
+        
         <div className="inline-flex gap-2">
           Don&apos;t have an account?
           <Link
