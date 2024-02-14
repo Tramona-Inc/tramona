@@ -16,6 +16,7 @@ export default function VerifyEmail() {
     if (id && token) {
       void mutateAsync({ id: id, token: token, date: date });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, token]);
 
   const { mutateAsync, isLoading } = api.auth.verifyEmailToken.useMutation({
