@@ -2,6 +2,7 @@
 // https://next-auth.js.org/configuration/pages
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -23,7 +24,6 @@ import type {
 import { getServerSession } from "next-auth/next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import router from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -47,12 +47,16 @@ const formSchema = z
         message: "Password must contain at least one digit",
       })
       .refine((value) => /[!@#$%^&*]/.test(value), {
-        message: "Password must contain at least one special character",
+        message:
+          "Password must contain at least one special character '!@#$%^&*'",
       })
       .refine((value) => /\S+$/.test(value), {
         message: "Password must not contain any whitespace characters",
       }),
     confirm: z.string(),
+    consent: z.boolean().refine((val) => val === true, {
+      message: "Please read and accept the terms and conditions",
+    }),
   })
   .required()
   .refine((data) => data.password === data.confirm, {
@@ -65,17 +69,23 @@ export default function SignIn({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      consent: false,
+    },
   });
 
   const { toast } = useToast();
 
-  const { mutate } = api.auth.createUser.useMutation({
+  const { mutate, isLoading } = api.auth.createUser.useMutation({
     onSuccess: () => {
-      void router.push("/auth/signin");
+      void router.push({
+        pathname: "/auth/signin",
+        query: { isNewUser: true },
+      });
 
       toast({
-        title: "Account created successfully!",
-        description: "Please sign in.",
+        title: "Please verify email first to login!",
+        description: "Account was created successfully!",
         variant: "default",
       });
     },
@@ -113,7 +123,7 @@ export default function SignIn({
           Sign up to start traveling
         </h1>
 
-        <section className="flex flex-col items-center justify-center space-y-5">
+        <section className="flex max-w-sm flex-col items-center justify-center space-y-5">
           <div className="w-full space-y-5">
             <Form {...form}>
               <form
@@ -189,8 +199,33 @@ export default function SignIn({
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="consent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="flex flex-row items-center gap-5 text-muted-foreground">
+                          <Checkbox
+                            onCheckedChange={() => field.onChange(!field.value)}
+                          />
+                          <p className="text-xs">
+                            By signing up, you consent to receive text and email
+                            notifications from Tramona, Inc. about updates,
+                            promotions, and important information. Msg & data
+                            rates may apply. You can opt-out anytime. For
+                            details, see our Privacy Policy.
+                          </p>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormMessage />
-                <Button type="submit" className="w-full">
+                <Button type="submit" disabled={isLoading} className="w-full">
                   Sign up
                 </Button>
               </form>
@@ -207,7 +242,7 @@ export default function SignIn({
             </div>
           </div>
 
-          <div className="my-5 flex w-full flex-col gap-5">
+          <div className="my-5 flex w-full flex-col gap-5 items-center justify-center">
             {providers &&
               Object.values(providers)
                 .slice(1) // remove the email provider
@@ -229,15 +264,16 @@ export default function SignIn({
                 })}
           </div>
         </section>
-        <p className="text-sm">
-          Already have an account?{" "}
-          <Link
-            href="/auth/signin"
-            className="font-medium text-primary underline underline-offset-2"
+        <div className="flex flex-row items-center gap-1">
+          <h1>Already have an account? </h1>
+          <Button
+            variant={"link"}
+            onClick={() => signIn()}
+            className="-p-1 text-md font-medium text-blue-600 underline underline-offset-2"
           >
             Log in
-          </Link>
-        </p>
+          </Button>
+        </div>
       </div>
     </>
   );

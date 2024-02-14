@@ -330,8 +330,7 @@ export default function HowToBookDialog(
                       buttonVariants({ size: "lg" }),
                       "rounded-full",
                     )}
-                    href={""} // TODO: href to my listing
-                    target="_blank"
+                    href={"/my-trips"} // TODO: href to my listing
                   >
                     My Trips
                     <ArrowRightIcon />
