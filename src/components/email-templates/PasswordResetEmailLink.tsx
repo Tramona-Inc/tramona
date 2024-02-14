@@ -8,7 +8,9 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-export function PasswordResetEmail({
+import TramonaIcon from "../_icons/TramonaIcon";
+
+export function PasswordResetEmailLink({
   name,
   url,
 }: {
@@ -22,9 +24,12 @@ export function PasswordResetEmail({
       </Head>
       <Tailwind>
         <Container className="mx-auto my-[40px] w-[465px] rounded border border-solid border-[#eaeaea] p-[20px]">
+          <Section className="mt-[32px]">
+            <TramonaIcon />
+          </Section>
           <Heading as="h1">{name && `Hi ${name},`}</Heading>
           <Text>
-            {`Please click on the following link to reset your password`}
+            {`Please click on the following link to resetting your password`}
           </Text>
           <Text>
             <i>

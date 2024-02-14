@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 // import { render } from "@react-email/render";
-import { PasswordResetEmail } from "@/components/email-templates/PasswordResetEmail";
+import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { users, type User } from "@/server/db/schema";
@@ -11,6 +11,7 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailler, { type TransportOptions } from "nodemailer";
 import { z } from "zod";
+import { VerifyEmailLink } from '@/components/email-templates/VerifyEmail';
 
 // Init transproter for nodemailer
 const transporter = nodemailler.createTransport({
@@ -103,6 +104,10 @@ export const authRouter = createTRPCRouter({
           });
 
           const url = `${env.NEXTAUTH_URL}/auth/verify-email?id=${user.id}&token=${token}`;
+
+          const emailHtml = render(
+            VerifyEmailLink({ url: url, name: user.name ?? user.email }),
+          );
 
           await new Promise((resolve, reject) => {
             transporter.sendMail(
@@ -207,7 +212,7 @@ export const authRouter = createTRPCRouter({
       const url = `${env.NEXTAUTH_URL}/auth/reset-password?id=${user.id}&token=${token}`;
 
       const emailHtml = render(
-        PasswordResetEmail({ url: url, name: user.name ?? user.email }),
+        PasswordResetEmailLink({ url: url, name: user.name ?? user.email }),
       );
 
       await new Promise((resolve, reject) => {

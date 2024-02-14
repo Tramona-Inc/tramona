@@ -29,24 +29,25 @@ export default function ForgotPassword() {
 
   const router = useRouter();
 
-  const { mutate } = api.auth.createUniqueForgotPasswordLink.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Email Sent!",
-        description: "Please check your email to reset your password.",
-        variant: "default",
-      });
+  const { mutate, isLoading } =
+    api.auth.createUniqueForgotPasswordLink.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Email Sent!",
+          description: "Please check your email to reset your password.",
+          variant: "default",
+        });
 
-      void router.push("/auth/signin");
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to send reset link.",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+        void router.push("/auth/signin");
+      },
+      onError: (error) => {
+        toast({
+          title: "Failed to send reset link.",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
 
   const handleSubmit = async ({ email }: z.infer<typeof formSchema>) => {
     mutate({ email: email });
@@ -89,7 +90,7 @@ export default function ForgotPassword() {
               Need support?
             </Link>
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" disabled={isLoading} className="w-full">
               Send link
             </Button>
           </form>

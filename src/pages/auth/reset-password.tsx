@@ -94,25 +94,27 @@ export default function ResetPassword() {
   }, [query.id, query.token, verifyTokenMutateAsync]);
 
   // Verify new password
-  const { mutateAsync: resetPasswordMutateAsync } =
-    api.auth.resetPassword.useMutation({
-      onSuccess: () => {
-        toast({
-          title: "Successfully updated password.",
-          description: "Please login with your new password!",
-          variant: "default",
-        });
+  const {
+    mutateAsync: resetPasswordMutateAsync,
+    isLoading: isLoadingResetPassword,
+  } = api.auth.resetPassword.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Successfully updated password.",
+        description: "Please login with your new password!",
+        variant: "default",
+      });
 
-        void router.push("/auth/signin");
-      },
-      onError: (error) => {
-        toast({
-          title: "Failed to reset password",
-          description: error.message,
-          variant: "destructive",
-        });
-      },
-    });
+      void router.push("/auth/signin");
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to reset password",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleSubmit = async ({ newPassword }: z.infer<typeof formSchema>) => {
     try {
@@ -169,7 +171,11 @@ export default function ResetPassword() {
               )}
             />
             <FormMessage />
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              disabled={isLoadingResetPassword}
+              className="w-full"
+            >
               Reset password
             </Button>
           </form>
