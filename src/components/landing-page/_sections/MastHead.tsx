@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import FeedLanding from "../FeedLanding";
 // import DesktopSearchBar from '../../search-bar/desktop-search-bar';
 // import MobileSearchBar from '@/common/components/search-bar/mobile-search-bar';
@@ -8,10 +7,7 @@ import FeedLanding from "../FeedLanding";
 // import { useUserInfo } from '@/hooks/useUserInfo';
 // import { useEffect, useState } from 'react';
 import dynamic from "next/dynamic";
-import NewRequestForm from "@/components/requests/NewRequestForm";
-import NewRequestDialog from "@/components/requests/NewRequestDialog";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
 
 const LandingVideo = dynamic(
   () => import("@/components/landing-page/LandingVideo"),
@@ -23,53 +19,19 @@ export default function MastHead() {
     <>
       <section className="relative flex h-[calc(100vh-4rem)] flex-col">
         <LandingVideo />
-        <div className="absolute inset-0 flex flex-col items-center justify-between transition-colors [transition-duration:300ms] focus-within:bg-black/50">
-          <div className="flex h-full w-full flex-row justify-center lg:flex-row">
-            {/* Left */}
-            <div className="flex w-9/12 flex-col items-center justify-center">
-              <div className="flex w-full flex-col items-center justify-center">
-                {/* <div className="hidden w-full overflow-clip xl:block">
-                  <DesktopSearchBar toast={toast} />
-                </div>
-                <div className="mx-auto overflow-clip xl:hidden">
-                  <MobileSearchBar />
-                </div> */}
-                <div className="mx-auto flex max-w-3xl flex-col items-center justify-center space-y-5 py-16">
-                  <div className=" p-1 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
-                    <h1 className="rounded bg-black/30 p-2 text-center text-2xl font-extrabold text-white backdrop-blur-md md:text-3xl lg:text-4xl">
-                      Tramona is name your own price tool
-                    </h1>
-                  </div>
-                  <div className="mx-10  w-fit rounded bg-black/30 p-2 text-center text-white backdrop-blur-md md:text-3xl lg:text-xl">
-                    We match you with vacant dates from top performing Airbnb
-                    hosts, so you get better travel deals
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right */}
-            {/* <div className="hidden h-full border-black/5 border-white bg-black/20 backdrop-blur-md xl:block xl:w-3/12">
-              <FeedLanding />
-            </div> */}
+        <div className="absolute inset-0 flex flex-col justify-center gap-4 bg-black/60 p-4 transition-colors duration-300">
+          <div className="mx-auto max-w-3xl space-y-4">
+            <h1 className="text-center text-3xl font-bold text-white md:text-6xl">
+              Tramona is a name your own price tool
+            </h1>
+            <p className="text-center text-xl text-white md:text-3xl">
+              We match you with vacant dates from top performing Airbnb hosts,
+              so you get better travel deals
+            </p>
           </div>
-        </div>
-      </section>
-      <section className="-translate-y-1/2">
-        <Card className="mx-auto hidden max-w-2xl [box-shadow:0_0_30px_#000a] md:block">
-          <NewRequestForm />
-        </Card>
-        <div className="flex -translate-y-32 flex-col items-center md:hidden">
-          <NewRequestDialog>
-            <Button
-              variant="white"
-              size="lg"
-              className="rounded-full pl-3 pr-5"
-            >
-              <Plus />
-              Make a request
-            </Button>
-          </NewRequestDialog>
+          <div className="mx-auto w-full max-w-5xl">
+            <DesktopSearchBar />
+          </div>
         </div>
       </section>
       <section className="h-[45vh] bg-blue-800 xl:hidden">

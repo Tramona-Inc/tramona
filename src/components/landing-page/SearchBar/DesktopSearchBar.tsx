@@ -1,185 +1,328 @@
-// import type { NewRequest } from '../../lib/new-request-utils';
-// import { getSuccessfulRequestToast, makeRequest } from '../../lib/new-request-utils';
-// import { useUserInfo } from '../../../hooks/useUserInfo';
-// import type { FormEvent } from 'react';
-// import { useRef, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormLabel } from "@/components/ui/form";
+import { optional, zodInteger, zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { api } from "@/utils/api";
+import { capitalize, cn, getNumNights } from "@/utils/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
+import { toast } from "@/components/ui/use-toast";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import LPDateRangePicker, {
+  LPFormItem,
+  LPFormLabel,
+  LPInput,
+  LPFormMessage,
+  classNames,
+  LPTextArea,
+} from "./components";
 
-// // warning: this code is bad
+const formSchema = z
+  .object({
+    location: zodString(),
+    maxNightlyPriceUSD: zodInteger({ min: 1 }),
+    date: z.object({
+      from: z.date(),
+      to: z.date(),
+    }),
+    numGuests: zodInteger({ min: 1 }),
+    propertyType: z.enum([...ALL_PROPERTY_TYPES, "any"]),
+    minNumBedrooms: optional(zodInteger()),
+    minNumBeds: optional(zodInteger()),
+    note: optional(zodString()),
+  })
+  .refine((data) => data.date.to > data.date.from, {
+    message: "Must stay for at least 1 night",
+    path: ["date"],
+  });
 
-// export default function DesktopSearchBar({
-//   toast,
-// }: {
-//   toast: (props: { title: string; description: string }) => void;
-// }) {
-//   const locationInputRef = useRef<HTMLInputElement | null>(null);
-//   const formRef = useRef<HTMLFormElement | null>(null);
+type FormSchema = z.infer<typeof formSchema>;
 
-//   const [location, setLocation] = useState('');
-//   const [price, setPrice] = useState('');
-//   const [checkIn, setCheckIn] = useState('');
-//   const [checkOut, setCheckOut] = useState('');
-//   const [guests, setGuests] = useState('');
+export default function DesktopSearchBar({
+  afterSubmit,
+}: {
+  afterSubmit?: () => void;
+}) {
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      propertyType: "any",
+    },
+  });
 
-//   const formIsEmpty = location === '' && price === '' && checkIn === '' && checkOut === '' && guests === '';
+  const mutation = api.requests.create.useMutation();
+  const utils = api.useUtils();
+  const router = useRouter();
+  const { status } = useSession();
 
-//   function clearForm() {
-//     setLocation('');
-//     setPrice('');
-//     setCheckIn('');
-//     setCheckOut('');
-//     setGuests('');
-//   }
+  // const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
+  // const fmtdFilters = getFmtdFilters({
+  //   minNumBedrooms,
+  //   minNumBeds,
+  //   propertyType: propertyType === "any" ? undefined : propertyType,
+  //   note,
+  // });
 
-//   const [user] = useUserInfo();
-//   const isLoggedIn = user !== null;
-//   const [formIsFocused, setFormIsFocused] = useState(false);
-//   const isExpanded = formIsFocused || !formIsEmpty;
+  async function onSubmit(data: FormSchema) {
+    const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
+    const checkIn = data.date.from;
+    const checkOut = data.date.to;
+    const numNights = getNumNights(checkIn, checkOut);
 
-//   function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
-//     event.preventDefault();
+    const newRequest = {
+      checkIn: checkIn,
+      checkOut: checkOut,
+      maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
+      propertyType: propertyType === "any" ? undefined : propertyType,
+      ...restData,
+    };
 
-//     const userId = user?.id;
+    if (status === "unauthenticated") {
+      localStorage.setItem("unsentRequest", JSON.stringify(newRequest));
+      void router.push("/auth/signin").then(() => {
+        toast({
+          title: `Request saved: ${newRequest.location}`,
+          description: "It will be sent after you sign in",
+        });
+      });
+    } else {
+      try {
+        await mutation.mutateAsync(newRequest).catch(() => {
+          throw new Error();
+        });
+        await utils.requests.invalidate();
+        successfulRequestToast(newRequest);
+        form.reset();
+      } catch (e) {
+        errorToast();
+      }
+    }
 
-//     const newRequest: NewRequest = {
-//       location,
-//       price: parseInt(price.slice(1)),
-//       checkIn: new Date(checkIn),
-//       checkOut: new Date(checkOut),
-//       numGuests: parseInt(guests),
-//     };
+    afterSubmit?.();
+  }
 
-//     if (isLoggedIn) {
-//       // make the request
-//       makeRequest(newRequest, userId!);
-//       toast(getSuccessfulRequestToast(newRequest));
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+        <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <LPFormItem className="col-span-full lg:col-span-4">
+                <LPFormLabel>Location</LPFormLabel>
+                <FormControl>
+                  <LPInput {...field} />
+                </FormControl>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
 
-//       clearForm();
-//       formRef.current?.blur();
-//       setFormIsFocused(false); // not sure why i have to do this but i do
-//     } else {
-//       localStorage.setItem('unsentRequest', JSON.stringify(newRequest));
-//       window.location.href = '/sign-up';
-//     }
-//   }
+          <FormField
+            control={form.control}
+            name="numGuests"
+            render={({ field }) => (
+              <LPFormItem className="lg:col-span-2">
+                <LPFormLabel>Number of guests</LPFormLabel>
+                <FormControl>
+                  <LPInput {...field} inputMode="numeric" />
+                </FormControl>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
 
-//   return (
-//     <div className="grid place-items-center [&>*]:[grid-area:1/1]">
-//       {/* expanded search bar */}
-//       <form
-//         ref={formRef}
-//         onFocus={() => setFormIsFocused(true)}
-//         onBlur={() => setFormIsFocused(false)}
-//         onSubmit={handleFormSubmit}
-//         className={`flex -space-x-10 rounded-full border border-black/5 bg-black/20 backdrop-blur-md transition-all duration-300 ${
-//           isExpanded ? 'scale-100 opacity-100' : 'scale-90 opacity-0'
-//         }`}
-//       >
-//         <label className="group rounded-full px-12 py-4 focus-within:bg-white">
-//           <p className="text-sm font-semibold tracking-wide text-white group-focus-within:text-black">Location</p>
-//           <input
-//             required
-//             type="text"
-//             value={location}
-//             onChange={e => setLocation(e.target.value)}
-//             ref={locationInputRef}
-//             className="bg-transparent text-lg text-white placeholder:text-zinc-300 group-focus-within:text-zinc-600 group-focus-within:outline-none group-focus-within:placeholder:text-zinc-400"
-//             placeholder="Enter your destination"
-//           />
-//         </label>
-//         <label className="group rounded-full px-12 py-4 focus-within:bg-white">
-//           <p className="text-sm font-semibold tracking-wide text-white group-focus-within:text-black">Your price</p>
-//           <div className="flex w-40 items-baseline gap-2">
-//             <input
-//               required
-//               type="text"
-//               value={price}
-//               onChange={e => {
-//                 if (e.target.value === '') setPrice('');
-//                 if (/^\$?[0-9]{0,5}$/.test(e.target.value)) {
-//                   let newPrice = e.target.value;
-//                   if (newPrice.startsWith('$')) {
-//                     newPrice = newPrice.slice(1);
-//                   }
-//                   setPrice('$' + newPrice);
-//                 }
-//               }}
-//               onBlur={e => {
-//                 if (e.target.value === '$') setPrice('');
-//               }}
-//               className={`bg-transparent text-lg text-white placeholder:text-zinc-300 group-focus-within:text-zinc-600 group-focus-within:outline-none group-focus-within:placeholder:text-zinc-400 ${
-//                 price === '' ? 'w-40' : 'w-16'
-//               }`}
-//               placeholder="Enter your budget"
-//             />
-//             {price.length > 1 && <p className="text-sm text-zinc-400">/night</p>}
-//           </div>
-//         </label>
-//         <label className="group overflow-clip rounded-full px-12 py-4 focus-within:bg-white">
-//           <p className="text-sm font-semibold tracking-wide text-white group-focus-within:text-black">Check in</p>
-//           <div className="w-28 overflow-clip transition-all focus-within:w-40">
-//             <input
-//               required
-//               value={checkIn}
-//               onChange={e => setCheckIn(e.target.value)}
-//               type="date"
-//               className="bg-transparent text-lg text-white placeholder:text-zinc-300 group-focus-within:text-zinc-600 group-focus-within:outline-none group-focus-within:placeholder:text-zinc-400 [&::calendar-picker-indicator]:opacity-0"
-//               placeholder="Add dates"
-//             />
-//           </div>
-//         </label>
-//         <label className="group overflow-clip rounded-full px-12 py-4 focus-within:bg-white">
-//           <p className="text-sm font-semibold tracking-wide text-white group-focus-within:text-black">Check out</p>
-//           <div className="w-28 overflow-clip transition-all focus-within:w-40">
-//             <input
-//               required
-//               type="date"
-//               value={checkOut}
-//               onChange={e => setCheckOut(e.target.value)}
-//               className="bg-transparent text-lg text-white placeholder:text-zinc-300 group-focus-within:text-zinc-600 group-focus-within:outline-none group-focus-within:placeholder:text-zinc-400 [&::calendar-picker-indicator]:opacity-0"
-//               placeholder="Add dates"
-//             />
-//           </div>
-//         </label>
-//         <label className="group rounded-full py-4 pl-12 focus-within:bg-white">
-//           <p className="text-sm font-semibold tracking-wide text-white group-focus-within:text-black">Guests</p>
-//           <input
-//             required
-//             type="text"
-//             value={guests}
-//             onChange={e => {
-//               if (/^[0-9]*$/.test(e.target.value)) {
-//                 setGuests(e.target.value);
-//               }
-//             }}
-//             className="bg-transparent text-lg text-white placeholder:text-zinc-300 group-focus-within:text-zinc-600 group-focus-within:outline-none group-focus-within:placeholder:text-zinc-400"
-//             placeholder="Number of guests"
-//           />
-//         </label>
-//         <div className="p-3 pl-12">
-//           <button
-//             type="submit"
-//             className="h-full whitespace-nowrap rounded-full bg-white px-8 py-3 font-semibold text-black"
-//           >
-//             Request Deal
-//           </button>
-//         </div>
-//       </form>
+          <FormField
+            control={form.control}
+            name="maxNightlyPriceUSD"
+            render={({ field }) => (
+              <LPFormItem className="lg:col-span-2">
+                <LPFormLabel>Name your price</LPFormLabel>
+                <FormControl>
+                  <LPInput
+                    {...field}
+                    inputMode="decimal"
+                    prefix="$"
+                    suffix="/night"
+                  />
+                </FormControl>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
 
-//       {/* not expanded */}
-//       <button
-//         className={`flex cursor-pointer items-center gap-4 rounded-full border border-black/5 bg-black/20 p-3 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/50 ${
-//           isExpanded ? 'pointer-events-none scale-110 opacity-0' : 'scale-100 opacity-100'
-//         }`}
-//         onClick={() => locationInputRef?.current?.focus()}
-//       >
-//         <div className="p-2 pl-4">
-//           Your Price <span className="p-1 opacity-40">&ndash;</span> Your Choice{' '}
-//           <span className="p-1 opacity-40">&ndash;</span> Your Vacation
-//         </div>
-//         <div className="inline-flex items-center whitespace-nowrap rounded-full bg-white px-8 py-3 font-semibold text-black">
-//           Request Deal
-//         </div>
-//       </button>
-//     </div>
-//   );
-// }
+          <LPDateRangePicker
+            control={form.control}
+            name="date"
+            formLabel="Check in/Check out"
+            className="col-span-full lg:col-span-3"
+          />
+
+          <div className="col-span-full">
+            <FiltersSection form={form} />
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <Button
+            disabled={form.formState.isSubmitting}
+            size="lg"
+            type="submit"
+            variant="white"
+            className="rounded-full"
+          >
+            Request Deal
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
+// const FiltersButton = forwardRef<
+//   HTMLButtonElement,
+//   { fmtdFilters: string | undefined }
+// >(({ fmtdFilters, ...props }, ref) => (
+//   <Button
+//     type="button"
+//     variant={fmtdFilters ? "filledInput" : "emptyInput"}
+//     className="pl-3"
+//     {...props}
+//     ref={ref}
+//   >
+//     <p className="overflow-clip text-ellipsis">
+//       {fmtdFilters ?? "Add filters"}
+//     </p>
+//     <FilterIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+//   </Button>
+// ));
+
+// FiltersButton.displayName = "FiltersButton";
+
+function FiltersSection({
+  form,
+}: {
+  form: ReturnType<typeof useForm<FormSchema>>;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // DD is short for dropdown
+  const [propertyTypeDDIsOpen, setPropertyTypeDDIsOpen] = useState(false);
+
+  return (
+    <div>
+      {isExpanded && (
+        <div className="grid grid-cols-2 lg:grid-cols-5">
+          <FormField
+            control={form.control}
+            name="minNumBedrooms"
+            render={({ field }) => (
+              <LPFormItem>
+                <LPFormLabel>Number of Bedrooms</LPFormLabel>
+                <FormControl>
+                  <LPInput {...field} inputMode="numeric" suffix="or more" />
+                </FormControl>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="minNumBeds"
+            render={({ field }) => (
+              <LPFormItem>
+                <LPFormLabel>Number of Beds</LPFormLabel>
+                <FormControl>
+                  <LPInput {...field} inputMode="numeric" suffix="or more" />
+                </FormControl>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="propertyType"
+            render={({ field }) => (
+              <LPFormItem>
+                <FormLabel
+                  className={classNames.buttonLabel({
+                    isFocused: propertyTypeDDIsOpen,
+                  })}
+                >
+                  Property Type
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  open={propertyTypeDDIsOpen}
+                  onOpenChange={setPropertyTypeDDIsOpen}
+                >
+                  <FormControl>
+                    <SelectTrigger
+                      className={cn(
+                        classNames.button({
+                          isPlaceholder: field.value === "any",
+                          isFocused: propertyTypeDDIsOpen,
+                        }),
+                        "text-base",
+                      )}
+                    >
+                      <SelectValue placeholder="" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    {ALL_PROPERTY_TYPES.map((propertyType) => (
+                      <SelectItem key={propertyType} value={propertyType}>
+                        {capitalize(propertyType)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="note"
+            render={({ field }) => (
+              <LPFormItem className="col-span-2">
+                <LPFormLabel>Additional notes</LPFormLabel>
+                <FormControl>
+                  <LPTextArea
+                    {...field}
+                    className="resize-none"
+                    placeholder="e.g. Pet friendly, close to the ocean"
+                  />
+                </FormControl>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
+        </div>
+      )}
+      <div className="flex justify-center p-2">
+        <button
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white hover:bg-white/20"
+        >
+          {isExpanded ? "Hide filters" : "Add filters (optional)"}
+        </button>
+      </div>
+    </div>
+  );
+}

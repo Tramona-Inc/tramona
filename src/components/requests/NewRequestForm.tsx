@@ -200,7 +200,7 @@ export default function NewRequestForm({
                 <FiltersButton fmtdFilters={fmtdFilters} />
               </PopoverTrigger>
               <PopoverContent align="start" side="top" className="w-96 p-2">
-                <p className="pb-4 pt-1 text-center text-lg font-semibold sm:text-left">
+                <p className="pb-4 pt-1 text-lg font-semibold">
                   Add filters (optional)
                 </p>
                 <FiltersSection form={form} />
