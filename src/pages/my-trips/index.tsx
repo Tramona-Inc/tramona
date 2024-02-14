@@ -1,5 +1,6 @@
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
+import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
 import { useMemo } from "react";
@@ -20,14 +21,18 @@ export default function MyTrips() {
 
       <div className="flex w-full flex-col gap-10 lg:flex-row">
         <div className="flex flex-col gap-8 lg:w-2/3">
-          <h2 className="flex items-center text-2xl font-bold">
-            Upcoming
-            {!isLoading && (
-              <span className="ml-2 rounded-full bg-zinc-200 px-3 py-0.5 text-sm font-semibold text-zinc-600">
-                {upcomingTotal}
-              </span>
-            )}
-          </h2>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-row items-center">
+              <h1 className="text-2xl font-bold">Upcoming</h1>
+              {!isLoading && (
+                <span className="ml-2 rounded-full bg-zinc-200 px-3 py-0.5 text-sm font-semibold text-zinc-600">
+                  {upcomingTotal}
+                </span>
+              )}
+            </div>
+
+            <Button variant={"darkPrimary"}>View More ...</Button>
+          </div>
           {isLoading ? (
             <>Loading ...</>
           ) : (
@@ -58,14 +63,18 @@ export default function MyTrips() {
         </div>
 
         <div className="flex flex-col gap-8 lg:w-1/3">
-          <h2 className="flex items-center text-2xl font-bold">
-            Previous
-            {!isLoading && (
-              <span className="ml-2 rounded-full bg-zinc-200 px-3 py-0.5 text-sm font-semibold text-zinc-600">
-                {previousTotal}
-              </span>
-            )}
-          </h2>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-row items-center">
+              <h1 className="text-2xl font-bold">Previous</h1>
+              {!isLoading && (
+                <span className="ml-2 rounded-full bg-zinc-200 px-3 py-0.5 text-sm font-semibold text-zinc-600">
+                  {previousTotal}
+                </span>
+              )}
+            </div>
+
+            <Button variant={"darkPrimary"}>View More ...</Button>
+          </div>
           <div className="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex lg:flex-col">
             {isLoading ? (
               <>Loading ...</>
