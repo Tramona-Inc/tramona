@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 // import { render } from "@react-email/render";
-import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { users, type User } from "@/server/db/schema";
@@ -12,6 +11,7 @@ import jwt from "jsonwebtoken";
 import nodemailler, { type TransportOptions } from "nodemailer";
 import { z } from "zod";
 import { VerifyEmailLink } from '@/components/email-templates/VerifyEmail';
+import { PasswordResetEmailLink } from '@/components/email-templates/PasswordResetEmailLink';
 
 // Init transproter for nodemailer
 const transporter = nodemailler.createTransport({
@@ -115,7 +115,7 @@ export const authRouter = createTRPCRouter({
                 from: env.EMAIL_FROM,
                 to: input.email,
                 subject: "Verify email | Tramona",
-                html: `Please click this email to confirm your email: <a href="${url}">${url}</a>`,
+                html: emailHtml,
               },
               (err, info) => {
                 if (err) {

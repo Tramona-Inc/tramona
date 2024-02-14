@@ -29,7 +29,7 @@ export function VerifyEmailLink({
           </Section>
           <Heading as="h1">{name && `Hi ${name},`}</Heading>
           <Text>
-            {`Please click on the following link to verify your password`}
+            {`Please click on the following link to verify your email`}
           </Text>
           <Text>
             <i>
