@@ -1,10 +1,12 @@
 import React from "react";
 import Image from "next/legacy/image";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Hosts() {
   return (
     <section className="flex h-full bg-[#3843D0] py-20">
-      <div className="container flex flex-col-reverse items-center justify-between gap-10 lg:flex-row">
+      <div className="container flex flex-col md:flex-col-reverse items-center justify-between gap-10 lg:flex-row">
         <div className="flex flex-col items-center space-y-5 text-center text-white lg:items-start lg:text-start">
           <div className="text-5xl font-bold uppercase xl:text-7xl">
             Hey Hosts!
@@ -17,7 +19,11 @@ export default function Hosts() {
             into bookings!
           </div>
 
-          <div className="px-2 text-2xl">👋 Join today!</div>
+          <Link href="/for-hosts">
+            <Button className="px-2 text-2xl text-white" variant="link">
+              👋 Join today!
+            </Button>
+          </Link>
         </div>
         <div className="relative aspect-square h-[350px] w-auto md:h-[500px]">
           <Image

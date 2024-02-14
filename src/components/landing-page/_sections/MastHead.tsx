@@ -1,5 +1,4 @@
-import React from "react";
-
+import { Card } from "@/components/ui/card";
 import FeedLanding from "../FeedLanding";
 // import DesktopSearchBar from '../../search-bar/desktop-search-bar';
 // import MobileSearchBar from '@/common/components/search-bar/mobile-search-bar';
@@ -9,6 +8,10 @@ import FeedLanding from "../FeedLanding";
 // import { useUserInfo } from '@/hooks/useUserInfo';
 // import { useEffect, useState } from 'react';
 import dynamic from "next/dynamic";
+import NewRequestForm from "@/components/requests/NewRequestForm";
+import NewRequestDialog from "@/components/requests/NewRequestDialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const LandingVideo = dynamic(
   () => import("@/components/landing-page/LandingVideo"),
@@ -16,54 +19,9 @@ const LandingVideo = dynamic(
 );
 
 export default function MastHead() {
-  //   const { toast } = useToast();
-
-  //   const [user, setUser, isLoggedIn, setIsLoggedIn] = useUserInfo();
-  //   const [referralCode, setReferralCode] = useState<string>("");
-  //   const [isCopied, setIsCopied] = useState(false);
-
-  //   useEffect(() => {
-  //     const unsentRequest = localStorage.getItem('unsentRequest');
-
-  //     if (unsentRequest && user) {
-  //       const request = JSON.parse(unsentRequest) as NewRequest;
-  //       request.checkIn = new Date(request.checkIn);
-  //       request.checkOut = new Date(request.checkOut);
-  //       // console.log(request.checkIn, request.checkIn instanceof Date);
-  //       makeRequest(request, user?.id);
-  //       toast(getSuccessfulRequestToast(request));
-  //       localStorage.removeItem('unsentRequest');
-  //     }
-  //   }, [user]);
-
-  //   useEffect(() => {
-  //     if (user != null && isLoggedIn) {
-  //       setReferralCode(user.referral?.referralCode || '');
-  //     }
-  //   }, [user, isLoggedIn]);
-
-  // const handleShareButtonClick = () => {
-  //   if (isLoggedIn) {
-  //     navigator.clipboard
-  //       .writeText('https://tramona.com/sign-up?code=' + referralCode)
-  //       .then(() => {
-  //         // console.log('Referral code copied to clipboard');
-  //         setIsCopied(true);
-  //         setTimeout(() => setIsCopied(false), 500);
-  //         // You can also show a success message or perform other actions
-  //       })
-  //       .catch(error => {
-  //         // console.error('Error copying to clipboard:', error);
-  //         // Handle any errors that may occur during the copy
-  //       });
-  //   } else {
-  //     // console.log('User is not logged in');
-  //   }
-  // };
-
   return (
     <>
-      <section className="relative flex h-screen flex-col">
+      <section className="relative flex h-[calc(100vh-4rem)] flex-col">
         <LandingVideo />
         <div className="absolute inset-0 flex flex-col items-center justify-between transition-colors [transition-duration:300ms] focus-within:bg-black/50">
           <div className="flex h-full w-full flex-row justify-center lg:flex-row">
@@ -95,6 +53,23 @@ export default function MastHead() {
               <FeedLanding />
             </div> */}
           </div>
+        </div>
+      </section>
+      <section className="-translate-y-1/2">
+        <Card className="mx-auto hidden max-w-2xl [box-shadow:0_0_30px_#000a] md:block">
+          <NewRequestForm />
+        </Card>
+        <div className="flex -translate-y-32 flex-col items-center md:hidden">
+          <NewRequestDialog>
+            <Button
+              variant="white"
+              size="lg"
+              className="rounded-full pl-3 pr-5"
+            >
+              <Plus />
+              Make a request
+            </Button>
+          </NewRequestDialog>
         </div>
       </section>
       <section className="h-[45vh] bg-blue-800 xl:hidden">

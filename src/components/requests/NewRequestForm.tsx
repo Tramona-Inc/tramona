@@ -24,7 +24,6 @@ import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
 import { capitalize, getNumNights, useIsDesktop } from "@/utils/utils";
-import { TRPCClientError } from "@trpc/client";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
   Select,
@@ -43,6 +42,9 @@ import {
   DrawerTitle,
 } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
+import { toast } from "../ui/use-toast";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 const formSchema = z
   .object({
@@ -81,6 +83,8 @@ export default function NewRequestForm({
 
   const mutation = api.requests.create.useMutation();
   const utils = api.useUtils();
+  const router = useRouter();
+  const { status } = useSession();
 
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   const fmtdFilters = getFmtdFilters({
@@ -96,26 +100,36 @@ export default function NewRequestForm({
     const checkOut = data.date.to;
     const numNights = getNumNights(checkIn, checkOut);
 
-    try {
-      const newRequest = {
-        checkIn: checkIn,
-        checkOut: checkOut,
-        maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
-        propertyType: propertyType === "any" ? undefined : propertyType,
-        ...restData,
-      };
+    const newRequest = {
+      checkIn: checkIn,
+      checkOut: checkOut,
+      maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
+      propertyType: propertyType === "any" ? undefined : propertyType,
+      ...restData,
+    };
 
-      await mutation.mutateAsync(newRequest).catch((error) => {
-        if (error instanceof TRPCClientError) {
-          throw new Error(error.message);
-        }
+    if (status === "unauthenticated") {
+      localStorage.setItem("unsentRequest", JSON.stringify(newRequest));
+      void router.push("/auth/signin").then(() => {
+        toast({
+          title: `Request saved: ${newRequest.location}`,
+          description: "It will be sent after you sign in",
+        });
       });
-      await utils.requests.invalidate();
-      successfulRequestToast(newRequest);
-      afterSubmit?.();
-    } catch (error) {
-      errorToast();
+    } else {
+      try {
+        await mutation.mutateAsync(newRequest).catch(() => {
+          throw new Error();
+        });
+        await utils.requests.invalidate();
+        successfulRequestToast(newRequest);
+        form.reset();
+      } catch (e) {
+        errorToast();
+      }
     }
+
+    afterSubmit?.();
   }
 
   return (
@@ -131,7 +145,7 @@ export default function NewRequestForm({
             <FormItem className="col-span-full sm:col-span-1">
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input {...field} autoFocus />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
