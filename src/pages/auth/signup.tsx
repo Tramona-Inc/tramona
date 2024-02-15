@@ -15,11 +15,9 @@ import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
+import { useRequireNoAuth } from "@/utils/auth-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type {
-  InferGetServerSidePropsType,
-  InferGetStaticPropsType,
-} from "next";
+import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import router from "next/router";
@@ -65,6 +63,8 @@ const formSchema = z
 export default function SignIn({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  useRequireNoAuth();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
