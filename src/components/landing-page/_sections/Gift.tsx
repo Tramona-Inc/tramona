@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../../ui/button";
 import Image from "next/legacy/image";
+import Link from "next/link";
 
 export default function Gift() {
   return (
@@ -11,12 +12,14 @@ export default function Gift() {
         </div>
 
         <div className="flex max-w-[200px] justify-center">
-          <Button
-            variant="outline"
-            className="border border-black px-9 py-7 text-sm font-bold text-black transition duration-300 ease-in-out md:text-2xl"
-          >
-            I Want to Make Money 💲🤑💲
-          </Button>
+          <Link href="/program">
+            <Button
+              variant="outline"
+              className="border border-black px-9 py-7 text-sm font-bold text-black transition duration-300 ease-in-out md:text-2xl"
+            >
+              I Want to Make Money 💲🤑💲
+            </Button>
+          </Link>
         </div>
       </div>
 

@@ -186,11 +186,10 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     tramonaPrice: 300,
     discountPercent: 22.6,
     address: "Vail",
-    hostPicUrl:
-      "https://images.trvl-media.com/lodging/35000000/34460000/34454600/34454579/566e4217.jpg?impolicy=resizecrop&rw=1200&ra=fit",
+    hostPicUrl: "",
     airbnbUrl: "https://www.vrbo.com/1460319?unitId=2018904",
     imageUrl:
-      "https://www.vrbo.com/1460319?pwaDialogNested=media-gallery&pwaThumbnailDialog=thumbnail-gallery&unitId=2018904",
+      "https://images.trvl-media.com/lodging/35000000/34460000/34454600/34454579/566e4217.jpg?impolicy=resizecrop&rw=1200&ra=fit",
   },
   {
     id: 14,
@@ -369,7 +368,8 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/7df83393-250f-4708-ae10-ac2e5c85fec4.jpg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://orbirental-images.s3.amazonaws.com/fcdf7900-3814-4d9b-8abd-8a63d56b4569",
   },
   {
     id: 27,
@@ -381,7 +381,8 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/ebcbf6b8-bd93-4b4a-8873-c868092290a8.jpg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/miso/Hosting-704485193611563872/original/1a85370c-e34c-40a1-acc7-cafd44ee6635.jpeg?im_w=720",
   },
   {
     id: 28,
@@ -404,7 +405,8 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/User-70801117/original/6518d4a1-c02d-469c-839a-b3afce00af91.jpeg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/miso/Hosting-1056469100112854699/original/c2cfd4c8-87f7-4d7d-a43a-a157e7c9af66.jpeg?im_w=720",
   },
   {
     id: 30,
@@ -416,7 +418,8 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/e274a0da-6f8b-4634-814c-1cf013befed6.jpg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/43256e6d-6ece-40d1-9c32-9aebe92e2714.jpg?im_w=1200",
   },
   {
     id: 31,
@@ -428,7 +431,8 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/User-29474549/original/bb16b553-905c-4784-9732-7cf7ce0ab71a.jpeg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/904dba29-4cb0-43fd-b0c4-817f24d72338.jpg?im_w=720",
   },
   {
     id: 32,
@@ -439,7 +443,8 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     address: "Nashville",
     hostPicUrl: "",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://hallson.co/wp-content/uploads/2022/09/gdxuzpzoeocnkhzvnwfi-scaled.jpg",
   },
   {
     id: 33,
@@ -447,14 +452,54 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     originalPrice: 275,
     tramonaPrice: 225,
     discountPercent: 18,
-    address: "Sugarbush",
+    address: "Nashville",
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/ebcbf6b8-bd93-4b4a-8873-c868092290a8.jpg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/881f0a02-60bc-4889-88d1-bace713818ea.jpg?im_w=1200",
   },
   {
     id: 34,
+    hostName: "Cirilo",
+    originalPrice: 384,
+    tramonaPrice: 275,
+    discountPercent: 28,
+    address: "Sayulita",
+    hostPicUrl:
+      "https://a0.muscache.com/im/pictures/user/06faded1-4169-4015-9d36-74aceadae47e.jpg?im_w=240",
+    airbnbUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/7637ebdb-b608-494b-93f6-90776d19d87c.jpg?im_w=1200",
+  },
+  {
+    id: 35,
+    hostName: "Arantza",
+    originalPrice: 377,
+    tramonaPrice: 175,
+    discountPercent: 53,
+    address: "Sayulita",
+    hostPicUrl:
+      "https://a0.muscache.com/im/pictures/user/8c11bd7e-f5e7-4e36-8649-b473bc1a04a3.jpg?im_w=240",
+    airbnbUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/hosting/Hosting-1067403559867848433/original/9875e283-a436-4506-8181-c5767414c76e.jpeg?im_w=1200",
+  },
+  {
+    id: 36,
+    hostName: "Montsserrat",
+    originalPrice: 373,
+    tramonaPrice: 200,
+    discountPercent: 46,
+    address: "Sayulita",
+    hostPicUrl:
+      "https://a0.muscache.com/im/pictures/user/User-541448800/original/40bbaaeb-5904-43ce-bfcf-63fb15920056.jpeg?im_w=240",
+    airbnbUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/miso/Hosting-1000894801403181490/original/f240306a-7b1c-4fd7-9306-871d14f58b4a.jpeg?im_w=1200",
+  },
+  {
+    id: 37,
     hostName: "Peter",
     originalPrice: 484,
     tramonaPrice: 367,
@@ -462,10 +507,11 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     address: "Killington Ski Resort",
     hostPicUrl: "",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://www.killingtongroup.com/unitimages/13332/Floor%2BPlan-Living%2BRoom-_DSC5064.JPG",
   },
   {
-    id: 35,
+    id: 38,
     hostName: "Ali",
     originalPrice: 168,
     tramonaPrice: 132,
@@ -474,10 +520,11 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/User-376650581/original/5f46e71f-1689-4d42-a017-1e408cc30e04.jpeg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/miso/Hosting-992217901200896993/original/de5e6e8a-d437-4005-89e7-1b3b1498fdfa.jpeg?im_w=1200",
   },
   {
-    id: 36,
+    id: 39,
     hostName: "Chen",
     originalPrice: 202,
     tramonaPrice: 175,
@@ -486,10 +533,11 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/users/24147121/profile_pic/1416927782/original.jpg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/miso/Hosting-707199221280154887/original/9753ff12-4841-4aab-bb97-0ef8745da523.jpeg?im_w=1200",
   },
   {
-    id: 37,
+    id: 40,
     hostName: "Shylo",
     originalPrice: 206,
     tramonaPrice: 160,
@@ -498,10 +546,11 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/User-522258241/original/d695bcd2-99a9-44ab-b689-cb1a9d7edf4e.jpeg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/4e1a1891-2e14-4be0-9545-e4bcbc52d77f.jpg?im_w=1200",
   },
   {
-    id: 38,
+    id: 41,
     hostName: "Mckenzie & Jeffrey",
     originalPrice: 232,
     tramonaPrice: 190,
@@ -510,10 +559,11 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/c6db26ae-24e9-4e20-a008-cca30ee4e1a1.jpg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/miso/Hosting-1003745090356162116/original/a4109071-e70e-4069-9671-1c7843333482.jpeg?im_w=720",
   },
   {
-    id: 39,
+    id: 42,
     hostName: "Elizabeth",
     originalPrice: 250,
     tramonaPrice: 200,
@@ -522,6 +572,7 @@ export const liveFeedOffers: LiveFeedOffer[] = [
     hostPicUrl:
       "https://a0.muscache.com/im/pictures/user/78cdc7e4-e600-4f31-b8bf-02579d304377.jpg?im_w=240",
     airbnbUrl: "",
-    imageUrl: "",
+    imageUrl:
+      "https://a0.muscache.com/im/pictures/33f5e7eb-07d3-4190-92f4-1907e015800f.jpg?im_w=1200",
   },
 ];
