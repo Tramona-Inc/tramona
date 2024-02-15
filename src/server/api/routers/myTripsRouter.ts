@@ -1,7 +1,25 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { offers, requests } from "@/server/db/schema";
 import { and, eq, inArray, isNotNull, or } from "drizzle-orm";
+import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { z } from "zod";
+
+async function getAllUserRequests(
+  id: string,
+  db: PostgresJsDatabase<typeof import("/home/zachuri/Documents/job/tramona/tramona/src/server/db/schema/index")>;
+) {
+  return await db
+    .select({
+      requestId: requests.id,
+      checkOut: requests.checkOut,
+    })
+    .from(requests)
+    .where(eq(requests.userId, id));
+}
 
 export const myTripsRouter = createTRPCRouter({
   mostRecentTrips: protectedProcedure
@@ -12,13 +30,15 @@ export const myTripsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Get all user Requests
-      const userRequests = await ctx.db
-        .select({
-          requestId: requests.id,
-          checkOut: requests.checkOut,
-        })
-        .from(requests)
-        .where(eq(requests.userId, ctx.user.id));
+      // const userRequests = await ctx.db
+      //   .select({
+      //     requestId: requests.id,
+      //     checkOut: requests.checkOut,
+      //   })
+      //   .from(requests)
+      //   .where(eq(requests.userId, ctx.user.id));
+
+      const userRequests = getAllUserRequests(ctx.user.id, ctx.db )
 
       // Get all accepted offers
       const allPaidTrips = await ctx.db
@@ -103,4 +123,7 @@ export const myTripsRouter = createTRPCRouter({
         displayPreviousTrips,
       };
     }),
+  getUpcomingTrips: publicProcedure.query(async ({ ctx }) => {
+    return null;
+  }),
 });
