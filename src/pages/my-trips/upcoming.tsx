@@ -1,6 +1,8 @@
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
+import { buttonVariants } from "@/components/ui/button";
 import { api } from "@/utils/api";
-import { formatDateRange } from "@/utils/utils";
+import { cn, formatDateRange } from "@/utils/utils";
+import Link from "next/link";
 import { useMemo } from "react";
 
 export default function Upcoming() {
@@ -11,7 +13,18 @@ export default function Upcoming() {
   });
 
   return (
-    <div className="container flex flex-col gap-10 py-10">
+    <div className="flex-start container flex flex-col gap-10 py-10">
+      <div>
+        <Link
+          href={"/my-trips"}
+          className={cn(
+            buttonVariants({ variant: "secondary" }),
+            "rounded-full",
+          )}
+        >
+          &larr; Back to my trips
+        </Link>
+      </div>
       <h1 className="text-4xl font-bold">Upcoming</h1>
 
       <div className="grid gap-8 lg:grid-cols-2">
