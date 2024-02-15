@@ -1,8 +1,4 @@
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { offers, requests } from "@/server/db/schema";
 import { and, eq, inArray, isNotNull, or } from "drizzle-orm";
 import { type PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -55,12 +51,12 @@ const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
 // Fetch the trips data to display
 const getDisplayTrips = async (
   tripIds: number[],
-  limit: number,
   db: TramonaDatabase,
+  limit?: number,
 ) => {
   return await db.query.offers.findMany({
     where: inArray(offers.id, tripIds),
-    limit: limit,
+    limit: limit ?? undefined,
     with: {
       property: {
         with: {
@@ -87,6 +83,31 @@ const getDisplayTrips = async (
   });
 };
 
+type AllAcceptedOffers = {
+  checkOut: Date | undefined;
+  offerId: number;
+  requestId: number;
+}[];
+
+const getCertainTrips = async (
+  type: string,
+  allAcceptedOffers: AllAcceptedOffers,
+  date: Date,
+) => {
+  switch (type) {
+    case "previous":
+      return allAcceptedOffers
+        .filter((trip) => trip.checkOut && trip.checkOut < date)
+        .map((trip) => trip.offerId);
+    case "upcoming":
+      return allAcceptedOffers
+        .filter((trip) => trip.checkOut && trip.checkOut >= date)
+        .map((trip) => trip.offerId);
+    default:
+      return [];
+  }
+};
+
 export const myTripsRouter = createTRPCRouter({
   mostRecentTrips: protectedProcedure
     .input(
@@ -96,42 +117,63 @@ export const myTripsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Get all accepted offers
-      const allPaidTrips = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
 
       // Get upcoming trips
-      const upcomingTripIds = allPaidTrips
-        .filter((trip) => trip.checkOut && trip.checkOut >= input.date)
-        .map((trip) => trip.offerId);
-
-      // Get previous trips
-      const previousTripIds = allPaidTrips
-        .filter((trip) => trip.checkOut && trip.checkOut < input.date)
-        .map((trip) => trip.offerId);
+      const upcomingTripIds = await getCertainTrips(
+        "upcoming",
+        allAcceptedOffers,
+        input.date,
+      );
 
       const displayUpcomingTrips = await getDisplayTrips(
         upcomingTripIds,
-        2,
         ctx.db,
+        2,
+      );
+
+      // Get previous trips
+      const previousTripIds = await getCertainTrips(
+        "previous",
+        allAcceptedOffers,
+        input.date,
       );
 
       const displayPreviousTrips = await getDisplayTrips(
         previousTripIds,
-        2,
         ctx.db,
+        2,
       );
 
-      // Overall total of upcoming and previous trips
-      const totalUpcomingTrips = upcomingTripIds.length;
-      const totalPreviousTrips = previousTripIds.length;
-
       return {
-        totalUpcomingTrips,
-        totalPreviousTrips,
+        totalUpcomingTrips: upcomingTripIds.length,
+        totalPreviousTrips: previousTripIds.length,
         displayUpcomingTrips,
         displayPreviousTrips,
       };
     }),
-  getUpcomingTrips: publicProcedure.query(async ({ ctx }) => {
-    return null;
-  }),
+  getUpcomingTrips: protectedProcedure
+    .input(
+      z.object({
+        date: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Get all accepted offers
+      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+
+      // Get upcoming trips
+      const upcomingTripIds = await getCertainTrips(
+        "upcoming",
+        allAcceptedOffers,
+        input.date,
+      );
+
+      const displayAllUpcomingTrips = await getDisplayTrips(
+        upcomingTripIds,
+        ctx.db,
+      );
+
+      return displayAllUpcomingTrips;
+    }),
 });

@@ -3,6 +3,7 @@ import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
+import Link from "next/link";
 import { useMemo } from "react";
 
 export default function MyTrips() {
@@ -28,7 +29,9 @@ export default function MyTrips() {
               )}
             </div>
 
-            <Button variant={"darkPrimary"}>View More ...</Button>
+            <Button variant={"darkPrimary"} asChild>
+              <Link href={"/my-trips/upcoming"}>View More ...</Link>
+            </Button>
           </div>
           {isLoading ? (
             <>Loading ...</>
@@ -70,7 +73,9 @@ export default function MyTrips() {
               )}
             </div>
 
-            <Button variant={"darkPrimary"}>View More ...</Button>
+            <Button variant={"darkPrimary"} asChild>
+              <Link href={"/my-trips/previous"}>View More ...</Link>
+            </Button>
           </div>
           <div className="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex lg:flex-col">
             {isLoading ? (
