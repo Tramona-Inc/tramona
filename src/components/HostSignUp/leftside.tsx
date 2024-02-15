@@ -20,7 +20,7 @@ const contents: Reviews[] = [
     message:
       "We work with thousands of hosts and property managers around the world.",
     quote:
-      "Since joining Tramona, my property vacancies have significantly decreased – the platform&aposs simple system to connect with travelers has kept my space consistently booked.",
+      "Since joining Tramona, my property vacancies have significantly decreased – the platform & simple system to connect with travelers has kept my space consistently booked.",
     // profile_pic: "/assets/images/host-sign-up-props/user1.jpg",
     profile_pic: "",
     fall_back: "CK",

@@ -13,13 +13,9 @@ import {
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import { authOptions } from "@/server/auth";
+import { useRequireNoAuth } from "@/utils/auth-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import { getServerSession } from "next-auth/next";
+import { type InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -37,7 +33,9 @@ const formSchema = z
 
 export default function SignIn({
   providers,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  useRequireNoAuth();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -160,7 +158,7 @@ export default function SignIn({
                         Log in with
                         {" " + provider.name}
                       </span>
-                   </Button>
+                    </Button>
                   );
                 })}
           </div>
@@ -176,7 +174,7 @@ export default function SignIn({
             <div className="h-[1px] w-full border border-black" />
           </div>
         </section>
-        
+
         <div className="inline-flex gap-2">
           Don&apos;t have an account?
           <Link
@@ -191,19 +189,7 @@ export default function SignIn({
   );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-
-  // * Allows user to redirect back to original page
-  const callbackUrl = context.query.callbackUrl ?? "/";
-
-  // If the user is already logged in, redirect.
-  // Note: Make sure not to redirect to the same page
-  // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: callbackUrl } };
-  }
-
+export async function getStaticProps() {
   const providers = await getProviders();
 
   return {

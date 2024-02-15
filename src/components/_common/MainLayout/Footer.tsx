@@ -64,8 +64,8 @@ export default function Footer() {
             <div className="flex-1">
               <FooterLink href="/faq">FAQ</FooterLink>
 
-              <FooterLink href="/sign-up">Sign up</FooterLink>
-              <FooterLink href="/sign-in">Log in</FooterLink>
+              <FooterLink href="/auth/signup">Sign up</FooterLink>
+              <FooterLink href="/auth/signin">Log in</FooterLink>
             </div>
             <div className="flex-1">
               <FooterLink href="/support">Contact us</FooterLink>

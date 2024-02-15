@@ -14,14 +14,10 @@ import {
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { authOptions } from "@/server/auth";
 import { api } from "@/utils/api";
+import { useRequireNoAuth } from "@/utils/auth-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import { getServerSession } from "next-auth/next";
+import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import router from "next/router";
@@ -66,7 +62,9 @@ const formSchema = z
 
 export default function SignIn({
   providers,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  useRequireNoAuth();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -242,7 +240,7 @@ export default function SignIn({
             </div>
           </div>
 
-          <div className="my-5 flex w-full flex-col gap-5 items-center justify-center">
+          <div className="my-5 flex w-full flex-col items-center justify-center gap-5">
             {providers &&
               Object.values(providers)
                 .slice(1) // remove the email provider
@@ -279,19 +277,7 @@ export default function SignIn({
   );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-
-  // * Allows user to redirect back to original page
-  const callbackUrl = context.query.callbackUrl ?? "/";
-
-  // If the user is already logged in, redirect.
-  // Note: Make sure not to redirect to the same page
-  // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: callbackUrl } };
-  }
-
+export async function getStaticProps() {
   const providers = await getProviders();
 
   return {
