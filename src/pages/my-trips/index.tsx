@@ -29,9 +29,11 @@ export default function MyTrips() {
               )}
             </div>
 
-            <Button variant={"darkPrimary"} asChild>
-              <Link href={"/my-trips/upcoming"}>View More ...</Link>
-            </Button>
+            {data?.displayUpcomingTrips !== null && !isLoading && 
+              <Button variant={"darkPrimary"} asChild>
+                <Link href={"/my-trips/previous"}>View More ...</Link>
+              </Button>
+              }
           </div>
           {isLoading ? (
             <>Loading ...</>
@@ -56,7 +58,12 @@ export default function MyTrips() {
                   );
                 })
               ) : (
-                <h1>No upcoming trips</h1>
+                <div className="flex h-full flex-col items-center justify-center gap-5">
+                  <h1 className="text-2xl font-bold">No upcoming trips</h1>
+                  <Button variant={"darkOutline"} asChild>
+                    <Link href={"/requests"}>Book some trips!</Link>
+                  </Button>
+                </div>
               )}
             </>
           )}
@@ -73,9 +80,11 @@ export default function MyTrips() {
               )}
             </div>
 
-            <Button variant={"darkPrimary"} asChild>
-              <Link href={"/my-trips/previous"}>View More ...</Link>
-            </Button>
+            {data?.displayPreviousTrips !== null && !isLoading && (
+              <Button variant={"darkPrimary"} asChild>
+                <Link href={"/my-trips/previous"}>View More ...</Link>
+              </Button>
+            )}
           </div>
           <div className="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex lg:flex-col">
             {isLoading ? (
@@ -98,7 +107,12 @@ export default function MyTrips() {
                     );
                   })
                 ) : (
-                  <h1>No previous trips</h1>
+                  <div className="flex h-full flex-col items-center justify-center gap-5">
+                    <h1 className="text-2xl font-bold">No previous trips</h1>
+                    <Button variant={"darkOutline"} asChild>
+                      <Link href={"/requests"}>Book some trips!</Link>
+                    </Button>
+                  </div>
                 )}
               </>
             )}

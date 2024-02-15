@@ -1,5 +1,5 @@
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { cn, formatDateRange } from "@/utils/utils";
 import Link from "next/link";
@@ -51,7 +51,12 @@ export default function Upcoming() {
                 );
               })
             ) : (
-              <h1>No upcoming trips</h1>
+              <div className="flex h-full flex-col items-center justify-center gap-5">
+                <h1 className="text-2xl font-bold">No upcoming trips</h1>
+                <Button variant={"darkOutline"} asChild>
+                  <Link href={"/requests"}>Book some trips!</Link>
+                </Button>
+              </div>
             )}
           </>
         )}
