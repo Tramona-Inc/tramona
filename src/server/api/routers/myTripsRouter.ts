@@ -176,4 +176,28 @@ export const myTripsRouter = createTRPCRouter({
 
       return displayAllUpcomingTrips;
     }),
+  getPreviousTrips: protectedProcedure
+    .input(
+      z.object({
+        date: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Get all accepted offers
+      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+
+      // Get upcoming trips
+      const upcomingTripIds = await getCertainTrips(
+        "previous",
+        allAcceptedOffers,
+        input.date,
+      );
+
+      const displayAllUpcomingTrips = await getDisplayTrips(
+        upcomingTripIds,
+        ctx.db,
+      );
+
+      return displayAllUpcomingTrips;
+    }),
 });
