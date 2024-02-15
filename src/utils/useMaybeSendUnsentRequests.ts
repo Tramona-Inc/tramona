@@ -5,7 +5,7 @@ import { api } from "./api";
 import { errorToast, successfulRequestToast } from "./toasts";
 import { z } from "zod";
 
-export function useMaybeSendUnsentRequest() {
+export function useMaybeSendUnsentRequests() {
   const { status } = useSession();
 
   const mutation = api.requests.create.useMutation();
@@ -14,33 +14,33 @@ export function useMaybeSendUnsentRequest() {
   useEffect(() => {
     if (status !== "authenticated") return;
 
-    const unsentRequestJSON = localStorage.getItem("unsentRequest");
-    if (!unsentRequestJSON) return;
-    localStorage.removeItem("unsentRequest");
+    const unsentRequestsJSON = localStorage.getItem("unsentRequests");
+    if (!unsentRequestsJSON) return;
+    localStorage.removeItem("unsentRequests");
 
     const res = requestInsertSchema
       .omit({ userId: true })
       // overwrite checkIn and checkOut because JSON.parse doesnt handle dates
       .extend({ checkIn: z.coerce.date(), checkOut: z.coerce.date() })
-      .safeParse(JSON.parse(unsentRequestJSON));
+      .safeParse(JSON.parse(unsentRequestsJSON));
 
     if (!res.success) return;
 
-    const { data: unsentRequest } = res;
+    const { data: unsentRequests } = res;
 
     void (async () => {
       try {
-        await mutation.mutateAsync(unsentRequest).catch(() => {
+        await mutation.mutateAsync(unsentRequests).catch(() => {
           throw new Error();
         });
         await utils.requests.invalidate();
         successfulRequestToast({
-          ...unsentRequest,
-          numGuests: unsentRequest.numGuests ?? 1,
+          ...unsentRequests,
+          numGuests: unsentRequests.numGuests ?? 1,
         });
       } catch (e) {
         errorToast();
-        localStorage.setItem("unsentRequest", unsentRequestJSON);
+        localStorage.setItem("unsentRequests", unsentRequestsJSON);
       }
     })();
   }, [mutation, status, utils.requests]);

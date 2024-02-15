@@ -102,6 +102,21 @@ export const requestsRouter = createTRPCRouter({
       });
     }),
 
+  createMultiple: protectedProcedure
+    .input(requestInsertSchema.omit({ userId: true }).array())
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.transaction((tx) =>
+        Promise.allSettled(
+          input.map((req) =>
+            tx.insert(requests).values({
+              ...req,
+              userId: ctx.user.id,
+            }),
+          ),
+        ),
+      );
+    }),
+
   delete: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {

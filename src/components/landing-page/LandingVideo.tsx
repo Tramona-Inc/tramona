@@ -31,7 +31,7 @@ const LandingVideo = () => {
         loop
         muted
         playsInline
-        className="h-full w-[100vw] object-cover"
+        className="absolute h-full w-full object-cover"
       />
       <div
         className={`transition-duration-7000ms absolute inset-0 ${

@@ -42,11 +42,15 @@ export default function DateRangePicker<
                 {field.value
                   ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     formatDateRange(field.value.from, field.value.to)
-                  : "Pick a date range"}
+                  : "Select dates"}
                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start" side="top">
+            <PopoverContent
+              className="w-auto p-0 backdrop-blur-md"
+              align="start"
+              side="top"
+            >
               <Calendar
                 mode="range"
                 selected={field.value}
