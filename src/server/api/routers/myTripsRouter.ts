@@ -54,33 +54,37 @@ const getDisplayTrips = async (
   db: TramonaDatabase,
   limit?: number,
 ) => {
-  return await db.query.offers.findMany({
-    where: inArray(offers.id, tripIds),
-    limit: limit ?? undefined,
-    with: {
-      property: {
-        with: {
-          host: { columns: { name: true, email: true, image: true } },
+  if (tripIds.length === 0) {
+    return null;
+  } else {
+    return await db.query.offers.findMany({
+      where: inArray(offers.id, tripIds),
+      limit: limit ?? undefined,
+      with: {
+        property: {
+          with: {
+            host: { columns: { name: true, email: true, image: true } },
+          },
+          columns: {
+            name: true,
+            imageUrls: true,
+            address: true,
+          },
         },
-        columns: {
-          name: true,
-          imageUrls: true,
-          address: true,
+        request: {
+          columns: {
+            userId: true,
+            checkIn: true,
+            checkOut: true,
+            resolvedAt: true,
+          },
+          with: {
+            madeByUser: { columns: { name: true } }, // Fetch user name
+          },
         },
       },
-      request: {
-        columns: {
-          userId: true,
-          checkIn: true,
-          checkOut: true,
-          resolvedAt: true,
-        },
-        with: {
-          madeByUser: { columns: { name: true } }, // Fetch user name
-        },
-      },
-    },
-  });
+    });
+  }
 };
 
 type AllAcceptedOffers = {

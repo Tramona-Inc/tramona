@@ -37,7 +37,7 @@ export default function MyTrips() {
             <>Loading ...</>
           ) : (
             <>
-              {data && data.displayUpcomingTrips.length > 0 ? (
+              {data?.displayUpcomingTrips !== null ? (
                 data?.displayUpcomingTrips.map((trip) => {
                   return (
                     <UpcomingCard
@@ -82,7 +82,7 @@ export default function MyTrips() {
               <>Loading ...</>
             ) : (
               <>
-                {data && data.displayPreviousTrips.length > 0 ? (
+                {data?.displayPreviousTrips !== null ? (
                   data?.displayPreviousTrips.map((trip) => {
                     return (
                       <PreviousCard

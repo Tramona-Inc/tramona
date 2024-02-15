@@ -25,7 +25,7 @@ export default function Previous() {
           &larr; Back to my trips
         </Link>
       </div>
-      <h1 className="text-4xl font-bold">Upcoming</h1>
+      <h1 className="text-4xl font-bold">Previous</h1>
 
       <div className="grid gap-8 lg:grid-cols-2">
         {isLoading ? (
