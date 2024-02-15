@@ -85,6 +85,7 @@ export const properties = pgTable(
     hostName: varchar("host_name", { length: 255 }),
 
     // how many guests does this property accomodate at most?
+    address: varchar("address", { length: 1000 }),
     maxNumGuests: smallint("max_num_guests").notNull(),
     numBeds: smallint("num_beds").notNull(),
     numBedrooms: smallint("num_bedrooms").notNull(),

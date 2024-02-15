@@ -1,10 +1,10 @@
 import * as React from "react";
 
 import { cn } from "@/utils/utils";
-import { useState } from "react";
-import VisibleIcon from "../_icons/VisibleIcon";
-import HiddenIcon from "../_icons/HiddenIcon";
 import { useMeasure } from "@uidotdev/usehooks";
+import { useState } from "react";
+import HiddenIcon from "../_icons/HiddenIcon";
+import VisibleIcon from "../_icons/VisibleIcon";
 
 // I customized this input component to support prefixes and suffixes.
 // They can be any ReactNode, including strings or JSX elements.

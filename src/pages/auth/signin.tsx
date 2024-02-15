@@ -50,7 +50,13 @@ export default function SignIn({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
-    await signIn("credentials", { email: email, password: password });
+    await signIn("credentials", {
+      email: email,
+      password: password,
+      callbackUrl: query.isNewUser
+        ? `${window.location.origin}/auth/welcome`
+        : window.location.origin,
+    });
   };
 
   if (query.error && !toastDisplayed) {
@@ -58,6 +64,16 @@ export default function SignIn({
       title:
         "Could not login. Please check your e-mail or password or third-party application.",
       variant: "destructive",
+    });
+
+    setToastDisplayed(true); // Set the state to true after displaying the toast
+  }
+
+  if (query.isVerified && !toastDisplayed) {
+    toast({
+      title: "Account successfully verified!",
+      description: "You are now able to login.",
+      variant: "default",
     });
 
     setToastDisplayed(true); // Set the state to true after displaying the toast
@@ -144,20 +160,32 @@ export default function SignIn({
                         Log in with
                         {" " + provider.name}
                       </span>
-                    </Button>
+                   </Button>
                   );
                 })}
           </div>
+
+          <Link
+            href="/auth/forgot-password"
+            className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-300"
+          >
+            Forgot your password?
+          </Link>
+
+          <div className="flex w-full flex-1 items-center justify-center">
+            <div className="h-[1px] w-full border border-black" />
+          </div>
         </section>
-        <p className="text-sm">
-          Don&apos;t have an account?{" "}
+        
+        <div className="inline-flex gap-2">
+          Don&apos;t have an account?
           <Link
             href="/auth/signup"
-            className="font-medium text-primary underline underline-offset-2"
+            className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-300"
           >
-            Sign up
+            Sign up for Tramona
           </Link>
-        </p>
+        </div>
       </div>
     </>
   );
