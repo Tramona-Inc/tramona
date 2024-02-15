@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useMeasure } from "@uidotdev/usehooks";
-import { TextareaHTMLAttributes, useState, type ComponentProps } from "react";
+import { useState, type ComponentProps, forwardRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
 
 // LP is short for landing page
@@ -76,28 +76,16 @@ export function LPFormItem({
   return <FormItem className={cn(classNames.wrapper, className)} {...props} />;
 }
 
-export function LPTextArea({
-  value,
-  defaultValue,
-  className,
-  ...props
-}: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea
-      className={cn(classNames.input, "px-8 pt-8", className)}
-      value={defaultValue ?? value ?? ""}
-      {...props}
-    />
-  );
-}
-
-export function LPInput({
-  prefix,
-  suffix,
-  value,
-  defaultValue,
-  ...props
-}: ComponentProps<"input"> & { prefix?: string; suffix?: string }) {
+export const LPInput = forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement> & {
+    prefix?: string;
+    suffix?: string;
+  }
+>(function LPInput(
+  { className, value, defaultValue, prefix, suffix, placeholder, ...props },
+  ref,
+) {
   const [prefixRef, { width: prefixWidth }] = useMeasure();
   const [suffixRef, { width: suffixWidth }] = useMeasure();
 
@@ -108,14 +96,14 @@ export function LPInput({
     <div className="relative">
       <input
         autoComplete="off"
-        placeholder=""
+        placeholder={placeholder ?? ""}
         value={defaultValue ?? value ?? ""}
-        className={classNames.input}
+        className={cn(classNames.input, className)}
         style={{
           paddingLeft: 32 + (prefixWidth ?? 0),
-          // paddingLeft: 32,
           paddingRight: 32 + (suffixWidth ?? 0),
         }}
+        ref={ref}
         {...props}
       />
       <div className="pointer-events-none absolute inset-0 top-4 hidden items-center justify-between px-8 text-white/50 group-focus-within:text-black/50 peer-[&:focus]:flex peer-[&:not(:placeholder-shown)]:flex">
@@ -124,7 +112,22 @@ export function LPInput({
       </div>
     </div>
   );
-}
+});
+
+// export function LPTextArea({
+//   value,
+//   defaultValue,
+//   className,
+//   ...props
+// }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+//   return (
+//     <textarea
+//       className={cn(classNames.input, "px-8 pt-8", className)}
+//       value={defaultValue ?? value ?? ""}
+//       {...props}
+//     />
+//   );
+// }
 
 export default function LPDateRangePicker<
   TFieldValues extends FieldValues = FieldValues,

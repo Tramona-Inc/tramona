@@ -109,7 +109,7 @@ export default function NewRequestForm({
     };
 
     if (status === "unauthenticated") {
-      localStorage.setItem("unsentRequest", JSON.stringify(newRequest));
+      localStorage.setItem("unsentRequests", JSON.stringify(newRequest));
       void router.push("/auth/signin").then(() => {
         toast({
           title: `Request saved: ${newRequest.location}`,

@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -25,29 +25,39 @@ import LPDateRangePicker, {
   LPInput,
   LPFormMessage,
   classNames,
-  LPTextArea,
 } from "./components";
+import { PlusIcon, XIcon } from "lucide-react";
 
-const formSchema = z
-  .object({
-    location: zodString(),
-    maxNightlyPriceUSD: zodInteger({ min: 1 }),
-    date: z.object({
-      from: z.date(),
-      to: z.date(),
-    }),
-    numGuests: zodInteger({ min: 1 }),
-    propertyType: z.enum([...ALL_PROPERTY_TYPES, "any"]),
-    minNumBedrooms: optional(zodInteger()),
-    minNumBeds: optional(zodInteger()),
-    note: optional(zodString()),
-  })
-  .refine((data) => data.date.to > data.date.from, {
-    message: "Must stay for at least 1 night",
-    path: ["date"],
-  });
+const formSchema = z.object({
+  data: z
+    .array(
+      z
+        .object({
+          location: zodString(),
+          maxNightlyPriceUSD: zodInteger({ min: 1 }),
+          date: z.object({
+            from: z.date(),
+            to: z.date(),
+          }),
+          numGuests: zodInteger({ min: 1 }),
+          propertyType: z.enum([...ALL_PROPERTY_TYPES, "any"]),
+          minNumBedrooms: optional(zodInteger()),
+          minNumBeds: optional(zodInteger()),
+          note: optional(zodString()),
+        })
+        .refine((data) => data.date.to > data.date.from, {
+          message: "Must stay for at least 1 night",
+          path: ["date"],
+        }),
+    )
+    .nonempty(),
+});
 
 type FormSchema = z.infer<typeof formSchema>;
+
+const defaultValues: Partial<FormSchema["data"][number]> = {
+  propertyType: "any",
+};
 
 export default function DesktopSearchBar({
   afterSubmit,
@@ -57,14 +67,26 @@ export default function DesktopSearchBar({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      propertyType: "any",
+      data: [defaultValues],
     },
   });
 
-  const mutation = api.requests.create.useMutation();
+  const [curTab, setCurTab] = useState(0);
+
+  const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
   const router = useRouter();
   const { status } = useSession();
+
+  const { data } = form.watch();
+  const numTabs = data.length;
+
+  console.log(data);
+
+  const tabsWithErrors =
+    form.formState.errors.data
+      ?.map?.((error, index) => (error ? index : null))
+      .filter((i): i is number => i !== null) ?? [];
 
   // const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   // const fmtdFilters = getFmtdFilters({
@@ -74,36 +96,61 @@ export default function DesktopSearchBar({
   //   note,
   // });
 
-  async function onSubmit(data: FormSchema) {
-    const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
-    const checkIn = data.date.from;
-    const checkOut = data.date.to;
-    const numNights = getNumNights(checkIn, checkOut);
+  async function onSubmit(data: FormSchema["data"]) {
+    const newRequests = data.map((request) => {
+      const {
+        date: _date,
+        maxNightlyPriceUSD,
+        propertyType,
+        ...restData
+      } = request;
+      const checkIn = request.date.from;
+      const checkOut = request.date.to;
+      const numNights = getNumNights(checkIn, checkOut);
 
-    const newRequest = {
-      checkIn: checkIn,
-      checkOut: checkOut,
-      maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
-      propertyType: propertyType === "any" ? undefined : propertyType,
-      ...restData,
-    };
+      return {
+        checkIn: checkIn,
+        checkOut: checkOut,
+        maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
+        propertyType: propertyType === "any" ? undefined : propertyType,
+        ...restData,
+      };
+    });
 
     if (status === "unauthenticated") {
-      localStorage.setItem("unsentRequest", JSON.stringify(newRequest));
+      localStorage.setItem("unsentRequests", JSON.stringify(newRequests));
       void router.push("/auth/signin").then(() => {
-        toast({
-          title: `Request saved: ${newRequest.location}`,
-          description: "It will be sent after you sign in",
-        });
+        if (newRequests.length === 1) {
+          toast({
+            title: `Request saved: ${newRequests[0]!.location}`,
+            description: "It will be sent after you sign in",
+          });
+        } else {
+          toast({
+            title: `Saved ${newRequests.length} requests`,
+            description: "They will be sent after you sign in",
+          });
+        }
       });
     } else {
       try {
-        await mutation.mutateAsync(newRequest).catch(() => {
+        await mutation.mutateAsync(newRequests).catch(() => {
           throw new Error();
         });
         await utils.requests.invalidate();
-        successfulRequestToast(newRequest);
-        form.reset();
+
+        // we need to do this instead of form.reset() since i
+        // worked around needing to give defaultValues to useForm
+        form.setValue("data", [defaultValues] as FormSchema["data"]);
+        setCurTab(0);
+
+        if (newRequests.length === 1) {
+          successfulRequestToast(newRequests[0]!);
+        } else {
+          toast({
+            title: `Successfully submitted ${newRequests.length} requests`,
+          });
+        }
       } catch (e) {
         errorToast();
       }
@@ -114,16 +161,93 @@ export default function DesktopSearchBar({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+      <form
+        onSubmit={form.handleSubmit((data) => onSubmit(data.data))}
+        className="space-y-2"
+        key={curTab} // rerender on tab changes (idk why i have to do this myself)
+      >
+        <div className="flex flex-wrap gap-1">
+          {Array.from({ length: numTabs }).map((_, i) => {
+            const isSelected = curTab === i;
+            const hasErrors = tabsWithErrors.includes(i);
+            const showX = isSelected && i > 0;
+
+            // buttons in buttons arent allowed, so we only show the x button
+            // on the tab when the tab is selected, and make the tab a div instead
+            // of a button when its selected
+            const Comp = showX ? "div" : "button";
+
+            return (
+              <Comp
+                key={i}
+                type="button"
+                onClick={showX ? undefined : () => setCurTab(i)}
+                className={cn(
+                  "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
+                  hasErrors && "pr-3",
+                  isSelected
+                    ? "bg-white text-black"
+                    : "bg-black/50 text-white hover:bg-neutral-600/60",
+                  showX && "pr-2",
+                )}
+              >
+                Trip {i + 1}
+                {hasErrors && (
+                  <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
+                    errors
+                  </div>
+                )}
+                {showX && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (curTab === numTabs - 1) {
+                        setCurTab(numTabs - 2);
+                      }
+                      form.setValue(
+                        "data",
+                        // need `as` since zod nonempty arrays are typed as [T, ...T[]] but filter just returns T[]
+                        data.filter((_, j) => j !== i) as FormSchema["data"],
+                      );
+                    }}
+                    className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
+                  >
+                    <XIcon className="size-3" />
+                  </button>
+                )}
+              </Comp>
+            );
+          })}
+          <button
+            key=""
+            type="button"
+            onClick={() => {
+              setCurTab(numTabs);
+              form.setValue("data", [
+                ...data,
+                defaultValues as FormSchema["data"][number],
+              ]);
+              // form.setFocus(`data.${data.length - 1}.location`);
+            }}
+            className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
+          >
+            <PlusIcon className="size-4" />
+            Add another trip
+          </button>
+        </div>
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
           <FormField
             control={form.control}
-            name="location"
+            name={`data.${curTab}.location`}
             render={({ field }) => (
               <LPFormItem className="col-span-full lg:col-span-4">
                 <LPFormLabel>Location</LPFormLabel>
                 <FormControl>
-                  <LPInput {...field} />
+                  <LPInput
+                    {...field}
+                    autoFocus
+                    placeholder="Enter your destination"
+                  />
                 </FormControl>
                 <LPFormMessage />
               </LPFormItem>
@@ -132,7 +256,7 @@ export default function DesktopSearchBar({
 
           <FormField
             control={form.control}
-            name="numGuests"
+            name={`data.${curTab}.numGuests`}
             render={({ field }) => (
               <LPFormItem className="lg:col-span-2">
                 <LPFormLabel>Number of guests</LPFormLabel>
@@ -146,7 +270,7 @@ export default function DesktopSearchBar({
 
           <FormField
             control={form.control}
-            name="maxNightlyPriceUSD"
+            name={`data.${curTab}.maxNightlyPriceUSD`}
             render={({ field }) => (
               <LPFormItem className="lg:col-span-2">
                 <LPFormLabel>Name your price</LPFormLabel>
@@ -165,13 +289,13 @@ export default function DesktopSearchBar({
 
           <LPDateRangePicker
             control={form.control}
-            name="date"
+            name={`data.${curTab}.date`}
             formLabel="Check in/Check out"
             className="col-span-full lg:col-span-3"
           />
 
           <div className="col-span-full">
-            <FiltersSection form={form} />
+            <FiltersSection form={form} curTab={curTab} />
           </div>
         </div>
 
@@ -213,8 +337,10 @@ export default function DesktopSearchBar({
 
 function FiltersSection({
   form,
+  curTab,
 }: {
   form: ReturnType<typeof useForm<FormSchema>>;
+  curTab: number;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -227,7 +353,7 @@ function FiltersSection({
         <div className="grid grid-cols-2 lg:grid-cols-5">
           <FormField
             control={form.control}
-            name="minNumBedrooms"
+            name={`data.${curTab}.minNumBedrooms`}
             render={({ field }) => (
               <LPFormItem>
                 <LPFormLabel>Bedrooms</LPFormLabel>
@@ -240,7 +366,7 @@ function FiltersSection({
           />
           <FormField
             control={form.control}
-            name="minNumBeds"
+            name={`data.${curTab}.minNumBeds`}
             render={({ field }) => (
               <LPFormItem>
                 <LPFormLabel>Beds</LPFormLabel>
@@ -253,7 +379,7 @@ function FiltersSection({
           />
           <FormField
             control={form.control}
-            name="propertyType"
+            name={`data.${curTab}.propertyType`}
             render={({ field }) => (
               <LPFormItem className="col-span-full lg:col-span-1">
                 <FormLabel
@@ -298,7 +424,7 @@ function FiltersSection({
 
           <FormField
             control={form.control}
-            name="note"
+            name={`data.${curTab}.note`}
             render={({ field }) => (
               <LPFormItem className="col-span-2">
                 <LPFormLabel>Additional notes</LPFormLabel>
