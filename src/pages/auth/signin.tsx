@@ -99,7 +99,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={"Email"} autoFocus />
+                        <Input {...field} autoFocus />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -112,12 +112,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          {...field}
-                          placeholder="Password"
-                          autoFocus
-                        />
+                        <Input type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
