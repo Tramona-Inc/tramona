@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/consistent-type-imports */
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { offers, requests } from "@/server/db/schema";
 import { and, eq, inArray, isNotNull, or } from "drizzle-orm";
 import { type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { z } from "zod";
 
-export type TramonaDatabase = PostgresJsDatabase<
-  typeof import("/home/zachuri/Documents/job-files/companies/tramona/tramona/src/server/db/schema/index")
->;
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+export type TramonaDatabase = PostgresJsDatabase<typeof import("@/server/db/schema")>;
 
 const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
   // Get all uers requests
@@ -56,7 +54,7 @@ const getDisplayTrips = async (
   limit?: number,
 ) => {
   if (tripIds.length === 0) {
-    return [];
+    return null;
   } else {
     return await db.query.offers.findMany({
       where: inArray(offers.id, tripIds),
@@ -174,7 +172,12 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      return await getDisplayTrips(upcomingTripIds, ctx.db);
+      const displayAllUpcomingTrips = await getDisplayTrips(
+        upcomingTripIds,
+        ctx.db,
+      );
+
+      return displayAllUpcomingTrips;
     }),
   getPreviousTrips: protectedProcedure
     .input(
@@ -193,6 +196,11 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      return await getDisplayTrips(upcomingTripIds, ctx.db);
+      const displayAllUpcomingTrips = await getDisplayTrips(
+        upcomingTripIds,
+        ctx.db,
+      );
+
+      return displayAllUpcomingTrips;
     }),
 });
