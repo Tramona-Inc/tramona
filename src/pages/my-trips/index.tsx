@@ -1,10 +1,21 @@
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
+import { AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
+import { inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
 import { useMemo } from "react";
+
+type MyTripsType<T> = T extends (infer U)[] ? U : never;
+
+export type UpcomingTrip = MyTripsType<
+  inferRouterOutputs<AppRouter>["myTrips"]["getUpcomingTrips"]
+>;
+export type PreviousTrip = MyTripsType<
+  inferRouterOutputs<AppRouter>["myTrips"]["getPreviousTrips"]
+>;
 
 export default function MyTrips() {
   const date = useMemo(() => new Date(), []); // useMemo from React
@@ -40,7 +51,7 @@ export default function MyTrips() {
           ) : (
             <>
               {data?.displayUpcomingTrips ? (
-                data?.displayUpcomingTrips.map((trip) => {
+                data?.displayUpcomingTrips.map((trip: UpcomingTrip) => {
                   return (
                     <UpcomingCard
                       key={trip.id}
@@ -92,7 +103,7 @@ export default function MyTrips() {
             ) : (
               <>
                 {data?.displayPreviousTrips ? (
-                  data?.displayPreviousTrips.map((trip) => {
+                  data?.displayPreviousTrips.map((trip: PreviousTrip) => {
                     return (
                       <PreviousCard
                         key={trip.id}
