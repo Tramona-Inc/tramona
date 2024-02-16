@@ -52,9 +52,9 @@ export default function RequestCard({
                 {request.madeByUser.email}
               </p>
             )}
-            <div className="flex items-center gap-1">
+            <div className="flex items-start gap-1">
               <MapPinIcon className="shrink-0 text-zinc-300" />
-              <h2 className="font-semibold text-zinc-700">
+              <h2 className="text-lg font-semibold text-zinc-700">
                 {request.location}
               </h2>
             </div>
