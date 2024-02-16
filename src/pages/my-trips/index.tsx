@@ -1,10 +1,15 @@
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
+import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
+import { type inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
 import { useMemo } from "react";
+
+export type Trip =
+  inferRouterOutputs<AppRouter>["myTrips"]["mostRecentTrips"]["displayUpcomingTrips"];
 
 export default function MyTrips() {
   const date = useMemo(() => new Date(), []); // useMemo from React
@@ -12,6 +17,9 @@ export default function MyTrips() {
   const { data, isLoading } = api.myTrips.mostRecentTrips.useQuery({
     date: date,
   });
+
+  const upcomingTrips = data?.displayUpcomingTrips;
+  const previousTrips = data?.displayPreviousTrips;
 
   return (
     <div className="container flex flex-col gap-10 py-10">
@@ -29,18 +37,18 @@ export default function MyTrips() {
               )}
             </div>
 
-            {data?.displayUpcomingTrips !== null && !isLoading && 
+            {data?.displayUpcomingTrips !== null && !isLoading && (
               <Button variant={"darkPrimary"} asChild>
                 <Link href={"/my-trips/previous"}>View More ...</Link>
               </Button>
-              }
+            )}
           </div>
           {isLoading ? (
             <>Loading ...</>
           ) : (
             <>
-              {data?.displayUpcomingTrips !== null ? (
-                data?.displayUpcomingTrips.map((trip) => {
+              {upcomingTrips !== null && upcomingTrips !== undefined ? (
+                upcomingTrips.map((trip) => {
                   return (
                     <UpcomingCard
                       key={trip.id}
@@ -91,8 +99,8 @@ export default function MyTrips() {
               <>Loading ...</>
             ) : (
               <>
-                {data?.displayPreviousTrips !== null ? (
-                  data?.displayPreviousTrips.map((trip) => {
+                {previousTrips !== null && previousTrips !== undefined ? (
+                  previousTrips.map((trip) => {
                     return (
                       <PreviousCard
                         key={trip.id}
