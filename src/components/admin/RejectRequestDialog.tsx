@@ -13,6 +13,7 @@ import { Button } from "../ui/button";
 import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { type RequestWithUser } from "../requests/RequestCard";
+import { errorToast } from "@/utils/toasts";
 
 export default function RejectRequestDialog({
   children,
@@ -24,14 +25,16 @@ export default function RejectRequestDialog({
   const mutation = api.requests.resolve.useMutation();
 
   async function reject() {
-    await mutation.mutateAsync({
-      id: request.id,
-    });
-    void utils.requests.invalidate();
-    setIsOpen(false);
-    toast({
-      title: "Sucessfully rejected request",
-    });
+    await mutation
+      .mutateAsync({ id: request.id })
+      .then(() => {
+        void utils.requests.invalidate();
+        toast({
+          title: "Sucessfully rejected request",
+        });
+      })
+      .catch(() => errorToast())
+      .finally(() => setIsOpen(false));
   }
 
   return (
