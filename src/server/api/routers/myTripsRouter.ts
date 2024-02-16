@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-imports */
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { offers, requests } from "@/server/db/schema";
 import { and, eq, inArray, isNotNull, or } from "drizzle-orm";
