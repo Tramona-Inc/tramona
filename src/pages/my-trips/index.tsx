@@ -1,10 +1,10 @@
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
-import { AppRouter } from "@/server/api/root";
+import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
-import { inferRouterOutputs } from "@trpc/server";
+import { type inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
 import { useMemo } from "react";
 
