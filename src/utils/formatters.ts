@@ -1,4 +1,3 @@
-import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
 import { type Request } from "@/server/db/schema";
 import { capitalize } from "./utils";
 
@@ -36,7 +35,10 @@ export function getFmtdFilters(
   return fmtdFiltersList.length === 0 ? undefined : fmtdFiltersList.join(" • ");
 }
 
-export function getRequestStatus(request: DetailedRequest) {
+export function getRequestStatus(request: {
+  resolvedAt: Date | null;
+  numOffers: number;
+}) {
   if (request.resolvedAt) {
     return request.numOffers === 0 ? "rejected" : "booked";
   }

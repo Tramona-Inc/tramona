@@ -2,20 +2,26 @@ import AdminOfferDialog from "@/components/admin/AdminOfferDialog";
 import RequestCard from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
 import { api } from "@/utils/api";
 import { HistoryIcon, InboxIcon } from "lucide-react";
 import Spinner from "../_common/Spinner";
+import { type RequestWithUser } from "../requests/RequestCard";
+import RejectRequestDialog from "./RejectRequestDialog";
 
 function IncomingRequestCards({
   requests,
 }: {
-  requests: DetailedRequest[] | undefined;
+  requests: RequestWithUser[] | undefined;
 }) {
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
-        <RequestCard key={request.id} request={request}>
+        <RequestCard withUser key={request.id} request={request}>
+          <RejectRequestDialog request={request}>
+            <Button className="rounded-full" variant="outline">
+              Reject
+            </Button>
+          </RejectRequestDialog>
           <AdminOfferDialog request={request}>
             <Button className="rounded-full">Make an offer</Button>
           </AdminOfferDialog>
@@ -30,12 +36,12 @@ function IncomingRequestCards({
 function PastRequestCards({
   requests,
 }: {
-  requests: DetailedRequest[] | undefined;
+  requests: RequestWithUser[] | undefined;
 }) {
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
-        <RequestCard key={request.id} request={request}>
+        <RequestCard withUser key={request.id} request={request}>
           <AdminOfferDialog request={request}>
             <Button className="rounded-full">Make another offer</Button>
           </AdminOfferDialog>
