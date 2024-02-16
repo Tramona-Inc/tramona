@@ -7,6 +7,7 @@ import { HistoryIcon, InboxIcon } from "lucide-react";
 import Spinner from "../_common/Spinner";
 import { type RequestWithUser } from "../requests/RequestCard";
 import RejectRequestDialog from "./RejectRequestDialog";
+import Link from "next/link";
 
 function IncomingRequestCards({
   requests,
@@ -17,7 +18,7 @@ function IncomingRequestCards({
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
         <RequestCard withUser key={request.id} request={request}>
-          <RejectRequestDialog request={request}>
+          <RejectRequestDialog requestId={request.id}>
             <Button className="rounded-full" variant="outline">
               Reject
             </Button>
@@ -42,6 +43,9 @@ function PastRequestCards({
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
         <RequestCard withUser key={request.id} request={request}>
+          <Button className="rounded-full" variant="outline" asChild>
+            <Link href={`/admin/${request.id}`}>Edit offers</Link>
+          </Button>
           <AdminOfferDialog request={request}>
             <Button className="rounded-full">Make another offer</Button>
           </AdminOfferDialog>

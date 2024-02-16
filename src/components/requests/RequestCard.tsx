@@ -124,6 +124,6 @@ function RequestCardBadge({
     case "rejected":
       return <Badge variant="red">Rejected</Badge>;
     case "booked":
-      return <Badge variant="blue">Used</Badge>;
+      return <Badge variant="blue">Booked</Badge>;
   }
 }

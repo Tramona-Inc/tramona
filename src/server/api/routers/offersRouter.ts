@@ -282,6 +282,7 @@ export const offersRouter = createTRPCRouter({
         columns: { paymentIntentId: true, checkoutSessionId: true },
       });
     }),
+
   create: roleRestrictedProcedure(["admin", "host"])
     .input(offerInsertSchema)
     .mutation(async ({ ctx, input }) => {

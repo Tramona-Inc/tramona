@@ -13,18 +13,18 @@ import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 
-export default function RejectRequestDialog({
+export default function RevokeOfferDialog({
   children,
-  requestId,
-}: PropsWithChildren<{ requestId: number }>) {
+  offerId,
+}: PropsWithChildren<{ offerId: number }>) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
-  const mutation = api.requests.resolve.useMutation();
+  const mutation = api.offers.delete.useMutation();
 
-  async function rejectRequest() {
+  async function deleteOffer() {
     await mutation
-      .mutateAsync({ id: requestId })
+      .mutateAsync({ id: offerId })
       .then(() => {
         void utils.requests.invalidate();
         toast({
@@ -40,9 +40,7 @@ export default function RejectRequestDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Are you sure you want to reject this request?
-          </DialogTitle>
+          <DialogTitle>Are you sure you want to revoke this offer?</DialogTitle>
           <DialogDescription>This can not be undone.</DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -54,11 +52,11 @@ export default function RejectRequestDialog({
             Cancel
           </Button>
           <Button
-            onClick={() => rejectRequest()}
+            onClick={() => deleteOffer()}
             disabled={mutation.isLoading}
             className="rounded-full"
           >
-            Reject
+            Revoke
           </Button>
         </DialogFooter>
       </DialogContent>
