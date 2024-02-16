@@ -1,10 +1,15 @@
 import { env } from "@/env";
+import { AppRouter } from "@/server/api/root";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
-import { offers, requests } from "@/server/db/schema";
+import { offers, referralEarnings, requests, users } from "@/server/db/schema";
+import { inferRouterOutputs } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
+
+export type StripePayment =
+  inferRouterOutputs<AppRouter>["stripe"]["getStripeSession"]["metadata"];
 
 // ! Necessary for stripe
 export const config = {
@@ -42,45 +47,58 @@ export default async function webhook(
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
+        const metadata = paymentIntentSucceeded.metadata as StripePayment;
 
         await db
           .update(offers)
           .set({
-            acceptedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
+            acceptedAt: new Date(metadata.confirmedAt!),
             paymentIntentId: paymentIntentSucceeded.id,
           })
           .where(
-            eq(
-              offers.id,
-              parseInt(paymentIntentSucceeded.metadata.listing_id!),
-            ),
+            eq(offers.id, parseInt(paymentIntentSucceeded.metadata.listingId!)),
           );
 
         await db
           .update(requests)
           .set({
-            resolvedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
+            resolvedAt: new Date(paymentIntentSucceeded.metadata.confirmedAt!),
           })
           .where(
             eq(
               requests.id,
-              parseInt(paymentIntentSucceeded.metadata.request_id!),
+              parseInt(paymentIntentSucceeded.metadata.requestId!),
             ),
           );
         // console.log("PaymentIntent was successful!");
+
+        const user = await db.query.users.findFirst({
+          where: eq(users.id, paymentIntentSucceeded.metadata.userId!),
+        });
+
+        const offerId = parseInt(paymentIntentSucceeded.metadata.listingId!);
+        const referralCode = user?.referralCodeUsed;
+        const refereeId = paymentIntentSucceeded.metadata.userId!;
+        const cashbackEarned = 100;
+
+        if (referralCode) {
+          await db
+            .insert(referralEarnings)
+            .values({ offerId, cashbackEarned, refereeId, referralCode });
+        }
 
         break;
 
       case "checkout.session.completed":
         const checkoutSessionCompleted = event.data.object;
 
-        // * Make sure to check listing_id isnt' null
+        // * Make sure to check listingId isnt' null
         if (
           checkoutSessionCompleted.metadata &&
-          checkoutSessionCompleted.metadata.listing_id !== null
+          checkoutSessionCompleted.metadata.listingId !== null
         ) {
-          const listing_id = parseInt(
-            checkoutSessionCompleted.metadata.listing_id!,
+          const listingId = parseInt(
+            checkoutSessionCompleted.metadata.listingId!,
           );
 
           await db
@@ -88,11 +106,11 @@ export default async function webhook(
             .set({
               checkoutSessionId: checkoutSessionCompleted.id,
             })
-            .where(eq(offers.id, listing_id));
+            .where(eq(offers.id, listingId));
 
           // console.log("Checkout session was successful!");
         } else {
-          // console.error("Metadata or listing_id is null or undefined");
+          // console.error("Metadata or listingId is null or undefined");
         }
         break;
 

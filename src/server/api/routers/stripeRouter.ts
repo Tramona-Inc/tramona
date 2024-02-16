@@ -1,5 +1,6 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -77,17 +78,24 @@ export const stripeRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const session = await stripe.checkout.sessions.retrieve(input.sessionId);
 
+      if (!session.metadata || !session.customer_details) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Session not found",
+        });
+      }
+
       return {
         metadata: {
-          user_id: session.metadata?.user_id,
-          stripe_email_used: session.customer_details?.email,
-          stripe_phone_used: session.customer_details?.phone,
-          price: session.metadata?.price,
-          listing_id: session.metadata?.listing_id,
-          property_id: session.metadata?.property_id,
-          request_id: session.metadata?.request_id,
-          checkout_session_id: session.id,
-          confirmed_at: session.metadata?.confirmed_at,
+          userId: session.metadata.user_id,
+          stripeEmailUsed: session.customer_details.email,
+          stripePhoneUsed: session.customer_details.phone,
+          price: session.metadata.price,
+          listingId: session.metadata.listing_id,
+          propertyId: session.metadata.property_id,
+          requestId: session.metadata.request_id,
+          checkoutSessionId: session.id,
+          confirmedAt: session.metadata.confirmed_at,
         },
       };
     }),
