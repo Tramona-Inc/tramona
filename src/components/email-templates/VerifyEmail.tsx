@@ -10,7 +10,7 @@ import {
 } from "@react-email/components";
 import TramonaIcon from "../_icons/TramonaIcon";
 
-export function VerifyEmailLink({
+export default function VerifyEmailLink({
   name,
   url,
 }: {
