@@ -10,8 +10,8 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailler, { type TransportOptions } from "nodemailer";
 import { z } from "zod";
-import { VerifyEmailLink } from '@/components/email-templates/VerifyEmail';
-import { PasswordResetEmailLink } from '@/components/email-templates/PasswordResetEmailLink';
+import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
+import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
 
 // Init transproter for nodemailer
 const transporter = nodemailler.createTransport({
