@@ -16,10 +16,10 @@ export const offers = pgTable(
     id: serial("id").primaryKey(),
     requestId: integer("request_id")
       .notNull()
-      .references(() => requests.id, { onDelete: "cascade" }),
+      .references(() => requests.id),
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id, { onDelete: "set null" }),
+      .references(() => properties.id),
     totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
     madePublicAt: timestamp("made_public_at"),

@@ -78,7 +78,7 @@ export const properties = pgTable(
   "properties",
   {
     id: serial("id").primaryKey(),
-    hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
+    hostId: text("host_id").references(() => users.id),
     name: varchar("name", { length: 255 }).notNull(),
 
     // for when blake/preju manually upload, otherwise get the host's name via hostId
