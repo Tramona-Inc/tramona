@@ -56,7 +56,7 @@ const getDisplayTrips = async (
   limit?: number,
 ) => {
   if (tripIds.length === 0) {
-    return null;
+    return [];
   } else {
     return await db.query.offers.findMany({
       where: inArray(offers.id, tripIds),
@@ -174,12 +174,7 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayAllUpcomingTrips = await getDisplayTrips(
-        upcomingTripIds,
-        ctx.db,
-      );
-
-      return displayAllUpcomingTrips;
+      return await getDisplayTrips(upcomingTripIds, ctx.db);
     }),
   getPreviousTrips: protectedProcedure
     .input(
@@ -198,11 +193,6 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayAllUpcomingTrips = await getDisplayTrips(
-        upcomingTripIds,
-        ctx.db,
-      );
-
-      return displayAllUpcomingTrips;
+      return await getDisplayTrips(upcomingTripIds, ctx.db);
     }),
 });
