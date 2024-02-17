@@ -23,7 +23,7 @@ export default function VerifyEmailLink({
         <title>Reset Password</title>
       </Head>
       <Tailwind>
-        <Container className="mx-auto my-[40px] w-[465px] rounded border border-solid border-[#eaeaea] p-[20px]">
+        <Container className="mx-auto my-[40px] w-[465px] rounded border border-solid border-[#eaeaea] bg-white p-[20px]">
           <Section className="mt-[32px]">
             <TramonaIcon />
           </Section>
