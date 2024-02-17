@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 
-import { type Form1Values } from "@/components/HostSignUp/forms/form1";
-import { type Form2Values } from "@/components/HostSignUp/forms/form2";
-import Leftside from "@/components/HostSignUp/leftside";
-import Rightside from "@/components/HostSignUp/rightside";
+import { type Form1Values } from "@/components/host-sign-up/forms/form1";
+import { type Form2Values } from "@/components/host-sign-up/forms/form2";
+import Leftside from "@/components/host-sign-up/leftside";
+import Rightside from "@/components/host-sign-up/rightside";
 import { useSession } from "next-auth/react";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";

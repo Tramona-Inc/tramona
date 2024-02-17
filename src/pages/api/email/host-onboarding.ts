@@ -1,7 +1,7 @@
 import {
   EmailTemplate,
   type EmailTemplateProps,
-} from "@/components/HostSignUp/EmailTemplate";
+} from "@/components/email-templates/HostSignUp";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);

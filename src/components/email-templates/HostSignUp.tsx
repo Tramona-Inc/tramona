@@ -14,7 +14,7 @@ export type EmailTemplateProps = {
   user: User;
 };
 
-export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
+export const HostSignUp: React.FC<Readonly<EmailTemplateProps>> = ({
   listings,
   email,
   phone_num,
