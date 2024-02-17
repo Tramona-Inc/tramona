@@ -75,13 +75,18 @@ export default async function webhook(
         const user = await db.query.users.findFirst({
           where: eq(users.id, paymentIntentSucceeded.metadata.userId!),
         });
-
-        const offerId = parseInt(paymentIntentSucceeded.metadata.listingId!);
         const referralCode = user?.referralCodeUsed;
-        const refereeId = paymentIntentSucceeded.metadata.userId!;
-        const cashbackEarned = 100;
 
         if (referralCode) {
+          const offerId = parseInt(paymentIntentSucceeded.metadata.listingId!);
+          const refereeId = paymentIntentSucceeded.metadata.userId!;
+
+          const tramonaFee =
+            parseInt(paymentIntentSucceeded.metadata.totalSavings!) * 0.2;
+          const cashbackMultiplier =
+            user.referralTier === "Ambassador" ? 0.5 : 0.3;
+          const cashbackEarned = tramonaFee * cashbackMultiplier;
+
           await db
             .insert(referralEarnings)
             .values({ offerId, cashbackEarned, refereeId, referralCode });
@@ -124,3 +129,7 @@ export default async function webhook(
     res.status(405).end("Method Not Allowed");
   }
 }
+
+// total airbnb - total tramona price
+// discount * 0.2 = tramona fee
+// tramona fee * 0.3 // 0.5 = cashback
