@@ -122,3 +122,8 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   standoutAmenities: z.array(z.enum(ALL_PROPERTY_STANDOUT_AMENITIES)),
   safetyItems: z.array(z.enum(ALL_PROPERTY_SAFETY_ITEMS)),
 });
+
+// make everything except id optional
+export const propertyUpdateSchema = propertyInsertSchema.partial().required({
+  id: true,
+});

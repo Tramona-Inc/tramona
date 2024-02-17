@@ -7,6 +7,7 @@ import {
 import {
   offerInsertSchema,
   offerSelectSchema,
+  offerUpdateSchema,
   offers,
   properties,
   referralCodes,
@@ -292,12 +293,44 @@ export const offersRouter = createTRPCRouter({
           columns: { hostId: true },
         });
 
-        if (ctx.user.role === "host" && property?.hostId !== ctx.user.id) {
+        if (property?.hostId !== ctx.user.id) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
 
       await ctx.db.insert(offers).values(input);
+    }),
+
+  update: roleRestrictedProcedure(["admin", "host"])
+    .input(offerUpdateSchema)
+    .mutation(async ({ ctx, input }) => {
+      // offer must exist...
+      const offer = await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.id),
+        columns: {},
+        with: {
+          property: { columns: { id: true } },
+        },
+      });
+
+      if (!offer) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      // ...and the associated property must be owned by the current user
+      // (or its an admin)
+      if (ctx.user.role === "host") {
+        const property = await ctx.db.query.properties.findFirst({
+          where: eq(properties.id, offer.property.id),
+          columns: { hostId: true },
+        });
+
+        if (property?.hostId !== ctx.user.id) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+      }
+
+      await ctx.db.update(offers).set(input).where(eq(offers.id, input.id));
     }),
 
   delete: roleRestrictedProcedure(["admin", "host"])

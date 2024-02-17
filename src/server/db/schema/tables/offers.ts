@@ -36,3 +36,8 @@ export const offers = pgTable(
 export type Offer = typeof offers.$inferSelect;
 export const offerSelectSchema = createSelectSchema(offers);
 export const offerInsertSchema = createInsertSchema(offers);
+
+// make everything except id optional
+export const offerUpdateSchema = offerInsertSchema.partial().required({
+  id: true,
+});

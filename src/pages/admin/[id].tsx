@@ -1,4 +1,5 @@
 import Spinner from "@/components/_common/Spinner";
+import AdminOfferDialog from "@/components/admin/AdminOfferDialog";
 import RevokeOfferDialog from "@/components/admin/RevokeOfferDialog";
 import RequestCard from "@/components/requests/RequestCard";
 import OfferCard from "@/components/requests/[id]/OfferCard";
@@ -65,6 +66,9 @@ export default function Page() {
                       Revoke offer
                     </Button>
                   </RevokeOfferDialog>
+                  <AdminOfferDialog request={request} offer={offer}>
+                    <Button className="rounded-full">Edit offer</Button>
+                  </AdminOfferDialog>
                 </OfferCard>
               ))}
             </div>

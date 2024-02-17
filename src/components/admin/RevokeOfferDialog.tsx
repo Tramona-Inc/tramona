@@ -25,12 +25,8 @@ export default function RevokeOfferDialog({
   async function deleteOffer() {
     await mutation
       .mutateAsync({ id: offerId })
-      .then(() => {
-        void utils.requests.invalidate();
-        toast({
-          title: "Sucessfully rejected request",
-        });
-      })
+      .then(() => utils.offers.invalidate())
+      .then(() => toast({ title: "Sucessfully revoked offer" }))
       .catch(() => errorToast())
       .finally(() => setIsOpen(false));
   }
