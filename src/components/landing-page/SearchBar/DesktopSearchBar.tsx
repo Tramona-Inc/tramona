@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -80,8 +80,6 @@ export default function DesktopSearchBar({
 
   const { data } = form.watch();
   const numTabs = data.length;
-
-  console.log(data);
 
   const tabsWithErrors =
     form.formState.errors.data
