@@ -27,6 +27,7 @@ export const stripeRouter = createTRPCRouter({
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
         userId: z.string(),
+        totalSavings: z.number(),
       }),
     )
     .mutation(({ input }) => {
@@ -40,6 +41,7 @@ export const stripeRouter = createTRPCRouter({
         request_id: input.requestId,
         price: input.price,
         confirmed_at: currentDate.toISOString(),
+        totalSavings: input.totalSavings,
       };
 
       return stripe.checkout.sessions.create({
@@ -95,6 +97,7 @@ export const stripeRouter = createTRPCRouter({
           propertyId: session.metadata.property_id,
           requestId: session.metadata.request_id,
           checkoutSessionId: session.id,
+          totalSavings: session.metadata.totalSavings,
           confirmedAt: session.metadata.confirmed_at,
         },
       };
