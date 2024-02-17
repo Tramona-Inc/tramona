@@ -1,7 +1,7 @@
 import { type User } from "@/server/db/schema";
 import * as React from "react";
 
-export type EmailTemplateProps = {
+export type AmbassadorApplicationProps = {
   values: {
     firstName: string;
     lastName: string;
@@ -20,7 +20,7 @@ export type EmailTemplateProps = {
   user: User;
 };
 
-export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
+const AmbassadorApplication: React.FC<Readonly<AmbassadorApplicationProps>> = ({
   values,
   user,
 }) => (
@@ -66,3 +66,5 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
     <p>{user.referralCodeUsed}</p>
   </div>
 );
+
+export default AmbassadorApplication;

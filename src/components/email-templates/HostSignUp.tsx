@@ -11,10 +11,10 @@ export type EmailTemplateProps = {
     | undefined;
   email: string;
   phone_num: string;
-  user: User;
+ user: User;
 };
 
-export const HostSignUp: React.FC<Readonly<EmailTemplateProps>> = ({
+const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
   listings,
   email,
   phone_num,
@@ -22,7 +22,7 @@ export const HostSignUp: React.FC<Readonly<EmailTemplateProps>> = ({
 }) => (
   <div>
     <h1>Host onboarding application</h1>
-    <h2>Applicant Name: {user.name}</h2>
+    <h2>Applicant Name: {user.name ?? ""}</h2>
 
     <h3>Personal Info</h3>
     <p>Email: {email}</p>
@@ -51,9 +51,11 @@ export const HostSignUp: React.FC<Readonly<EmailTemplateProps>> = ({
     <h1>User Session info</h1>
     <p>{user.id}</p>
     <p>{user.email}</p>
-    <p>{user.name}</p>
+    <p>{user.name ?? ""}</p>
     <p>{user.phoneNumber}</p>
     <p>{user.role}</p>
     <p>{user.referralCodeUsed}</p>
   </div>
 );
+
+export default EmailTemplate;
