@@ -3,7 +3,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HistoryIcon, Plus, TagIcon } from "lucide-react";
 import Head from "next/head";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
-import RequestCard from "@/components/requests/RequestCard";
+import RequestCard, {
+  DetailedRequest,
+} from "@/components/requests/RequestCard";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
@@ -24,7 +26,7 @@ function NewRequestButton() {
 function RequestCards({
   requests,
 }: {
-  requests: React.ComponentProps<typeof RequestCard>["request"][] | undefined;
+  requests: DetailedRequest[] | undefined;
 }) {
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
