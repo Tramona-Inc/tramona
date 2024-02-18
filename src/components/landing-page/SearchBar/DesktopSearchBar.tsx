@@ -1,13 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormLabel } from "@/components/ui/form";
-import { optional, zodInteger, zodString } from "@/utils/zod-utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
-import { api } from "@/utils/api";
-import { capitalize, cn, getNumNights } from "@/utils/utils";
 import {
   Select,
   SelectContent,
@@ -15,18 +7,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { useRouter } from "next/router";
+import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { api } from "@/utils/api";
+import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { capitalize, cn, getNumNights } from "@/utils/utils";
+import { optional, zodInteger, zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PlusIcon, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import LPDateRangePicker, {
   LPFormItem,
   LPFormLabel,
-  LPInput,
   LPFormMessage,
+  LPInput,
   classNames,
 } from "./components";
-import { PlusIcon, XIcon } from "lucide-react";
 
 const formSchema = z.object({
   data: z
@@ -80,8 +80,6 @@ export default function DesktopSearchBar({
 
   const { data } = form.watch();
   const numTabs = data.length;
-
-  console.log(data);
 
   const tabsWithErrors =
     form.formState.errors.data

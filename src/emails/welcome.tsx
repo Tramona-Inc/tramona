@@ -35,7 +35,7 @@ const PropDefaults: NetlifyWelcomeEmailProps = {
         <li className="mb-20" key={1}>
           <strong>Deploy your first project.</strong>{" "}
           <Link>Connect to Git, choose a template</Link>, or manually deploy a
-          project you've been working on locally.
+          project you&apos;ve been working on locally.
         </li>
       ),
     },
@@ -43,8 +43,8 @@ const PropDefaults: NetlifyWelcomeEmailProps = {
       id: 2,
       Description: (
         <li className="mb-20" key={2}>
-          <strong>Check your deploy logs.</strong> Find out what's included in
-          your build and watch for errors or failed deploys.{" "}
+          <strong>Check your deploy logs.</strong> Find out what&apos;s included
+          in your build and watch for errors or failed deploys.{" "}
           <Link>Learn how to read your deploy logs</Link>.
         </li>
       ),
@@ -98,12 +98,12 @@ export const NetlifyWelcomeEmail = ({
           <Section>
             <Row>
               <Text className="text-base">
-                Congratulations! You're joining over 3 million developers around
-                the world who use Netlify to build and ship sites, stores, and
-                apps.
+                Congratulations! You&apos;re joining over 3 million developers
+                around the world who use Netlify to build and ship sites,
+                stores, and apps.
               </Text>
 
-              <Text className="text-base">Here's how to get started:</Text>
+              <Text className="text-base">Here&apos;s how to get started:</Text>
             </Row>
           </Section>
 
