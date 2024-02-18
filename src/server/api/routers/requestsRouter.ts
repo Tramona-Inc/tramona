@@ -31,35 +31,35 @@ export const requestsRouter = createTRPCRouter({
         },
       })
       .then((res) =>
-        res.map((request) => {
-          const hostImages = request.offers
-            .map((offer) => offer.property.host?.image)
-            .filter(Boolean);
+        res
+          .map((request) => {
+            const hostImages = request.offers
+              .map((offer) => offer.property.host?.image)
+              .filter(Boolean);
 
-          const numOffers = request.offers.length;
+            const numOffers = request.offers.length;
 
-          const { offers: _, ...requestExceptOffers } = request;
+            const { offers: _, ...requestExceptOffers } = request;
 
-          return { ...requestExceptOffers, hostImages, numOffers };
-        }),
+            return { ...requestExceptOffers, hostImages, numOffers };
+          })
+          .sort(
+            (a, b) =>
+              b.numOffers - a.numOffers ||
+              b.createdAt.getTime() - a.createdAt.getTime(),
+          ),
       );
 
     const activeRequests = myRequests
       .filter((request) => request.resolvedAt === null)
-      .map((request) => ({ ...request, resolvedAt: null })) // because ts is dumb
-      .sort(
-        (a, b) =>
-          b.numOffers - a.numOffers ||
-          b.createdAt.getTime() - a.createdAt.getTime(),
-      );
+      .map((request) => ({ ...request, resolvedAt: null })); // because ts is dumb
 
     const inactiveRequests = myRequests
       .filter((request) => request.resolvedAt !== null)
       .map((request) => ({
         ...request,
         resolvedAt: request.resolvedAt ?? new Date(),
-      })) // because ts is dumb, new Date will never actually happen
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      })); // because ts is dumb, new Date will never actually happen
 
     return {
       activeRequests,
@@ -80,10 +80,16 @@ export const requestsRouter = createTRPCRouter({
       // doing this until drizzle adds aggregations for
       // relational queries lol
       .then((res) =>
-        res.map((req) => {
-          const { offers, ...reqWithoutOffers } = req;
-          return { ...reqWithoutOffers, numOffers: offers.length };
-        }),
+        res
+          .map((req) => {
+            const { offers, ...reqWithoutOffers } = req;
+            return { ...reqWithoutOffers, numOffers: offers.length };
+          })
+          .sort(
+            (a, b) =>
+              b.numOffers - a.numOffers ||
+              a.createdAt.getTime() - b.createdAt.getTime(),
+          ),
       )
       .then((res) => ({
         incomingRequests: res.filter(
