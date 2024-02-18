@@ -8,6 +8,7 @@ import Spinner from "../_common/Spinner";
 import { type RequestWithUser } from "../requests/RequestCard";
 import RejectRequestDialog from "./RejectRequestDialog";
 import Link from "next/link";
+import DeleteRequestDialog from "./DeleteRequestDialog";
 
 function IncomingRequestCards({
   requests,
@@ -18,6 +19,11 @@ function IncomingRequestCards({
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
         <RequestCard withUser key={request.id} request={request}>
+          <DeleteRequestDialog requestId={request.id}>
+            <Button className="rounded-full" variant="outline">
+              Delete
+            </Button>
+          </DeleteRequestDialog>
           <RejectRequestDialog requestId={request.id}>
             <Button className="rounded-full" variant="outline">
               Reject
@@ -43,6 +49,11 @@ function PastRequestCards({
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
         <RequestCard withUser key={request.id} request={request}>
+          <DeleteRequestDialog requestId={request.id}>
+            <Button className="rounded-full" variant="outline">
+              Delete
+            </Button>
+          </DeleteRequestDialog>
           <Button className="rounded-full" variant="outline" asChild>
             <Link href={`/admin/${request.id}`}>Edit offers</Link>
           </Button>

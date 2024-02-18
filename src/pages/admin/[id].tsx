@@ -28,7 +28,7 @@ export default function Page() {
     <>
       <div className="relative">
         <div className="absolute inset-0 bg-primary">
-          <div className="relative top-1/2 h-1/2 rounded-t-3xl bg-background"></div>
+          <div className="relative top-1/2 h-1/2 bg-background sm:rounded-t-3xl"></div>
         </div>
         <div className="px-4 py-16">
           <div className="mx-auto max-w-xl">

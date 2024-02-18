@@ -13,7 +13,7 @@ import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 
-export default function RejectRequestDialog({
+export default function DeleteRequestDialog({
   children,
   requestId,
 }: PropsWithChildren<{ requestId: number }>) {
@@ -21,15 +21,15 @@ export default function RejectRequestDialog({
   const [isLoading, setIsLoading] = useState(false);
 
   const utils = api.useUtils();
-  const mutation = api.requests.resolve.useMutation();
+  const mutation = api.requests.delete.useMutation();
 
-  async function rejectRequest() {
+  async function deleteRequest() {
     setIsLoading(true);
 
     await mutation
       .mutateAsync({ id: requestId })
       .then(() => utils.requests.invalidate())
-      .then(() => toast({ title: "Sucessfully rejected request" }))
+      .then(() => toast({ title: "Sucessfully deleted request" }))
       .catch(() => errorToast());
 
     setIsLoading(false);
@@ -42,9 +42,11 @@ export default function RejectRequestDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Are you sure you want to reject this request?
+            Are you sure you want to delete this request?
           </DialogTitle>
-          <DialogDescription>This can not be undone.</DialogDescription>
+          <DialogDescription>
+            This will also delete all associated offers. This can not be undone.
+          </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button
@@ -55,11 +57,11 @@ export default function RejectRequestDialog({
             Cancel
           </Button>
           <Button
-            onClick={() => rejectRequest()}
+            onClick={() => deleteRequest()}
             disabled={isLoading}
             className="rounded-full"
           >
-            Reject
+            Delete
           </Button>
         </DialogFooter>
       </DialogContent>
