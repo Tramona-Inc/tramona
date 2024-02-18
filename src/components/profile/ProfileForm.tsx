@@ -68,7 +68,7 @@ export default function ProfileForm() {
     if (!verified) {
       toast({
         variant: "destructive",
-        description: "Please validate phone number!",
+        title: "Please validate phone number!",
       });
       return;
     }
