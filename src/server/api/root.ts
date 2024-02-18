@@ -5,6 +5,7 @@ import { propertiesRouter } from "./routers/propertiesRouter";
 import { requestsRouter } from "./routers/requestsRouter";
 import { stripeRouter } from "./routers/stripeRouter";
 import { usersRouter } from "./routers/usersRouter";
+import { twilioRouter } from "./routers/twilioRouter";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   offers: offersRouter,
   stripe: stripeRouter,
   auth: authRouter,
+  twilio: twilioRouter,
 });
 
 // export type definition of API

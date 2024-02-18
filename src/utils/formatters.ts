@@ -42,3 +42,8 @@ export function getRequestStatus(request: DetailedRequest) {
   }
   return request.numOffers === 0 ? "pending" : "accepted";
 }
+
+export function formatPhoneNumber(phoneNumber: string) {
+  const removeNonDigit = phoneNumber.replace(/\D/g, "");
+  return "+1" + removeNonDigit;
+}
