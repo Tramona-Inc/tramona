@@ -4,7 +4,7 @@ import { HistoryIcon, Plus, TagIcon } from "lucide-react";
 import Head from "next/head";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
 import RequestCard, {
-  DetailedRequest,
+  type DetailedRequest,
 } from "@/components/requests/RequestCard";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";

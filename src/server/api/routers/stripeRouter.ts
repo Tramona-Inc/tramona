@@ -26,6 +26,7 @@ export const stripeRouter = createTRPCRouter({
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
         userId: z.string(),
+        totalSavings: z.number(),
       }),
     )
     .mutation(({ input }) => {
@@ -38,6 +39,7 @@ export const stripeRouter = createTRPCRouter({
         property_id: input.propertyId,
         request_id: input.requestId,
         price: input.price,
+        total_savings: input.totalSavings,
         confirmed_at: currentDate.toISOString(),
       };
 
@@ -52,6 +54,7 @@ export const stripeRouter = createTRPCRouter({
               product_data: {
                 name: input.name,
                 description: input.description,
+                metadata: metadata,
                 images: input.images,
               },
             },
@@ -87,6 +90,7 @@ export const stripeRouter = createTRPCRouter({
           property_id: session.metadata?.property_id,
           request_id: session.metadata?.request_id,
           checkout_session_id: session.id,
+          total_savings: session.metadata?.total_savings,
           confirmed_at: session.metadata?.confirmed_at,
         },
       };

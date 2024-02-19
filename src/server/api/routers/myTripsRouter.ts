@@ -1,50 +1,37 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { offers, requests } from "@/server/db/schema";
-import { and, eq, inArray, isNotNull, or } from "drizzle-orm";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { z } from "zod";
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-export type TramonaDatabase = PostgresJsDatabase<typeof import("@/server/db/schema")>;
+export type TramonaDatabase = PostgresJsDatabase<
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  typeof import("@/server/db/schema")
+>;
 
 const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
-  // Get all uers requests
-  const userRequests = await db
+  const result = await db
     .select({
-      requestId: requests.id,
+      offerId: offers.id,
+      requestId: offers.requestId,
       checkOut: requests.checkOut,
     })
-    .from(requests)
-    .where(eq(requests.userId, userId));
-
-  // Get's all accepted offers
-  return await db
-    .select({ offerId: offers.id, requestId: offers.requestId })
     .from(offers)
+    .fullJoin(requests, eq(offers.requestId, requests.id))
     .where(
       and(
         isNotNull(offers.acceptedAt),
         isNotNull(offers.paymentIntentId),
         isNotNull(offers.checkoutSessionId),
-        or(
-          ...userRequests.map((request) =>
-            eq(offers.requestId, request.requestId),
-          ),
-        ),
+        eq(requests.userId, userId),
       ),
-    )
-    .then((allPaidTrips) =>
-      allPaidTrips.map((paidTrip) => {
-        const matchingRequest = userRequests.find(
-          (userRequest) => userRequest.requestId === paidTrip.requestId,
-        );
-
-        return {
-          ...paidTrip,
-          checkOut: matchingRequest?.checkOut,
-        };
-      }),
     );
+
+  return result.map(({ offerId, requestId, checkOut }) => ({
+    offerId: offerId!,
+    requestId: requestId!,
+    checkOut: checkOut!,
+  }));
 };
 
 // Fetch the trips data to display
@@ -87,7 +74,7 @@ const getDisplayTrips = async (
 };
 
 type AllAcceptedOffers = {
-  checkOut: Date | undefined;
+  checkOut: Date;
   offerId: number;
   requestId: number;
 }[];
@@ -120,7 +107,9 @@ export const myTripsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Get all accepted offers
-      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+      const allAcceptedOffers = (
+        await getAllAcceptedOffers(ctx.user.id, ctx.db)
+      ).filter((id) => id !== null);
 
       // Get upcoming trips
       const upcomingTripIds = await getCertainTrips(
