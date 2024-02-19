@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { referralCodes, users } from "./tables/users";
+import { referralCodes, referralEarnings, users } from "./tables/users";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
 import { properties } from "./tables/properties";
@@ -12,6 +12,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   referralCode: one(referralCodes), // the one they own, not the one used at signup
   propertiesOwned: many(properties),
   requestsMade: many(requests),
+  referralEarnings: many(referralEarnings),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -59,5 +60,12 @@ export const offersRelations = relations(offers, ({ one }) => ({
   request: one(requests, {
     fields: [offers.requestId],
     references: [requests.id],
+  }),
+}));
+
+export const earningsRelations = relations(referralEarnings, ({ one }) => ({
+  refereeId: one(users, {
+    fields: [referralEarnings.refereeId],
+    references: [users.id],
   }),
 }));
