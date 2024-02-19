@@ -1,15 +1,10 @@
 import { env } from "@/env";
-import { AppRouter } from "@/server/api/root";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import { offers, referralEarnings, requests, users } from "@/server/db/schema";
-import { inferRouterOutputs } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-
-export type StripePayment =
-  inferRouterOutputs<AppRouter>["stripe"]["getStripeSession"]["metadata"];
 
 // ! Necessary for stripe
 export const config = {
@@ -47,42 +42,43 @@ export default async function webhook(
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
-        const metadata = paymentIntentSucceeded.metadata as StripePayment;
 
         await db
           .update(offers)
           .set({
-            acceptedAt: new Date(metadata.confirmedAt!),
+            acceptedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
             paymentIntentId: paymentIntentSucceeded.id,
           })
           .where(
-            eq(offers.id, parseInt(paymentIntentSucceeded.metadata.listingId!)),
+            eq(
+              offers.id,
+              parseInt(paymentIntentSucceeded.metadata.listing_id!),
+            ),
           );
 
         await db
           .update(requests)
           .set({
-            resolvedAt: new Date(paymentIntentSucceeded.metadata.confirmedAt!),
+            resolvedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
           })
           .where(
             eq(
               requests.id,
-              parseInt(paymentIntentSucceeded.metadata.requestId!),
+              parseInt(paymentIntentSucceeded.metadata.request_id!),
             ),
           );
         // console.log("PaymentIntent was successful!");
-
         const user = await db.query.users.findFirst({
-          where: eq(users.id, paymentIntentSucceeded.metadata.userId!),
+          where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
         const referralCode = user?.referralCodeUsed;
 
         if (referralCode) {
-          const offerId = parseInt(paymentIntentSucceeded.metadata.listingId!);
-          const refereeId = paymentIntentSucceeded.metadata.userId!;
+          const offerId = parseInt(paymentIntentSucceeded.metadata.listing_id!);
+          const refereeId = paymentIntentSucceeded.metadata.user_id!;
 
           const tramonaFee =
-            parseInt(paymentIntentSucceeded.metadata.totalSavings!) * 0.2;
+            parseInt(paymentIntentSucceeded.metadata.total_savings!) * 0.2;
           const cashbackMultiplier =
             user.referralTier === "Ambassador" ? 0.5 : 0.3;
           const cashbackEarned = tramonaFee * cashbackMultiplier;
@@ -97,13 +93,13 @@ export default async function webhook(
       case "checkout.session.completed":
         const checkoutSessionCompleted = event.data.object;
 
-        // * Make sure to check listingId isnt' null
+        // * Make sure to check listing_id isnt' null
         if (
           checkoutSessionCompleted.metadata &&
-          checkoutSessionCompleted.metadata.listingId !== null
+          checkoutSessionCompleted.metadata.listing_id !== null
         ) {
-          const listingId = parseInt(
-            checkoutSessionCompleted.metadata.listingId!,
+          const listing_id = parseInt(
+            checkoutSessionCompleted.metadata.listing_id!,
           );
 
           await db
@@ -111,11 +107,11 @@ export default async function webhook(
             .set({
               checkoutSessionId: checkoutSessionCompleted.id,
             })
-            .where(eq(offers.id, listingId));
+            .where(eq(offers.id, listing_id));
 
           // console.log("Checkout session was successful!");
         } else {
-          // console.error("Metadata or listingId is null or undefined");
+          // console.error("Metadata or listing_id is null or undefined");
         }
         break;
 
@@ -129,7 +125,3 @@ export default async function webhook(
     res.status(405).end("Method Not Allowed");
   }
 }
-
-// total airbnb - total tramona price
-// discount * 0.2 = tramona fee
-// tramona fee * 0.3 // 0.5 = cashback
