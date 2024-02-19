@@ -20,7 +20,7 @@
     "chromatic": "npx chromatic --project-token=chpt_e09628bd7bc2d55"
   },
   "dependencies": {
-    "@auth/drizzle-adapter": "^0.3.16",
+    "@auth/drizzle-adapter": "^0.7.0",
     "@builder.io/react-hydration-overlay": "^0.0.7",
     "@hookform/resolvers": "^3.3.4",
     "@radix-ui/react-accordion": "^1.1.2",

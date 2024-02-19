@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@auth/drizzle-adapter':
-    specifier: ^0.3.16
-    version: 0.3.16(nodemailer@6.9.8)
+    specifier: ^0.7.0
+    version: 0.7.0(nodemailer@6.9.8)
   '@builder.io/react-hydration-overlay':
     specifier: ^0.0.7
     version: 0.0.7(react-dom@18.2.0)(react@18.2.0)(webpack@5.89.0)
@@ -341,11 +341,17 @@ packages:
       '@jridgewell/gen-mapping': 0.3.3
       '@jridgewell/trace-mapping': 0.3.22
 
-  /@auth/core@0.22.0(nodemailer@6.9.8):
-    resolution: {integrity: sha512-BwngPhtcEtJPV+sfs8pGPZ+RdKnpBeXRk2K2Os10DyMfaL/Vszj2TJU6sRaS38hXzo+xycYX+83olBElqc2Ngw==}
+  /@auth/core@0.27.0(nodemailer@6.9.8):
+    resolution: {integrity: sha512-3bydnRJIM/Al6mkYmb53MsC+6G8ojw3lLPzwgVnX4dCo6N2lrib6Wq6r0vxZIhuHGjLObqqtUfpeaEj5aeTHFg==}
     peerDependencies:
+      '@simplewebauthn/browser': ^9.0.1
+      '@simplewebauthn/server': ^9.0.2
       nodemailer: ^6.8.0
     peerDependenciesMeta:
+      '@simplewebauthn/browser':
+        optional: true
+      '@simplewebauthn/server':
+        optional: true
       nodemailer:
         optional: true
     dependencies:
@@ -359,11 +365,13 @@ packages:
       preact-render-to-string: 5.2.3(preact@10.11.3)
     dev: false
 
-  /@auth/drizzle-adapter@0.3.16(nodemailer@6.9.8):
-    resolution: {integrity: sha512-08uS3j6Omzhshgtn8bjKxZlVOrO2Y3eXdTCYDFdhVAG7KpnotRYFhjrXqVlb9kjaNIxavnyad37+DtpIoOYqmg==}
+  /@auth/drizzle-adapter@0.7.0(nodemailer@6.9.8):
+    resolution: {integrity: sha512-p/8cjrREiPPns78CT/a7VGl2TD78BNXtJ9TAXrw80bUInHd2xkEtk4CzXajWS/5r7qXE9n3r4BV9sISrf6Yqnw==}
     dependencies:
-      '@auth/core': 0.22.0(nodemailer@6.9.8)
+      '@auth/core': 0.27.0(nodemailer@6.9.8)
     transitivePeerDependencies:
+      - '@simplewebauthn/browser'
+      - '@simplewebauthn/server'
       - nodemailer
     dev: false
 
