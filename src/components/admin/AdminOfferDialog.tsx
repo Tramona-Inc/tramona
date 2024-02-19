@@ -10,11 +10,13 @@ import {
 import { type Request } from "@/server/db/schema";
 import { useState } from "react";
 import AdminOfferForm from "./AdminOfferForm";
+import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
 export default function AdminOfferDialog({
   children,
   request,
-}: React.PropsWithChildren<{ request: Request }>) {
+  offer,
+}: React.PropsWithChildren<{ request: Request; offer?: OfferWithProperty }>) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -24,7 +26,7 @@ export default function AdminOfferDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Make an offer</DialogTitle>
+          <DialogTitle>{offer ? "Update" : "Make an"} offer</DialogTitle>
           <DialogDescription>
             Create a property and give it a total price
           </DialogDescription>
@@ -32,6 +34,7 @@ export default function AdminOfferDialog({
         <AdminOfferForm
           afterSubmit={() => setIsOpen(false)}
           request={request}
+          offer={offer}
         />
       </DialogContent>
     </Dialog>

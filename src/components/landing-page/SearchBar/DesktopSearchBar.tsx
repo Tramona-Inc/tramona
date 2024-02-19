@@ -168,7 +168,7 @@ export default function DesktopSearchBar({
           {Array.from({ length: numTabs }).map((_, i) => {
             const isSelected = curTab === i;
             const hasErrors = tabsWithErrors.includes(i);
-            const showX = isSelected && i > 0;
+            const showX = isSelected && numTabs > 1;
 
             // buttons in buttons arent allowed, so we only show the x button
             // on the tab when the tab is selected, and make the tab a div instead

@@ -16,10 +16,10 @@ export const offers = pgTable(
     id: serial("id").primaryKey(),
     requestId: integer("request_id")
       .notNull()
-      .references(() => requests.id),
+      .references(() => requests.id, { onDelete: "cascade" }),
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id),
+      .references(() => properties.id, { onDelete: "set null" }),
     totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
     madePublicAt: timestamp("made_public_at"),
@@ -36,3 +36,8 @@ export const offers = pgTable(
 export type Offer = typeof offers.$inferSelect;
 export const offerSelectSchema = createSelectSchema(offers);
 export const offerInsertSchema = createInsertSchema(offers);
+
+// make everything except id optional
+export const offerUpdateSchema = offerInsertSchema.partial().required({
+  id: true,
+});

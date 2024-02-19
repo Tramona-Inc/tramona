@@ -4,7 +4,7 @@ import { formatCurrency, formatDateRange, getNumNights, plural } from "./utils";
 import { type Request } from "@/server/db/schema";
 
 export function errorToast(error = "Something went wrong, please try again") {
-  return toast({
+  toast({
     title: error,
     description: (
       <>
@@ -31,7 +31,7 @@ export function successfulRequestToast(
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
 
-  return toast({
+  toast({
     title: `Request sent: ${request.location}`,
     description: `${fmtdPrice} • ${fmtdDateRange} • ${fmtdNumGuests}`,
   });
@@ -42,11 +42,13 @@ export function successfulAdminOfferToast({
   totalPrice,
   checkIn,
   checkOut,
+  isUpdate = false,
 }: {
   propertyName: string;
   totalPrice: number;
   checkIn: Date;
   checkOut: Date;
+  isUpdate?: boolean;
 }) {
   const pricePerNight = totalPrice / getNumNights(checkIn, checkOut);
 
@@ -54,8 +56,8 @@ export function successfulAdminOfferToast({
   const fmtdNightlyPrice = `${formatCurrency(pricePerNight)}/night`;
   const fmtdDateRange = formatDateRange(checkIn, checkOut);
 
-  return toast({
-    title: `Offer sent: ${propertyName}`,
+  toast({
+    title: `Offer ${isUpdate ? "updated" : "sent"}: ${propertyName}`,
     description: `${fmtdTotalPrice} • ${fmtdNightlyPrice} • ${fmtdDateRange}`,
   });
 }

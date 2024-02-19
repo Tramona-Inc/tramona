@@ -1,5 +1,13 @@
 import type { LucideIcon, LucideProps } from "lucide-react";
-import { BadgeCheck, Menu, ShieldAlert, Star, Trash, User } from "lucide-react";
+import {
+  BadgeCheck,
+  ChevronLeft,
+  Menu,
+  ShieldAlert,
+  Star,
+  Trash,
+  User,
+} from "lucide-react";
 import * as React from "react"; // Import React
 
 type Icons = Record<
@@ -14,7 +22,8 @@ const iconComponents: Icons = {
   user: User,
   star: Star,
   trash: Trash,
-  success: BadgeCheck, 
+  success: BadgeCheck,
+  chevronLeft: ChevronLeft,
   apple: () => {
     return (
       <svg
@@ -116,7 +125,6 @@ const iconComponents: Icons = {
     );
   },
 };
-
 
 const NoIconFound: React.FC = () => {
   return null;

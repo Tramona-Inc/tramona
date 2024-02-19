@@ -82,7 +82,7 @@ export default function SignIn({
       <Head>
         <title>Log in | Tramona</title>
       </Head>
-      <div className="flex h-screen flex-col items-center justify-center space-y-10">
+      <div className="flex min-h-screen flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-5xl font-bold tracking-tight">Log in to Tramona</h1>
 
         <section className="flex flex-col items-center justify-center space-y-5">
@@ -99,7 +99,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={"Email"} autoFocus />
+                        <Input {...field} autoFocus />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -112,12 +112,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          {...field}
-                          placeholder="Password"
-                          autoFocus
-                        />
+                        <Input type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

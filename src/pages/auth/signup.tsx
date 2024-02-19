@@ -116,7 +116,7 @@ export default function SignIn({
       <Head>
         <title>Sign up | Tramona</title>
       </Head>
-      <div className="flex h-screen flex-col items-center justify-center space-y-10">
+      <div className="flex min-h-screen flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-center text-5xl font-bold tracking-tight">
           Sign up to start traveling
         </h1>
@@ -135,11 +135,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder={"name@domain.com"}
-                          autoFocus
-                        />
+                        <Input {...field} autoFocus />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -152,7 +148,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input {...field} type="text" autoFocus />
+                        <Input {...field} type="text"  />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -165,7 +161,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input {...field} type="text" autoFocus />
+                        <Input {...field} type="text" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -178,7 +174,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input {...field} type="password" autoFocus />
+                        <Input {...field} type="password" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -191,7 +187,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Verify Password</FormLabel>
                       <FormControl>
-                        <Input {...field} type="password" autoFocus />
+                        <Input {...field} type="password" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

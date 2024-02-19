@@ -18,13 +18,20 @@ export function useRequireRole(allowedRoles: User["role"][]) {
   return session;
 }
 
+/**
+ * if you are already signed in, you will be redirected
+ * to /requests if youre a guest, /admin if youre an admin,
+ * and the hosts page later when we do that
+ */
 export function useRequireNoAuth() {
   const session = useSession();
   const router = useRouter();
 
   useEffect(() => {
     if (session.status === "authenticated") {
-      void router.push("/requests");
+      void router.replace(
+        session.data.user.role === "admin" ? "/admin" : "/requests",
+      );
     }
-  }, [router, session.status]);
+  }, [router, session.data?.user.role, session.status]);
 }

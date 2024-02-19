@@ -101,6 +101,7 @@ export default function HowToBookDialog(
       cancelUrl: cancelUrl,
       images: props.offer.property.imageUrls,
       userId: session.data?.user.id ?? "",
+      totalSavings,
     });
 
     const stripe = await stripePromise;
