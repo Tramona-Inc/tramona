@@ -4,8 +4,8 @@ import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { z } from "zod";
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 export type TramonaDatabase = PostgresJsDatabase<
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   typeof import("@/server/db/schema")
 >;
 
