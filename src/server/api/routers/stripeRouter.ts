@@ -52,6 +52,7 @@ export const stripeRouter = createTRPCRouter({
               product_data: {
                 name: input.name,
                 description: input.description,
+                metadata: metadata,
                 images: input.images,
               },
             },
