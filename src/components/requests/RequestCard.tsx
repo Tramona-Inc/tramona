@@ -1,4 +1,3 @@
-import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
 import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
@@ -11,11 +10,27 @@ import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
+import { type inferRouterOutputs } from "@trpc/server";
+import { type AppRouter } from "@/server/api/root";
+
+export type DetailedRequest =
+  inferRouterOutputs<AppRouter>["requests"]["getMyRequests"][
+    | "activeRequests"
+    | "inactiveRequests"][number];
+
+export type RequestWithUser =
+  inferRouterOutputs<AppRouter>["requests"]["getAll"][
+    | "incomingRequests"
+    | "pastRequests"][number];
 
 export default function RequestCard({
+  withUser,
   request,
   children,
-}: React.PropsWithChildren<{ request: DetailedRequest }>) {
+}: React.PropsWithChildren<
+  | { request: DetailedRequest; withUser?: false | undefined }
+  | { request: RequestWithUser; withUser: true }
+>) {
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
@@ -30,13 +45,22 @@ export default function RequestCard({
   return (
     <Card key={request.id}>
       <CardContent className="space-y-2">
-        <h2 className="flex gap-1 text-lg font-semibold text-zinc-700">
-          <MapPinIcon className="text-zinc-300" />
-          <div className="flex-1">{request.location}</div>
-          <div className="mb-auto">
-            <RequestCardBadge request={request} />
+        <div className="flex items-start justify-between gap-1">
+          <div className="flex-1">
+            {withUser && (
+              <p className="text-xs font-medium text-zinc-500">
+                {request.madeByUser.email}
+              </p>
+            )}
+            <div className="flex items-start gap-1">
+              <MapPinIcon className="shrink-0 text-zinc-300" />
+              <h2 className="text-lg font-semibold text-zinc-700">
+                {request.location}
+              </h2>
+            </div>
           </div>
-        </h2>
+          <RequestCardBadge request={request} />
+        </div>
         <div className="text-zinc-500">
           <p>
             requested{" "}
@@ -67,7 +91,11 @@ export default function RequestCard({
   );
 }
 
-function RequestCardBadge({ request }: { request: DetailedRequest }) {
+function RequestCardBadge({
+  request,
+}: {
+  request: DetailedRequest | RequestWithUser;
+}) {
   switch (getRequestStatus(request)) {
     case "pending":
       const msAgo = Date.now() - request.createdAt.getTime();
@@ -77,25 +105,25 @@ function RequestCardBadge({ request }: { request: DetailedRequest }) {
     case "accepted":
       return (
         <Badge variant="green" className="pr-1">
-          {request.numOffers > 0 ? request.numOffers : "No"}{" "}
-          {request.numOffers === 1 ? "offer" : "offers"}
+          {plural(request.numOffers, "offer")}
           <div className="flex items-center -space-x-2">
-            {request.hostImages.map((imageUrl) => (
-              <Image
-                key={imageUrl}
-                src={imageUrl}
-                alt=""
-                width={22}
-                height={22}
-                className="inline-block"
-              />
-            ))}
+            {"hostImages" in request &&
+              request.hostImages.map((imageUrl) => (
+                <Image
+                  key={imageUrl}
+                  src={imageUrl}
+                  alt=""
+                  width={22}
+                  height={22}
+                  className="inline-block"
+                />
+              ))}
           </div>
         </Badge>
       );
     case "rejected":
       return <Badge variant="red">Rejected</Badge>;
     case "booked":
-      return <Badge variant="blue">Used</Badge>;
+      return <Badge variant="blue">Booked</Badge>;
   }
 }

@@ -16,10 +16,10 @@ export const offers = pgTable(
     id: serial("id").primaryKey(),
     requestId: integer("request_id")
       .notNull()
-      .references(() => requests.id),
+      .references(() => requests.id, { onDelete: "cascade" }),
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id),
+      .references(() => properties.id, { onDelete: "set null" }),
     totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
     madePublicAt: timestamp("made_public_at"),
@@ -37,23 +37,7 @@ export type Offer = typeof offers.$inferSelect;
 export const offerSelectSchema = createSelectSchema(offers);
 export const offerInsertSchema = createInsertSchema(offers);
 
-
-        // const user = await db.query.users.findFirst({
-        //   where: eq(users.id, paymentIntentSucceeded.metadata.userId!),
-        // });
-        // const referralCode = user?.referralCodeUsed;
-
-        // if (referralCode) {
-        //   const offerId = parseInt(paymentIntentSucceeded.metadata.listingId!);
-        //   const refereeId = paymentIntentSucceeded.metadata.userId!;
-
-        //   const tramonaFee =
-        //     parseInt(paymentIntentSucceeded.metadata.totalSavings!) * 0.2;
-        //   const cashbackMultiplier =
-        //     user.referralTier === "Ambassador" ? 0.5 : 0.3;
-        //   const cashbackEarned = tramonaFee * cashbackMultiplier;
-
-        //   await db
-        //     .insert(referralEarnings)
-        //     .values({ offerId, cashbackEarned, refereeId, referralCode });
-        // }
+// make everything except id optional
+export const offerUpdateSchema = offerInsertSchema.partial().required({
+  id: true,
+});

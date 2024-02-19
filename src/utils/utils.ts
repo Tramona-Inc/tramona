@@ -118,12 +118,14 @@ export function formatDateMonthDay(date: Date) {
   return `${month} ${day}`;
 }
 
-export function formatDateRangeFromStrs(from: string, to?: string) {
-  const fromDate = new Date(from + "T00:00:00");
-  const toDate = to ? new Date(to + "T00:00:00") : undefined;
+// not used right now and probably will never have to:
 
-  return formatDateRange(fromDate, toDate);
-}
+// export function formatDateRangeFromStrs(from: string, to?: string) {
+//   const fromDate = new Date(from + "T00:00:00");
+//   const toDate = to ? new Date(to + "T00:00:00") : undefined;
+
+//   return formatDateRange(fromDate, toDate);
+// }
 
 export function getNumNights(from: Date, to: Date) {
   return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
