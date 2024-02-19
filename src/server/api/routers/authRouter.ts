@@ -4,14 +4,15 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 // import { render } from "@react-email/render";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
-import { users, type User } from "@/server/db/schema";
+import { referralCodes, users, type User } from "@/server/db/schema";
 import { render } from "@react-email/render";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailler, { type TransportOptions } from "nodemailer";
 import { z } from "zod";
-import { VerifyEmailLink } from '@/components/email-templates/VerifyEmail';
-import { PasswordResetEmailLink } from '@/components/email-templates/PasswordResetEmailLink';
+import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
+import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
+import { generateReferralCode } from '@/utils/utils';
 
 // Init transproter for nodemailer
 const transporter = nodemailler.createTransport({
@@ -80,8 +81,13 @@ export const authRouter = createTRPCRouter({
             .returning()
             .then((res) => res[0] ?? null);
 
-          // Link user account
           if (user) {
+            // Create referral code
+            await ctx.db
+                .insert(referralCodes)
+                .values({ ownerId: user.id, referralCode: generateReferralCode() });
+
+            // Link user account
             await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
               provider: "credentials",
               providerAccountId: user.id,
