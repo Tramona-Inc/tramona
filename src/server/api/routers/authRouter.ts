@@ -5,6 +5,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 // import { render } from "@react-email/render";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { referralCodes, users } from "@/server/db/schema";
+import { generateReferralCode } from "@/utils/utils";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
@@ -28,7 +29,7 @@ export const authRouter = createTRPCRouter({
       //     code: "BAD_REQUEST",
       //     message: "User with this username already exists",
       //   });
-      
+
       try {
         if (input.referralCode) {
           const referralCode = await ctx.db.query.referralCodes.findFirst({
@@ -79,10 +80,14 @@ export const authRouter = createTRPCRouter({
           })
           .returning()
           .then((res) => res[0] ?? null);
-        
-    
 
         if (user) {
+          // Create a referral
+          await ctx.db
+            .insert(referralCodes)
+            .values({ ownerId: user.id, referralCode: generateReferralCode() });
+
+          // Link account
           await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
             provider: "credentials",
             providerAccountId: user.id,
@@ -90,6 +95,7 @@ export const authRouter = createTRPCRouter({
             type: "email",
           });
         }
+
         return user;
       } catch (error) {
         throw new TRPCError({
