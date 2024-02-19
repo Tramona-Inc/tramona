@@ -71,6 +71,7 @@ export default async function webhook(
         const user = await db.query.users.findFirst({
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
+
         const referralCode = user?.referralCodeUsed;
 
         if (referralCode) {

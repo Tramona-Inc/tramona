@@ -36,3 +36,24 @@ export const offers = pgTable(
 export type Offer = typeof offers.$inferSelect;
 export const offerSelectSchema = createSelectSchema(offers);
 export const offerInsertSchema = createInsertSchema(offers);
+
+
+        // const user = await db.query.users.findFirst({
+        //   where: eq(users.id, paymentIntentSucceeded.metadata.userId!),
+        // });
+        // const referralCode = user?.referralCodeUsed;
+
+        // if (referralCode) {
+        //   const offerId = parseInt(paymentIntentSucceeded.metadata.listingId!);
+        //   const refereeId = paymentIntentSucceeded.metadata.userId!;
+
+        //   const tramonaFee =
+        //     parseInt(paymentIntentSucceeded.metadata.totalSavings!) * 0.2;
+        //   const cashbackMultiplier =
+        //     user.referralTier === "Ambassador" ? 0.5 : 0.3;
+        //   const cashbackEarned = tramonaFee * cashbackMultiplier;
+
+        //   await db
+        //     .insert(referralEarnings)
+        //     .values({ offerId, cashbackEarned, refereeId, referralCode });
+        // }
