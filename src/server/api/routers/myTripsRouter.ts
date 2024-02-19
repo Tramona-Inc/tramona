@@ -10,7 +10,7 @@ export type TramonaDatabase = PostgresJsDatabase<
 >;
 
 const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
-  return await db
+  const result = await db
     .select({
       offerId: offers.id,
       requestId: offers.requestId,
@@ -26,6 +26,12 @@ const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
         eq(requests.userId, userId),
       ),
     );
+
+  return result.map(({ offerId, requestId, checkOut }) => ({
+    offerId: offerId!,
+    requestId: requestId!,
+    checkOut: checkOut!,
+  }));
 };
 
 // Fetch the trips data to display
@@ -68,7 +74,7 @@ const getDisplayTrips = async (
 };
 
 type AllAcceptedOffers = {
-  checkOut: Date | undefined;
+  checkOut: Date;
   offerId: number;
   requestId: number;
 }[];
@@ -101,7 +107,9 @@ export const myTripsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Get all accepted offers
-      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+      const allAcceptedOffers = (
+        await getAllAcceptedOffers(ctx.user.id, ctx.db)
+      ).filter((id) => id !== null);
 
       // Get upcoming trips
       const upcomingTripIds = await getCertainTrips(
