@@ -52,7 +52,7 @@ export function PasswordResetEmailLink({
           </Text>
           <Text>{`Thanks,`}</Text>
           <Text>
-            <strong>{`Turkish Dictionary Team`}</strong>
+            <strong>{`Tramona Team`}</strong>
           </Text>
         </Container>
       </Tailwind>
