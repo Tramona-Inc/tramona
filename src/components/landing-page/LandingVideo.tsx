@@ -6,7 +6,6 @@ const LandingVideo = () => {
 
   const playVideo = () => {
     if (videoRef.current && !videoLoaded) {
-      
       videoRef.current.play()
         .then(() => setVideoLoaded(true))
         .catch((error) => {
