@@ -14,7 +14,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   propertiesOwned: many(properties),
   requestsMade: many(requests),
   referralEarnings: many(referralEarnings),
-  conversations: many(conversations),
+  messages: many(messages),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({

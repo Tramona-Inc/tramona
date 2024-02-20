@@ -50,7 +50,12 @@ export default function MessagePage() {
   useEffect(() => {
     const fetchRecipients = async () => {
       try {
-        const { data, error } = await supabase.from("user").select("id");
+        const { data, error } = await supabase.from("messages").select(`
+          id,
+          message,
+          conversation_id,
+          conversations (id, conversation_type, created_at) 
+        `);
         if (data) {
           // Assuming your user table structure, modify as needed
           console.log(data);
