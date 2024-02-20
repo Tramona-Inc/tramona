@@ -1,10 +1,10 @@
 import {
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
   Dispatch,
   SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 
 import {
@@ -12,13 +12,12 @@ import {
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "../ui/alert-dialog";
 
+import TramonaIcon from "../_icons/TramonaIcon";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
-import TramonaIcon from "../_icons/TramonaIcon";
 
 import { api } from "@/utils/api";
 
@@ -83,7 +82,6 @@ export default function OTPDialog({
     setCode(initialCode);
     setOtpSent(false);
     setVerified(false);
-
     refs.current[0]?.focus();
   };
 
@@ -100,14 +98,17 @@ export default function OTPDialog({
         to: toPhoneNumber,
       });
 
+      setOtpSent(true);
+      setOpen(true);
+
       toast({
         title: "Verification code sent!",
         description: "Code is valid for 10 minutes.",
       });
-
-      setOtpSent(true);
-      setOpen(true);
     } catch (err: any) {
+      setOpen(false);
+      setVerified(false);
+
       toast({
         variant: "destructive",
         title: "Something went wrong!",
@@ -144,6 +145,9 @@ export default function OTPDialog({
         setVerified(true);
         setOpen(false);
       } catch (err: any) {
+        setVerified(false);
+        setOpen(false);
+
         toast({
           variant: "destructive",
           title: "Something went wrong!",
@@ -159,11 +163,22 @@ export default function OTPDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button variant="link" onClick={sendVerificationCode}>
-          Send verification code
-        </Button>
-      </AlertDialogTrigger>
+      <Button
+        variant="link"
+        onClick={() => {
+          if (toPhoneNumber !== "") {
+            sendVerificationCode();
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Please enter a phone number!",
+            });
+          }
+        }}
+      >
+        Send verification code
+      </Button>
+
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="justify-content mb-5 flex flex-col items-center gap-2">

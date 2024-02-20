@@ -1,3 +1,4 @@
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -7,7 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -32,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { forwardRef } from "react";
 import {
   NestedDrawer,
   DrawerContent,
@@ -42,9 +41,22 @@ import {
   DrawerTitle,
 } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "../ui/label";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import OTPDialog from "../otp-dialog/OTPDialog";
+import { formatPhoneNumber } from "@/utils/formatters";
 
 const formSchema = z
   .object({
@@ -72,6 +84,9 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
+  const { data: session, status } = useSession();
+  const user = session?.user;
+
   const isDesktop = useIsDesktop();
 
   const form = useForm<FormSchema>({
@@ -81,10 +96,14 @@ export default function NewRequestForm({
     },
   });
 
-  const mutation = api.requests.create.useMutation();
+  const createRequestsMutation = api.requests.create.useMutation();
+
+  const smsMutation = api.twilio.sendSMS.useMutation();
+
+  const updateUserProfileMutation = api.users.updateProfile.useMutation();
+
   const utils = api.useUtils();
   const router = useRouter();
-  const { status } = useSession();
 
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   const fmtdFilters = getFmtdFilters({
@@ -94,12 +113,50 @@ export default function NewRequestForm({
     note,
   });
 
+  const [toPhoneNumber, setToPhoneNumber] = useState<string>("");
+
+  const [open, setOpen] = useState<boolean>(false);
+
+  const [verified, setVerified] = useState<boolean>(false);
+
+  const verifiedRef = useRef<boolean>(verified);
+
+  const waitForVerification = async () => {
+    return new Promise<void>((resolve) => {
+      if (verifiedRef.current) {
+        resolve();
+      } else {
+        const unsubscribe = () => {
+          if (verifiedRef.current) {
+            resolve();
+            clearInterval(interval);
+          }
+        };
+
+        const interval = setInterval(unsubscribe, 100);
+      }
+    });
+  };
+
+  useEffect(() => {
+    verifiedRef.current = verified;
+  }, [verified]);
+
   async function onSubmit(data: FormSchema) {
+    await waitForVerification();
+
+    await updateUserProfileMutation.mutateAsync({
+      name: user?.name!,
+      email: user?.email!,
+      phoneNumber: toPhoneNumber,
+    });
+
+    setOpen(false);
+
     const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
     const checkIn = data.date.from;
     const checkOut = data.date.to;
     const numNights = getNumNights(checkIn, checkOut);
-
     const newRequest = {
       checkIn: checkIn,
       checkOut: checkOut,
@@ -107,7 +164,6 @@ export default function NewRequestForm({
       propertyType: propertyType === "any" ? undefined : propertyType,
       ...restData,
     };
-
     if (status === "unauthenticated") {
       localStorage.setItem("unsentRequest", JSON.stringify(newRequest));
       void router.push("/auth/signin").then(() => {
@@ -118,8 +174,12 @@ export default function NewRequestForm({
       });
     } else {
       try {
-        await mutation.mutateAsync(newRequest).catch(() => {
+        await createRequestsMutation.mutateAsync(newRequest).catch(() => {
           throw new Error();
+        });
+        await smsMutation.mutateAsync({
+          msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+          to: formatPhoneNumber(toPhoneNumber),
         });
         await utils.requests.invalidate();
         successfulRequestToast(newRequest);
@@ -128,7 +188,6 @@ export default function NewRequestForm({
         errorToast();
       }
     }
-
     afterSubmit?.();
   }
 
@@ -226,14 +285,48 @@ export default function NewRequestForm({
           )}
         </FormItem>
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          size="lg"
-          type="submit"
-          className="col-span-full"
-        >
-          Request Deal
-        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <Button
+            disabled={form.formState.isSubmitting}
+            size="lg"
+            type="submit"
+            className="col-span-full"
+            onClick={() => {
+              if (form.formState.isValid) {
+                setOpen(true);
+              }
+            }}
+          >
+            Request Deal
+          </Button>
+
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Phone number verification</DialogTitle>
+              <DialogDescription>
+                I want to receive sms texts through phone
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 p-4 py-4">
+              <div className="flex flex-row items-center gap-4">
+                <Label>Phone number</Label>
+                <Input
+                  id="phone-number"
+                  value={toPhoneNumber}
+                  onChange={(e) => {
+                    setToPhoneNumber(e.target.value);
+                  }}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <OTPDialog
+                toPhoneNumber={formatPhoneNumber(toPhoneNumber)}
+                setVerified={setVerified}
+              />
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </form>
     </Form>
   );

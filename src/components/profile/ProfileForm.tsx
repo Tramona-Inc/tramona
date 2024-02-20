@@ -19,7 +19,7 @@ import { zodString } from "@/utils/zod-utils";
 import { api } from "@/utils/api";
 import { useState } from "react";
 
-import OTPDialog from "./OTPDialog";
+import OTPDialog from "../otp-dialog/OTPDialog";
 import { formatPhoneNumber } from "@/utils/formatters";
 
 const formSchema = z.object({
@@ -68,7 +68,7 @@ export default function ProfileForm() {
     if (!verified) {
       toast({
         variant: "destructive",
-        title: "Please validate phone number!",
+        title: "Please verify phone number!",
       });
       return;
     }

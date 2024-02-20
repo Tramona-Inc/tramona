@@ -8,7 +8,7 @@ export default function TwilioDemo() {
   const sms = () => {
     const response = sendSMS.mutateAsync({
       msg: "Hi this is Tramona!",
-      to: "+14256283838",
+      to: "+17815794214",
     });
 
     console.log("sendSMS: ", response);
