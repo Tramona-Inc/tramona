@@ -1,8 +1,9 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import MessagesSidebar from "@/components/messages/messages-sidebar";
 import MessagesContent from "@/components/messages/messages-content";
+import MessagesSidebar from "@/components/messages/messages-sidebar";
+import supabase from "@/utils/supabase";
 
 export type IncomingMessage = {
   id: string;
@@ -45,6 +46,25 @@ export default function MessagePage() {
       recentMessage: "[shows most recent message]",
     },
   ];
+
+  useEffect(() => {
+    const fetchRecipients = async () => {
+      try {
+        const { data, error } = await supabase.from("user").select("id");
+        if (data) {
+          // Assuming your user table structure, modify as needed
+          console.log(data);
+        }
+        if (error) {
+          console.error("Error fetching recipients:", error);
+        }
+      } catch (error) {
+        console.error("Error fetching recipients:");
+      }
+    };
+
+    void fetchRecipients();
+  }, []);
 
   return (
     <>
