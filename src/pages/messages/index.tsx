@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import MessagesContent from "@/components/messages/messages-content";
 import MessagesSidebar from "@/components/messages/messages-sidebar";
 import supabase from "@/utils/supabase";
+import { useSession } from "next-auth/react";
 
 export type IncomingMessage = {
   id: string;
@@ -47,15 +48,27 @@ export default function MessagePage() {
     },
   ];
 
+  const { data: session, status } = useSession();
+
   useEffect(() => {
+    console.log(session?.user.id);
+
     const fetchRecipients = async () => {
       try {
-        const { data, error } = await supabase.from("messages").select(`
-          id,
-          message,
-          conversation_id,
-          conversations (id, conversation_type, created_at) 
-        `);
+        const { data, error } = await supabase
+          .from("messages")
+          .select(
+            `
+            id,
+            message,
+            conversation_id,
+            user_id,
+            conversations (id, conversation_type, created_at) 
+          `,
+          )
+          .eq("user_id", session?.user.id);
+
+        // .eq("user_id", session?.user.id);
         if (data) {
           // Assuming your user table structure, modify as needed
           console.log(data);
