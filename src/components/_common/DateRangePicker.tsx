@@ -16,8 +16,8 @@ import { CalendarIcon } from "lucide-react";
 import { type FieldPath, type FieldValues } from "react-hook-form";
 
 export default function DateRangePicker<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
 >(
   props: Omit<
     React.ComponentProps<typeof FormField<TFieldValues, TName>>,
