@@ -34,6 +34,7 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
+import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -63,6 +64,9 @@ export default function AdminOfferForm({
   afterSubmit?: () => void;
   request: Request;
 }) {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -86,6 +90,7 @@ export default function AdminOfferForm({
 
   const propertiesMutation = api.properties.create.useMutation();
   const offersMutation = api.offers.create.useMutation();
+  const twilioMutation = api.twilio.sendSMS.useMutation();
 
   const utils = api.useUtils();
 
@@ -126,6 +131,13 @@ export default function AdminOfferForm({
         utils.offers.invalidate(),
         utils.requests.invalidate(),
       ]);
+
+      const sms = {
+        to: user?.phoneNumber!,
+        msg: "You have a new offer for a request in your Tramona account!",
+      };
+
+      await twilioMutation.mutateAsync(sms);
 
       successfulAdminOfferToast({
         propertyName: newProperty.name,
