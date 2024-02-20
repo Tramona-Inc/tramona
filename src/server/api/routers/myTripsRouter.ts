@@ -1,7 +1,102 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { offers, requests } from "@/server/db/schema";
-import { and, eq, isNotNull, or } from "drizzle-orm";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
+import { type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { z } from "zod";
+
+export type TramonaDatabase = PostgresJsDatabase<
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  typeof import("@/server/db/schema")
+>;
+
+const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
+  const result = await db
+    .select({
+      offerId: offers.id,
+      requestId: offers.requestId,
+      checkOut: requests.checkOut,
+    })
+    .from(offers)
+    .fullJoin(requests, eq(offers.requestId, requests.id))
+    .where(
+      and(
+        isNotNull(offers.acceptedAt),
+        isNotNull(offers.paymentIntentId),
+        isNotNull(offers.checkoutSessionId),
+        eq(requests.userId, userId),
+      ),
+    );
+
+  return result.map(({ offerId, requestId, checkOut }) => ({
+    offerId: offerId!,
+    requestId: requestId!,
+    checkOut: checkOut!,
+  }));
+};
+
+// Fetch the trips data to display
+const getDisplayTrips = async (
+  tripIds: number[],
+  db: TramonaDatabase,
+  limit?: number,
+) => {
+  if (tripIds.length === 0) {
+    return null;
+  } else {
+    return await db.query.offers.findMany({
+      where: inArray(offers.id, tripIds),
+      limit: limit ?? undefined,
+      with: {
+        property: {
+          with: {
+            host: { columns: { name: true, email: true, image: true } },
+          },
+          columns: {
+            name: true,
+            imageUrls: true,
+            address: true,
+          },
+        },
+        request: {
+          columns: {
+            userId: true,
+            checkIn: true,
+            checkOut: true,
+            resolvedAt: true,
+          },
+          with: {
+            madeByUser: { columns: { name: true } }, // Fetch user name
+          },
+        },
+      },
+    });
+  }
+};
+
+type AllAcceptedOffers = {
+  checkOut: Date;
+  offerId: number;
+  requestId: number;
+}[];
+
+const getCertainTrips = async (
+  type: string,
+  allAcceptedOffers: AllAcceptedOffers,
+  date: Date,
+) => {
+  switch (type) {
+    case "previous":
+      return allAcceptedOffers
+        .filter((trip) => trip.checkOut && trip.checkOut < date)
+        .map((trip) => trip.offerId);
+    case "upcoming":
+      return allAcceptedOffers
+        .filter((trip) => trip.checkOut && trip.checkOut >= date)
+        .map((trip) => trip.offerId);
+    default:
+      return [];
+  }
+};
 
 export const myTripsRouter = createTRPCRouter({
   mostRecentTrips: protectedProcedure
@@ -11,58 +106,90 @@ export const myTripsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Obtain all request ids by the user
-      const requestIds = await ctx.db
-        .select({ requestId: requests.id })
-        .from(requests)
-        .where(eq(requests.userId, ctx.user.id))
-        .then((requestIdsData) =>
-          requestIdsData.map((request) => request.requestId),
-        );
+      // Get all accepted offers
+      const allAcceptedOffers = (
+        await getAllAcceptedOffers(ctx.user.id, ctx.db)
+      ).filter((id) => id !== null);
 
-      const allTrips = await ctx.db.query.offers.findMany({
-        where: and(
-          isNotNull(offers.acceptedAt),
-          isNotNull(offers.paymentIntentId),
-          isNotNull(offers.checkoutSessionId),
-          or(...requestIds.map((requestId) => eq(offers.requestId, requestId))),
-        ),
-        with: {
-          property: {
-            with: {
-              host: { columns: { name: true, email: true, image: true } },
-            },
-            columns: {
-              name: true,
-              imageUrls: true,
-              address: true,
-            },
-          },
-          request: {
-            columns: {
-              userId: true,
-              checkIn: true,
-              checkOut: true,
-              resolvedAt: true,
-            },
-            with: {
-              madeByUser: { columns: { name: true } }, // Fetch user name
-            },
-          },
-        },
-      });
-
-      // Later add pagination
-      const upcomingTrips = allTrips.filter(
-        (trip) =>
-          trip.request.checkIn && new Date(trip.request.checkOut) > input.date,
+      // Get upcoming trips
+      const upcomingTripIds = await getCertainTrips(
+        "upcoming",
+        allAcceptedOffers,
+        input.date,
       );
 
-      const previousTrips = allTrips.filter(
-        (trip) =>
-          trip.request.checkIn && new Date(trip.request.checkOut) <= input.date,
+      const displayUpcomingTrips = await getDisplayTrips(
+        upcomingTripIds,
+        ctx.db,
+        2,
       );
 
-      return { upcomingTrips, previousTrips };
+      // Get previous trips
+      const previousTripIds = await getCertainTrips(
+        "previous",
+        allAcceptedOffers,
+        input.date,
+      );
+
+      const displayPreviousTrips = await getDisplayTrips(
+        previousTripIds,
+        ctx.db,
+        2,
+      );
+
+      return {
+        totalUpcomingTrips: upcomingTripIds.length,
+        totalPreviousTrips: previousTripIds.length,
+        displayUpcomingTrips,
+        displayPreviousTrips,
+      };
+    }),
+  getUpcomingTrips: protectedProcedure
+    .input(
+      z.object({
+        date: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Get all accepted offers
+      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+
+      // Get upcoming trips
+      const upcomingTripIds = await getCertainTrips(
+        "upcoming",
+        allAcceptedOffers,
+        input.date,
+      );
+
+      const displayAllUpcomingTrips = await getDisplayTrips(
+        upcomingTripIds,
+        ctx.db,
+      );
+
+      return displayAllUpcomingTrips;
+    }),
+  getPreviousTrips: protectedProcedure
+    .input(
+      z.object({
+        date: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Get all accepted offers
+      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+
+      // Get upcoming trips
+      const upcomingTripIds = await getCertainTrips(
+        "previous",
+        allAcceptedOffers,
+        input.date,
+      );
+
+      const displayAllUpcomingTrips = await getDisplayTrips(
+        upcomingTripIds,
+        ctx.db,
+      );
+
+      return displayAllUpcomingTrips;
     }),
 });

@@ -1,4 +1,5 @@
 import {
+  serial,
   integer,
   pgEnum,
   pgTable,
@@ -7,6 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { offers } from "..";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
@@ -16,6 +18,11 @@ export const roleEnum = pgEnum("role", ["guest", "host", "admin"]);
 export const referralTierEnum = pgEnum("referral_tier", [
   "Partner",
   "Ambassador",
+]);
+export const earningStatusEnum = pgEnum("earning_status", [
+  "pending",
+  "paid",
+  "cancelled",
 ]);
 
 export const users = pgTable("user", {
@@ -51,6 +58,30 @@ export const referralCodes = pgTable("referral_codes", {
   numBookingsUsingCode: integer("num_bookings_using_code").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const referralEarnings = pgTable("referral_earnings", {
+  id: serial("id").primaryKey(),
+  referralCode: text("referral_code")
+    .notNull()
+    .references(() => referralCodes.referralCode, { onDelete: "set null" }),
+  refereeId: text("referee_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "set null" }),
+  offerId: integer("offer_id")
+    .notNull()
+    .references(() => offers.id, { onDelete: "cascade" }),
+  earningStatus: earningStatusEnum("earning_status")
+    .notNull()
+    .default("pending"),
+  cashbackEarned: integer("cashback_earned").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type ReferralEarnings = typeof referralEarnings.$inferSelect;
+export const referralEarningsSelectSchema =
+  createSelectSchema(referralEarnings);
+export const referralEarningsInsertSchema =
+  createInsertSchema(referralEarnings);
 
 export type ReferralCode = typeof referralCodes.$inferSelect;
 export const referralCodeSelectSchema = createSelectSchema(referralCodes);

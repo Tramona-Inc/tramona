@@ -72,6 +72,7 @@ export default function DesktopSearchBar({
   });
 
   const [curTab, setCurTab] = useState(0);
+  const MAX_TRIPS = 10;
 
   const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
@@ -168,7 +169,7 @@ export default function DesktopSearchBar({
           {Array.from({ length: numTabs }).map((_, i) => {
             const isSelected = curTab === i;
             const hasErrors = tabsWithErrors.includes(i);
-            const showX = isSelected && i > 0;
+            const showX = isSelected && numTabs > 1;
 
             // buttons in buttons arent allowed, so we only show the x button
             // on the tab when the tab is selected, and make the tab a div instead
@@ -216,6 +217,7 @@ export default function DesktopSearchBar({
               </Comp>
             );
           })}
+          {numTabs < MAX_TRIPS && (
           <button
             key=""
             type="button"
@@ -231,7 +233,12 @@ export default function DesktopSearchBar({
           >
             <PlusIcon className="size-4" />
             Add another trip
-          </button>
+          </button>)}
+          {numTabs >= MAX_TRIPS && (
+            <div className="text-sm text-red-500">
+              Maximum of {MAX_TRIPS} trips reached.
+            </div>
+          )}
         </div>
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
           <FormField

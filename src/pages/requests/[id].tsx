@@ -1,11 +1,15 @@
 import Spinner from "@/components/_common/Spinner";
 import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
 import OfferCard from "@/components/requests/[id]/OfferCard";
+import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { TagIcon } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { getNumNights } from "@/utils/utils";
+import PaywallDialog from "@/components/requests/[id]/PaywallDialog";
+import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
 
 export default function Page() {
   const router = useRouter();
@@ -29,7 +33,7 @@ export default function Page() {
       </Head>
       <div className="relative">
         <div className="absolute inset-0 bg-primary">
-          <div className="relative top-1/2 h-1/2 rounded-t-3xl bg-background"></div>
+          <div className="relative top-1/2 h-1/2 bg-background sm:rounded-t-3xl"></div>
         </div>
         <div className="px-4 py-16">
           <div className="mx-auto max-w-xl">
@@ -57,7 +61,40 @@ export default function Page() {
                   requestId={requestId}
                   checkIn={request.checkIn}
                   checkOut={request.checkOut}
-                />
+                >
+                  <Button size="lg" variant="outline" className="rounded-full">
+                    <Link href={`/listings/${offer.id}`}>More details</Link>
+                  </Button>
+                  {false /* offer.isPremium */ ? (
+                    <PaywallDialog>
+                      <Button size="lg" variant="gold" className="rounded-lg">
+                        Join Tramona Lisa
+                      </Button>
+                    </PaywallDialog>
+                  ) : (
+                    <HowToBookDialog
+                      isBooked={false} // default will always be false in request page
+                      listingId={offer.id}
+                      propertyName={offer.property.name}
+                      offerNightlyPrice={
+                        offer.totalPrice /
+                        getNumNights(request.checkIn, request.checkOut)
+                      }
+                      totalPrice={offer.totalPrice}
+                      originalNightlyPrice={offer.property.originalNightlyPrice}
+                      airbnbUrl={offer.property.airbnbUrl ?? ""}
+                      checkIn={request.checkIn}
+                      checkOut={request.checkOut}
+                      requestId={requestId}
+                      offer={offer}
+                      isAirbnb={offer.property.airbnbUrl !== null}
+                    >
+                      <Button size="lg" className="min-w-32 rounded-full">
+                        Book
+                      </Button>
+                    </HowToBookDialog>
+                  )}
+                </OfferCard>
               ))}
             </div>
           ) : (

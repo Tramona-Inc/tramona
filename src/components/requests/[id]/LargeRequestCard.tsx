@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
 import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
@@ -11,6 +10,7 @@ import {
 } from "@/utils/utils";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import Image from "next/image";
+import { type DetailedRequest } from "../RequestCard";
 
 export default function LargeRequestCard({
   request,

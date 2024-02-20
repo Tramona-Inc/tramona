@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
   referralCodeSelectSchema,
   referralCodes,
+  referralEarnings,
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
@@ -88,5 +89,18 @@ export const referralCodesRouter = createTRPCRouter({
       .update(users)
       .set({ referralCodeUsed: null })
       .where(eq(users.id, ctx.user.id));
+  }),
+  getReferralEarnings: protectedProcedure.query(async ({ ctx }) => {
+    const userReferralCode = await ctx.db.query.referralCodes.findFirst({
+      where: eq(referralCodes.ownerId, ctx.user.id),
+    });
+
+    if (userReferralCode) {
+      const earnings = await ctx.db.query.referralEarnings.findMany({
+        where: eq(referralEarnings.referralCode, userReferralCode.referralCode),
+      });
+
+      return earnings;
+    }
   }),
 });

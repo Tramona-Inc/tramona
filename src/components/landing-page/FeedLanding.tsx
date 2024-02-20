@@ -32,13 +32,13 @@ export default function FeedLanding() {
 
         {/* Hidden the scrollbar */}
         <ScrollArea className="scrollbar-hide group max-h-[45vh] space-y-5 overflow-y-auto text-black md:max-h-[30vh] lg:max-h-[30vh]">
-          <div className="animate-loop-scroll flex flex-col gap-5 group-hover:paused">
+          <div className="animate-loop-scroll flex flex-col gap-5 group-hover:paused m-2">
             {/* {isLoading && <h1>Loading</h1>} */}
             {feed?.map((offer: OfferType) => (
               <FeedCardSm key={offer.id} offer={offer} />
             ))}
           </div>
-          <div className='aria-hidden="true" animate-loop-scroll mt-2 flex flex-col gap-5 group-hover:paused'>
+          <div className='aria-hidden="true" animate-loop-scroll mt-2 flex flex-col gap-5 group-hover:paused m-2'>
             {/* {isLoading && <h1>Loading</h1>} */}
             {feed?.map((offer: OfferType) => (
               <FeedCardSm key={offer.id} offer={offer} />

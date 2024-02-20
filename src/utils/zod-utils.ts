@@ -37,9 +37,13 @@ export function zodString({ minLen = 0, maxLen = 255 } = {}) {
 }
 
 export function zodNumber({ min = -Infinity, max = Infinity } = {}) {
-  return zodString()
-    .transform((s) => +s)
-    .refine((n) => !isNaN(n), { message: "Must be a number" })
+  return z
+    .union([
+      zodString()
+        .transform((s) => +s)
+        .refine((n) => !isNaN(n), { message: "Must be a number" }),
+      z.number(),
+    ])
     .refine((n) => n >= min && n <= max, {
       message:
         max === Infinity
