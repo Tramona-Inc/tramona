@@ -103,7 +103,7 @@ export default function FeedCard({ offer }: Props) {
   // const offerDate = dayjs(offer.request.resolvedAt).fromNow();
 
   return (
-    <Card className="w-[450px] lg:w-[500px]">
+    <Card className="w-[390px] lg:w-[500px] md:w-[450px]">
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex gap-3">
           <UserAvatar
@@ -139,9 +139,13 @@ export default function FeedCard({ offer }: Props) {
                   alt={`${0}`}
                   // width={2000}
                   // height={2000}
-                  layout="fill"
+                  // layout="fill"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  fill 
+                  priority 
                   style={{
                     objectFit: "cover",
+                    
                   }}
                 />
               </div>
