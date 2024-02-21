@@ -21,7 +21,9 @@ import Icons from "@/components/ui/icons";
 const formSchema = z.object({
   name: zodString(),
   email: zodString().email(),
-  message: zodString(),
+  message: zodString().max(300, {
+    message: "Response must be less than 300 Characters",
+  }),
 });
 
 function ContactForm() {
@@ -32,12 +34,31 @@ function ContactForm() {
   const { toast } = useToast();
 
   const handleSubmit = async ({}: z.infer<typeof formSchema>) => {
-    toast({
-      title: "Message sent successfully",
-      description: "We will be in touch shortly",
-    });
+    try {
+      //  Simulate an API request (replace with actual API call)
+      await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-    form.resetField("message", { defaultValue: "" });
+      // Simulate a successful response
+      toast({
+        title: "Message sent successfully",
+        description: "We will be in touch shortly",
+      });
+
+      // Reset the message field after successful submission
+      form.resetField("message", { defaultValue: "" });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+      });
+    }
   };
 
   return (
@@ -120,7 +141,7 @@ export default function Page() {
           >
             info@tramona.com
           </a>
-         .
+          .
         </p>
       </section>
       <section className="space-y-4 rounded-xl border p-4 shadow-md">

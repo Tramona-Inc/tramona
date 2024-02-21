@@ -132,7 +132,7 @@ export function ProgramFrom() {
     try {
       setIsLoading(true);
 
-      await fetch("/api/email/send", {
+      await fetch("/api/email/ambassador", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
