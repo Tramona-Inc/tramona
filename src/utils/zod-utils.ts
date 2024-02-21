@@ -85,3 +85,22 @@ export function zodMMDDYYYY() {
     )
     .transform((s) => parseISO(s));
 }
+
+export function zodPassword() {
+  return z
+    .string()
+    .min(8, { message: "Must be 8+ characters" })
+    .max(32, { message: "Can't be longer than 32 characters" })
+    .refine((value) => /[a-z]/.test(value), {
+      message: "Must contain at least one lowercase letter",
+    })
+    .refine((value) => /[A-Z]/.test(value), {
+      message: "Must contain at least one uppercase letter",
+    })
+    .refine((value) => /\d/.test(value), {
+      message: "Must contain at least one digit",
+    })
+    .refine((value) => /[!@#$%^&*]/.test(value), {
+      message: "Must contain at least one special character '!@#$%^&*'",
+    });
+}
