@@ -1,7 +1,11 @@
 import { relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
-import { conversations, messages } from "./tables/messages";
+import {
+  conversationParticipants,
+  conversations,
+  messages,
+} from "./tables/messages";
 import { offers } from "./tables/offers";
 import { properties } from "./tables/properties";
 import { requests } from "./tables/requests";
@@ -15,6 +19,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   requestsMade: many(requests),
   referralEarnings: many(referralEarnings),
   messages: many(messages),
+  conversationParticipants: many(conversationParticipants),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -86,3 +91,17 @@ export const messagesRelations = relations(messages, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const conversationParticipantsRelations = relations(
+  conversationParticipants,
+  ({ one }) => ({
+    conversation: one(conversations, {
+      fields: [conversationParticipants.conversationId],
+      references: [conversations.id],
+    }),
+    user: one(users, {
+      fields: [conversationParticipants.userId],
+      references: [users.id],
+    }),
+  }),
+);

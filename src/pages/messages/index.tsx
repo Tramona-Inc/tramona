@@ -51,21 +51,11 @@ export default function MessagePage() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    console.log(session?.user.id);
-
     const fetchRecipients = async () => {
       try {
         const { data, error } = await supabase
-          .from("messages")
-          .select(
-            `
-            id,
-            message,
-            conversation_id,
-            user_id,
-            conversations (id, conversation_type, created_at) 
-          `,
-          )
+          .from("conversation_participants")
+          .select("conversation_id")
           .eq("user_id", session?.user.id);
 
         // .eq("user_id", session?.user.id);
