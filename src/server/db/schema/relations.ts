@@ -19,7 +19,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   requestsMade: many(requests),
   referralEarnings: many(referralEarnings),
   messages: many(messages),
-  conversationParticipants: many(conversationParticipants),
+  conversations: many(conversationParticipants),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -79,6 +79,7 @@ export const earningsRelations = relations(referralEarnings, ({ one }) => ({
 
 export const conversationsRelations = relations(conversations, ({ many }) => ({
   messages: many(messages),
+  participants: many(conversationParticipants),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({

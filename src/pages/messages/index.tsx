@@ -1,10 +1,9 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import MessagesContent from "@/components/messages/messages-content";
 import MessagesSidebar from "@/components/messages/messages-sidebar";
-import supabase from "@/utils/supabase";
-import { useSession } from "next-auth/react";
+import { api } from "@/utils/api";
 
 export type IncomingMessage = {
   id: string;
@@ -31,48 +30,11 @@ export default function MessagePage() {
       name: "Derick",
       recentMessage: "[shows most recent message]",
     },
-    {
-      id: "3",
-      name: "Anna",
-      recentMessage: "[shows most recent message]",
-    },
-    {
-      id: "4",
-      name: "Anna",
-      recentMessage: "[shows most recent message]",
-    },
-    {
-      id: "5",
-      name: "Anna",
-      recentMessage: "[shows most recent message]",
-    },
   ];
 
-  const { data: session, status } = useSession();
+  const { data: participants } = api.messages.getParticipants.useQuery();
 
-  useEffect(() => {
-    const fetchRecipients = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("conversation_participants")
-          .select("conversation_id")
-          .eq("user_id", session?.user.id);
-
-        // .eq("user_id", session?.user.id);
-        if (data) {
-          // Assuming your user table structure, modify as needed
-          console.log(data);
-        }
-        if (error) {
-          console.error("Error fetching recipients:", error);
-        }
-      } catch (error) {
-        console.error("Error fetching recipients:");
-      }
-    };
-
-    void fetchRecipients();
-  }, []);
+  console.log(participants);
 
   return (
     <>
