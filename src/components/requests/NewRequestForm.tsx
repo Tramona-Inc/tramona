@@ -16,14 +16,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FilterIcon } from "lucide-react";
+import { Check, FilterIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
-import { capitalize, getNumNights, useIsDesktop } from "@/utils/utils";
+import { capitalize, cn, getNumNights, useIsDesktop } from "@/utils/utils";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
   Select,
@@ -33,6 +33,15 @@ import {
   SelectValue,
 } from "../ui/select";
 import { forwardRef } from "react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
 import {
   NestedDrawer,
   DrawerContent,
@@ -45,6 +54,7 @@ import { DialogClose } from "../ui/dialog";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import usePlaceAutocomplete from "use-places-autocomplete";
 
 const formSchema = z
   .object({
@@ -85,6 +95,14 @@ export default function NewRequestForm({
   const utils = api.useUtils();
   const router = useRouter();
   const { status } = useSession();
+
+  const {
+    ready,
+    value,
+    suggestions: { status: suggestionsLoading, data },
+    setValue,
+    clearSuggestions,
+  } = usePlaceAutocomplete({ debounce: 300 });
 
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   const fmtdFilters = getFmtdFilters({
@@ -144,9 +162,75 @@ export default function NewRequestForm({
           render={({ field }) => (
             <FormItem className="col-span-full sm:col-span-1">
               <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="filledInput"
+                      type="button"
+                      role="combobox"
+                      disabled={!ready}
+                      className="line-clamp-1 w-full self-start"
+                    >
+                      {field.value}
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <Command>
+                    <CommandInput
+                      value={value}
+                      onValueChange={(value) => {
+                        setValue(value);
+
+                        if (value === "" || data.length === 0)
+                          clearSuggestions();
+                      }}
+                      placeholder="Search location..."
+                    />
+                    {/* {suggestionsLoading && (
+                      <CommandGroup>Loading suggestions...</CommandGroup>
+                    )} */}
+                    {suggestionsLoading === "OK" && (
+                      <CommandList>
+                        {data.map((suggestion) => (
+                          <CommandItem
+                            key={suggestion.place_id}
+                            value={suggestion.description}
+                            onSelect={() =>
+                              form.setValue("location", suggestion.description)
+                            }
+                            className="flex"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4 flex-shrink-0",
+                                suggestion.description === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            <p className="line-clamp-1">
+                              {suggestion.description}
+                            </p>
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    )}
+                    {value === "" && (
+                      <CommandGroup>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Start typing to see suggestions
+                        </p>
+                      </CommandGroup>
+                    )}
+                    {data.length === 0 && value !== "" && (
+                      <CommandEmpty>No suggestions to show!</CommandEmpty>
+                    )}
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
