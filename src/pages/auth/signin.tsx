@@ -25,12 +25,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const formSchema = z
-  .object({
-    email: zodEmail(),
-    password: z.string(),
-  })
-  .required();
+const formSchema = z.object({
+  email: zodEmail(),
+  password: z.string(),
+});
 
 export default function SignIn({
   providers,
