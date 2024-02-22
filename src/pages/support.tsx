@@ -33,15 +33,16 @@ function ContactForm() {
 
   const { toast } = useToast();
 
-  const handleSubmit = async ({}: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (formData: z.infer<typeof formSchema>) => {
     try {
+      console.log(formData);
       //  Simulate an API request (replace with actual API call)
-      await fetch("/api/contact", {
+      await fetch("/api/email/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       });
 
       // Simulate a successful response
