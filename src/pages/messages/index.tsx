@@ -3,38 +3,25 @@ import { useState } from "react";
 
 import MessagesContent from "@/components/messages/messages-content";
 import MessagesSidebar from "@/components/messages/messages-sidebar";
+import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
+import { type inferRouterOutputs } from "@trpc/server";
 
-export type IncomingMessage = {
-  id: string;
-  name: string;
-  recentMessage: string;
-};
+export type Conversation =
+  inferRouterOutputs<AppRouter>["messages"]["getConversations"][number];
+
+export type Conversations =
+  inferRouterOutputs<AppRouter>["messages"]["getConversations"];
 
 export default function MessagePage() {
-  const [selectedRecipient, setSelectedRecipient] =
-    useState<IncomingMessage | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
 
-  const selectRecipient = (recipient: IncomingMessage | null) => {
-    setSelectedRecipient(recipient);
+  const selectConversation = (conversation: Conversation | null) => {
+    setSelectedConversation(conversation);
   };
 
-  const recipients: IncomingMessage[] = [
-    {
-      id: "1",
-      name: "Anna",
-      recentMessage: "[shows most recent message, this is the recent message]",
-    },
-    {
-      id: "2",
-      name: "Derick",
-      recentMessage: "[shows most recent message]",
-    },
-  ];
-
-  const { data: participants } = api.messages.getParticipants.useQuery();
-
-  console.log(participants);
+  const { data: conversations } = api.messages.getConversations.useQuery();
 
   return (
     <>
@@ -44,13 +31,13 @@ export default function MessagePage() {
 
       <div className="grid min-h-[calc(100vh-4.25rem)] grid-cols-1 bg-white md:grid-cols-6">
         <MessagesSidebar
-          recipients={recipients}
-          selectedRecipient={selectedRecipient}
-          setSelected={selectRecipient}
+          conversations={conversations ?? []}
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
         />
         <MessagesContent
-          selectedRecipient={selectedRecipient}
-          setSelected={selectRecipient}
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
         />
       </div>
     </>

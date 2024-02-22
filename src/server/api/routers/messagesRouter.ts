@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
 export const messagesRouter = createTRPCRouter({
-  getParticipants: protectedProcedure.query(async ({ ctx }) => {
+  getConversations: protectedProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {},
@@ -18,7 +18,12 @@ export const messagesRouter = createTRPCRouter({
                 participants: {
                   with: {
                     user: {
-                      columns: { name: true, email: true, image: true },
+                      columns: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        image: true,
+                      },
                     },
                   },
                 },
@@ -35,7 +40,9 @@ export const messagesRouter = createTRPCRouter({
 
     return result.conversations.map(({ conversation }) => ({
       ...conversation,
-      participants: conversation.participants.map((p) => p.user),
+      participants: conversation.participants
+        .filter((p) => p.user.id !== ctx.user.id)
+        .map((p) => p.user),
     }));
   }),
 });

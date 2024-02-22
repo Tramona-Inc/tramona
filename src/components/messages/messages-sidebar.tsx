@@ -1,31 +1,41 @@
-import { type IncomingMessage } from "@/pages/messages";
-import UserAvatar from "../_common/UserAvatar";
+import { type Conversation, type Conversations } from "@/pages/messages";
 
 import { cn } from "@/utils/utils";
+import UserAvatar from "../_common/UserAvatar";
 
-export function MessageRecipient({
-  recipient,
+export function MessageConversation({
+  conversation,
   isSelected,
   setSelected,
 }: {
-  recipient: IncomingMessage;
+  conversation: Conversation;
   isSelected: boolean;
-  setSelected: (arg0: IncomingMessage) => void;
+  setSelected: (arg0: Conversation) => void;
 }) {
+  const { participants, messages } = conversation;
+
+  const displayParticipants = participants
+    .map((participant) => participant.name)
+    .join(", ");
+
   return (
     <div
       className={cn(
         "flex items-center justify-start border-b-2 border-zinc-100 px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
         isSelected && "bg-zinc-100",
       )}
-      onClick={() => setSelected(recipient)}
+      onClick={() => setSelected(conversation)}
     >
-      <UserAvatar email={undefined} image={undefined} name={recipient.name} />
+      <UserAvatar
+        email={participants[0]?.email ?? ""}
+        image={participants[0]?.image ?? ""}
+        name={participants[0]?.name ?? ""}
+      />
 
       <div className="ml-4 md:ml-2">
-        <h2 className="text-xl font-bold">{recipient.name}</h2>
+        <h1 className="text-xl font-bold">{displayParticipants}</h1>
         <p className="line-clamp-1 text-sm text-muted-foreground">
-          {recipient.recentMessage}
+          {messages[0]?.message ?? ""}
         </p>
       </div>
     </div>
@@ -33,33 +43,33 @@ export function MessageRecipient({
 }
 
 export type SidebarProps = {
-  recipients: IncomingMessage[];
-  selectedRecipient: IncomingMessage | null;
-  setSelected: (arg0: IncomingMessage) => void;
+  conversations: Conversations;
+  selectedConversation: Conversation | null;
+  setSelected: (arg0: Conversation) => void;
 };
 
 export default function MessagesSidebar({
-  recipients,
-  selectedRecipient,
+  conversations,
+  selectedConversation,
   setSelected,
 }: SidebarProps) {
   return (
     <div
       className={cn(
         "col-span-1 block md:col-span-2 md:border-r-2 xl:col-span-1",
-        selectedRecipient && "hidden md:block",
+        selectedConversation && "hidden md:block",
       )}
     >
       <h1 className="flex h-[100px] w-full items-center border-b-2 p-4 text-4xl font-bold md:text-2xl md:font-semibold lg:p-8">
         Messages
       </h1>
 
-      {recipients.length > 0 ? (
-        recipients.map((recipient) => (
-          <MessageRecipient
-            key={recipient.id}
-            recipient={recipient}
-            isSelected={selectedRecipient?.id === recipient.id}
+      {conversations.length > 0 ? (
+        conversations.map((conversation) => (
+          <MessageConversation
+            key={conversation.id}
+            conversation={conversation}
+            isSelected={selectedConversation?.id === conversation.id}
             setSelected={setSelected}
           />
         ))
