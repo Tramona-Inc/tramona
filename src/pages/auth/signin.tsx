@@ -118,7 +118,11 @@ export default function SignIn({
                   )}
                 />
                 <FormMessage />
-                <Button type="submit" className="w-full">
+                <Button
+                  disabled={form.formState.isSubmitting}
+                  type="submit"
+                  className="w-full"
+                >
                   Log In
                 </Button>
               </form>
