@@ -1,9 +1,17 @@
-import { type MessageType } from "@/server/db/schema";
 import { Message } from "./Message";
+import { type ChatMessageResult } from './ChatMessages';
 
 type InitMessageProps = {
-  messages: MessageType[];
+  messages: ChatMessageResult[];
 };
+
+function NoMessages() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+      No messages
+    </div>
+  );
+}
 
 export default function InitMessages(props: InitMessageProps) {
   const { messages } = props;
@@ -15,9 +23,7 @@ export default function InitMessages(props: InitMessageProps) {
           <Message key={message.id} message={message} />
         ))
       ) : (
-        <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
-          No messages
-        </div>
+        <NoMessages />
       )}
     </div>
   );

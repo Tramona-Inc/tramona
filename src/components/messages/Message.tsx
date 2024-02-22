@@ -1,8 +1,8 @@
-import { type MessageType } from "@/server/db/schema";
 import UserAvatar from "../_common/UserAvatar";
+import { ChatMessageResult } from "./ChatMessages";
 
 export type MessageProp = {
-  message: MessageType;
+  message: ChatMessageResult;
 };
 
 export function Message({ message }: MessageProp) {
@@ -10,14 +10,14 @@ export function Message({ message }: MessageProp) {
     <div className="flex items-start gap-3">
       <UserAvatar
         email={undefined}
-        image={undefined}
-        name={undefined}
+        image={message.user.image}
+        name={message.user.name}
         size="lg"
       />
 
       <div>
         <div className="flex items-baseline gap-2">
-          {/* <p className="text-2xl font-bold">{message.sender.name}</p> */}
+          <p className="text-2xl font-bold">{message.user.name}</p>
           {/* <p className="text-sm text-muted-foreground">
             {message.createdAt as string}
           </p> */}

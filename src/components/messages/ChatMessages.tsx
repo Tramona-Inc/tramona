@@ -7,21 +7,31 @@ type ChatMessagesProps = {
   conversationId: number;
 };
 
+export type ChatMessageResult = MessageType & {
+  user: { name: string | null; email: string; image: string };
+};
+
 export default function ChatMessages({ conversationId }: ChatMessagesProps) {
-  const [messages, setMessages] = useState<MessageType[]>();
+  const [messages, setMessages] = useState<ChatMessageResult[]>();
 
   useEffect(() => {
     const fetchConversation = async () => {
       try {
         const { data, error } = await supabase
           .from("messages")
-          .select()
+          .select(
+            `
+            *,
+            user(name, image, email)
+          `,
+          )
           .eq("conversation_id", conversationId);
 
-        console.log(data);
-
         if (data) {
-          setMessages(data);
+          // TODO: FIX this is weird
+          const chatMessages: ChatMessageResult[] =
+            data as unknown as ChatMessageResult[];
+          setMessages(chatMessages);
         }
 
         if (error) {
