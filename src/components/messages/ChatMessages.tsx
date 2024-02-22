@@ -3,9 +3,11 @@ import supabase from "@/utils/supabase-client";
 import { useEffect, useState } from "react";
 import InitMessages from "./InitMessages";
 
-export default function ChatMessages() {
-  const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+type ChatMessagesProps = {
+  conversationId: number;
+};
 
+export default function ChatMessages({ conversationId }: ChatMessagesProps) {
   const [messages, setMessages] = useState<MessageType[]>();
 
   useEffect(() => {
@@ -14,7 +16,7 @@ export default function ChatMessages() {
         const { data, error } = await supabase
           .from("messages")
           .select()
-          .eq("conversation_id", 1);
+          .eq("conversation_id", conversationId);
 
         console.log(data);
 
@@ -31,7 +33,7 @@ export default function ChatMessages() {
     };
 
     void fetchConversation();
-  }, []);
+  }, [conversationId]);
 
   return (
     <div className="relative flex flex-1 overflow-y-auto">
