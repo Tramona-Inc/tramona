@@ -34,9 +34,6 @@ export default function MessagesContent({
           />
           <ChatMessages />
           <ChatInput />
-          {/* <div>box 1</div>
-          <div className="flex flex-1 bg-red-100 w-full">box 2</div>
-          <div>box 3</div> */}
         </div>
       )}
     </div>
