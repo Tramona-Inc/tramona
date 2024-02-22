@@ -14,6 +14,7 @@ import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useRequireNoAuth } from "@/utils/auth-utils";
+import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
@@ -24,12 +25,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const formSchema = z
-  .object({
-    email: z.string().email(),
-    password: z.string(),
-  })
-  .required();
+const formSchema = z.object({
+  email: zodEmail(),
+  password: z.string(),
+});
 
 export default function SignIn({
   providers,
@@ -160,7 +159,7 @@ export default function SignIn({
 
           <Link
             href="/auth/forgot-password"
-            className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-300"
+            className="font-medium text-primary underline underline-offset-2"
           >
             Forgot your password?
           </Link>
@@ -170,15 +169,15 @@ export default function SignIn({
           </div>
         </section>
 
-        <div className="inline-flex gap-2">
-          Don&apos;t have an account?
+        <p>
+          Already have an account?{" "}
           <Link
             href="/auth/signup"
-            className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-300"
+            className="font-semibold text-primary underline underline-offset-2"
           >
-            Sign up for Tramona
+            Sign up
           </Link>
-        </div>
+        </p>
       </div>
     </>
   );

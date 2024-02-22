@@ -10,17 +10,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
+import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const formSchema = z
-  .object({
-    email: z.string().email(),
-  })
-  .required();
+const formSchema = z.object({
+  email: zodEmail(),
+});
 
 export default function ForgotPassword() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,7 +53,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
+    <div className="flex min-h-screen flex-col items-center justify-center">
       <section className="flex max-w-sm flex-col space-y-5">
         <h1 className="text-4xl font-bold tracking-tight">
           Forgot your password?
@@ -66,7 +65,7 @@ export default function ForgotPassword() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-7"
+            className="flex flex-col gap-4"
           >
             <FormField
               control={form.control}
@@ -81,20 +80,17 @@ export default function ForgotPassword() {
                 </FormItem>
               )}
             />
-            <FormMessage />
-
-            <Link
-              href="/support"
-              className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-300"
-            >
-              Need support?
-            </Link>
-
-            <Button type="submit" disabled={isLoading} className="w-full">
+            <Button type="submit" disabled={isLoading} className="block">
               Send link
             </Button>
           </form>
         </Form>
+        <Link
+          href="/support"
+          className="font-medium text-primary underline underline-offset-2"
+        >
+          Need support?
+        </Link>
       </section>
     </div>
   );

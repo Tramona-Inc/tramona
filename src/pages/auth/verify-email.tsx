@@ -12,13 +12,6 @@ export default function VerifyEmail() {
 
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (id && token) {
-      void mutateAsync({ id: id, token: token, date: date });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, token]);
-
   const { mutateAsync, isLoading } = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
       void router.push({
@@ -31,6 +24,12 @@ export default function VerifyEmail() {
       return null;
     },
   });
+
+  useEffect(() => {
+    if (id && token) {
+      void mutateAsync({ id: id, token: token, date: date });
+    }
+  }, [date, id, mutateAsync, token]);
 
   return (
     <main className="flex h-screen flex-col items-center justify-center">
