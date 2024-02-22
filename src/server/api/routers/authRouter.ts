@@ -1,29 +1,17 @@
 import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-// import { render } from "@react-email/render";
-import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { referralCodes, users, type User } from "@/server/db/schema";
 import { render } from "@react-email/render";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
-import nodemailler, { type TransportOptions } from "nodemailer";
 import { z } from "zod";
 import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
 import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
-import { generateReferralCode } from '@/utils/utils';
-
-// Init transproter for nodemailer
-const transporter = nodemailler.createTransport({
-  host: env.SMTP_HOST,
-  port: env.SMTP_PORT,
-  // debug: true,
-  auth: {
-    user: env.SMTP_USER,
-    pass: env.SMTP_PASSWORD,
-  },
-} as TransportOptions);
+import { generateReferralCode } from "@/utils/utils";
+import { env } from "@/env";
+import { sendEmail } from "@/server/server-utils";
 
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
@@ -83,9 +71,10 @@ export const authRouter = createTRPCRouter({
 
           if (user) {
             // Create referral code
-            await ctx.db
-                .insert(referralCodes)
-                .values({ ownerId: user.id, referralCode: generateReferralCode() });
+            await ctx.db.insert(referralCodes).values({
+              ownerId: user.id,
+              referralCode: generateReferralCode(),
+            });
 
             // Link user account
             await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
@@ -111,28 +100,10 @@ export const authRouter = createTRPCRouter({
 
           const url = `${env.NEXTAUTH_URL}/auth/verify-email?id=${user.id}&token=${token}`;
 
-          const emailHtml = render(
-            VerifyEmailLink({ url: url, name: user.name ?? user.email }),
-          );
-
-          await new Promise((resolve, reject) => {
-            transporter.sendMail(
-              {
-                from: env.EMAIL_FROM,
-                to: input.email,
-                subject: "Verify email | Tramona",
-                html: emailHtml,
-              },
-              (err, info) => {
-                if (err) {
-                  // console.error(err);
-                  reject(err);
-                } else {
-                  // console.log(info);
-                  resolve(info);
-                }
-              },
-            );
+          await sendEmail({
+            to: input.email,
+            subject: "Verify Email | Tramona",
+            content: VerifyEmailLink({ url, name: user.name ?? user.email }),
           });
         }
 
@@ -217,28 +188,10 @@ export const authRouter = createTRPCRouter({
 
       const url = `${env.NEXTAUTH_URL}/auth/reset-password?id=${user.id}&token=${token}`;
 
-      const emailHtml = render(
-        PasswordResetEmailLink({ url: url, name: user.name ?? user.email }),
-      );
-
-      await new Promise((resolve, reject) => {
-        transporter.sendMail(
-          {
-            from: env.EMAIL_FROM,
-            to: input.email,
-            subject: "Reset Password | Tramona",
-            html: emailHtml,
-          },
-          (err, info) => {
-            if (err) {
-              // console.error(err);
-              reject(err);
-            } else {
-              // console.log(info);
-              resolve(info);
-            }
-          },
-        );
+      await sendEmail({
+        to: input.email,
+        subject: "Reset Password | Tramona",
+        content: PasswordResetEmailLink({ url, name: user.name ?? user.email }),
       });
 
       return null;
