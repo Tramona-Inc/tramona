@@ -52,3 +52,6 @@ export const conversationParticipants = pgTable(
     compoundKey: primaryKey({ columns: [vt.conversationId, vt.userId] }),
   }),
 );
+
+
+export type MessageType = typeof messages.$inferSelect;

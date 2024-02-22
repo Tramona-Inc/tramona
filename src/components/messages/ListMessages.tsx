@@ -7,5 +7,5 @@ export default function ListMessages() {
         <Message key={value} />
       ))}
     </div>
-  );
+ );
 }
