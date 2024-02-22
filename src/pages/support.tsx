@@ -35,7 +35,7 @@ function ContactForm() {
 
   const handleSubmit = async (formData: z.infer<typeof formSchema>) => {
     try {
-      console.log(formData);
+      console.log(formData + "before");
       //  Simulate an API request (replace with actual API call)
       await fetch("/api/email/contact", {
         method: "POST",
@@ -50,6 +50,7 @@ function ContactForm() {
         title: "Message sent successfully",
         description: "We will be in touch shortly",
       });
+      console.log(JSON.stringify(formData) + "after");
 
       // Reset the message field after successful submission
       form.resetField("message", { defaultValue: "" });

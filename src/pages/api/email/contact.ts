@@ -14,34 +14,25 @@ interface ContactFormData {
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  // try {
-  //   const bodyData = req.body as ContactFormProps;
-
-  //   const { data, error } = await resend.emails.send({
-  //     from: `${bodyData.values.name} - Contact Form <onboarding@resend.dev>`,
-  //     to: "info@tramona.com",
-  //     subject: "User needs Support",
-  //     text: "Contact Form",
-  //     react: ContactForm(bodyData),
-  //   });
-
-  //   if (error) {
-  //     return res.status(400).json(error);
-  //   }
-
-  //   res.status(200).json(data);
-  // } catch (error) {
-  //   res.status(500).json({ error: "Internal Server Error" });
-  // }
-
   try {
-    const bodyData = req.body as ContactFormProps;
-    console.log(bodyData);
     // from: `${bodyData.values.name} - Contact Form <onboarding@resend.dev>`,
     // from: bodyData.values.email,
 
+    const bodyData = req.body as ContactFormData;
+    console.log("RECEIVED DATA FROM CLIENT: ", bodyData);
+    // if (!email) {
+    //   return res.status(400).json({ error: "Invalid request body" });
+    // }
+
+    // console.log(values + " before " );
+
+    // if (!values || typeof values !== "object" || !values.email) {
+    //   return res.status(400).json({ error: "Invalid request body" });
+    // }
+
     const { data, error } = await resend.emails.send({
-      from: bodyData.values.email,
+      // from: bodyData.email,
+      from: "onboarding@resend.dev",
       // from: "info@tramona.com",
       to: "info@tramona.com",
       subject: "User needs Support",
