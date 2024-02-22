@@ -1,8 +1,8 @@
 import Head from "next/head";
 import { useState } from "react";
 
-import MessagesContent from "@/components/messages/messages-content";
-import MessagesSidebar from "@/components/messages/messages-sidebar";
+import MessagesContent from "@/components/messages/MessagesContent";
+import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 import { type inferRouterOutputs } from "@trpc/server";
