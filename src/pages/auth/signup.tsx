@@ -110,7 +110,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} autoFocus />
+                        <Input {...field} autoFocus type="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

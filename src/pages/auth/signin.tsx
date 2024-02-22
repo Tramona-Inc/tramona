@@ -98,7 +98,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} autoFocus />
+                        <Input {...field} autoFocus type="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -174,7 +174,7 @@ export default function SignIn({
         </section>
 
         <p>
-          Already have an account?{" "}
+          Don&apos; have an account?{" "}
           <Link
             href="/auth/signup"
             className="font-semibold text-primary underline underline-offset-2"
