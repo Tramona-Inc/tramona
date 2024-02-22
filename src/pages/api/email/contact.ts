@@ -6,6 +6,12 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   // try {
@@ -30,12 +36,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const bodyData = req.body as ContactFormProps;
-    // console.log(bodyData);
+    console.log(bodyData);
+    // from: `${bodyData.values.name} - Contact Form <onboarding@resend.dev>`,
+    // from: bodyData.values.email,
 
     const { data, error } = await resend.emails.send({
       from: bodyData.values.email,
-      // from: `${bodyData.values.name} - Contact Form <onboarding@resend.dev>`,
-      // from: bodyData.values.email,
       // from: "info@tramona.com",
       to: "info@tramona.com",
       subject: "User needs Support",

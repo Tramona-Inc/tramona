@@ -19,13 +19,13 @@ const ContactForm: React.FC<Readonly<ContactFormProps>> = ({
     <p>Message: {values.message}</p>
     <p>Message: {values.email}</p>
 
-    {/* <h1>User Session info</h1>
+    <h1>User Session info</h1>
     <p>{user.id}</p>
     <p>{user.email}</p>
     <p>{user.name}</p>
     <p>{user.phoneNumber}</p>
     <p>{user.role}</p>
-    <p>{user.referralCodeUsed}</p> */}
+    <p>{user.referralCodeUsed}</p>
   </div>
 );
 
