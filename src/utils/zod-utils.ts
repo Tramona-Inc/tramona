@@ -6,9 +6,12 @@ import { z, type ZodType } from "zod";
  * validators for react-hook-form (e.g. trim input, parse empty strings as undefined,
  * minimum length of 1 by default)
  *
+ * this is also a place for schemas/pipelines that youre reusing (e.g. zodPassword, zodEmail, zodMMDDYYYY)
+ *
  * Example usage:
  * const schema = z.object({
  *  name: zodString({ minLen: 3, maxLen: 50 }),
+ *  email: zodEmail(),
  *  age: zodNumber({ min: 0, max: 120 }),
  *  birthday: optional(zodMMDDYYYY()),
  * });
@@ -84,6 +87,12 @@ export function zodMMDDYYYY() {
       { message: "Invalid date" },
     )
     .transform((s) => parseISO(s));
+}
+
+export function zodEmail() {
+  return zodString()
+    .email({ message: "Invalid email address" })
+    .transform((s) => s.toLowerCase());
 }
 
 export function zodPassword() {

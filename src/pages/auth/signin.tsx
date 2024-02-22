@@ -14,6 +14,7 @@ import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useRequireNoAuth } from "@/utils/auth-utils";
+import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
@@ -26,7 +27,7 @@ import * as z from "zod";
 
 const formSchema = z
   .object({
-    email: z.string().email(),
+    email: zodEmail(),
     password: z.string(),
   })
   .required();

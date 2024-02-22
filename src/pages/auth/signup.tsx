@@ -2,7 +2,6 @@
 // https://next-auth.js.org/configuration/pages
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -16,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
-import { zodPassword } from "@/utils/zod-utils";
+import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
@@ -28,9 +27,9 @@ import { z } from "zod";
 
 const formSchema = z
   .object({
-    email: z.string().email(),
+    email: zodEmail(),
     // username: z.string().max(60),
-    name: z.string().max(32),
+    name: zodString({ minLen: 2 }),
     password: zodPassword(),
     confirm: z.string(),
   })
