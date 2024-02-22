@@ -39,12 +39,10 @@ export function Message() {
 
 export default function ListMessages() {
   return (
-    <div className="flex h-[500px] flex-1 flex-col overflow-y-auto bg-red-500 p-5">
-      <div className="mb-5 flex flex-col gap-8">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
-          <Message key={value} />
-        ))}
-      </div>
+    <div className="absolute space-y-5 p-5">
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
+        <Message key={value} />
+      ))}
     </div>
   );
 }
