@@ -1,7 +1,10 @@
 import { env } from "@/env";
 import { stripe } from "@/server/api/routers/stripeRouter";
+import { twilioRouter } from "@/server/api/routers/twilioRouter";
 import { db } from "@/server/db";
 import { offers, requests } from "@/server/db/schema";
+import { api } from "@/utils/api";
+import { formatPhoneNumber } from "@/utils/formatters";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
@@ -67,6 +70,16 @@ export default async function webhook(
               parseInt(paymentIntentSucceeded.metadata.request_id!),
             ),
           );
+
+        const twilioMutation = api.twilio.sendSMS.useMutation();
+
+        const sms = {
+          to: formatPhoneNumber(paymentIntentSucceeded.metadata.phone_number!),
+          msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
+        };
+
+        await twilioMutation.mutateAsync(sms);
+
         // console.log("PaymentIntent was successful!");
 
         break;
@@ -97,7 +110,7 @@ export default async function webhook(
         break;
 
       default:
-        // console.log(`Unhandled event type ${event.type}`);
+      // console.log(`Unhandled event type ${event.type}`);
     }
 
     res.json({ received: true });
