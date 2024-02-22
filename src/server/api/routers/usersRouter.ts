@@ -3,7 +3,7 @@ import { referralCodes, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 import { generateReferralCode } from "@/utils/utils";
-import { zodString } from "@/utils/zod-utils";
+import { zodEmail, zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 
 export const usersRouter = createTRPCRouter({
@@ -68,7 +68,7 @@ export const usersRouter = createTRPCRouter({
     .input(
       z.object({
         name: zodString(),
-        email: zodString().email(),
+        email: zodEmail(),
         phoneNumber: zodString({ maxLen: 20 }),
       }),
     )
