@@ -33,14 +33,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { forwardRef } from "react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+
 import {
   NestedDrawer,
   DrawerContent,
@@ -53,7 +46,7 @@ import { DialogClose } from "../ui/dialog";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import usePlaceAutocomplete from "use-places-autocomplete";
+import PlacesInput from "../_common/PlacesInput";
 
 const formSchema = z
   .object({
@@ -94,14 +87,6 @@ export default function NewRequestForm({
   const utils = api.useUtils();
   const router = useRouter();
   const { status } = useSession();
-
-  const {
-    ready,
-    value,
-    suggestions: { status: suggestionsLoading, data },
-    setValue,
-    clearSuggestions,
-  } = usePlaceAutocomplete({ debounce: 300 });
 
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   const fmtdFilters = getFmtdFilters({
@@ -155,87 +140,11 @@ export default function NewRequestForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-2 gap-4"
       >
-        <FormField
+        <PlacesInput
           control={form.control}
           name="location"
-          render={({ field }) => (
-            <FormItem className="col-span-full sm:col-span-1">
-              <FormLabel>Location</FormLabel>
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="filledInput"
-                      type="button"
-                      role="combobox"
-                      disabled={!ready}
-                      className="line-clamp-1 text-ellipsis text-left"
-                    >
-                      {field.value}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent
-                  align="start"
-                  className="overflow-clip px-0 pt-0"
-                >
-                  <Command>
-                    <CommandInput
-                      value={value}
-                      onValueChange={(value) => {
-                        setValue(value);
-
-                        if (value === "" || data.length === 0)
-                          clearSuggestions();
-                      }}
-                      placeholder="Search location..."
-                    />
-                    {/* {suggestionsLoading && (
-                      <CommandGroup>Loading suggestions...</CommandGroup>
-                    )} */}
-                    {suggestionsLoading === "OK" && (
-                      <CommandList>
-                        {data.map((suggestion) => (
-                          <CommandItem
-                            key={suggestion.place_id}
-                            value={suggestion.description}
-                            onSelect={() =>
-                              form.setValue("location", suggestion.description)
-                            }
-                            className="flex"
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4 flex-shrink-0",
-                                suggestion.description === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0",
-                              )}
-                            />
-                            <p className="line-clamp-1">
-                              {suggestion.description}
-                            </p>
-                          </CommandItem>
-                        ))}
-                      </CommandList>
-                    )}
-                    {value === "" && (
-                      <CommandGroup>
-                        <p className="mt-2 text-center text-sm text-muted-foreground">
-                          Start typing to see suggestions
-                        </p>
-                      </CommandGroup>
-                    )}
-                    {data.length === 0 && value !== "" && (
-                      <CommandEmpty>No suggestions</CommandEmpty>
-                    )}
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
+          formLabel="Location"
+          className="col-span-full sm:col-span-1"
         />
 
         <FormField
