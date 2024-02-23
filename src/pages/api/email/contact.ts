@@ -32,10 +32,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { data, error } = await resend.emails.send({
       // from: bodyData.email,
+      //   from: "info@tramona.com",
       from: "onboarding@resend.dev",
       // from: "info@tramona.com",
       to: "info@tramona.com",
-      subject: "User needs Support",
+      subject: "Support : Bug Report /Feature Request",
       text: "Contact Form",
       react: ContactForm(bodyData),
     });
