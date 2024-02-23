@@ -130,26 +130,28 @@ export const LPInput = forwardRef<
 // }
 
 export default function LPDateRangePicker<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: Omit<
-    React.ComponentProps<typeof FormField<TFieldValues, TName>>,
-    "render"
-  > & {
-    className: string;
-    formLabel: string;
-  },
-) {
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <FormField
       {...props}
       render={({ field }) => (
-        <LPFormItem className={props.className}>
+        <LPFormItem className={className}>
           <FormLabel className={classNames.buttonLabel({ isFocused: isOpen })}>
-            {props.formLabel}
+            {formLabel}
           </FormLabel>
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
