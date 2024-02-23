@@ -34,7 +34,7 @@ export default function MessagesContent({
             setSelected={setSelected}
           />
           <ChatMessages conversationId={selectedConversation.id} />
-          <ChatInput />
+          <ChatInput conversationId={selectedConversation.id}/>
         </div>
       )}
     </div>

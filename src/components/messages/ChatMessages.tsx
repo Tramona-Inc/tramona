@@ -1,7 +1,7 @@
 import { type MessageType } from "@/server/db/schema";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useState } from "react";
-import InitMessages from "./InitMessages";
+import ListMessages from "./ListMessages";
 
 type ChatMessagesProps = {
   conversationId: number;
@@ -34,7 +34,7 @@ export default function ChatMessages({ conversationId }: ChatMessagesProps) {
           setMessages(chatMessages);
         }
 
-        console.log(data);
+        // console.log(data);
 
         if (error) {
           throw error;
@@ -49,8 +49,8 @@ export default function ChatMessages({ conversationId }: ChatMessagesProps) {
 
   return (
     <div className="relative flex flex-1 overflow-y-auto">
-      {/* <ListMessages /> */}
-      <InitMessages messages={messages ?? []} />
+      <ListMessages conversationId={conversationId} />
+      {/* <InitMessages messages={messages ?? []} /> */}
     </div>
   );
 }
