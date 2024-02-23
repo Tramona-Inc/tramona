@@ -1,27 +1,52 @@
-import { useState, type FormEvent } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "../ui/form";
 import { Input } from "../ui/input";
 
+const formSchema = z.object({
+  newMessage: z.string(),
+});
+
 export default function ChatInput() {
-  const [newMessage, setNewMessage] = useState("");
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      newMessage: "",
+    },
+  });
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    setNewMessage("");
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log(values);
+    return null;
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <Input
-          id="newMessage"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
           name="newMessage"
-          placeholder="Type a message"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          className="rounded-full"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  placeholder="Type a message"
+                  className="rounded-full"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
       </form>
-    </div>
+    </Form>
   );
 }

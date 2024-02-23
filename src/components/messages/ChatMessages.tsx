@@ -34,6 +34,8 @@ export default function ChatMessages({ conversationId }: ChatMessagesProps) {
           setMessages(chatMessages);
         }
 
+        console.log(data);
+
         if (error) {
           throw error;
         }

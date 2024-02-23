@@ -1,5 +1,5 @@
+import { type ChatMessageResult } from "./ChatMessages";
 import { Message } from "./Message";
-import { type ChatMessageResult } from './ChatMessages';
 
 type InitMessageProps = {
   messages: ChatMessageResult[];
