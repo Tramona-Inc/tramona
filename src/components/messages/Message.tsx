@@ -1,10 +1,9 @@
 // import dayjs from "dayjs";
 // import relativeTime from "dayjs/plugin/relativeTime";
+import { type ChatMessageType } from "@/utils/store/messages";
 import UserAvatar from "../_common/UserAvatar";
-import { type ChatMessageResult } from "./ChatMessages";
-
 export type MessageProp = {
-  message: ChatMessageResult;
+  message: ChatMessageType;
 };
 
 // Plugin for relative time

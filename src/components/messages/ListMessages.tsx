@@ -1,9 +1,5 @@
-import supabase from "@/utils/supabase-client";
-import { useEffect } from "react";
-
-type ListMessageProps = {
-  conversationId: number;
-};
+import { useMessage } from "@/utils/store/messages";
+import { Message } from "./Message";
 
 function NoMessages() {
   return (
@@ -13,35 +9,39 @@ function NoMessages() {
   );
 }
 
-export default function ListMessages(props: ListMessageProps) {
-  // const [messages, setMessages] = useState([]);
+export default function ListMessages() {
+  const { currentConversationId, conversations } = useMessage();
 
-  useEffect(() => {
-    const channel = supabase
-      .channel(`${props.conversationId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        (payload) => {
-          console.log("Change recieved!", payload);
-        },
-      )
-      .subscribe();
+  const messages = currentConversationId
+    ? conversations[currentConversationId] ?? []
+    : [];
 
-    return () => {
-      void channel.unsubscribe();
-    };
-  });
+  // useEffect(() => {
+  //   const channel = supabase
+  //     .channel(`${conversationId}`)
+  //     .on(
+  //       "postgres_changes",
+  //       { event: "INSERT", schema: "public", table: "messages" },
+  //       (payload) => {
+  //         console.log("Change recieved!", payload);
+  //       },
+  //     )
+  //     .subscribe();
+
+  //   return () => {
+  //     void channel.unsubscribe();
+  //   };
+  // });
 
   return (
     <div className="absolute h-full w-full space-y-5 p-5">
-      {/* {messages.length > 0 ? (
+      {messages.length > 0 ? (
         messages.map((message) => (
           <Message key={message.id} message={message} />
         ))
       ) : (
         <NoMessages />
-      )} */}
+      )}
     </div>
   );
 }

@@ -1,20 +1,25 @@
-import { type MessageType } from "@/server/db/schema";
+import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useState } from "react";
+import InitMessages from "../../utils/store/InitMessages";
 import ListMessages from "./ListMessages";
 
-type ChatMessagesProps = {
+const LIMIT_MESSAGE = 10;
+
+export default function ChatMessages({
+  conversationId,
+}: {
   conversationId: number;
-};
+}) {
+  const [messages, setMessages] = useState<ChatMessageType[]>();
 
-export type ChatMessageResult = MessageType & {
-  user: { name: string | null; email: string; image: string };
-};
+  const { switchConversation, setInitConversationMessages } = useMessage();
 
-export default function ChatMessages({ conversationId }: ChatMessagesProps) {
-  const [messages, setMessages] = useState<ChatMessageResult[]>();
-
+  // Fetch conversation on the client
   useEffect(() => {
+    // Update conversation state
+    switchConversation(conversationId);
+
     const fetchConversation = async () => {
       try {
         const { data, error } = await supabase
@@ -25,13 +30,15 @@ export default function ChatMessages({ conversationId }: ChatMessagesProps) {
             user(name, image, email)
           `,
           )
+          .range(0, LIMIT_MESSAGE)
           .eq("conversation_id", conversationId);
 
         if (data) {
           // TODO: FIX this is weird
-          const chatMessages: ChatMessageResult[] =
-            data as unknown as ChatMessageResult[];
+          const chatMessages: ChatMessageType[] =
+            data as unknown as ChatMessageType[];
           setMessages(chatMessages);
+          setInitConversationMessages(conversationId, chatMessages);
         }
 
         // console.log(data);
@@ -49,8 +56,10 @@ export default function ChatMessages({ conversationId }: ChatMessagesProps) {
 
   return (
     <div className="relative flex flex-1 overflow-y-auto">
-      <ListMessages conversationId={conversationId} />
-      {/* <InitMessages messages={messages ?? []} /> */}
+      <ListMessages />
+      {messages && (
+        <InitMessages messages={messages} conversationId={conversationId} />
+      )}
     </div>
   );
 }
