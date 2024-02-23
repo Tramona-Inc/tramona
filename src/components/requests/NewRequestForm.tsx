@@ -145,12 +145,6 @@ export default function NewRequestForm({
   async function onSubmit(data: FormSchema) {
     await waitForVerification();
 
-    await updateUserProfileMutation.mutateAsync({
-      name: user?.name!,
-      email: user?.email!,
-      phoneNumber: toPhoneNumber,
-    });
-
     setOpen(false);
 
     const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
