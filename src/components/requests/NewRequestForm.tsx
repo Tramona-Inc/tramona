@@ -170,13 +170,16 @@ export default function NewRequestForm({
                       type="button"
                       role="combobox"
                       disabled={!ready}
-                      className="line-clamp-1 w-full self-start"
+                      className="line-clamp-1 text-ellipsis text-left"
                     >
                       {field.value}
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent>
+                <PopoverContent
+                  align="start"
+                  className="overflow-clip px-0 pt-0"
+                >
                   <Command>
                     <CommandInput
                       value={value}
@@ -219,13 +222,13 @@ export default function NewRequestForm({
                     )}
                     {value === "" && (
                       <CommandGroup>
-                        <p className="mt-2 text-sm text-muted-foreground">
+                        <p className="mt-2 text-center text-sm text-muted-foreground">
                           Start typing to see suggestions
                         </p>
                       </CommandGroup>
                     )}
                     {data.length === 0 && value !== "" && (
-                      <CommandEmpty>No suggestions to show!</CommandEmpty>
+                      <CommandEmpty>No suggestions</CommandEmpty>
                     )}
                   </Command>
                 </PopoverContent>
