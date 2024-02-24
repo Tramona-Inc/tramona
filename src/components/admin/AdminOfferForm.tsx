@@ -35,9 +35,12 @@ import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
+import { getNumNights } from "@/utils/utils";
+import { useEffect } from "react";
+
 const formSchema = z.object({
   propertyName: zodString(),
-  offeredPriceUSD: zodInteger({ min: 1 }),
+  offeredPriceUSD: zodInteger({ min: 1 }).optional(),
   hostName: zodString(),
   address: zodString({ maxLen: 1000 }).optional(),
   maxNumGuests: zodInteger({ min: 1 }),
@@ -45,6 +48,7 @@ const formSchema = z.object({
   numBedrooms: zodInteger({ min: 1 }),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
   originalNightlyPriceUSD: zodInteger(),
+  offeredNightlyPriceUSD: zodInteger({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
   amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
@@ -68,6 +72,9 @@ export default function AdminOfferForm({
   request: Request;
   offer?: OfferWithProperty;
 }) {
+  const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+  const offeredNightlyPriceUSD = offer ? Math.round(offer.totalPrice / numberOfNights / 100) : 1;
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -100,6 +107,7 @@ export default function AdminOfferForm({
             airbnbUrl: offer.property.airbnbUrl ?? undefined,
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
+            offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined, 
             originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
           }
@@ -120,15 +128,17 @@ export default function AdminOfferForm({
   const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
-    const { offeredPriceUSD, ...propertyData } = data;
+    const { offeredNightlyPriceUSD, ...propertyData } = data;
 
-    const totalPrice = offeredPriceUSD * 100;
+    // const totalPrice = offeredPriceUSD * 100;
+    const totalPrice = data.offeredNightlyPriceUSD * numberOfNights * 100;
 
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
       type: propertyData.propertyType,
       originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
+      // offeredNightlyPrice: offeredNightlyPriceUSD, 
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
     };
 
@@ -184,6 +194,11 @@ export default function AdminOfferForm({
   }
 
   const [isAirbnb, setIsAirbnb] = useState<boolean>(true);
+  const [nightlyPrice, setNightlyPrice] = useState(offeredNightlyPriceUSD);
+  const [totalPrice, setTotalPrice] = useState(offeredNightlyPriceUSD * numberOfNights);
+  useEffect(() => {
+    setTotalPrice(nightlyPrice * numberOfNights);
+  }, [nightlyPrice, numberOfNights]);
 
   return (
     <Form {...form}>
@@ -240,16 +255,37 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
-          name="offeredPriceUSD"
+          name="offeredNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Offered price (total)</FormLabel>
+              <FormLabel>Offered price (nightly)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e); // or your existing logic
+                    setNightlyPrice(Number(e.target.value));
+                  }}
                   inputMode="decimal"
                   prefix="$"
-                  suffix="total"
+                  suffix="/night"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="offeredPriceUSD"
+          render={() => (
+            <FormItem>
+              <FormLabel>Total offered price ({numberOfNights} nights)</FormLabel>
+              <FormControl>
+                <Input
+                  value={`$${totalPrice}`}
+                  readOnly
                 />
               </FormControl>
               <FormMessage />
