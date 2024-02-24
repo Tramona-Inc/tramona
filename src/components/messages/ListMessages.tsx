@@ -1,5 +1,11 @@
-import { useMessage } from "@/utils/store/messages";
+import { SupabaseDatabase } from "@/types/supabase";
+import { ChatMessageType, useMessage } from "@/utils/store/messages";
+import supabase from "@/utils/supabase-client";
+import { useEffect } from "react";
 import { Message } from "./Message";
+
+export type MessageDbType =
+  SupabaseDatabase["public"]["Tables"]["messages"]["Row"];
 
 function NoMessages() {
   return (
@@ -10,7 +16,8 @@ function NoMessages() {
 }
 
 export default function ListMessages() {
-  const { currentConversationId, conversations } = useMessage();
+  const { currentConversationId, conversations, addMessageToConversation } =
+    useMessage();
 
   const messages = currentConversationId
     ? conversations[currentConversationId] ?? []
@@ -18,22 +25,57 @@ export default function ListMessages() {
 
   console.log(messages);
 
-  // useEffect(() => {
-  //   const channel = supabase
-  //     .channel(`${conversationId}`)
-  //     .on(
-  //       "postgres_changes",
-  //       { event: "INSERT", schema: "public", table: "messages" },
-  //       (payload) => {
-  //         console.log("Change recieved!", payload);
-  //       },
-  //     )
-  //     .subscribe();
+  const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+    console.log("Change received!", payload);
 
-  //   return () => {
-  //     void channel.unsubscribe();
-  //   };
-  // });
+    try {
+      // Get user associated with message
+      const { data, error } = await supabase
+        .from("user")
+        .select("name, email, image")
+        .eq("id", payload.new.user_id)
+        .single();
+
+      if (error) {
+        console.log(error);
+      } else {
+        const newMessage: ChatMessageType = {
+          id: payload.new.id,
+          conversationId: payload.new.conversation_id,
+          userId: payload.new.user_id,
+          message: payload.new.message,
+          isEdit: payload.new.is_edit,
+          createdAt: new Date(payload.new.created_at),
+          read: payload.new.read,
+          user: data,
+        };
+
+        addMessageToConversation(currentConversationId!, newMessage);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`${currentConversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        handlePostgresChange,
+      )
+      .subscribe();
+
+    return () => {
+      void channel.unsubscribe();
+    };
+  }, [currentConversationId, addMessageToConversation]);
 
   return (
     <div className="absolute h-full w-full space-y-5 p-5">

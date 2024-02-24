@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import InitMessages from "../../utils/store/InitMessages";
 import ListMessages from "./ListMessages";
 
-const LIMIT_MESSAGE = 10;
+const LIMIT_MESSAGE = 9;
 
 export default function ChatMessages({
   conversationId,
@@ -31,7 +31,8 @@ export default function ChatMessages({
           `,
           )
           .range(0, LIMIT_MESSAGE)
-          .eq("conversation_id", conversationId);
+          .eq("conversation_id", conversationId)
+          .order("created_at", { ascending: false });
 
         if (data) {
           // TODO: FIX this is weird
