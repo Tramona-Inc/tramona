@@ -13,11 +13,8 @@ import {
 } from "@/components/ui/popover";
 import { Check } from "lucide-react";
 import { cn } from "@/utils/utils";
-import { FormControl, FormField } from "../ui/form";
-import { Button } from "../ui/button";
+import { FormControl } from "../ui/form";
 import usePlaceAutocomplete from "use-places-autocomplete";
-import { type FieldPath, type FieldValues } from "react-hook-form";
-import { useState } from "react";
 import useTimeout from "@/utils/useTimeout";
 
 export default function PlacesPopover({

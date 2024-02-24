@@ -28,7 +28,6 @@ import LPDateRangePicker, {
   LPLocationInput,
   classNames,
 } from "./components";
-import PlacesInput from "@/components/_common/PlacesInput";
 
 const formSchema = z.object({
   data: z

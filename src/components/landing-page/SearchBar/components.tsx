@@ -4,12 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatDateRange } from "@/utils/utils";
-import {
-  CalendarIcon,
-  LocateFixedIcon,
-  MapIcon,
-  MapPinIcon,
-} from "lucide-react";
+import { CalendarIcon, MapPinIcon } from "lucide-react";
 import { type FieldPath, type FieldValues } from "react-hook-form";
 import {
   FormField,
@@ -21,7 +16,6 @@ import { useMeasure } from "@uidotdev/usehooks";
 import { useState, type ComponentProps, forwardRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import PlacesPopover from "@/components/_common/PlacesPopover";
-import { Button } from "@/components/ui/button";
 
 // LP is short for landing page
 

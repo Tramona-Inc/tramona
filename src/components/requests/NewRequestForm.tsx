@@ -16,14 +16,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, FilterIcon } from "lucide-react";
+import { FilterIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
-import { capitalize, cn, getNumNights, useIsDesktop } from "@/utils/utils";
+import { capitalize, getNumNights, useIsDesktop } from "@/utils/utils";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
   Select,
