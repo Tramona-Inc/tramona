@@ -18,21 +18,23 @@ import { type FieldPath, type FieldValues } from "react-hook-form";
 export default function DateRangePicker<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
->(
-  props: Omit<
-    React.ComponentProps<typeof FormField<TFieldValues, TName>>,
-    "render"
-  > & {
-    className: string;
-    formLabel: string;
-  },
-) {
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
   return (
     <FormField
       {...props}
       render={({ field }) => (
-        <FormItem className={props.className}>
-          <FormLabel>{props.formLabel}</FormLabel>
+        <FormItem className={className}>
+          <FormLabel>{formLabel}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
               <Button
