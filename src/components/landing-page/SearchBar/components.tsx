@@ -4,7 +4,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatDateRange } from "@/utils/utils";
-import { CalendarIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  LocateFixedIcon,
+  MapIcon,
+  MapPinIcon,
+} from "lucide-react";
 import { type FieldPath, type FieldValues } from "react-hook-form";
 import {
   FormField,
@@ -15,6 +20,8 @@ import {
 import { useMeasure } from "@uidotdev/usehooks";
 import { useState, type ComponentProps, forwardRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
+import PlacesPopover from "@/components/_common/PlacesPopover";
+import { Button } from "@/components/ui/button";
 
 // LP is short for landing page
 
@@ -128,6 +135,60 @@ export const LPInput = forwardRef<
 //     />
 //   );
 // }
+
+export function LPLocationInput<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <LPFormItem className={className}>
+          <FormLabel className={classNames.buttonLabel({ isFocused: isOpen })}>
+            {formLabel}
+          </FormLabel>
+
+          <PlacesPopover
+            open={isOpen}
+            setOpen={setIsOpen}
+            value={field.value}
+            onValueChange={field.onChange}
+            className="w-[100vw] -translate-y-12 overflow-clip px-0 pt-0 sm:w-[80vw] sm:translate-x-7 lg:w-80"
+            trigger={({ value, disabled }) => (
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                disabled={disabled}
+                className={cn(
+                  classNames.button({
+                    isPlaceholder: !field.value,
+                    isFocused: isOpen,
+                  }),
+                  "flex items-center",
+                )}
+              >
+                {value ?? "Enter your destination"}
+                <MapPinIcon className="ml-auto h-4 w-4 opacity-50" />
+              </button>
+            )}
+          />
+        </LPFormItem>
+      )}
+    />
+  );
+}
 
 export default function LPDateRangePicker<
   TFieldValues extends FieldValues,
