@@ -21,7 +21,8 @@ import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
-import router from "next/router";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -38,10 +39,18 @@ const formSchema = z
     path: ["confirm"],
   });
 
-export default function SignIn({
+export default function SignUp({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   useRequireNoAuth();
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof router.query.code === "string") {
+      localStorage.setItem("referralCode", router.query.code);
+    }
+  }, [router.query.code]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

@@ -1,6 +1,6 @@
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function VerifyEmail() {
   const router = useRouter();
@@ -10,35 +10,31 @@ export default function VerifyEmail() {
 
   const date = useMemo(() => new Date(), []); // useMemo from React
 
-  const [error, setError] = useState("");
-
-  const { mutateAsync, isLoading } = api.auth.verifyEmailToken.useMutation({
+  const mutation = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
       void router.push({
         pathname: "/auth/signin",
         query: { isNewUser: true, isVerified: true },
       });
     },
-    onError: (error) => {
-      setError(error.message);
-      return null;
-    },
   });
 
   useEffect(() => {
     if (id && token) {
-      void mutateAsync({ id: id, token: token, date: date });
+      mutation.mutate({ id: id, token: token, date: date });
     }
-  }, [date, id, mutateAsync, token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, token]);
 
   return (
     <main className="flex h-screen flex-col items-center justify-center">
-      {isLoading && <h1>Verifying your email ...</h1>}
-      {error && (
-        <div>
-          <h1>{error}</h1>
-          <p>Please sign up</p>
-        </div>
+      {mutation.isLoading && (
+        <p className="text-muted-foreground">Verifying your email...</p>
+      )}
+      {mutation.error && (
+        <p className="text-muted-foreground">
+          Something went wrong, please try signing up again
+        </p>
       )}
     </main>
   );

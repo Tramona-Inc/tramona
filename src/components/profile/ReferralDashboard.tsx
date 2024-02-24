@@ -27,7 +27,7 @@ export default function ReferralDashboard() {
 
   const code =
     user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
-  const url = `https://tramona.com/auth/signin?code=${code}`;
+  const url = `https://tramona.com/auth/signup?code=${code}`;
 
   const messageWithLink = `${message}\n\n${url}`;
 
