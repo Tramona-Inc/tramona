@@ -41,9 +41,6 @@ export default function ChatMessages({
           setMessages(chatMessages);
           setInitConversationMessages(conversationId, chatMessages);
         }
-
-        // console.log(data);
-
         if (error) {
           throw error;
         }

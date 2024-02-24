@@ -1,5 +1,5 @@
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
-import supabase from '@/utils/supabase-client';
+import supabase from "@/utils/supabase-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
@@ -25,7 +25,11 @@ export default function ChatInput({
 
   const { data: session } = useSession();
 
-  const { addMessageToConversation } = useMessage();
+  const addMessageToConversation = useMessage(
+    (state) => state.addMessageToConversation,
+  );
+  const optimisticIds = useMessage((state) => state.optimisticIds);
+  const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -45,7 +49,8 @@ export default function ChatInput({
           },
         };
 
-        addMessageToConversation(conversationId, newMessage);
+        addMessageToConversation(conversationId, newMessage, optimisticIds);
+        setOptimisticIds(newMessage.id);
 
         const { error } = await supabase.from("messages").insert({
           conversation_id: conversationId,

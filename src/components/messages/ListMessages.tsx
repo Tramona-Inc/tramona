@@ -16,8 +16,12 @@ function NoMessages() {
 }
 
 export default function ListMessages() {
-  const { currentConversationId, conversations, addMessageToConversation } =
-    useMessage();
+  const {
+    currentConversationId,
+    conversations,
+    optimisticIds,
+    addMessageToConversation,
+  } = useMessage((state) => state);
 
   const messages = currentConversationId
     ? conversations[currentConversationId] ?? []
@@ -29,28 +33,34 @@ export default function ListMessages() {
     console.log("Change received!", payload);
 
     try {
-      // Get user associated with message
-      const { data, error } = await supabase
-        .from("user")
-        .select("name, email, image")
-        .eq("id", payload.new.user_id)
-        .single();
+      if (!optimisticIds.includes(payload.new.id)) {
+        // Get user associated with message
+        const { data, error } = await supabase
+          .from("user")
+          .select("name, email, image")
+          .eq("id", payload.new.user_id)
+          .single();
 
-      if (error) {
-        console.log(error);
-      } else {
-        const newMessage: ChatMessageType = {
-          id: payload.new.id,
-          conversationId: payload.new.conversation_id,
-          userId: payload.new.user_id,
-          message: payload.new.message,
-          isEdit: payload.new.is_edit,
-          createdAt: new Date(payload.new.created_at),
-          read: payload.new.read,
-          user: data,
-        };
+        if (error) {
+          console.log(error);
+        } else {
+          const newMessage: ChatMessageType = {
+            id: payload.new.id,
+            conversationId: payload.new.conversation_id,
+            userId: payload.new.user_id,
+            message: payload.new.message,
+            isEdit: payload.new.is_edit,
+            createdAt: new Date(payload.new.created_at),
+            read: payload.new.read,
+            user: data,
+          };
 
-        addMessageToConversation(currentConversationId!, newMessage);
+          addMessageToConversation(
+            currentConversationId!,
+            newMessage,
+            optimisticIds,
+          );
+        }
       }
     } catch (error) {
       console.error(error);
@@ -75,7 +85,7 @@ export default function ListMessages() {
     return () => {
       void channel.unsubscribe();
     };
-  }, [currentConversationId, addMessageToConversation]);
+  }, [currentConversationId, addMessageToConversation, messages]);
 
   return (
     <div className="absolute h-full w-full space-y-5 p-5">
