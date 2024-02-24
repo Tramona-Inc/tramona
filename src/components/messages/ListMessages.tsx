@@ -16,6 +16,8 @@ export default function ListMessages() {
     ? conversations[currentConversationId] ?? []
     : [];
 
+  console.log(messages);
+
   // useEffect(() => {
   //   const channel = supabase
   //     .channel(`${conversationId}`)

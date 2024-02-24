@@ -1,18 +1,14 @@
-import supabase from "@/utils/supabase-client";
+import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import supabase from '@/utils/supabase-client';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-} from "../ui/form";
+import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 
 const formSchema = z.object({
-  message: z.string().refine((data) => data.trim() !== "")
+  message: z.string().refine((data) => data.trim() !== ""),
 });
 
 export default function ChatInput({
@@ -29,9 +25,28 @@ export default function ChatInput({
 
   const { data: session } = useSession();
 
+  const { addMessageToConversation } = useMessage();
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (session) {
+        const newMessage: ChatMessageType = {
+          id: Math.floor(Math.random() * 1000000), //randomn id locally (will not match online)
+          createdAt: new Date(),
+          conversationId: conversationId,
+          userId: session.user.id,
+          message: values.message,
+          read: false,
+          isEdit: false,
+          user: {
+            name: session.user.name,
+            email: session.user.email,
+            image: session.user.image ?? "",
+          },
+        };
+
+        addMessageToConversation(conversationId, newMessage);
+
         const { error } = await supabase.from("messages").insert({
           conversation_id: conversationId,
           user_id: session?.user.id,

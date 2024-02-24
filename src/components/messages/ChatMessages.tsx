@@ -56,7 +56,10 @@ export default function ChatMessages({
 
   return (
     <div className="relative flex flex-1 overflow-y-auto">
+      {/* Display's our messages */}
       <ListMessages />
+
+      {/* Initializes messages with zustand */}
       {messages && (
         <InitMessages messages={messages} conversationId={conversationId} />
       )}
