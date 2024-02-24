@@ -193,9 +193,11 @@ export default function AdminOfferForm({
     });
   }
 
+  const defaultNightlyPrice = 0;
   const [isAirbnb, setIsAirbnb] = useState<boolean>(true);
-  const [nightlyPrice, setNightlyPrice] = useState(offeredNightlyPriceUSD);
-  const [totalPrice, setTotalPrice] = useState(offeredNightlyPriceUSD * numberOfNights);
+  const [nightlyPrice, setNightlyPrice] = useState(offer ? offeredNightlyPriceUSD : defaultNightlyPrice);
+  const [totalPrice, setTotalPrice] = useState(nightlyPrice * numberOfNights);
+  
   useEffect(() => {
     setTotalPrice(nightlyPrice * numberOfNights);
   }, [nightlyPrice, numberOfNights]);
