@@ -69,7 +69,7 @@ export default function SignIn({
   if (query.isVerified && !toastDisplayed) {
     toast({
       title: "Account successfully verified!",
-      description: "You are now able to login.",
+      description: "Please reenter your credentials to log in.",
       variant: "default",
     });
 

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
+import { errorToast } from "@/utils/toasts";
 import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { InferGetStaticPropsType } from "next";
@@ -39,6 +40,8 @@ const formSchema = z
     path: ["confirm"],
   });
 
+type FormSchema = z.infer<typeof formSchema>;
+
 export default function SignUp({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
@@ -52,48 +55,22 @@ export default function SignUp({
     }
   }, [router.query.code]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
 
-  const { toast } = useToast();
+  const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
-  const { mutate, isLoading } = api.auth.createUser.useMutation({
-    onSuccess: () => {
-      void router.push({
-        pathname: "/auth/signin",
-        query: { isNewUser: true },
-      });
-
-      toast({
-        title: "Please verify email first to login!",
-        description: "Account was created successfully!",
-        variant: "default",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Something went wrong!",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = async ({
-    email,
-    password,
-    // username,
-    name,
-  }: z.infer<typeof formSchema>) => {
-    // await signIn("email", { email: email });
-    mutate({
-      email: email,
-      password: password,
-      // username: username,
-      name: name,
-    });
-  };
+  async function handleSubmit(newUser: FormSchema) {
+    await createUser(newUser)
+      .then(() =>
+        router.push({
+          pathname: "/auth/verify-email",
+          query: { email: newUser.email },
+        }),
+      )
+      .catch(() => errorToast("Couldn't sign up, please try again"));
+  }
 
   return (
     <>
@@ -179,7 +156,11 @@ export default function SignUp({
                 />
 
                 <FormMessage />
-                <Button type="submit" disabled={isLoading} className="w-full">
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+                  className="w-full"
+                >
                   Sign up
                 </Button>
               </form>
