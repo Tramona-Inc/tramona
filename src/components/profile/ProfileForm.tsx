@@ -15,12 +15,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import { zodString } from "@/utils/zod-utils";
+import { zodEmail, zodString } from "@/utils/zod-utils";
 import { api } from "@/utils/api";
 
 const formSchema = z.object({
   name: zodString(),
-  email: zodString().email(),
+  email: zodEmail(),
   phoneNumber: zodString({ maxLen: 20 }),
 });
 

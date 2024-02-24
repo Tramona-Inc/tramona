@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { api } from "./api";
 import { errorToast, successfulRequestToast } from "./toasts";
 import { z } from "zod";
+import { toast } from "@/components/ui/use-toast";
 
 export function useMaybeSendUnsentRequests() {
   const { status } = useSession();
@@ -22,6 +23,7 @@ export function useMaybeSendUnsentRequests() {
       .omit({ userId: true })
       // overwrite checkIn and checkOut because JSON.parse doesnt handle dates
       .extend({ checkIn: z.coerce.date(), checkOut: z.coerce.date() })
+      .array()
       .safeParse(JSON.parse(unsentRequestsJSON));
 
     if (!res.success) return;
@@ -30,14 +32,26 @@ export function useMaybeSendUnsentRequests() {
 
     void (async () => {
       try {
-        await mutation.mutateAsync(unsentRequests).catch(() => {
-          throw new Error();
-        });
+        await Promise.all(
+          unsentRequests.map((req) =>
+            mutation.mutateAsync(req).catch(() => {
+              throw new Error();
+            }),
+          ),
+        );
         await utils.requests.invalidate();
-        successfulRequestToast({
-          ...unsentRequests,
-          numGuests: unsentRequests.numGuests ?? 1,
-        });
+
+        if (unsentRequests.length === 1) {
+          const req = unsentRequests[0]!;
+          successfulRequestToast({
+            ...req,
+            numGuests: req.numGuests ?? 1,
+          });
+        } else {
+          toast({
+            title: `Successfully submitted ${unsentRequests.length} requests`,
+          });
+        }
       } catch (e) {
         errorToast();
         localStorage.setItem("unsentRequests", unsentRequestsJSON);

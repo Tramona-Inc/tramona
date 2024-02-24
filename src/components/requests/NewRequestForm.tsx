@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { forwardRef } from "react";
+
 import {
   NestedDrawer,
   DrawerContent,
@@ -45,6 +46,7 @@ import { DialogClose } from "../ui/dialog";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import PlacesInput from "../_common/PlacesInput";
 
 const formSchema = z
   .object({
@@ -138,18 +140,11 @@ export default function NewRequestForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-2 gap-4"
       >
-        <FormField
+        <PlacesInput
           control={form.control}
           name="location"
-          render={({ field }) => (
-            <FormItem className="col-span-full sm:col-span-1">
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          formLabel="Location"
+          className="col-span-full sm:col-span-1"
         />
 
         <FormField

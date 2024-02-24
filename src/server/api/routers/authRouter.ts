@@ -3,7 +3,6 @@ import * as bycrypt from "bcrypt";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { referralCodes, users, type User } from "@/server/db/schema";
-import { render } from "@react-email/render";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -12,15 +11,15 @@ import { PasswordResetEmailLink } from "@/components/email-templates/PasswordRes
 import { generateReferralCode } from "@/utils/utils";
 import { env } from "@/env";
 import { sendEmail } from "@/server/server-utils";
+import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
     .input(
       z.object({
-        name: z.string().min(2, { message: "NameLengthError" }),
-        // username: z.string().min(2, { message: "UsernameLengthError" }),
-        email: z.string().email({ message: "EmailInvalidError" }),
-        password: z.string(), // validated within the client
+        name: zodString({ minLen: 2 }),
+        email: zodEmail(),
+        password: zodPassword(),
         referralCode: z.string().optional(),
       }),
     )
@@ -156,7 +155,7 @@ export const authRouter = createTRPCRouter({
   createUniqueForgotPasswordLink: publicProcedure
     .input(
       z.object({
-        email: z.string().email(),
+        email: zodEmail(),
       }),
     )
     .mutation(async ({ input, ctx }) => {

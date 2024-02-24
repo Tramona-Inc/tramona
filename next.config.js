@@ -17,6 +17,10 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  rewrites: async () => [
+    { source: "/privacy-policy", destination: "/html/privacy-policy.html" },
+    { source: "/tos", destination: "/html/tos.html" },
+  ],
   images: {
     remotePatterns: [
       {
