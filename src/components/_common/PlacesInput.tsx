@@ -25,6 +25,7 @@ import usePlaceAutocomplete from "use-places-autocomplete";
 
 import { type FieldPath, type FieldValues } from "react-hook-form";
 import PlacesPopover from "./PlacesPopover";
+import { useState } from "react";
 
 export default function PlacesInput<
   TFieldValues extends FieldValues,
@@ -40,6 +41,8 @@ export default function PlacesInput<
   className: string;
   formLabel: string;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <FormField
       {...props}
@@ -48,8 +51,11 @@ export default function PlacesInput<
           <FormLabel>{formLabel}</FormLabel>
           <PlacesPopover
             autoFocus
+            open={open}
+            setOpen={setOpen}
             value={field.value}
             onValueChange={field.onChange}
+            className="w-[100vw] -translate-y-12 overflow-clip px-0 pt-0 sm:w-72 sm:-translate-x-5"
             trigger={({ value, disabled }) => (
               <Button
                 variant={value ? "filledInput" : "emptyInput"}

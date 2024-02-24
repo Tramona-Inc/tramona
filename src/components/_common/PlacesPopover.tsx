@@ -25,11 +25,17 @@ export default function PlacesPopover({
   onValueChange,
   autoFocus = false,
   trigger,
+  className,
+  open,
+  setOpen,
   ...props
 }: React.ComponentProps<typeof Popover> & {
   value: string;
   onValueChange: (value: string) => void;
   autoFocus?: boolean;
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  className: string;
   trigger: (props: { disabled: boolean; value: string }) => React.ReactNode;
 }) {
   const {
@@ -40,21 +46,17 @@ export default function PlacesPopover({
     clearSuggestions,
   } = usePlaceAutocomplete({ debounce: 300 });
 
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
 
   // useEffect(() => ..., []) was offsetting the popover a lil, idk why this works
-  useTimeout(() => setOpen(true), 0);
+  useTimeout(() => setOpen(autoFocus), 0);
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
       <PopoverTrigger asChild>
         <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
       </PopoverTrigger>
-      <PopoverContent
-        dontAnimate
-        align="start"
-        className="w-[100vw] -translate-y-12 overflow-clip px-0 pt-0 sm:w-72 sm:-translate-x-5"
-      >
+      <PopoverContent dontAnimate align="start" className={className}>
         <Command>
           <CommandInput
             value={input}
