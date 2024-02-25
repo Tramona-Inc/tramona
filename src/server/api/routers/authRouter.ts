@@ -97,7 +97,7 @@ export const authRouter = createTRPCRouter({
             expiresIn: "30m",
           });
 
-          const url = `${env.NEXTAUTH_URL}/auth/verify-email?id=${user.id}&token=${token}`;
+          const url = `${env.NEXTAUTH_URL}/auth/verifying-email?id=${user.id}&token=${token}`;
 
           await sendEmail({
             to: input.email,
