@@ -1,7 +1,7 @@
 import { type MessageDbType } from "@/types/supabase.message";
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
 import { Message } from "./Message";
 
@@ -15,6 +15,8 @@ function NoMessages() {
 
 export default function ListMessages() {
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
+
+  const [userScrolled, setUserScrolled] = useState(false);
 
   const { conversations } = useMessage();
   const optimisticIds = useMessage((state) => state.optimisticIds);
@@ -83,27 +85,52 @@ export default function ListMessages() {
     }
   }, [messages]);
 
+  const handleOnScroll = () => {
+    const scrollContainer = scrollRef.current;
+
+    // Check if scroll is more than 10 pixels
+    if (scrollContainer) {
+      const isScroll =
+        scrollContainer.scrollTop <
+        scrollContainer.scrollHeight - scrollContainer.clientHeight - 10;
+
+      setUserScrolled(isScroll);
+    }
+  };
+
+  const scrollDown = () => {
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  };
+
   return (
-    <div
-      ref={scrollRef}
-      className="relative mb-2 flex flex-1 flex-col overflow-y-auto"
-    >
-      <div className="flex-1"></div>
-      <div className="absolute w-full">
-        {messages.length > 0 ? (
-          messages
-            .slice()
-            .reverse()
-            .map((message) => <Message key={message.id} message={message} />)
-        ) : (
-          <NoMessages />
-        )}
-        <div className="absolute bottom-5 flex w-full items-center justify-center">
+    <>
+      <div
+        ref={scrollRef}
+        onScroll={handleOnScroll}
+        className="relative mb-2 flex flex-1 flex-col overflow-y-auto"
+      >
+        <div className="flex-1"></div>
+        <div className="absolute w-full">
+          {messages.length > 0 ? (
+            messages
+              .slice()
+              .reverse()
+              .map((message) => <Message key={message.id} message={message} />)
+          ) : (
+            <NoMessages />
+          )}
+        </div>
+      </div>
+      {userScrolled && (
+        <div
+          className="absolute bottom-16 flex w-full items-center justify-center"
+          onClick={() => scrollDown()}
+        >
           <div className="cursor-pointer rounded-full bg-black p-2 transition-all hover:scale-110">
             <Icons.arrowDown color="white" />
           </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
