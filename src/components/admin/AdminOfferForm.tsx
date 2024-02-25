@@ -73,7 +73,9 @@ export default function AdminOfferForm({
   offer?: OfferWithProperty;
 }) {
   const numberOfNights = getNumNights(request.checkIn, request.checkOut);
-  const offeredNightlyPriceUSD = offer ? Math.round(offer.totalPrice / numberOfNights / 100) : 1;
+  const offeredNightlyPriceUSD = offer
+    ? Math.round(offer.totalPrice / numberOfNights / 100)
+    : 1;
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -107,7 +109,7 @@ export default function AdminOfferForm({
             airbnbUrl: offer.property.airbnbUrl ?? undefined,
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
-            offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined, 
+            offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
           }
@@ -128,7 +130,7 @@ export default function AdminOfferForm({
   const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
-    const { offeredNightlyPriceUSD, ...propertyData } = data;
+    const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
     // const totalPrice = offeredPriceUSD * 100;
     const totalPrice = data.offeredNightlyPriceUSD * numberOfNights * 100;
@@ -138,7 +140,7 @@ export default function AdminOfferForm({
       name: propertyData.propertyName,
       type: propertyData.propertyType,
       originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
-      // offeredNightlyPrice: offeredNightlyPriceUSD, 
+      // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
     };
 
@@ -195,12 +197,11 @@ export default function AdminOfferForm({
 
   const defaultNightlyPrice = 0;
   const [isAirbnb, setIsAirbnb] = useState<boolean>(true);
-  const [nightlyPrice, setNightlyPrice] = useState(offer ? offeredNightlyPriceUSD : defaultNightlyPrice);
-  const [totalPrice, setTotalPrice] = useState(nightlyPrice * numberOfNights);
-  
-  useEffect(() => {
-    setTotalPrice(nightlyPrice * numberOfNights);
-  }, [nightlyPrice, numberOfNights]);
+  const [nightlyPrice, setNightlyPrice] = useState(
+    offer ? offeredNightlyPriceUSD : defaultNightlyPrice,
+  );
+
+  const totalPrice = nightlyPrice * numberOfNights;
 
   return (
     <Form {...form}>
@@ -212,7 +213,7 @@ export default function AdminOfferForm({
           control={form.control}
           name="propertyName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-full">
               <FormLabel>Property name</FormLabel>
               <FormControl>
                 <Input {...field} autoFocus />
@@ -283,12 +284,11 @@ export default function AdminOfferForm({
           name="offeredPriceUSD"
           render={() => (
             <FormItem>
-              <FormLabel>Total offered price ({numberOfNights} nights)</FormLabel>
+              <FormLabel>
+                Total offered price ({numberOfNights} nights)
+              </FormLabel>
               <FormControl>
-                <Input
-                  value={`$${totalPrice}`}
-                  readOnly
-                />
+                <Input prefix="$" value={totalPrice} readOnly />
               </FormControl>
               <FormMessage />
             </FormItem>
