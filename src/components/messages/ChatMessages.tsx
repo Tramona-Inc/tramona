@@ -65,7 +65,7 @@ export default function ChatMessages({
   }, [conversationId]);
 
   return (
-    <div className="relative flex flex-1 overflow-y-auto">
+    <>
       {/* Display's our messages */}
       <ListMessages />
 
@@ -73,6 +73,6 @@ export default function ChatMessages({
       {messages && (
         <InitMessages messages={messages} conversationId={conversationId} />
       )}
-    </div>
+    </>
   );
 }

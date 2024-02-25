@@ -1,7 +1,7 @@
 import { type MessageDbType } from "@/types/supabase.message";
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Message } from "./Message";
 
 function NoMessages() {
@@ -13,6 +13,8 @@ function NoMessages() {
 }
 
 export default function ListMessages() {
+  const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
+
   const { conversations } = useMessage();
   const optimisticIds = useMessage((state) => state.optimisticIds);
   const currentConversationId = useMessage(
@@ -27,8 +29,6 @@ export default function ListMessages() {
     ? conversations[currentConversationId] ?? []
     : [];
 
-  console.log(conversations);
-
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     if (!optimisticIds.includes(payload.new.id)) {
       const { data, error } = await supabase
@@ -39,8 +39,6 @@ export default function ListMessages() {
       if (error) {
         console.log(error);
       } else {
-        console.log("PAYLOAD IS WORKING");
-
         const newMessage: ChatMessageType = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
@@ -76,18 +74,30 @@ export default function ListMessages() {
     };
   }, [currentConversationId, messages]);
 
-  console.log(conversations);
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+
+    if (scrollContainer) {
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+  }, [messages]);
 
   return (
-    <div className="absolute h-full w-full space-y-5 p-5">
-      {messages.length > 0 ? (
-        messages
-          .slice()
-          .reverse()
-          .map((message) => <Message key={message.id} message={message} />)
-      ) : (
-        <NoMessages />
-      )}
+    <div
+      ref={scrollRef}
+      className="relative flex flex-1 flex-col overflow-y-auto"
+    >
+      <div className="flex-1"></div>
+      <div className="absolute h-full w-full flex-1 space-y-5 p-5">
+        {messages.length > 0 ? (
+          messages
+            .slice()
+            .reverse()
+            .map((message) => <Message key={message.id} message={message} />)
+        ) : (
+          <NoMessages />
+        )}
+      </div>
     </div>
   );
 }
