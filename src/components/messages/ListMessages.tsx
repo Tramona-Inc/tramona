@@ -1,11 +1,9 @@
-import { SupabaseDatabase } from "@/types/supabase";
-import { ChatMessageType, useMessage } from "@/utils/store/messages";
+import { type MessageDbType } from '@/types/supabase.message';
+import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect } from "react";
 import { Message } from "./Message";
 
-export type MessageDbType =
-  SupabaseDatabase["public"]["Tables"]["messages"]["Row"];
 
 function NoMessages() {
   return (

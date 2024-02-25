@@ -34,29 +34,38 @@ export default function ChatInput({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (session) {
-        const newMessage: ChatMessageType = {
-          id: Math.floor(Math.random() * 1000000), //randomn id locally (will not match online)
-          createdAt: new Date(),
-          conversationId: conversationId,
-          userId: session.user.id,
-          message: values.message,
-          read: false,
-          isEdit: false,
-          user: {
-            name: session.user.name,
-            email: session.user.email,
-            image: session.user.image ?? "",
-          },
-        };
+        const { data, error } = await supabase
+          .from("messages")
+          .insert({
+            conversation_id: conversationId,
+            user_id: session?.user.id,
+            message: values.message,
+          })
+          .select("*")
+          .single();
 
+        console.log("DATA INSERTED: ", data?.id);
+
+        let newMessage: ChatMessageType;
+
+        if (data) {
+          newMessage = {
+            id: data.id, //randomn id locally (will not match online)
+            createdAt: new Date(data.created_at),
+            conversationId: data.conversation_id,
+            userId: data.conversation_id,
+            message: data.message,
+            read: data.read,
+            isEdit: data.is_edit,
+            user: {
+              name: session.user.name,
+              email: session.user.email,
+              image: session.user.image ?? "",
+            },
+          };
+        }
         addMessageToConversation(conversationId, newMessage, optimisticIds);
         setOptimisticIds(newMessage.id);
-
-        const { error } = await supabase.from("messages").insert({
-          conversation_id: conversationId,
-          user_id: session?.user.id,
-          message: values.message,
-        });
 
         if (error) {
           throw error;
