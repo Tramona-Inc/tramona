@@ -14,7 +14,7 @@
     --card-foreground: var(--zinc-950);
     --popover: var(--zinc-100);
     --popover-foreground: var(--zinc-950);
-    --primary: var(--blue-600);
+    --primary: var(--black);
     --primary-foreground: var(--zinc-50);
     --secondary: var(--zinc-100);
     --secondary-foreground: var(--zinc-800);
@@ -26,7 +26,7 @@
     --destructive-foreground: var(--zinc-50);
     --border: var(--zinc-200);
     --input: var(--zinc-300);
-    --ring: var(--blue-600);
+    --ring: var(--black);
     --radius: 0.5rem;
   }
 
