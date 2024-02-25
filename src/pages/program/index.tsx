@@ -90,7 +90,7 @@ function ExploreEarningsCard() {
         ))}
       </div>
       <div className="space-y-1">
-        <p className="text-xs font-bold uppercase tracking-wide text-white/60">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
           With
         </p>
         <div>
