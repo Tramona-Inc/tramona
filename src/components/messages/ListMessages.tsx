@@ -1,5 +1,5 @@
 import { type MessageDbType } from "@/types/supabase.message";
-import { ChatMessageType, useMessage } from "@/utils/store/messages";
+import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect } from "react";
 import { Message } from "./Message";
@@ -13,7 +13,7 @@ function NoMessages() {
 }
 
 export default function ListMessages() {
-  const conversations = useMessage((state) => state.conversations);
+  const { conversations } = useMessage();
   const optimisticIds = useMessage((state) => state.optimisticIds);
   const currentConversationId = useMessage(
     (state) => state.currentConversationId,
@@ -27,15 +27,10 @@ export default function ListMessages() {
     ? conversations[currentConversationId] ?? []
     : [];
 
-  // console.log(messages);
-
   console.log(conversations);
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    // console.log("Change received!", payload);
-
     if (!optimisticIds.includes(payload.new.id)) {
-      // Get user associated with message
       const { data, error } = await supabase
         .from("user")
         .select("name, email, image")
@@ -44,6 +39,8 @@ export default function ListMessages() {
       if (error) {
         console.log(error);
       } else {
+        console.log("PAYLOAD IS WORKING");
+
         const newMessage: ChatMessageType = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
@@ -54,7 +51,7 @@ export default function ListMessages() {
           read: payload.new.read,
           user: data,
         };
-        addMessageToConversation(currentConversationId!, newMessage);
+        addMessageToConversation(payload.new.conversation_id, newMessage);
       }
     }
   };
@@ -77,14 +74,17 @@ export default function ListMessages() {
     return () => {
       void channel.unsubscribe();
     };
-  }, [currentConversationId, messages, conversations, handlePostgresChange]);
+  }, [currentConversationId, messages]);
+
+  console.log(conversations);
 
   return (
     <div className="absolute h-full w-full space-y-5 p-5">
       {messages.length > 0 ? (
-        messages.map((message) => (
-          <Message key={message.id} message={message} />
-        ))
+        messages
+          .slice()
+          .reverse()
+          .map((message) => <Message key={message.id} message={message} />)
       ) : (
         <NoMessages />
       )}

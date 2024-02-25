@@ -54,8 +54,8 @@ export const useMessage = create<MessageState>((set) => ({
       if (updatedConversations[conversationId]) {
         // Add the new message to the existing conversation
         updatedConversations[conversationId] = [
-          ...(updatedConversations[conversationId] as ChatMessageType[]),
           newMessage,
+          ...(updatedConversations[conversationId] as ChatMessageType[]),
         ];
       } else {
         // If the conversation doesn't exist, create a new conversation with the new message

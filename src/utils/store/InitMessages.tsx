@@ -18,7 +18,13 @@ export default function InitMessages({
     if (!initState.current) {
       console.log(messages);
 
-      setInitConversationMessages(conversationId, messages.reverse());
+      useMessage.setState((state) => ({
+        conversations: {
+          ...state.conversations,
+          [conversationId]: messages,
+        },
+      }));
+
       initState.current = true;
     }
   }, []);
