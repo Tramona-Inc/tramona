@@ -110,7 +110,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
+    <div className="flex min-h-screen flex-col items-center justify-center">
       <section className="flex max-w-sm flex-col space-y-5">
         <h1 className="text-4xl font-bold tracking-tight">
           Reset your password
@@ -145,7 +145,7 @@ export default function ResetPassword() {
                 <FormItem>
                   <FormLabel>Verify Password</FormLabel>
                   <FormControl>
-                    <Input {...field} type={"password"} autoFocus />
+                    <Input {...field} type={"password"} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
