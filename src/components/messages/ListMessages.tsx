@@ -2,6 +2,7 @@ import { type MessageDbType } from "@/types/supabase.message";
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useRef } from "react";
+import { Icons } from "../_icons/icons";
 import { Message } from "./Message";
 
 function NoMessages() {
@@ -88,7 +89,7 @@ export default function ListMessages() {
       className="relative mb-2 flex flex-1 flex-col overflow-y-auto"
     >
       <div className="flex-1"></div>
-      <div className="absolute w-full space-y-10 p-5">
+      <div className="absolute w-full">
         {messages.length > 0 ? (
           messages
             .slice()
@@ -97,6 +98,11 @@ export default function ListMessages() {
         ) : (
           <NoMessages />
         )}
+        <div className="absolute bottom-5 flex w-full items-center justify-center">
+          <div className="rounded-full bg-black p-2">
+            <Icons.arrowDown color="white" />
+          </div>
+        </div>
       </div>
     </div>
   );

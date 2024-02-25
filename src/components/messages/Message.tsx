@@ -13,7 +13,7 @@ export function Message({ message }: MessageProp) {
   // const daysDifference = dayjs().diff(dayjs(message.createdAt), "day");
 
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-3 p-5">
       <UserAvatar
         email={undefined}
         image={message.user.image}
