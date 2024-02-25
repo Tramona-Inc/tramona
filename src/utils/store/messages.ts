@@ -18,7 +18,6 @@ type MessageState = {
   addMessageToConversation: (
     conversationId: number,
     messages: ChatMessageType,
-    optimistiIds: number[],
   ) => void;
   optimisticIds: number[];
   setOptimisticIds: (id: number) => void;
@@ -31,6 +30,8 @@ export const useMessage = create<MessageState>((set) => ({
     conversationId: number,
     messages: ChatMessageType[],
   ) => {
+    console.log(messages);
+
     set((state) => ({
       ...state,
       conversations: {
@@ -45,7 +46,6 @@ export const useMessage = create<MessageState>((set) => ({
   addMessageToConversation: (
     conversationId: number,
     newMessage: ChatMessageType,
-    optimisticIds: number[],
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {

@@ -28,12 +28,12 @@ export default function ChatInput({
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
   );
-  const optimisticIds = useMessage((state) => state.optimisticIds);
   const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (session) {
+        // TODO: might be better to update the state first then insert into db
         const { data, error } = await supabase
           .from("messages")
           .insert({
@@ -60,7 +60,7 @@ export default function ChatInput({
             },
           };
 
-          addMessageToConversation(conversationId, newMessage, optimisticIds);
+          addMessageToConversation(conversationId, newMessage);
           setOptimisticIds(newMessage.id);
         } else {
           throw "No data";

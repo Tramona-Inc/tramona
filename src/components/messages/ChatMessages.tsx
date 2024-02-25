@@ -53,7 +53,7 @@ export default function ChatMessages({
   }, [conversationId]);
 
   return (
-    <div className="relative flex flex-1 overflow-y-auto">
+    <div className="relative flex-1 overflow-y-auto flex">
       {/* Display's our messages */}
       <ListMessages />
 

@@ -1,9 +1,8 @@
-import { type MessageDbType } from '@/types/supabase.message';
+import { type MessageDbType } from "@/types/supabase.message";
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect } from "react";
 import { Message } from "./Message";
-
 
 function NoMessages() {
   return (
@@ -25,10 +24,10 @@ export default function ListMessages() {
     ? conversations[currentConversationId] ?? []
     : [];
 
-  console.log(messages);
+  // console.log(conversations);
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    console.log("Change received!", payload);
+    // console.log("Change received!", payload);
 
     try {
       if (!optimisticIds.includes(payload.new.id)) {
@@ -53,11 +52,7 @@ export default function ListMessages() {
             user: data,
           };
 
-          addMessageToConversation(
-            currentConversationId!,
-            newMessage,
-            optimisticIds,
-          );
+          addMessageToConversation(currentConversationId!, newMessage);
         }
       }
     } catch (error) {
