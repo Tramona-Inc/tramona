@@ -18,6 +18,8 @@ export default function ListMessages() {
 
   const [userScrolled, setUserScrolled] = useState(false);
 
+  const [notification, setNotification] = useState(0);
+
   const { conversations } = useMessage();
   const optimisticIds = useMessage((state) => state.optimisticIds);
   const currentConversationId = useMessage(
@@ -55,6 +57,14 @@ export default function ListMessages() {
         addMessageToConversation(payload.new.conversation_id, newMessage);
       }
     }
+
+    const scrollContainer = scrollRef.current;
+    if (
+      scrollContainer.scrollTop <
+      scrollContainer.scrollHeight - scrollContainer.clientHeight - 10
+    ) {
+      setNotification((current) => current + 1);
+    }
   };
 
   useEffect(() => {
@@ -80,7 +90,7 @@ export default function ListMessages() {
   useEffect(() => {
     const scrollContainer = scrollRef.current;
 
-    if (scrollContainer) {
+    if (scrollContainer && !userScrolled) {
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
   }, [messages]);
@@ -95,10 +105,20 @@ export default function ListMessages() {
         scrollContainer.scrollHeight - scrollContainer.clientHeight - 10;
 
       setUserScrolled(isScroll);
+
+      // Set notification to 0 when scroll to bottom
+      if (
+        scrollContainer.scrollTop ===
+        scrollContainer.scrollHeight - scrollContainer.clientHeight
+      ) {
+        setNotification(0);
+      }
     }
   };
 
   const scrollDown = () => {
+    // Clear notification when scorlled down
+    setNotification(0);
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   };
 
@@ -126,9 +146,15 @@ export default function ListMessages() {
           className="absolute bottom-16 flex w-full items-center justify-center"
           onClick={() => scrollDown()}
         >
-          <div className="cursor-pointer rounded-full bg-black p-2 transition-all hover:scale-110">
-            <Icons.arrowDown color="white" />
-          </div>
+          {notification ? (
+            <div className="cursor-pointer rounded-xl bg-black px-6 py-1 transition-all hover:scale-110">
+              <h1 className="text-white">New {notification} messages</h1>
+            </div>
+          ) : (
+            <div className="cursor-pointer rounded-full bg-black p-2 transition-all hover:scale-110">
+              <Icons.arrowDown color="white" />
+            </div>
+          )}
         </div>
       )}
     </>
