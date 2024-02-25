@@ -36,8 +36,21 @@ export default function ChatMessages({
 
         if (data) {
           // TODO: FIX this is weird
-          const chatMessages: ChatMessageType[] =
-            data as unknown as ChatMessageType[];
+          const chatMessages: ChatMessageType[] = data.map((message) => ({
+            conversationId: message.conversation_id,
+            id: message.id,
+            createdAt: new Date(message.created_at),
+            userId: message.user_id,
+            message: message.message,
+            read: message.read,
+            isEdit: message.is_edit,
+            user: {
+              name: message.user?.name ?? "",
+              image: message.user?.image ?? "",
+              email: message.user?.email ?? "",
+            },
+          }));
+
           setMessages(chatMessages);
           setInitConversationMessages(conversationId, chatMessages);
         }
@@ -53,7 +66,7 @@ export default function ChatMessages({
   }, [conversationId]);
 
   return (
-    <div className="relative flex-1 overflow-y-auto flex">
+    <div className="relative flex flex-1 overflow-y-auto">
       {/* Display's our messages */}
       <ListMessages />
 
