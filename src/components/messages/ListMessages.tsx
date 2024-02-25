@@ -99,7 +99,7 @@ export default function ListMessages() {
           <NoMessages />
         )}
         <div className="absolute bottom-5 flex w-full items-center justify-center">
-          <div className="rounded-full bg-black p-2">
+          <div className="cursor-pointer rounded-full bg-black p-2 transition-all hover:scale-110">
             <Icons.arrowDown color="white" />
           </div>
         </div>
