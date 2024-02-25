@@ -37,10 +37,7 @@ export default function DateRangePicker<
           <FormLabel>{formLabel}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant={field.value ? "filledInput" : "emptyInput"}
-                className="pl-3"
-              >
+              <Button variant={field.value ? "filledInput" : "emptyInput"}>
                 {field.value
                   ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     formatDateRange(field.value.from, field.value.to)

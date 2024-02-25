@@ -241,7 +241,6 @@ const FiltersButton = forwardRef<
   <Button
     type="button"
     variant={fmtdFilters ? "filledInput" : "emptyInput"}
-    className="pl-3"
     {...props}
     ref={ref}
   >
