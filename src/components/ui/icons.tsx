@@ -7,6 +7,7 @@ import {
   Star,
   Trash,
   User,
+  ArrowDown,
 } from "lucide-react";
 import * as React from "react"; // Import React
 
@@ -24,6 +25,7 @@ const iconComponents: Icons = {
   trash: Trash,
   success: BadgeCheck,
   chevronLeft: ChevronLeft,
+  arrowDown: ArrowDown,
   apple: () => {
     return (
       <svg

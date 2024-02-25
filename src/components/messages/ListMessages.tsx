@@ -85,10 +85,10 @@ export default function ListMessages() {
   return (
     <div
       ref={scrollRef}
-      className="relative flex flex-1 flex-col overflow-y-auto"
+      className="relative mb-2 flex flex-1 flex-col overflow-y-auto"
     >
       <div className="flex-1"></div>
-      <div className="absolute h-full w-full flex-1 space-y-5 p-5">
+      <div className="absolute w-full space-y-10 p-5">
         {messages.length > 0 ? (
           messages
             .slice()
