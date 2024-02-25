@@ -1,4 +1,4 @@
-import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
@@ -41,19 +41,15 @@ export default function ChatInput({
             user_id: session?.user.id,
             message: values.message,
           })
-          .select("*")
+          .select("*, user(email, name, image)")
           .single();
 
-        console.log("DATA INSERTED: ", data?.id);
-
-        let newMessage: ChatMessageType;
-
         if (data) {
-          newMessage = {
-            id: data.id, //randomn id locally (will not match online)
+          const newMessage = {
+            id: data.id,
             createdAt: new Date(data.created_at),
             conversationId: data.conversation_id,
-            userId: data.conversation_id,
+            userId: data.user_id,
             message: data.message,
             read: data.read,
             isEdit: data.is_edit,
@@ -63,9 +59,12 @@ export default function ChatInput({
               image: session.user.image ?? "",
             },
           };
+
+          addMessageToConversation(conversationId, newMessage, optimisticIds);
+          setOptimisticIds(newMessage.id);
+        } else {
+          throw "No data";
         }
-        addMessageToConversation(conversationId, newMessage, optimisticIds);
-        setOptimisticIds(newMessage.id);
 
         if (error) {
           throw error;
