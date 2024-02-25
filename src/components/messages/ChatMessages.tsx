@@ -35,7 +35,6 @@ export default function ChatMessages({
           .order("created_at", { ascending: false });
 
         if (data) {
-          // TODO: FIX this is weird
           const chatMessages: ChatMessageType[] = data.map((message) => ({
             conversationId: message.conversation_id,
             id: message.id,

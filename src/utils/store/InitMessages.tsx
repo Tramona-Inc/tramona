@@ -10,14 +10,18 @@ export default function InitMessages({
 }) {
   const initState = useRef(false);
 
-  const { setInitConversationMessages } = useMessage();
+  const setInitConversationMessages = useMessage(
+    (state) => state.setInitConversationMessages,
+  );
 
   useEffect(() => {
     if (!initState.current) {
-      setInitConversationMessages(conversationId, messages);
+      console.log(messages);
+
+      setInitConversationMessages(conversationId, messages.reverse());
       initState.current = true;
     }
-  }, [conversationId, messages, setInitConversationMessages]);
+  }, []);
 
   return <></>;
 }

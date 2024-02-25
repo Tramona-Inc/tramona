@@ -30,8 +30,6 @@ export const useMessage = create<MessageState>((set) => ({
     conversationId: number,
     messages: ChatMessageType[],
   ) => {
-    console.log(messages);
-
     set((state) => ({
       ...state,
       conversations: {

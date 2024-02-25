@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { SupabaseDatabase } from '@/types/supabase';
+import { type SupabaseDatabase } from "@/types/supabase";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;

@@ -1,5 +1,5 @@
 import { type MessageDbType } from "@/types/supabase.message";
-import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { ChatMessageType, useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect } from "react";
 import { Message } from "./Message";
@@ -13,50 +13,49 @@ function NoMessages() {
 }
 
 export default function ListMessages() {
-  const {
-    currentConversationId,
-    conversations,
-    optimisticIds,
-    addMessageToConversation,
-  } = useMessage((state) => state);
+  const conversations = useMessage((state) => state.conversations);
+  const optimisticIds = useMessage((state) => state.optimisticIds);
+  const currentConversationId = useMessage(
+    (state) => state.currentConversationId,
+  );
+
+  const addMessageToConversation = useMessage(
+    (state) => state.addMessageToConversation,
+  );
 
   const messages = currentConversationId
     ? conversations[currentConversationId] ?? []
     : [];
 
-  // console.log(conversations);
+  // console.log(messages);
+
+  console.log(conversations);
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     // console.log("Change received!", payload);
 
-    try {
-      if (!optimisticIds.includes(payload.new.id)) {
-        // Get user associated with message
-        const { data, error } = await supabase
-          .from("user")
-          .select("name, email, image")
-          .eq("id", payload.new.user_id)
-          .single();
-
-        if (error) {
-          console.log(error);
-        } else {
-          const newMessage: ChatMessageType = {
-            id: payload.new.id,
-            conversationId: payload.new.conversation_id,
-            userId: payload.new.user_id,
-            message: payload.new.message,
-            isEdit: payload.new.is_edit,
-            createdAt: new Date(payload.new.created_at),
-            read: payload.new.read,
-            user: data,
-          };
-
-          addMessageToConversation(currentConversationId!, newMessage);
-        }
+    if (!optimisticIds.includes(payload.new.id)) {
+      // Get user associated with message
+      const { data, error } = await supabase
+        .from("user")
+        .select("name, email, image")
+        .eq("id", payload.new.user_id)
+        .single();
+      if (error) {
+        console.log(error);
+      } else {
+        const newMessage: ChatMessageType = {
+          id: payload.new.id,
+          conversationId: payload.new.conversation_id,
+          userId: payload.new.user_id,
+          message: payload.new.message,
+          isEdit: payload.new.is_edit,
+          createdAt: new Date(payload.new.created_at),
+          read: payload.new.read,
+          user: data,
+        };
+        addMessageToConversation(currentConversationId!, newMessage);
       }
-    } catch (error) {
-      console.error(error);
     }
   };
 
@@ -78,7 +77,7 @@ export default function ListMessages() {
     return () => {
       void channel.unsubscribe();
     };
-  }, [currentConversationId, addMessageToConversation, messages]);
+  }, [currentConversationId, messages, conversations, handlePostgresChange]);
 
   return (
     <div className="absolute h-full w-full space-y-5 p-5">
