@@ -27,7 +27,7 @@ export default function UserAvatar({
 
   return (
     <Avatar size={size}>
-      {image && <AvatarImage src={image} alt="" />}
+      {image && <AvatarImage src={image} alt="" style={{ objectFit: 'cover' }} />}
       <AvatarFallback>{fallback}</AvatarFallback>
     </Avatar>
   );
