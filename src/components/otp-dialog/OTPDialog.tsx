@@ -1,6 +1,6 @@
 import {
-  Dispatch,
-  SetStateAction,
+  type Dispatch,
+  type SetStateAction,
   useEffect,
   useMemo,
   useRef,
@@ -20,6 +20,7 @@ import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
 
 import { api } from "@/utils/api";
+import { errorToast } from "@/utils/toasts";
 
 interface OTPDialogProps {
   toPhoneNumber: string;
@@ -105,15 +106,10 @@ export default function OTPDialog({
         title: "Verification code sent!",
         description: "Code is valid for 10 minutes.",
       });
-    } catch (err: any) {
+    } catch (err) {
       setOpen(false);
       setVerified(false);
-
-      toast({
-        variant: "destructive",
-        title: "Something went wrong!",
-        description: err,
-      });
+      errorToast();
     }
   };
 
@@ -144,20 +140,16 @@ export default function OTPDialog({
 
         setVerified(true);
         setOpen(false);
-      } catch (err: any) {
+      } catch (err) {
         setVerified(false);
         setOpen(false);
 
-        toast({
-          variant: "destructive",
-          title: "Something went wrong!",
-          description: err,
-        });
+        errorToast();
       }
     };
 
     if (otpSent && allFilled) {
-      verify();
+      void verify();
     }
   }, [allFilled]);
 
@@ -167,7 +159,7 @@ export default function OTPDialog({
         variant="link"
         onClick={() => {
           if (toPhoneNumber !== "") {
-            sendVerificationCode();
+            void sendVerificationCode();
           } else {
             toast({
               variant: "destructive",

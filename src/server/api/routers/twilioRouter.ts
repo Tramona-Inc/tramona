@@ -1,8 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { Twilio } from "twilio";
 import {
-  ServiceListInstanceCreateOptions,
-  ServiceInstance,
+  type ServiceListInstanceCreateOptions,
+  type ServiceInstance,
 } from "twilio/lib/rest/verify/v2/service";
 import { MailService } from "@sendgrid/mail";
 import { env } from "@/env";

@@ -48,7 +48,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "../ui/label";
@@ -84,8 +83,7 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
-  const { data: session, status } = useSession();
-  const user = session?.user;
+  const { status } = useSession();
 
   const isDesktop = useIsDesktop();
 
@@ -99,8 +97,6 @@ export default function NewRequestForm({
   const createRequestsMutation = api.requests.create.useMutation();
 
   const smsMutation = api.twilio.sendSMS.useMutation();
-
-  const updateUserProfileMutation = api.users.updateProfile.useMutation();
 
   const utils = api.useUtils();
   const router = useRouter();
