@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // https://next-auth.js.org/configuration/pages
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useRequireNoAuth } from "@/utils/auth-utils";
+import { errorToast } from "@/utils/toasts";
 import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type InferGetStaticPropsType } from "next";
@@ -21,7 +21,7 @@ import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -41,8 +41,6 @@ export default function SignIn({
 
   const { query } = useRouter();
 
-  const [toastDisplayed, setToastDisplayed] = useState(false);
-
   const handleSubmit = async ({
     email,
     password,
@@ -56,25 +54,18 @@ export default function SignIn({
     });
   };
 
-  if (query.error && !toastDisplayed) {
-    toast({
-      title:
-        "Could not login. Please check your e-mail or password or third-party application.",
-      variant: "destructive",
-    });
+  useEffect(() => {
+    if (query.error) {
+      errorToast("Couldn't log in, please try again");
+    }
 
-    setToastDisplayed(true); // Set the state to true after displaying the toast
-  }
-
-  if (query.isVerified && !toastDisplayed) {
-    toast({
-      title: "Account successfully verified!",
-      description: "Please reenter your credentials to log in.",
-      variant: "default",
-    });
-
-    setToastDisplayed(true); // Set the state to true after displaying the toast
-  }
+    if (query.isVerified) {
+      toast({
+        title: "Account successfully verified!",
+        description: "Please re-enter your credentials to log in.",
+      });
+    }
+  }, [query.error, query.isVerified]);
 
   return (
     <>
