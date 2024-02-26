@@ -18,7 +18,7 @@ import { PlusIcon, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useForm, useFormContext } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import LPDateRangePicker, {
   LPFormItem,
@@ -53,10 +53,6 @@ const formSchema = z.object({
     )
     .nonempty(),
 });
-
-type T = NonNullable<
-  Parameters<typeof useForm<any, "middle", any>>[0]
->["context"];
 
 type FormSchema = z.infer<typeof formSchema>;
 
