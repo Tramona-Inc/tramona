@@ -46,6 +46,7 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "@react-email/components": "^0.0.14",
     "@react-email/render": "^0.0.12",
+    "@sendgrid/mail": "^8.1.0",
     "@stripe/react-stripe-js": "^2.4.0",
     "@stripe/stripe-js": "^2.4.0",
     "@t3-oss/env-nextjs": "^0.7.3",
@@ -88,6 +89,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "use-places-autocomplete": "^4.0.1",
+    "twilio": "^4.22.0",
     "vaul": "^0.9.0",
     "zod": "^3.22.4"
   },
