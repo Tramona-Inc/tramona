@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatDateRange } from "@/utils/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, MapPinIcon } from "lucide-react";
 import { type FieldPath, type FieldValues } from "react-hook-form";
 import {
   FormField,
@@ -15,6 +15,7 @@ import {
 import { useMeasure } from "@uidotdev/usehooks";
 import { useState, type ComponentProps, forwardRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
+import PlacesPopover from "@/components/_common/PlacesPopover";
 
 // LP is short for landing page
 
@@ -129,27 +130,85 @@ export const LPInput = forwardRef<
 //   );
 // }
 
-export default function LPDateRangePicker<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: Omit<
-    React.ComponentProps<typeof FormField<TFieldValues, TName>>,
-    "render"
-  > & {
-    className: string;
-    formLabel: string;
-  },
-) {
+export function LPLocationInput<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <FormField
       {...props}
       render={({ field }) => (
-        <LPFormItem className={props.className}>
+        <LPFormItem className={className}>
           <FormLabel className={classNames.buttonLabel({ isFocused: isOpen })}>
-            {props.formLabel}
+            {formLabel}
+          </FormLabel>
+
+          <PlacesPopover
+            open={isOpen}
+            setOpen={setIsOpen}
+            value={field.value}
+            onValueChange={field.onChange}
+            className="w-96 -translate-y-14 overflow-clip px-0 pt-0"
+            trigger={({ value, disabled }) => (
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                disabled={disabled}
+                className={cn(
+                  classNames.button({
+                    isPlaceholder: !field.value,
+                    isFocused: isOpen,
+                  }),
+                  "flex items-center text-left",
+                )}
+              >
+                <p className="flex-1 truncate">
+                  {value ?? "Enter your destination"}
+                </p>
+                <MapPinIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+              </button>
+            )}
+          />
+        </LPFormItem>
+      )}
+    />
+  );
+}
+
+export default function LPDateRangePicker<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <LPFormItem className={className}>
+          <FormLabel className={classNames.buttonLabel({ isFocused: isOpen })}>
+            {formLabel}
           </FormLabel>
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>

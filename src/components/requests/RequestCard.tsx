@@ -104,11 +104,11 @@ function RequestCardBadge({
       return <Badge variant="yellow">Pending {fmtdTimeAgo}</Badge>;
     case "accepted":
       return (
-        <Badge variant="green" className="pr-1">
+        <Badge variant="green">
           {plural(request.numOffers, "offer")}
-          <div className="flex items-center -space-x-2">
-            {"hostImages" in request &&
-              request.hostImages.map((imageUrl) => (
+          {"hostImages" in request && request.hostImages.length > 0 && (
+            <div className="flex items-center -space-x-2">
+              {request.hostImages.map((imageUrl) => (
                 <Image
                   key={imageUrl}
                   src={imageUrl}
@@ -118,7 +118,8 @@ function RequestCardBadge({
                   className="inline-block"
                 />
               ))}
-          </div>
+            </div>
+          )}
         </Badge>
       );
     case "rejected":

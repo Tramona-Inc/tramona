@@ -1,6 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
+import Spinner from "@/components/_common/Spinner";
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { api } from "@/utils/api";
@@ -32,7 +30,7 @@ export default function Previous() {
 
       <div className="grid gap-8 lg:grid-cols-2">
         {isLoading ? (
-          <>Loading ...</>
+          <Spinner />
         ) : (
           <>
             {data && data.length > 0 ? (

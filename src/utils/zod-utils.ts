@@ -62,7 +62,9 @@ export function zodInteger({ min = -Infinity, max = Infinity } = {}) {
 }
 
 export function zodUrl() {
-  return zodString().url({ message: "Must be a valid URL" });
+  return zodString({ maxLen: Infinity }).url({
+    message: "Must be a valid URL",
+  });
 }
 
 export function zodMMDDYYYY() {

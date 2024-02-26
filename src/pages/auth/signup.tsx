@@ -12,16 +12,17 @@ import {
 } from "@/components/ui/form";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
+import { errorToast } from "@/utils/toasts";
 import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
-import router from "next/router";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -38,53 +39,37 @@ const formSchema = z
     path: ["confirm"],
   });
 
-export default function SignIn({
+type FormSchema = z.infer<typeof formSchema>;
+
+export default function SignUp({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   useRequireNoAuth();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof router.query.code === "string") {
+      localStorage.setItem("referralCode", router.query.code);
+    }
+  }, [router.query.code]);
+
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
 
-  const { toast } = useToast();
+  const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
-  const { mutate, isLoading } = api.auth.createUser.useMutation({
-    onSuccess: () => {
-      void router.push({
-        pathname: "/auth/signin",
-        query: { isNewUser: true },
-      });
-
-      toast({
-        title: "Please verify email first to login!",
-        description: "Account was created successfully!",
-        variant: "default",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Something went wrong!",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = async ({
-    email,
-    password,
-    // username,
-    name,
-  }: z.infer<typeof formSchema>) => {
-    // await signIn("email", { email: email });
-    mutate({
-      email: email,
-      password: password,
-      // username: username,
-      name: name,
-    });
-  };
+  async function handleSubmit(newUser: FormSchema) {
+    await createUser(newUser)
+      .then(() =>
+        router.push({
+          pathname: "/auth/verify-email",
+          query: { email: newUser.email },
+        }),
+      )
+      .catch(() => errorToast("Couldn't sign up, please try again"));
+  }
 
   return (
     <>
@@ -110,7 +95,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} autoFocus />
+                        <Input {...field} autoFocus type="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -170,7 +155,11 @@ export default function SignIn({
                 />
 
                 <FormMessage />
-                <Button type="submit" disabled={isLoading} className="w-full">
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+                  className="w-full"
+                >
                   Sign up
                 </Button>
               </form>

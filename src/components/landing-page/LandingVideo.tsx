@@ -6,9 +6,10 @@ const LandingVideo = () => {
 
   const playVideo = () => {
     if (videoRef.current && !videoLoaded) {
-      videoRef.current.play()
+      videoRef.current
+        .play()
         .then(() => setVideoLoaded(true))
-        .catch((error) => {
+        .catch(() => {
           // Handle error (like user didn't interact with the document yet)
           // console.error("Error playing video:", error);
         });
@@ -18,13 +19,13 @@ const LandingVideo = () => {
   React.useEffect(() => {
     if (videoRef.current) {
       videoRef.current.load();
-      videoRef.current.addEventListener('loadeddata', playVideo);
+      videoRef.current.addEventListener("loadeddata", playVideo);
     }
 
     // cleanup function to remove event listener
     return () => {
       if (videoRef.current) {
-        videoRef.current.removeEventListener('loadeddata', playVideo);
+        videoRef.current.removeEventListener("loadeddata", playVideo);
       }
     };
   }, []);
@@ -49,4 +50,3 @@ const LandingVideo = () => {
 };
 
 export default LandingVideo;
-

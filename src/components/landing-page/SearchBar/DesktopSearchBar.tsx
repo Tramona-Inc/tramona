@@ -25,6 +25,7 @@ import LPDateRangePicker, {
   LPFormLabel,
   LPFormMessage,
   LPInput,
+  LPLocationInput,
   classNames,
 } from "./components";
 
@@ -68,6 +69,9 @@ export default function DesktopSearchBar({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data: [defaultValues],
+    },
+    context: {
+      test: 123,
     },
   });
 
@@ -218,22 +222,23 @@ export default function DesktopSearchBar({
             );
           })}
           {numTabs < MAX_TRIPS && (
-          <button
-            key=""
-            type="button"
-            onClick={() => {
-              setCurTab(numTabs);
-              form.setValue("data", [
-                ...data,
-                defaultValues as FormSchema["data"][number],
-              ]);
-              // form.setFocus(`data.${data.length - 1}.location`);
-            }}
-            className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
-          >
-            <PlusIcon className="size-4" />
-            Add another trip
-          </button>)}
+            <button
+              key=""
+              type="button"
+              onClick={() => {
+                setCurTab(numTabs);
+                form.setValue("data", [
+                  ...data,
+                  defaultValues as FormSchema["data"][number],
+                ]);
+                // form.setFocus(`data.${data.length - 1}.location`);
+              }}
+              className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
+            >
+              <PlusIcon className="size-4" />
+              Add another trip
+            </button>
+          )}
           {numTabs >= MAX_TRIPS && (
             <div className="text-sm text-red-500">
               Maximum of {MAX_TRIPS} trips reached.
@@ -241,22 +246,11 @@ export default function DesktopSearchBar({
           )}
         </div>
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
-          <FormField
+          <LPLocationInput
             control={form.control}
             name={`data.${curTab}.location`}
-            render={({ field }) => (
-              <LPFormItem className="col-span-full lg:col-span-4">
-                <LPFormLabel>Location</LPFormLabel>
-                <FormControl>
-                  <LPInput
-                    {...field}
-                    autoFocus
-                    placeholder="Enter your destination"
-                  />
-                </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
+            formLabel="Location"
+            className="col-span-full lg:col-span-4"
           />
 
           <FormField

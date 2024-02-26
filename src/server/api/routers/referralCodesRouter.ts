@@ -1,16 +1,16 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
-  referralCodeSelectSchema,
-  referralCodes,
-  referralEarnings,
-  users,
-} from "@/server/db/schema";
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
+import { referralCodes, referralEarnings, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq, sql } from "drizzle-orm";
+import { z } from "zod";
 
 export const referralCodesRouter = createTRPCRouter({
   startUsingCode: protectedProcedure
-    .input(referralCodeSelectSchema.pick({ referralCode: true }))
+    .input(z.string())
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.referralCodeUsed) {
         throw new TRPCError({
@@ -20,7 +20,7 @@ export const referralCodesRouter = createTRPCRouter({
       }
 
       const referralCode = await ctx.db.query.referralCodes.findFirst({
-        where: eq(referralCodes.referralCode, input.referralCode),
+        where: eq(referralCodes.referralCode, input),
         columns: {
           ownerId: true,
         },
@@ -33,12 +33,19 @@ export const referralCodesRouter = createTRPCRouter({
         });
       }
 
+      if (referralCode.ownerId === ctx.user.id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You cannot use your own referral code",
+        });
+      }
+
       await ctx.db.transaction(async (tx) => {
         const results = await Promise.allSettled([
           // use the referral code
           tx
             .update(users)
-            .set({ referralCodeUsed: input.referralCode })
+            .set({ referralCodeUsed: input })
             .where(eq(users.id, ctx.user.id)),
 
           // increment numSignUpsUsingCode
@@ -47,7 +54,7 @@ export const referralCodesRouter = createTRPCRouter({
             .set({
               numSignUpsUsingCode: sql`${referralCodes.numSignUpsUsingCode} + 1`,
             })
-            .where(eq(referralCodes.referralCode, input.referralCode)),
+            .where(eq(referralCodes.referralCode, input)),
         ]);
 
         if (results.some((result) => result.status === "rejected")) {
@@ -61,16 +68,19 @@ export const referralCodesRouter = createTRPCRouter({
         where: eq(users.id, referralCode.ownerId),
         columns: {
           name: true,
-          email: true,
+          image: true,
         },
       });
 
       return {
-        codeOwnerName: referralCodeOwner?.name ?? "an anonymous person",
+        owner: {
+          name: referralCodeOwner?.name ?? "an anonymous person",
+          image: referralCodeOwner?.image ?? null,
+        },
       };
     }),
 
-  stopUsingCode: protectedProcedure.query(async ({ ctx }) => {
+  stopUsingCode: protectedProcedure.mutation(async ({ ctx }) => {
     const userDetails = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
@@ -90,6 +100,19 @@ export const referralCodesRouter = createTRPCRouter({
       .set({ referralCodeUsed: null })
       .where(eq(users.id, ctx.user.id));
   }),
+
+  verifyCode: publicProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      const code = await ctx.db.query.referralCodes.findFirst({
+        where: eq(referralCodes.referralCode, input),
+        columns: {
+          referralCode: true,
+        },
+      });
+      return !!code;
+    }),
+
   getReferralEarnings: protectedProcedure.query(async ({ ctx }) => {
     const userReferralCode = await ctx.db.query.referralCodes.findFirst({
       where: eq(referralCodes.ownerId, ctx.user.id),
