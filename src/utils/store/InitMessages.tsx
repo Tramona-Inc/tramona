@@ -17,7 +17,7 @@ export default function InitMessages({
           ...state.conversations,
           [conversationId]: {
             messages,
-            page: 1,
+            page: 0,
           },
         },
       }));

@@ -4,6 +4,7 @@ import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
 // import LoadMoreMessages from "./LoadMoreMessages";
+import LoadMoreMessages from "./LoadMoreMessages";
 import { Message } from "./Message";
 
 function NoMessages() {
@@ -30,6 +31,8 @@ export default function ListMessages() {
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
   );
+
+  console.log(conversations);
 
   const messages = currentConversationId
     ? conversations[currentConversationId]?.messages ?? []
@@ -130,7 +133,9 @@ export default function ListMessages() {
         onScroll={handleOnScroll}
         className="relative mb-2 flex flex-1 flex-col overflow-y-auto"
       >
-        <div className="flex-1">{/* <LoadMoreMessages /> */}</div>
+        <div className="flex-1">
+          <LoadMoreMessages />
+        </div>
         <div className="absolute w-full">
           {messages.length > 0 ? (
             messages
