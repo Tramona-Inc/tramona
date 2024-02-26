@@ -36,10 +36,10 @@ const headerLinks = [
     href: "/for-hosts",
     label: "For Hosts",
   },
-  {
-    href: "/exclusive-offers",
-    label: "Exclusive Offers",
-  },
+  // {
+  //   href: "/exclusive-offers",
+  //   label: "Exclusive Offers",
+  // },
   {
     href: "/feed",
     label: "Social Feed",
