@@ -18,6 +18,7 @@ type ConversationsState = Record<
 type MessageState = {
   conversations: ConversationsState;
   currentConversationId: number | null;
+  setCurrentConversationId: (id: number) => void;
   setInitConversationMessages: (
     conversationId: number,
     messages: ChatMessageType[],
@@ -40,6 +41,11 @@ type MessageState = {
 export const useMessage = create<MessageState>((set) => ({
   conversations: {},
   currentConversationId: null,
+  setCurrentConversationId: (id: number) => {
+    set(() => ({
+      currentConversationId: id,
+    }));
+  },
   setInitConversationMessages: (
     conversationId: number,
     messages: ChatMessageType[],

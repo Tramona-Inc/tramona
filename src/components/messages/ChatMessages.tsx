@@ -1,9 +1,9 @@
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
+import { errorToast } from "@/utils/toasts";
 import { useEffect, useState } from "react";
 import InitMessages from "../../utils/store/InitMessages";
 import ListMessages from "./ListMessages";
-import { errorToast } from '@/utils/toasts';
 
 export const LIMIT_MESSAGE = 9;
 
@@ -14,7 +14,7 @@ export default function ChatMessages({
 }) {
   const [messages, setMessages] = useState<ChatMessageType[]>();
 
- const { switchConversation, setInitConversationMessages } = useMessage();
+  const { switchConversation, setInitConversationMessages } = useMessage();
 
   // Fetch conversation on the client
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function ChatMessages({
         .order("created_at", { ascending: false });
 
       if (error) {
-        errorToast(error.message)
+        errorToast(error.message);
       }
 
       if (data) {
@@ -57,7 +57,7 @@ export default function ChatMessages({
         const hasMore = chatMessages.length >= LIMIT_MESSAGE;
 
         setMessages(chatMessages);
-        setInitConversationMessages(conversationId, chatMessages, 1, hasMore);
+        setInitConversationMessages(conversationId, chatMessages, 0, hasMore);
       }
     };
 
