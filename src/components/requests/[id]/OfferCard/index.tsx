@@ -38,6 +38,7 @@ export default function OfferCard({
     property.originalNightlyPrice,
     offerNightlyPrice,
   );
+  const numNights = getNumNights(checkIn, checkOut);
 
   return (
     <Card className={cn(isPremium && "p-0", "overflow-clip")}>
@@ -60,7 +61,7 @@ export default function OfferCard({
                 {discountPercentage}% off
               </p>
             </div>
-            <div className="flex flex-1 items-center gap-4 text-muted-foreground sm:flex-col">
+            <div className="flex flex-1 justify-center gap-4 text-muted-foreground sm:flex-col sm:justify-start">
               <div>
                 <p className="text-xs font-semibold uppercase">
                   Original Price
@@ -73,9 +74,7 @@ export default function OfferCard({
                 </p>
               </div>
               <div>
-                <p className="text-center text-xs font-semibold uppercase">
-                  Tramona Price
-                </p>
+                <p className="text-xs font-semibold uppercase">Tramona Price</p>
                 <p>
                   <span className="text-3xl font-bold text-primary">
                     {formatCurrency(offerNightlyPrice)}
@@ -84,13 +83,12 @@ export default function OfferCard({
                 </p>
               </div>
               <div>
-                <p className="text-md font-bold uppercase text-black text-primary">
-                  Total Cost
-                </p>
+                <p className="text-xs font-semibold uppercase">Total cost</p>
                 <p>
                   <span className="text-3xl font-bold text-primary">
                     {formatCurrency(offer.totalPrice)}
                   </span>
+                  <span className="text-sm"></span>
                 </p>
               </div>
             </div>
