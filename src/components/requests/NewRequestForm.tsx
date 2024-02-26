@@ -23,7 +23,7 @@ import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
-import { capitalize, getNumNights, useIsDesktop } from "@/utils/utils";
+import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
   Select,
@@ -58,6 +58,8 @@ import { useSession } from "next-auth/react";
 import OTPDialog from "../otp-dialog/OTPDialog";
 import { formatPhoneNumber } from "@/utils/formatters";
 import PlacesInput from "../_common/PlacesInput";
+import { map } from "@trpc/server/observable";
+import ErrorMsg from "../ui/ErrorMsg";
 
 const formSchema = z
   .object({
@@ -110,6 +112,15 @@ export default function NewRequestForm({
     propertyType: propertyType === "any" ? undefined : propertyType,
     note,
   });
+
+  const invalidFields = Object.keys(form.formState.errors);
+
+  const numFiltersErrors = [
+    "minNumBedrooms",
+    "minNumBeds",
+    "propertyType",
+    "note",
+  ].filter((field) => invalidFields.includes(field)).length;
 
   const [toPhoneNumber, setToPhoneNumber] = useState<string>("");
 
@@ -268,6 +279,9 @@ export default function NewRequestForm({
               </DrawerContent>
             </NestedDrawer>
           )}
+          <ErrorMsg>
+            {numFiltersErrors > 0 && plural(numFiltersErrors, "error")}
+          </ErrorMsg>
         </FormItem>
 
         <Dialog open={open} onOpenChange={setOpen}>
