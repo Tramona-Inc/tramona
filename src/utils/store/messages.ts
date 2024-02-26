@@ -1,3 +1,4 @@
+import { LIMIT_MESSAGE } from "@/components/messages/ChatMessages";
 import { type MessageType } from "@/server/db/schema";
 import { create } from "zustand";
 
@@ -10,6 +11,7 @@ type ConversationsState = Record<
   {
     messages: ChatMessageType[];
     page: number;
+    hasMore: boolean;
   }
 >;
 
@@ -20,11 +22,13 @@ type MessageState = {
     conversationId: number,
     messages: ChatMessageType[],
     page: number,
+    hasMore: boolean,
   ) => void;
   switchConversation: (conversationId: number) => void;
   addMessageToConversation: (
     conversationId: number,
     messages: ChatMessageType,
+    hasMore: boolean,
   ) => void;
   optimisticIds: number[];
   setOptimisticIds: (id: number) => void;
@@ -41,6 +45,7 @@ export const useMessage = create<MessageState>((set) => ({
     conversationId: number,
     messages: ChatMessageType[],
     page: number,
+    hasMore: boolean,
   ) => {
     set((state) => ({
       ...state,
@@ -49,6 +54,7 @@ export const useMessage = create<MessageState>((set) => ({
         [conversationId]: {
           messages,
           page,
+          hasMore,
         },
       },
     }));
@@ -59,6 +65,7 @@ export const useMessage = create<MessageState>((set) => ({
   addMessageToConversation: (
     conversationId: number,
     newMessage: ChatMessageType,
+    hasMore: boolean,
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
@@ -74,12 +81,14 @@ export const useMessage = create<MessageState>((set) => ({
             ...(updatedConversations[conversationId]?.messages ?? []),
           ],
           page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
+          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
         };
       } else {
         // If the conversation doesn't exist, create a new conversation with the new message
         updatedConversations[conversationId] = {
           messages: [newMessage],
           page: 1, // Set a default value for page
+          hasMore: hasMore,
         };
       }
 
@@ -116,12 +125,14 @@ export const useMessage = create<MessageState>((set) => ({
             ...moreMessages,
           ],
           page: (updatedConversations[conversationId]?.page ?? 1) + 1,
+          hasMore: moreMessages.length >= LIMIT_MESSAGE,
         };
       } else {
         // If the conversation doesn't exist, create a new conversation with the new message
         updatedConversations[conversationId] = {
           messages: moreMessages,
           page: 1, // Set a default value for page
+          hasMore: true,
         };
       }
 

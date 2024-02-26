@@ -1,4 +1,4 @@
-import { ChatMessageType, useMessage } from "@/utils/store/messages";
+import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { getFromAndTo } from "@/utils/utils";
 import { Button } from "../ui/button";
@@ -65,7 +65,7 @@ export default function LoadMoreMessages() {
   };
 
   return (
-    <div className="absolute top-5 z-10 flex w-full items-center justify-center">
+    <div className="flex items-center justify-center py-5">
       <Button
         variant={"darkPrimary"}
         className="mx-10 w-full transition-all hover:scale-110"

@@ -1,3 +1,4 @@
+import { LIMIT_MESSAGE } from "@/components/messages/ChatMessages";
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import { useEffect, useRef } from "react";
 
@@ -10,6 +11,8 @@ export default function InitMessages({
 }) {
   const initState = useRef(false);
 
+  const hasMore = messages.length >= LIMIT_MESSAGE;
+
   useEffect(() => {
     if (!initState.current) {
       useMessage.setState((state) => ({
@@ -18,6 +21,7 @@ export default function InitMessages({
           [conversationId]: {
             messages,
             page: 0,
+            hasMore: hasMore,
           },
         },
       }));

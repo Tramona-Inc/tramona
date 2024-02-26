@@ -32,11 +32,13 @@ export default function ListMessages() {
     (state) => state.addMessageToConversation,
   );
 
-  console.log(conversations);
-
   const messages = currentConversationId
     ? conversations[currentConversationId]?.messages ?? []
     : [];
+
+  const hasMore = currentConversationId
+    ? conversations[currentConversationId]?.hasMore ?? false
+    : false;
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     if (!optimisticIds.includes(payload.new.id)) {
@@ -58,7 +60,11 @@ export default function ListMessages() {
           read: payload.new.read,
           user: data,
         };
-        addMessageToConversation(payload.new.conversation_id, newMessage);
+        addMessageToConversation(
+          payload.new.conversation_id,
+          newMessage,
+          hasMore,
+        );
       }
     }
 
@@ -133,10 +139,9 @@ export default function ListMessages() {
         onScroll={handleOnScroll}
         className="relative mb-2 flex flex-1 flex-col overflow-y-auto"
       >
-        <div className="flex-1">
-          <LoadMoreMessages />
-        </div>
+        <div className="flex-1"></div>
         <div className="absolute w-full">
+          {hasMore && <LoadMoreMessages />}
           {messages.length > 0 ? (
             messages
               .slice()

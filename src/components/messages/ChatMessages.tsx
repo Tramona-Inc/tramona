@@ -50,8 +50,10 @@ export default function ChatMessages({
             },
           }));
 
+          const hasMore = chatMessages.length >= LIMIT_MESSAGE;
+
           setMessages(chatMessages);
-          setInitConversationMessages(conversationId, chatMessages, 1);
+          setInitConversationMessages(conversationId, chatMessages, 1, hasMore);
         }
         if (error) {
           throw error;
