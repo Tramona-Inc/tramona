@@ -14,7 +14,10 @@ export const messagesRouter = createTRPCRouter({
           with: {
             conversation: {
               with: {
-                messages: { limit: 1 },
+                messages: {
+                  orderBy: (messages, { desc }) => [desc(messages.createdAt)],
+                  limit: 1,
+                },
                 participants: {
                   with: {
                     user: {
