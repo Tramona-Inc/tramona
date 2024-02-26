@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import InitMessages from "../../utils/store/InitMessages";
 import ListMessages from "./ListMessages";
 
-const LIMIT_MESSAGE = 9;
+export const LIMIT_MESSAGE = 9;
 
 export default function ChatMessages({
   conversationId,
@@ -51,7 +51,7 @@ export default function ChatMessages({
           }));
 
           setMessages(chatMessages);
-          setInitConversationMessages(conversationId, chatMessages);
+          setInitConversationMessages(conversationId, chatMessages, 1);
         }
         if (error) {
           throw error;

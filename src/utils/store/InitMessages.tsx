@@ -10,18 +10,15 @@ export default function InitMessages({
 }) {
   const initState = useRef(false);
 
-  const setInitConversationMessages = useMessage(
-    (state) => state.setInitConversationMessages,
-  );
-
   useEffect(() => {
     if (!initState.current) {
-      console.log(messages);
-
       useMessage.setState((state) => ({
         conversations: {
           ...state.conversations,
-          [conversationId]: messages,
+          [conversationId]: {
+            messages,
+            page: 1,
+          },
         },
       }));
 
