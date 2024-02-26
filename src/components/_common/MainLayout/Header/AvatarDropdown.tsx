@@ -133,7 +133,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
           My Requests
         </DropdownLink>
         <DropdownLink href="/my-trips" Icon={BriefcaseIcon}>
-          My trips
+          My Trips
         </DropdownLink>
         {/* <DropdownLink href="/messages" Icon={MessageSquareText}>
           Messages
