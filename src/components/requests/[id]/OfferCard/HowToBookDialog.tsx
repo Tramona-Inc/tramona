@@ -211,6 +211,7 @@ export default function HowToBookDialog(
                         "rounded-full",
                       )}
                       onClick={() => checkout()}
+                      disabled={!createCheckout.isIdle}
                     >
                       Pay now
                     </Button>
