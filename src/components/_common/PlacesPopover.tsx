@@ -41,7 +41,10 @@ export default function PlacesPopover({
     setValue: setInput,
     suggestions: { status: suggestionsLoading, data },
     clearSuggestions,
-  } = usePlaceAutocomplete({ debounce: 300 });
+  } = usePlaceAutocomplete({
+    callbackName: "PlacesAutocomplete",
+    debounce: 300,
+  });
 
   // const [open, setOpen] = useState(false);
 
@@ -62,6 +65,7 @@ export default function PlacesPopover({
 
               if (value === "" || data.length === 0) clearSuggestions();
             }}
+            required
             placeholder="Search locations..."
           />
           {/* {suggestionsLoading && (
