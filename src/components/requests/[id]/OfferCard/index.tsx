@@ -30,15 +30,19 @@ export default function OfferCard({
   requestId: number;
 }>) {
   const isPremium = false; // temporary until we add payments
+
   const hostName = property.host?.name ?? property.hostName;
-  const offerNightlyPrice = offer.totalPrice / getNumNights(checkIn, checkOut);
+
+  const numNights = getNumNights(checkIn, checkOut);
+  const offerNightlyPrice = offer.totalPrice / numNights;
+
   const numAmenities =
     property.amenities.length + property.standoutAmenities.length;
+
   const discountPercentage = getDiscountPercentage(
     property.originalNightlyPrice,
     offerNightlyPrice,
   );
-  const numNights = getNumNights(checkIn, checkOut);
 
   return (
     <Card className={cn(isPremium && "p-0", "overflow-clip")}>
