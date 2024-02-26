@@ -42,18 +42,19 @@ import { Textarea } from "../ui/textarea";
 import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
 import { getNumNights } from "@/utils/utils";
+import ErrorMsg from "../ui/ErrorMsg";
 
 const formSchema = z.object({
   propertyName: zodString(),
-  offeredPriceUSD: optional(zodInteger({ min: 1 })),
+  offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
   address: optional(zodString({ maxLen: 1000 })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
-  originalNightlyPriceUSD: zodInteger(),
-  offeredNightlyPriceUSD: zodInteger({ min: 1 }),
+  originalNightlyPriceUSD: zodNumber(),
+  offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
   amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
@@ -173,7 +174,10 @@ export default function AdminOfferForm({
         .catch(() => errorToast());
 
       if (!propertyId) {
-        throw new Error("Could not create property, please try again");
+        form.setError("root", {
+          message: "Could not create property, please try again",
+        });
+        return;
       }
 
       const newOffer = { requestId: request.id, propertyId, totalPrice };
@@ -210,6 +214,7 @@ export default function AdminOfferForm({
 
   return (
     <Form {...form}>
+      <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-4 md:grid-cols-2"
@@ -495,7 +500,7 @@ export default function AdminOfferForm({
           name="address"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Address</FormLabel>
+              <FormLabel>Address (optional)</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
               </FormControl>
