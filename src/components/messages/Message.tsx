@@ -1,4 +1,5 @@
 import { type ChatMessageType } from "@/utils/store/messages";
+import dayjs from "dayjs";
 import UserAvatar from "../_common/UserAvatar";
 export type MessageProp = {
   message: ChatMessageType;
@@ -33,7 +34,7 @@ export function Message({ message }: MessageProp) {
         <div className="flex items-baseline gap-2">
           <p className="text-2xl font-bold">{message.user.name}</p>
           <p className="text-sm text-muted-foreground">
-            {messageDate.toLocaleString()}
+            {dayjs(messageDate).format("M/DD h:mm a ")}
           </p>
         </div>
 
