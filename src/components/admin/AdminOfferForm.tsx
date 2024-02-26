@@ -17,8 +17,14 @@ import {
 } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
-import { capitalize } from "@/utils/utils";
-import { zodInteger, zodNumber, zodString, zodUrl } from "@/utils/zod-utils";
+import { capitalize, plural } from "@/utils/utils";
+import {
+  optional,
+  zodInteger,
+  zodNumber,
+  zodString,
+  zodUrl,
+} from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -36,13 +42,12 @@ import { Textarea } from "../ui/textarea";
 import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
 import { getNumNights } from "@/utils/utils";
-import { useEffect } from "react";
 
 const formSchema = z.object({
   propertyName: zodString(),
-  offeredPriceUSD: zodInteger({ min: 1 }).optional(),
+  offeredPriceUSD: optional(zodInteger({ min: 1 })),
   hostName: zodString(),
-  address: zodString({ maxLen: 1000 }).optional(),
+  address: optional(zodString({ maxLen: 1000 })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
@@ -55,7 +60,7 @@ const formSchema = z.object({
   standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
   safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
   about: zodString({ maxLen: Infinity }),
-  airbnbUrl: zodString({ maxLen: Infinity }).url().optional(),
+  airbnbUrl: optional(zodUrl()),
   imageUrls: z.object({ value: zodUrl() }).array(),
 });
 
@@ -285,7 +290,7 @@ export default function AdminOfferForm({
           render={() => (
             <FormItem>
               <FormLabel>
-                Total offered price ({numberOfNights} nights)
+                Total offered price ({plural(numberOfNights, "night")})
               </FormLabel>
               <FormControl>
                 <Input prefix="$" value={totalPrice} readOnly />
