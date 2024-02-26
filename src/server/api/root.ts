@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "@/server/api/trpc";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { authRouter } from "./routers/authRouter";
 import { offersRouter } from "./routers/offersRouter";
 import { propertiesRouter } from "./routers/propertiesRouter";
@@ -7,6 +7,7 @@ import { stripeRouter } from "./routers/stripeRouter";
 import { usersRouter } from "./routers/usersRouter";
 import { myTripsRouter } from "./routers/myTripsRouter";
 import { referralCodesRouter } from "./routers/referralCodesRouter";
+import { z } from "zod";
 
 /**
  * This is the primary router for your server.
@@ -22,6 +23,9 @@ export const appRouter = createTRPCRouter({
   stripe: stripeRouter,
   auth: authRouter,
   myTrips: myTripsRouter,
+  printDate: publicProcedure.input(z.date()).mutation(({ input }) => {
+    console.log(input.toString());
+  }),
 });
 
 // export type definition of API
