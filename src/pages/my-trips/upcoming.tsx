@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
 import Spinner from "@/components/_common/Spinner";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button, buttonVariants } from "@/components/ui/button";
