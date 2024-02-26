@@ -72,7 +72,7 @@ export const requestsRouter = createTRPCRouter({
       .findMany({
         with: {
           madeByUser: {
-            columns: { email: true },
+            columns: { email: true, phoneNumber: true },
           },
           offers: { columns: { id: true } },
         },

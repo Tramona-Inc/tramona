@@ -61,7 +61,13 @@ export default function Page() {
                   checkIn={request.checkIn}
                   checkOut={request.checkOut}
                 >
-                  <RevokeOfferDialog offerId={offer.id}>
+                  <RevokeOfferDialog
+                    requestCreatedAt={request.createdAt}
+                    offerId={offer.id}
+                    propertyAddress={offer.property.address!}
+                    userPhoneNumber={request.madeByUser.phoneNumber!}
+                    propertyName={offer.property.name}
+                  >
                     <Button variant="outline" className="rounded-full">
                       Revoke offer
                     </Button>
