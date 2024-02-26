@@ -32,7 +32,7 @@ export default function Previous() {
 
       <div className="grid gap-8 lg:grid-cols-2">
         {isLoading ? (
-          <>Loading ...</>
+          <Spinner />
         ) : (
           <>
             {data && data.length > 0 ? (

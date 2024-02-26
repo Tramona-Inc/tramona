@@ -18,6 +18,7 @@ import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 
 import { cn } from "@/utils/utils";
 import { api } from "@/utils/api";
+import Spinner from "@/components/_common/Spinner";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -59,7 +60,7 @@ function ExploreEarningsCard() {
   const [referrals, setReferrals] = useState(200);
 
   const currentTier = tiers[tab];
-  if (!currentTier) return <div>Loading...</div>;
+  if (!currentTier) return <Spinner />;
 
   const earnings = Math.floor(
     referrals * avgAnnualTravelSpendings * (currentTier.percent / 100),
