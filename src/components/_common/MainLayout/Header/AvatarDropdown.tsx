@@ -1,5 +1,6 @@
 import { cn } from "@/utils/utils";
 import {
+  BriefcaseIcon,
   HomeIcon,
   LogOutIcon,
   TagIcon,
@@ -130,6 +131,9 @@ export default function AvatarDropdown({ session }: { session: Session }) {
         </DropdownLink>
         <DropdownLink href="/requests" Icon={TagIcon}>
           Your Requests
+        </DropdownLink>
+        <DropdownLink href="/my-trips" Icon={BriefcaseIcon}>
+          My trips
         </DropdownLink>
         {/* <DropdownLink href="/messages" Icon={MessageSquareText}>
           Messages
