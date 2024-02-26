@@ -94,13 +94,13 @@ export default function Page() {
   return (
     <>
       <Head>
-        <title>Your Requests | Tramona</title>
+        <title>My Requests | Tramona</title>
       </Head>
       <div className="px-4 pb-64 pt-16">
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center">
             <h1 className="flex-1 py-4 text-3xl font-bold text-black">
-              Your Requests
+              My Requests
             </h1>
             <NewRequestButton />
           </div>
