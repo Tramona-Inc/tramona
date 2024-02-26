@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
 import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
+import Spinner from "../_common/Spinner";
 
 const defaultMessage = `Hey! Join this new travel platform. They let people travel at any price they want. You name the price and they'll find a bnb out of your budget and make it work with your price. Here's the link, check it out:`;
 
@@ -40,16 +41,10 @@ export default function ReferralDashboard() {
   function saveReferralMessage() {
     localStorage.setItem("referralMessage", message);
     setMessage(message);
-    toast({ title: "Message saved!", description: "Copy it & share" });
+    toast({ title: "Message saved", description: "Copy it and share!" });
   }
 
-  if (isLoading) {
-    return (
-      <Button variant="ghost" disabled isLoading>
-        Loading
-      </Button>
-    );
-  }
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="space-y-8">

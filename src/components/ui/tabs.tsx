@@ -45,7 +45,7 @@ const TabsTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      {count !== undefined && (
+      {count !== undefined && count !== 0 && (
         <div className="min-w-7 rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600 group-data-[state=active]:bg-primary/20 group-data-[state=active]:text-primary">
           {count === "blank" ? <>&nbsp;</> : count}
         </div>

@@ -160,7 +160,7 @@ export function LPLocationInput<
             setOpen={setIsOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className="w-[100vw] -translate-y-12 overflow-clip px-0 pt-0 sm:w-[80vw] sm:translate-x-7 lg:w-80"
+            className="w-96 -translate-y-14 overflow-clip px-0 pt-0"
             trigger={({ value, disabled }) => (
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -170,11 +170,13 @@ export function LPLocationInput<
                     isPlaceholder: !field.value,
                     isFocused: isOpen,
                   }),
-                  "flex items-center",
+                  "flex items-center text-left",
                 )}
               >
-                {value ?? "Enter your destination"}
-                <MapPinIcon className="ml-auto h-4 w-4 opacity-50" />
+                <p className="flex-1 truncate">
+                  {value ?? "Enter your destination"}
+                </p>
+                <MapPinIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
               </button>
             )}
           />

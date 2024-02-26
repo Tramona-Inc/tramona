@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
@@ -10,6 +7,7 @@ import { formatDateRange } from "@/utils/utils";
 import { type inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
 import { useMemo } from "react";
+import Spinner from "@/components/_common/Spinner";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
@@ -50,7 +48,7 @@ export default function MyTrips() {
             )}
           </div>
           {isLoading ? (
-            <>Loading ...</>
+            <Spinner />
           ) : (
             <>
               {data?.displayUpcomingTrips ? (
@@ -102,7 +100,7 @@ export default function MyTrips() {
           </div>
           <div className="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex lg:flex-col">
             {isLoading ? (
-              <>Loading ...</>
+              <Spinner />
             ) : (
               <>
                 {data?.displayPreviousTrips ? (

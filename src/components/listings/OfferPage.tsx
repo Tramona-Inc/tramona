@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -165,9 +164,8 @@ export default function OfferPage({
                   <DialogContent className="max-w-4xl">
                     <DialogHeader>
                       <DialogTitle>About this property</DialogTitle>
-                      <DialogDescription></DialogDescription>
                     </DialogHeader>
-                    <p className="py-2">{property.about}</p>
+                    <p className="whitespace-break-spaces">{property.about}</p>
                   </DialogContent>
                 </Dialog>
               </div>
@@ -212,7 +210,7 @@ export default function OfferPage({
                 offer={{ property, ...offer }}
                 totalPrice={offer.totalPrice}
                 offerNightlyPrice={offerNightlyPrice}
-                isAirbnb={isAirbnb} 
+                isAirbnb={isAirbnb}
               >
                 <Button size="lg" className="w-full">
                   {isBooked ? "Booked ✓" : "Book Now"}

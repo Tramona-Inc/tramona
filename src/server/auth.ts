@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
           id: token.id,
           role: token.role,
           username: token.username,
-          referralCodeUse: token.referralCodeUsed,
+          referralCodeUsed: token.referralCodeUsed,
           referralTier: token.referralTier,
           phoneNumber: token.phoneNumber,
         },
@@ -62,7 +62,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           role: user.role,
           username: user.username,
-          referralCodeUse: user.referralCodeUsed,
+          referralCodeUsed: user.referralCodeUsed,
           referralTier: user.referralTier,
           phoneNumber: user.phoneNumber,
         };
