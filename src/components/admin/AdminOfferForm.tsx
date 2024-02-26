@@ -17,10 +17,15 @@ import {
 } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
-import { capitalize } from "@/utils/utils";
-import { zodInteger, zodNumber, zodString, zodUrl } from "@/utils/zod-utils";
+import { capitalize, plural } from "@/utils/utils";
+import {
+  optional,
+  zodInteger,
+  zodNumber,
+  zodString,
+  zodUrl,
+} from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TRPCClientError } from "@trpc/client";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,23 +40,28 @@ import {
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { useSession } from "next-auth/react";
+import { type OfferWithProperty } from "../requests/[id]/OfferCard";
+
+import { getNumNights } from "@/utils/utils";
 
 const formSchema = z.object({
   propertyName: zodString(),
-  offeredPriceUSD: zodInteger({ min: 1 }),
+  offeredPriceUSD: optional(zodInteger({ min: 1 })),
   hostName: zodString(),
+  address: optional(zodString({ maxLen: 1000 })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
   originalNightlyPriceUSD: zodInteger(),
+  offeredNightlyPriceUSD: zodInteger({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
   amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
   standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
   safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
   about: zodString({ maxLen: Infinity }),
-  airbnbUrl: zodString({ maxLen: Infinity }).url().optional(),
+  airbnbUrl: optional(zodUrl()),
   imageUrls: z.object({ value: zodUrl() }).array(),
 });
 
@@ -60,12 +70,21 @@ type FormSchema = z.infer<typeof formSchema>;
 export default function AdminOfferForm({
   afterSubmit,
   request,
+  // pass it the current offer data to turn it from a "create offer" form
+  // to an autofilled "update offer" form
+  offer,
 }: {
   afterSubmit?: () => void;
   request: Request;
+  offer?: OfferWithProperty;
 }) {
   const { data: session } = useSession();
   const user = session?.user;
+
+  const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+  const offeredNightlyPriceUSD = offer
+    ? Math.round(offer.totalPrice / numberOfNights / 100)
+    : 1;
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -80,6 +99,30 @@ export default function AdminOfferForm({
       amenities: [],
       standoutAmenities: [],
       safetyItems: [],
+      ...(offer
+        ? {
+            // im sorry
+            // ?? undefineds are to turn string | null into string | undefined
+            hostName: offer.property.hostName ?? undefined,
+            address: offer.property.address ?? undefined,
+            maxNumGuests: offer.property.maxNumGuests,
+            numBeds: offer.property.numBeds,
+            numBedrooms: offer.property.numBedrooms,
+            propertyType: offer.property.propertyType,
+            avgRating: offer.property.avgRating,
+            numRatings: offer.property.numRatings,
+            amenities: offer.property.amenities,
+            standoutAmenities: offer.property.standoutAmenities,
+            safetyItems: offer.property.safetyItems,
+            about: offer.property.about,
+            airbnbUrl: offer.property.airbnbUrl ?? undefined,
+            propertyName: offer.property.name,
+            offeredPriceUSD: offer.totalPrice / 100,
+            offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
+            originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100,
+            imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
+          }
+        : {}),
     },
   });
 
@@ -88,72 +131,94 @@ export default function AdminOfferForm({
     control: form.control,
   });
 
-  const propertiesMutation = api.properties.create.useMutation();
-  const offersMutation = api.offers.create.useMutation();
+  const updatePropertiesMutation = api.properties.update.useMutation();
+  const updateOffersMutation = api.offers.update.useMutation();
+  const createPropertiesMutation = api.properties.create.useMutation();
+  const createOffersMutation = api.offers.create.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
 
   const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
-    const { offeredPriceUSD, ...propertyData } = data;
+    const { offeredNightlyPriceUSD: _, ...propertyData } = data;
+
+    // const totalPrice = offeredPriceUSD * 100;
+    const totalPrice = data.offeredNightlyPriceUSD * numberOfNights * 100;
 
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
       type: propertyData.propertyType,
       originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
+      // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
     };
 
-    try {
-      const propertyId = await propertiesMutation
+    // if offer wasnt null then this is an "update offer" form
+    // so update the current property and offer...
+    if (offer) {
+      const newOffer = {
+        id: offer.id,
+        requestId: request.id,
+        propertyId: offer.property.id,
+        totalPrice,
+      };
+
+      await Promise.all([
+        updatePropertiesMutation.mutateAsync({
+          ...newProperty,
+          id: offer.property.id,
+        }),
+        updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
+      ]);
+      // ...otherwise its a "create offer" form so make a new property and offer
+    } else {
+      const propertyId = await createPropertiesMutation
         .mutateAsync(newProperty)
-        .catch((error) => {
-          if (error instanceof TRPCClientError) {
-            throw new Error(error.message);
-          }
-        });
+        .catch(() => errorToast());
 
       if (!propertyId) {
         throw new Error("Could not create property, please try again");
       }
 
-      const newOffer = {
-        requestId: request.id,
-        propertyId: propertyId,
-        totalPrice: offeredPriceUSD * 100,
-      };
+      const newOffer = { requestId: request.id, propertyId, totalPrice };
 
-      await offersMutation.mutateAsync(newOffer);
-
-      await Promise.all([
-        utils.properties.invalidate(),
-        utils.offers.invalidate(),
-        utils.requests.invalidate(),
-      ]);
-
-      const sms = {
-        to: user?.phoneNumber!,
-        msg: "You have a new offer for a request in your Tramona account!",
-      };
-
-      await twilioMutation.mutateAsync(sms);
-
-      successfulAdminOfferToast({
-        propertyName: newProperty.name,
-        totalPrice: newOffer.totalPrice,
-        checkIn: request.checkIn,
-        checkOut: request.checkOut,
-      });
-      afterSubmit?.();
-    } catch (error) {
-      if (error instanceof Error) {
-        errorToast(error.message);
-      }
+      await createOffersMutation
+        .mutateAsync(newOffer)
+        .catch(() => errorToast());
     }
+
+    await Promise.all([
+      utils.properties.invalidate(),
+      utils.offers.invalidate(),
+      utils.requests.invalidate(),
+    ]);
+
+    if (user?.phoneNumber) {
+      await twilioMutation.mutateAsync({
+        to: user.phoneNumber, // TODO: text the traveller, not the admin
+        msg: "You have a new offer for a request in your Tramona account!",
+      });
+    }
+
+    successfulAdminOfferToast({
+      propertyName: newProperty.name,
+      totalPrice,
+      checkIn: request.checkIn,
+      checkOut: request.checkOut,
+      isUpdate: !!offer,
+    });
+
+    afterSubmit?.();
   }
 
+  const defaultNightlyPrice = 0;
   const [isAirbnb, setIsAirbnb] = useState<boolean>(true);
+  const [nightlyPrice, setNightlyPrice] = useState(
+    offer ? offeredNightlyPriceUSD : defaultNightlyPrice,
+  );
+
+  const totalPrice = nightlyPrice * numberOfNights;
 
   return (
     <Form {...form}>
@@ -165,7 +230,7 @@ export default function AdminOfferForm({
           control={form.control}
           name="propertyName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-full">
               <FormLabel>Property name</FormLabel>
               <FormControl>
                 <Input {...field} autoFocus />
@@ -210,17 +275,37 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
-          name="offeredPriceUSD"
+          name="offeredNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Offered price (total)</FormLabel>
+              <FormLabel>Offered price (nightly)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e); // or your existing logic
+                    setNightlyPrice(Number(e.target.value));
+                  }}
                   inputMode="decimal"
                   prefix="$"
-                  suffix="total"
+                  suffix="/night"
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="offeredPriceUSD"
+          render={() => (
+            <FormItem>
+              <FormLabel>
+                Total offered price ({plural(numberOfNights, "night")})
+              </FormLabel>
+              <FormControl>
+                <Input prefix="$" value={totalPrice} readOnly />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -417,6 +502,20 @@ export default function AdminOfferForm({
           />
         )}
 
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormItem className="col-span-full space-y-1">
           <FormLabel>Image URLs</FormLabel>
           <div className="space-y-2 rounded-md border bg-secondary p-2">
@@ -490,7 +589,7 @@ export default function AdminOfferForm({
           type="submit"
           className="col-span-full"
         >
-          Make offer
+          {offer ? "Update" : "Make"} offer
         </Button>
       </form>
     </Form>

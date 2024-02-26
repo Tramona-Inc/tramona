@@ -1,9 +1,9 @@
-import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
 import { getRequestStatus } from "@/utils/formatters";
 import { cn, plural } from "@/utils/utils";
 import Link from "next/link";
 import { Button, buttonVariants } from "../ui/button";
 import { ArrowRightIcon } from "lucide-react";
+import { type DetailedRequest } from "./RequestCard";
 
 export function RequestCardAction({ request }: { request: DetailedRequest }) {
   const primaryBtn = cn(buttonVariants(), "rounded-full");

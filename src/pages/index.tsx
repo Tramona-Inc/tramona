@@ -9,10 +9,10 @@ import Reviews from "@/components/landing-page/_sections/Reviews";
 import TramonaLoop from "@/components/landing-page/_sections/TramonaLoop";
 import Gift from "@/components/landing-page/_sections/Gift";
 import Save from "@/components/landing-page/_sections/Save";
-import { useMaybeSendUnsentRequest } from "@/utils/useMaybeSendUnsentRequest";
+import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 
 export default function Home() {
-  useMaybeSendUnsentRequest();
+  useMaybeSendUnsentRequests();
 
   return (
     <>

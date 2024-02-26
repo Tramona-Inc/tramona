@@ -88,7 +88,7 @@ export default function Form1({ nextTab, handleFormData }: Form1Props) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
             <div className=" space-y-5">
               {listingsFields.map((field, index) => (
-                <>
+                <React.Fragment key={field.id}>
                   <div className="flex flex-col md:flex-row">
                     <div className="w-full">
                       <div className="flex flex-row space-x-2 pb-7">
@@ -183,7 +183,7 @@ export default function Form1({ nextTab, handleFormData }: Form1Props) {
                   </div>
 
                   <Separator />
-                </>
+                </React.Fragment>
               ))}
 
               <div className="flex justify-between">

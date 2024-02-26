@@ -90,7 +90,7 @@ function ExploreEarningsCard() {
         ))}
       </div>
       <div className="space-y-1">
-        <p className="text-xs font-bold uppercase tracking-wide text-white/60">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
           With
         </p>
         <div>
@@ -143,7 +143,7 @@ function IntroSection() {
             that, we have created one of the most generous partnership programs.
           </p>
           <Link
-            href="/auth/signin"
+            href="/auth/signup"
             className={buttonVariants({ variant: "darkPrimary", size: "lg" })}
           >
             Sign Up Now
@@ -177,8 +177,8 @@ function ProgramTiers() {
         referral code!
       </p>
 
-      <div className="flex flex-col gap-5 lg:flex-row">
-        <Card className="relative w-[400px] max-w-lg rounded-3xl border-black xl:w-[500px]">
+      <div className="flex flex-col items-center gap-5  lg:flex-row">
+        <Card className="relative w-[345px]  max-w-lg rounded-3xl border-black sm:w-[400px] xl:w-[500px]">
           <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
             TIER 1
           </div>
@@ -191,12 +191,12 @@ function ProgramTiers() {
               </p>
             </div>
 
-            <Link
+            {/* <Link
               href="/program/partner"
               className="self-center font-medium text-blue-400 underline underline-offset-2 hover:text-blue-300 lg:text-lg"
             >
               Learn More
-            </Link>
+            </Link> */}
           </CardContent>
 
           {status === "loading" && (
@@ -210,7 +210,7 @@ function ProgramTiers() {
               href="/program/partner"
               className="ml-auto rounded-lg border-2 border-zinc-950 bg-blue-300 px-10 py-2 text-lg font-semibold text-zinc-950 hover:bg-blue-200"
             >
-              Apply
+              Learn More
             </Link>
           )}
 
@@ -235,7 +235,7 @@ function ProgramTiers() {
           )}
         </Card>
 
-        <Card className="relative w-[400px] max-w-lg rounded-3xl border-black xl:w-[500px]">
+        <Card className="relative w-[345px] max-w-lg rounded-3xl border-black sm:w-[400px] xl:w-[500px]">
           <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
             TIER 2
           </div>
@@ -380,8 +380,8 @@ function FAQ() {
               How long do the payouts last for?
             </AccordionTrigger>
             <AccordionContent>
-              You will receive payouts for as long as the person you referred
-              uses Tramona.
+              You are eligible for payouts for individuals you refer, provided
+              they take a trip within one year from the date of your referral.
             </AccordionContent>
           </AccordionItem>
 
@@ -390,8 +390,9 @@ function FAQ() {
               What if I refer someone and they dont travel?
             </AccordionTrigger>
             <AccordionContent>
-              That&apos;s okay! You will still receive a payout whenever they do
-              use Tramona.
+              That&apos;s alright! You will still receive a payout whenever they
+              use Tramona, as long as they travel within one year from the date
+              you referred them.
             </AccordionContent>
           </AccordionItem>
 

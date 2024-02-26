@@ -1,17 +1,18 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import { Stepper, StepperItem } from "@/components/ui/stepper";
-import { useStepper } from "@/components/ui/use-stepper";
-import type { StepperConfig } from "@/components/ui/stepper";
-import { Button } from "@/components/ui/button";
 import Undone from "@/components/_icons/UndoneIcon";
-import { CalendarCheck, BadgeDollarSign, PiggyBank } from "lucide-react";
 import OfferCard from "@/components/offer-card/OfferCard";
 import { liveFeedOffers } from "@/components/offer-card/data";
+import { Button } from "@/components/ui/button";
+import type { StepperConfig } from "@/components/ui/stepper";
+import { Stepper, StepperItem } from "@/components/ui/stepper";
+import { useStepper } from "@/components/ui/use-stepper";
+import { BadgeDollarSign, CalendarCheck, PiggyBank } from "lucide-react";
 
-import { cn, sleep } from "@/utils/utils";
 import { api } from "@/utils/api";
+import { cn, sleep } from "@/utils/utils";
+import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 
 function StepperContentLayout({
   children,
@@ -165,6 +166,9 @@ export default function Welcome() {
       <Head>
         <title>Welcome | Tramona</title>
       </Head>
+
+      <ReferralCodeDialog />
+
       <div className="mx-auto flex w-full flex-col gap-4 px-5 py-10 lg:px-80">
         <Stepper activeStep={activeStep} responsive={false}>
           {steps.map((step, index) => (

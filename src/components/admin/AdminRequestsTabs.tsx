@@ -2,20 +2,33 @@ import AdminOfferDialog from "@/components/admin/AdminOfferDialog";
 import RequestCard from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { type DetailedRequest } from "@/server/api/routers/requestsRouter";
 import { api } from "@/utils/api";
 import { HistoryIcon, InboxIcon } from "lucide-react";
 import Spinner from "../_common/Spinner";
+import { type RequestWithUser } from "../requests/RequestCard";
+import RejectRequestDialog from "./RejectRequestDialog";
+import Link from "next/link";
+import DeleteRequestDialog from "./DeleteRequestDialog";
 
 function IncomingRequestCards({
   requests,
 }: {
-  requests: DetailedRequest[] | undefined;
+  requests: RequestWithUser[] | undefined;
 }) {
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
-        <RequestCard key={request.id} request={request}>
+        <RequestCard withUser key={request.id} request={request}>
+          <DeleteRequestDialog requestId={request.id}>
+            <Button className="rounded-full" variant="outline">
+              Delete
+            </Button>
+          </DeleteRequestDialog>
+          <RejectRequestDialog requestId={request.id}>
+            <Button className="rounded-full" variant="outline">
+              Reject
+            </Button>
+          </RejectRequestDialog>
           <AdminOfferDialog request={request}>
             <Button className="rounded-full">Make an offer</Button>
           </AdminOfferDialog>
@@ -30,12 +43,20 @@ function IncomingRequestCards({
 function PastRequestCards({
   requests,
 }: {
-  requests: DetailedRequest[] | undefined;
+  requests: RequestWithUser[] | undefined;
 }) {
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
-        <RequestCard key={request.id} request={request}>
+        <RequestCard withUser key={request.id} request={request}>
+          <DeleteRequestDialog requestId={request.id}>
+            <Button className="rounded-full" variant="outline">
+              Delete
+            </Button>
+          </DeleteRequestDialog>
+          <Button className="rounded-full" variant="outline" asChild>
+            <Link href={`/admin/${request.id}`}>Edit offers</Link>
+          </Button>
           <AdminOfferDialog request={request}>
             <Button className="rounded-full">Make another offer</Button>
           </AdminOfferDialog>

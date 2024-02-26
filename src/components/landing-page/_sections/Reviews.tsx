@@ -8,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../../ui/carousel";
+import Link from "next/link";
 
 export default function Reviews() {
   return (
@@ -44,13 +45,14 @@ export default function Reviews() {
                         {/* <p className="w-fit flex-row rounded-lg bg-[#09786C] p-3 text-white">
                             Create an account
                           </p> */}
-
-                        <Button
-                          variant="outline"
-                          className=" w-fit border border-[#09786C] bg-[#09786C] text-sm font-bold text-black transition duration-300 ease-in-out"
-                        >
-                          Create an account
-                        </Button>
+                        <Link href="/auth/signup">
+                          <Button
+                            variant="outline"
+                            className=" w-fit border border-[#09786C] bg-[#09786C] text-sm font-bold text-black transition duration-300 ease-in-out"
+                          >
+                            Create an account
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </div>

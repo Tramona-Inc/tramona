@@ -1,7 +1,7 @@
 import { env } from "@/env";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
-import { offers, requests } from "@/server/db/schema";
+import { offers, referralEarnings, requests, users } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { formatPhoneNumber } from "@/utils/formatters";
 import { eq } from "drizzle-orm";
@@ -80,6 +80,26 @@ export default async function webhook(
         await twilioMutation.mutateAsync(sms);
 
         // console.log("PaymentIntent was successful!");
+        const user = await db.query.users.findFirst({
+          where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
+        });
+
+        const referralCode = user?.referralCodeUsed;
+
+        if (referralCode) {
+          const offerId = parseInt(paymentIntentSucceeded.metadata.listing_id!);
+          const refereeId = paymentIntentSucceeded.metadata.user_id!;
+
+          const tramonaFee =
+            parseInt(paymentIntentSucceeded.metadata.total_savings!) * 0.2;
+          const cashbackMultiplier =
+            user.referralTier === "Ambassador" ? 0.5 : 0.3;
+          const cashbackEarned = tramonaFee * cashbackMultiplier;
+
+          await db
+            .insert(referralEarnings)
+            .values({ offerId, cashbackEarned, refereeId, referralCode });
+        }
 
         break;
 

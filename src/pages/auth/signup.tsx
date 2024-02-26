@@ -12,107 +12,76 @@ import {
 } from "@/components/ui/form";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { authOptions } from "@/server/auth";
 import { api } from "@/utils/api";
+import { useRequireNoAuth } from "@/utils/auth-utils";
+import { errorToast } from "@/utils/toasts";
+import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import { getServerSession } from "next-auth/next";
+import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import router from "next/router";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { z } from "zod";
 
 const formSchema = z
   .object({
-    email: z.string().email(),
+    email: zodEmail(),
     // username: z.string().max(60),
-    name: z.string().max(32),
-    password: z
-      .string()
-      .min(8, { message: "The password must be at least 8 characters long" })
-      .max(32, { message: "The password must be a maximum of 32 characters" })
-      .refine((value) => /[a-z]/.test(value), {
-        message: "Password must contain at least one lowercase letter",
-      })
-      .refine((value) => /[A-Z]/.test(value), {
-        message: "Password must contain at least one uppercase letter",
-      })
-      .refine((value) => /\d/.test(value), {
-        message: "Password must contain at least one digit",
-      })
-      .refine((value) => /[!@#$%^&*]/.test(value), {
-        message: "Password must contain at least one special character",
-      })
-      .refine((value) => /\S+$/.test(value), {
-        message: "Password must not contain any whitespace characters",
-      }),
+    name: zodString({ minLen: 2 }),
+    password: zodPassword(),
     confirm: z.string(),
   })
-  .required()
   .refine((data) => data.password === data.confirm, {
     message: "Passwords don't match",
     path: ["confirm"],
   });
 
-export default function SignIn({
+type FormSchema = z.infer<typeof formSchema>;
+
+export default function SignUp({
   providers,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const form = useForm<z.infer<typeof formSchema>>({
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  useRequireNoAuth();
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof router.query.code === "string") {
+      localStorage.setItem("referralCode", router.query.code);
+    }
+  }, [router.query.code]);
+
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
 
-  const { toast } = useToast();
+  const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
-  const { mutate } = api.auth.createUser.useMutation({
-    onSuccess: () => {
-      void router.push("/auth/signin");
-
-      toast({
-        title: "Account created successfully!",
-        description: "Please sign in.",
-        variant: "default",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Something went wrong!",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = async ({
-    email,
-    password,
-    // username,
-    name,
-  }: z.infer<typeof formSchema>) => {
-    // await signIn("email", { email: email });
-    mutate({
-      email: email,
-      password: password,
-      // username: username,
-      name: name,
-    });
-  };
+  async function handleSubmit(newUser: FormSchema) {
+    await createUser(newUser)
+      .then(() =>
+        router.push({
+          pathname: "/auth/verify-email",
+          query: { email: newUser.email },
+        }),
+      )
+      .catch(() => errorToast("Couldn't sign up, please try again"));
+  }
 
   return (
     <>
       <Head>
         <title>Sign up | Tramona</title>
       </Head>
-      <div className="flex h-screen flex-col items-center justify-center space-y-10">
-        <h1 className="text-5xl font-bold tracking-tight">
+      <div className="flex min-h-screen flex-col items-center justify-center space-y-10 py-8">
+        <h1 className="text-center text-5xl font-bold tracking-tight">
           Sign up to start traveling
         </h1>
 
-        <section className="flex flex-col items-center justify-center space-y-5">
+        <section className="flex max-w-sm flex-col items-center justify-center space-y-5">
           <div className="w-full space-y-5">
             <Form {...form}>
               <form
@@ -126,11 +95,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder={"name@domain.com"}
-                          autoFocus
-                        />
+                        <Input {...field} autoFocus type="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -143,7 +108,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input {...field} type="text" autoFocus />
+                        <Input {...field} type="text"  />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -156,7 +121,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input {...field} type="text" autoFocus />
+                        <Input {...field} type="text" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -169,7 +134,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input {...field} type="password" autoFocus />
+                        <Input {...field} type="password" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -182,14 +147,19 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Verify Password</FormLabel>
                       <FormControl>
-                        <Input {...field} type="password" autoFocus />
+                        <Input {...field} type="password" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormMessage />
-                <Button type="submit" className="w-full">
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+                  className="w-full"
+                >
                   Sign up
                 </Button>
               </form>
@@ -206,7 +176,7 @@ export default function SignIn({
             </div>
           </div>
 
-          <div className="my-5 flex w-full flex-col gap-5">
+          <div className="my-5 flex w-full flex-col items-center justify-center gap-5">
             {providers &&
               Object.values(providers)
                 .slice(1) // remove the email provider
@@ -228,34 +198,38 @@ export default function SignIn({
                 })}
           </div>
         </section>
-        <div className="flex flex-row items-center gap-1 text-sm">
-          <h1>Already have an account? </h1>
-          <Button
-            variant={"link"}
-            onClick={() => signIn()}
-            className="-p-1 text-sm font-medium text-blue-600 underline underline-offset-2"
+        <p>
+          Already have an account?{" "}
+          <Link
+            href="/auth/signin"
+            className="font-semibold text-primary underline underline-offset-2"
           >
-            Log in here.
-          </Button>
-        </div>
+            Log in
+          </Link>
+        </p>
+        <p className="text-xs text-muted-foreground">
+          By signing up, you agree to our{" "}
+          <Link
+            className="underline underline-offset-2 hover:text-primary"
+            href="/tos"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            className="underline underline-offset-2 hover:text-primary"
+            href="/privacy-policy"
+          >
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </>
   );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-
-  // * Allows user to redirect back to original page
-  const callbackUrl = context.query.callbackUrl ?? "/";
-
-  // If the user is already logged in, redirect.
-  // Note: Make sure not to redirect to the same page
-  // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: callbackUrl } };
-  }
-
+export async function getStaticProps() {
   const providers = await getProviders();
 
   return {

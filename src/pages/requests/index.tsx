@@ -3,12 +3,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HistoryIcon, Plus, TagIcon } from "lucide-react";
 import Head from "next/head";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
-import RequestCard from "@/components/requests/RequestCard";
+import RequestCard, {
+  type DetailedRequest,
+} from "@/components/requests/RequestCard";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
 import Spinner from "@/components/_common/Spinner";
-import { useMaybeSendUnsentRequest } from "@/utils/useMaybeSendUnsentRequest";
+import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 
 function NewRequestButton() {
   return (
@@ -24,7 +26,7 @@ function NewRequestButton() {
 function RequestCards({
   requests,
 }: {
-  requests: React.ComponentProps<typeof RequestCard>["request"][] | undefined;
+  requests: DetailedRequest[] | undefined;
 }) {
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -87,18 +89,18 @@ function RequestsTabs() {
 
 export default function Page() {
   useSession({ required: true });
-  useMaybeSendUnsentRequest();
+  useMaybeSendUnsentRequests();
 
   return (
     <>
       <Head>
-        <title>Your Requests | Tramona</title>
+        <title>My Requests | Tramona</title>
       </Head>
       <div className="px-4 pb-64 pt-16">
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center">
             <h1 className="flex-1 py-4 text-3xl font-bold text-black">
-              Your Requests
+              My Requests
             </h1>
             <NewRequestButton />
           </div>

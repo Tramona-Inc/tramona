@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // https://next-auth.js.org/configuration/pages
 
 import { Button } from "@/components/ui/button";
@@ -13,62 +12,67 @@ import {
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import { authOptions } from "@/server/auth";
+import { useRequireNoAuth } from "@/utils/auth-utils";
+import { errorToast } from "@/utils/toasts";
+import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import { getServerSession } from "next-auth/next";
+import { type InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const formSchema = z
-  .object({
-    email: z.string().email(),
-    password: z.string(),
-  })
-  .required();
+const formSchema = z.object({
+  email: zodEmail(),
+  password: z.string(),
+});
 
 export default function SignIn({
   providers,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  useRequireNoAuth();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   const { query } = useRouter();
 
-  const [toastDisplayed, setToastDisplayed] = useState(false);
-
   const handleSubmit = async ({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
-    await signIn("credentials", { email: email, password: password });
+    await signIn("credentials", {
+      email: email,
+      password: password,
+      callbackUrl: query.isNewUser
+        ? `${window.location.origin}/auth/welcome`
+        : window.location.origin,
+    });
   };
 
-  if (query.error && !toastDisplayed) {
-    toast({
-      title:
-        "Could not login. Please check your e-mail or password or third-party application.",
-      variant: "destructive",
-    });
+  useEffect(() => {
+    if (query.error) {
+      errorToast("Couldn't log in, please try again");
+    }
 
-    setToastDisplayed(true); // Set the state to true after displaying the toast
-  }
+    if (query.isVerified) {
+      toast({
+        title: "Account successfully verified!",
+        description: "Please re-enter your credentials to log in.",
+      });
+    }
+  }, [query.error, query.isVerified]);
 
   return (
     <>
       <Head>
         <title>Log in | Tramona</title>
       </Head>
-      <div className="flex h-screen flex-col items-center justify-center space-y-10">
+      <div className="flex min-h-screen flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-5xl font-bold tracking-tight">Log in to Tramona</h1>
 
         <section className="flex flex-col items-center justify-center space-y-5">
@@ -85,7 +89,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={"Email"} autoFocus />
+                        <Input {...field} autoFocus type="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -98,19 +102,18 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          {...field}
-                          placeholder="Password"
-                          autoFocus
-                        />
+                        <Input type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormMessage />
-                <Button type="submit" className="w-full">
+                <Button
+                  disabled={form.formState.isSubmitting}
+                  type="submit"
+                  className="w-full"
+                >
                   Log In
                 </Button>
               </form>
@@ -148,31 +151,34 @@ export default function SignIn({
                   );
                 })}
           </div>
+
+          <Link
+            href="/auth/forgot-password"
+            className="font-medium text-primary underline underline-offset-2"
+          >
+            Forgot your password?
+          </Link>
+
+          <div className="flex w-full flex-1 items-center justify-center">
+            <div className="h-[1px] w-full border border-black" />
+          </div>
         </section>
-        <Link
-          href="/auth/signup"
-          className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline"
-        >
-          Don&apos;t have an account? Sign up
-        </Link>
+
+        <p>
+          Don&apos; have an account?{" "}
+          <Link
+            href="/auth/signup"
+            className="font-semibold text-primary underline underline-offset-2"
+          >
+            Sign up
+          </Link>
+        </p>
       </div>
     </>
   );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-
-  // * Allows user to redirect back to original page
-  const callbackUrl = context.query.callbackUrl ?? "/";
-
-  // If the user is already logged in, redirect.
-  // Note: Make sure not to redirect to the same page
-  // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: callbackUrl } };
-  }
-
+export async function getStaticProps() {
   const providers = await getProviders();
 
   return {

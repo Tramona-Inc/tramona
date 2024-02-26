@@ -12,6 +12,7 @@ const avatarVariants = cva(
         sm: "size-8 text-xs",
         md: "size-10 text-base",
         lg: "size-14 text-lg",
+        huge: "size-40 text-3xl",
       },
     },
     defaultVariants: {

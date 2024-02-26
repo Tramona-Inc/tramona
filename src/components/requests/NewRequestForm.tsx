@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+
 import {
   NestedDrawer,
   DrawerContent,
@@ -56,6 +57,7 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import OTPDialog from "../otp-dialog/OTPDialog";
 import { formatPhoneNumber } from "@/utils/formatters";
+import PlacesInput from "../_common/PlacesInput";
 
 const formSchema = z
   .object({
@@ -155,7 +157,7 @@ export default function NewRequestForm({
       ...restData,
     };
     if (status === "unauthenticated") {
-      localStorage.setItem("unsentRequest", JSON.stringify(newRequest));
+      localStorage.setItem("unsentRequests", JSON.stringify(newRequest));
       void router.push("/auth/signin").then(() => {
         toast({
           title: `Request saved: ${newRequest.location}`,
@@ -187,18 +189,11 @@ export default function NewRequestForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-2 gap-4"
       >
-        <FormField
+        <PlacesInput
           control={form.control}
           name="location"
-          render={({ field }) => (
-            <FormItem className="col-span-full sm:col-span-1">
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          formLabel="Location"
+          className="col-span-full sm:col-span-1"
         />
 
         <FormField
@@ -249,7 +244,7 @@ export default function NewRequestForm({
                 <FiltersButton fmtdFilters={fmtdFilters} />
               </PopoverTrigger>
               <PopoverContent align="start" side="top" className="w-96 p-2">
-                <p className="pb-4 pt-1 text-center text-lg font-semibold sm:text-left">
+                <p className="pb-4 pt-1 text-lg font-semibold">
                   Add filters (optional)
                 </p>
                 <FiltersSection form={form} />
@@ -329,7 +324,6 @@ const FiltersButton = forwardRef<
   <Button
     type="button"
     variant={fmtdFilters ? "filledInput" : "emptyInput"}
-    className="pl-3"
     {...props}
     ref={ref}
   >

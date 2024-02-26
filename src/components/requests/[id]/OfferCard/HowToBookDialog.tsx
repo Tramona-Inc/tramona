@@ -101,6 +101,7 @@ export default function HowToBookDialog(
       cancelUrl: cancelUrl,
       images: props.offer.property.imageUrls,
       userId: session.data?.user.id ?? "",
+      totalSavings,
       phoneNumber: session.data?.user.phoneNumber ?? "",
     });
 
@@ -173,7 +174,7 @@ export default function HowToBookDialog(
     if (isAirbnb) {
       return (
         <DialogHeader>
-          <DialogTitle className="text-center text-5xl">
+          <DialogTitle className="text-3xl">
             {isBooked ? "One Last Step!" : "Confirm Booking"}
           </DialogTitle>
         </DialogHeader>
@@ -182,7 +183,7 @@ export default function HowToBookDialog(
       return (
         <>
           <DialogHeader>
-            <DialogTitle className="text-center text-5xl">
+            <DialogTitle className="text-3xl">
               {isBooked ? "Thank you for Booking!" : "Confirm Booking:"}
             </DialogTitle>
           </DialogHeader>
@@ -211,6 +212,7 @@ export default function HowToBookDialog(
                         "rounded-full",
                       )}
                       onClick={() => checkout()}
+                      disabled={!createCheckout.isIdle}
                     >
                       Pay now
                     </Button>
@@ -331,8 +333,7 @@ export default function HowToBookDialog(
                       buttonVariants({ size: "lg" }),
                       "rounded-full",
                     )}
-                    href={""} // TODO: href to my listing
-                    target="_blank"
+                    href={"/my-trips"} // TODO: href to my listing
                   >
                     My Trips
                     <ArrowRightIcon />

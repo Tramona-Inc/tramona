@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 // import {
 //   Dialog,
 //   DialogHeader,
@@ -22,25 +22,27 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import {
-  Share,
-  // Link, MessageCircle, Mail, LucideIcon
-} from "lucide-react";
+import { Share } from "lucide-react";
 import CarouselDots from "./carousel-dots";
 
-import type { AppRouter } from "@/server/api/root";
-import type { inferRouterOutputs } from "@trpc/server";
-import { formatCurrency, getDiscountPercentage } from "@/utils/utils";
+// import type { AppRouter } from "@/server/api/root";
+// import type { inferRouterOutputs } from "@trpc/server";
+import { getDiscountPercentage } from "@/utils/utils";
+import { type LiveFeedOffer } from "../offer-card/data";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-export type FeedWithInfo =
-  inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
-
 type Props = {
-  offer: FeedWithInfo;
+  offer: LiveFeedOffer;
 };
+
+// export type FeedWithInfo =
+//   inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
+
+// type Props = {
+//   offer: FeedWithInfo;
+// };
 
 // function ModalButton({ icon, text }: { icon: ReactNode; text: string }) {
 //   return (
@@ -94,24 +96,29 @@ export default function FeedCard({ offer }: Props) {
     });
   }, [api]);
 
-  const name = offer.request.madeByUser.name?.split(" ") ?? [""];
+  // const name = offer.request.madeByUser.name?.split(" ") ?? [""];
+  const name = offer.hostName;
 
   // Format the time when the offer was completed at
-  const offerDate = dayjs(offer.request.resolvedAt).fromNow();
+  // const offerDate = dayjs(offer.request.resolvedAt).fromNow();
 
   return (
-    <Card className="w-[450px] lg:w-[500px]">
+    <Card className="w-[390px] lg:w-[500px] md:w-[450px]">
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex gap-3">
           <UserAvatar
             name={name[0]}
             email={undefined}
-            image={offer.request.madeByUser.image}
+            image={offer.hostPicUrl}
+            
+            // image={offer.request.madeByUser.image}
           />
           <div>
-            <p className="font-semibold">Booked by {name[0]}</p>
+            {/* <p className="font-semibold">Booked by {name[0]}</p> */}
+            <p className="font-semibold">Booked by Anonymous</p>
             <p className="text-sm text-secondary-foreground/50">
-              {offer.request.madeByUser.name} - {offerDate}
+              {/* {offer.request.madeByUser.name} - {offerDate} */}
+              Hosted by {offer.hostName}
             </p>
           </div>
         </div>
@@ -122,18 +129,30 @@ export default function FeedCard({ offer }: Props) {
 
       <CardContent>
         <Carousel setApi={setApi} className="-mx-4">
-          <CarouselContent className="max-h-[500px] min-h-[500px]">
-            {offer.property.imageUrls.map((image, idx) => (
-              <CarouselItem key={idx} className="flex justify-center">
+          {/* <CarouselContent className="max-h-[500px] min-h-[500px]"> */}
+          <CarouselContent>
+            {/* {offer.property.imageUrls.map((image, idx) => ( */}
+            {/* // <CarouselItem key={idx} className="flex justify-center -pl-4"> */}
+            <CarouselItem key={0} className=" -pl-5 -pt-5">
+              <div className="relative flex h-[500px]">
                 <Image
-                  src={image}
-                  alt={`${idx}`}
-                  width={750}
-                  height={750}
-                  style={{ objectFit: "cover" }}
+                  src={offer.imageUrl}
+                  alt={`${0}`}
+                  // width={2000}
+                  // height={2000}
+                  // layout="fill"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  fill 
+                  priority 
+                  style={{
+                    objectFit: "cover",
+                    
+                  }}
                 />
-              </CarouselItem>
-            ))}
+              </div>
+            </CarouselItem>
+
+            {/* ))} */}
           </CarouselContent>
           {count !== 0 && <CarouselDots count={count} current={current} />}
           <CarouselNext
@@ -149,23 +168,25 @@ export default function FeedCard({ offer }: Props) {
         <div className="mx-2 mb-1 mt-4 flex items-center justify-between">
           <div className="text-center text-secondary-foreground/50">
             <p className="text-2xl font-semibold line-through lg:text-3xl">
-              {formatCurrency(offer.property.originalNightlyPrice)}
+              {/* {formatCurrency(offer.property.originalNightlyPrice)} */}$
+              {offer.originalPrice}
             </p>
             <p className="text-sm tracking-tight">Airbnb price</p>
           </div>
           <div className="text-center text-secondary-foreground/50">
             <p className="text-2xl font-semibold text-primary lg:text-3xl">
-              {formatCurrency(offer.totalPrice)}
+              {/* {formatCurrency(offer.totalPrice)} */}${offer.tramonaPrice}
             </p>
             <p className="text-sm tracking-tight">Our price</p>
           </div>
           <div className="bg-primary px-4 py-2 text-zinc-50 lg:px-5 lg:py-3">
             <p className="text-lg font-semibold lg:text-xl">
-              {getDiscountPercentage(
+              {/* {getDiscountPercentage(
                 offer.property.originalNightlyPrice,
                 offer.totalPrice,
-              )}
-              % OFF
+              )} */}
+              {getDiscountPercentage(offer.originalPrice, offer.tramonaPrice)}%
+              OFF
             </p>
           </div>
         </div>

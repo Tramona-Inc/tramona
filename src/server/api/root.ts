@@ -5,6 +5,8 @@ import { propertiesRouter } from "./routers/propertiesRouter";
 import { requestsRouter } from "./routers/requestsRouter";
 import { stripeRouter } from "./routers/stripeRouter";
 import { usersRouter } from "./routers/usersRouter";
+import { myTripsRouter } from "./routers/myTripsRouter";
+import { referralCodesRouter } from "./routers/referralCodesRouter";
 import { twilioRouter } from "./routers/twilioRouter";
 
 /**
@@ -14,11 +16,13 @@ import { twilioRouter } from "./routers/twilioRouter";
  */
 export const appRouter = createTRPCRouter({
   users: usersRouter,
+  referralCodes: referralCodesRouter,
   requests: requestsRouter,
   properties: propertiesRouter,
   offers: offersRouter,
   stripe: stripeRouter,
   auth: authRouter,
+  myTrips: myTripsRouter,
   twilio: twilioRouter,
 });
 

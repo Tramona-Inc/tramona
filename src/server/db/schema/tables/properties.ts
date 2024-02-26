@@ -78,13 +78,14 @@ export const properties = pgTable(
   "properties",
   {
     id: serial("id").primaryKey(),
-    hostId: text("host_id").references(() => users.id),
+    hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 255 }).notNull(),
 
     // for when blake/preju manually upload, otherwise get the host's name via hostId
     hostName: varchar("host_name", { length: 255 }),
 
     // how many guests does this property accomodate at most?
+    address: varchar("address", { length: 1000 }),
     maxNumGuests: smallint("max_num_guests").notNull(),
     numBeds: smallint("num_beds").notNull(),
     numBedrooms: smallint("num_bedrooms").notNull(),
@@ -120,4 +121,9 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   amenities: z.array(z.enum(ALL_PROPERTY_AMENITIES)),
   standoutAmenities: z.array(z.enum(ALL_PROPERTY_STANDOUT_AMENITIES)),
   safetyItems: z.array(z.enum(ALL_PROPERTY_SAFETY_ITEMS)),
+});
+
+// make everything except id optional
+export const propertyUpdateSchema = propertyInsertSchema.partial().required({
+  id: true,
 });

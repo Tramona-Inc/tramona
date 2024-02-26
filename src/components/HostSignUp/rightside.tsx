@@ -63,7 +63,7 @@ const Rightside: React.FC<Props> = ({
   }
 
   return (
-    <div className="flex h-screen flex-col p-10 text-black md:container md:h-full md:w-2/3 md:px-20 md:pt-40">
+    <div className="flex min-h-screen flex-col p-10 text-black md:container md:h-full md:w-2/3 md:px-20 md:pt-40">
       <div className="mb-10 space-y-5">
         <h3 className="md:text-md text-sm xl:text-lg">Step {tab} of 3</h3>
         <Progress value={Math.ceil(tab * 33.25)} className="w-3/4 md:w-1/3 " />

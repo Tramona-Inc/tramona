@@ -1,8 +1,9 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { users } from "@/server/db/schema";
+import { referralCodes, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
-import { zodString } from "@/utils/zod-utils";
+import { generateReferralCode } from "@/utils/utils";
+import { zodEmail, zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 
 export const usersRouter = createTRPCRouter({
@@ -21,7 +22,7 @@ export const usersRouter = createTRPCRouter({
     };
   }),
   myReferralCode: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.users
+    const referralCode = await ctx.db.query.users
       .findFirst({
         where: eq(users.id, ctx.user.id),
         columns: {},
@@ -30,12 +31,25 @@ export const usersRouter = createTRPCRouter({
         },
       })
       .then((res) => res?.referralCode ?? null);
+
+    // If no referral code genereated
+    if (!referralCode) {
+      const [generatedCode] = await ctx.db
+        .insert(referralCodes)
+        .values({ ownerId: ctx.user.id, referralCode: generateReferralCode() })
+        .returning();
+
+      return generatedCode;
+    }
+
+    return referralCode;
   }),
+
   updateProfile: protectedProcedure
     .input(
       z.object({
         name: zodString(),
-        email: zodString().email(),
+        email: zodEmail(),
         phoneNumber: zodString({ maxLen: 20 }),
       }),
     )

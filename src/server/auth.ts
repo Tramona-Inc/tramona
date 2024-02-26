@@ -15,6 +15,9 @@ import GoogleProvider from "next-auth/providers/google";
 import { CustomPgDrizzleAdapter } from "./adapter";
 import { users, type User as TramonaUser } from "./db/schema";
 
+const THIRTY_DAYS = 30 * 24 * 60 * 60;
+const THIRTY_MINUTES = 30 * 60;
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -46,7 +49,7 @@ export const authOptions: NextAuthOptions = {
           id: token.id,
           role: token.role,
           username: token.username,
-          referralCodeUse: token.referralCodeUsed,
+          referralCodeUsed: token.referralCodeUsed,
           referralTier: token.referralTier,
           phoneNumber: token.phoneNumber,
         },
@@ -59,7 +62,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           role: user.role,
           username: user.username,
-          referralCodeUse: user.referralCodeUsed,
+          referralCodeUsed: user.referralCodeUsed,
           referralTier: user.referralTier,
           phoneNumber: user.phoneNumber,
         };
@@ -121,6 +124,11 @@ export const authOptions: NextAuthOptions = {
 
         if (!isPasswordValid) return Promise.resolve(null);
 
+        // Check if email is verified
+        if (user.emailVerified === null) {
+          return Promise.resolve(null);
+        }
+
         return Promise.resolve(user as User);
       },
     }),
@@ -150,6 +158,8 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: THIRTY_DAYS,
+    updateAge: THIRTY_MINUTES,
   },
   pages: {
     signIn: "/auth/signin",

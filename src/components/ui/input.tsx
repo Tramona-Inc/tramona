@@ -1,10 +1,10 @@
 import * as React from "react";
 
 import { cn } from "@/utils/utils";
-import { useState } from "react";
-import VisibleIcon from "../_icons/VisibleIcon";
-import HiddenIcon from "../_icons/HiddenIcon";
 import { useMeasure } from "@uidotdev/usehooks";
+import { useState } from "react";
+import HiddenIcon from "../_icons/HiddenIcon";
+import VisibleIcon from "../_icons/VisibleIcon";
 
 // I customized this input component to support prefixes and suffixes.
 // They can be any ReactNode, including strings or JSX elements.
@@ -41,11 +41,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const passwordEyeballButton = (
       <button
         type="button"
+        tabIndex={-1}
         onClick={(e) => {
-          e.preventDefault();
+          e.stopPropagation();
           setShowingPassword(!showingPassword);
         }}
-        className="absolute bottom-0 right-0 grid h-10 w-10 place-items-center rounded-full text-zinc-600 hover:bg-black/10 focus-visible:bg-black/10"
+        onMouseDown={(e) => e.preventDefault()}
+        onMouseUp={(e) => e.preventDefault()}
+        className="pointer-events-auto absolute bottom-0 right-0 grid h-10 w-10 place-items-center rounded-full text-zinc-600 hover:bg-black/10 focus-visible:bg-black/10"
       >
         {showingPassword ? <VisibleIcon /> : <HiddenIcon />}
       </button>
