@@ -64,7 +64,6 @@ export default function ListMessages() {
         addMessageToConversation(
           payload.new.conversation_id,
           newMessage,
-          hasMore,
         );
       }
     }

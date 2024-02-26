@@ -1,5 +1,6 @@
 import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
+import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
@@ -28,52 +29,47 @@ export default function ChatInput({
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
   );
+
   const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      if (session) {
-        // TODO: might be better to update the state first then insert into db
-        const { data, error } = await supabase
-          .from("messages")
-          .insert({
-            conversation_id: conversationId,
-            user_id: session?.user.id,
-            message: values.message,
-          })
-          .select("*, user(email, name, image)")
-          .single();
+    if (session) {
+      // TODO: might be better to update the state first then insert into db
+      const { data, error } = await supabase
+        .from("messages")
+        .insert({
+          conversation_id: conversationId,
+          user_id: session?.user.id,
+          message: values.message,
+        })
+        .select("*, user(email, name, image)")
+        .single();
 
-        if (data) {
-          const newMessage = {
-            id: data.id,
-            createdAt: new Date(data.created_at),
-            conversationId: data.conversation_id,
-            userId: data.user_id,
-            message: data.message,
-            read: data.read,
-            isEdit: data.is_edit,
-            user: {
-              name: session.user.name,
-              email: session.user.email,
-              image: session.user.image ?? "",
-            },
-          };
-
-          addMessageToConversation(conversationId, newMessage);
-          setOptimisticIds(newMessage.id);
-        } else {
-          throw "No data";
-        }
-
-        if (error) {
-          throw error;
-        }
-
-        form.reset();
+      if (error) {
+        errorToast(error.message);
       }
-    } catch (error) {
-      console.log(error);
+
+      if (data) {
+        const newMessage = {
+          id: data.id,
+          createdAt: new Date(data.created_at),
+          conversationId: data.conversation_id,
+          userId: data.user_id,
+          message: data.message,
+          read: data.read,
+          isEdit: data.is_edit,
+          user: {
+            name: session.user.name,
+            email: session.user.email,
+            image: session.user.image ?? "",
+          },
+        };
+
+        addMessageToConversation(conversationId, newMessage);
+        setOptimisticIds(newMessage.id);
+      }
+
+      form.reset();
     }
   };
 

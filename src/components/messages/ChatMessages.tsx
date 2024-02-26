@@ -14,7 +14,7 @@ export default function ChatMessages({
 }) {
   const [messages, setMessages] = useState<ChatMessageType[]>();
 
-  const { switchConversation, setInitConversationMessages } = useMessage();
+ const { switchConversation, setInitConversationMessages } = useMessage();
 
   // Fetch conversation on the client
   useEffect(() => {

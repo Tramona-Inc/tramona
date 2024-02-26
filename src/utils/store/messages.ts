@@ -28,7 +28,6 @@ type MessageState = {
   addMessageToConversation: (
     conversationId: number,
     messages: ChatMessageType,
-    hasMore: boolean,
   ) => void;
   optimisticIds: number[];
   setOptimisticIds: (id: number) => void;
@@ -65,7 +64,6 @@ export const useMessage = create<MessageState>((set) => ({
   addMessageToConversation: (
     conversationId: number,
     newMessage: ChatMessageType,
-    hasMore: boolean,
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
@@ -87,8 +85,8 @@ export const useMessage = create<MessageState>((set) => ({
         // If the conversation doesn't exist, create a new conversation with the new message
         updatedConversations[conversationId] = {
           messages: [newMessage],
-          page: 1, // Set a default value for page
-          hasMore: hasMore,
+          page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
+          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
         };
       }
 
