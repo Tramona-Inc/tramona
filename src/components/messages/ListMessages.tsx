@@ -4,6 +4,7 @@ import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
 // import LoadMoreMessages from "./LoadMoreMessages";
+import { errorToast } from "@/utils/toasts";
 import LoadMoreMessages from "./LoadMoreMessages";
 import { Message } from "./Message";
 
@@ -48,7 +49,7 @@ export default function ListMessages() {
         .eq("id", payload.new.user_id)
         .single();
       if (error) {
-        console.log(error);
+        errorToast(error.message);
       } else {
         const newMessage: ChatMessageType = {
           id: payload.new.id,
