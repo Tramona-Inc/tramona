@@ -200,7 +200,7 @@ export default function OfferPage({
                     nights
                   </p>
                   <div className="flex">
-                    <p className="text-gray-300 line-through">
+                    <p className="text-zinc-400 line-through">
                       {formatCurrency(property.originalNightlyPrice)}
                     </p>
                     <p className="ms-1">{formatCurrency(offer.totalPrice)}</p>
