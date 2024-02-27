@@ -100,7 +100,7 @@ export default async function webhook(
               totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${cashbackEarned}`,
               numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
             })
-            .where(eq(referralCodes, referralCode));
+            .where(eq(referralCodes.referralCode, referralCode));
         }
 
         break;
