@@ -17,15 +17,13 @@ import { api } from "@/utils/api";
 import {
   cn,
   formatCurrency,
-  formatDateRange,
   formatDateMonthDay,
   getDiscountPercentage,
   getNumNights,
-  plural,
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { type inferRouterOutputs } from "@trpc/server";
-import { CalendarIcon, CheckIcon, UsersIcon, XIcon } from "lucide-react";
+import { CheckIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
@@ -65,8 +63,6 @@ export default function OfferPage({
     offerNightlyPrice,
   );
 
-  const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-  const fmtdNumGuests = plural(request.numGuests, "guest");
   const checkInDate = formatDateMonthDay(request.checkIn);
   const checkOutDate = formatDateMonthDay(request.checkOut);
   const numNights = getNumNights(request.checkIn, request.checkOut);
@@ -200,7 +196,8 @@ export default function OfferPage({
               <div className="-space-y-1 text-black">
                 <div className="flex justify-between py-2">
                   <p className="underline">
-                    {formatCurrency(offerNightlyPrice)} x {numNights} nights
+                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
+                    nights
                   </p>
                   <div className="flex">
                     <p className="text-gray-300 line-through">
@@ -220,7 +217,7 @@ export default function OfferPage({
               </div>
             </div>
             <div className="flex justify-between py-2">
-              <p className="underline">Total {"(USD)"}</p>
+              <p className="underline">Total (USD)</p>
               <p className="font-bold">$112</p>
             </div>
             {!isLoading ? (
@@ -238,7 +235,11 @@ export default function OfferPage({
                 offerNightlyPrice={offerNightlyPrice}
                 isAirbnb={isAirbnb}
               >
-                <Button size="lg" className="w-full rounded-full bg-black">
+                <Button
+                  size="lg"
+                  className="w-full rounded-full"
+                  disabled={isBooked}
+                >
                   {isBooked ? "Booked ✓" : "Confirm Booking"}
                 </Button>
               </HowToBookDialog>
