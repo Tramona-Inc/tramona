@@ -58,7 +58,7 @@ export default function AccountSidebar() {
           >
             Cash Back Balance
           </Link>
-          <Link
+          {/* <Link
             href={"/account/wallet"}
             className={`${
               pathname === "/account/wallet"
@@ -67,7 +67,7 @@ export default function AccountSidebar() {
             } py-4`}
           >
             My Wallet
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>
