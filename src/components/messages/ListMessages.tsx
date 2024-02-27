@@ -41,6 +41,8 @@ export default function ListMessages() {
     ? conversations[currentConversationId]?.hasMore ?? false
     : false;
 
+  console.log(conversations);
+
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     if (!optimisticIds.includes(payload.new.id)) {
       const { data, error } = await supabase

@@ -20,7 +20,7 @@ export default function InitMessages({
           ...state.conversations,
           [conversationId]: {
             messages,
-            page: 0,
+            page: 1,
             hasMore: hasMore,
           },
         },
