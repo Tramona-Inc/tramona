@@ -61,10 +61,7 @@ export default function ListMessages() {
           read: payload.new.read,
           user: data,
         };
-        addMessageToConversation(
-          payload.new.conversation_id,
-          newMessage,
-        );
+        addMessageToConversation(payload.new.conversation_id, newMessage);
       }
     }
 
@@ -87,8 +84,7 @@ export default function ListMessages() {
           schema: "public",
           table: "messages",
         },
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        handlePostgresChange,
+        (payload: { new: MessageDbType }) => void handlePostgresChange(payload),
       )
       .subscribe();
 
