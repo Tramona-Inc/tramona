@@ -1,16 +1,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buttonVariants } from "../ui/button";
+import { useSession } from "next-auth/react";
 
 export default function AccountSidebar() {
   const pathname = usePathname();
+  const { data: session, status } = useSession({ required: true });
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-5">
       <div className="flex divide-x-2 divide-zinc-100 rounded-xl bg-white shadow-md lg:w-[300px] lg:flex-col lg:space-y-3 lg:divide-x-0 lg:divide-y-2">
-        <div className="w-full space-y-3 px-14 py-6 text-center">
+        <div className="w-1/2 space-y-3 px-14 py-6 text-center sm:w-full">
           <p className="text-muted-foreground">Welcome,</p>
-          <p className="text-3xl font-bold">Kierra</p>
+          <p className="text-3xl font-bold">{session.user.name}</p>
           <p className="text-muted-foreground">Member since 2/5/23</p>
         </div>
 
@@ -19,7 +25,7 @@ export default function AccountSidebar() {
           <p className="font-bold">$327.9</p>
 
           <Link
-            href={"/refer"}
+            href={"/profile"}
             className={buttonVariants({ variant: "outline" })}
           >
             Refer a Friend
