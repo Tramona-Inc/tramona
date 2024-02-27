@@ -81,7 +81,7 @@ export default function Form2({
             name="phone_num"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Phone Number</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter phone number" {...field} />
                 </FormControl>

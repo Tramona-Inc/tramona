@@ -75,7 +75,7 @@ export default function Form1({ nextTab, handleFormData }: Form1Props) {
 
   return (
     <>
-      <div className="pb-5 md:pb-10">
+      <div className=" pb-5 md:pb-10">
         <h1 className="text-2xl font-bold md:text-3xl xl:text-4xl">
           Enter the link to your listings below to get started setting up!
         </h1>
@@ -83,7 +83,7 @@ export default function Form1({ nextTab, handleFormData }: Form1Props) {
           Where do you currently list? (Please include all websites)
         </h2>
       </div>
-      <div className="h-full overflow-auto">
+      <div className="h-full overflow-visible">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
             <div className=" space-y-5">
@@ -92,7 +92,7 @@ export default function Form1({ nextTab, handleFormData }: Form1Props) {
                   <div className="flex flex-col md:flex-row">
                     <div className="w-full">
                       <div className="flex flex-row space-x-2 pb-7">
-                        <div className="w-1/4">
+                        <div className="w-1/4 ">
                           <FormField
                             control={form.control}
                             key={field.id}
