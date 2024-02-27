@@ -1,7 +1,13 @@
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
-import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
+import {
+  format,
+  formatDate,
+  isSameDay,
+  isSameMonth,
+  isSameYear,
+} from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -97,25 +103,7 @@ export function formatDateRange(from: Date, to?: Date) {
 }
 
 export function formatDateMonthDay(date: Date) {
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const month = monthNames[date.getMonth()];
-  const day = date.getDay();
-
-  return `${month} ${day}`;
+  return formatDate(date, "MMMM d");
 }
 
 // not used right now and probably will never have to:
