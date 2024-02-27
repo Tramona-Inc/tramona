@@ -2,10 +2,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buttonVariants } from "../ui/button";
 import { useSession } from "next-auth/react";
+import { api } from "@/utils/api";
+import { formatCurrency } from "@/utils/utils";
 
 export default function AccountSidebar() {
   const pathname = usePathname();
   const { data: session, status } = useSession({ required: true });
+  const { data, isLoading } = api.users.myReferralCode.useQuery();
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -22,7 +25,9 @@ export default function AccountSidebar() {
 
         <div className="space-y-4 px-14 py-6 text-center">
           <p>Lifetime Cash Back</p>
-          <p className="font-bold">$327.9</p>
+          <p className="font-bold">
+            {!isLoading && formatCurrency(data?.totalBookingVolume ?? 0)}
+          </p>
 
           <Link
             href={"/profile"}
