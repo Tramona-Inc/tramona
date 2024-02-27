@@ -6,6 +6,7 @@ import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 import { type inferRouterOutputs } from "@trpc/server";
+import { useSession } from 'next-auth/react';
 
 export type Conversation =
   inferRouterOutputs<AppRouter>["messages"]["getConversations"][number];
@@ -14,6 +15,9 @@ export type Conversations =
   inferRouterOutputs<AppRouter>["messages"]["getConversations"];
 
 export default function MessagePage() {
+  useSession({ required: true });
+
+
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
 
