@@ -1,5 +1,6 @@
 import { type ChatMessageType } from "@/utils/store/messages";
 import dayjs from "dayjs";
+import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 export type MessageProp = {
   message: ChatMessageType;
@@ -21,6 +22,8 @@ function convertUTCDateToLocalDate(date: Date) {
 export function Message({ message }: MessageProp) {
   const messageDate = convertUTCDateToLocalDate(new Date(message.createdAt));
 
+  const { data: session } = useSession();
+
   return (
     <div className="flex items-start gap-3 p-5">
       <UserAvatar
@@ -36,6 +39,9 @@ export function Message({ message }: MessageProp) {
           <p className="text-sm text-muted-foreground">
             {dayjs(messageDate).format("M/DD h:mm a ")}
           </p>
+          {session?.user.id === message.userId && message.read && (
+            <p className="text-sm text-muted-foreground">read</p>
+          )}
         </div>
 
         <p className="mt-2">{message.message}</p>
