@@ -19,6 +19,7 @@ import {
   formatDateMonthDay,
   getDiscountPercentage,
   getNumNights,
+  getTramonaFeeTotal,
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { type inferRouterOutputs } from "@trpc/server";
@@ -65,6 +66,13 @@ export default function OfferPage({
   const checkInDate = formatDateMonthDay(request.checkIn);
   const checkOutDate = formatDateMonthDay(request.checkOut);
   const numNights = getNumNights(request.checkIn, request.checkOut);
+
+  const originalTotal = property.originalNightlyPrice * numNights;
+
+  const tramonaServiceFee = getTramonaFeeTotal(
+    originalTotal - offer.totalPrice,
+  );
+  const tax = (offer.totalPrice + tramonaServiceFee) * 0.0725;
 
   return (
     <div className="space-y-4">
@@ -199,24 +207,26 @@ export default function OfferPage({
                   </p>
                   <div className="flex">
                     <p className="text-zinc-400 line-through">
-                      {formatCurrency(property.originalNightlyPrice)}
+                      {formatCurrency(originalTotal)}
                     </p>
                     <p className="ms-1">{formatCurrency(offer.totalPrice)}</p>
                   </div>
                 </div>
                 <div className="flex justify-between py-2">
                   <p className="underline">Tramona service fee</p>
-                  <p>$10</p>
+                  <p>{formatCurrency(tramonaServiceFee)}</p>
                 </div>
                 <div className="flex justify-between py-2">
                   <p className="underline">Taxes</p>
-                  <p>$2</p>
+                  <p>{formatCurrency(tax)}</p>
                 </div>
               </div>
             </div>
             <div className="flex justify-between py-2">
               <p className="underline">Total (USD)</p>
-              <p className="font-bold">$112</p>
+              <p className="font-bold">
+                {formatCurrency(offer.totalPrice + tramonaServiceFee + tax)}
+              </p>
             </div>
             {!isLoading ? (
               <HowToBookDialog
