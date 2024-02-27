@@ -58,7 +58,6 @@ import { useSession } from "next-auth/react";
 import OTPDialog from "../otp-dialog/OTPDialog";
 import { formatPhoneNumber } from "@/utils/formatters";
 import PlacesInput from "../_common/PlacesInput";
-import { map } from "@trpc/server/observable";
 import ErrorMsg from "../ui/ErrorMsg";
 
 const formSchema = z
@@ -152,8 +151,8 @@ export default function NewRequestForm({
   }, [verified]);
 
   async function onSubmit(data: FormSchema) {
+    setOpen(true);
     await waitForVerification();
-
     setOpen(false);
 
     const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
@@ -290,11 +289,6 @@ export default function NewRequestForm({
             size="lg"
             type="submit"
             className="col-span-full"
-            onClick={() => {
-              if (form.formState.isValid) {
-                setOpen(true);
-              }
-            }}
           >
             Request Deal
           </Button>
