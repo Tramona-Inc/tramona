@@ -14,6 +14,14 @@ export type ReferralTableData =
 export default function CashbackBalance() {
   const { data, isLoading } = api.referralCodes.getReferralEarnings.useQuery();
 
+  const cashbackBalance = data?.reduce((prev, item) => {
+    if (item.earningStatus === "pending") {
+      return prev + item.cashbackEarned;
+    }
+
+    return prev;
+  }, 0);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -26,7 +34,7 @@ export default function CashbackBalance() {
       <div className="min-h-[calc(100vh-5rem)] gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
         <AccountSidebar />
         <div className="w-full space-y-5">
-          <CashbackBalanceDetails />
+          <CashbackBalanceDetails balance={cashbackBalance ?? 0} />
 
           <div className="rounded-xl bg-zinc-50 shadow-md">
             <h2 className="px-5 py-6 text-2xl font-bold lg:px-10 lg:text-3xl">
