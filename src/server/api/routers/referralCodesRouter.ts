@@ -120,6 +120,13 @@ export const referralCodesRouter = createTRPCRouter({
 
     if (userReferralCode) {
       const earnings = await ctx.db.query.referralEarnings.findMany({
+        with: {
+          refereeId: {
+            columns: {
+              name: true,
+            },
+          },
+        },
         where: eq(referralEarnings.referralCode, userReferralCode.referralCode),
       });
 

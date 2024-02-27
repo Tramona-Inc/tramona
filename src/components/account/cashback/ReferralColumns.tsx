@@ -7,36 +7,46 @@ import { Badge } from "@/components/ui/badge";
 import { referralStatuses } from "./data";
 import type { Referral } from "./referrals";
 import { DataTableColumnHeader } from "./ReferralColumnHeaders";
+import { formatCurrency } from "@/utils/utils";
+import { formatDate } from "date-fns";
 
 export const referralColumns: ColumnDef<Referral>[] = [
   {
-    accessorKey: "date",
+    accessorKey: "createdAt",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Date" />
     ),
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("date")}</div>,
+    cell: ({ row }) => (
+      <div className="w-[80px]">
+        {formatDate(row.getValue("createdAt"), "MM/dd/yyyy")}
+      </div>
+    ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "refereeId",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Referee Name" />
     ),
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    cell: ({ row }) => {
+      const referee: { name: string } = row.getValue("refereeId");
+
+      return <div>{referee.name}</div>;
+    },
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "status",
+    accessorKey: "earningStatus",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
       const status = referralStatuses.find(
-        (status) => status.value === row.original.status,
+        (status) => status.value === row.original.earningStatus,
       );
 
       if (!status) {
@@ -66,11 +76,13 @@ export const referralColumns: ColumnDef<Referral>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "cashback",
+    accessorKey: "cashbackEarned",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Cash Back" />
     ),
-    cell: ({ row }) => <div>{row.getValue("cashback")}</div>,
+    cell: ({ row }) => (
+      <div>{formatCurrency(row.getValue("cashbackEarned"))}</div>
+    ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },

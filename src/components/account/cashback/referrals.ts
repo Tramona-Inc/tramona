@@ -2,9 +2,11 @@ export type Referral = {
   id: number;
   referralCode: string;
   createdAt: Date;
-  refereeId: string;
+  refereeId: string & {
+    name: string | null;
+  };
   offerId: number;
-  earningStatus: "paid" | "pending" | "cancelled";
+  earningStatus: "pending" | "paid" | "cancelled";
   cashbackEarned: number;
 };
 
