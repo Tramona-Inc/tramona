@@ -12,6 +12,7 @@ import {
 
 import { Label } from "@/components/ui/label";
 import { cn } from "@/utils/utils";
+import ErrorMsg from "./ErrorMsg";
 
 const Form = FormProvider;
 
@@ -148,23 +149,14 @@ FormDescription.displayName = "FormDescription";
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => {
+>((props, ref) => {
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message) : "";
 
   return (
-    <p
-      ref={ref}
-      id={formMessageId}
-      className={cn(
-        "text-sm font-medium text-destructive transition-[height] duration-150",
-        body === "" ? "h-0" : "h-4",
-        className,
-      )}
-      {...props}
-    >
+    <ErrorMsg ref={ref} id={formMessageId} {...props}>
       {body}
-    </p>
+    </ErrorMsg>
   );
 });
 FormMessage.displayName = "FormMessage";

@@ -110,6 +110,7 @@ export default function FeedCard({ offer }: Props) {
             name={name[0]}
             email={undefined}
             image={offer.hostPicUrl}
+            
             // image={offer.request.madeByUser.image}
           />
           <div>
