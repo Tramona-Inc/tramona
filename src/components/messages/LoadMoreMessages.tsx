@@ -63,7 +63,7 @@ export default function LoadMoreMessages() {
     <div className="flex items-center justify-center py-5">
       <Button
         variant={"darkPrimary"}
-        className="mx-10 w-full transition-all hover:scale-110"
+        className="mx-10 w-full transition-all"
         onClick={() => fetchConversation()}
       >
         Load More
