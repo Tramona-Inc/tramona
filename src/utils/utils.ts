@@ -181,11 +181,23 @@ export function getDiscountPercentage(
 }
 
 export function useIsDesktop() {
-  return (useWindowSize()?.width ?? 0) >= 640;
+ return (useWindowSize()?.width ?? 0) >= 640;
 }
 
 export function getTramonaFeeTotal(totalSavings: number) {
   const fee = 0.2 * totalSavings;
 
   return fee;
+}
+
+export function getFromAndTo(page: number, itemPerPage: number) {
+  let from = page * itemPerPage;
+
+  const to = from + itemPerPage;
+
+  if (page > 0) {
+    from += 1;
+  }
+
+  return { from, to };
 }
