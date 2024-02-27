@@ -36,7 +36,7 @@ export default function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
-  let isBooked = true;
+  let isBooked = false;
 
   const { data, isLoading } =
     api.offers.getStripePaymentIntentAndCheckoutSessionId.useQuery({
