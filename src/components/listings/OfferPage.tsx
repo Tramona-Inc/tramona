@@ -36,7 +36,7 @@ export default function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
-  let isBooked = false;
+  let isBooked = true;
 
   const { data, isLoading } =
     api.offers.getStripePaymentIntentAndCheckoutSessionId.useQuery({
@@ -240,7 +240,14 @@ export default function OfferPage({
                   className="w-full rounded-full"
                   disabled={isBooked}
                 >
-                  {isBooked ? "Booked ✓" : "Confirm Booking"}
+                  {isBooked ? (
+                    <>
+                      <CheckIcon className="size-5" />
+                      Booked
+                    </>
+                  ) : (
+                    <>Confirm Booking</>
+                  )}
                 </Button>
               </HowToBookDialog>
             ) : (
