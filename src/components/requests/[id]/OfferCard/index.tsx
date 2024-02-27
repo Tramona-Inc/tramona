@@ -30,10 +30,15 @@ export default function OfferCard({
   requestId: number;
 }>) {
   const isPremium = false; // temporary until we add payments
+
   const hostName = property.host?.name ?? property.hostName;
-  const offerNightlyPrice = offer.totalPrice / getNumNights(checkIn, checkOut);
+
+  const numNights = getNumNights(checkIn, checkOut);
+  const offerNightlyPrice = offer.totalPrice / numNights;
+
   const numAmenities =
     property.amenities.length + property.standoutAmenities.length;
+
   const discountPercentage = getDiscountPercentage(
     property.originalNightlyPrice,
     offerNightlyPrice,
@@ -60,7 +65,7 @@ export default function OfferCard({
                 {discountPercentage}% off
               </p>
             </div>
-            <div className="flex flex-1 items-center gap-4 text-muted-foreground sm:flex-col">
+            <div className="flex flex-1 justify-center gap-4 text-muted-foreground sm:flex-col sm:justify-start">
               <div>
                 <p className="text-xs font-semibold uppercase">
                   Original Price
@@ -73,9 +78,7 @@ export default function OfferCard({
                 </p>
               </div>
               <div>
-                <p className="text-center text-xs font-semibold uppercase">
-                  Tramona Price
-                </p>
+                <p className="text-xs font-semibold uppercase">Tramona Price</p>
                 <p>
                   <span className="text-3xl font-bold text-primary">
                     {formatCurrency(offerNightlyPrice)}
@@ -84,13 +87,12 @@ export default function OfferCard({
                 </p>
               </div>
               <div>
-                <p className="text-md font-bold uppercase text-black text-primary">
-                  Total Cost
-                </p>
+                <p className="text-xs font-semibold uppercase">Total cost</p>
                 <p>
                   <span className="text-3xl font-bold text-primary">
                     {formatCurrency(offer.totalPrice)}
                   </span>
+                  <span className="text-sm"></span>
                 </p>
               </div>
             </div>
@@ -113,9 +115,11 @@ export default function OfferCard({
               {property.avgRating} ({property.numRatings})
             </Badge>
             <Badge variant="secondary">{property.propertyType}</Badge>
-            <Badge variant="secondary">
-              {plural(numAmenities, "amenity", "amenities")}
-            </Badge>
+            {numAmenities > 0 && (
+              <Badge variant="secondary">
+                {plural(numAmenities, "amenity", "amenities")}
+              </Badge>
+            )}
           </div>
           <div className="flex gap-6">
             <div className="flex w-72 flex-row gap-5">

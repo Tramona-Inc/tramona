@@ -4,29 +4,36 @@ const LandingVideo = () => {
   const [videoLoaded, setVideoLoaded] = React.useState(false);
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
 
+  const playVideo = () => {
+    if (videoRef.current && !videoLoaded) {
+      videoRef.current
+        .play()
+        .then(() => setVideoLoaded(true))
+        .catch(() => {
+          // Handle error (like user didn't interact with the document yet)
+          // console.error("Error playing video:", error);
+        });
+    }
+  };
+
   React.useEffect(() => {
-    const loadVideo = async () => {
-      try {
-        videoRef.current?.load();
-        // Optional: You can perform additional actions after the video is loaded.
-        setVideoLoaded(true);
-        return videoRef?.current?.play();
-      } catch (error) {
-        // console.error("Error loading video:", error);
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.addEventListener("loadeddata", playVideo);
+    }
+
+    // cleanup function to remove event listener
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.removeEventListener("loadeddata", playVideo);
       }
     };
-
-    void loadVideo(); // Explicitly mark the promise as ignored
   }, []);
 
   return (
     <>
       <video
         ref={videoRef}
-        onLoadedData={() => {
-          setVideoLoaded(true);
-          return videoRef?.current?.play();
-        }}
         src="/assets/videos/landing-bg.mp4"
         loop
         muted

@@ -2,7 +2,6 @@
 // https://next-auth.js.org/configuration/pages
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -13,103 +12,64 @@ import {
 } from "@/components/ui/form";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
+import { errorToast } from "@/utils/toasts";
+import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import router from "next/router";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { z } from "zod";
 
 const formSchema = z
   .object({
-    email: z.string().email(),
+    email: zodEmail(),
     // username: z.string().max(60),
-    name: z.string().max(32),
-    password: z
-      .string()
-      .min(8, { message: "The password must be at least 8 characters long" })
-      .max(32, { message: "The password must be a maximum of 32 characters" })
-      .refine((value) => /[a-z]/.test(value), {
-        message: "Password must contain at least one lowercase letter",
-      })
-      .refine((value) => /[A-Z]/.test(value), {
-        message: "Password must contain at least one uppercase letter",
-      })
-      .refine((value) => /\d/.test(value), {
-        message: "Password must contain at least one digit",
-      })
-      .refine((value) => /[!@#$%^&*]/.test(value), {
-        message:
-          "Password must contain at least one special character '!@#$%^&*'",
-      })
-      .refine((value) => /\S+$/.test(value), {
-        message: "Password must not contain any whitespace characters",
-      }),
+    name: zodString({ minLen: 2 }),
+    password: zodPassword(),
     confirm: z.string(),
-    consent: z.boolean().refine((val) => val === true, {
-      message: "Please read and accept the terms and conditions",
-    }),
   })
-  .required()
   .refine((data) => data.password === data.confirm, {
     message: "Passwords don't match",
     path: ["confirm"],
   });
 
-export default function SignIn({
+type FormSchema = z.infer<typeof formSchema>;
+
+export default function SignUp({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   useRequireNoAuth();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof router.query.code === "string") {
+      localStorage.setItem("referralCode", router.query.code);
+    }
+  }, [router.query.code]);
+
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      consent: false,
-    },
   });
 
-  const { toast } = useToast();
+  const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
-  const { mutate, isLoading } = api.auth.createUser.useMutation({
-    onSuccess: () => {
-      void router.push({
-        pathname: "/auth/signin",
-        query: { isNewUser: true },
-      });
-
-      toast({
-        title: "Please verify email first to login!",
-        description: "Account was created successfully!",
-        variant: "default",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Something went wrong!",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = async ({
-    email,
-    password,
-    // username,
-    name,
-  }: z.infer<typeof formSchema>) => {
-    // await signIn("email", { email: email });
-    mutate({
-      email: email,
-      password: password,
-      // username: username,
-      name: name,
-    });
-  };
+  async function handleSubmit(newUser: FormSchema) {
+    await createUser(newUser)
+      .then(() =>
+        router.push({
+          pathname: "/auth/verify-email",
+          query: { email: newUser.email },
+        }),
+      )
+      .catch(() => errorToast("Couldn't sign up, please try again"));
+  }
 
   return (
     <>
@@ -135,7 +95,7 @@ export default function SignIn({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} autoFocus />
+                        <Input {...field} autoFocus type="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -194,32 +154,12 @@ export default function SignIn({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="consent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="flex flex-row items-center gap-5 text-muted-foreground">
-                          <Checkbox
-                            onCheckedChange={() => field.onChange(!field.value)}
-                          />
-                          <p className="text-xs">
-                            By signing up, you consent to receive text and email
-                            notifications from Tramona, Inc. about updates,
-                            promotions, and important information. Msg & data
-                            rates may apply. You can opt-out anytime. For
-                            details, see our Privacy Policy.
-                          </p>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormMessage />
-                <Button type="submit" disabled={isLoading} className="w-full">
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+                  className="w-full"
+                >
                   Sign up
                 </Button>
               </form>
@@ -258,16 +198,32 @@ export default function SignIn({
                 })}
           </div>
         </section>
-        <div className="flex flex-row items-center gap-1">
-          <h1>Already have an account? </h1>
-          <Button
-            variant={"link"}
-            onClick={() => signIn()}
-            className="-p-1 text-md font-medium text-blue-600 underline underline-offset-2"
+        <p>
+          Already have an account?{" "}
+          <Link
+            href="/auth/signin"
+            className="font-semibold text-primary underline underline-offset-2"
           >
             Log in
-          </Button>
-        </div>
+          </Link>
+        </p>
+        <p className="text-xs text-muted-foreground">
+          By signing up, you agree to our{" "}
+          <Link
+            className="underline underline-offset-2 hover:text-primary"
+            href="/tos"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            className="underline underline-offset-2 hover:text-primary"
+            href="/privacy-policy"
+          >
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </>
   );

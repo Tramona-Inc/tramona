@@ -3,7 +3,7 @@ import { referralCodes, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 import { generateReferralCode } from "@/utils/utils";
-import { zodString } from "@/utils/zod-utils";
+import { zodEmail, zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 
 export const usersRouter = createTRPCRouter({
@@ -44,31 +44,12 @@ export const usersRouter = createTRPCRouter({
 
     return referralCode;
   }),
-  insertReferralCode: protectedProcedure
-    .input(
-      z.object({
-        referralCode: z
-          .string()
-          .min(7, { message: "Invalid Code" })
-          .max(7, { message: "Invalid Code" }),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const insertedReferral = await ctx.db
-        .update(users)
-        .set({
-          referralCodeUsed: input.referralCode,
-        })
-        .where(eq(users.id, ctx.user.id))
-        .returning();
 
-      return insertedReferral;
-    }),
   updateProfile: protectedProcedure
     .input(
       z.object({
         name: zodString(),
-        email: zodString().email(),
+        email: zodEmail(),
         phoneNumber: zodString({ maxLen: 20 }),
       }),
     )

@@ -1,46 +1,21 @@
-import { api } from "@/utils/api";
-import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ExternalLinkIcon } from "lucide-react";
 
-export default function VerifyEmail() {
-  const router = useRouter();
-
-  const id = router.query.id as string;
-  const token = router.query.token as string;
-
-  const date = useMemo(() => new Date(), []); // useMemo from React
-
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (id && token) {
-      void mutateAsync({ id: id, token: token, date: date });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, token]);
-
-  const { mutateAsync, isLoading } = api.auth.verifyEmailToken.useMutation({
-    onSuccess: () => {
-      void router.push({
-        pathname: "/auth/signin",
-        query: { isNewUser: true, isVerified: true },
-      });
-    },
-    onError: (error) => {
-      setError(error.message);
-      return null;
-    },
-  });
-
+export default function Page() {
   return (
-    <main className="flex h-screen flex-col items-center justify-center">
-      {isLoading && <h1>Verifying your email ...</h1>}
-      {error && (
-        <div>
-          <h1>{error}</h1>
-          <p>Please sign up</p>
-        </div>
-      )}
-    </main>
+    <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center gap-4">
+      <h1 className="text-center text-5xl font-bold tracking-tight">
+        Check your email
+      </h1>
+      <p className="text-muted-foreground">
+        Account successfully created! Please check your email for a secure login
+        link.
+      </p>
+      <Button asChild>
+        <a href="https://mail.google.com" target="_blank" rel="noreferrer">
+          Open Gmail <ExternalLinkIcon className="size-4" />
+        </a>
+      </Button>
+    </div>
   );
 }

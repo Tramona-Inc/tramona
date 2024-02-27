@@ -23,7 +23,7 @@ import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
-import { capitalize, getNumNights, useIsDesktop } from "@/utils/utils";
+import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
   Select,
@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { forwardRef } from "react";
+
 import {
   NestedDrawer,
   DrawerContent,
@@ -45,6 +46,9 @@ import { DialogClose } from "../ui/dialog";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import PlacesInput from "../_common/PlacesInput";
+import { map } from "@trpc/server/observable";
+import ErrorMsg from "../ui/ErrorMsg";
 
 const formSchema = z
   .object({
@@ -94,6 +98,15 @@ export default function NewRequestForm({
     note,
   });
 
+  const invalidFields = Object.keys(form.formState.errors);
+
+  const numFiltersErrors = [
+    "minNumBedrooms",
+    "minNumBeds",
+    "propertyType",
+    "note",
+  ].filter((field) => invalidFields.includes(field)).length;
+
   async function onSubmit(data: FormSchema) {
     const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
     const checkIn = data.date.from;
@@ -138,18 +151,11 @@ export default function NewRequestForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-2 gap-4"
       >
-        <FormField
+        <PlacesInput
           control={form.control}
           name="location"
-          render={({ field }) => (
-            <FormItem className="col-span-full sm:col-span-1">
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          formLabel="Location"
+          className="col-span-full sm:col-span-1"
         />
 
         <FormField
@@ -224,6 +230,9 @@ export default function NewRequestForm({
               </DrawerContent>
             </NestedDrawer>
           )}
+          <ErrorMsg>
+            {numFiltersErrors > 0 && plural(numFiltersErrors, "error")}
+          </ErrorMsg>
         </FormItem>
 
         <Button
@@ -246,7 +255,6 @@ const FiltersButton = forwardRef<
   <Button
     type="button"
     variant={fmtdFilters ? "filledInput" : "emptyInput"}
-    className="pl-3"
     {...props}
     ref={ref}
   >

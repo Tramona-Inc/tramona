@@ -37,7 +37,7 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 }));
 
 export const referralCodesRelations = relations(referralCodes, ({ one }) => ({
-  user: one(users, {
+  owner: one(users, {
     fields: [referralCodes.ownerId],
     references: [users.id],
   }),

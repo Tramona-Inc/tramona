@@ -1,4 +1,3 @@
-import { useToast } from "@/components/ui/use-toast";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -11,19 +10,9 @@ import { Stepper, StepperItem } from "@/components/ui/stepper";
 import { useStepper } from "@/components/ui/use-stepper";
 import { BadgeDollarSign, CalendarCheck, PiggyBank } from "lucide-react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
 import { cn, sleep } from "@/utils/utils";
-import { useState } from "react";
+import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 
 function StepperContentLayout({
   children,
@@ -156,9 +145,6 @@ const steps = [
 ] satisfies StepperConfig[];
 
 export default function Welcome() {
-  const [open, setOpen] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const { nextStep, activeStep, isLastStep } = useStepper({
     initialStep: 0,
     steps,
@@ -175,57 +161,13 @@ export default function Welcome() {
       });
   };
 
-  const { toast } = useToast();
-
-  const { mutate } = api.users.insertReferralCode.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Sucessfully applied referral code!",
-        variant: "default",
-      });
-
-      setOpen(false);
-    },
-    onError: () => {
-      setError('Invalid Code');
-    },
-  });
-
-  const [referralCode, setReferralCode] = useState("");
-
-  function handleReferralCode() {
-    // TODO: logic to update there referral code
-    mutate({ referralCode: referralCode });
-  }
-
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger className="hidden">Open</DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Did someone refer you?</DialogTitle>
-            <DialogDescription>
-              Please input their referral code!
-            </DialogDescription>
-            <div>
-              <Input
-                type={"text"}
-                onChange={(e) => setReferralCode(e.target.value)}
-                value={referralCode}
-                placeholder="Referral code"
-              />
-              {error && <h1 className="text-red-500">{error}</h1>}
-            </div>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => handleReferralCode()}>Submit</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       <Head>
         <title>Welcome | Tramona</title>
       </Head>
+
+      <ReferralCodeDialog />
 
       <div className="mx-auto flex w-full flex-col gap-4 px-5 py-10 lg:px-80">
         <Stepper activeStep={activeStep} responsive={false}>

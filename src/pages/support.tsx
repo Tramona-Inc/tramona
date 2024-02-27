@@ -15,12 +15,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { zodString } from "@/utils/zod-utils";
+import { zodEmail, zodString } from "@/utils/zod-utils";
 import Icons from "@/components/ui/icons";
 
 const formSchema = z.object({
   name: zodString(),
-  email: zodString().email(),
+  email: zodEmail(),
   message: zodString(),
 });
 
@@ -120,7 +120,7 @@ export default function Page() {
           >
             info@tramona.com
           </a>
-         .
+          .
         </p>
       </section>
       <section className="space-y-4 rounded-xl border p-4 shadow-md">

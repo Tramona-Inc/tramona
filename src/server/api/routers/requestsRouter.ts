@@ -114,9 +114,17 @@ export const requestsRouter = createTRPCRouter({
       });
     }),
 
+  // 10 requests limit
   createMultiple: protectedProcedure
     .input(requestInsertSchema.omit({ userId: true }).array())
     .mutation(async ({ ctx, input }) => {
+      if (input.length > 10) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot create more than 10 requests at a time",
+        });
+      }
+
       await ctx.db.transaction((tx) =>
         Promise.allSettled(
           input.map((req) =>

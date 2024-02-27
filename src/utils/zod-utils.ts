@@ -6,9 +6,12 @@ import { z, type ZodType } from "zod";
  * validators for react-hook-form (e.g. trim input, parse empty strings as undefined,
  * minimum length of 1 by default)
  *
+ * this is also a place for schemas/pipelines that youre reusing (e.g. zodPassword, zodEmail, zodMMDDYYYY)
+ *
  * Example usage:
  * const schema = z.object({
  *  name: zodString({ minLen: 3, maxLen: 50 }),
+ *  email: zodEmail(),
  *  age: zodNumber({ min: 0, max: 120 }),
  *  birthday: optional(zodMMDDYYYY()),
  * });
@@ -59,7 +62,9 @@ export function zodInteger({ min = -Infinity, max = Infinity } = {}) {
 }
 
 export function zodUrl() {
-  return zodString().url({ message: "Must be a valid URL" });
+  return zodString({ maxLen: Infinity }).url({
+    message: "Must be a valid URL",
+  });
 }
 
 export function zodMMDDYYYY() {
@@ -84,4 +89,29 @@ export function zodMMDDYYYY() {
       { message: "Invalid date" },
     )
     .transform((s) => parseISO(s));
+}
+
+export function zodEmail() {
+  return zodString()
+    .email({ message: "Invalid email address" })
+    .transform((s) => s.toLowerCase());
+}
+
+export function zodPassword() {
+  return z
+    .string()
+    .min(8, { message: "Must be 8+ characters" })
+    .max(32, { message: "Can't be longer than 32 characters" })
+    .refine((value) => /[a-z]/.test(value), {
+      message: "Must contain at least one lowercase letter",
+    })
+    .refine((value) => /[A-Z]/.test(value), {
+      message: "Must contain at least one uppercase letter",
+    })
+    .refine((value) => /\d/.test(value), {
+      message: "Must contain at least one digit",
+    })
+    .refine((value) => /[!@#$%^&*]/.test(value), {
+      message: "Must contain at least one special character '!@#$%^&*'",
+    });
 }

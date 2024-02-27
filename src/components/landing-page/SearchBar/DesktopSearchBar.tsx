@@ -1,13 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormLabel } from "@/components/ui/form";
-import { optional, zodInteger, zodString } from "@/utils/zod-utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
-import { api } from "@/utils/api";
-import { capitalize, cn, getNumNights } from "@/utils/utils";
 import {
   Select,
   SelectContent,
@@ -15,18 +7,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { useRouter } from "next/router";
+import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { api } from "@/utils/api";
+import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { capitalize, cn, getNumNights } from "@/utils/utils";
+import { optional, zodInteger, zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PlusIcon, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import LPDateRangePicker, {
   LPFormItem,
   LPFormLabel,
-  LPInput,
   LPFormMessage,
+  LPInput,
+  LPLocationInput,
   classNames,
 } from "./components";
-import { PlusIcon, XIcon } from "lucide-react";
 
 const formSchema = z.object({
   data: z
@@ -69,9 +70,13 @@ export default function DesktopSearchBar({
     defaultValues: {
       data: [defaultValues],
     },
+    context: {
+      test: 123,
+    },
   });
 
   const [curTab, setCurTab] = useState(0);
+  const MAX_TRIPS = 10;
 
   const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
@@ -216,40 +221,36 @@ export default function DesktopSearchBar({
               </Comp>
             );
           })}
-          <button
-            key=""
-            type="button"
-            onClick={() => {
-              setCurTab(numTabs);
-              form.setValue("data", [
-                ...data,
-                defaultValues as FormSchema["data"][number],
-              ]);
-              // form.setFocus(`data.${data.length - 1}.location`);
-            }}
-            className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
-          >
-            <PlusIcon className="size-4" />
-            Add another trip
-          </button>
+          {numTabs < MAX_TRIPS && (
+            <button
+              key=""
+              type="button"
+              onClick={() => {
+                setCurTab(numTabs);
+                form.setValue("data", [
+                  ...data,
+                  defaultValues as FormSchema["data"][number],
+                ]);
+                // form.setFocus(`data.${data.length - 1}.location`);
+              }}
+              className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
+            >
+              <PlusIcon className="size-4" />
+              Add another trip
+            </button>
+          )}
+          {numTabs >= MAX_TRIPS && (
+            <div className="text-sm text-red-500">
+              Maximum of {MAX_TRIPS} trips reached.
+            </div>
+          )}
         </div>
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
-          <FormField
+          <LPLocationInput
             control={form.control}
             name={`data.${curTab}.location`}
-            render={({ field }) => (
-              <LPFormItem className="col-span-full lg:col-span-4">
-                <LPFormLabel>Location</LPFormLabel>
-                <FormControl>
-                  <LPInput
-                    {...field}
-                    autoFocus
-                    placeholder="Enter your destination"
-                  />
-                </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
+            formLabel="Location"
+            className="col-span-full lg:col-span-4"
           />
 
           <FormField

@@ -10,37 +10,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
+import { zodPassword } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import * as z from "zod";
 
 const formSchema = z
   .object({
-    newPassword: z
-      .string()
-      .min(8, { message: "The password must be at least 8 characters long" })
-      .max(32, { message: "The password must be a maximum of 32 characters" })
-      .refine((value) => /[a-z]/.test(value), {
-        message: "Password must contain at least one lowercase letter",
-      })
-      .refine((value) => /[A-Z]/.test(value), {
-        message: "Password must contain at least one uppercase letter",
-      })
-      .refine((value) => /\d/.test(value), {
-        message: "Password must contain at least one digit",
-      })
-      .refine((value) => /[!@#$%^&*]/.test(value), {
-        message:
-          "Password must contain at least one special character '!@#$%^&*'",
-      })
-      .refine((value) => /\S+$/.test(value), {
-        message: "Password must not contain any whitespace characters",
-      }),
+    newPassword: zodPassword(),
     verifyPassword: z.string(),
   })
-  .required()
   .refine((data) => data.newPassword === data.verifyPassword, {
     message: "Passwords don't match",
     path: ["confirm"],
@@ -129,7 +110,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
+    <div className="flex min-h-screen flex-col items-center justify-center">
       <section className="flex max-w-sm flex-col space-y-5">
         <h1 className="text-4xl font-bold tracking-tight">
           Reset your password
@@ -164,7 +145,7 @@ export default function ResetPassword() {
                 <FormItem>
                   <FormLabel>Verify Password</FormLabel>
                   <FormControl>
-                    <Input {...field} type={"password"} autoFocus />
+                    <Input {...field} type={"password"} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

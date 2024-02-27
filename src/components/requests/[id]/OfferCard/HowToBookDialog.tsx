@@ -173,7 +173,7 @@ export default function HowToBookDialog(
     if (isAirbnb) {
       return (
         <DialogHeader>
-          <DialogTitle className="text-center text-5xl">
+          <DialogTitle className="text-3xl">
             {isBooked ? "One Last Step!" : "Confirm Booking"}
           </DialogTitle>
         </DialogHeader>
@@ -182,7 +182,7 @@ export default function HowToBookDialog(
       return (
         <>
           <DialogHeader>
-            <DialogTitle className="text-center text-5xl">
+            <DialogTitle className="text-3xl">
               {isBooked ? "Thank you for Booking!" : "Confirm Booking:"}
             </DialogTitle>
           </DialogHeader>
@@ -211,6 +211,7 @@ export default function HowToBookDialog(
                         "rounded-full",
                       )}
                       onClick={() => checkout()}
+                      disabled={!createCheckout.isIdle}
                     >
                       Pay now
                     </Button>

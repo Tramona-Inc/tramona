@@ -14,10 +14,11 @@ import {
 } from "src/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { zodEmail } from "@/utils/zod-utils";
 
 // type: z.string().min(1, { message: "Input required" }),
 const Form2Schema = z.object({
-  email: z.string().email(),
+  email: zodEmail(),
   phone_num: z.string().min(10, { message: "Invalid phone number" }),
 });
 
