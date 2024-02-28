@@ -9,8 +9,31 @@ import type { Referral } from "./referrals";
 import { DataTableColumnHeader } from "./ReferralColumnHeaders";
 import { formatCurrency } from "@/utils/utils";
 import { formatDate } from "date-fns";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const referralColumns: ColumnDef<Referral>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "createdAt",
     header: ({ column }) => (

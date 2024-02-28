@@ -37,9 +37,6 @@ export default function CashbackBalance() {
           <CashbackBalanceDetails balance={cashbackBalance ?? 0} />
 
           <div className="rounded-xl bg-zinc-50 shadow-md">
-            <h2 className="px-5 py-6 text-2xl font-bold lg:px-10 lg:text-3xl">
-              Cash Back on Referral
-            </h2>
             <ReferralTable data={data ?? []} columns={referralColumns} />
           </div>
         </div>
