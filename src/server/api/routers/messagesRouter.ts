@@ -40,8 +40,10 @@ async function fetchUsersConversations(userId: string) {
   });
 }
 
-async function fetchConversationWithAdmin(userId: string, adminId: string) {
-  return await db.query.users.findFirst({
+async function fetchConversationWithAdmin(userId: string) {
+  const adminId = env.TRAMONA_ADMIN_USER_ID;
+
+  const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: {},
     with: {
@@ -73,6 +75,17 @@ async function fetchConversationWithAdmin(userId: string, adminId: string) {
       },
     },
   });
+
+  if (
+    result?.conversations &&
+    result.conversations.some(
+      (conv) => conv.conversation?.participants?.length === 1,
+    )
+  ) {
+    return result;
+  } else {
+    return null;
+  }
 }
 
 export const messagesRouter = createTRPCRouter({
@@ -92,18 +105,6 @@ export const messagesRouter = createTRPCRouter({
   }),
 
   checkAdminConversation: protectedProcedure.query(async ({ ctx }) => {
-    const adminId = env.TRAMONA_ADMIN_USER_ID;
-
-    const userResult = await fetchConversationWithAdmin(ctx.user.id, adminId);
-    if (
-      userResult?.conversations &&
-      userResult.conversations.some(
-        (conv) => conv.conversation?.participants?.length === 1,
-      )
-    ) {
-      return userResult;
-    } else {
-      return null;
-    }
+    return await fetchConversationWithAdmin(ctx.user.id);
   }),
 });
