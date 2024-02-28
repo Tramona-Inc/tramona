@@ -26,6 +26,13 @@ export default function Page() {
 
   const request = requests?.activeRequests.find(({ id }) => id === requestId);
 
+  const { data: conversations } =
+    api.messages.checkAdminConversation.useQuery();
+
+  function handleConversation() {
+    console.log(conversations);
+  }
+
   return (
     <>
       <Head>
@@ -63,7 +70,12 @@ export default function Page() {
                   checkOut={request.checkOut}
                 >
                   <Button size="lg" variant="outline" className="rounded-full">
-                    <Link href={`/listings/${offer.id}`}>Message</Link>
+                    <Button
+                      // href={`/listings/${offer.id}`}
+                      onClick={() => handleConversation()}
+                    >
+                      Message
+                    </Button>
                   </Button>
                   <Button size="lg" variant="outline" className="rounded-full">
                     <Link href={`/listings/${offer.id}`}>More details</Link>
