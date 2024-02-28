@@ -1,10 +1,16 @@
 import { env } from "@/env";
 import { createTRPCRouter } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { conversationParticipants, users } from "@/server/db/schema";
+import {
+  conversationParticipants,
+  conversations,
+  users,
+} from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { protectedProcedure } from "./../trpc";
+
+const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
 
 async function fetchUsersConversations(userId: string) {
   return await db.query.users.findFirst({
@@ -41,8 +47,6 @@ async function fetchUsersConversations(userId: string) {
 }
 
 async function fetchConversationWithAdmin(userId: string) {
-  const adminId = env.TRAMONA_ADMIN_USER_ID;
-
   const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: {},
@@ -67,7 +71,7 @@ async function fetchConversationWithAdmin(userId: string) {
                     },
                   },
                 },
-                where: eq(conversationParticipants.userId, adminId),
+                where: eq(conversationParticipants.userId, ADMIN_ID),
               },
             },
           },
@@ -82,10 +86,20 @@ async function fetchConversationWithAdmin(userId: string) {
       (conv) => conv.conversation?.participants?.length === 1,
     )
   ) {
-    return result;
+    return true;
   } else {
-    return null;
+    return false;
   }
+}
+
+async function createConversationWithAdmin(userId: string) {
+  // Generate conversation and get id
+  const conversation = await db
+    .insert(conversations)
+    .values({})
+    .returning({ id: conversations.id });
+
+  // TODO: add admin and user to created conversation
 }
 
 export const messagesRouter = createTRPCRouter({
@@ -104,7 +118,12 @@ export const messagesRouter = createTRPCRouter({
     }));
   }),
 
-  checkAdminConversation: protectedProcedure.query(async ({ ctx }) => {
-    return await fetchConversationWithAdmin(ctx.user.id);
+  checkAdminConversation: protectedProcedure.mutation(async ({ ctx }) => {
+    const adminConvoExist = await fetchConversationWithAdmin(ctx.user.id);
+
+    if (adminConvoExist) {
+    } else {
+      void createConversationWithAdmin(ctx.user.id);
+    }
   }),
 });

@@ -26,11 +26,15 @@ export default function Page() {
 
   const request = requests?.activeRequests.find(({ id }) => id === requestId);
 
-  const { data: conversations } =
-    api.messages.checkAdminConversation.useQuery();
+  const { mutate } =
+    api.messages.checkAdminConversation.useMutation({
+      onSuccess: () => {
+        return null;
+      },
+    });
 
   function handleConversation() {
-    console.log(conversations);
+    mutate();
   }
 
   return (
