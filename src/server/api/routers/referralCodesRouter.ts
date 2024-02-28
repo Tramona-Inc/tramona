@@ -1,12 +1,15 @@
+import { RequestCashback } from "@/components/email-templates/RequestCashback";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
 import { referralCodes, referralEarnings, users } from "@/server/db/schema";
+import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { type Referral } from "@/components/account/cashback/referrals";
 
 export const referralCodesRouter = createTRPCRouter({
   startUsingCode: protectedProcedure
@@ -133,4 +136,18 @@ export const referralCodesRouter = createTRPCRouter({
       return earnings;
     }
   }),
+  sendCashbackRequest: protectedProcedure
+    .input(z.object({ transactions: z.string() }))
+    .mutation(async ({ ctx }) => {
+      const name = ctx.user.name;
+
+      // await sendEmail({
+      //   to: "info@tramona.com",
+      //   subject: `Cashback payout request from ${name}`,
+      //   content: RequestCashback({
+      //     name: name,
+      //     transactions: selectedRows,
+      //   }),
+      // });
+    }),
 });
