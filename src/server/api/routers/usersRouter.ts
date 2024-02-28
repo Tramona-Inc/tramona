@@ -66,4 +66,22 @@ export const usersRouter = createTRPCRouter({
 
       return updatedUser;
     }),
+
+    updatePhoneNumber: protectedProcedure
+      .input(
+        z.object({
+          phoneNumber: zodString({ maxLen: 20 }),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const updatedUser = await ctx.db
+          .update(users)
+          .set({
+            phoneNumber: input.phoneNumber,
+          })
+          .where(eq(users.id, ctx.user.id))
+          .returning();
+
+        return updatedUser;
+      })
 });

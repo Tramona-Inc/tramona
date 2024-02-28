@@ -24,6 +24,7 @@ export default function Page() {
 
   const request = requests?.pastRequests.find(({ id }) => id === requestId);
 
+
   return (
     <>
       <div className="relative">
@@ -62,7 +63,8 @@ export default function Page() {
                   checkOut={request.checkOut}
                 >
                   <RevokeOfferDialog
-                    requestCreatedAt={request.createdAt}
+                    requestCheckIn={request.checkIn}
+                    requestCheckOut={request.checkOut}
                     offerId={offer.id}
                     propertyAddress={offer.property.address!}
                     userPhoneNumber={request.madeByUser.phoneNumber!}

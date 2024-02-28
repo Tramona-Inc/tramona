@@ -105,6 +105,9 @@ export default function NewRequestForm({
   const utils = api.useUtils();
   const router = useRouter();
 
+  const { data } = useSession();
+  const phone = data?.user.phoneNumber;
+
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   const fmtdFilters = getFmtdFilters({
     minNumBedrooms,
@@ -132,7 +135,9 @@ export default function NewRequestForm({
 
   const waitForVerification = async () => {
     return new Promise<void>((resolve) => {
+      console.log('here1');
       if (verifiedRef.current) {
+        console.log('here2');
         resolve();
       } else {
         const unsubscribe = () => {
@@ -151,8 +156,16 @@ export default function NewRequestForm({
     verifiedRef.current = verified;
   }, [verified]);
 
+  useEffect(() => {
+    if (phone) {
+      verifiedRef.current = true;
+    }
+  }, [phone]);
+
   async function onSubmit(data: FormSchema) {
+    console.log('clicked');
     await waitForVerification();
+    console.log('error?');
 
     setOpen(false);
 
@@ -177,14 +190,16 @@ export default function NewRequestForm({
       });
     } else {
       try {
+        console.log('that', phone);
+        console.log('this:', formatPhoneNumber(phone!));
         await createRequestsMutation.mutateAsync(newRequest).catch(() => {
           throw new Error();
         });
+        await utils.requests.invalidate();
         await smsMutation.mutateAsync({
           msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-          to: formatPhoneNumber(toPhoneNumber),
+          to: formatPhoneNumber(phone!),
         });
-        await utils.requests.invalidate();
         successfulRequestToast(newRequest);
         form.reset();
       } catch (e) {
@@ -284,9 +299,8 @@ export default function NewRequestForm({
           </ErrorMsg>
         </FormItem>
 
-        <Dialog open={open} onOpenChange={setOpen}>
           <Button
-            disabled={form.formState.isSubmitting}
+            //disabled={form.formState.isSubmitting}
             size="lg"
             type="submit"
             className="col-span-full"
@@ -298,34 +312,36 @@ export default function NewRequestForm({
           >
             Request Deal
           </Button>
-
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Phone number verification</DialogTitle>
-              <DialogDescription>
-                I want to receive sms texts through phone
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 p-4 py-4">
-              <div className="flex flex-row items-center gap-4">
-                <Label>Phone number</Label>
-                <Input
-                  id="phone-number"
-                  value={toPhoneNumber}
-                  onChange={(e) => {
-                    setToPhoneNumber(e.target.value);
-                  }}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <OTPDialog
-                toPhoneNumber={formatPhoneNumber(toPhoneNumber)}
-                setVerified={setVerified}
-              />
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          {!phone && (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Phone number verification</DialogTitle>
+                  <DialogDescription>
+                    I want to receive sms texts through phone
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 p-4 py-4">
+                  <div className="flex flex-row items-center gap-4">
+                    <Label>Phone number</Label>
+                    <Input
+                      id="phone-number"
+                      value={toPhoneNumber}
+                      onChange={(e) => {
+                        setToPhoneNumber(e.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <OTPDialog
+                    toPhoneNumber={formatPhoneNumber(toPhoneNumber)}
+                    setVerified={setVerified}
+                  />
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
       </form>
     </Form>
   );

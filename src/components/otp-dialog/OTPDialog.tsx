@@ -132,11 +132,24 @@ export default function OTPDialog({
 
           clear();
           return;
+        } else {
+          console.log('yay');
+          const { mutate } = api.users.updatePhoneNumber.useMutation({onSuccess: (() => {
+            toast({
+              title: "Phone number verified!"
+            })
+          }), onError: (() => {
+            errorToast("Error verifying phone number!");
+          })});
+          mutate({phoneNumber: toPhoneNumber});
         }
 
-        toast({
-          title: "Phone number successfully verified!",
-        });
+
+
+
+
+
+        //add phoneNumber to database
 
         setVerified(true);
         setOpen(false);

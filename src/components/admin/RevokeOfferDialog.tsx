@@ -15,7 +15,8 @@ import { errorToast } from "@/utils/toasts";
 
 export default function RevokeOfferDialog(
   props: PropsWithChildren<{
-    requestCreatedAt: Date;
+    requestCheckIn: Date;
+    requestCheckOut: Date;
     propertyName: string;
     propertyAddress: string;
     userPhoneNumber: string;
@@ -26,6 +27,8 @@ export default function RevokeOfferDialog(
 
   const utils = api.useUtils();
   const mutation = api.offers.delete.useMutation();
+  const twilioMutation = api.twilio.sendSMS.useMutation();
+
 
   async function deleteOffer() {
     await mutation
@@ -34,6 +37,11 @@ export default function RevokeOfferDialog(
       .then(() => toast({ title: "Sucessfully revoked offer" }))
       .catch(() => errorToast())
       .finally(() => setIsOpen(false));
+
+    await twilioMutation.mutateAsync({
+      to: props.userPhoneNumber, // TODO: text the traveller, not the admin
+      msg: `Tramona: Hello, your ${props.propertyName} in ${props.propertyAddress} offer from ${props.requestCheckIn} - ${props.requestCheckOut} has expired. Please click here to view your other offers.`,
+    });
   }
 
   return (
@@ -45,7 +53,7 @@ export default function RevokeOfferDialog(
           <DialogDescription>This can not be undone.</DialogDescription>
         </DialogHeader>
         {JSON.stringify({
-          requestCreatedAt: props.requestCreatedAt,
+          requestCheckIn: props.requestCheckIn,
           propertyName: props.propertyName,
           propertyAddress: props.propertyAddress,
           userPhoneNumber: props.userPhoneNumber,
