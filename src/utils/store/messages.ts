@@ -2,6 +2,7 @@ import { LIMIT_MESSAGE } from "@/components/messages/ChatMessages";
 import { type MessageType } from "@/server/db/schema";
 import { create } from "zustand";
 import supabase from "../supabase-client";
+import { errorToast } from "../toasts";
 
 export type ChatMessageType = MessageType & {
   user: { name: string | null; email: string; image: string | null };
@@ -190,7 +191,7 @@ export const useMessage = create<MessageState>((set, get) => ({
         }));
       }
     } catch (error) {
-      console.log(error);
+      errorToast(error as string);
     }
   },
 }));
