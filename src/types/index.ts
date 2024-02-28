@@ -1,5 +1,7 @@
 // these types are only being used for fake data and wont be needed soon
 
+import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+
 /**
  * Represents the offer type.
  */
@@ -67,3 +69,8 @@ export type LiveDeals = {
   tramonaPrice: number | null;
   oldPrice: number | null;
 };
+
+export type TramonaDatabase = PostgresJsDatabase<
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  typeof import("@/server/db/schema")
+>;
