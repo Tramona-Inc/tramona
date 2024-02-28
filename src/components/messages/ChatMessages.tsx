@@ -18,6 +18,7 @@ export default function ChatMessages({
 
     // Fetch initial messages when the component mounts
     void fetchInitialMessages(conversationId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 
   return (
