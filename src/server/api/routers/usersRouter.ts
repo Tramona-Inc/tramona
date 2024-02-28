@@ -21,6 +21,24 @@ export const usersRouter = createTRPCRouter({
       referralCodeUsed: res?.referralCodeUsed ?? null,
     };
   }),
+
+  myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
+    const phone = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        phoneNumber: true,
+      },
+    })
+    .then((res) => {
+      console.log(res?.phoneNumber);
+      res?.phoneNumber ?? null
+    });
+
+
+    return phone;
+
+  }),
+
   myReferralCode: protectedProcedure.query(async ({ ctx }) => {
     const referralCode = await ctx.db.query.users
       .findFirst({

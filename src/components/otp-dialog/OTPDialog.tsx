@@ -21,17 +21,22 @@ import { useToast } from "../ui/use-toast";
 
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
+import { useSession } from "next-auth/react";
 
 interface OTPDialogProps {
   toPhoneNumber: string;
   setVerified: Dispatch<SetStateAction<boolean>>;
+  setPhoneNumber: Dispatch<SetStateAction<string>>;
 }
 
 export default function OTPDialog({
   toPhoneNumber,
   setVerified,
+  setPhoneNumber,
 }: OTPDialogProps) {
   const { toast } = useToast();
+
+  const { data, update } = useSession();
 
   const initialCode = ["", "", "", "", "", ""];
 
@@ -107,11 +112,26 @@ export default function OTPDialog({
         description: "Code is valid for 10 minutes.",
       });
     } catch (err) {
+      console.log('askdlfjaskdf');
       setOpen(false);
       setVerified(false);
       errorToast();
     }
   };
+
+    const { mutate } = api.users.updatePhoneNumber.useMutation(
+      {onSuccess: (res) => {
+      toast({
+        title: "Phone number verified!"
+      });
+      void update((prev: typeof data) => ({ ...prev, user: res }));
+      if (res[0]?.phoneNumber) {
+        setPhoneNumber(res[0]?.phoneNumber);
+      }
+    }, onError: () => {
+      errorToast("Error verifying phone number!");
+    }});
+
 
   useEffect(() => {
     const verify = async () => {
@@ -134,34 +154,23 @@ export default function OTPDialog({
           return;
         } else {
           console.log('yay');
-          const { mutate } = api.users.updatePhoneNumber.useMutation({onSuccess: (() => {
-            toast({
-              title: "Phone number verified!"
-            })
-          }), onError: (() => {
-            errorToast("Error verifying phone number!");
-          })});
           mutate({phoneNumber: toPhoneNumber});
         }
 
-
-
-
-
-
         //add phoneNumber to database
-
+        console.log('?');
         setVerified(true);
         setOpen(false);
       } catch (err) {
         setVerified(false);
+        console.log(".");
         setOpen(false);
-
-        errorToast();
+        errorToast(err.message);
       }
     };
 
     if (otpSent && allFilled) {
+      console.log('voided');
       void verify();
     }
   }, [allFilled]);

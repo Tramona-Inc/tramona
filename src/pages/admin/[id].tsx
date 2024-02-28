@@ -59,8 +59,7 @@ export default function Page() {
                   key={offer.id}
                   offer={offer}
                   requestId={requestId}
-                  checkIn={request.checkIn}
-                  checkOut={request.checkOut}
+                  checkIn={request.checkIn} checkOut={request.checkOut}
                 >
                   <RevokeOfferDialog
                     requestCheckIn={request.checkIn}

@@ -87,7 +87,7 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
-  const { status } = useSession();
+  const { status, data, update } = useSession();
 
   const isDesktop = useIsDesktop();
 
@@ -105,8 +105,7 @@ export default function NewRequestForm({
   const utils = api.useUtils();
   const router = useRouter();
 
-  const { data } = useSession();
-  const phone = data?.user.phoneNumber;
+
 
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   const fmtdFilters = getFmtdFilters({
@@ -131,17 +130,20 @@ export default function NewRequestForm({
 
   const [verified, setVerified] = useState<boolean>(false);
 
-  const verifiedRef = useRef<boolean>(verified);
+  const { data: number } = api.users.myPhoneNumber.useQuery();
+
+
 
   const waitForVerification = async () => {
     return new Promise<void>((resolve) => {
       console.log('here1');
-      if (verifiedRef.current) {
+      if (verified) {
         console.log('here2');
         resolve();
       } else {
         const unsubscribe = () => {
-          if (verifiedRef.current) {
+          console.log('test', verified);
+          if (verified) {
             resolve();
             clearInterval(interval);
           }
@@ -153,20 +155,33 @@ export default function NewRequestForm({
   };
 
   useEffect(() => {
-    verifiedRef.current = verified;
+    console.log("verified", verified);
   }, [verified]);
 
-  useEffect(() => {
-    if (phone) {
-      verifiedRef.current = true;
-    }
-  }, [phone]);
+    useEffect(() => {
+      console.log("hereadsdf");
+    // Update phone number when session data changes
+      console.log('authenticated');
+      //void update((prev: typeof data) => ({ ...prev, user: res }));
+
+      console.log(number);
+      if(number) {
+        console.log('?');
+        console.log(number);
+        setToPhoneNumber(number);
+        setVerified(true);
+      }
+
+  }, [number]);
+
 
   async function onSubmit(data: FormSchema) {
-    console.log('clicked');
-    await waitForVerification();
-    console.log('error?');
+    if (!toPhoneNumber) {
+      setOpen(true);
+    }
 
+    await waitForVerification();
+    console.log('al;sjdfl');
     setOpen(false);
 
     const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
@@ -190,15 +205,14 @@ export default function NewRequestForm({
       });
     } else {
       try {
-        console.log('that', phone);
-        console.log('this:', formatPhoneNumber(phone!));
+
         await createRequestsMutation.mutateAsync(newRequest).catch(() => {
           throw new Error();
         });
         await utils.requests.invalidate();
         await smsMutation.mutateAsync({
           msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-          to: formatPhoneNumber(phone!),
+          to: toPhoneNumber,
         });
         successfulRequestToast(newRequest);
         form.reset();
@@ -312,7 +326,7 @@ export default function NewRequestForm({
           >
             Request Deal
           </Button>
-          {!phone && (
+
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
@@ -337,11 +351,12 @@ export default function NewRequestForm({
                   <OTPDialog
                     toPhoneNumber={formatPhoneNumber(toPhoneNumber)}
                     setVerified={setVerified}
+                    setPhoneNumber={setToPhoneNumber}
                   />
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          )}
+
       </form>
     </Form>
   );
