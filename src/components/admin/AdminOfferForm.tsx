@@ -49,6 +49,7 @@ const formSchema = z.object({
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
   address: optional(zodString({ maxLen: 1000 })),
+  areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
@@ -102,6 +103,7 @@ export default function AdminOfferForm({
             // ?? undefineds are to turn string | null into string | undefined
             hostName: offer.property.hostName ?? undefined,
             address: offer.property.address ?? undefined,
+            areaDescription: offer.property.areaDescription ?? undefined,
             maxNumGuests: offer.property.maxNumGuests,
             numBeds: offer.property.numBeds,
             numBedrooms: offer.property.numBedrooms,
@@ -501,6 +503,20 @@ export default function AdminOfferForm({
           render={({ field }) => (
             <FormItem className="col-span-full">
               <FormLabel>Address (optional)</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="areaDescription"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Area Description (optional)</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
               </FormControl>

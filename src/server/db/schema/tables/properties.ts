@@ -105,6 +105,7 @@ export const properties = pgTable(
       .array()
       .notNull(),
     about: text("about").notNull(),
+    areaDescription: text("area_description"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
