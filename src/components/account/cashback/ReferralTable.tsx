@@ -15,7 +15,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -24,6 +23,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import type { Referral } from "./referrals";
+import { toast } from "@/components/ui/use-toast";
+
+import { api } from "@/utils/api";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -64,58 +68,98 @@ export function ReferralTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const { mutate, isLoading } =
+    api.referralCodes.sendCashbackRequest.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Cashback requested!",
+          description:
+            "We've received your request to redeem your cashback. We will get back to you in 1-2 days!",
+        });
+      },
+      onError: () => {
+        toast({
+          variant: "destructive",
+          title: "Something went wrong!",
+          description: "Oops! Something went wrong, please try again",
+        });
+      },
+    });
+
   return (
-    <div className="space-y-4">
-      <div className="border">
-        <Table>
-          <TableHeader className="bg-zinc-100">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+    <>
+      <div className="flex items-center justify-between px-5 py-6">
+        <h2 className="text-2xl font-bold lg:text-3xl">
+          Cash Back on Referral
+        </h2>
+
+        <Button
+          disabled={table.getSelectedRowModel().rows.length === 0}
+          isLoading={isLoading}
+          onClick={async () => {
+            const selectedRows = table
+              .getSelectedRowModel()
+              .rows.map((row) => row.original) as Referral[];
+
+            mutate({ transactions: selectedRows });
+          }}
+        >
+          Request cashback
+        </Button>
       </div>
-    </div>
+
+      <div className="space-y-4">
+        <div className="border">
+          <Table>
+            <TableHeader className="bg-zinc-100">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id} colSpan={header.colSpan}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </>
   );
 }

@@ -1,12 +1,15 @@
+import { RequestCashback } from "@/components/email-templates/RequestCashback";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
 import { referralCodes, referralEarnings, users } from "@/server/db/schema";
+import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { referralCashbackSchema } from "@/components/account/cashback/referrals";
 
 export const referralCodesRouter = createTRPCRouter({
   startUsingCode: protectedProcedure
@@ -120,10 +123,38 @@ export const referralCodesRouter = createTRPCRouter({
 
     if (userReferralCode) {
       const earnings = await ctx.db.query.referralEarnings.findMany({
+        with: {
+          referee: {
+            columns: {
+              name: true,
+            },
+          },
+          offer: {
+            columns: {
+              totalPrice: true,
+            },
+          },
+        },
         where: eq(referralEarnings.referralCode, userReferralCode.referralCode),
       });
 
       return earnings;
     }
   }),
+  sendCashbackRequest: protectedProcedure
+    .input(z.object({ transactions: referralCashbackSchema.array() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.user;
+
+      await sendEmail({
+        to: "info@tramona.com",
+        subject: `Cashback payout request from ${user.name}`,
+        content: RequestCashback({
+          name: user.name,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          transactions: input.transactions,
+        }),
+      });
+    }),
 });
