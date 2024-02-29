@@ -43,13 +43,20 @@ export default function AdminUtility() {
           <CopyToClipboardBtn
             message={url}
             render={({ justCopied, copyMessage }) => (
-              <Button size="lg" className="" onClick={copyMessage}>
+              <Button
+                size="lg"
+                variant={"darkOutline"}
+                className=""
+                onClick={copyMessage}
+              >
                 {justCopied ? "Copied!" : "Copy link"}
               </Button>
             )}
           />
         ) : (
-          <Button onClick={() => handleUrl()}>Generate URL</Button>
+          <Button size="lg" onClick={() => handleUrl()}>
+            Generate URL
+          </Button>
         )}
       </CardContent>
     </Card>
