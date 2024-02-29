@@ -124,7 +124,6 @@ export const messagesRouter = createTRPCRouter({
 
     // Create conversation with admin if it doesn't exist
     if (!adminConvoExist) {
-      console.log("CREATED");
       void createConversationWithAdmin(ctx.user.id);
     }
   }),
