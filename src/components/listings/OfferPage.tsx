@@ -264,6 +264,16 @@ export default function OfferPage({
           </Card>
         </div>
       </div>
+      <div>
+        <div className="border-y-2 py-5">
+          <h1 className="text-xl font-bold">Where you&apos;ll be</h1>
+          <div className="py-3">
+            {/* <img src={property.imageUrls[1]!} alt="" /> image will go here*/}
+          </div>
+          <h3 className="font-semibold">Area Description</h3>
+          <p>{property.areaDescription}</p>
+        </div>
+      </div>
     </div>
   );
 }
