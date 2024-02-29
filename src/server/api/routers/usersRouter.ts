@@ -97,7 +97,7 @@ export const usersRouter = createTRPCRouter({
         hostToken: zodString(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx }) => {
       const payload = {
         email: ctx.user.email,
         id: ctx.user.id,

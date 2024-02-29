@@ -55,7 +55,6 @@ export default function SignUp({
   const { mutateAsync: verifyHostTokenAsync } =
     api.auth.verifyHostToken.useMutation({
       onSuccess: () => {
-        
         setIsVerifiedHostUrl(true);
       },
       onError: () => {
@@ -98,16 +97,14 @@ export default function SignUp({
   const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
   async function handleSubmit(newUser: FormSchema) {
-    console.log("CLIENT", isVerifiedHostUrl);
-
     type NewUserAsHost = FormSchema & { isVerifiedHostUrl: boolean };
 
-    let newUserWithHost: NewUserAsHost = {
+    const newUserWithHostCheck: NewUserAsHost = {
       ...newUser,
       isVerifiedHostUrl: isVerifiedHostUrl,
     };
 
-    await createUser(newUserWithHost)
+    await createUser(newUserWithHostCheck)
       .then(() =>
         router.push({
           pathname: "/auth/verify-email",

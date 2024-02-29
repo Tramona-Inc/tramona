@@ -1,6 +1,6 @@
 // these types are only being used for fake data and wont be needed soon
 
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 /**
  * Represents the offer type.
