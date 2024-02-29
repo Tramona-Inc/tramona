@@ -1,10 +1,15 @@
 import { relations } from "drizzle-orm";
-import { referralCodes, referralEarnings, users } from "./tables/users";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
+import {
+  conversationParticipants,
+  conversations,
+  messages,
+} from "./tables/messages";
+import { offers } from "./tables/offers";
 import { properties } from "./tables/properties";
 import { requests } from "./tables/requests";
-import { offers } from "./tables/offers";
+import { referralCodes, referralEarnings, users } from "./tables/users";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -13,6 +18,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   propertiesOwned: many(properties),
   requestsMade: many(requests),
   referralEarnings: many(referralEarnings),
+  messages: many(messages),
+  conversations: many(conversationParticipants),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -69,3 +76,33 @@ export const earningsRelations = relations(referralEarnings, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const conversationsRelations = relations(conversations, ({ many }) => ({
+  messages: many(messages),
+  participants: many(conversationParticipants),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  user: one(users, {
+    fields: [messages.userId],
+    references: [users.id],
+  }),
+}));
+
+export const conversationParticipantsRelations = relations(
+  conversationParticipants,
+  ({ one }) => ({
+    conversation: one(conversations, {
+      fields: [conversationParticipants.conversationId],
+      references: [conversations.id],
+    }),
+    user: one(users, {
+      fields: [conversationParticipants.userId],
+      references: [users.id],
+    }),
+  }),
+);

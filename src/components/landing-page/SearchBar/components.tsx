@@ -180,6 +180,7 @@ export function LPLocationInput<
               </button>
             )}
           />
+          <LPFormMessage />
         </LPFormItem>
       )}
     />
