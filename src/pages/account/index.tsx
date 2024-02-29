@@ -1,9 +1,10 @@
 import Head from "next/head";
+import { useSession } from "next-auth/react";
 
 import AccountSidebar from "@/components/account/AccountSidebar";
 import CashbackAccount from "@/components/account/CashbackAccount";
 import ReferFolks from "@/components/account/ReferFolks";
-import { useSession } from "next-auth/react";
+
 import { api } from "@/utils/api";
 
 export default function MyAccount() {
@@ -31,6 +32,7 @@ export default function MyAccount() {
         <AccountSidebar />
         <div className="w-full space-y-5">
           <CashbackAccount
+            isLoading={isLoading}
             cashbackBalance={cashbackBalance}
             recentEarnings={recentEarnings}
           />

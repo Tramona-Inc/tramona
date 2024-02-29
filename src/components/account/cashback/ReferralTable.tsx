@@ -15,7 +15,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -26,8 +25,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import type { Referral } from "./referrals";
-import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
+
+import { api } from "@/utils/api";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -74,7 +74,7 @@ export function ReferralTable<TData, TValue>({
         toast({
           title: "Cashback requested!",
           description:
-            "We've received your request to redeem your cashback. We will get back to you in X days!",
+            "We've received your request to redeem your cashback. We will get back to you in 1-2 days!",
         });
       },
       onError: () => {

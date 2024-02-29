@@ -1,8 +1,11 @@
 import type { FormEvent } from "react";
+import { useSession } from "next-auth/react";
+
 // import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { useSession } from "next-auth/react";
+import Spinner from "../_common/Spinner";
+
 import { api } from "@/utils/api";
 
 export default function ReferFolks() {
@@ -45,14 +48,18 @@ export default function ReferFolks() {
           <p className="py-2 text-sm font-semibold">OR</p> */}
 
           <Label htmlFor="referralCode">Share your referral code</Label>
-          <Input
-            id="referralCode"
-            name="referralCode"
-            type="text"
-            value={isLoading ? "" : data?.referralCode}
-            className="text-muted-foreground"
-            disabled
-          />
+          {isLoading ? (
+            <Spinner />
+          ) : (
+            <Input
+              id="referralCode"
+              name="referralCode"
+              type="text"
+              value={data?.referralCode}
+              className="text-muted-foreground"
+              disabled
+            />
+          )}
         </form>
       </div>
     </div>
