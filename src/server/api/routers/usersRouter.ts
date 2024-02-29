@@ -69,7 +69,29 @@ export const usersRouter = createTRPCRouter({
 
       return updatedUser;
     }),
-  createUrlToBeAHost: protectedProcedure.mutation(async ({ ctx }) => {
+  createUrlToBeHost: protectedProcedure.mutation(async ({ ctx }) => {
+    if (ctx.user.role === "admin") {
+      const payload = {
+        email: ctx.user.email,
+        id: ctx.user.id,
+      };
+
+      // Create token
+      const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+        expiresIn: "24h",
+      });
+
+      const url = `${env.NEXTAUTH_URL}/auth/signup/?hostToken=${token}`;
+
+      return url;
+    } else {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Must be admin to create URL",
+      });
+    }
+  }),
+  verifyUrlToBeHostUrl: protectedProcedure.mutation(async ({ ctx }) => {
     if (ctx.user.role === "admin") {
       const payload = {
         email: ctx.user.email,

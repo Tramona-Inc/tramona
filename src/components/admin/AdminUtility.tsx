@@ -14,7 +14,7 @@ import { Input } from "../ui/input";
 export default function AdminUtility() {
   const [url, setUrl] = useState<string>();
 
-  const { mutate } = api.users.createUrlToBeAHost.useMutation({
+  const { mutate } = api.users.createUrlToBeHost.useMutation({
     onSuccess: (url: SetStateAction<string | undefined>) => {
       setUrl(url);
     },
