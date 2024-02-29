@@ -176,13 +176,13 @@ function confirmpayments() {
                   <div>
                     <h4 className="text-xs ">Step 5</h4>
                     <h5 className="text-xl font-semibold">You're done!</h5>
-                    {/* <Button
+                    <Button
                       onClick={() => {
                         setTab(tab + 1);
                       }}
                     >
                       COUNT
-                    </Button> */}
+                    </Button>
                   </div>
                 </div>
               </div>
