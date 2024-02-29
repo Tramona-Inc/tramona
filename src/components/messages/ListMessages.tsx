@@ -10,7 +10,7 @@ import { Message } from "./Message";
 
 function NoMessages() {
   return (
-    <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+    <div className="absolute flex h-full flex-col items-center justify-center text-muted-foreground">
       No messages
     </div>
   );
@@ -138,15 +138,17 @@ export default function ListMessages() {
         <div className="flex-1"></div>
         <div className="absolute w-full">
           {hasMore && <LoadMoreMessages />}
-          {messages.length > 0 ? (
+          {messages.length > 0 &&
             messages
               .slice()
               .reverse()
-              .map((message) => <Message key={message.id} message={message} />)
-          ) : (
-            <NoMessages />
-          )}
+              .map((message) => <Message key={message.id} message={message} />)}
         </div>
+        {messages.length === 0 && (
+          <div className="flex h-full w-full items-center justify-center">
+            <NoMessages />
+          </div>
+        )}
       </div>
       {userScrolled && (
         <div
