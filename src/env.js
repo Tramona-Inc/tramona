@@ -38,6 +38,8 @@ export const env = createEnv({
     STRIPE_WEBHOOK_SECRET: z.string(),
     FACEBOOK_CLIENT_ID: z.string(),
     FACEBOOK_CLIENT_SECRET: z.string(),
+    SENDGRID_API_KEY: z.string(), 
+    SENDGRID_FROM: z.string(), 
   },
 
   /**
@@ -72,6 +74,8 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY, 
+    SENDGRID_FROM: process.env.SENDGRID_FROM, 
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_GOOGLE_PLACES_KEY: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY,

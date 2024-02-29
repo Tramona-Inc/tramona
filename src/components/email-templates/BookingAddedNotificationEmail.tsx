@@ -1,0 +1,66 @@
+import { Section, Text } from "@react-email/components";
+import * as React from "react";
+import {
+  Layout,
+  Header,
+  Footer,
+  SocialLinks,
+  Info,
+  BottomHr,
+  CustomButton,
+  BookingCard,
+} from "./EmailComponents";
+
+interface BookingAddedNotificationEmailProps {
+  userName: string;
+  checkIn: string;
+  checkOut: string;
+  originalPrice: number;
+  tramonaPrice: number;
+  description: string;
+  property_image_link: string;
+  trip_detail_link: string;
+}
+
+// format date  
+export const BookingAddedNotificationEmail = ({
+  userName = "User",
+  checkIn = "January 24",
+  checkOut = "January 29",
+  description = "Private Cozy Clean, close to EVERYTHING",
+  originalPrice = 220,
+  tramonaPrice = 110,
+  property_image_link = "https://via.placeholder.com/600x300?text=Offer+Image+Here&bg=cccccc",
+  trip_detail_link = "https://www.tramona.com/",
+}: BookingAddedNotificationEmailProps) => {
+  return (
+    <Layout title_preview="Your friend just added you to this booking">
+      <Header title="Your friend just added you to this booking" />
+      <Text className="text-left text-base px-6 text-brand">
+        Hello! You just got added to a booking by {userName}.
+      </Text>
+      <Section
+        className="flex justify-center px-6 pb-6"
+        style={{ width: "100%" }}
+      >
+        <BookingCard
+          checkIn={checkIn}
+          checkOut={checkOut}
+          originalPrice={originalPrice}
+          tramonaPrice={tramonaPrice}
+          description={description}
+          property_image_link={property_image_link}
+          isExpired={false}
+          booking_link={trip_detail_link}
+        />
+      </Section>
+      <CustomButton link={trip_detail_link} title="View trip detail" />
+      <BottomHr />
+      <SocialLinks />
+      <Footer />
+      <Info />
+    </Layout>
+  );
+};
+
+export default BookingAddedNotificationEmail;
