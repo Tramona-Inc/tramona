@@ -13,7 +13,7 @@ export default function Document() {
           id="googlemaps"
           type="text/javascript"
           strategy="afterInteractive"
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&loading=async`}
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback=PlacesAutocomplete&loading=async`}
         />
       </body>
     </Html>

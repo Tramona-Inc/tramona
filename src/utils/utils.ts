@@ -1,7 +1,13 @@
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
-import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
+import {
+  format,
+  formatDate,
+  isSameDay,
+  isSameMonth,
+  isSameYear,
+} from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -97,25 +103,7 @@ export function formatDateRange(from: Date, to?: Date) {
 }
 
 export function formatDateMonthDay(date: Date) {
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const month = monthNames[date.getMonth()];
-  const day = date.getDay();
-
-  return `${month} ${day}`;
+  return formatDate(date, "MMMM d");
 }
 
 // not used right now and probably will never have to:
@@ -181,11 +169,23 @@ export function getDiscountPercentage(
 }
 
 export function useIsDesktop() {
-  return (useWindowSize()?.width ?? 0) >= 640;
+ return (useWindowSize()?.width ?? 0) >= 640;
 }
 
 export function getTramonaFeeTotal(totalSavings: number) {
   const fee = 0.2 * totalSavings;
 
   return fee;
+}
+
+export function getFromAndTo(page: number, itemPerPage: number) {
+  let from = page * itemPerPage;
+
+  const to = from + itemPerPage;
+
+  if (page > 0) {
+    from += 1;
+  }
+
+  return { from, to };
 }

@@ -7,6 +7,7 @@ import { stripeRouter } from "./routers/stripeRouter";
 import { usersRouter } from "./routers/usersRouter";
 import { myTripsRouter } from "./routers/myTripsRouter";
 import { referralCodesRouter } from "./routers/referralCodesRouter";
+import { messagesRouter } from "./routers/messagesRouter";
 import { twilioRouter } from "./routers/twilioRouter";
 
 /**
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   myTrips: myTripsRouter,
   twilio: twilioRouter,
+  messages: messagesRouter,
 });
 
 // export type definition of API

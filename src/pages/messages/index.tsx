@@ -1,50 +1,31 @@
 import Head from "next/head";
 import { useState } from "react";
 
-import MessagesSidebar from "@/components/messages/messages-sidebar";
-import MessagesContent from "@/components/messages/messages-content";
+import MessagesContent from "@/components/messages/MessagesContent";
+import MessagesSidebar from "@/components/messages/MessagesSidebar";
+import { type AppRouter } from "@/server/api/root";
+import { api } from "@/utils/api";
+import { type inferRouterOutputs } from "@trpc/server";
+import { useSession } from 'next-auth/react';
 
-export type IncomingMessage = {
-  id: string;
-  name: string;
-  recentMessage: string;
-};
+export type Conversation =
+  inferRouterOutputs<AppRouter>["messages"]["getConversations"][number];
+
+export type Conversations =
+  inferRouterOutputs<AppRouter>["messages"]["getConversations"];
 
 export default function MessagePage() {
-  const [selectedRecipient, setSelectedRecipient] =
-    useState<IncomingMessage | null>(null);
+  useSession({ required: true });
 
-  const selectRecipient = (recipient: IncomingMessage | null) => {
-    setSelectedRecipient(recipient);
+
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
+
+  const selectConversation = (conversation: Conversation | null) => {
+    setSelectedConversation(conversation);
   };
 
-  const recipients: IncomingMessage[] = [
-    {
-      id: "1",
-      name: "Anna",
-      recentMessage: "[shows most recent message, this is the recent message]",
-    },
-    {
-      id: "2",
-      name: "Derick",
-      recentMessage: "[shows most recent message]",
-    },
-    {
-      id: "3",
-      name: "Anna",
-      recentMessage: "[shows most recent message]",
-    },
-    {
-      id: "4",
-      name: "Anna",
-      recentMessage: "[shows most recent message]",
-    },
-    {
-      id: "5",
-      name: "Anna",
-      recentMessage: "[shows most recent message]",
-    },
-  ];
+  const { data: conversations } = api.messages.getConversations.useQuery();
 
   return (
     <>
@@ -52,15 +33,15 @@ export default function MessagePage() {
         <title>Messages | Tramona</title>
       </Head>
 
-      <div className="grid min-h-[calc(100vh-4.25rem)] grid-cols-1 bg-white md:grid-cols-6">
+      <div className="grid h-[calc(100vh-5em)] grid-cols-1 bg-white md:grid-cols-6">
         <MessagesSidebar
-          recipients={recipients}
-          selectedRecipient={selectedRecipient}
-          setSelected={selectRecipient}
+          conversations={conversations ?? []}
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
         />
         <MessagesContent
-          selectedRecipient={selectedRecipient}
-          setSelected={selectRecipient}
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
         />
       </div>
     </>
