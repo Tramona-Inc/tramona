@@ -15,7 +15,7 @@ type Tabs = {
 function confirmpayments() {
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
 
-  const [tab, setTab] = useState<number>(1);
+  const [tab, setTab] = useState<number>(5);
   const [imageOpacity, setImageOpacity] = useState<number>(1);
 
   const handleTabChange = (content: Tabs) => {
@@ -39,22 +39,22 @@ function confirmpayments() {
         <DialogTrigger asChild>
           <Button variant="outline">Open Booking Instructions</Button>
         </DialogTrigger>
-        <DialogContent className="w-[500px]">
-          <h1 className="mt-10 text-4xl font-bold">Confirm and Pay</h1>
+        <DialogContent className="w-[750px] p-10 ">
+          <h1 className="mt-8 text-4xl font-bold">Confirm and Pay</h1>
 
-          <div className="space-y-10">
+          <div className="space-y-10 pr-5">
             {/* <h1 className="mt-10 text-4xl font-bold">Confirm and Pay</h1> */}
             <div className="space-y-5">
               {/* Step 1 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-3",
-                  1 === tab ? "opacity-100" : "opacity-50",
+                  "flex h-full flex-row space-x-6",
+                  1 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab === 1 ? <Circle /> : <CircleEmpty />}
+                {tab >= 1 ? <Circle /> : <CircleEmpty />}
                 {/* <Circle /> */}
-                <div className="space-y-3 ">
+                <div className="w-full space-y-5">
                   <div>
                     <h4 className="text-xs ">Step 1</h4>
                     <h5 className="text-xl font-semibold">
@@ -80,7 +80,7 @@ function confirmpayments() {
                     </div>
                   </div>
 
-                  <div className="mt-2 flex w-full flex-col gap-y-2">
+                  <div className="mt-2 flex w-full flex-col gap-y-3">
                     <h1 className="font-semibold">Price details</h1>
                     <div className="flex w-1/2 flex-row justify-between">
                       <p>Tramona Fee</p>
@@ -98,12 +98,13 @@ function confirmpayments() {
               {/* Step 2 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-3",
-                  2 === tab ? "opacity-100" : "opacity-50",
+                  "flex h-full flex-row space-x-6",
+                  2 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab === 2 ? <Circle /> : <CircleEmpty />}
-                <div className="space-y-3">
+                {tab >= 2 ? <Circle /> : <CircleEmpty />}
+
+                <div className="w-full space-y-5">
                   <div>
                     <h4 className="text-xs ">Step 2</h4>
                     <h5 className="text-xl font-semibold">
@@ -123,13 +124,13 @@ function confirmpayments() {
               {/* Step 3 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-3",
-                  3 === tab ? "opacity-100" : "opacity-50",
+                  "flex h-full flex-row space-x-6",
+                  3 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab === 3 ? <Circle /> : <CircleEmpty />}
+                {tab >= 3 ? <Circle /> : <CircleEmpty />}
 
-                <div className="space-y-5">
+                <div className="w-full space-y-5">
                   <div>
                     <h4 className="text-xs ">Step 3</h4>
                     <h5 className="text-xl font-semibold">
@@ -142,7 +143,7 @@ function confirmpayments() {
                     “Hi, I was offered your property on Tramona for $100 total
                     for Feb 20-25 and I’d like to book it at that price.”
                   </div>
-                  <div className="space-x-3">
+                  <div className="space-x-8">
                     <Button className="border border-black bg-white text-black">
                       Copy message
                     </Button>
@@ -154,13 +155,13 @@ function confirmpayments() {
               {/* Step 4 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-3",
-                  4 === tab ? "opacity-100" : "opacity-50",
+                  "flex h-full flex-row space-x-6",
+                  4 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab === 4 ? <Circle /> : <CircleEmpty />}
+                {tab >= 4 ? <Circle /> : <CircleEmpty />}
 
-                <div className="space-y-5">
+                <div className="w-full space-y-5">
                   <div>
                     <h4 className="text-xs ">Step 4</h4>
                     <h5 className="text-xl font-semibold">
@@ -176,19 +177,19 @@ function confirmpayments() {
               {/* Step 5 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-3",
+                  "flex h-full flex-row space-x-7",
                   5 === tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab === 4 ? (
+                {tab === 5 ? (
                   <div className="mt-6 h-4 w-4 items-center justify-center rounded-full bg-black" />
                 ) : (
                   <div className="mt-6 h-4 w-4 items-center justify-center rounded-full border-[3px] border-black opacity-50 " />
                 )}
 
-                <div className="space-y-5">
+                <div className="w-full space-y-5">
                   <div>
-                    <h4 className="text-xs ">Step 6</h4>
+                    <h4 className="text-xs ">Step 5</h4>
                     <h5 className="text-xl font-semibold">You're done!</h5>
                   </div>
                 </div>
