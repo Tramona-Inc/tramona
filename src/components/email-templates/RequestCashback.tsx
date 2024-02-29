@@ -7,6 +7,7 @@ import {
   Section,
   Tailwind,
   Text,
+  Link,
 } from "@react-email/components";
 import TramonaIcon from "../_icons/TramonaIcon";
 import { type ReferralCashback } from "../account/cashback/referrals";
@@ -15,9 +16,13 @@ import { formatDate } from "date-fns";
 
 export function RequestCashback({
   name,
+  email,
+  phoneNumber,
   transactions,
 }: {
   name: string | null;
+  email: string;
+  phoneNumber: string | null;
   transactions: ReferralCashback[];
 }) {
   return (
@@ -47,6 +52,19 @@ export function RequestCashback({
                 <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
               </Section>
             ))}
+          </Section>
+
+          <Section className="mt-[32px]">
+            <Heading as="h3">{`Contact info`}</Heading>
+            <Text>{`Email address:`}</Text>
+            <Link href={`mailto:${email}`}>{email}</Link>
+
+            {phoneNumber && (
+              <>
+                <Text>{`Contact:`}</Text>
+                <Link href={`tel:${phoneNumber}`}>{phoneNumber}</Link>
+              </>
+            )}
           </Section>
         </Container>
       </Tailwind>

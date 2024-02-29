@@ -144,13 +144,15 @@ export const referralCodesRouter = createTRPCRouter({
   sendCashbackRequest: protectedProcedure
     .input(z.object({ transactions: referralCashbackSchema.array() }))
     .mutation(async ({ ctx, input }) => {
-      const name = ctx.user.name;
+      const user = ctx.user;
 
       await sendEmail({
         to: "info@tramona.com",
-        subject: `Cashback payout request from ${name}`,
+        subject: `Cashback payout request from ${user.name}`,
         content: RequestCashback({
-          name: name,
+          name: user.name,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
           transactions: input.transactions,
         }),
       });
