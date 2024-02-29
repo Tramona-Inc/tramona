@@ -331,7 +331,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
                       <tr>
                       <td style={{ padding: '0', width: '50px' }}>
                         <a href="https://www.tramona.com/" style={{ borderRadius: '50%', display: 'block' }}>
-                            <img src={hostImageUrl || "https://via.placeholder.com/150"} alt="Host" style={{ width: '48px', height: '48px', borderRadius: '50%', display: 'block', border: 'none' }} />
+                            <img src={hostImageUrl ?? "https://via.placeholder.com/150"} alt="Host" style={{ width: '48px', height: '48px', borderRadius: '50%', display: 'block', border: 'none' }} />
                         </a>
                         </td>
                         <td style={{ padding: '0 0 0 8px' }}>
