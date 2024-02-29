@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/utils/utils";
 
 import Circle from "./progress-bar";
-import CircleEmpty from "./circle-empty";
 
 type Tabs = {
   id: number;
@@ -13,28 +12,15 @@ type Tabs = {
 };
 
 function confirmpayments() {
-  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
-
-  const [tab, setTab] = useState<number>(5);
-  const [imageOpacity, setImageOpacity] = useState<number>(1);
-
-  const handleTabChange = (content: Tabs) => {
-    // Delay the tab change to allow time for the fade-out transition
-    setTimeout(() => {
-      // Update the tab
-      setTab(content.id);
-    }, 250); // Adjust the timeout based on your transition duration
-    setTimeout(() => {
-      setImageOpacity(1);
-    }, 500);
-  };
+  const [isDialog, setIsDialog] = useState(false);
+  const [tab, setTab] = useState<number>(1);
 
   return (
     <>
       <Dialog
-        open={true}
-        // open={isAlertDialogOpen}
-        // onClose={() => setIsAlertDialogOpen(false)}
+        open={isDialog}
+        onOpenChange={setIsDialog}
+        onClose={() => setIsDialog(false)}
       >
         <DialogTrigger asChild>
           <Button variant="outline">Open Booking Instructions</Button>
@@ -48,15 +34,11 @@ function confirmpayments() {
               {/* Step 1 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-6",
+                  "flex h-full flex-row space-x-6 transition duration-1000 ",
                   1 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab >= 1 ? (
-                  <Circle step={tab} currenttab={1} />
-                ) : (
-                  <CircleEmpty />
-                )}
+                <Circle step={tab} currenttab={1} />
                 <div className="w-full space-y-5">
                   <div>
                     <h4 className="text-xs ">Step 1</h4>
@@ -101,15 +83,12 @@ function confirmpayments() {
               {/* Step 2 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-6",
+                  "flex h-full flex-row space-x-6 transition duration-1000 ",
                   2 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab >= 2 ? (
-                  <Circle step={tab} currenttab={2} />
-                ) : (
-                  <CircleEmpty />
-                )}
+                <Circle step={tab} currenttab={2} />
+
                 <div className="w-full space-y-5">
                   <div>
                     <h4 className="text-xs ">Step 2</h4>
@@ -130,15 +109,11 @@ function confirmpayments() {
               {/* Step 3 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-6",
+                  "flex h-full flex-row space-x-6 transition duration-1000 ",
                   3 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab >= 3 ? (
-                  <Circle step={tab} currenttab={3} />
-                ) : (
-                  <CircleEmpty />
-                )}
+                <Circle step={tab} currenttab={3} />
 
                 <div className="w-full space-y-5">
                   <div>
@@ -165,15 +140,11 @@ function confirmpayments() {
               {/* Step 4 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-6",
+                  "flex h-full flex-row space-x-6 transition duration-1000 ",
                   4 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab >= 4 ? (
-                  <Circle step={tab} currenttab={4} />
-                ) : (
-                  <CircleEmpty />
-                )}
+                <Circle step={tab} currenttab={4} />
 
                 <div className="w-full space-y-5">
                   <div>
@@ -191,7 +162,7 @@ function confirmpayments() {
               {/* Step 5 */}
               <div
                 className={cn(
-                  "flex h-full flex-row space-x-7",
+                  "flex h-full flex-row space-x-6 transition-opacity duration-1000 ",
                   5 === tab ? "opacity-100" : "opacity-50",
                 )}
               >
@@ -205,6 +176,13 @@ function confirmpayments() {
                   <div>
                     <h4 className="text-xs ">Step 5</h4>
                     <h5 className="text-xl font-semibold">You're done!</h5>
+                    <Button
+                      onClick={() => {
+                        setTab(tab + 1);
+                      }}
+                    >
+                      COUNT
+                    </Button>
                   </div>
                 </div>
               </div>
