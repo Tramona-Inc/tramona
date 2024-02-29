@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/utils/utils";
 
 import Circle from "./progress-bar";
+import CircleEmpty from "./circle-empty";
 
 type Tabs = {
   id: number;
@@ -51,8 +52,8 @@ function confirmpayments() {
                   1 === tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                <Circle />
-
+                {tab === 1 ? <Circle /> : <CircleEmpty />}
+                {/* <Circle /> */}
                 <div className="space-y-3 ">
                   <div>
                     <h4 className="text-xs ">Step 1</h4>
@@ -101,7 +102,7 @@ function confirmpayments() {
                   2 === tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                <Circle />
+                {tab === 2 ? <Circle /> : <CircleEmpty />}
                 <div className="space-y-3">
                   <div>
                     <h4 className="text-xs ">Step 2</h4>
@@ -126,7 +127,7 @@ function confirmpayments() {
                   3 === tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                <Circle />
+                {tab === 3 ? <Circle /> : <CircleEmpty />}
 
                 <div className="space-y-5">
                   <div>
@@ -157,7 +158,7 @@ function confirmpayments() {
                   4 === tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                <Circle />
+                {tab === 4 ? <Circle /> : <CircleEmpty />}
 
                 <div className="space-y-5">
                   <div>
@@ -179,7 +180,11 @@ function confirmpayments() {
                   5 === tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                <div className="mt-6 h-4 w-4 items-center justify-center rounded-full bg-black" />
+                {tab === 4 ? (
+                  <div className="mt-6 h-4 w-4 items-center justify-center rounded-full bg-black" />
+                ) : (
+                  <div className="mt-6 h-4 w-4 items-center justify-center rounded-full border-[3px] border-black opacity-50 " />
+                )}
 
                 <div className="space-y-5">
                   <div>
