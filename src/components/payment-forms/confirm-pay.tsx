@@ -52,8 +52,11 @@ function confirmpayments() {
                   1 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab >= 1 ? <Circle /> : <CircleEmpty />}
-                {/* <Circle /> */}
+                {tab >= 1 ? (
+                  <Circle step={tab} currenttab={1} />
+                ) : (
+                  <CircleEmpty />
+                )}
                 <div className="w-full space-y-5">
                   <div>
                     <h4 className="text-xs ">Step 1</h4>
@@ -102,8 +105,11 @@ function confirmpayments() {
                   2 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab >= 2 ? <Circle /> : <CircleEmpty />}
-
+                {tab >= 2 ? (
+                  <Circle step={tab} currenttab={2} />
+                ) : (
+                  <CircleEmpty />
+                )}
                 <div className="w-full space-y-5">
                   <div>
                     <h4 className="text-xs ">Step 2</h4>
@@ -128,7 +134,11 @@ function confirmpayments() {
                   3 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab >= 3 ? <Circle /> : <CircleEmpty />}
+                {tab >= 3 ? (
+                  <Circle step={tab} currenttab={3} />
+                ) : (
+                  <CircleEmpty />
+                )}
 
                 <div className="w-full space-y-5">
                   <div>
@@ -159,7 +169,11 @@ function confirmpayments() {
                   4 <= tab ? "opacity-100" : "opacity-50",
                 )}
               >
-                {tab >= 4 ? <Circle /> : <CircleEmpty />}
+                {tab >= 4 ? (
+                  <Circle step={tab} currenttab={4} />
+                ) : (
+                  <CircleEmpty />
+                )}
 
                 <div className="w-full space-y-5">
                   <div>
