@@ -50,12 +50,12 @@ export const referralColumns: ColumnDef<Referral>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "refereeId",
+    accessorKey: "referee",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Referee Name" />
     ),
     cell: ({ row }) => {
-      const referee: { name: string } = row.getValue("refereeId");
+      const referee: { name: string } = row.getValue("referee");
 
       return <div>{referee.name}</div>;
     },
@@ -92,7 +92,10 @@ export const referralColumns: ColumnDef<Referral>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount" />
     ),
-    cell: ({ row }) => <div>${row.getValue("amount")}</div>,
+    cell: ({ row }) => {
+      const offer: { totalPrice: number } = row.getValue("amount");
+      return <div>{formatCurrency(offer.totalPrice)}</div>;
+    },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },

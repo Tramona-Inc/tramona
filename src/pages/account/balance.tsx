@@ -6,7 +6,7 @@ import { ReferralTable } from "@/components/account/cashback/ReferralTable";
 import { referralColumns } from "@/components/account/cashback/ReferralColumns";
 import { api } from "@/utils/api";
 import type { inferRouterOutputs } from "@trpc/server";
-import { AppRouter } from "@/server/api/root";
+import type { AppRouter } from "@/server/api/root";
 
 export type ReferralTableData =
   inferRouterOutputs<AppRouter>["referralCodes"]["getReferralEarnings"];

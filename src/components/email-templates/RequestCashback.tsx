@@ -9,7 +9,7 @@ import {
   Text,
 } from "@react-email/components";
 import TramonaIcon from "../_icons/TramonaIcon";
-import { Referral } from "../account/cashback/referrals";
+import { type ReferralCashback } from "../account/cashback/referrals";
 import { formatCurrency } from "@/utils/utils";
 import { formatDate } from "date-fns";
 
@@ -18,7 +18,7 @@ export function RequestCashback({
   transactions,
 }: {
   name: string | null;
-  transactions: Referral[];
+  transactions: ReferralCashback[];
 }) {
   return (
     <Html lang="en">
@@ -39,10 +39,10 @@ export function RequestCashback({
           <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
           <Section className="mb-[32px] mt-[32px] text-center">
             {transactions.map((transaction) => (
-              <Section id={`${transaction.id}`}>
+              <Section key={transaction.id}>
                 <Text className="text-sm text-muted-foreground">{`(ID: ${transaction.id})`}</Text>
-                <Text>{`${formatCurrency(transaction.cashbackEarned)} cashback from ${transaction.refereeId.name}'s booking`}</Text>
-                <Text className="text-sm text-muted-foreground">{`(${formatDate(transaction.createdAt, "MM/dd/yyyy")})`}</Text>
+                <Text>{`${formatCurrency(transaction.cashbackEarned)} cashback from ${transaction.referee.name}'s booking`}</Text>
+                <Text className="text-sm text-muted-foreground">{`Payment of ${formatCurrency(transaction.offer.totalPrice!)} (${formatDate(transaction.createdAt, "MM/dd/yyyy")})`}</Text>
 
                 <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
               </Section>
