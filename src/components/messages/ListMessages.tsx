@@ -91,6 +91,7 @@ export default function ListMessages() {
     return () => {
       void channel.unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConversationId, messages]);
 
   useEffect(() => {
@@ -99,6 +100,7 @@ export default function ListMessages() {
     if (scrollContainer && !userScrolled) {
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   const handleOnScroll = () => {

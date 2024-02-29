@@ -1,5 +1,5 @@
 import { api } from "@/utils/api";
-import { SetStateAction, useState } from "react";
+import { type SetStateAction, useState } from "react";
 import CopyToClipboardBtn from "../_utils/CopyToClipboardBtn";
 import { Button } from "../ui/button";
 import {
