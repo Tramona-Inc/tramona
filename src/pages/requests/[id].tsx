@@ -26,12 +26,11 @@ export default function Page() {
 
   const request = requests?.activeRequests.find(({ id }) => id === requestId);
 
-  const { mutate } =
-    api.messages.checkAdminConversation.useMutation({
-      onSuccess: () => {
-        return null;
-      },
-    });
+  const { mutate } = api.messages.checkAdminConversation.useMutation({
+    onSuccess: () => {
+      void router.push("/messages");
+    },
+  });
 
   function handleConversation() {
     mutate();
@@ -74,10 +73,7 @@ export default function Page() {
                   checkOut={request.checkOut}
                 >
                   <Button size="lg" variant="outline" className="rounded-full">
-                    <Button
-                      // href={`/listings/${offer.id}`}
-                      onClick={() => handleConversation()}
-                    >
+                    <Button onClick={() => handleConversation()}>
                       Message
                     </Button>
                   </Button>

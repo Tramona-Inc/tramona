@@ -1,13 +1,10 @@
 import { env } from "@/env";
 import { createTRPCRouter } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import {
-  conversationParticipants,
-  conversations,
-  users,
-} from "@/server/db/schema";
+import { conversationParticipants, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { conversations } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
@@ -49,17 +46,11 @@ async function fetchUsersConversations(userId: string) {
 async function fetchConversationWithAdmin(userId: string) {
   const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
-    columns: {},
     with: {
       conversations: {
-        columns: {},
         with: {
           conversation: {
             with: {
-              messages: {
-                orderBy: (messages, { desc }) => [desc(messages.createdAt)],
-                limit: 1,
-              },
               participants: {
                 with: {
                   user: {
@@ -71,7 +62,6 @@ async function fetchConversationWithAdmin(userId: string) {
                     },
                   },
                 },
-                where: eq(conversationParticipants.userId, ADMIN_ID),
               },
             },
           },
@@ -80,26 +70,37 @@ async function fetchConversationWithAdmin(userId: string) {
     },
   });
 
-  if (
-    result?.conversations &&
-    result.conversations.some(
-      (conv) => conv.conversation?.participants?.length === 1,
-    )
-  ) {
-    return true;
-  } else {
-    return false;
-  }
+  // Check if conversation contains two participants
+  // and check if admin id is in there
+  const isAdminInConversation = result?.conversations?.some(
+    (conv) =>
+      conv.conversation?.participants?.length === 2 &&
+      conv.conversation.participants.some(
+        (participant) => participant.user.id === ADMIN_ID,
+      ),
+  );
+
+  return isAdminInConversation ?? false;
 }
 
 async function createConversationWithAdmin(userId: string) {
   // Generate conversation and get id
-  const conversation = await db
+  const [createdConversation] = await db
     .insert(conversations)
     .values({})
     .returning({ id: conversations.id });
 
-  // TODO: add admin and user to created conversation
+  const createdConversationId = createdConversation?.id;
+
+  if (createdConversationId !== undefined) {
+    // Insert participants for the user and admin
+    const participantValues = [
+      { conversationId: createdConversationId, userId: userId },
+      { conversationId: createdConversationId, userId: ADMIN_ID },
+    ];
+
+    await db.insert(conversationParticipants).values(participantValues);
+  }
 }
 
 export const messagesRouter = createTRPCRouter({
@@ -121,8 +122,9 @@ export const messagesRouter = createTRPCRouter({
   checkAdminConversation: protectedProcedure.mutation(async ({ ctx }) => {
     const adminConvoExist = await fetchConversationWithAdmin(ctx.user.id);
 
-    if (adminConvoExist) {
-    } else {
+    // Create conversation with admin if it doesn't exist
+    if (!adminConvoExist) {
+      console.log("CREATED");
       void createConversationWithAdmin(ctx.user.id);
     }
   }),
