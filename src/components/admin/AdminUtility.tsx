@@ -1,5 +1,5 @@
 import { api } from "@/utils/api";
-import { type SetStateAction, useState } from "react";
+import { useState } from "react";
 import CopyToClipboardBtn from "../_utils/CopyToClipboardBtn";
 import { Button } from "../ui/button";
 import {
@@ -15,7 +15,7 @@ export default function AdminUtility() {
   const [url, setUrl] = useState<string>();
 
   const { mutate } = api.users.createUrlToBeHost.useMutation({
-    onSuccess: (url: SetStateAction<string | undefined>) => {
+    onSuccess: (url: string) => {
       setUrl(url);
     },
   });

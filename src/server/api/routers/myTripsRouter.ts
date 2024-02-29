@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { offers, requests } from "@/server/db/schema";
-import { TramonaDatabase } from "@/types";
+import { type TramonaDatabase } from "@/types";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 
