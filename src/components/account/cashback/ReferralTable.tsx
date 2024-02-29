@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { Referral } from "./referrals";
 import { api } from "@/utils/api";
+import { toast } from "@/components/ui/use-toast";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -69,8 +70,20 @@ export function ReferralTable<TData, TValue>({
 
   const { mutate, isLoading } =
     api.referralCodes.sendCashbackRequest.useMutation({
-      onSuccess: (res) => {},
-      onError: (error) => {},
+      onSuccess: () => {
+        toast({
+          title: "Cashback requested!",
+          description:
+            "We've received your request to redeem your cashback. We will get back to you in X days!",
+        });
+      },
+      onError: () => {
+        toast({
+          variant: "destructive",
+          title: "Something went wrong!",
+          description: "Oops! Something went wrong, please try again",
+        });
+      },
     });
 
   return (

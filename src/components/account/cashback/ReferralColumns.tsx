@@ -88,12 +88,12 @@ export const referralColumns: ColumnDef<Referral>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "amount",
+    accessorKey: "offer",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount" />
     ),
     cell: ({ row }) => {
-      const offer: { totalPrice: number } = row.getValue("amount");
+      const offer: { totalPrice: number } = row.getValue("offer");
       return <div>{formatCurrency(offer.totalPrice)}</div>;
     },
     filterFn: (row, id, value) => {
