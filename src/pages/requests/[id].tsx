@@ -72,10 +72,13 @@ export default function Page() {
                   checkIn={request.checkIn}
                   checkOut={request.checkOut}
                 >
-                  <Button size="lg" variant="outline" className="rounded-full">
-                    <Button onClick={() => handleConversation()}>
-                      Message
-                    </Button>
+                  <Button
+                    onClick={() => handleConversation()}
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full"
+                  >
+                    Message
                   </Button>
                   <Button size="lg" variant="outline" className="rounded-full">
                     <Link href={`/listings/${offer.id}`}>More details</Link>
