@@ -25,10 +25,10 @@ function confirmpayments() {
         <DialogTrigger asChild>
           <Button variant="outline">Open Booking Instructions</Button>
         </DialogTrigger>
-        <DialogContent className="w-[750px] p-10 ">
+        <DialogContent className="w-screen p-10 md:w-[750px] ">
           <h1 className="mt-8 text-4xl font-bold">Confirm and Pay</h1>
 
-          <div className="space-y-10 pr-5">
+          <div className="mt-10 space-y-10 pr-5 md:mt-0">
             {/* <h1 className="mt-10 text-4xl font-bold">Confirm and Pay</h1> */}
             <div className="space-y-5">
               {/* Step 1 */}
@@ -128,7 +128,7 @@ function confirmpayments() {
                     “Hi, I was offered your property on Tramona for $100 total
                     for Feb 20-25 and I’d like to book it at that price.”
                   </div>
-                  <div className="space-x-8">
+                  <div className="flex flex-col space-y-2 md:flex-row md:space-x-8 md:space-y-0">
                     <Button className="border border-black bg-white text-black">
                       Copy message
                     </Button>
@@ -176,13 +176,13 @@ function confirmpayments() {
                   <div>
                     <h4 className="text-xs ">Step 5</h4>
                     <h5 className="text-xl font-semibold">You're done!</h5>
-                    <Button
+                    {/* <Button
                       onClick={() => {
                         setTab(tab + 1);
                       }}
                     >
                       COUNT
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </div>
