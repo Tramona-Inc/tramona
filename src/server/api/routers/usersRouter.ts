@@ -81,7 +81,7 @@ export const usersRouter = createTRPCRouter({
         expiresIn: "24h",
       });
 
-      const url = `${env.NEXTAUTH_URL}?hostToken=${token}`;
+      const url = `${env.NEXTAUTH_URL}/?hostToken=${token}`;
 
       return url;
     } else {

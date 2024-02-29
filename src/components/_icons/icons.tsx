@@ -1,35 +1,36 @@
-import type { LucideIcon, LucideProps } from 'lucide-react';
+import type { LucideIcon, LucideProps } from "lucide-react";
 import {
+  ArrowDown,
   ArrowRight,
-  Twitter,
-  Github,
-  Mail,
-  Instagram,
-  Linkedin,
-  Clipboard,
-  Loader2,
+  ArrowUp,
+  Check,
+  ChevronDown,
   ChevronLeft,
   ChevronLeftCircle,
   ChevronRightCircle,
-  Radio,
-  LayoutDashboard,
-  Tags,
-  List,
-  MessageSquareIcon,
-  Layers3,
-  Settings,
-  LogOut,
-  HelpCircle,
   ChevronsUpDownIcon,
-  ChevronDown,
-  Hourglass,
-  Check,
-  Lock,
-  ArrowDown,
-  ArrowUp,
+  Clipboard,
   EyeOff,
+  FileSliders,
+  Github,
+  HelpCircle,
+  Hourglass,
+  Instagram,
+  Layers3,
+  LayoutDashboard,
+  Linkedin,
+  List,
+  Loader2,
+  Lock,
+  LogOut,
+  Mail,
+  MessageSquareIcon,
   MoreHorizontal,
-} from 'lucide-react';
+  Radio,
+  Settings,
+  Tags,
+  Twitter,
+} from "lucide-react";
 
 export type Icon = LucideIcon;
 
@@ -64,6 +65,7 @@ export const Icons = {
   chevronCircleLeft: ChevronLeftCircle,
   chevronCircleRight: ChevronRightCircle,
   radio: Radio,
+  adminTab: FileSliders,
   message: () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +174,14 @@ export const Icons = {
     </svg>
   ),
   logo: ({ ...props }: LucideProps) => (
-    <svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
       <path
         d="M29.5407 46.1705V10.1004C29.5407 9.08113 28.1944 8.71512 27.6784 9.59406L6.5005 45.6642C6.1091 46.3308 6.5898 47.1705 7.36285 47.1705H28.5407C29.093 47.1705 29.5407 46.7228 29.5407 46.1705Z"
         fill="white"
@@ -208,7 +217,11 @@ export const Icons = {
       stroke="currentColor"
       className="h-6 w-6"
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
+      />
     </svg>
   ),
 };
