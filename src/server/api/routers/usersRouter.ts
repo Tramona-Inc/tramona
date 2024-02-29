@@ -30,8 +30,7 @@ export const usersRouter = createTRPCRouter({
       },
     })
     .then((res) => {
-      console.log(res?.phoneNumber);
-      res?.phoneNumber ?? null
+      return res?.phoneNumber ?? null
     });
 
 

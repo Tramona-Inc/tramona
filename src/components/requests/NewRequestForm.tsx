@@ -132,18 +132,20 @@ export default function NewRequestForm({
 
   const { data: number } = api.users.myPhoneNumber.useQuery();
 
+  const verifiedRef = useRef(verified);
+  const phoneRef = useRef(toPhoneNumber);
+
 
 
   const waitForVerification = async () => {
+    console.log(verifiedRef.current);
+    console.log(verified);
     return new Promise<void>((resolve) => {
-      console.log('here1');
-      if (verified) {
-        console.log('here2');
+      if (verifiedRef.current) {
         resolve();
       } else {
         const unsubscribe = () => {
-          console.log('test', verified);
-          if (verified) {
+          if (verifiedRef.current) {
             resolve();
             clearInterval(interval);
           }
@@ -155,34 +157,26 @@ export default function NewRequestForm({
   };
 
   useEffect(() => {
-    console.log("verified", verified);
+    verifiedRef.current = verified;
   }, [verified]);
 
-    useEffect(() => {
-      console.log("hereadsdf");
-    // Update phone number when session data changes
-      console.log('authenticated');
-      //void update((prev: typeof data) => ({ ...prev, user: res }));
+  useEffect(() => {
 
-      console.log(number);
-      if(number) {
-        console.log('?');
-        console.log(number);
-        setToPhoneNumber(number);
-        setVerified(true);
-      }
-
+    if(number) {
+      phoneRef.current = number;
+      verifiedRef.current = true;
+    }
   }, [number]);
 
-
   async function onSubmit(data: FormSchema) {
-    if (!toPhoneNumber) {
+    if (!phoneRef.current) {
       setOpen(true);
     }
 
     await waitForVerification();
-    console.log('al;sjdfl');
     setOpen(false);
+
+
 
     const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
     const checkIn = data.date.from;
@@ -210,9 +204,14 @@ export default function NewRequestForm({
           throw new Error();
         });
         await utils.requests.invalidate();
+        await utils.users.invalidate();
+
+        while (!phoneRef.current) {
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+        }
         await smsMutation.mutateAsync({
           msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-          to: toPhoneNumber,
+          to: phoneRef.current,
         });
         successfulRequestToast(newRequest);
         form.reset();
