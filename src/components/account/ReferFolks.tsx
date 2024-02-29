@@ -1,9 +1,15 @@
 import type { FormEvent } from "react";
-import { Button } from "../ui/button";
+// import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { useSession } from "next-auth/react";
+import { api } from "@/utils/api";
 
 export default function ReferFolks() {
+  const { data: session } = useSession();
+
+  const { data, isLoading } = api.users.myReferralCode.useQuery();
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -15,32 +21,35 @@ export default function ReferFolks() {
         Refer the folks you know
       </h2>
       <p className="text-md text-primary lg:text-xl">
-        Earn <strong className="text-lg lg:text-2xl">30%</strong> of what we
-        make off everyone you refer
+        Earn{" "}
+        <strong className="text-lg lg:text-2xl">
+          {session?.user.referralTier === "Ambassador" ? "50" : "30"}%
+        </strong>{" "}
+        of what we make off everyone you refer
       </p>
       <div className="flex flex-col space-y-8 rounded-xl bg-white px-8 py-4 shadow-md">
         <form onSubmit={handleSubmit} className="space-y-2">
-          <Label htmlFor="email">Email your friend</Label>
+          {/* <Label htmlFor="email">Email your friend</Label>
 
           <Input
             id="email"
             name="email"
             type="email"
             placeholder="Friend's Email"
-            className=" basis-full"
+            className="basis-full"
           />
           <Button type="submit" className="flex-grow-0">
             Send Invite
           </Button>
 
-          <p className="py-2">or</p>
+          <p className="py-2 text-sm font-semibold">OR</p> */}
 
           <Label htmlFor="referralCode">Share your referral code</Label>
           <Input
             id="referralCode"
             name="referralCode"
             type="text"
-            value="aslkfjqwerq"
+            value={isLoading ? "" : data?.referralCode}
             className="text-muted-foreground"
             disabled
           />
