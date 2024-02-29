@@ -91,8 +91,13 @@ export const usersRouter = createTRPCRouter({
       });
     }
   }),
-  verifyUrlToBeHostUrl: protectedProcedure.mutation(async ({ ctx }) => {
-    if (ctx.user.role === "admin") {
+  verifyUrlToBeHostUrl: protectedProcedure
+    .input(
+      z.object({
+        hostToken: zodString(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
       const payload = {
         email: ctx.user.email,
         id: ctx.user.id,
@@ -106,11 +111,5 @@ export const usersRouter = createTRPCRouter({
       const url = `${env.NEXTAUTH_URL}/auth/signup/?hostToken=${token}`;
 
       return url;
-    } else {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Must be admin to create URL",
-      });
-    }
-  }),
+    }),
 });

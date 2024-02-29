@@ -1,17 +1,17 @@
-import { TRPCError } from "@trpc/server";
-import * as bycrypt from "bcrypt";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
+import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
+import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { referralCodes, users, type User } from "@/server/db/schema";
+import { sendEmail } from "@/server/server-utils";
+import { generateReferralCode } from "@/utils/utils";
+import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
+import { TRPCError } from "@trpc/server";
+import * as bycrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
-import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
-import { generateReferralCode } from "@/utils/utils";
-import { env } from "@/env";
-import { sendEmail } from "@/server/server-utils";
-import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
@@ -21,6 +21,7 @@ export const authRouter = createTRPCRouter({
         email: zodEmail(),
         password: zodPassword(),
         referralCode: z.string().optional(),
+        isVerifiedHostUrl: z.boolean(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -37,6 +38,8 @@ export const authRouter = createTRPCRouter({
 
       const hashedPassword: string = await bycrypt.hash(input.password, 10);
 
+      // TODO: make the sign up flow for host with gmail too
+
       try {
         let user: User | null;
 
@@ -49,6 +52,7 @@ export const authRouter = createTRPCRouter({
               email: input.email,
               // username: input.username,
               password: hashedPassword,
+              role: input.isVerifiedHostUrl ? "host" : "guest",
             })
             .where(eq(users.id, userQueriedWEmail.id))
             .returning()
@@ -63,7 +67,7 @@ export const authRouter = createTRPCRouter({
               email: input.email,
               // username: input.username,
               password: hashedPassword,
-              role: "guest",
+              role: input.isVerifiedHostUrl ? "host" : "guest",
             })
             .returning()
             .then((res) => res[0] ?? null);
@@ -297,5 +301,22 @@ export const authRouter = createTRPCRouter({
       return {
         message: "Password changed successfully",
       };
+    }),
+  verifyHostToken: publicProcedure
+    .input(
+      z.object({
+        token: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET!);
+        return payload;
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid token or user does not exist",
+        });
+      }
     }),
 });
