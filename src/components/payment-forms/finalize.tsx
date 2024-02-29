@@ -1,14 +1,5 @@
-import { render } from "react-dom";
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@radix-ui/react-separator";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 function TripFinalizationCard() {
   return (
