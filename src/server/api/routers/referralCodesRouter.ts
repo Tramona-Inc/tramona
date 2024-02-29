@@ -9,7 +9,7 @@ import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { type Referral } from "@/components/account/cashback/referrals";
+import { referralCashbackSchema } from "@/components/account/cashback/referrals";
 
 export const referralCodesRouter = createTRPCRouter({
   startUsingCode: protectedProcedure
@@ -124,9 +124,14 @@ export const referralCodesRouter = createTRPCRouter({
     if (userReferralCode) {
       const earnings = await ctx.db.query.referralEarnings.findMany({
         with: {
-          refereeId: {
+          referee: {
             columns: {
               name: true,
+            },
+          },
+          offer: {
+            columns: {
+              totalPrice: true,
             },
           },
         },
@@ -137,17 +142,17 @@ export const referralCodesRouter = createTRPCRouter({
     }
   }),
   sendCashbackRequest: protectedProcedure
-    .input(z.object({ transactions: z.string() }))
-    .mutation(async ({ ctx }) => {
+    .input(z.object({ transactions: referralCashbackSchema.array() }))
+    .mutation(async ({ ctx, input }) => {
       const name = ctx.user.name;
 
-      // await sendEmail({
-      //   to: "info@tramona.com",
-      //   subject: `Cashback payout request from ${name}`,
-      //   content: RequestCashback({
-      //     name: name,
-      //     transactions: selectedRows,
-      //   }),
-      // });
+      await sendEmail({
+        to: "info@tramona.com",
+        subject: `Cashback payout request from ${name}`,
+        content: RequestCashback({
+          name: name,
+          transactions: input.transactions,
+        }),
+      });
     }),
 });

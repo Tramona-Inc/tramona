@@ -64,8 +64,12 @@ export const offersRelations = relations(offers, ({ one }) => ({
 }));
 
 export const earningsRelations = relations(referralEarnings, ({ one }) => ({
-  refereeId: one(users, {
+  referee: one(users, {
     fields: [referralEarnings.refereeId],
     references: [users.id],
+  }),
+  offer: one(offers, {
+    fields: [referralEarnings.offerId],
+    references: [offers.id],
   }),
 }));

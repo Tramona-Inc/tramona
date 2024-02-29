@@ -1,14 +1,30 @@
+import { z } from "zod";
+
 export type Referral = {
   id: number;
   referralCode: string;
   createdAt: Date;
-  refereeId: string & {
+  referee: {
     name: string | null;
   };
-  offerId: number;
+  offer: {
+    totalPrice: number;
+  };
   earningStatus: "pending" | "paid" | "cancelled";
   cashbackEarned: number;
 };
+
+export const referralCashbackSchema = z.object({
+  id: z.number().int(),
+  referralCode: z.string(),
+  createdAt: z.date(),
+  referee: z.object({ name: z.string().nullable() }),
+  offer: z.object({ totalPrice: z.number().int().nullable() }),
+  earningStatus: z.enum(["pending", "paid", "cancelled"]),
+  cashbackEarned: z.number(),
+});
+
+export type ReferralCashback = z.infer<typeof referralCashbackSchema>;
 
 // export const referrals: Referral[] = [
 //   {

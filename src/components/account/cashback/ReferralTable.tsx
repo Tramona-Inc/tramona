@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Referral } from "./referrals";
+import type { Referral } from "./referrals";
 import { api } from "@/utils/api";
 
 interface DataTableProps<TData, TValue> {
@@ -68,7 +68,10 @@ export function ReferralTable<TData, TValue>({
   });
 
   const { mutate, isLoading } =
-    api.referralCodes.sendCashbackRequest.useMutation();
+    api.referralCodes.sendCashbackRequest.useMutation({
+      onSuccess: (res) => {},
+      onError: (error) => {},
+    });
 
   return (
     <>
@@ -85,7 +88,7 @@ export function ReferralTable<TData, TValue>({
               .getSelectedRowModel()
               .rows.map((row) => row.original) as Referral[];
 
-            mutate({ transactions: "" });
+            mutate({ transactions: selectedRows });
           }}
         >
           Request cashback
