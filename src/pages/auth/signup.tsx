@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/form";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
@@ -22,7 +23,7 @@ import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -47,6 +48,41 @@ export default function SignUp({
   useRequireNoAuth();
 
   const router = useRouter();
+  const { query } = useRouter();
+
+  const [isVerifiedHostUrl, setIsVerifiedHostUrl] = useState(false);
+
+  const { mutateAsync: verifyHostTokenAsync } =
+    api.auth.verifyHostToken.useMutation({
+      onSuccess: () => {
+        setIsVerifiedHostUrl(true);
+      },
+      onError: () => {
+        toast({
+          description: "Link has expired!",
+          title: "Please contact tramona support to received a new host link.",
+          variant: "destructive",
+        });
+
+        void router.push("/auth/signup");
+      },
+    });
+
+  useEffect(() => {
+    const verifyHostToken = async () => {
+      if (query.hostToken) {
+        try {
+          await verifyHostTokenAsync({
+            token: query.hostToken as string,
+          });
+        } catch (error) {
+          return error;
+        }
+      }
+    };
+
+    void verifyHostToken();
+  }, [verifyHostTokenAsync, query.hostToken]);
 
   useEffect(() => {
     if (typeof router.query.code === "string") {
@@ -61,7 +97,14 @@ export default function SignUp({
   const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
   async function handleSubmit(newUser: FormSchema) {
-    await createUser(newUser)
+    type NewUserAsHost = FormSchema & { isVerifiedHostUrl: boolean };
+
+    const newUserWithHostCheck: NewUserAsHost = {
+      ...newUser,
+      isVerifiedHostUrl: isVerifiedHostUrl,
+    };
+
+    await createUser(newUserWithHostCheck)
       .then(() =>
         router.push({
           pathname: "/auth/verify-email",

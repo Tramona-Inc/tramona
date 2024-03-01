@@ -2,8 +2,11 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { referralCodes, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
+import { env } from "@/env";
 import { generateReferralCode } from "@/utils/utils";
 import { zodEmail, zodString } from "@/utils/zod-utils";
+import { TRPCError } from "@trpc/server";
+import jwt from "jsonwebtoken";
 import { z } from "zod";
 
 export const usersRouter = createTRPCRouter({
@@ -65,5 +68,48 @@ export const usersRouter = createTRPCRouter({
         .returning();
 
       return updatedUser;
+    }),
+  createUrlToBeHost: protectedProcedure.mutation(async ({ ctx }) => {
+    if (ctx.user.role === "admin") {
+      const payload = {
+        email: ctx.user.email,
+        id: ctx.user.id,
+      };
+
+      // Create token
+      const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+        expiresIn: "24h",
+      });
+
+      const url = `${env.NEXTAUTH_URL}/auth/signup/?hostToken=${token}`;
+
+      return url;
+    } else {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Must be admin to create URL",
+      });
+    }
+  }),
+  verifyUrlToBeHostUrl: protectedProcedure
+    .input(
+      z.object({
+        hostToken: zodString(),
+      }),
+    )
+    .mutation(async ({ ctx }) => {
+      const payload = {
+        email: ctx.user.email,
+        id: ctx.user.id,
+      };
+
+      // Create token
+      const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+        expiresIn: "24h",
+      });
+
+      const url = `${env.NEXTAUTH_URL}/auth/signup/?hostToken=${token}`;
+
+      return url;
     }),
 });
