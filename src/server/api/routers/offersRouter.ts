@@ -5,6 +5,7 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
+  groupMembers,
   offerInsertSchema,
   offerSelectSchema,
   offerUpdateSchema,
@@ -16,7 +17,7 @@ import {
 } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNotNull, isNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -29,7 +30,9 @@ export const offersRouter = createTRPCRouter({
           request: {
             columns: { id: true },
             with: {
-              madeByUser: { columns: { id: true } },
+              madeByGroup: {
+                with: { members: { where: eq(groupMembers.isOwner, true) } },
+              },
             },
           },
         },
@@ -42,8 +45,8 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
-      // you can only accept your own offers
-      if (offerDetails.request.madeByUser.id !== ctx.user.id) {
+      // only the owner of the group can accept offers
+      if (offerDetails.request.madeByGroup.members[0]?.userId !== ctx.user.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
         });
@@ -163,7 +166,7 @@ export const offersRouter = createTRPCRouter({
               numGuests: true,
               id: true,
             },
-            with: { madeByUser: { columns: { id: true } } },
+            with: { madeByGroup: { with: { members: true } } },
           },
           property: {
             with: {
@@ -175,7 +178,11 @@ export const offersRouter = createTRPCRouter({
         },
       });
 
-      if (offer?.request.madeByUser.id !== ctx.user.id) {
+      const memberIds = offer?.request.madeByGroup.members.map(
+        (member) => member.userId,
+      );
+
+      if (!memberIds?.includes(ctx.user.id)) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
@@ -229,51 +236,51 @@ export const offersRouter = createTRPCRouter({
     }));
   }),
 
-  getAllOffers: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.offers.findMany({
-      with: {
-        property: {
-          with: {
-            host: { columns: { name: true, email: true, image: true } },
-          },
-          columns: { name: true, originalNightlyPrice: true, imageUrls: true },
-        },
-        request: {
-          columns: {
-            userId: true,
-            checkIn: true,
-            checkOut: true,
-            resolvedAt: true,
-          },
-          with: {
-            madeByUser: { columns: { name: true, image: true } }, // Fetch user name
-          },
-        },
-      },
-      where: and(
-        isNotNull(offers.acceptedAt),
-        isNotNull(offers.paymentIntentId),
-        isNotNull(offers.checkoutSessionId),
-      ),
-      orderBy: desc(offers.createdAt),
-    });
+  // getAllOffers: publicProcedure.query(async ({ ctx }) => {
+  //   return await ctx.db.query.offers.findMany({
+  //     with: {
+  //       property: {
+  //         with: {
+  //           host: { columns: { name: true, email: true, image: true } },
+  //         },
+  //         columns: { name: true, originalNightlyPrice: true, imageUrls: true },
+  //       },
+  //       request: {
+  //         columns: {
+  //           userId: true,
+  //           checkIn: true,
+  //           checkOut: true,
+  //           resolvedAt: true,
+  //         },
+  //         with: {
+  //           madeByUser: { columns: { name: true, image: true } }, // Fetch user name
+  //         },
+  //       },
+  //     },
+  //     where: and(
+  //       isNotNull(offers.acceptedAt),
+  //       isNotNull(offers.paymentIntentId),
+  //       isNotNull(offers.checkoutSessionId),
+  //     ),
+  //     orderBy: desc(offers.createdAt),
+  //   });
 
-    // return await ctx.db.query.requests.findMany({
-    //   with: {
-    //     offers: {
-    //       with: {
-    //         property: {
-    //           with: {
-    //             host: { columns: { name: true, email: true, image: true } },
-    //           },
-    //         },
-    //       },
-    //     },
-    //     madeByUser: { columns: { name: true, image: true } },
-    //   },
-    //   orderBy: desc(requests.createdAt),
-    // });
-  }),
+  // return await ctx.db.query.requests.findMany({
+  //   with: {
+  //     offers: {
+  //       with: {
+  //         property: {
+  //           with: {
+  //             host: { columns: { name: true, email: true, image: true } },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     madeByUser: { columns: { name: true, image: true } },
+  //   },
+  //   orderBy: desc(requests.createdAt),
+  // });
+  // }),
 
   getStripePaymentIntentAndCheckoutSessionId: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
