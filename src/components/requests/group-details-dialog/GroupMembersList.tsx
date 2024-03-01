@@ -28,17 +28,6 @@ export default function GroupMembersList({
     const isYou = userId === member.id;
     const isOwner = member.isGroupOwner;
 
-    const actionBtn = userIsOwner ? (
-      <Button
-        size="icon"
-        variant="ghost"
-        className="rounded-full"
-        tooltip={isYou ? "Leave group" : "Remove from group"}
-      >
-        <LogOutIcon className="size-4" />
-      </Button>
-    ) : null;
-
     return (
       <GroupMember
         key={member.id}
@@ -50,17 +39,31 @@ export default function GroupMembersList({
       >
         {isAdminDashboard || isSingleUser ? null : isYou ? (
           <LeaveGroupDialog groupId={groupId} userIsOwner={userIsOwner}>
-            {actionBtn}
+            <Button
+              size="icon"
+              variant="ghost"
+              className="rounded-full"
+              tooltip="Leave group"
+            >
+              <LogOutIcon className="size-4" />
+            </Button>
           </LeaveGroupDialog>
-        ) : (
+        ) : userIsOwner ? (
           <RemoveFromGroupDialog
             groupId={groupId}
             memberId={member.id}
             memberName={member.name}
           >
-            {actionBtn}
+            <Button
+              size="icon"
+              variant="ghost"
+              className="rounded-full"
+              tooltip="Remove from group"
+            >
+              <LogOutIcon className="size-4" />
+            </Button>
           </RemoveFromGroupDialog>
-        )}
+        ) : null}
       </GroupMember>
     );
   });

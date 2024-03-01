@@ -30,7 +30,12 @@ export function LeaveGroupDialog({
 
     await mutateAsync(groupId)
       .then(() => utils.invalidate())
-      .then(() => toast({ title: "Left group successfully" }))
+      .then(() =>
+        toast({
+          title: "Left group successfully",
+          description: "The request has been removed from your dashboard",
+        }),
+      )
       .catch(() => errorToast());
 
     setLoading(false);

@@ -32,6 +32,8 @@ export function InviteByEmailForm({
   });
   const utils = api.useUtils();
 
+  const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
+
   async function inviteUserByEmail(
     input: Parameters<typeof mutation.mutate>[0],
   ) {
@@ -73,13 +75,25 @@ export function InviteByEmailForm({
           render={({ field }) => (
             <FormItem className="flex-1">
               <FormControl>
-                <Input {...field} autoFocus placeholder="Invite by email" />
+                <Input
+                  {...field}
+                  autoFocus
+                  placeholder={
+                    isEveryoneInvited
+                      ? `Invited ${request.numGuests}/${request.numGuests} people`
+                      : "Invite by email"
+                  }
+                  disabled={isEveryoneInvited}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          disabled={form.formState.isSubmitting || isEveryoneInvited}
+        >
           Invite
         </Button>
       </form>

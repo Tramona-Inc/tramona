@@ -29,9 +29,9 @@ export default function GroupDetailsDialog({
   const userIsOwner = request.groupMembers.some(
     (member) => member.isGroupOwner && member.id === session.user.id,
   );
-
-  const isEveryoneAdded = request.groupMembers.length >= request.numGuests;
-  const isInviteDialog = !isAdminDashboard && userIsOwner && !isEveryoneAdded;
+  const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
+  const isInviteDialog = !isAdminDashboard && userIsOwner && !isEveryoneInvited;
+  const showInviteForm = !isAdminDashboard && userIsOwner; // still show it after everyone is invited, just disabled
   const isSingleUser = request.groupMembers.length === 1;
 
   return (
@@ -55,8 +55,8 @@ export default function GroupDetailsDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          {isInviteDialog && <InviteByEmailForm request={request} />}
-          <div className="space-y-2">
+          {showInviteForm && <InviteByEmailForm request={request} />}
+          <div className="min-h-64 space-y-2">
             {!isSingleUser && (
               <p className="text-sm font-semibold uppercase text-muted-foreground">
                 Current group members ({request.groupMembers.length})

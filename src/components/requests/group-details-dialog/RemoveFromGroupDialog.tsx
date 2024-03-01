@@ -37,7 +37,7 @@ export function RemoveFromGroupDialog({
       .then(() => utils.invalidate())
       .then(() =>
         toast({
-          title: `Removed ${memberName ?? "member"} from the group successfully`,
+          title: `Successfully removed ${memberName ?? "member"} from the group`,
         }),
       )
       .catch(() => errorToast());

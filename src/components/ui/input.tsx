@@ -31,7 +31,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref,
   ) => {
     const inputClassNames =
-      "flex h-10 w-full rounded-md appearance-none border border-input outline-transparent outline bg-primary-foreground py-2 text-sm text-black file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-auto";
+      "flex h-10 w-full rounded-md appearance-none border border-input outline-transparent outline bg-primary-foreground py-2 text-sm text-black file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed";
 
     const [prefixRef, { width: prefixWidth }] = useMeasure();
     const [suffixRef, { width: suffixWidth }] = useMeasure();

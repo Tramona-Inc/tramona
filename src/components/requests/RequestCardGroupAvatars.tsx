@@ -19,9 +19,10 @@ export default function RequestGroupAvatars({
     (member) => member.id === session.user.id && member.isGroupOwner,
   );
 
-  const isEveryoneAdded = request.groupMembers.length >= request.numGuests;
-  const showPlus = userIsOwner && !isAdminDashboard && !isEveryoneAdded;
+  const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
+  const showPlus = userIsOwner && !isAdminDashboard && !isEveryoneInvited;
   const isSingleUser = request.groupMembers.length === 1;
+  const isInviteDialog = !isAdminDashboard && userIsOwner && !isEveryoneInvited;
 
   return (
     <GroupDetailsDialog request={request} isAdminDashboard={isAdminDashboard}>
@@ -29,9 +30,9 @@ export default function RequestGroupAvatars({
         variant="wrapper"
         className="-space-x-2"
         tooltip={
-          isAdminDashboard || isEveryoneAdded
-            ? `View ${isSingleUser ? "user" : "group"} details`
-            : "Invite people"
+          isInviteDialog
+            ? "Invite people"
+            : `View ${isSingleUser ? "user" : "group"} details`
         }
       >
         {request.groupMembers.map((member) => (
