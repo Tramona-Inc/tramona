@@ -81,7 +81,7 @@ export const usersRouter = createTRPCRouter({
         expiresIn: "24h",
       });
 
-      const url = `${env.NEXTAUTH_URL}/auth/signup/?hostToken=${token}`;
+      const url = `${env.NEXTAUTH_URL}/auth/signup/host?token=${token}`;
 
       return url;
     } else {
@@ -91,25 +91,4 @@ export const usersRouter = createTRPCRouter({
       });
     }
   }),
-  verifyUrlToBeHostUrl: protectedProcedure
-    .input(
-      z.object({
-        hostToken: zodString(),
-      }),
-    )
-    .mutation(async ({ ctx }) => {
-      const payload = {
-        email: ctx.user.email,
-        id: ctx.user.id,
-      };
-
-      // Create token
-      const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
-        expiresIn: "24h",
-      });
-
-      const url = `${env.NEXTAUTH_URL}/auth/signup/?hostToken=${token}`;
-
-      return url;
-    }),
 });

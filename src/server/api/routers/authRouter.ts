@@ -21,6 +21,103 @@ export const authRouter = createTRPCRouter({
         email: zodEmail(),
         password: zodPassword(),
         referralCode: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const userQueriedWEmail = await ctx.db.query.users.findFirst({
+        where: eq(users.email, input.email),
+      });
+
+      if (userQueriedWEmail?.emailVerified) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User with this email already exists",
+        });
+      }
+
+      const hashedPassword: string = await bycrypt.hash(input.password, 10);
+
+      try {
+        let user: User | null;
+
+        // Users signed up but didn't verify email
+        if (userQueriedWEmail?.emailVerified === null) {
+          user = await ctx.db
+            .update(users)
+            .set({
+              name: input.name,
+              email: input.email,
+              password: hashedPassword,
+            })
+            .where(eq(users.id, userQueriedWEmail.id))
+            .returning()
+            .then((res) => res[0] ?? null);
+        } else {
+          // Initial sign up insert the user info
+          user = await ctx.db
+            .insert(users)
+            .values({
+              id: crypto.randomUUID(),
+              name: input.name,
+              email: input.email,
+              password: hashedPassword,
+            })
+            .returning()
+            .then((res) => res[0] ?? null);
+
+          if (user) {
+            // Create referral code
+            await ctx.db.insert(referralCodes).values({
+              ownerId: user.id,
+              referralCode: generateReferralCode(),
+            });
+
+            // Link user account
+            await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
+              provider: "credentials",
+              providerAccountId: user.id,
+              userId: user.id,
+              type: "email",
+            });
+          }
+        }
+
+        // Send email verification token
+        if (user) {
+          const payload = {
+            email: user.email,
+            id: user.id,
+          };
+
+          // Create token
+          const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+            expiresIn: "30m",
+          });
+
+          const url = `${env.NEXTAUTH_URL}/auth/verifying-email?id=${user.id}&token=${token}`;
+
+          await sendEmail({
+            to: input.email,
+            subject: "Verify Email | Tramona",
+            content: VerifyEmailLink({ url, name: user.name ?? user.email }),
+          });
+        }
+
+        return user;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
+  createUserHost: publicProcedure
+    .input(
+      z.object({
+        name: zodString({ minLen: 2 }),
+        email: zodEmail(),
+        password: zodPassword(),
+        referralCode: z.string().optional(),
         isVerifiedHostUrl: z.boolean(),
       }),
     )
@@ -50,7 +147,6 @@ export const authRouter = createTRPCRouter({
             .set({
               name: input.name,
               email: input.email,
-              // username: input.username,
               password: hashedPassword,
               role: input.isVerifiedHostUrl ? "host" : "guest",
             })
@@ -65,7 +161,6 @@ export const authRouter = createTRPCRouter({
               id: crypto.randomUUID(),
               name: input.name,
               email: input.email,
-              // username: input.username,
               password: hashedPassword,
               role: input.isVerifiedHostUrl ? "host" : "guest",
             })
