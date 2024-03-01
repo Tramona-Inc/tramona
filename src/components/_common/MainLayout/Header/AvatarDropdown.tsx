@@ -25,13 +25,14 @@ import {
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
 import UserAvatar from "../../UserAvatar";
+import { Button } from "@/components/ui/button";
 
 function DropdownTop({ session }: { session: Session }) {
   const title = session.user.name ?? session.user.email ?? "Anonymous";
   const subtitle = session.user.name ? session.user.email : null;
 
   return (
-    <div className="flex items-center gap-2 pb-1 pl-3">
+    <div className="flex items-center gap-2 pb-1 pl-3 font-medium">
       <UserAvatar {...session.user} />
       <div className="flex-1 -space-y-1">
         <div className="font-medium">
@@ -92,14 +93,16 @@ function DropdownLink({
 export default function AvatarDropdown({ session }: { session: Session }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="focus:outline-none">
-        <UserAvatar
-          name={session.user.name}
-          email={session.user.email}
-          image={session.user.image}
-        />
+      <DropdownMenuTrigger asChild>
+        <Button variant="wrapper">
+          <UserAvatar
+            name={session.user.name}
+            email={session.user.email}
+            image={session.user.image}
+          />
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 py-4 font-medium">
+      <DropdownMenuContent align="end" className="w-80">
         <DropdownTop session={session} />
         <DropdownMenuSeparator />
         {session.user.role === "admin" && (
