@@ -38,6 +38,7 @@ const TooltipContent = React.forwardRef<
   <TooltipPrimitive.Content
     ref={ref}
     sideOffset={sideOffset}
+    collisionPadding={8}
     className={tooltipVariants({ variant, size, className })}
     {...props}
   />
