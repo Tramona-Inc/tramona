@@ -10,7 +10,7 @@ import { offers } from "./tables/offers";
 import { properties } from "./tables/properties";
 import { requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
-import { groupMembers, groups } from "./tables/groups";
+import { groupInvites, groupMembers, groups } from "./tables/groups";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -110,6 +110,7 @@ export const conversationParticipantsRelations = relations(
 
 export const groupsRelations = relations(groups, ({ many }) => ({
   members: many(groupMembers),
+  invites: many(groupInvites),
   requests: many(requests),
 }));
 
@@ -121,5 +122,12 @@ export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
   user: one(users, {
     fields: [groupMembers.userId],
     references: [users.id],
+  }),
+}));
+
+export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupInvites.groupId],
+    references: [groups.id],
   }),
 }));

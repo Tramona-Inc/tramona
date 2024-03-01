@@ -5,6 +5,7 @@ import {
   primaryKey,
   serial,
   text,
+  timestamp,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
@@ -33,5 +34,19 @@ export const groupMembers = pgTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.groupId, vt.userId] }),
+  }),
+);
+
+export const groupInvites = pgTable(
+  "group_invites",
+  {
+    groupId: integer("group_id")
+      .notNull()
+      .references(() => groups.id),
+    inviteeEmail: text("invitee_email").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey({ columns: [vt.groupId, vt.inviteeEmail] }),
   }),
 );
