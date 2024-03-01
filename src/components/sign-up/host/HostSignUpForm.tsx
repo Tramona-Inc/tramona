@@ -57,6 +57,8 @@ export default function HostSignUpForm() {
 
   const [isVerifiedHostUrl, setIsVerifiedHostUrl] = useState(false);
 
+  const { mutateAsync: mutateSendOTP } = api.twilio.sendOTP.useMutation();
+
   const { mutateAsync: verifyHostTokenAsync } =
     api.auth.verifyHostToken.useMutation({
       onSuccess: () => {
@@ -104,25 +106,34 @@ export default function HostSignUpForm() {
 
   async function handleSubmit(newUser: FormSchema) {
     if (query.token === undefined) {
-      errorToast("Invalid url or expired!");
+      errorToast("Invalid or expired url to be host!");
 
       void router.push("/auth/signup");
     } else {
       console.log(newUser);
 
-      type NewUserAsHost = FormSchema & { isVerifiedHostUrl: boolean };
-
-      const newUserWithHostCheck: NewUserAsHost = {
-        ...newUser,
+      const newUserWithHostCheck = {
+        email: newUser.email,
+        name: newUser.name,
+        password: newUser.password,
+        confirm: newUser.confirm,
+        isAirbnb: newUser.isAirbnb,
+        profileLink: newUser.profileLink,
         isVerifiedHostUrl: isVerifiedHostUrl,
       };
 
       await createUser(newUserWithHostCheck)
         .then(() =>
+          // Verify Phone number first before addingin to db
+          mutateSendOTP({
+            to: "+1" + newUser.phoneNumber,
+          }),
+        )
+        .then(() =>
           router.push({
-            pathname: "/auth/verify-email",
+            pathname: "/auth/verify-sms",
             query: {
-              phone: newUser.phoneNumber,
+              phone: "+1" + newUser.phoneNumber,
               email: newUser.email,
             },
           }),
