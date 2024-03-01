@@ -33,7 +33,7 @@ export default function Page() {
         <div className="px-4 py-16">
           <div className="mx-auto max-w-xl">
             {request ? (
-              <RequestCard withUser request={request} />
+              <RequestCard isAdminDashboard request={request} />
             ) : (
               <Card className="h-56" />
             )}
