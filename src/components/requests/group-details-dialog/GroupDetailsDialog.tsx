@@ -14,6 +14,7 @@ import { useSession } from "next-auth/react";
 import React from "react";
 import GroupMembersList from "./GroupMembersList";
 import { InviteByEmailForm } from "./InviteByEmailForm";
+import GroupInviteesList from "./GroupInviteesList";
 
 export default function GroupDetailsDialog({
   children,
@@ -56,7 +57,7 @@ export default function GroupDetailsDialog({
 
         <div className="space-y-4">
           {showInviteForm && <InviteByEmailForm request={request} />}
-          <div className="min-h-52 space-y-2">
+          <div className="min-h-28 space-y-2">
             {!isSingleUser && (
               <p className="text-sm font-semibold uppercase text-muted-foreground">
                 Current group members ({request.groupMembers.length})
@@ -67,6 +68,18 @@ export default function GroupDetailsDialog({
               userId={session.user.id}
               isAdminDashboard={isAdminDashboard}
             />
+            {!isAdminDashboard && request.groupInvites.length > 0 && (
+              <>
+                <p className="text-sm font-semibold uppercase text-muted-foreground">
+                  Pending invites ({request.groupInvites.length})
+                </p>
+                <GroupInviteesList
+                  request={request}
+                  userId={session.user.id}
+                  isAdminDashboard={isAdminDashboard}
+                />
+              </>
+            )}
           </div>
         </div>
         {isAdminDashboard && (

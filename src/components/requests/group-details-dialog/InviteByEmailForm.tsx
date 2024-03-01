@@ -54,11 +54,18 @@ export function InviteByEmailForm({
       email,
       groupId: request.madeByGroupId,
     })
-      .then(({ inviteeName }) => {
-        toast({
-          title: `Successfully added ${inviteeName ?? "member"} to the group`,
-        }),
-          form.reset();
+      .then(({ status, inviteeName }) => {
+        if (status === "sent invite") {
+          toast({
+            title: `Emailed an invite to ${email}`,
+            description: "The invite will expire in 24 hours",
+          });
+        } else if (status === "added user") {
+          toast({
+            title: `Successfully added ${inviteeName ?? "member"} to the group`,
+          });
+        }
+        form.reset();
       })
       .catch((err: string) => {
         form.setError("email", { message: err });

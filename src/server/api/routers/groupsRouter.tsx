@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { and, eq } from "drizzle-orm";
-import { groupMembers, groups, users } from "@/server/db/schema";
+import { groupInvites, groupMembers, groups, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
+import { add } from "date-fns";
+import { sendEmail } from "@/server/server-utils";
 
 export const groupsRouter = createTRPCRouter({
   inviteUserByEmail: protectedProcedure
@@ -25,7 +27,36 @@ export const groupsRouter = createTRPCRouter({
       });
 
       if (!invitee) {
-        throw new TRPCError({ code: "NOT_FOUND" });
+        await ctx.db
+          .insert(groupInvites)
+          .values({
+            expiresAt: add(new Date(), { hours: 24 }),
+            groupId: input.groupId,
+            inviteeEmail: input.email,
+          })
+
+          // instead of making a new invite, just extend the expiration date of the existing one
+          .onConflictDoUpdate({
+            target: [groupInvites.groupId, groupInvites.inviteeEmail],
+            set: {
+              expiresAt: add(new Date(), { hours: 24 }),
+            },
+          });
+
+        await sendEmail({
+          to: input.email,
+          subject: "You've been invited to a request on Tramona",
+          content: (
+            <>
+              {ctx.user.name ?? ctx.user.email ?? "An anonymous user"} invited
+              you to their request on Tramona. Sign up at
+              https://tramona.com/auth/signup with this email to be added to the
+              group!
+            </>
+          ),
+        });
+
+        return { status: "sent invite" as const };
       }
 
       await ctx.db
@@ -45,7 +76,7 @@ export const groupsRouter = createTRPCRouter({
           }
         });
 
-      return { inviteeName: invitee.name };
+      return { status: "added user" as const, inviteeName: invitee.name };
     }),
 
   inviteUserById: protectedProcedure

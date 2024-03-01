@@ -50,6 +50,7 @@ export const requestsRouter = createTRPCRouter({
                   },
                 },
               },
+              invites: true,
             },
           },
         },
@@ -60,7 +61,7 @@ export const requestsRouter = createTRPCRouter({
         res
           .map((groupMember) => {
             const {
-              group: { requests, members },
+              group: { requests, members, invites },
             } = groupMember;
 
             return requests.map((request) => ({
@@ -69,6 +70,7 @@ export const requestsRouter = createTRPCRouter({
                 ...member.user,
                 isGroupOwner: member.isOwner,
               })),
+              groupInvites: invites,
             }));
           })
           .flat(1),
@@ -138,6 +140,7 @@ export const requestsRouter = createTRPCRouter({
                   },
                 },
               },
+              invites: true,
             },
           },
           offers: { columns: { id: true } },
@@ -156,6 +159,7 @@ export const requestsRouter = createTRPCRouter({
                 ...member.user,
                 isGroupOwner: member.isOwner,
               })),
+              groupInvites: madeByGroup.invites,
             };
           })
           .sort(
