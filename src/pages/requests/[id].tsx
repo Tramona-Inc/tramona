@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { getNumNights } from "@/utils/utils";
 import PaywallDialog from "@/components/requests/[id]/PaywallDialog";
-import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
+import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog copy";
 
 export default function Page() {
   const router = useRouter();
