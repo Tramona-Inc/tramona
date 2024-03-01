@@ -13,16 +13,22 @@ import {
   DrawerPortal,
   DrawerTitle,
   DrawerTrigger,
+  NestedDrawer,
 } from "./drawer";
 
 // const Dialog = DialogPrimitive.Root;
 
-function Dialog(
-  props: React.ComponentProps<typeof DialogPrimitive.Root> &
-    React.ComponentProps<typeof Drawer>,
-) {
+function Dialog({
+  nested = false,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Root> &
+  React.ComponentProps<typeof Drawer> & {
+    nested?: boolean;
+  }) {
   return useIsDesktop() ? (
     <DialogPrimitive.Root {...props} />
+  ) : nested ? (
+    <NestedDrawer {...props} />
   ) : (
     <Drawer {...props} />
   );
@@ -104,6 +110,7 @@ const DialogContent = React.forwardRef<
             "relative w-full max-w-xl rounded-xl border bg-background p-6 shadow-lg outline-none duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             className,
           )}
+          onCloseAutoFocus={(e) => e.preventDefault()}
           {...props}
         >
           <div className="space-y-4">{children}</div>
@@ -170,7 +177,7 @@ const DialogDescription = React.forwardRef<
   useIsDesktop() ? (
     <DialogPrimitive.Description
       ref={ref}
-      className={cn("text-muted-foreground", className)}
+      className={cn("leading-tight text-muted-foreground", className)}
       {...props}
     />
   ) : (
