@@ -10,16 +10,17 @@ import { offers } from "./tables/offers";
 import { properties } from "./tables/properties";
 import { requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
+import { groupMembers, groups } from "./tables/groups";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
   referralCode: one(referralCodes), // the one they own, not the one used at signup
   propertiesOwned: many(properties),
-  requestsMade: many(requests),
   referralEarnings: many(referralEarnings),
   messages: many(messages),
   conversations: many(conversationParticipants),
+  groups: many(groupMembers),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -52,9 +53,9 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
-  madeByUser: one(users, {
-    fields: [requests.userId],
-    references: [users.id],
+  madeByGroup: one(groups, {
+    fields: [requests.madeByGroupId],
+    references: [groups.id],
   }),
   offers: many(offers),
 }));
@@ -106,3 +107,19 @@ export const conversationParticipantsRelations = relations(
     }),
   }),
 );
+
+export const groupsRelations = relations(groups, ({ many }) => ({
+  members: many(groupMembers),
+  requests: many(requests),
+}));
+
+export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupMembers.groupId],
+    references: [groups.id],
+  }),
+  user: one(users, {
+    fields: [groupMembers.userId],
+    references: [users.id],
+  }),
+}));

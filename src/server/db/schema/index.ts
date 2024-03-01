@@ -7,3 +7,4 @@ export * from "./tables/offers";
 export * from "./tables/properties";
 export * from "./tables/requests";
 export * from "./tables/users";
+export * from "./tables/groups";

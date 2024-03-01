@@ -4,19 +4,21 @@ import {
   integer,
   pgTable,
   smallint,
-  text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { users } from "./users";
 import { propertyTypeEnum } from "./properties";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { groups } from "./groups";
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
-  userId: text("user_id")
+
+  // im avoiding calling this groupId because were gonna add groups of requests in the future
+  madeByGroupId: integer("made_by_group_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    // for this onDelete cascade to do anything, well need to delete groups with no members
+    .references(() => groups.id, { onDelete: "cascade" }),
   maxTotalPrice: integer("max_total_price").notNull(), // in cents
   location: varchar("location", { length: 255 }).notNull(), // TODO: use postGIS
   checkIn: date("check_in", { mode: "date" }).notNull(),
