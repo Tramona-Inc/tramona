@@ -10,7 +10,7 @@ const Tooltip = TooltipPrimitive.Root;
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
 const tooltipVariants = cva(
-  "z-50 font-semibold overflow-hidden pointer-events-none rounded-md shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+  "z-[100] font-medium overflow-hidden pointer-events-none shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
   {
     variants: {
       variant: {
@@ -18,14 +18,14 @@ const tooltipVariants = cva(
         inverted: "bg-background text-foreground",
       },
       size: {
-        default: "px-3 py-1.5 text-sm",
-        sm: "px-2 py-1 text-xs",
-        lg: "px-4 py-2 text-base",
+        sm: "px-2 py-1 text-xs rounded-sm",
+        md: "px-3 py-1.5 text-sm rounded",
+        lg: "px-4 py-2 text-base rounded-md",
       },
     },
     defaultVariants: {
       variant: "default",
-      size: "default",
+      size: "sm",
     },
   },
 );
