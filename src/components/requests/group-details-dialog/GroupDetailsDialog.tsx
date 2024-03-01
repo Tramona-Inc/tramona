@@ -56,7 +56,7 @@ export default function GroupDetailsDialog({
 
         <div className="space-y-4">
           {showInviteForm && <InviteByEmailForm request={request} />}
-          <div className="min-h-64 space-y-2">
+          <div className="min-h-52 space-y-2">
             {!isSingleUser && (
               <p className="text-sm font-semibold uppercase text-muted-foreground">
                 Current group members ({request.groupMembers.length})
