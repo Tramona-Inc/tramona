@@ -67,6 +67,8 @@ export default function SignUp({
       .catch(() => errorToast("Couldn't sign up, please try again"));
   }
 
+  // TODO: Refactor later to separted form into its own component
+
   return (
     <>
       <Head>
