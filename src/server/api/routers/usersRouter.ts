@@ -1,8 +1,13 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { referralCodes, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
+import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
 import { zodEmail, zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
@@ -91,4 +96,17 @@ export const usersRouter = createTRPCRouter({
       });
     }
   }),
+  insertPhoneWithEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string(),
+        phone: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await db
+        .update(users)
+        .set({ phoneNumber: input.phone })
+        .where(eq(users.email, input.email))
+    }),
 });

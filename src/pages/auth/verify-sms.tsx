@@ -11,26 +11,44 @@ export default function Page() {
 
   const { phone, email } = router.query;
 
-  const { mutateAsync } = api.twilio.verifyOTP.useMutation({
-    onSuccess: () => {
-      void router.push({
-        pathname: "/auth/verify-sms",
-        query: {
-          email: email,
-        },
-      });
-    },
-    onError: () => {
-      setCode("");
-      errorToast("Wrong code");
-    },
-  });
+  const { mutateAsync: mutateVerifyOTP } = api.twilio.verifyOTP.useMutation();
+  const { mutateAsync: mutateInsertPhone } =
+    api.users.insertPhoneWithEmail.useMutation();
 
   useEffect(() => {
-    if (code.length === 6 && phone) {
-      // Verify Code
-      void mutateAsync({ to: phone as string, code: code });
-    }
+    const verifyCode = async () => {
+      if (code.length === 6 && phone) {
+        // Verify Code
+        const verifyOTPResponse = await mutateVerifyOTP({
+          to: phone as string,
+          code: code,
+        });
+
+        const { status } = verifyOTPResponse; // pending | approved | canceled
+
+        if (status !== "approved") {
+          errorToast("Incorrect code!");
+          return;
+        } else {
+          // insert email
+          if (email && phone) {
+            void mutateInsertPhone({
+              email: email as string,
+              phone: phone as string,
+            });
+          }
+
+          void router.push({
+            pathname: "/auth/verify-email",
+            query: {
+              email: email,
+            },
+          });
+        }
+      }
+    };
+
+    void verifyCode(); // Call the asynchronous function here
   }, [code]);
 
   return (
