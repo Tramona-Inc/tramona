@@ -57,19 +57,21 @@ export default function GroupDetailsDialog({
 
         <div className="space-y-4">
           {showInviteForm && <InviteByEmailForm request={request} />}
-          <div className="min-h-28 space-y-2">
-            {!isSingleUser && (
-              <p className="text-sm font-semibold uppercase text-muted-foreground">
-                Current group members ({request.groupMembers.length})
-              </p>
-            )}
-            <GroupMembersList
-              request={request}
-              userId={session.user.id}
-              isAdminDashboard={isAdminDashboard}
-            />
+          <div className="min-h-28 space-y-4">
+            <div className="space-y-1">
+              {request.numGuests > 1 && (
+                <p className="text-sm font-semibold uppercase text-muted-foreground">
+                  Current group members ({request.groupMembers.length})
+                </p>
+              )}
+              <GroupMembersList
+                request={request}
+                userId={session.user.id}
+                isAdminDashboard={isAdminDashboard}
+              />
+            </div>
             {!isAdminDashboard && request.groupInvites.length > 0 && (
-              <>
+              <div className="space-y-1">
                 <p className="text-sm font-semibold uppercase text-muted-foreground">
                   Pending invites ({request.groupInvites.length})
                 </p>
@@ -78,7 +80,7 @@ export default function GroupDetailsDialog({
                   userId={session.user.id}
                   isAdminDashboard={isAdminDashboard}
                 />
-              </>
+              </div>
             )}
           </div>
         </div>

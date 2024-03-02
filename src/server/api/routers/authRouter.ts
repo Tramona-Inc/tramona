@@ -10,7 +10,7 @@ import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
 import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
 import { generateReferralCode } from "@/utils/utils";
 import { env } from "@/env";
-import { sendEmail } from "@/server/server-utils";
+import { addUserToGroups, sendEmail } from "@/server/server-utils";
 import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 
 export const authRouter = createTRPCRouter({
@@ -69,19 +69,26 @@ export const authRouter = createTRPCRouter({
             .then((res) => res[0] ?? null);
 
           if (user) {
-            // Create referral code
-            await ctx.db.insert(referralCodes).values({
-              ownerId: user.id,
-              referralCode: generateReferralCode(),
-            });
+            await Promise.all([
+              // Create referral code
+              ctx.db
+                .insert(referralCodes)
+                .values({
+                  ownerId: user.id,
+                  referralCode: generateReferralCode(),
+                })
+                .onConflictDoNothing(),
 
-            // Link user account
-            await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
-              provider: "credentials",
-              providerAccountId: user.id,
-              userId: user.id,
-              type: "email",
-            });
+              // Link user account
+              CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
+                provider: "credentials",
+                providerAccountId: user.id,
+                userId: user.id,
+                type: "email",
+              }),
+
+              addUserToGroups(user),
+            ]);
           }
         }
 

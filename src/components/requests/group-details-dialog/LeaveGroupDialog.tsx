@@ -48,8 +48,8 @@ export function LeaveGroupDialog({
         <DialogHeader>
           <DialogTitle>Are you sure you want to leave this group?</DialogTitle>
           <DialogDescription>
-            This will remove the request from your dashboard{" "}
-            {userIsOwner && <>and transfer ownership to someone else</>}. This
+            This will remove the request from your dashboard
+            {userIsOwner && <> and transfer ownership to someone else</>}. This
             action cannot be undone.
           </DialogDescription>
         </DialogHeader>
