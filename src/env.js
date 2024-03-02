@@ -43,6 +43,7 @@ export const env = createEnv({
     TWILIO_FROM: z.string(),
     SENDGRID_API_KEY: z.string(),
     SENDGRID_FROM: z.string(),
+    TRAMONA_ADMIN_USER_ID: z.string(),
   },
 
   /**
@@ -54,6 +55,8 @@ export const env = createEnv({
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
     NEXT_PUBLIC_GOOGLE_PLACES_KEY: z.string(),
+    NEXT_PUBLIC_SUPABASE_URL: z.string(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
   },
 
   /**
@@ -87,6 +90,9 @@ export const env = createEnv({
     TWILIO_FROM: process.env.TWILIO_FROM,
     SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
     SENDGRID_FROM: process.env.SENDGRID_FROM,
+    TRAMONA_ADMIN_USER_ID: process.env.TRAMONA_ADMIN_USER_ID,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

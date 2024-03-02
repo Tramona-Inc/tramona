@@ -6,6 +6,7 @@ import {
 } from "@/server/api/trpc";
 import { zodString } from "@/utils/zod-utils";
 import { MailService } from "@sendgrid/mail";
+import { TRPCError } from "@trpc/server";
 import { Twilio } from "twilio";
 import {
   type ServiceInstance,
@@ -103,13 +104,20 @@ export const twilioRouter = createTRPCRouter({
 
       const { sid } = service;
 
-      const verificationCheck = await twilio.verify.v2
-        .services(sid)
-        .verificationChecks.create({
-          to,
-          code,
-        });
+      try {
+        const verificationCheck = await twilio.verify.v2
+          .services(sid)
+          .verificationChecks.create({
+            to,
+            code,
+          });
 
-      return verificationCheck;
+        return verificationCheck;
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User with this email already exists",
+        });
+      }
     }),
 });
