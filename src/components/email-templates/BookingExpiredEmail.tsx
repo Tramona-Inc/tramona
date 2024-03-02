@@ -20,11 +20,11 @@ interface BookingExpiredEmailProps {
   originalPrice: number;
   tramonaPrice: number;
   description: string;
-  image_link: string;
-  trip_detail_link: string;
+  imageLink: string;
+  tripDetailLink: string;
 }
 
-export const BookingExpiredEmail = ({
+export function BookingExpiredEmail({
   userName = "User",
   offerPrice = 100,
   checkIn = "January 24",
@@ -33,38 +33,34 @@ export const BookingExpiredEmail = ({
   description = "Private Cozy Clean, close to EVERYTHING",
   originalPrice = 220,
   tramonaPrice = 110,
-  image_link = "https://via.placeholder.com/600x300?text=Offer+Image+Here&bg=cccccc",
-  trip_detail_link = "https://www.tramona.com/",
-}: BookingExpiredEmailProps) => {
+  imageLink = "https://via.placeholder.com/600x300?text=Offer+Image+Here&bg=cccccc",
+  tripDetailLink = "https://www.tramona.com/"
+}: BookingExpiredEmailProps) {
   return (
     <Layout title_preview="Booking Expired">
       <Header title="Booking Expired" />
       <Text className="text-left text-base px-6 text-brand">
-        Hello, {userName}. Your offer for ${offerPrice} on {checkIn} -{" "}
-        {checkOut} at {location} has been removed.
+        Hello, {userName}. Your offer for ${offerPrice} on {checkIn} - {checkOut} at {location} has been removed.
       </Text>
-      <Section
-        className="flex justify-center px-6 pb-6"
-        style={{ width: "100%" }}
-      >
+      <Section className="flex justify-center px-6 pb-6" style={{ width: "100%" }}>
         <BookingCard
           checkIn={checkIn}
           checkOut={checkOut}
           originalPrice={originalPrice}
           tramonaPrice={tramonaPrice}
           description={description}
-          property_image_link={image_link}
+          property_image_link={imageLink}
           isExpired={true}
-          booking_link={trip_detail_link}
+          booking_link={tripDetailLink}
         />
       </Section>
-      <CustomButton link={trip_detail_link} title="View trip detail" />
+      <CustomButton link={tripDetailLink} title="View trip detail" />
       <BottomHr />
       <SocialLinks />
       <Footer />
       <Info />
     </Layout>
   );
-};
+}
 
 export default BookingExpiredEmail;

@@ -2,7 +2,7 @@ import React from "react";
 import { Layout, Header, Footer, SocialLinks, Info, BottomHr, CustomButton } from "./EmailComponents";
 import { Text } from "@react-email/components";
 
-export function PasswordResetEmailLink({
+export default function PasswordResetEmailLink({
   name,
   url,
 }: {
@@ -13,7 +13,7 @@ export function PasswordResetEmailLink({
     <Layout title_preview="Reset Your Password">
       <Header title="Reset Your Password" />
       <div className="pt-2" style={{ textAlign: "center" }}>
-        <div className="inline-block w-11/12 mx-auto">
+        <div className="text-left text-base px-6 text-brand">
           <Text className="text-4xl font-bold text-left text-brand">{name ? `Hi ${name},` : ''}</Text>
           <Text className="text-brand text-left">Please click on the following link to reset your password</Text>
           <Text className="text-brand">
@@ -23,7 +23,7 @@ export function PasswordResetEmailLink({
           </Text>
         </div>
         <CustomButton link={url} title="Reset Password" />
-        <div className="inline-block w-11/12 mx-auto">
+        <div className="text-left text-base px-6 text-brand">
         <Text className="text-brand text-left">
         If you did not request this, please ignore this email and your password will remain unchanged.
         </Text>
@@ -38,4 +38,3 @@ export function PasswordResetEmailLink({
     </Layout>
   );
 }
-

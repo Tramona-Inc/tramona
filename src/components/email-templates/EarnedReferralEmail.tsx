@@ -15,16 +15,16 @@ interface EarnedReferralEmailProps {
   earnedAmount: number;
   totalEarnedAmount: number;
   referralCode: string;
-  deal_link: string;
+  dealLink: string;
 }
 
-export const EarnedReferralEmail = ({
+export function EarnedReferralEmail({
   userName = "User",
   earnedAmount = 50,
   totalEarnedAmount = 500,
   referralCode = "AH123",
-  deal_link = "https://www.tramona.com/",
-}: EarnedReferralEmailProps) => {
+  dealLink = "https://www.tramona.com/"
+}: EarnedReferralEmailProps) {
   return (
     <Layout title_preview="Money earned from a referral">
       <Header title="Money earned from a referral" />
@@ -49,6 +49,7 @@ export const EarnedReferralEmail = ({
           <Text className="text-sm font-semibold text-brand">Total earned</Text>
         </div>
       </Section>
+
       <Section className="text-center my-4">
         <div className="bg-lightgrey inline-block py-3 w-11/12 mx-auto">
           <Text className="text-base text-brand">
@@ -68,15 +69,14 @@ export const EarnedReferralEmail = ({
           </div>
         </div>
       </Section>
-      <CustomButton link={deal_link} title="View deal" />
+
+      <CustomButton link={dealLink} title="View deal" />
       <BottomHr />
       <SocialLinks />
       <Footer />
       <Info />
     </Layout>
   );
-};
+}
 
 export default EarnedReferralEmail;
-
-  
