@@ -11,7 +11,7 @@ import {
 } from "./EmailComponents";
 import React from "react";
 
-export function TramonaWelcomeEmail({}) {
+export function TramonaWelcomeEmail() {
   return (
     <Layout title_preview="Welcome to Tramona">
       <Header title="Welcome to Tramona" />

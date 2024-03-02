@@ -2,7 +2,7 @@ import React from "react";
 import { Layout, Header, Footer, SocialLinks, Info, BottomHr, CustomButton } from "./EmailComponents";
 import { Text } from "@react-email/components";
 
-export default function VerifyEmailLink({
+export function VerifyEmailLink({
   name,
   url,
 }: {

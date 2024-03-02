@@ -32,5 +32,3 @@ export function InvitedToRequestNotificationEmail({
     </Layout>
   );
 }
-
-export default InvitedToRequestNotificationEmail;

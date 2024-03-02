@@ -62,5 +62,3 @@ export function BookingExpiredEmail({
     </Layout>
   );
 }
-
-export default BookingExpiredEmail;

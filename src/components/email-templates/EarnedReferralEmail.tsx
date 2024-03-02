@@ -78,5 +78,3 @@ export function EarnedReferralEmail({
     </Layout>
   );
 }
-
-export default EarnedReferralEmail;

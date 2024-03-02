@@ -65,5 +65,3 @@ export function BookingConfirmationEmail({
     </Layout>
   );
 }
-
-export default BookingConfirmationEmail;
