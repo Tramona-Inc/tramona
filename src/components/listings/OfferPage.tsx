@@ -268,7 +268,8 @@ export default function OfferPage({
         <div className="border-y-2 py-5">
           <h1 className="text-xl font-bold">Where you&apos;ll be</h1>
           <div className="py-3">
-            {/* <img src={property.imageUrls[1]!} alt="" /> image will go here*/}
+            <img src={property.mapScreenshot ?? undefined} alt="" />
+            <p>{property.mapScreenshot}</p>
           </div>
           <h3 className="font-semibold">Area Description</h3>
           <p>{property.areaDescription}</p>

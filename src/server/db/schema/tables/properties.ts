@@ -106,6 +106,7 @@ export const properties = pgTable(
       .notNull(),
     about: text("about").notNull(),
     areaDescription: text("area_description"),
+    mapScreenshot: text("map_screenshot"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
