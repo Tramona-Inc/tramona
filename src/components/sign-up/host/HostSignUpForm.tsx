@@ -110,8 +110,6 @@ export default function HostSignUpForm() {
 
       void router.push("/auth/signup");
     } else {
-      console.log(query.conversationId);
-
       const newUserWithHostCheck = {
         email: newUser.email,
         name: newUser.name,
