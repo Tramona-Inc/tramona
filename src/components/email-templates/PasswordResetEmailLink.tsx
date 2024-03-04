@@ -1,4 +1,4 @@
-import { Layout, Header, CustomButton } from "./EmailComponents";
+import { Layout, CustomButton } from "./EmailComponents";
 import { Text } from "@react-email/components";
 
 export function PasswordResetEmailLink({
