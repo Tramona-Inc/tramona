@@ -102,15 +102,15 @@ export default function HostSignUpForm() {
     resolver: zodResolver(formSchema),
   });
 
-  const { mutateAsync: createUser } = api.auth.createUser.useMutation();
+  const { mutateAsync: createUserHost } = api.auth.createUserHost.useMutation();
 
   async function handleSubmit(newUser: FormSchema) {
-    if (query.token === undefined) {
+    if (query.token === undefined && query.conversationId === undefined) {
       errorToast("Invalid or expired url to be host!");
 
       void router.push("/auth/signup");
     } else {
-      console.log(newUser);
+      console.log(query.conversationId);
 
       const newUserWithHostCheck = {
         email: newUser.email,
@@ -119,16 +119,18 @@ export default function HostSignUpForm() {
         confirm: newUser.confirm,
         isAirbnb: newUser.isAirbnb,
         profileLink: newUser.profileLink,
+        conversationId: query.conversationId as string,
         isVerifiedHostUrl: isVerifiedHostUrl,
       };
 
-      await createUser(newUserWithHostCheck)
+      await createUserHost(newUserWithHostCheck)
         .then(() =>
           // Verify Phone number first before addingin to db
           mutateSendOTP({
             to: "+1" + newUser.phoneNumber,
           }),
         )
+        // will redirect to page that updates user phone number
         .then(() =>
           router.push({
             pathname: "/auth/verify-sms",

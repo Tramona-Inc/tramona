@@ -7,11 +7,19 @@ export default function VerifyEmail() {
 
   const id = router.query.id as string;
   const token = router.query.token as string;
+  const conversationId = router.query.conversationId as string;
+  const userId = router.query.userId as string;
 
   const date = useMemo(() => new Date(), []); // useMemo from React
 
+  const mutationConversation = api.messages.addUserToConversation.useMutation();
+
   const mutation = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
+      if (conversationId && userId) {
+        void mutationConversation.mutateAsync({ userId, conversationId });
+      }
+
       void router.push({
         pathname: "/auth/signin",
         query: { isNewUser: true, isVerified: true },
@@ -23,7 +31,6 @@ export default function VerifyEmail() {
     if (id && token) {
       mutation.mutate({ id: id, token: token, date: date });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, token]);
 
   return (
