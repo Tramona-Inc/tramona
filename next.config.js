@@ -71,6 +71,10 @@ const config = {
         protocol: "https",
         hostname: "www.killingtongroup.com",
       },
+      {
+        protocol: "https",
+        hostname: "tramona-map-screenshots.s3.amazonaws.com",
+      },
     ],
   },
   experimental: {

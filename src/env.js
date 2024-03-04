@@ -51,6 +51,10 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: z.string(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
     NEXT_PUBLIC_GOOGLE_PLACES_KEY: z.string(),
+    NEXT_PUBLIC_AWS_ACCESS_KEY_ID: z.string(),
+    NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY: z.string(),
+    NEXT_PUBLIC_REGION: z.string(),
+    NEXT_PUBLIC_MAP_SCREENSHOTS_BUCKET_NAME: z.string(),
   },
 
   /**
@@ -81,6 +85,12 @@ export const env = createEnv({
     FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_AWS_ACCESS_KEY_ID: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+    NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY:
+      process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    NEXT_PUBLIC_REGION: process.env.NEXT_PUBLIC_REGION,
+    NEXT_PUBLIC_MAP_SCREENSHOTS_BUCKET_NAME:
+      process.env.NEXT_PUBLIC_MAP_SCREENSHOTS_BUCKET_NAME,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

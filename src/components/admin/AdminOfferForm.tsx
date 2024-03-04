@@ -43,15 +43,7 @@ import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
-import { s3 } from "@/utils/aws";
-import {
-  PutObjectAclCommandInput,
-  PutObjectCommand,
-  PutObjectCommandInput,
-  S3Client,
-  S3ClientConfig,
-} from "@aws-sdk/client-s3";
-import { fileURLToPath } from "url";
+import uploadObjectToS3 from "@/utils/s3";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -149,6 +141,7 @@ export default function AdminOfferForm({
   const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
+    const url = await uploadObjectToS3(file);
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
     // const totalPrice = offeredPriceUSD * 100;
@@ -161,6 +154,7 @@ export default function AdminOfferForm({
       originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
+      mapScreenshot: url,
     };
 
     // if offer wasnt null then this is an "update offer" form
@@ -215,8 +209,6 @@ export default function AdminOfferForm({
       checkOut: request.checkOut,
       isUpdate: !!offer,
     });
-
-    await uploadObjectToS3();
   }
 
   const defaultNightlyPrice = 0;
@@ -226,56 +218,7 @@ export default function AdminOfferForm({
   );
 
   const totalPrice = nightlyPrice * numberOfNights;
-
-  const [file, setFile] = useState<any>(null);
-
-  const onFileChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const selectedFile = event.currentTarget.files?.[0];
-    setFile(selectedFile ?? null);
-  };
-
-  console.log(file);
-  console.log(file.url);
-
-  // const configuration: S3ClientConfig = {region: 'us-east-1'}
-  // const client = new S3Client(configuration);
-
-  // const uploadObjectToS3 = async () => {
-  //   const params = {
-  //     Bucket: 'tramona-uploader',
-  //     Key: file.name,
-  //     Body: fileURLToPath
-  //   }
-
-  //   try {
-  //     const command = new PutObjectCommand(params);
-  //     const response = await client.send(command);
-  //     console.log("Upload successful:", response);
-  //   } catch (error) {
-  //     console.error("Error uploading object:", error);
-  //   }
-  // };
-
-  // const uploadImage = async (event: React.FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault();
-  //   if (!file) return;
-  //   const {url, fields}: {url:string, fields: any} = await createPresignedUrl() as any
-  //   const data = {
-  //     ...fields,
-  //     'Content-Type': file.type,
-  //     file
-  //   }
-  //   const formData = new FormData()
-  //   for (const name in data) {
-  //     formData.append(name, data[name])
-  //   }
-  //   await fetch(url, {
-  //     method: 'POST',
-  //     body: formData,
-  //   })
-  // }
-
-  // s3.upload(file)
+  const [file, setFile] = useState<File | null>(null);
 
   return (
     <Form {...form}>
@@ -581,7 +524,15 @@ export default function AdminOfferForm({
             <FormItem className="col-span-full">
               <FormLabel>Screenshot of Map</FormLabel>
               <FormControl>
-                <Input {...field} type="file" onChange={onFileChange} />
+                <Input
+                  {...field}
+                  type="file"
+                  onChange={(event) => {
+                    const selectedFile = event.target.files?.[0];
+                    setFile(selectedFile ?? null);
+                    field.onChange(event);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
