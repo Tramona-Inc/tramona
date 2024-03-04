@@ -1,12 +1,10 @@
-import Head from "next/head";
-import { useState } from "react";
-
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import { type AppRouter } from "@/server/api/root";
-import { api } from "@/utils/api";
 import { type inferRouterOutputs } from "@trpc/server";
-import { useSession } from 'next-auth/react';
+import { useSession } from "next-auth/react";
+import Head from "next/head";
+import { useState } from "react";
 
 export type Conversation =
   inferRouterOutputs<AppRouter>["messages"]["getConversations"][number];
@@ -17,15 +15,12 @@ export type Conversations =
 export default function MessagePage() {
   useSession({ required: true });
 
-
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
 
   const selectConversation = (conversation: Conversation | null) => {
     setSelectedConversation(conversation);
   };
-
-  const { data: conversations } = api.messages.getConversations.useQuery();
 
   return (
     <>
@@ -35,7 +30,6 @@ export default function MessagePage() {
 
       <div className="grid h-[calc(100vh-5em)] grid-cols-1 bg-white md:grid-cols-6">
         <MessagesSidebar
-          conversations={conversations ?? []}
           selectedConversation={selectedConversation}
           setSelected={selectConversation}
         />

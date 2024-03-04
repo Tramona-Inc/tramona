@@ -3,7 +3,6 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
 import { zodString } from "@/utils/zod-utils";
-import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { conversations } from "./../../db/schema/tables/messages";
@@ -115,16 +114,16 @@ export const messagesRouter = createTRPCRouter({
   getConversations: protectedProcedure.query(async ({ ctx }) => {
     const result = await fetchUsersConversations(ctx.user.id);
 
-    if (!result) {
-      throw new TRPCError({ code: "NOT_FOUND" });
+    if (result) {
+      return result.conversations.map(({ conversation }) => ({
+        ...conversation,
+        participants: conversation.participants
+          .filter((p) => p.user.id !== ctx.user.id)
+          .map((p) => p.user),
+      }));
     }
 
-    return result.conversations.map(({ conversation }) => ({
-      ...conversation,
-      participants: conversation.participants
-        .filter((p) => p.user.id !== ctx.user.id)
-        .map((p) => p.user),
-    }));
+    return [];
   }),
 
   checkAdminConversation: protectedProcedure.mutation(async ({ ctx }) => {

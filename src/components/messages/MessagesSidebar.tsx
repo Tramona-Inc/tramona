@@ -1,4 +1,4 @@
-import { Conversation } from "@/pages/messages";
+import { type Conversation } from "@/pages/messages";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
@@ -91,7 +91,7 @@ export default function MessagesSidebar({
           </p>
         )
       ) : (
-        <div className='flex flex-col items-center justify-center'>
+        <div className="flex flex-col items-center justify-center">
           <Icons.loading />
         </div>
       )}
