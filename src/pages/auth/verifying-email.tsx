@@ -12,12 +12,17 @@ export default function VerifyEmail() {
 
   const date = useMemo(() => new Date(), []); // useMemo from React
 
-  const mutationConversation = api.messages.addUserToConversation.useMutation();
+  const { mutateAsync: addUserToConversation } =
+    api.messages.addUserToConversation.useMutation();
 
-  const mutation = api.auth.verifyEmailToken.useMutation({
+  const {
+    mutate: verifyEmailToken,
+    isLoading,
+    error,
+  } = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
       if (conversationId && userId) {
-        void mutationConversation.mutateAsync({ userId, conversationId });
+        void addUserToConversation({ userId, conversationId });
       }
 
       void router.push({
@@ -29,16 +34,16 @@ export default function VerifyEmail() {
 
   useEffect(() => {
     if (id && token) {
-      mutation.mutate({ id: id, token: token, date: date });
+      verifyEmailToken({ id: id, token: token, date: date });
     }
   }, [id, token]);
 
   return (
     <main className="flex h-screen flex-col items-center justify-center">
-      {mutation.isLoading && (
+      {isLoading && (
         <p className="text-muted-foreground">Verifying your email...</p>
       )}
-      {mutation.error && (
+      {error && (
         <p className="text-muted-foreground">
           Something went wrong, please try signing up again
         </p>
