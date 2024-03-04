@@ -1,6 +1,7 @@
 import { type Conversation, type Conversations } from "@/pages/messages";
 
 import { cn } from "@/utils/utils";
+import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 
 export function MessageConversation({
@@ -12,11 +13,13 @@ export function MessageConversation({
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {
-  const { participants, messages } = conversation;
+  const { participants, messages, id } = conversation;
 
   const displayParticipants = participants
     .map((participant) => participant.name)
     .join(", ");
+
+  const { data: session } = useSession();
 
   return (
     <div
@@ -37,6 +40,12 @@ export function MessageConversation({
         <p className="line-clamp-1 text-sm text-muted-foreground">
           {messages[0]?.message ?? ""}
         </p>
+        {session?.user.role === "admin"}{" "}
+        {
+          <p className="line-clamp-1 text-sm uppercase text-muted-foreground">
+            Conversation Id: {id}
+          </p>
+        }
       </div>
     </div>
   );
