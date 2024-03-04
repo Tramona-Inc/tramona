@@ -117,12 +117,24 @@ export const messagesRouter = createTRPCRouter({
     const result = await fetchUsersConversations(ctx.user.id);
 
     if (result) {
-      return result.conversations.map(({ conversation }) => ({
-        ...conversation,
-        participants: conversation.participants
-          .filter((p) => p.user.id !== ctx.user.id)
-          .map((p) => p.user),
-      }));
+      const orderedConversations = result.conversations.map(
+        ({ conversation }) => ({
+          ...conversation,
+          participants: conversation.participants
+            .filter((p) => p.user.id !== ctx.user.id)
+            .map((p) => p.user),
+        }),
+      );
+
+      // Order conversations by the createdAt of the newest message in descending order
+      orderedConversations.sort((a, b) => {
+        const aLatestMessageDate = a.messages[0]?.createdAt ?? new Date(0);
+        const bLatestMessageDate = b.messages[0]?.createdAt ?? new Date(0);
+
+        return bLatestMessageDate.getTime() - aLatestMessageDate.getTime();
+      });
+
+      return orderedConversations;
     }
 
     return [];
