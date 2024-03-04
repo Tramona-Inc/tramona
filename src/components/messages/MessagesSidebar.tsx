@@ -1,8 +1,9 @@
-import { type Conversation, type Conversations } from "@/pages/messages";
-
+import { Conversation } from "@/pages/messages";
+import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
+import { Icons } from "../_icons/icons";
 
 export function MessageConversation({
   conversation,
@@ -52,16 +53,17 @@ export function MessageConversation({
 }
 
 export type SidebarProps = {
-  conversations: Conversations;
   selectedConversation: Conversation | null;
   setSelected: (arg0: Conversation) => void;
 };
 
 export default function MessagesSidebar({
-  conversations,
   selectedConversation,
   setSelected,
 }: SidebarProps) {
+  const { data: conversations, isLoading } =
+    api.messages.getConversations.useQuery();
+
   return (
     <div
       className={cn(
@@ -73,17 +75,25 @@ export default function MessagesSidebar({
         Messages
       </h1>
 
-      {conversations.length > 0 ? (
-        conversations.map((conversation) => (
-          <MessageConversation
-            key={conversation.id}
-            conversation={conversation}
-            isSelected={selectedConversation?.id === conversation.id}
-            setSelected={setSelected}
-          />
-        ))
+      {!isLoading ? (
+        conversations && conversations.length > 0 ? (
+          conversations.map((conversation) => (
+            <MessageConversation
+              key={conversation.id}
+              conversation={conversation}
+              isSelected={selectedConversation?.id === conversation.id}
+              setSelected={setSelected}
+            />
+          ))
+        ) : (
+          <p className="p-4 text-muted-foreground lg:p-8">
+            No messages to show!
+          </p>
+        )
       ) : (
-        <p className="p-4 text-muted-foreground lg:p-8">No messages to show!</p>
+        <div className='flex flex-col items-center justify-center'>
+          <Icons.loading />
+        </div>
       )}
     </div>
   );
