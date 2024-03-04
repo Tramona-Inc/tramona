@@ -103,10 +103,10 @@ export const usersRouter = createTRPCRouter({
         phone: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       return await db
         .update(users)
         .set({ phoneNumber: input.phone })
-        .where(eq(users.email, input.email))
+        .where(eq(users.email, input.email));
     }),
 });
