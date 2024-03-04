@@ -1,5 +1,5 @@
 import { type AppRouter } from "@/server/api/root";
-import { MessageType } from "@/server/db/schema";
+import { type MessageType } from "@/server/db/schema";
 import { type inferRouterOutputs } from "@trpc/server";
 
 import { create } from "zustand";
@@ -19,7 +19,7 @@ type ConversationListState = {
   ) => void;
 };
 
-export const useConversation = create<ConversationListState>((set, get) => ({
+export const useConversation = create<ConversationListState>((set) => ({
   conversationList: [],
   setConversationList: (conversationList: Conversations | []) => {
     set(() => ({ conversationList }));

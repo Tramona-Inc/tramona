@@ -43,7 +43,7 @@ export function MessageConversation({
       <div className="ml-4 md:ml-2">
         <h1 className="text-xl font-bold">{displayParticipants}</h1>
         <p className="line-clamp-1 text-sm text-muted-foreground">
-          {messages[0]?.userId === session?.user.id && "You: "} 
+          {messages[0]?.userId === session?.user.id && "You: "}
           {messages[0]?.message ?? ""}
         </p>
         {session?.user.role === "admin" && (
@@ -82,8 +82,6 @@ export default function MessagesSidebar({
       setHasFetched(true); // Mark as fetched
     }
   }, [fetchedConversations, setConversationList, hasFetched]);
-
-  console.log(conversations);
 
   return (
     <div
