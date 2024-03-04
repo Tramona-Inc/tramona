@@ -30,7 +30,7 @@ export function BookingConfirmationEmail({
   tripDetailLink = "https://www.tramona.com/",
 }: BookingConfirmationEmailProps) {
   return (
-    <Layout title_preview="Booking confirmation/Payment received">
+    <Layout title="Booking confirmation/Payment received">
       <Text className="text-brand px-6 text-left text-base">
         Hello, {userName}. Your booking to {placeName} has been confirmed.
         Congrats and enjoy!

@@ -23,7 +23,7 @@ export function BookingAddedNotificationEmail({
   tripDetailLink = "https://www.tramona.com/",
 }: BookingAddedNotificationEmailProps) {
   return (
-    <Layout title_preview="Your friend just added you to this booking">
+    <Layout title="Your friend just added you to this booking">
       <Text className="text-brand px-6 text-left text-base">
         Hello! You just got added to a booking by {userName}.
       </Text>

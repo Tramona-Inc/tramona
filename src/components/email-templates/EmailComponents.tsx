@@ -18,7 +18,7 @@ import { ReactNode } from "react";
 
 interface LayoutProps {
   children: ReactNode;
-  title_preview: string;
+  title: string;
 }
 
 interface HeaderProps {
@@ -85,10 +85,10 @@ const main = {
   background: "#FFFFF",
 };
 
-export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   return (
     <Html>
-      <Preview className="text-brand">{title_preview}</Preview>
+      <Preview className="text-brand">{title}</Preview>
       <Tailwind
         config={{
           theme: {
@@ -111,7 +111,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
         <Head />
         <Body className="font-sans text-base" style={main}>
           <Container className="bg-white" style={{ backgroundColor: "white" }}>
-            <Header title={title_preview} />
+            <Header title={title} />
             {children}
             <BottomHr />
             <SocialLinks />

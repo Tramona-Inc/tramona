@@ -31,7 +31,7 @@ export function PendingOfferEmail({
   offerLink = "https://www.tramona.com/",
 }: PendingOfferEmailProps) {
   return (
-    <Layout title_preview="Pending offer (Come book)">
+    <Layout title="Pending offer (Come book)">
       <Text className="text-brand px-6 text-left text-base">
         You just got an offer. Click here to check it out.
       </Text>
