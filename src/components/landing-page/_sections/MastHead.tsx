@@ -19,7 +19,6 @@ export default function MastHead() {
     <>
       <section className="relative flex min-h-[calc(100vh-4rem)] flex-col justify-center">
         <LandingVideo />
-        <div className="absolute inset-0 bg-black/60" />
         <div className="z-10 flex flex-col justify-center gap-4 p-4">
           <div className="mx-auto max-w-3xl space-y-4">
             <h1 className="text-center text-3xl font-bold text-white md:text-6xl">
