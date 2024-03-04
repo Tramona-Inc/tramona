@@ -8,6 +8,7 @@ import FeedLanding from "../FeedLanding";
 // import { useEffect, useState } from 'react';
 import dynamic from "next/dynamic";
 import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
+import NewRequestForm from "@/components/requests/NewRequestForm";
 
 const LandingVideo = dynamic(
   () => import("@/components/landing-page/LandingVideo"),
@@ -31,7 +32,8 @@ export default function MastHead() {
             </p>
           </div>
           <div className="mx-auto w-full max-w-5xl">
-            <DesktopSearchBar />
+            {/* <DesktopSearchBar /> */}
+            <NewRequestForm />
           </div>
         </div>
       </section>

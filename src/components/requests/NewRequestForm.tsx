@@ -86,7 +86,7 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
-  const { status } = useSession();
+  const { status, data, update } = useSession();
 
   const isDesktop = useIsDesktop();
 
@@ -127,9 +127,14 @@ export default function NewRequestForm({
 
   const [verified, setVerified] = useState<boolean>(false);
 
-  const verifiedRef = useRef<boolean>(verified);
+  const { data: number } = api.users.myPhoneNumber.useQuery();
+
+  const verifiedRef = useRef(verified);
+  const phoneRef = useRef(toPhoneNumber);
 
   const waitForVerification = async () => {
+    console.log(verifiedRef.current);
+    console.log(verified);
     return new Promise<void>((resolve) => {
       if (verifiedRef.current) {
         resolve();
@@ -150,8 +155,18 @@ export default function NewRequestForm({
     verifiedRef.current = verified;
   }, [verified]);
 
+  useEffect(() => {
+    if (number) {
+      phoneRef.current = number;
+      verifiedRef.current = true;
+    }
+  }, [number]);
+
   async function onSubmit(data: FormSchema) {
-    setOpen(true);
+    if (!phoneRef.current) {
+      setOpen(true);
+    }
+
     await waitForVerification();
     setOpen(false);
 
@@ -179,11 +194,16 @@ export default function NewRequestForm({
         await createRequestsMutation.mutateAsync(newRequest).catch(() => {
           throw new Error();
         });
+        await utils.requests.invalidate();
+        await utils.users.invalidate();
+
+        while (!phoneRef.current) {
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+        }
         await smsMutation.mutateAsync({
           msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-          to: formatPhoneNumber(toPhoneNumber),
+          to: phoneRef.current,
         });
-        await utils.requests.invalidate();
         successfulRequestToast(newRequest);
         form.reset();
       } catch (e) {
@@ -283,16 +303,16 @@ export default function NewRequestForm({
           </ErrorMsg>
         </FormItem>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <Button
-            disabled={form.formState.isSubmitting}
-            size="lg"
-            type="submit"
-            className="col-span-full"
-          >
-            Request Deal
-          </Button>
+        <Button
+          //disabled={form.formState.isSubmitting}
+          size="lg"
+          type="submit"
+          className="col-span-full"
+        >
+          Request Deal
+        </Button>
 
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Phone number verification</DialogTitle>
@@ -316,6 +336,7 @@ export default function NewRequestForm({
               <OTPDialog
                 toPhoneNumber={formatPhoneNumber(toPhoneNumber)}
                 setVerified={setVerified}
+                setPhoneNumber={setToPhoneNumber}
               />
             </DialogFooter>
           </DialogContent>

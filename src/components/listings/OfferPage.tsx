@@ -16,14 +16,14 @@ import { api } from "@/utils/api";
 import {
   cn,
   formatCurrency,
-  formatDateRange,
+  formatDateMonthDay,
   getDiscountPercentage,
   getNumNights,
-  plural,
+  getTramonaFeeTotal,
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { type inferRouterOutputs } from "@trpc/server";
-import { CalendarIcon, CheckIcon, UsersIcon, XIcon } from "lucide-react";
+import { CheckIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
@@ -63,8 +63,16 @@ export default function OfferPage({
     offerNightlyPrice,
   );
 
-  const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-  const fmtdNumGuests = plural(request.numGuests, "guest");
+  const checkInDate = formatDateMonthDay(request.checkIn);
+  const checkOutDate = formatDateMonthDay(request.checkOut);
+  const numNights = getNumNights(request.checkIn, request.checkOut);
+
+  const originalTotal = property.originalNightlyPrice * numNights;
+
+  const tramonaServiceFee = getTramonaFeeTotal(
+    originalTotal - offer.totalPrice,
+  );
+  const tax = (offer.totalPrice + tramonaServiceFee) * 0.0725;
 
   return (
     <div className="space-y-4">
@@ -172,30 +180,53 @@ export default function OfferPage({
             </div>
           </section>
         </div>
-        <Card className="flex-1">
-          <div className="space-y-4 text-muted-foreground">
-            <div className="-space-y-1">
-              <p className="text-sm line-through">
-                {formatCurrency(property.originalNightlyPrice)}/night
-              </p>
-              <p>
-                <span className="text-4xl font-extrabold tracking-tight text-primary">
-                  {formatCurrency(offerNightlyPrice)}
-                </span>
-                /night ({discountPercentage}% off)
-              </p>
+        <div className="flex-1">
+          <div className="rounded-t-lg bg-black py-2 text-center font-bold text-white">
+            {discountPercentage}% OFF
+          </div>
+          <Card className="rounded-t-none">
+            <Card>
+              <div className="flex justify-around">
+                <div>
+                  <p>Check-in</p>
+                  <p className="font-bold">{checkInDate}</p>
+                </div>
+                <div>
+                  <p>Check-out</p>
+                  <p className="font-bold">{checkOutDate}</p>
+                </div>
+              </div>
+            </Card>
+            <div className="space-y-4 border-y py-4 text-muted-foreground">
+              <p className="text-xl font-bold text-black">Price Details</p>
+              <div className="-space-y-1 text-black">
+                <div className="flex justify-between py-2">
+                  <p className="underline">
+                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
+                    nights
+                  </p>
+                  <div className="flex">
+                    <p className="text-zinc-400 line-through">
+                      {formatCurrency(originalTotal)}
+                    </p>
+                    <p className="ms-1">{formatCurrency(offer.totalPrice)}</p>
+                  </div>
+                </div>
+                <div className="flex justify-between py-2">
+                  <p className="underline">Tramona service fee</p>
+                  <p>{formatCurrency(tramonaServiceFee)}</p>
+                </div>
+                <div className="flex justify-between py-2">
+                  <p className="underline">Taxes</p>
+                  <p>{formatCurrency(tax)}</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-extrabold text-black">Total Price</h1>
-              <p className="text-2xl text-primary">
-                {formatCurrency(offer.totalPrice)}
+            <div className="flex justify-between py-2">
+              <p className="underline">Total (USD)</p>
+              <p className="font-bold">
+                {formatCurrency(offer.totalPrice + tramonaServiceFee + tax)}
               </p>
-            </div>
-            <div className="flex items-center gap-1">
-              <CalendarIcon className="size-4" />
-              <p className="mr-3">{fmtdDateRange}</p>
-              <UsersIcon className="size-4" />
-              <p>{fmtdNumGuests}</p>
             </div>
             {!isLoading ? (
               <HowToBookDialog
@@ -212,15 +243,26 @@ export default function OfferPage({
                 offerNightlyPrice={offerNightlyPrice}
                 isAirbnb={isAirbnb}
               >
-                <Button size="lg" className="w-full">
-                  {isBooked ? "Booked ✓" : "Book Now"}
+                <Button
+                  size="lg"
+                  className="w-full rounded-full"
+                  disabled={isBooked}
+                >
+                  {isBooked ? (
+                    <>
+                      <CheckIcon className="size-5" />
+                      Booked
+                    </>
+                  ) : (
+                    <>Confirm Booking</>
+                  )}
                 </Button>
               </HowToBookDialog>
             ) : (
               <Spinner />
             )}
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );

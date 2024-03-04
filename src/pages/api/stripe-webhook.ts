@@ -1,10 +1,14 @@
 import { env } from "@/env";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
-import { offers, referralEarnings, requests, users } from "@/server/db/schema";
-import { api } from "@/utils/api";
-import { formatPhoneNumber } from "@/utils/formatters";
-import { eq } from "drizzle-orm";
+import {
+  offers,
+  referralCodes,
+  referralEarnings,
+  requests,
+  users,
+} from "@/server/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 
@@ -99,6 +103,14 @@ export default async function webhook(
           await db
             .insert(referralEarnings)
             .values({ offerId, cashbackEarned, refereeId, referralCode });
+
+          await db
+            .update(referralCodes)
+            .set({
+              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${cashbackEarned}`,
+              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
+            })
+            .where(eq(referralCodes.referralCode, referralCode));
         }
 
         break;

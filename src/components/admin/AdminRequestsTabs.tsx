@@ -24,7 +24,13 @@ function IncomingRequestCards({
               Delete
             </Button>
           </DeleteRequestDialog>
-          <RejectRequestDialog requestId={request.id}>
+          <RejectRequestDialog
+            requestId={request.id}
+            requestCheckIn={request.checkIn}
+            requestCheckOut={request.checkOut}
+            userPhoneNumber={request.madeByUser.phoneNumber!}
+            location={request.location}
+          >
             <Button className="rounded-full" variant="outline">
               Reject
             </Button>

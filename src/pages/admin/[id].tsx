@@ -24,6 +24,8 @@ export default function Page() {
 
   const request = requests?.pastRequests.find(({ id }) => id === requestId);
 
+  const offerCount = offers?.length;
+
   return (
     <>
       <div className="relative">
@@ -58,15 +60,17 @@ export default function Page() {
                   key={offer.id}
                   offer={offer}
                   requestId={requestId}
-                  checkIn={request.checkIn}
-                  checkOut={request.checkOut}
+                  checkIn={request.checkIn} checkOut={request.checkOut}
                 >
                   <RevokeOfferDialog
-                    requestCreatedAt={request.createdAt}
+                    requestId={request.id}
+                    requestCheckIn={request.checkIn}
+                    requestCheckOut={request.checkOut}
                     offerId={offer.id}
                     propertyAddress={offer.property.address!}
                     userPhoneNumber={request.madeByUser.phoneNumber!}
                     propertyName={offer.property.name}
+                    offerCount={offerCount!}
                   >
                     <Button variant="outline" className="rounded-full">
                       Revoke offer

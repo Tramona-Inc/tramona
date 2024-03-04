@@ -12,20 +12,27 @@ import { Button } from "../ui/button";
 import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import { env } from "@/env";
+
 
 export default function RevokeOfferDialog(
   props: PropsWithChildren<{
-    requestCreatedAt: Date;
+    requestId: number,
+    requestCheckIn: Date;
+    requestCheckOut: Date;
     propertyName: string;
     propertyAddress: string;
     userPhoneNumber: string;
     offerId: number;
+    offerCount: number;
   }>,
 ) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
   const mutation = api.offers.delete.useMutation();
+  const twilioMutation = api.twilio.sendSMS.useMutation();
+
 
   async function deleteOffer() {
     await mutation
@@ -34,6 +41,32 @@ export default function RevokeOfferDialog(
       .then(() => toast({ title: "Sucessfully revoked offer" }))
       .catch(() => errorToast())
       .finally(() => setIsOpen(false));
+
+      const formattedCheckIn = new Date(props.requestCheckIn).toLocaleDateString('en-US', {
+        month: 'short', // Short month name (e.g., "Feb")
+        day: '2-digit', // Two-digit day (e.g., "27")
+        year: 'numeric', // Full year (e.g., "2024")
+      });
+
+      const formattedCheckOut = new Date(props.requestCheckOut).toLocaleDateString('en-US', {
+        month: 'short', 
+        day: '2-digit',
+        year: 'numeric',
+      });
+      const url = `${env.NEXTAUTH_URL}/requests/${props.requestId}`
+
+
+      props.offerCount >= 2 ?
+        await twilioMutation.mutateAsync({
+          to: props.userPhoneNumber,
+          msg: `Tramona: Hello, your ${props.propertyName} in ${props.propertyAddress} offer from ${formattedCheckIn} - ${formattedCheckOut} has expired. Please visit the following URL in your browser to view your other offers: ${url}`,
+        })
+        :
+        await twilioMutation.mutateAsync({
+          to: props.userPhoneNumber,
+          msg: `Tramona: Hello, your ${props.propertyName} in ${props.propertyAddress} offer from ${formattedCheckIn} - ${formattedCheckOut} has expired.`,
+        })
+
   }
 
   return (
@@ -44,13 +77,6 @@ export default function RevokeOfferDialog(
           <DialogTitle>Are you sure you want to revoke this offer?</DialogTitle>
           <DialogDescription>This can not be undone.</DialogDescription>
         </DialogHeader>
-        {JSON.stringify({
-          requestCreatedAt: props.requestCreatedAt,
-          propertyName: props.propertyName,
-          propertyAddress: props.propertyAddress,
-          userPhoneNumber: props.userPhoneNumber,
-          offerId: props.offerId,
-        })}
         <DialogFooter>
           <Button
             onClick={() => setIsOpen(false)}
