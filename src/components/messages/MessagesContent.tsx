@@ -1,4 +1,4 @@
-import { type Conversation } from "@/pages/messages";
+import { type Conversation } from '@/utils/store/conversations';
 import { cn } from "@/utils/utils";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";

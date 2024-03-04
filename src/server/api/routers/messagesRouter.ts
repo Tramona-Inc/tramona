@@ -10,13 +10,16 @@ import { protectedProcedure } from "./../trpc";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
 
-async function fetchUsersConversations(userId: string) {
+export async function fetchUsersConversations(userId: string) {
   return await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: {},
     with: {
       conversations: {
         columns: {},
+        orderBy: (conversations, { desc }) => [
+          desc(conversations.conversationId),
+        ],
         with: {
           conversation: {
             with: {
@@ -58,7 +61,6 @@ async function fetchConversationWithAdmin(userId: string) {
                     columns: {
                       id: true,
                       name: true,
-                      email: true,
                       image: true,
                     },
                   },

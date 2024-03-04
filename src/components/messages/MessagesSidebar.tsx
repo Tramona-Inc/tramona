@@ -1,7 +1,11 @@
-import { type Conversation } from "@/pages/messages";
 import { api } from "@/utils/api";
+import {
+  useConversation,
+  type Conversation,
+} from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import UserAvatar from "../_common/UserAvatar";
 import { Icons } from "../_icons/icons";
 
@@ -61,8 +65,25 @@ export default function MessagesSidebar({
   selectedConversation,
   setSelected,
 }: SidebarProps) {
-  const { data: conversations, isLoading } =
+  const [hasFetched, setHasFetched] = useState(false);
+  const { data: fetchedConversations, isLoading } =
     api.messages.getConversations.useQuery();
+
+  const conversations = useConversation((state) => state.conversationList);
+
+  const setConversationList = useConversation(
+    (state) => state.setConversationList,
+  );
+
+  useEffect(() => {
+    // Check if data has been fetched and hasn't been processed yet
+    if (fetchedConversations && !hasFetched) {
+      setConversationList(fetchedConversations);
+      setHasFetched(true); // Mark as fetched
+    }
+  }, [fetchedConversations, setConversationList, hasFetched]);
+
+  console.log(conversations);
 
   return (
     <div
