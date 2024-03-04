@@ -1,12 +1,7 @@
 import { Section, Text } from "@react-email/components";
-import * as React from "react";
 import {
   Layout,
   Header,
-  Footer,
-  SocialLinks,
-  Info,
-  BottomHr,
   CustomButton,
   EmailConfirmationCard,
 } from "./EmailComponents";
@@ -32,16 +27,19 @@ export function BookingConfirmationEmail({
   endDate = "Nov 11, 2024",
   address = "101 Street Planet Earth",
   propertyImageLink = "https://via.placeholder.com/600x300",
-  tripDetailLink = "https://www.tramona.com/"
+  tripDetailLink = "https://www.tramona.com/",
 }: BookingConfirmationEmailProps) {
   return (
     <Layout title_preview="Booking confirmation/Payment received">
       <Header title="Booking Confirmation/Payment Received" />
-      <Text className="text-left text-base px-6 text-brand">
+      <Text className="text-brand px-6 text-left text-base">
         Hello, {userName}. Your booking to {placeName} has been confirmed.
         Congrats and enjoy!
       </Text>
-      <Section className="flex justify-center px-6 pb-6" style={{ width: "100%" }}>
+      <Section
+        className="flex justify-center px-6 pb-6"
+        style={{ width: "100%" }}
+      >
         <EmailConfirmationCard
           hostName={hostName}
           hostImageUrl={hostImageUrl}
@@ -54,14 +52,10 @@ export function BookingConfirmationEmail({
         />
       </Section>
       <CustomButton link={tripDetailLink} title="View trip detail" />
-      <Text className="text-left text-base px-6 text-brand">
+      <Text className="text-brand px-6 text-left text-base">
         If there are any questions, send us an email at info@tramona.com or send
         the host a message directly.
       </Text>
-      <BottomHr />
-      <SocialLinks />
-      <Footer />
-      <Info />
     </Layout>
   );
 }

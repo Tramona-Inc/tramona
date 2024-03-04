@@ -1,15 +1,5 @@
 import { Section, Text } from "@react-email/components";
-import * as React from "react";
-import {
-  Layout,
-  Header,
-  Footer,
-  SocialLinks,
-  Info,
-  BottomHr,
-  CustomButton,
-  BookingCard,
-} from "./EmailComponents";
+import { Layout, Header, CustomButton, BookingCard } from "./EmailComponents";
 
 interface BookingExpiredEmailProps {
   userName: string;
@@ -34,15 +24,19 @@ export function BookingExpiredEmail({
   originalPrice = 220,
   tramonaPrice = 110,
   imageLink = "https://via.placeholder.com/600x300?text=Offer+Image+Here&bg=cccccc",
-  tripDetailLink = "https://www.tramona.com/"
+  tripDetailLink = "https://www.tramona.com/",
 }: BookingExpiredEmailProps) {
   return (
     <Layout title_preview="Booking Expired">
       <Header title="Booking Expired" />
-      <Text className="text-left text-base px-6 text-brand">
-        Hello, {userName}. Your offer for ${offerPrice} on {checkIn} - {checkOut} at {location} has been removed.
+      <Text className="text-brand px-6 text-left text-base">
+        Hello, {userName}. Your offer for ${offerPrice} on {checkIn} -{" "}
+        {checkOut} at {location} has been removed.
       </Text>
-      <Section className="flex justify-center px-6 pb-6" style={{ width: "100%" }}>
+      <Section
+        className="flex justify-center px-6 pb-6"
+        style={{ width: "100%" }}
+      >
         <BookingCard
           checkIn={checkIn}
           checkOut={checkOut}
@@ -55,10 +49,6 @@ export function BookingExpiredEmail({
         />
       </Section>
       <CustomButton link={tripDetailLink} title="View trip detail" />
-      <BottomHr />
-      <SocialLinks />
-      <Footer />
-      <Info />
     </Layout>
   );
 }

@@ -1,15 +1,5 @@
 import { Section, Text } from "@react-email/components";
-import * as React from "react";
-import {
-  Layout,
-  Header,
-  Footer,
-  SocialLinks,
-  Info,
-  BottomHr,
-  CustomButton,
-  BookingCard,
-} from "./EmailComponents";
+import { Layout, Header, CustomButton, BookingCard } from "./EmailComponents";
 
 interface BookingAddedNotificationEmailProps {
   userName: string;
@@ -22,7 +12,6 @@ interface BookingAddedNotificationEmailProps {
   tripDetailLink: string;
 }
 
-
 export function BookingAddedNotificationEmail({
   userName = "User",
   checkIn = "January 24",
@@ -31,15 +20,18 @@ export function BookingAddedNotificationEmail({
   originalPrice = 220,
   tramonaPrice = 110,
   propertyImageLink = "https://via.placeholder.com/600x300?text=Offer+Image+Here&bg=cccccc",
-  tripDetailLink = "https://www.tramona.com/"
+  tripDetailLink = "https://www.tramona.com/",
 }: BookingAddedNotificationEmailProps) {
   return (
     <Layout title_preview="Your friend just added you to this booking">
       <Header title="Your friend just added you to this booking" />
-      <Text className="text-left text-base px-6 text-brand">
+      <Text className="text-brand px-6 text-left text-base">
         Hello! You just got added to a booking by {userName}.
       </Text>
-      <Section className="flex justify-center px-6 pb-6" style={{ width: "100%" }}>
+      <Section
+        className="flex justify-center px-6 pb-6"
+        style={{ width: "100%" }}
+      >
         <BookingCard
           checkIn={checkIn}
           checkOut={checkOut}
@@ -52,10 +44,6 @@ export function BookingAddedNotificationEmail({
         />
       </Section>
       <CustomButton link={tripDetailLink} title="View trip detail" />
-      <BottomHr />
-      <SocialLinks />
-      <Footer />
-      <Info />
     </Layout>
   );
 }
