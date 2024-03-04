@@ -18,7 +18,6 @@ export function EarnedReferralEmail({
 }: EarnedReferralEmailProps) {
   return (
     <Layout title_preview="Money earned from a referral">
-      <Header title="Money earned from a referral" />
       <Text className="text-brand px-6 text-left text-base">
         Hello, {userName}. Your referral network is paying off. You just earned
         ${earnedAmount} from a referral. Your total is now ${totalEarnedAmount}.

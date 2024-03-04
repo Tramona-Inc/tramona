@@ -31,7 +31,6 @@ export function BookingConfirmationEmail({
 }: BookingConfirmationEmailProps) {
   return (
     <Layout title_preview="Booking confirmation/Payment received">
-      <Header title="Booking Confirmation/Payment Received" />
       <Text className="text-brand px-6 text-left text-base">
         Hello, {userName}. Your booking to {placeName} has been confirmed.
         Congrats and enjoy!

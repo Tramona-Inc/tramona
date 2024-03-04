@@ -24,7 +24,6 @@ export function BookingAddedNotificationEmail({
 }: BookingAddedNotificationEmailProps) {
   return (
     <Layout title_preview="Your friend just added you to this booking">
-      <Header title="Your friend just added you to this booking" />
       <Text className="text-brand px-6 text-left text-base">
         Hello! You just got added to a booking by {userName}.
       </Text>

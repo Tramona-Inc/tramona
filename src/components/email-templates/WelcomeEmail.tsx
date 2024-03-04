@@ -5,7 +5,6 @@ import { Layout, Header, CustomButton } from "./EmailComponents";
 export function TramonaWelcomeEmail() {
   return (
     <Layout title_preview="Welcome to Tramona">
-      <Header title="Welcome to Tramona" />
       <div className="pb-4 pt-2" style={{ textAlign: "center" }}>
         <div className="bg-lightgrey mx-auto inline-block w-11/12">
           <a

@@ -111,6 +111,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
         <Head />
         <Body className="font-sans text-base" style={main}>
           <Container className="bg-white" style={{ backgroundColor: "white" }}>
+            <Header title={title_preview} />
             {children}
             <BottomHr />
             <SocialLinks />

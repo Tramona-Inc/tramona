@@ -28,7 +28,6 @@ export function BookingExpiredEmail({
 }: BookingExpiredEmailProps) {
   return (
     <Layout title_preview="Booking Expired">
-      <Header title="Booking Expired" />
       <Text className="text-brand px-6 text-left text-base">
         Hello, {userName}. Your offer for ${offerPrice} on {checkIn} -{" "}
         {checkOut} at {location} has been removed.
