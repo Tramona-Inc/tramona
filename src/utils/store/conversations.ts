@@ -17,8 +17,6 @@ type ConversationListState = {
     conversationId: number,
     newMessage: MessageType,
   ) => void;
-  conversationOptimisticIds: number[];
-  setConversationOptimisticIds: (id: number) => void;
 };
 
 export const useConversation = create<ConversationListState>((set) => ({
@@ -65,9 +63,4 @@ export const useConversation = create<ConversationListState>((set) => ({
       return { conversationList: updatedConversations };
     });
   },
-  conversationOptimisticIds: [],
-  setConversationOptimisticIds: (id: number) =>
-    set((state) => ({
-      conversationOptimisticIds: [...state.conversationOptimisticIds, id],
-    })),
 }));
