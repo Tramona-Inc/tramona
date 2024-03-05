@@ -1,6 +1,6 @@
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
-import { type Conversation } from '@/utils/store/conversations';
+import { type Conversation } from "@/utils/store/conversations";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useState } from "react";

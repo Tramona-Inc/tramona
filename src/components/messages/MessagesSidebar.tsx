@@ -60,9 +60,11 @@ export function MessageConversation({
       <div className="ml-4 md:ml-2">
         <h1 className="text-xl font-bold">{displayParticipants}</h1>
         <p className="line-clamp-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
-          {messages.length > 0 && !messages[0]?.read && messages[0]?.userId !== session?.user.id && (
-            <div className="rounded-full bg-blue-500 p-1" />
-          )}
+          {messages.length > 0 &&
+            !messages[0]?.read &&
+            messages[0]?.userId !== session?.user.id && (
+              <div className="rounded-full bg-blue-500 p-1" />
+            )}
           {messages[0]?.userId === session?.user.id && "You: "}
           {messages[0]?.message ?? ""}
         </p>
