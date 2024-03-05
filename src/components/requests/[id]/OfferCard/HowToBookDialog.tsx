@@ -102,6 +102,8 @@ export default function HowToBookDialog(
       images: props.offer.property.imageUrls,
       userId: session.data?.user.id ?? "",
       totalSavings,
+      // TODO: create conversation later based on hostId
+      // hostId: props.offer.property.hostId,
     });
 
     const stripe = await stripePromise;

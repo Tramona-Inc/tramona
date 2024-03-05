@@ -1,4 +1,5 @@
 import { env } from "@/env";
+import { createConversationWithAdmin } from "@/server/api/routers/messagesRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
@@ -102,6 +103,16 @@ export default async function webhook(
             })
             .where(eq(referralCodes.referralCode, referralCode));
         }
+
+        // Add two two users to conversation
+        // void addTwoUserToConversation(
+        //   paymentIntentSucceeded.metadata.user_id!,
+        //   paymentIntentSucceeded.metadata.host_id!,
+        // );
+
+        void await createConversationWithAdmin(
+          paymentIntentSucceeded.metadata.user_id!,
+        );
 
         break;
 

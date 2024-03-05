@@ -83,14 +83,18 @@ async function fetchConversationWithAdmin(userId: string) {
   return isAdminInConversation ?? false;
 }
 
-async function createConversationWithAdmin(userId: string) {
-  // Generate conversation and get id
+async function generateConversation() {
   const [createdConversation] = await db
     .insert(conversations)
     .values({})
     .returning({ id: conversations.id });
 
-  const createdConversationId = createdConversation?.id;
+  return createdConversation?.id;
+}
+
+export async function createConversationWithAdmin(userId: string) {
+  // Generate conversation and get id
+  const createdConversationId = await generateConversation();
 
   if (createdConversationId !== undefined) {
     // Insert participants for the user and admin
@@ -107,6 +111,24 @@ async function addUserToConversation(userId: string, conversationId: number) {
   await db
     .insert(conversationParticipants)
     .values({ conversationId: conversationId, userId: userId });
+}
+
+export async function addTwoUserToConversation(
+  user1Id: string,
+  user2Id: string,
+) {
+  // Generate conversation and get id
+  const createdConversationId = await generateConversation();
+
+  if (createdConversationId !== undefined) {
+    // Insert participants for the user and admin
+    const participantValues = [
+      { conversationId: createdConversationId, userId: user1Id },
+      { conversationId: createdConversationId, userId: user2Id },
+    ];
+
+    await db.insert(conversationParticipants).values(participantValues);
+  }
 }
 
 export const messagesRouter = createTRPCRouter({
@@ -169,5 +191,15 @@ export const messagesRouter = createTRPCRouter({
         .update(messages)
         .set({ read: true })
         .where(eq(messages.id, input.messageId));
+    }),
+  addTwoUsersToConversation: protectedProcedure
+    .input(
+      z.object({
+        user1Id: zodString(),
+        user2Id: zodString(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await addTwoUserToConversation(input.user1Id, input.user2Id);
     }),
 });
