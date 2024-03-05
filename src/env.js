@@ -29,8 +29,6 @@ export const env = createEnv({
     SMTP_HOST: z.string(),
     SMTP_PORT: z.string(),
     EMAIL_FROM: z.string(),
-    GITHUB_CLIENT_ID: z.string(),
-    GITHUB_CLIENT_SECRET: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     RESEND_API_KEY: z.string(),
@@ -39,6 +37,7 @@ export const env = createEnv({
     FACEBOOK_CLIENT_ID: z.string(),
     FACEBOOK_CLIENT_SECRET: z.string(),
     TRAMONA_ADMIN_USER_ID: z.string(),
+    SLACK_TOKEN: z.string(),
   },
 
   /**
@@ -68,8 +67,6 @@ export const env = createEnv({
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,
     EMAIL_FROM: process.env.EMAIL_FROM,
-    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
-    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
@@ -83,6 +80,7 @@ export const env = createEnv({
     TRAMONA_ADMIN_USER_ID: process.env.TRAMONA_ADMIN_USER_ID,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SLACK_TOKEN: process.env.SLACK_TOKEN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
