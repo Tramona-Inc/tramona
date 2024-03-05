@@ -1,5 +1,5 @@
-import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { env } from "@/env";
 import { api } from "@/utils/api";
 import {
@@ -10,21 +10,12 @@ import {
   getTramonaFeeTotal,
 } from "@/utils/utils";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
-import { ArrowRightIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type OfferWithProperty } from ".";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../../ui/dialog";
+import ProgressBar from "../../../payment-forms/progress-bar";
+import { Dialog, DialogContent, DialogTrigger } from "../../../ui/dialog";
 
 const useStripe = () => {
   const stripe = useMemo<Promise<Stripe | null>>(
@@ -34,28 +25,6 @@ const useStripe = () => {
 
   return stripe;
 };
-
-type PriceDetailsProps = {
-  title: string;
-  value: number;
-  color: string;
-  isNight?: boolean;
-};
-
-const PriceDetails: React.FC<PriceDetailsProps> = ({
-  title,
-  value,
-  color,
-  isNight = false,
-}) => (
-  <div className="text-center">
-    <h1 className="text-md">{title}</h1>
-    <div className="flex items-center justify-center">
-      <p className={`text-lg ${color}`}>{formatCurrency(value)}</p>
-      {isNight && <span className="text-sm">/night</span>}
-    </div>
-  </div>
-);
 
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{
@@ -102,8 +71,6 @@ export default function HowToBookDialog(
       images: props.offer.property.imageUrls,
       userId: session.data?.user.id ?? "",
       totalSavings,
-      // TODO: create conversation later based on hostId
-      // hostId: props.offer.property.hostId,
     });
 
     const stripe = await stripePromise;
@@ -115,245 +82,192 @@ export default function HowToBookDialog(
     }
   }
 
-  const renderPriceDetails = () => {
-    // const { isAirbnb, offerNightlyPrice, originalNightlyPrice, totalPrice } = props;
-    const { isAirbnb, totalPrice } = props;
+  const [isDialog, setIsDialog] = useState(false);
+  const [tab, setTab] = useState<number>(props.isBooked ? 2 : 1);
+  const { isAirbnb, totalPrice } = props;
 
-    if (isAirbnb) {
-      return (
-        <div className="flex flex-row items-center justify-center gap-5 font-bold sm:gap-10">
-          {/* <PriceDetails
-            title="Tramona Price"
-            value={offerNightlyPrice}
-            color="font-extrabold text-primary"
-            isNight={true}
-          />
-          <PriceDetails
-            title="Original Price"
-            value={originalNightlyPrice}
-            color="text-muted-foreground"
-            isNight={true}
-          /> */}
-          <PriceDetails
-            title="Total Savings"
-            value={totalSavings}
-            color="text-primary"
-          />
-          <PriceDetails
-            title="Tramona Fee"
-            value={tramonafee}
-            color="text-primary"
-          />
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex flex-row items-center justify-center gap-10 font-bold">
-          <PriceDetails
-            title="Tramona Price"
-            value={totalPrice}
-            color="font-extrabold text-primary"
-          />
-          <PriceDetails
-            title="Original Price"
-            value={originalTotalPrice}
-            color="text-muted-foreground"
-          />
-          <PriceDetails
-            title="Savings"
-            value={originalTotalPrice - totalPrice}
-            color="text-primary"
-          />
-        </div>
-      );
+  useEffect(() => {
+    if (props.isBooked) {
+      setTab(2);
     }
-  };
-
-  const renderBookingDetails = () => {
-    const { isAirbnb, isBooked } = props;
-
-    if (isAirbnb) {
-      return (
-        <DialogHeader>
-          <DialogTitle className="text-3xl">
-            {isBooked ? "One Last Step!" : "Confirm Booking"}
-          </DialogTitle>
-        </DialogHeader>
-      );
-    } else {
-      return (
-        <>
-          <DialogHeader>
-            <DialogTitle className="text-3xl">
-              {isBooked ? "Thank you for Booking!" : "Confirm Booking:"}
-            </DialogTitle>
-          </DialogHeader>
-        </>
-      );
-    }
-  };
+  }, [props.isBooked]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{props.children}</DialogTrigger>
-      <DialogContent>
-        <div className="space-y-4">
-          {/* Displaying Prices when not booked*/}
-          {renderBookingDetails()}
-          {!props.isBooked && <>{renderPriceDetails()}</>}
-          {props.isAirbnb ? (
-            <>
-              {/* Airbnb and display pay button */}
-              {!props.isBooked && (
-                <>
-                  <div className="flex flex-col">
-                    <Button
-                      className={cn(
-                        buttonVariants({ size: "lg" }),
-                        "rounded-full",
-                      )}
-                      onClick={() => checkout()}
-                      disabled={!createCheckout.isIdle}
-                    >
-                      Pay now
-                    </Button>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    *Note: paying the Tramona fee does not mean the property is
-                    booked for you. You must complete all the steps.
-                  </p>
-                </>
+
+      <DialogContent className="w-screen p-10 md:w-[750px] ">
+        <h1 className="mt-8 text-4xl font-bold">Confirm and Pay</h1>
+
+        <div className="mt-10 space-y-10 pr-5 md:mt-0">
+          {/* <h1 className="mt-10 text-4xl font-bold">Confirm and Pay</h1> */}
+          <div className="space-y-5">
+            {/* Step 1 */}
+            <div
+              className={cn(
+                "flex h-full flex-row space-x-6 transition duration-1000 ",
+                1 <= tab ? "opacity-100" : "opacity-50",
               )}
-              {/* Airbnb flow and instructions */}
-              <DialogHeader>
-                <DialogTitle>How To Book:</DialogTitle>
-                <DialogDescription>
-                  Here&apos;s how to secure your booking.
-                </DialogDescription>
-              </DialogHeader>
-              <ol className="list-decimal space-y-1 px-4 marker:text-muted-foreground">
-                <li>We charge a 20% fee of your total savings.</li>
-                {!props.isBooked && (
-                  <li>
-                    Once you click{" "}
-                    <span className="inline-block rounded-full bg-primary px-2 text-white">
-                      Pay now
-                    </span>{" "}
-                    and pay the Tramona Fee, you will be given the specific
-                    instructions on how to book your stay on Airbnb.
-                  </li>
-                )}
-                <li>
-                  Once you click{" "}
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary pl-2 pr-1 text-white">
-                    Contact Host
-                    <ArrowRightIcon className="size-5" />
-                  </span>{" "}
-                  below, you will be taken to the listing page on Airbnb.
-                </li>
-                <li>
-                  Scroll to the bottom of the listing where it says “Contact
-                  Host”.
-                </li>
-                <li>Click “Contact Host” and send them this message:</li>
-              </ol>
-              <p className="border-l-2 border-primary bg-primary/10 p-2">
-                ”{message}”
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <CopyToClipboardBtn
-                  message={message}
-                  render={({ justCopied, copyMessage }) => (
-                    <Button
-                      className="rounded-full"
-                      size="lg"
-                      variant="outline"
-                      onClick={copyMessage}
-                    >
-                      {justCopied ? "Copied!" : "Copy message"}
-                    </Button>
-                  )}
+            >
+              <ProgressBar step={tab} currenttab={1} />
+              <div className="w-full space-y-5">
+                <div>
+                  <h4 className="text-xs ">Step 1</h4>
+                  <h5 className="text-xl font-semibold">Pay the Tramona fee</h5>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <p>Non Tramona Price: {formatCurrency(originalTotalPrice)}</p>
+                  <p>Tramona Price: {formatCurrency(totalSavings)}</p>
+                  <p>
+                    Total savings with Tramona: {formatCurrency(totalPrice)}
+                  </p>
+                  <p>
+                    Tramona Fee: {formatCurrency(totalPrice * 0.2)} (
+                    <span className="italic">
+                      We charge a 20% fee of your total savings).
+                    </span>
+                  </p>
+                </div>
+
+                <div className="py-2">
+                  <div className="rounded-md border-2 border-dashed border-[#636363] bg-[#E5E5E5] p-4  text-xs">
+                    <span className="italic">*Notes:</span> Paying the Tramona
+                    fee does not guarantee a successful booking. If you fail, we
+                    will refund you.
+                  </div>
+                </div>
+
+                <div className="mt-2 flex w-full flex-col gap-y-3">
+                  <h1 className="font-semibold">Price details</h1>
+                  <div className="flex w-1/2 flex-row justify-between">
+                    <p>Tramona Fee</p>
+                    <p>{formatCurrency(totalPrice * 0.2)}</p>
+                  </div>
+                  <div className="flex w-1/2 flex-row justify-between font-bold">
+                    <p>Total</p>
+                    <p>{formatCurrency(totalPrice * 0.2)}</p>
+                  </div>
+                </div>
+                {/* <Button className="w-2/5">Pay now</Button> */}
+
+                <Button
+                  className="w-2/5"
+                  onClick={() => checkout()}
+                  disabled={!createCheckout.isIdle || props.isBooked}
+                >
+                  Pay now
+                </Button>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div
+              className={cn(
+                "flex h-full flex-row space-x-6 transition duration-1000 ",
+                2 <= tab ? "opacity-100" : "opacity-50",
+              )}
+            >
+              <ProgressBar step={tab} currenttab={2} />
+
+              <div className="w-full space-y-5">
+                <div>
+                  <h4 className="text-xs ">Step 2</h4>
+                  <h5 className="text-xl font-semibold">
+                    Airbnb link gets unlocked
+                  </h5>
+                </div>
+                <Input
+                  placeholder="https://www.airbnb.com/rooms/xxxxxxxx"
+                  className="rounded-md border-2 border-dashed border-[#636363] bg-[#E5E5E5] p-7  text-xs italic"
                 />
-                {/* Enable contact host once paid */}
-                {props.isBooked ? (
-                  <Link
-                    className={cn(
-                      buttonVariants({ size: "lg" }),
-                      "rounded-full",
-                    )}
-                    href={props.airbnbUrl}
-                    target="_blank"
-                  >
-                    Contact Host
-                    <ArrowRightIcon />
-                  </Link>
-                ) : (
-                  <Button
-                    disabled={true}
-                    className={cn(
-                      buttonVariants({ size: "lg" }),
-                      "rounded-full",
-                    )}
-                  >
-                    Contact Host
-                    <ArrowRightIcon />
-                  </Button>
-                )}
+                <Button className="border border-black bg-white text-black ">
+                  Copy link
+                </Button>
               </div>
-            </>
-          ) : (
-            // Direct booking flow and instructions
-            <>
-              <div className="container flex flex-col px-10 py-5">
-                <ol className="flex list-decimal flex-col text-start marker:text-muted-foreground">
-                  {!props.isBooked && (
-                    <li>
-                      Once you click pay now and pay the total, your booking is
-                      confirmed.
-                    </li>
-                  )}
-                  <li>
-                    You will be able to see the trip under{" "}
-                    <span className="inline-flex rounded-full bg-primary pl-3 pr-2 text-white">
-                      My Trips
-                      <ArrowRightIcon />
-                    </span>{" "}
-                    and see confirmation, check-in instructions and more.
-                  </li>
-                  <li>
-                    A copy of your booking confirmation, check-in instructions
-                    and host contact info will be emailed to you.
-                  </li>
-                </ol>
-              </div>
-              <DialogFooter className="flex items-center justify-center">
-                {props.isBooked ? (
-                  // Direct Booking once paid link to trip
-                  <Link
-                    className={cn(
-                      buttonVariants({ size: "lg" }),
-                      "rounded-full",
-                    )}
-                    href={"/my-trips"} // TODO: href to my listing
-                  >
-                    My Trips
-                    <ArrowRightIcon />
-                  </Link>
-                ) : (
-                  // Direct Booking pay first
-                  <Button
-                    className={cn(
-                      buttonVariants({ size: "lg" }),
-                      "rounded-full",
-                    )}
-                    onClick={() => checkout()}
-                  >
-                    Pay now
+            </div>
+
+            {/* Step 3 */}
+            <div
+              className={cn(
+                "flex h-full flex-row space-x-6 transition duration-1000 ",
+                3 <= tab ? "opacity-100" : "opacity-50",
+              )}
+            >
+              <ProgressBar step={tab} currenttab={3} />
+
+              <div className="w-full space-y-5">
+                <div>
+                  <h4 className="text-xs ">Step 3</h4>
+                  <h5 className="text-xl font-semibold">
+                    Contact the host through the chat feature on Airbnb by copy
+                    and pasting our premade message
+                  </h5>
+                </div>
+
+                <div className="rounded-md border-2 border-dashed border-[#636363] bg-[#E5E5E5] p-4  text-xs italic">
+                  “Hi, I was offered your property on Tramona for $100 total for
+                  Feb 20-25 and I’d like to book it at that price.”
+                </div>
+                <div className="flex flex-col space-y-2 md:flex-row md:space-x-8 md:space-y-0">
+                  <Button className="border border-black bg-white text-black">
+                    Copy message
                   </Button>
-                )}
-              </DialogFooter>
-            </>
-          )}
+                  <Button>Contact host</Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div
+              className={cn(
+                "flex h-full flex-row space-x-6 transition duration-1000 ",
+                4 <= tab ? "opacity-100" : "opacity-50",
+              )}
+            >
+              <ProgressBar step={tab} currenttab={4} />
+
+              <div className="w-full space-y-5">
+                <div>
+                  <h4 className="text-xs ">Step 4</h4>
+                  <h5 className="text-xl font-semibold">
+                    Receive exclusive offer from the host
+                  </h5>
+                  <p className="text-sm">
+                    This will happen on Airbnb, through the chat
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 5 */}
+            <div
+              className={cn(
+                "flex h-full flex-row space-x-6 transition-opacity duration-1000 ",
+                5 === tab ? "opacity-100" : "opacity-50",
+              )}
+            >
+              {tab === 5 ? (
+                <div className="mt-6 h-4 w-4 items-center justify-center rounded-full bg-black" />
+              ) : (
+                <div className="mt-6 h-4 w-4 items-center justify-center rounded-full border-[3px] border-black opacity-50 " />
+              )}
+
+              <div className="w-full space-y-5">
+                <div>
+                  <h4 className="text-xs ">Step 5</h4>
+                  <h5 className="text-xl font-semibold">You&apos;re done!</h5>
+                  <Button
+                    onClick={() => {
+                      setTab(tab + 1);
+                    }}
+                  >
+                    COUNT
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
