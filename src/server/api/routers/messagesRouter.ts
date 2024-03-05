@@ -145,12 +145,32 @@ export const messagesRouter = createTRPCRouter({
         }),
       );
 
-      // Order conversations by the createdAt of the newest message in descending order
+      // Order conversations by the most recent activity (conversation or message creation)
       orderedConversations.sort((a, b) => {
-        const aLatestMessageDate = a.messages[0]?.createdAt ?? new Date(0);
-        const bLatestMessageDate = b.messages[0]?.createdAt ?? new Date(0);
+        // Get the conversation's createdAt date
+        const aConversationDate = new Date(a.createdAt);
+        const bConversationDate = new Date(b.createdAt);
 
-        return bLatestMessageDate.getTime() - aLatestMessageDate.getTime();
+        // Get the latest message's createdAt date, or use the conversation's createdAt date if no messages
+        const aLatestMessageDate = a.messages[0]
+          ? new Date(a.messages[0].createdAt)
+          : aConversationDate;
+        const bLatestMessageDate = b.messages[0]
+          ? new Date(b.messages[0].createdAt)
+          : bConversationDate;
+
+        // Use the most recent of the two dates for comparison
+        const aMostRecentDate =
+          aLatestMessageDate > aConversationDate
+            ? aLatestMessageDate
+            : aConversationDate;
+        const bMostRecentDate =
+          bLatestMessageDate > bConversationDate
+            ? bLatestMessageDate
+            : bConversationDate;
+
+        // Sort in descending order of the most recent activity
+        return bMostRecentDate.getTime() - aMostRecentDate.getTime();
       });
 
       return orderedConversations;
