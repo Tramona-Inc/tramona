@@ -527,6 +527,7 @@ export default function AdminOfferForm({
                 <Input
                   {...field}
                   type="file"
+                  accept="image/*"
                   onChange={(event) => {
                     const selectedFile = event.target.files?.[0];
                     setFile(selectedFile ?? null);
