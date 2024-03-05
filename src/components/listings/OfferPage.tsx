@@ -1,5 +1,5 @@
 import UserAvatar from "@/components/_common/UserAvatar";
-import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
+import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog copy";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

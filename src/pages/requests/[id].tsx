@@ -1,7 +1,7 @@
 import Spinner from "@/components/_common/Spinner";
 import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
 import OfferCard from "@/components/requests/[id]/OfferCard";
-import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
+import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog copy";
 import PaywallDialog from "@/components/requests/[id]/PaywallDialog";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
