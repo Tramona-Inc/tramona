@@ -1,10 +1,5 @@
 import { Section, Text } from "@react-email/components";
-import {
-  Layout,
-  Header,
-  CustomButton,
-  EmailConfirmationCard,
-} from "./EmailComponents";
+import { Layout, CustomButton, EmailConfirmationCard } from "./EmailComponents";
 
 interface BookingConfirmationEmailProps {
   userName: string;

@@ -1,5 +1,5 @@
 import { Section, Text } from "@react-email/components";
-import { Layout, Header, CustomButton } from "./EmailComponents";
+import { Layout, CustomButton } from "./EmailComponents";
 
 interface EarnedReferralEmailProps {
   userName: string;

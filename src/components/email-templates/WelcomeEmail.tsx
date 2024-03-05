@@ -1,6 +1,6 @@
-import { Text } from "@react-email/components";
+import { Img, Text } from "@react-email/components";
 
-import { Layout, Header, CustomButton } from "./EmailComponents";
+import { Layout, CustomButton } from "./EmailComponents";
 
 export function TramonaWelcomeEmail() {
   return (
@@ -11,7 +11,7 @@ export function TramonaWelcomeEmail() {
             href="https://www.tramona.com/"
             style={{ display: "block", width: "100%", margin: "0 auto" }}
           >
-            <img
+            <Img
               src={
                 "https://www.tramona.com/assets/images/email_images/welcome_email.png"
               }

@@ -1,10 +1,5 @@
 import { Section, Text } from "@react-email/components";
-import {
-  Layout,
-  Header,
-  CustomButton,
-  EmailOfferCard,
-} from "./EmailComponents";
+import { Layout, CustomButton, EmailOfferCard } from "./EmailComponents";
 
 interface Countdown {
   days: number;
