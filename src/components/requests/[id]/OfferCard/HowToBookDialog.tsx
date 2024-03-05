@@ -1,3 +1,4 @@
+import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { env } from "@/env";
@@ -42,7 +43,7 @@ export default function HowToBookDialog(
     isAirbnb: boolean;
   }>,
 ) {
-  const message = `Hi, I was offered your property on Tramona for ${formatCurrency(
+  const messageToHost = `Hi, I was offered your property on Tramona for ${formatCurrency(
     props.totalPrice,
   )} total for ${formatDateRange(
     props.checkIn,
@@ -180,10 +181,25 @@ export default function HowToBookDialog(
                 <Input
                   placeholder="https://www.airbnb.com/rooms/xxxxxxxx"
                   className="rounded-md border-2 border-dashed border-[#636363] bg-[#E5E5E5] p-7  text-xs italic"
+                  disabled={!props.isBooked}
+                  value={!props.isBooked ? "" : props.airbnbUrl}
                 />
-                <Button className="border border-black bg-white text-black ">
-                  Copy link
-                </Button>
+
+                <CopyToClipboardBtn
+                  message={props.airbnbUrl}
+                  render={({ justCopied, copyMessage }) => (
+                    <Button
+                      className="border border-black bg-white text-black"
+                      disabled={!props.isBooked}
+                      onClick={() => {
+                        copyMessage();
+                        setTab(3);
+                      }}
+                    >
+                      {justCopied ? "Copied!" : "Copy link"}
+                    </Button>
+                  )}
+                />
               </div>
             </div>
 
@@ -206,14 +222,25 @@ export default function HowToBookDialog(
                 </div>
 
                 <div className="rounded-md border-2 border-dashed border-[#636363] bg-[#E5E5E5] p-4  text-xs italic">
-                  “Hi, I was offered your property on Tramona for $100 total for
-                  Feb 20-25 and I’d like to book it at that price.”
+                  {messageToHost}
                 </div>
                 <div className="flex flex-col space-y-2 md:flex-row md:space-x-8 md:space-y-0">
-                  <Button className="border border-black bg-white text-black">
-                    Copy message
-                  </Button>
-                  <Button>Contact host</Button>
+                  <CopyToClipboardBtn
+                    message={messageToHost}
+                    render={({ justCopied, copyMessage }) => (
+                      <Button
+                        className="border border-black bg-white text-black"
+                        disabled={!props.isBooked}
+                        onClick={() => {
+                          copyMessage();
+                          setTab(5);
+                        }}
+                      >
+                        {justCopied ? "Copied!" : "Copy link"}
+                      </Button>
+                    )}
+                  />
+                  <Button disabled={!props.isBooked}>Contact host</Button>
                 </div>
               </div>
             </div>
@@ -257,13 +284,6 @@ export default function HowToBookDialog(
                 <div>
                   <h4 className="text-xs ">Step 5</h4>
                   <h5 className="text-xl font-semibold">You&apos;re done!</h5>
-                  <Button
-                    onClick={() => {
-                      setTab(tab + 1);
-                    }}
-                  >
-                    COUNT
-                  </Button>
                 </div>
               </div>
             </div>
