@@ -1,5 +1,5 @@
 import { Section, Text } from "@react-email/components";
-import { Layout, Header, CustomButton, BookingCard } from "./EmailComponents";
+import { Layout, CustomButton, BookingCard } from "./EmailComponents";
 
 interface BookingExpiredEmailProps {
   userName: string;

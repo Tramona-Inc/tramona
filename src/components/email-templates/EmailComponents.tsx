@@ -14,7 +14,7 @@ import {
 
 import { Tailwind } from "@react-email/tailwind";
 import * as React from "react";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface LayoutProps {
   children: ReactNode;
