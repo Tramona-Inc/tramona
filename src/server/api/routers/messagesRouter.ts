@@ -72,7 +72,7 @@ async function fetchConversationWithAdmin(userId: string) {
 
   // Check if conversation contains two participants
   // and check if admin id is in there
-  const isAdminInConversation = result?.conversations?.some(
+  const conversationWithAdmin = result?.conversations?.find(
     (conv) =>
       conv.conversation?.participants?.length === 2 &&
       conv.conversation.participants.some(
@@ -80,7 +80,7 @@ async function fetchConversationWithAdmin(userId: string) {
       ),
   );
 
-  return isAdminInConversation ?? false;
+  return conversationWithAdmin?.conversation?.id ?? null;
 }
 
 async function generateConversation() {
@@ -104,6 +104,8 @@ export async function createConversationWithAdmin(userId: string) {
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
+
+    return createdConversationId;
   }
 }
 
@@ -179,13 +181,15 @@ export const messagesRouter = createTRPCRouter({
     return [];
   }),
 
-  checkAdminConversation: protectedProcedure.mutation(async ({ ctx }) => {
-    const adminConvoExist = await fetchConversationWithAdmin(ctx.user.id);
+  createConversationWithAdmin: protectedProcedure.mutation(async ({ ctx }) => {
+    const conversationId = await fetchConversationWithAdmin(ctx.user.id);
 
     // Create conversation with admin if it doesn't exist
-    if (!adminConvoExist) {
-      void createConversationWithAdmin(ctx.user.id);
+    if (!conversationId) {
+      return await createConversationWithAdmin(ctx.user.id);
     }
+
+    return conversationId;
   }),
 
   addUserToConversation: publicProcedure
