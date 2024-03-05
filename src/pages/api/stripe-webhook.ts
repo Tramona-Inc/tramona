@@ -1,5 +1,8 @@
 import { env } from "@/env";
-import { createConversationWithAdmin } from "@/server/api/routers/messagesRouter";
+import {
+  createConversationWithAdmin,
+  fetchConversationWithAdmin,
+} from "@/server/api/routers/messagesRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
@@ -104,15 +107,26 @@ export default async function webhook(
             .where(eq(referralCodes.referralCode, referralCode));
         }
 
+        // TODO
         // Add two two users to conversation
         // void addTwoUserToConversation(
         //   paymentIntentSucceeded.metadata.user_id!,
         //   paymentIntentSucceeded.metadata.host_id!,
         // );
 
-        void await createConversationWithAdmin(
-          paymentIntentSucceeded.metadata.user_id!,
-        );
+        // ! For now will add user to admin
+        if (paymentIntentSucceeded.metadata.user_id) {
+          const conversationId = await fetchConversationWithAdmin(
+            paymentIntentSucceeded.metadata.user_id,
+          );
+
+          // Create conversation with admin if it doesn't exist
+          if (!conversationId) {
+            await createConversationWithAdmin(
+              paymentIntentSucceeded.metadata.user_id,
+            );
+          }
+        }
 
         break;
 
