@@ -16,7 +16,7 @@ export default async function uploadObjectToS3(file: File | null) {
   }
 
   const params: PutObjectCommandInput = {
-    Bucket: env.NEXT_PUBLIC_MAP_SCREENSHOTS_BUCKET_NAME,
+    Bucket: env.MAP_SCREENSHOTS_BUCKET_NAME,
     Key: file.name,
     Body: file,
     ACL: "public-read",
