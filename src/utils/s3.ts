@@ -2,17 +2,15 @@ import { env } from "@/env";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { PutObjectCommandInput } from "@aws-sdk/client-s3";
 
+export const s3 = new S3Client({
+  region: env.NEXT_PUBLIC_REGION,
+  credentials: {
+    accessKeyId: env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+    secretAccessKey: env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+  },
+});
+
 export default async function uploadObjectToS3(file: File | null) {
-  const configuration = {
-    region: env.NEXT_PUBLIC_REGION,
-    credentials: {
-      accessKeyId: env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-      secretAccessKey: env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-    },
-  };
-
-  const client = new S3Client(configuration);
-
   if (!file) {
     throw new Error("no file selected");
   }
@@ -26,7 +24,7 @@ export default async function uploadObjectToS3(file: File | null) {
 
   try {
     const command: PutObjectCommand = new PutObjectCommand(params);
-    await client.send(command);
+    await s3.send(command);
     const presignedUrl = `https://tramona-map-screenshots.s3.amazonaws.com/${file.name}`;
     return presignedUrl;
   } catch (error) {
