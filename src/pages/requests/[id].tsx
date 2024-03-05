@@ -26,9 +26,9 @@ export default function Page() {
 
   const request = requests?.activeRequests.find(({ id }) => id === requestId);
 
-  const { mutate } = api.messages.checkAdminConversation.useMutation({
-    onSuccess: () => {
-      void router.push("/messages");
+  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
+    onSuccess: (conversationId) => {
+      void router.push(`/messages?conversationId=${conversationId}`);
     },
   });
 
