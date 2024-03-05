@@ -10,6 +10,7 @@ import {
   Section,
   Text,
   Hr,
+  Img,
 } from "@react-email/components";
 
 import { Tailwind } from "@react-email/tailwind";
@@ -71,7 +72,7 @@ interface EmailConfirmationCardProps {
 export const TramonaLogo = () => {
   return (
     <div className="text-brand flex items-center gap-2 bg-white text-lg font-bold">
-      <img
+      <Img
         src="https://www.tramona.com/assets/images/email_images/tramona_wbg.png"
         alt="Tramona Logo"
         style={{ width: "auto", height: "24px", marginRight: "5px" }}
@@ -210,7 +211,7 @@ export const SocialLinks: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <img
+                <Img
                   src="https://www.tramona.com/assets/images/email_images/tramona_wbg.png"
                   alt="Tramona Logo"
                   style={{ height: "16px" }}
@@ -224,7 +225,7 @@ export const SocialLinks: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img
+                  <Img
                     src="https://www.tramona.com/assets/images/email_images/facebook_wbg.png"
                     alt="Facebook"
                     style={{
@@ -239,7 +240,7 @@ export const SocialLinks: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img
+                  <Img
                     src="https://www.tramona.com/assets/images/email_images/instagram_wbg.png"
                     alt="Instagram"
                     style={{ width: "16px", height: "16px" }}
@@ -298,7 +299,7 @@ export const EmailOfferCard: React.FC<EmailOfferCardProps> = ({
                   href={offer_link}
                   style={{ borderRadius: "8px 8px 0 0", display: "block" }}
                 >
-                  <img
+                  <Img
                     src={property_image_link}
                     alt="Offer Image"
                     style={{
@@ -480,7 +481,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
                   href={confirmation_link}
                   style={{ borderRadius: "8px 8px 0 0", display: "block" }}
                 >
-                  <img
+                  <Img
                     src={property_image_link}
                     alt="Place Image"
                     style={{
@@ -517,7 +518,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
                         href="https://www.tramona.com/"
                         style={{ borderRadius: "50%", display: "block" }}
                       >
-                        <img
+                        <Img
                           src={
                             hostImageUrl ?? "https://via.placeholder.com/150"
                           }
@@ -589,19 +590,19 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
 export const BookingCard: React.FC<BookingCardProps> = ({
   checkIn,
   checkOut,
-  originalPrice,
-  tramonaPrice,
+  // originalPrice,
+  // tramonaPrice,
   description,
   property_image_link,
   isExpired,
   booking_link,
 }) => {
-  let discountPercentage = 0;
-  if (tramonaPrice) {
-    discountPercentage = originalPrice
-      ? Math.round(((originalPrice - tramonaPrice) / originalPrice) * 100)
-      : 0;
-  }
+  // let discountPercentage = 0;
+  // if (tramonaPrice) {
+  //   discountPercentage = originalPrice
+  //     ? Math.round(((originalPrice - tramonaPrice) / originalPrice) * 100)
+  //     : 0;
+  // }
 
   return (
     <table
@@ -659,7 +660,7 @@ export const BookingCard: React.FC<BookingCardProps> = ({
                     lineHeight: "0",
                   }}
                 >
-                  <img
+                  <Img
                     src={property_image_link}
                     alt="Offer Image"
                     style={{ width: "100%", display: "block", border: "0" }}
