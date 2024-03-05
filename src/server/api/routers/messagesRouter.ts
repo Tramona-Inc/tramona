@@ -44,7 +44,7 @@ export async function fetchUsersConversations(userId: string) {
   });
 }
 
-async function fetchConversationWithAdmin(userId: string) {
+export async function fetchConversationWithAdmin(userId: string) {
   const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
     with: {
