@@ -29,11 +29,16 @@ export function MessageConversation({
   const { mutateAsync: setMessageToReadMutate } =
     api.messages.setMessageToRead.useMutation();
 
+  const setConversationReadState = useConversation(
+    (state) => state.setConversationReadState,
+  );
+
   function handleSelected() {
     if (session?.user.id !== messages[0]?.userId && messages[0]?.id) {
       void setMessageToReadMutate({ messageId: messages[0]?.id });
     }
-    // TODO: set local state to read too
+    // Update local state to true
+    setConversationReadState(conversation.id);
 
     setSelected(conversation);
   }

@@ -17,6 +17,7 @@ type ConversationListState = {
     conversationId: number,
     newMessage: MessageType,
   ) => void;
+  setConversationReadState: (conversationId: number) => void;
 };
 
 export const useConversation = create<ConversationListState>((set) => ({
@@ -59,6 +60,24 @@ export const useConversation = create<ConversationListState>((set) => ({
           updatedConversations.unshift(movedConversation);
         }
       }
+
+      return { conversationList: updatedConversations };
+    });
+  },
+  setConversationReadState: (conversationId: number) => {
+    set((state) => {
+      const updatedConversations = state.conversationList.map(
+        (conversation) => {
+          if (conversation.id === conversationId) {
+            const updatedMessages = conversation.messages.map((message) => ({
+              ...message,
+              read: true,
+            }));
+            return { ...conversation, messages: updatedMessages };
+          }
+          return conversation;
+        },
+      );
 
       return { conversationList: updatedConversations };
     });
