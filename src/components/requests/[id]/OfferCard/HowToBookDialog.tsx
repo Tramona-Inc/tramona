@@ -98,7 +98,9 @@ export default function HowToBookDialog(
       <DialogTrigger asChild>{props.children}</DialogTrigger>
 
       <DialogContent className="w-screen p-10 md:w-[750px] ">
-        <h1 className="mt-8 text-4xl font-bold">Confirm and Pay</h1>
+        <h1 className="mt-8 text-4xl font-bold">
+          {props.isBooked ? "Contact Host" : "Confirm and Pay"}
+        </h1>
 
         <div className="mt-10 space-y-10 pr-5 md:mt-0">
           {/* <h1 className="mt-10 text-4xl font-bold">Confirm and Pay</h1> */}
@@ -150,14 +152,13 @@ export default function HowToBookDialog(
                     <p>{formatCurrency(totalPrice * 0.2)}</p>
                   </div>
                 </div>
-                {/* <Button className="w-2/5">Pay now</Button> */}
 
                 <Button
                   className="w-2/5"
                   onClick={() => checkout()}
                   disabled={!createCheckout.isIdle || props.isBooked}
                 >
-                  Pay now
+                  {props.isBooked ? "Paid" : "Pay now"}
                 </Button>
               </div>
             </div>
