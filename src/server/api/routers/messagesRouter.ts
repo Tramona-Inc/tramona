@@ -2,10 +2,10 @@ import { env } from "@/env";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
-import { zodString } from "@/utils/zod-utils";
+import { zodNumber, zodString } from "@/utils/zod-utils";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { conversations } from "./../../db/schema/tables/messages";
+import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
@@ -155,5 +155,19 @@ export const messagesRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       await addUserToConversation(input.userId, parseInt(input.conversationId));
+    }),
+
+  setMessageToRead: protectedProcedure
+    .input(
+      z.object({
+        messageId: zodNumber(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // TODO: add error checking
+      return await ctx.db
+        .update(messages)
+        .set({ read: true })
+        .where(eq(messages.id, input.messageId));
     }),
 });

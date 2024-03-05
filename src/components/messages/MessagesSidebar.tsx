@@ -5,7 +5,7 @@ import {
 } from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import UserAvatar from "../_common/UserAvatar";
 import { Icons } from "../_icons/icons";
 
@@ -26,13 +26,25 @@ export function MessageConversation({
 
   const { data: session } = useSession();
 
+  const { mutateAsync: setMessageToReadMutate } =
+    api.messages.setMessageToRead.useMutation();
+
+  function handleSelected() {
+    if (session?.user.id !== messages[0]?.userId && messages[0]?.id) {
+      void setMessageToReadMutate({ messageId: messages[0]?.id });
+    }
+    // TODO: set local state to read too
+
+    setSelected(conversation);
+  }
+
   return (
     <div
       className={cn(
         "flex items-center justify-start border-b-2 border-zinc-100 px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
         isSelected && "bg-zinc-100",
       )}
-      onClick={() => setSelected(conversation)}
+      onClick={() => handleSelected()}
     >
       <UserAvatar
         email={participants[0]?.email ?? ""}
@@ -42,7 +54,10 @@ export function MessageConversation({
 
       <div className="ml-4 md:ml-2">
         <h1 className="text-xl font-bold">{displayParticipants}</h1>
-        <p className="line-clamp-1 text-sm text-muted-foreground">
+        <p className="line-clamp-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
+          {!messages[0]?.read && messages[0]?.userId !== session?.user.id && (
+            <div className="rounded-full bg-blue-500 p-1" />
+          )}
           {messages[0]?.userId === session?.user.id && "You: "}
           {messages[0]?.message ?? ""}
         </p>
