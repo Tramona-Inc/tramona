@@ -37,6 +37,10 @@ export default function ChatInput({
     (state) => state.setConversationToTop,
   );
 
+  const setConversationOpimisticIds = useConversation(
+    (state) => state.setConversationOptimisticIds,
+  );
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
       // TODO: might be better to update the state first then insert into db
@@ -71,6 +75,7 @@ export default function ChatInput({
         };
 
         setConversationToTop(conversationId, newMessage);
+        setConversationOpimisticIds(newMessage.id);
         addMessageToConversation(conversationId, newMessage);
         setOptimisticIds(newMessage.id);
       }

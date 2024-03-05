@@ -65,7 +65,6 @@ export default function MessagesSidebar({
   selectedConversation,
   setSelected,
 }: SidebarProps) {
-  const [hasFetched, setHasFetched] = useState(false);
   const { data: fetchedConversations, isLoading } =
     api.messages.getConversations.useQuery();
 
@@ -77,11 +76,10 @@ export default function MessagesSidebar({
 
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
-    if (fetchedConversations && !hasFetched) {
+    if (fetchedConversations) {
       setConversationList(fetchedConversations);
-      setHasFetched(true); // Mark as fetched
     }
-  }, [fetchedConversations, setConversationList, hasFetched]);
+  }, [fetchedConversations, setConversationList]);
 
   return (
     <div
