@@ -1,5 +1,10 @@
-import { type Conversation } from '@/utils/store/conversations';
+import {
+  useConversation,
+  type Conversation,
+} from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
 import ChatMessages from "./ChatMessages";
@@ -13,6 +18,28 @@ export default function MessagesContent({
   selectedConversation,
   setSelected,
 }: ContentProps) {
+  // Getting state from conversation state (not messages state)
+  const { query } = useRouter();
+
+  const conversations = useConversation((state) => state.conversationList);
+
+  // allows us to open message from query
+  useEffect(() => {
+    if (query.conversationId && conversations.length > 0) {
+      const conversationIdToSelect = parseInt(query.conversationId as string);
+
+      // Find the conversation with the matching ID
+      const selectedConversation = conversations.find(
+        (conversation) => conversation.id === conversationIdToSelect,
+      );
+
+      // Set the selected conversation in your Zustand store
+      if (selectedConversation) {
+        setSelected(selectedConversation);
+      }
+    }
+  }, [conversations, query.conversationId, setSelected]);
+
   return (
     <div
       className={cn(
@@ -34,7 +61,7 @@ export default function MessagesContent({
             setSelected={setSelected}
           />
           <ChatMessages conversationId={selectedConversation.id} />
-          <ChatInput conversationId={selectedConversation.id}/>
+          <ChatInput conversationId={selectedConversation.id} />
         </div>
       )}
     </div>
