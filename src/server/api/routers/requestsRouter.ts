@@ -132,7 +132,7 @@ export const requestsRouter = createTRPCRouter({
         sendSlackMessage(
           `*${name} just made a request: ${input.location}*`,
           `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-          `<https://tramona.com/admin-dashboard|Go to admin dashboard>`,
+          `<https://tramona.com/admin|Go to admin dashboard>`,
         );
       }
     }),
@@ -164,7 +164,7 @@ export const requestsRouter = createTRPCRouter({
       if (env.NODE_ENV === "production") {
         sendSlackMessage(
           `*${name} just made ${input.length} requests*`,
-          `<https://tramona.com/admin-dashboard|Go to admin dashboard>`,
+          `<https://tramona.com/admin|Go to admin dashboard>`,
         );
       }
     }),
