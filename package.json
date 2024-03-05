@@ -123,7 +123,7 @@
     "autoprefixer": "^10.4.17",
     "chromatic": "^10.3.1",
     "drizzle-kit": "^0.20.13",
-    "embla-carousel": "8.0.0-rc19",
+    "embla-carousel": "8.0.0",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.1.0",
     "eslint-plugin-drizzle": "^0.2.3",
