@@ -17,9 +17,6 @@ export async function fetchUsersConversations(userId: string) {
     with: {
       conversations: {
         columns: {},
-        orderBy: (conversations, { desc }) => [
-          desc(conversations.conversationId),
-        ],
         with: {
           conversation: {
             with: {
