@@ -43,7 +43,6 @@ import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
-import uploadObjectToS3 from "@/utils/s3";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -137,11 +136,16 @@ export default function AdminOfferForm({
   const updateOffersMutation = api.offers.update.useMutation();
   const createPropertiesMutation = api.properties.create.useMutation();
   const createOffersMutation = api.offers.create.useMutation();
+  const uploadFileMutation = api.files.upload.useMutation();
 
   const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
-    const url = await uploadObjectToS3(file);
+    if (!file) {
+      throw new Error("screenshot not uploaded");
+    }
+    console.log("Uploaded file:", file);
+    const url = await uploadFileMutation.mutateAsync({ file });
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
     // const totalPrice = offeredPriceUSD * 100;
