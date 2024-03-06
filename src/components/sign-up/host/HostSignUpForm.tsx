@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
+import { ALL_HOST_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
@@ -39,8 +40,8 @@ const formSchema = z
     name: zodString({ minLen: 2 }),
     password: zodPassword(),
     confirm: z.string(),
-    isAirbnb: z.enum(["airbnb", "other"]),
-    profileLink: zodUrl(),
+    hostType: z.enum(ALL_HOST_TYPES),
+    profileUrl: zodUrl(),
   })
   .refine((data) => data.password === data.confirm, {
     message: "Passwords don't match",
@@ -114,31 +115,37 @@ export default function HostSignUpForm() {
         email: newUser.email,
         name: newUser.name,
         password: newUser.password,
-        confirm: newUser.confirm,
-        isAirbnb: newUser.isAirbnb,
-        profileLink: newUser.profileLink,
+        // confirm: newUser.confirm,
+        hostType: newUser.hostType,
+        profileUrl: newUser.profileUrl,
         conversationId: query.conversationId as string,
-        isVerifiedHostUrl: isVerifiedHostUrl,
       };
 
-      await createUserHost(newUserWithHostCheck)
-        .then(() =>
-          // Verify Phone number first before addingin to db
-          mutateSendOTP({
-            to: "+1" + newUser.phoneNumber,
-          }),
-        )
-        // will redirect to page that updates user phone number
-        .then(() =>
-          router.push({
-            pathname: "/auth/verify-sms",
-            query: {
-              phone: "+1" + newUser.phoneNumber,
-              email: newUser.email,
-            },
-          }),
-        )
-        .catch(() => errorToast("Couldn't sign up, please try again"));
+      if (isVerifiedHostUrl) {
+        await createUserHost(newUserWithHostCheck)
+         .then(() =>
+            // ! Later fix to update to global
+            // Verify Phone number first before addingin to db
+            mutateSendOTP({
+              to: "+1" + newUser.phoneNumber,
+            }),
+          )
+          // will redirect to page that updates user phone number
+          .then(() =>
+            router.push({
+              pathname: "/auth/verify-sms",
+              query: {
+                phone: "+1" + newUser.phoneNumber,
+                email: newUser.email,
+              },
+            }),
+          )
+          .catch(() => errorToast("Couldn't sign up, please try again"));
+      } else {
+        errorToast(
+          "Url is invalid. Please contact support to request a new url",
+        );
+      }
     }
   }
 
@@ -213,7 +220,7 @@ export default function HostSignUpForm() {
           />
           <FormField
             control={form.control}
-            name="isAirbnb"
+            name="hostType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Where do you currently list?</FormLabel>
@@ -223,13 +230,16 @@ export default function HostSignUpForm() {
                   value={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[180px] capitalize">
                       <SelectValue placeholder="Please choose" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="airbnb">Airbnb</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                  <SelectContent className="capitalize">
+                    {ALL_HOST_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -238,7 +248,7 @@ export default function HostSignUpForm() {
           />
           <FormField
             control={form.control}
-            name="profileLink"
+            name="profileUrl"
             render={({ field }) => (
               <FormItem>
                 <FormControl>

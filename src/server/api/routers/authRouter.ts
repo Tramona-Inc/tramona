@@ -3,7 +3,13 @@ import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { db } from "@/server/db";
-import { referralCodes, users, type User } from "@/server/db/schema";
+import {
+  ALL_HOST_TYPES,
+  hostProfiles,
+  referralCodes,
+  users,
+  type User,
+} from "@/server/db/schema";
 import { sendEmail } from "@/server/server-utils";
 import { generateReferralCode } from "@/utils/utils";
 import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
@@ -173,6 +179,8 @@ export const authRouter = createTRPCRouter({
         password: zodPassword(),
         referralCode: z.string().optional(),
         conversationId: z.string(),
+        hostType: z.enum(ALL_HOST_TYPES),
+        profileUrl: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -219,8 +227,15 @@ export const authRouter = createTRPCRouter({
           }
         }
 
-        // Send email verification token
         if (user) {
+          // Insert Host info
+          await ctx.db.insert(hostProfiles).values({
+            userId: user.id,
+            type: input.hostType,
+            profileUrl: input.profileUrl,
+          });
+
+          // Send email verification token
           await sendVerificationEmailWithConversation(
             user,
             input.conversationId,

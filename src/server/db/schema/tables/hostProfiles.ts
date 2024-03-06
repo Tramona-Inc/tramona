@@ -1,12 +1,9 @@
 import { pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
-export const hostTypeEnum = pgEnum("host_type", [
-  "airbnb",
-  "direct",
-  "vrbo",
-  "other",
-]);
+export const ALL_HOST_TYPES = ["airbnb", "direct", "vrbo", "other"] as const;
+
+export const hostTypeEnum = pgEnum("host_type", ALL_HOST_TYPES);
 
 export const hostProfiles = pgTable("host_profiles", {
   userId: text("user_id")

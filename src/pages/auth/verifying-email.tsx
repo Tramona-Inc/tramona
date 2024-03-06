@@ -22,6 +22,8 @@ export default function VerifyEmail() {
   } = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
       if (conversationId && userId) {
+        console.log(userId);
+
         void addUserToConversation({ userId, conversationId });
       }
 
