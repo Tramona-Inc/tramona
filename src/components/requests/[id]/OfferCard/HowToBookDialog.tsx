@@ -56,8 +56,24 @@ export default function HowToBookDialog(
       offer={offer}
       totalPrice={offer.totalPrice}
       offerNightlyPrice={offerNightlyPrice}
-    />
+    >
+      {props.children}
+    </AirbnbDialog>
   ) : (
-    <DirectBookDialog />
+    <DirectBookDialog
+      isBooked={isBooked}
+      listingId={offer.id}
+      propertyName={propertyName}
+      originalNightlyPrice={originalNightlyPrice}
+      airbnbUrl={airbnbUrl ?? ""}
+      checkIn={checkIn}
+      checkOut={checkOut}
+      requestId={requestId}
+      offer={offer}
+      totalPrice={offer.totalPrice}
+      offerNightlyPrice={offerNightlyPrice}
+    >
+      {props.children}
+    </DirectBookDialog>
   );
 }

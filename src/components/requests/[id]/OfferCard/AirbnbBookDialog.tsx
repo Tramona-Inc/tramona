@@ -32,21 +32,30 @@ export default function AirbnbBookDialog(
     requestId: number;
   }>,
 ) {
-  const { totalPrice } = props;
+  const {
+    isBooked,
+    offer,
+    originalNightlyPrice,
+    airbnbUrl,
+    checkIn,
+    checkOut,
+    requestId,
+    totalPrice,
+  } = props;
 
-  const [open, setOpen] = useState<boolean>(props.isBooked);
-  const [tab, setTab] = useState<number>(props.isBooked ? 2 : 1);
+  const [open, setOpen] = useState<boolean>(isBooked);
+  const [tab, setTab] = useState<number>(isBooked ? 2 : 1);
 
   const originalTotalPrice =
-    props.originalNightlyPrice * getNumNights(props.checkIn, props.checkOut);
-  const totalSavings = originalTotalPrice - props.totalPrice;
+    originalNightlyPrice * getNumNights(checkIn, checkOut);
+  const totalSavings = originalTotalPrice - totalPrice;
   const tramonafee = getTramonaFeeTotal(totalSavings);
 
   const messageToHost = `Hi, I was offered your property on Tramona for ${formatCurrency(
-    props.totalPrice,
+    totalPrice,
   )} total for ${formatDateRange(
-    props.checkIn,
-    props.checkOut,
+    checkIn,
+    checkOut,
   )} and I'd like to book it at that price.`;
 
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
@@ -56,14 +65,14 @@ export default function AirbnbBookDialog(
 
   async function checkout() {
     const response = await createCheckout.mutateAsync({
-      listingId: props.offer.id,
-      propertyId: props.offer.property.id,
-      requestId: props.requestId,
-      name: props.offer.property.name,
+      listingId: offer.id,
+      propertyId: offer.property.id,
+      requestId: requestId,
+      name: offer.property.name,
       price: tramonafee, // Airbnb (tramona fee) Set's price for checkout
-      description: "From: " + formatDateRange(props.checkIn, props.checkOut),
+      description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
-      images: props.offer.property.imageUrls,
+      images: offer.property.imageUrls,
       userId: session.data?.user.id ?? "",
       totalSavings,
     });
@@ -83,7 +92,7 @@ export default function AirbnbBookDialog(
 
       <DialogContent className="w-screen p-10 md:w-[750px] ">
         <h1 className="mt-8 text-4xl font-bold">
-          {props.isBooked ? "Contact Host" : "Confirm and Pay"}
+          {isBooked ? "Contact Host" : "Confirm and Pay"}
         </h1>
 
         <div className="mt-10 space-y-10 pr-5 md:mt-0">
@@ -140,9 +149,9 @@ export default function AirbnbBookDialog(
                 <Button
                   className="w-2/5"
                   onClick={() => checkout()}
-                  disabled={!createCheckout.isIdle || props.isBooked}
+                  disabled={!createCheckout.isIdle || isBooked}
                 >
-                  {props.isBooked ? "Paid" : "Pay now"}
+                  {isBooked ? "Paid" : "Pay now"}
                 </Button>
               </div>
             </div>
@@ -166,16 +175,16 @@ export default function AirbnbBookDialog(
                 <Input
                   placeholder="https://www.airbnb.com/rooms/xxxxxxxx"
                   className="rounded-md border-2 border-dashed border-[#636363] bg-[#E5E5E5] p-7  text-xs italic"
-                  disabled={!props.isBooked}
-                  value={!props.isBooked ? "" : props.airbnbUrl}
+                  disabled={!isBooked}
+                  value={!isBooked ? "" : airbnbUrl}
                 />
 
                 <CopyToClipboardBtn
-                  message={props.airbnbUrl}
+                  message={airbnbUrl}
                   render={({ justCopied, copyMessage }) => (
                     <Button
                       className="border border-black bg-white text-black"
-                      disabled={!props.isBooked}
+                      disabled={!isBooked}
                       onClick={() => {
                         copyMessage();
                         setTab(3);
@@ -215,7 +224,7 @@ export default function AirbnbBookDialog(
                     render={({ justCopied, copyMessage }) => (
                       <Button
                         className="border border-black bg-white text-black"
-                        disabled={!props.isBooked}
+                        disabled={!isBooked}
                         onClick={() => {
                           copyMessage();
                           setTab(5);
@@ -225,7 +234,7 @@ export default function AirbnbBookDialog(
                       </Button>
                     )}
                   />
-                  <Button disabled={!props.isBooked}>Contact host</Button>
+                  <Button disabled={!isBooked}>Contact host</Button>
                 </div>
               </div>
             </div>

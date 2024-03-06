@@ -12,6 +12,7 @@ import {
 import { type AppRouter } from "@/server/api/root";
 import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
+import { TAX_PERCENTAGE } from "@/utils/constants";
 import {
   cn,
   formatCurrency,
@@ -72,7 +73,8 @@ export default function OfferPage({
   const tramonaServiceFee = getTramonaFeeTotal(
     originalTotal - offer.totalPrice,
   );
-  const tax = (offer.totalPrice + tramonaServiceFee) * 0.0725;
+
+  const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
   return (
     <div className="space-y-4">
