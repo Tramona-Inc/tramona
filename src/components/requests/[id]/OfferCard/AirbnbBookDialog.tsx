@@ -1,5 +1,5 @@
 import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
-import ProgressBar from "@/components/payment-forms/progress-bar";
+import ProgressBar from "@/components/requests/[id]/OfferCard/ProgressBar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
