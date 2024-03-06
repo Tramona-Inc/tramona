@@ -1,5 +1,7 @@
+import { api } from "@/utils/api";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import UserAvatar from "../_common/UserAvatar";
 import { Button } from "../ui/button";
 import {
@@ -24,6 +26,19 @@ type UpcomingCardProps = {
 };
 
 export default function UpcomingCard(props: UpcomingCardProps) {
+  const router = useRouter();
+
+  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
+    onSuccess: (conversationId) => {
+      void router.push(`/messages?conversationId=${conversationId}`);
+    },
+  });
+
+  function handleConversation() {
+    // TODO: only messages admin for now
+    mutate();
+  }
+
   return (
     <div className="border-2xl flex flex-col-reverse rounded-lg border shadow-xl md:flex-row">
       <div className="flex flex-col gap-2 p-8 font-bold md:w-1/2">
@@ -45,7 +60,11 @@ export default function UpcomingCard(props: UpcomingCardProps) {
         <Separator />
 
         <div className="flex flex-row flex-wrap gap-2">
-          <Button variant={"outline"} size={"sm"}>
+          <Button
+            variant={"outline"}
+            size={"sm"}
+            onClick={() => handleConversation()}
+          >
             Message host
           </Button>
           <Dialog>
