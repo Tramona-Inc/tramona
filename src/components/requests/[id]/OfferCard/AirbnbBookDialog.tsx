@@ -237,7 +237,10 @@ export default function AirbnbBookDialog(
                   />
                 </div>
                 <Button asChild disabled={!isBooked}>
-                  <Link href={offer.property.airbnbMessageUrl ?? ""}>
+                  <Link
+                    target="_blank"
+                    href={offer.property.airbnbMessageUrl ?? ""}
+                  >
                     Press to Contact host
                   </Link>
                 </Button>
