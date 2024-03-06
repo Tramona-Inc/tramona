@@ -97,6 +97,7 @@ export const properties = pgTable(
     originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
     propertyType: propertyTypeEnum("property_type").notNull(),
     amenities: propertyAmenitiesEnum("property_amenities").array().notNull(),
+    checkInInfo: varchar("check_in_info"),
     standoutAmenities: propertyStandoutAmenitiesEnum(
       "property_standout_amenities",
     )

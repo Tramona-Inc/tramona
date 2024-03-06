@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -19,6 +20,7 @@ type UpcomingCardProps = {
   date: string;
   address: string;
   propertyImage: string;
+  checkInInfo: string | null;
 };
 
 export default function UpcomingCard(props: UpcomingCardProps) {
@@ -74,9 +76,23 @@ export default function UpcomingCard(props: UpcomingCardProps) {
               </DialogHeader>
             </DialogContent>
           </Dialog>
-          <Button variant={"outline"} size={"sm"}>
-            Check-in instruction
-          </Button>
+          <Dialog>
+            <DialogTrigger>
+              <Button variant={"outline"} size={"sm"}>
+                Check-in instruction
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Check-in instruction</DialogTitle>
+                <DialogDescription>
+                  {props.checkInInfo
+                    ? props.checkInInfo
+                    : "No instructions added by host! Please contact host to make sure."}
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 

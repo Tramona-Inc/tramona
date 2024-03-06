@@ -63,6 +63,7 @@ const formSchema = z.object({
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
+  checkInInfo: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
 });
 
@@ -119,6 +120,7 @@ export default function AdminOfferForm({
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100,
+            checkInInfo: offer.property.checkInInfo ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
           }
         : {}),
@@ -521,6 +523,20 @@ export default function AdminOfferForm({
               <FormLabel>Address (optional)</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="checkInInfo"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Check In Info (optional)</FormLabel>
+              <FormControl>
+                <Textarea {...field} className="resize-y" rows={2} />
               </FormControl>
               <FormMessage />
             </FormItem>

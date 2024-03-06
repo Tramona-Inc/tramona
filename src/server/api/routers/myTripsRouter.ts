@@ -50,6 +50,7 @@ const getDisplayTrips = async (
             name: true,
             imageUrls: true,
             address: true,
+            checkInInfo: true,
           },
         },
         request: {
