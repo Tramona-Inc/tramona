@@ -30,6 +30,7 @@ import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import TagSelect from "../_common/TagSelect";
+import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 import {
   Select,
   SelectContent,
@@ -39,7 +40,6 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
-import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
@@ -62,6 +62,7 @@ const formSchema = z.object({
   safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
+  airbnbMessageUrl: optional(zodUrl()),
   imageUrls: z.object({ value: zodUrl() }).array(),
 });
 
@@ -113,6 +114,7 @@ export default function AdminOfferForm({
             safetyItems: offer.property.safetyItems,
             about: offer.property.about,
             airbnbUrl: offer.property.airbnbUrl ?? undefined,
+            airbnbMessageUrl: offer.property.airbnbMessageUrl ?? undefined,
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
@@ -480,19 +482,35 @@ export default function AdminOfferForm({
         </div>
 
         {isAirbnb && (
-          <FormField
-            control={form.control}
-            name="airbnbUrl"
-            render={({ field }) => (
-              <FormItem className="col-span-full">
-                <FormLabel>Airbnb URL</FormLabel>
-                <FormControl>
-                  <Input {...field} inputMode="url" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <>
+            <FormField
+              control={form.control}
+              name="airbnbUrl"
+              render={({ field }) => (
+                <FormItem className="col-span-full">
+                  <FormLabel>Airbnb URL</FormLabel>
+                  <FormControl>
+                    <Input {...field} inputMode="url" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="airbnbMessageUrl"
+              render={({ field }) => (
+                <FormItem className="col-span-full">
+                  <FormLabel>Airbnb Message Host Url</FormLabel>
+                  <FormControl>
+                    <Input {...field} inputMode="url" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
         )}
 
         <FormField
