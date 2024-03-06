@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
 import { TAX_PERCENTAGE } from "@/utils/constants";
@@ -97,24 +96,39 @@ export default function DirectBookDialog(
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{props.children}</DialogTrigger>
 
-      <DialogContent className="w-screen md:w-[750px] ">
-        <div className="rounded-t-lg bg-black py-2 text-center font-bold text-white">
-          {discountPercentage}% OFF
-        </div>
-        <Card>
-          <div className="flex justify-around">
+      <DialogContent className="w-screen md:w-[500px] ">
+        <div className="rounded-md bg-white shadow-md">
+          <div className="rounded-t-md bg-black py-2 text-center font-bold text-white">
+            {discountPercentage}% OFF
+          </div>
+          <div className="flex items-center justify-around p-3">
             <div>
               <p>Check-in</p>
               <p className="font-bold">{checkInDate}</p>
             </div>
+            <div className="h-[1px] w-[75px] border-[1px]" />
+
             <div>
               <p>Check-out</p>
               <p className="font-bold">{checkOutDate}</p>
             </div>
           </div>
-        </Card>
+        </div>
+        <div className="space-y-4 py-4 text-muted-foreground">
+          <h1 className="text-xl font-bold text-black">Price Details</h1>
+          <div className="-space-y-1 text-black">
+            <div className="flex justify-between py-2 text-muted-foreground">
+              <p>Non Tramona Price</p>
+              <p>{formatCurrency(originalNightlyPrice)}/night</p>
+            </div>
+            <div className="flex justify-between py-2 ">
+              <p>Tramona Price</p>
+              <p>{formatCurrency(offerNightlyPrice)}/night</p>
+            </div>
+          </div>
+        </div>
         <div className="space-y-4 border-y py-4 text-muted-foreground">
-          <p className="text-xl font-bold text-black">Price Details</p>
+          <h1 className="text-xl font-bold text-black">Final Price Details</h1>
           <div className="-space-y-1 text-black">
             <div className="flex justify-between py-2">
               <p className="underline">
@@ -138,7 +152,7 @@ export default function DirectBookDialog(
           </div>
         </div>
         <div className="flex justify-between py-2">
-          <p className="underline">Total (USD)</p>
+          <p className="font-bold underline">Total (USD)</p>
           <p className="font-bold">{formatCurrency(totalPriceWithFees)}</p>
         </div>
         <Button
