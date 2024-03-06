@@ -12,6 +12,7 @@ import {
   getTramonaFeeTotal,
 } from "@/utils/utils";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
@@ -234,8 +235,12 @@ export default function AirbnbBookDialog(
                       </Button>
                     )}
                   />
-                  <Button disabled={!isBooked}>Contact host</Button>
                 </div>
+                <Button asChild disabled={!isBooked}>
+                  <Link href={offer.property.airbnbMessageUrl ?? ""}>
+                    Press to Contact host
+                  </Link>
+                </Button>
               </div>
             </div>
 
