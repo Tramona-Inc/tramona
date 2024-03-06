@@ -7,7 +7,7 @@ import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import UserAvatar from "../_common/UserAvatar";
-import { Icons } from "../_icons/icons";
+import Spinner from "../_common/Spinner";
 
 export function MessageConversation({
   conversation,
@@ -130,9 +130,7 @@ export default function MessagesSidebar({
           </p>
         )
       ) : (
-        <div className="flex flex-col items-center justify-center">
-          <Icons.loading />
-        </div>
+        <Spinner />
       )}
     </div>
   );
