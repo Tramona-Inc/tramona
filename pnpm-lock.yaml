@@ -159,8 +159,8 @@ dependencies:
     specifier: ^0.5.1
     version: 0.5.1(drizzle-orm@0.29.4)(zod@3.22.4)
   embla-carousel-autoplay:
-    specifier: 8.0.0-rc19
-    version: 8.0.0-rc19(embla-carousel@8.0.0)
+    specifier: 8.0.0
+    version: 8.0.0(embla-carousel@8.0.0)
   embla-carousel-react:
     specifier: 8.0.0-rc19
     version: 8.0.0-rc19(react@18.2.0)
@@ -9068,10 +9068,10 @@ packages:
       minimalistic-crypto-utils: 1.0.1
     dev: true
 
-  /embla-carousel-autoplay@8.0.0-rc19(embla-carousel@8.0.0):
-    resolution: {integrity: sha512-c1pxsGHuWbYD3outH5y4L+kzg15smyHKFIDmXLaXlI6rCiizzf6hWMW0ZgxJLV4y4nUwDrYhM6TtzxvvOcsfUw==}
+  /embla-carousel-autoplay@8.0.0(embla-carousel@8.0.0):
+    resolution: {integrity: sha512-FWHhZULH5+ydg7fiabwQppCDoTMi8pbMC20lmVytoXn7hH2KAhXHc/8yCUb3yToqMduCN6xPKUONtgzBqz3RZg==}
     peerDependencies:
-      embla-carousel: 8.0.0-rc19
+      embla-carousel: 8.0.0
     dependencies:
       embla-carousel: 8.0.0
     dev: false
