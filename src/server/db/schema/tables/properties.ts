@@ -92,6 +92,7 @@ export const properties = pgTable(
     avgRating: doublePrecision("avg_rating").notNull(),
     numRatings: integer("num_ratings").notNull(),
     airbnbUrl: varchar("airbnb_url"),
+    airbnbMessageUrl: varchar("airbnb_message_url"),
     imageUrls: varchar("image_url").array().notNull(),
     originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
     propertyType: propertyTypeEnum("property_type").notNull(),
@@ -105,6 +106,8 @@ export const properties = pgTable(
       .array()
       .notNull(),
     about: text("about").notNull(),
+    areaDescription: text("area_description"),
+    mapScreenshot: text("map_screenshot"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({

@@ -1,8 +1,13 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { referralCodes, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
+import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
 import { zodEmail, zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
@@ -69,47 +74,45 @@ export const usersRouter = createTRPCRouter({
 
       return updatedUser;
     }),
-  createUrlToBeHost: protectedProcedure.mutation(async ({ ctx }) => {
-    if (ctx.user.role === "admin") {
-      const payload = {
-        email: ctx.user.email,
-        id: ctx.user.id,
-      };
-
-      // Create token
-      const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
-        expiresIn: "24h",
-      });
-
-      const url = `${env.NEXTAUTH_URL}/auth/signup/?hostToken=${token}`;
-
-      return url;
-    } else {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Must be admin to create URL",
-      });
-    }
-  }),
-  verifyUrlToBeHostUrl: protectedProcedure
+  createUrlToBeHost: protectedProcedure
     .input(
       z.object({
-        hostToken: zodString(),
+        conversationId: zodString(),
       }),
     )
-    .mutation(async ({ ctx }) => {
-      const payload = {
-        email: ctx.user.email,
-        id: ctx.user.id,
-      };
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role === "admin") {
+        const payload = {
+          email: ctx.user.email,
+          id: ctx.user.id,
+        };
 
-      // Create token
-      const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
-        expiresIn: "24h",
-      });
+        // Create token
+        const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+          expiresIn: "24h",
+        });
 
-      const url = `${env.NEXTAUTH_URL}/auth/signup/?hostToken=${token}`;
+        const url = `${env.NEXTAUTH_URL}/auth/signup/host?token=${token}&conversationId=${input.conversationId}`;
 
-      return url;
+        return url;
+      } else {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Must be admin to create URL",
+        });
+      }
+    }),
+  insertPhoneWithEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string(),
+        phone: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .update(users)
+        .set({ phoneNumber: input.phone })
+        .where(eq(users.email, input.email));
     }),
 });

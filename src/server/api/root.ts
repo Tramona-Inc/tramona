@@ -8,6 +8,7 @@ import { usersRouter } from "./routers/usersRouter";
 import { myTripsRouter } from "./routers/myTripsRouter";
 import { referralCodesRouter } from "./routers/referralCodesRouter";
 import { messagesRouter } from "./routers/messagesRouter";
+import { twilioRouter } from "./routers/twilioRouter";
 
 /**
  * This is the primary router for your server.
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   myTrips: myTripsRouter,
   messages: messagesRouter,
+  twilio: twilioRouter,
 });
 
 // export type definition of API

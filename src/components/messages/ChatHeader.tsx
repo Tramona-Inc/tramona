@@ -1,8 +1,8 @@
-import { type Conversation } from "@/pages/messages";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
 import { Button, buttonVariants } from "../ui/button";
+import { type Conversation } from '@/utils/store/conversations';
 
 export type ContentProps = {
   selectedConversation: Conversation;

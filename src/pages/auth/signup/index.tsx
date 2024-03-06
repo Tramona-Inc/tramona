@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// https://next-auth.js.org/configuration/pages
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,7 +9,6 @@ import {
 } from "@/components/ui/form";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
@@ -23,14 +19,13 @@ import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z
   .object({
     email: zodEmail(),
-    // username: z.string().max(60),
     name: zodString({ minLen: 2 }),
     password: zodPassword(),
     confirm: z.string(),
@@ -48,41 +43,6 @@ export default function SignUp({
   useRequireNoAuth();
 
   const router = useRouter();
-  const { query } = useRouter();
-
-  const [isVerifiedHostUrl, setIsVerifiedHostUrl] = useState(false);
-
-  const { mutateAsync: verifyHostTokenAsync } =
-    api.auth.verifyHostToken.useMutation({
-      onSuccess: () => {
-        setIsVerifiedHostUrl(true);
-      },
-      onError: () => {
-        toast({
-          description: "Link has expired!",
-          title: "Please contact tramona support to received a new host link.",
-          variant: "destructive",
-        });
-
-        void router.push("/auth/signup");
-      },
-    });
-
-  useEffect(() => {
-    const verifyHostToken = async () => {
-      if (query.hostToken) {
-        try {
-          await verifyHostTokenAsync({
-            token: query.hostToken as string,
-          });
-        } catch (error) {
-          return error;
-        }
-      }
-    };
-
-    void verifyHostToken();
-  }, [verifyHostTokenAsync, query.hostToken]);
 
   useEffect(() => {
     if (typeof router.query.code === "string") {
@@ -97,14 +57,7 @@ export default function SignUp({
   const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
   async function handleSubmit(newUser: FormSchema) {
-    type NewUserAsHost = FormSchema & { isVerifiedHostUrl: boolean };
-
-    const newUserWithHostCheck: NewUserAsHost = {
-      ...newUser,
-      isVerifiedHostUrl: isVerifiedHostUrl,
-    };
-
-    await createUser(newUserWithHostCheck)
+    await createUser(newUser)
       .then(() =>
         router.push({
           pathname: "/auth/verify-email",
@@ -113,6 +66,8 @@ export default function SignUp({
       )
       .catch(() => errorToast("Couldn't sign up, please try again"));
   }
+
+  // TODO: Refactor later to separted form into its own component
 
   return (
     <>
@@ -144,19 +99,6 @@ export default function SignUp({
                     </FormItem>
                   )}
                 />
-                {/* <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="text"  />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
                 <FormField
                   control={form.control}
                   name="name"
