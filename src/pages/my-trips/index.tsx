@@ -1,3 +1,4 @@
+import Spinner from "@/components/_common/Spinner";
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
@@ -5,10 +6,9 @@ import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
 import { type inferRouterOutputs } from "@trpc/server";
+import Head from "next/head";
 import Link from "next/link";
 import { useMemo } from "react";
-import Spinner from "@/components/_common/Spinner";
-import Head from "next/head";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
@@ -71,6 +71,7 @@ export default function MyTrips() {
                         )}
                         address={trip.property.address ?? ""}
                         propertyImage={trip.property.imageUrls[0] ?? ""}
+                        checkInInfo={trip.property.checkInInfo ?? ""}
                       />
                     );
                   })
