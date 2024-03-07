@@ -34,6 +34,7 @@ export default function RequestGroupAvatars({
             ? "Invite people"
             : `View ${isSingleUser ? "user" : "group"} details`
         }
+        tooltipOptions={{ side: "left" }}
       >
         {request.groupMembers.map((member) => (
           <UserAvatar

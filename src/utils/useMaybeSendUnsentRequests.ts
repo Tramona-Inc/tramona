@@ -9,7 +9,8 @@ import { toast } from "@/components/ui/use-toast";
 export function useMaybeSendUnsentRequests() {
   const { status } = useSession();
 
-  const mutation = api.requests.create.useMutation();
+  const { mutateAsync: createRequests } =
+    api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export function useMaybeSendUnsentRequests() {
     localStorage.removeItem("unsentRequests");
 
     const res = requestInsertSchema
-      .omit({ userId: true })
+      .omit({ madeByGroupId: true, requestGroupId: true })
       // overwrite checkIn and checkOut because JSON.parse doesnt handle dates
       .extend({ checkIn: z.coerce.date(), checkOut: z.coerce.date() })
       .array()
@@ -32,13 +33,9 @@ export function useMaybeSendUnsentRequests() {
 
     void (async () => {
       try {
-        await Promise.all(
-          unsentRequests.map((req) =>
-            mutation.mutateAsync(req).catch(() => {
-              throw new Error();
-            }),
-          ),
-        );
+        createRequests(unsentRequests).catch(() => {
+          throw new Error();
+        });
         await utils.requests.invalidate();
 
         if (unsentRequests.length === 1) {
@@ -57,5 +54,5 @@ export function useMaybeSendUnsentRequests() {
         localStorage.setItem("unsentRequests", unsentRequestsJSON);
       }
     })();
-  }, [mutation, status, utils.requests]);
+  }, [createRequests, status, utils.requests]);
 }

@@ -51,6 +51,7 @@ export interface ButtonProps
   asChild?: boolean;
   isLoading?: boolean;
   tooltip?: React.ReactNode;
+  tooltipOptions?: React.ComponentProps<typeof TooltipContent>;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -62,6 +63,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       asChild = false,
       isLoading = false,
       tooltip,
+      tooltipOptions = {},
       children,
       ...props
     },
@@ -81,7 +83,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return tooltip ? (
       <Tooltip>
         <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent>{tooltip}</TooltipContent>
+        <TooltipContent {...tooltipOptions}>{tooltip}</TooltipContent>
       </Tooltip>
     ) : (
       button

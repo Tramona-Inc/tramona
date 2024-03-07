@@ -5,8 +5,10 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
+  MAX_REQUEST_GROUP_SIZE,
   groupMembers,
   groups,
+  requestGroups,
   requestInsertSchema,
   requestSelectSchema,
   requests,
@@ -15,9 +17,31 @@ import { getRequestStatus } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
+async function createGroup({
+  ownerId,
+  _db = db,
+}: {
+  ownerId?: string;
+  _db?: typeof db;
+}) {
+  const groupId = await _db
+    .insert(groups)
+    .values({})
+    .returning()
+    .then((res) => res[0]!.id);
+
+  if (ownerId) {
+    await _db
+      .insert(groupMembers)
+      .values({ groupId, userId: ownerId, isOwner: true });
+  }
+
+  return groupId;
+}
+
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
-    const myRequests = await ctx.db.query.groupMembers
+    const groupedRequests = await ctx.db.query.groupMembers
       .findMany({
         where: eq(groupMembers.userId, ctx.user.id),
         with: {
@@ -76,8 +100,8 @@ export const requestsRouter = createTRPCRouter({
           .flat(1),
       )
 
-      .then((res) =>
-        res
+      .then((res) => {
+        const ungroupedRequests = res
 
           // 2. extract host images & offers count
           .map((request) => {
@@ -97,27 +121,47 @@ export const requestsRouter = createTRPCRouter({
             (a, b) =>
               b.numOffers - a.numOffers ||
               b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
-      );
+          );
 
-    // 4. group by active/inactive
+        // 4. group
+        const groupedRequests: {
+          groupId: number;
+          requests: typeof ungroupedRequests;
+        }[] = [];
 
-    const activeRequests = myRequests
-      .filter((request) => request.resolvedAt === null)
-      .map((request) => ({ ...request, resolvedAt: null })); // because ts is dumb
+        for (const request of ungroupedRequests) {
+          const group = groupedRequests.find(
+            ({ groupId }) => groupId === request.requestGroupId,
+          );
 
-    const inactiveRequests = myRequests
-      .filter((request) => request.resolvedAt !== null)
-      .map((request) => ({
-        ...request,
-        resolvedAt: request.resolvedAt ?? new Date(),
-      })); // because ts is dumb, new Date will never actually happen
+          if (group) {
+            group.requests.push(request);
+          } else {
+            groupedRequests.push({
+              groupId: request.requestGroupId,
+              requests: [request],
+            });
+          }
+        }
+
+        return groupedRequests;
+      });
+
+    // 5. group by active/inactive (and put partially-active groups on active)
+
+    const activeRequestGroups = groupedRequests.filter((group) =>
+      group.requests.some((request) => request.resolvedAt === null),
+    );
+
+    const inactiveRequestGroups = groupedRequests.filter(
+      (group) => !activeRequestGroups.includes(group),
+    );
 
     // 5. all done
 
     return {
-      activeRequests,
-      inactiveRequests,
+      activeRequestGroups,
+      inactiveRequestGroups,
     };
   }),
 
@@ -176,60 +220,32 @@ export const requestsRouter = createTRPCRouter({
       }));
   }),
 
-  // getAllIncoming: roleRestrictedProcedure(["host", "admin"]).query(
-  //   async ({ ctx, input }) => {
-  //     // get the requests close to this users properties
-  //   },
-  // ),
-
-  create: protectedProcedure
-    .input(requestInsertSchema.omit({ madeByGroupId: true }))
-    .mutation(async ({ ctx, input }) => {
-      const groupId = await ctx.db
-        .insert(groups)
-        .values({})
-        .returning()
-        .then((res) => res[0]!.id);
-
-      await ctx.db
-        .insert(groupMembers)
-        .values({ groupId, userId: ctx.user.id, isOwner: true });
-
-      await ctx.db.insert(requests).values({
-        ...input,
-        madeByGroupId: groupId,
-      });
-    }),
-
-  // 10 requests limit
   createMultiple: protectedProcedure
-    .input(requestInsertSchema.omit({ madeByGroupId: true }).array())
+    .input(
+      requestInsertSchema
+        .omit({ madeByGroupId: true, requestGroupId: true })
+        .array()
+        .max(MAX_REQUEST_GROUP_SIZE),
+    )
     .mutation(async ({ ctx, input }) => {
-      if (input.length > 10) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot create more than 10 requests at a time",
-        });
-      }
-
       await ctx.db.transaction(async (tx) => {
+        const requestGroupId = await tx
+          .insert(requestGroups)
+          .values({})
+          .returning()
+          .then((res) => res[0]!.id);
+
         const results = await Promise.allSettled(
           input.map(async (req) => {
-            // this is all copy pasted from the create procedure above
-            // well figure out later how to extract this into a function
-            const groupId = await tx
-              .insert(groups)
-              .values({})
-              .returning()
-              .then((res) => res[0]!.id);
-
-            await tx
-              .insert(groupMembers)
-              .values({ groupId, userId: ctx.user.id });
+            const madeByGroupId = await createGroup({
+              ownerId: ctx.user.id,
+              _db: tx,
+            });
 
             await tx.insert(requests).values({
               ...req,
-              madeByGroupId: groupId,
+              madeByGroupId,
+              requestGroupId,
             });
           }),
         );

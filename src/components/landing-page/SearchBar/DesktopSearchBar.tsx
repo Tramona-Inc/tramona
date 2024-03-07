@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES, MAX_REQUEST_GROUP_SIZE } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { capitalize, cn, getNumNights } from "@/utils/utils";
@@ -76,7 +76,6 @@ export default function DesktopSearchBar({
   });
 
   const [curTab, setCurTab] = useState(0);
-  const MAX_TRIPS = 10;
 
   const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
@@ -221,7 +220,7 @@ export default function DesktopSearchBar({
               </Comp>
             );
           })}
-          {numTabs < MAX_TRIPS && (
+          {numTabs < MAX_REQUEST_GROUP_SIZE && (
             <button
               key=""
               type="button"
@@ -238,11 +237,6 @@ export default function DesktopSearchBar({
               <PlusIcon className="size-4" />
               Add another trip
             </button>
-          )}
-          {numTabs >= MAX_TRIPS && (
-            <div className="text-sm text-red-500">
-              Maximum of {MAX_TRIPS} trips reached.
-            </div>
           )}
         </div>
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">

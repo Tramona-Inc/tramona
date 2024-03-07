@@ -178,11 +178,15 @@ export const offersRouter = createTRPCRouter({
         },
       });
 
-      const memberIds = offer?.request.madeByGroup.members.map(
+      if (!offer) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      const memberIds = offer.request.madeByGroup.members.map(
         (member) => member.userId,
       );
 
-      if (!memberIds?.includes(ctx.user.id)) {
+      if (!memberIds.includes(ctx.user.id)) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 

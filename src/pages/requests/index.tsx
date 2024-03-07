@@ -23,21 +23,55 @@ function NewRequestButton() {
   );
 }
 
-function RequestCards({
+function RequestGroup({
+  groupId,
   requests,
 }: {
-  requests: DetailedRequest[] | undefined;
+  groupId: number;
+  requests: DetailedRequest[];
 }) {
-  return requests ? (
+  if (requests.length === 0) return null;
+
+  if (requests.length === 1) {
+    const request = requests[0]!;
+    return (
+      <RequestCard request={request}>
+        <RequestCardAction request={request} />
+      </RequestCard>
+    );
+  }
+
+  return (
+    <div className="col-span-full overflow-hidden rounded-xl bg-accent">
+      <div className="flex items-center gap-2 px-4 pt-2">
+        <p className="text-sm font-semibold uppercase text-zinc-600">
+          {requests.length} Requests
+        </p>
+      </div>
+      <div className="flex gap-2 overflow-x-auto p-2">
+        {requests.map((request) => (
+          <div key={request.id} className="min-w-96 *:h-full">
+            <RequestCard request={request}>
+              <RequestCardAction request={request} />
+            </RequestCard>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RequestCards({
+  requestGroups,
+}: {
+  requestGroups: { groupId: number; requests: DetailedRequest[] }[];
+}) {
+  return (
     <div className="grid gap-4 lg:grid-cols-2">
-      {requests.map((request) => (
-        <RequestCard key={request.id} request={request}>
-          <RequestCardAction request={request} />
-        </RequestCard>
+      {requestGroups.map(({ groupId, requests }) => (
+        <RequestGroup key={groupId} groupId={groupId} requests={requests} />
       ))}
     </div>
-  ) : (
-    <Spinner />
   );
 }
 
@@ -49,38 +83,46 @@ function RequestsTabs() {
       <TabsList>
         <TabsTrigger
           value="activeRequests"
-          count={requests?.activeRequests.length ?? "blank"}
+          count={requests?.activeRequestGroups.length ?? "blank"}
         >
           <TagIcon /> Current Requests
         </TabsTrigger>
         <TabsTrigger
           value="inactiveRequests"
-          count={requests?.inactiveRequests.length ?? "blank"}
+          count={requests?.inactiveRequestGroups.length ?? "blank"}
         >
           <HistoryIcon /> Past Requests
         </TabsTrigger>
       </TabsList>
       <TabsContent value="activeRequests">
-        {requests?.activeRequests.length !== 0 ? (
-          <RequestCards requests={requests?.activeRequests} />
+        {requests ? (
+          requests.activeRequestGroups.length !== 0 ? (
+            <RequestCards requestGroups={requests.activeRequestGroups} />
+          ) : (
+            <div className="flex flex-col items-center gap-4 pt-32">
+              <p className="text-center text-muted-foreground">
+                No requests yet, make a request to get started
+              </p>
+              <NewRequestButton />
+            </div>
+          )
         ) : (
-          <div className="flex flex-col items-center gap-4 pt-32">
-            <p className="text-center text-muted-foreground">
-              No requests yet, make a request to get started
-            </p>
-            <NewRequestButton />
-          </div>
+          <Spinner />
         )}
       </TabsContent>
       <TabsContent value="inactiveRequests">
-        {requests?.inactiveRequests.length !== 0 ? (
-          <RequestCards requests={requests?.inactiveRequests} />
+        {requests ? (
+          requests.inactiveRequestGroups.length !== 0 ? (
+            <RequestCards requestGroups={requests.inactiveRequestGroups} />
+          ) : (
+            <div className="flex flex-col items-center gap-4 pt-32">
+              <p className="text-center text-muted-foreground">
+                Your past requests will show up here
+              </p>
+            </div>
+          )
         ) : (
-          <div className="flex flex-col items-center gap-4 pt-32">
-            <p className="text-center text-muted-foreground">
-              Your past requests will show up here
-            </p>
-          </div>
+          <Spinner />
         )}
       </TabsContent>
     </Tabs>

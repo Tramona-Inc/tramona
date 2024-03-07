@@ -24,7 +24,10 @@ export default function Page() {
 
   const { data: requests } = api.requests.getMyRequests.useQuery();
 
-  const request = requests?.activeRequests.find(({ id }) => id === requestId);
+  const request = requests?.activeRequestGroups
+    .map((group) => group.requests)
+    .flat(1)
+    .find(({ id }) => id === requestId);
 
   return (
     <>

@@ -16,8 +16,8 @@ import RequestGroupAvatars from "./RequestCardGroupAvatars";
 
 export type DetailedRequest =
   inferRouterOutputs<AppRouter>["requests"]["getMyRequests"][
-    | "activeRequests"
-    | "inactiveRequests"][number];
+    | "activeRequestGroups"
+    | "inactiveRequestGroups"][number]["requests"][number];
 
 export type RequestWithUser =
   inferRouterOutputs<AppRouter>["requests"]["getAll"][

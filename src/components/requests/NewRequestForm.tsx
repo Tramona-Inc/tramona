@@ -84,7 +84,7 @@ export default function NewRequestForm({
     },
   });
 
-  const mutation = api.requests.create.useMutation();
+  const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
   const router = useRouter();
   const { status } = useSession();
@@ -130,7 +130,7 @@ export default function NewRequestForm({
       });
     } else {
       try {
-        await mutation.mutateAsync(newRequest).catch(() => {
+        await mutation.mutateAsync([newRequest]).catch(() => {
           throw new Error();
         });
         await utils.requests.invalidate();
