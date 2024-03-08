@@ -276,3 +276,4 @@ export default function HostSignUpForm() {
     </div>
   );
 }
+http://localhost:3000/auth/verifying-email?id=13a7fe38-20ef-4b71-8bd2-dd4b625cbeff&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InpwdW5zYWxhQHVjaS5lZHUiLCJpZCI6IjEzYTdmZTM4LTIwZWYtNGI3MS04YmQyLWRkNGI2MjVjYmVmZiIsImlhdCI6MTcwOTg1OTUxMywiZXhwIjoxNzA5ODYxMzEzfQ.PNmI8gw71epaZnmTTL7YkG4KSJesksgRaaLlDBemtLU&conversationId=1&userId=13a7fe38-20ef-4b71-8bd2-dd4b625cbeff

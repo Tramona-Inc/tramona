@@ -48,14 +48,15 @@ async function insertUserAuth(
   name: string,
   email: string,
   hashedPassword: string,
+  makeHost: boolean = false,
 ) {
   return await db
     .insert(users)
     .values({
-      id: crypto.randomUUID(),
       name: name,
       email: email,
       password: hashedPassword,
+      role: makeHost ? 'host' : 'guest',
     })
     .returning()
     .then((res) => res[0] ?? null);
@@ -208,7 +209,7 @@ export const authRouter = createTRPCRouter({
           );
         } else {
           // Initial sign up insert the user info
-          user = await insertUserAuth(input.name, input.email, hashedPassword);
+          user = await insertUserAuth(input.name, input.email, hashedPassword, true);
 
           if (user) {
             // Create referral code
