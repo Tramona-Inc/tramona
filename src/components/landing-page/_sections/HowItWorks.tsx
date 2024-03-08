@@ -34,12 +34,11 @@ const HowItWorks: React.FC = () => (
         <div className="absolute inset-0 z-0">
           <Image
             src="/assets/images/landing-page/how_it_works.jpeg"
-            alt="How It Works Background"
+            alt=""
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority
-            style={{ objectFit: "cover", objectPosition: "center" }}
-            className="rounded-3xl"
+            className="rounded-3xl object-cover object-center"
           />
         </div>
         <div className="relative z-10">

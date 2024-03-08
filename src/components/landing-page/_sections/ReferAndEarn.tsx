@@ -10,11 +10,10 @@ const ReferAndEarn = () => {
           <div className="h-48 w-full overflow-hidden rounded-lg md:h-64 md:w-96">
             <Image
               src="/assets/images/landing-page/referandearn.jpeg"
-              alt="Descriptive Alt Text"
               width={384}
               height={192}
-              style={{ objectFit: "contain" }}
-              className="rounded-lg"
+              alt=""
+              className="rounded-lg object-contain"
             />
           </div>
         </div>

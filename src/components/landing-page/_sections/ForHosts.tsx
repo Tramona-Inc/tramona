@@ -20,11 +20,10 @@ const ForHosts = () => {
         <div className="h-48 w-full overflow-hidden rounded-lg md:h-64 md:w-96">
           <Image
             src="/assets/images/landing-page/forhosts.jpeg"
-            alt="Descriptive Alt Text"
-            style={{ objectFit: "cover", objectPosition: "center" }}
+            alt=""
             width={384}
             height={192}
-            className="rounded-lg"
+            className="rounded-lg object-cover object-center"
           />
         </div>
       </div>
