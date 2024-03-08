@@ -1,7 +1,10 @@
 import { type NavLink } from "@/components/dashboard/DashboardSidebar";
 import HostDashboardSidebar from "@/components/dashboard/HostDashboardSidebar";
 
-const navLinks: NavLink[] = [{ href: "/messages", name: "Messages" }];
+const navLinks: NavLink[] = [
+  { href: "/host", name: "Overview" },
+  { href: "/messages", name: "Messages" },
+];
 
 export default function HostDashboardLayout({
   children,
