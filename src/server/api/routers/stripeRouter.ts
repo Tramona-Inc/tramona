@@ -25,23 +25,23 @@ export const stripeRouter = createTRPCRouter({
         description: z.string(),
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
-        userId: z.string(),
         totalSavings: z.number(),
         // hostId: z.string(),
       }),
     )
-    .mutation(({ input }) => {
+    .mutation(({ ctx, input }) => {
       const currentDate = new Date(); // Get the current date and time
 
       // Object that can be access through webhook and client
       const metadata = {
-        user_id: input.userId,
+        user_id: ctx.user.id,
         listing_id: input.listingId,
         property_id: input.propertyId,
         request_id: input.requestId,
         price: input.price,
         total_savings: input.totalSavings,
         confirmed_at: currentDate.toISOString(),
+        phone_number: ctx.user.phoneNumber,
         // host_id: input.hostId,
       };
 
@@ -94,6 +94,7 @@ export const stripeRouter = createTRPCRouter({
           checkout_session_id: session.id,
           total_savings: session.metadata?.total_savings,
           confirmed_at: session.metadata?.confirmed_at,
+          phoneNumber: session.metadata?.phone_number,
           // host_id: session.metadata?.host_id
         },
       };

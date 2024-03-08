@@ -79,7 +79,6 @@ export default function DirectBookDialog(
       description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
       images: offer.property.imageUrls,
-      userId: session.data?.user.id ?? "",
       totalSavings,
     });
 
