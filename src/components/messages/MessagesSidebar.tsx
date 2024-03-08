@@ -6,8 +6,8 @@ import {
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import UserAvatar from "../_common/UserAvatar";
 import Spinner from "../_common/Spinner";
+import UserAvatar from "../_common/UserAvatar";
 
 export function MessageConversation({
   conversation,

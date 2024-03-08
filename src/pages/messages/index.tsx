@@ -1,3 +1,5 @@
+import DashboardLayout from "@/components/_common/DashboardLayout";
+import HostDashboardLayout from "@/components/_common/DashboardLayout/Host";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import {
@@ -9,7 +11,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-export default function MessagePage() {
+function MessageDisplay() {
   const [isViewed, setIsViewd] = useState(false);
 
   const conversations = useConversation((state) => state.conversationList);
@@ -22,8 +24,6 @@ export default function MessagePage() {
   };
 
   const { query } = useRouter();
-
-  useSession({ required: true });
 
   // Allows us to open message from url query
   useEffect(() => {
@@ -45,21 +45,36 @@ export default function MessagePage() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
+    <div className="grid h-[calc(100vh-5em)] grid-cols-1 md:grid-cols-6">
+      <MessagesSidebar
+        selectedConversation={selectedConversation}
+        setSelected={selectConversation}
+      />
+      <MessagesContent
+        selectedConversation={selectedConversation}
+        setSelected={selectConversation}
+      />
+    </div>
+  );
+}
+
+export default function MessagePage() {
+  const { data: session } = useSession({ required: true });
+
+  return (
     <>
       <Head>
         <title>Messages | Tramona</title>
       </Head>
-
-      <div className="grid h-[calc(100vh-5em)] grid-cols-1 bg-white md:grid-cols-6">
-        <MessagesSidebar
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-        />
-        <MessagesContent
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-        />
-      </div>
+      {session?.user.role === "host" ? (
+        <HostDashboardLayout>
+          <MessageDisplay />
+        </HostDashboardLayout>
+      ) : (
+        <DashboardLayout>
+          <MessageDisplay />
+        </DashboardLayout>
+      )}
     </>
   );
 }
