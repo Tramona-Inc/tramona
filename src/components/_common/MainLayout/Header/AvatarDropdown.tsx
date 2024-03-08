@@ -1,15 +1,11 @@
 import { cn } from "@/utils/utils";
 import {
-  BriefcaseIcon,
   HomeIcon,
   LogOutIcon,
-  TagIcon,
   UserCheck2Icon,
   UserCheckIcon,
   UserCogIcon,
   type LucideProps,
-  // MessageSquareText,
-  // DollarSignIcon,
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -129,28 +125,10 @@ export default function AvatarDropdown({ session }: { session: Session }) {
         <DropdownLink href="/" Icon={HomeIcon}>
           Home
         </DropdownLink>
-        <DropdownLink href="/requests" Icon={TagIcon}>
-          My Requests
-        </DropdownLink>
-        <DropdownLink href="/my-trips" Icon={BriefcaseIcon}>
-          My Trips
-        </DropdownLink>
-        {/* <DropdownLink href="/messages" Icon={MessageSquareText}>
-          Messages
-          <Badge variant="secondary" size="sm">
-            5
-          </Badge>
-        </DropdownLink> */}
         <DropdownLink href="/profile" Icon={UserCogIcon}>
           Profile
         </DropdownLink>
         <DropdownMenuSeparator />
-        {/* <>
-          <DropdownLink href="/account" Icon={DollarSignIcon}>
-            Cashback Balance: <span className="text-primary">$112</span>
-          </DropdownLink>
-          <DropdownMenuSeparator />
-        </> */}
 
         <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: `${window.location.origin}` })}
