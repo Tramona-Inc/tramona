@@ -13,6 +13,7 @@ import {
 import NavLink from "@/components/_utils/NavLink";
 import { cn } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 
 export default function Header() {
   return (
@@ -46,7 +47,17 @@ const headerLinks = [
   },
 ];
 
+const userLinks = [
+  { href: "/", label: "Overview" },
+  { href: "/my-trips", label: "My Trips" },
+  { href: "/requests", label: "Request/Offers" },
+  { href: "/messages", label: "Messages" },
+  { href: "/faq", label: "FAQ" },
+];
+
 function LargeHeader() {
+  const { status } = useSession();
+
   return (
     <header className="sticky top-0 z-50 flex items-center bg-white p-4 shadow-md">
       <div className="flex flex-1 gap-4">
@@ -54,11 +65,15 @@ function LargeHeader() {
       </div>
 
       <div className="flex items-center justify-center gap-2">
-        {headerLinks.map(({ href, label }, i) => (
-          <HeaderLink key={i} href={href}>
-            {label}
-          </HeaderLink>
-        ))}
+        {status === "unauthenticated" && (
+          <>
+            {headerLinks.map(({ href, label }, i) => (
+              <HeaderLink key={i} href={href}>
+                {label}
+              </HeaderLink>
+            ))}
+          </>
+        )}
       </div>
 
       <div className="flex flex-1 justify-end">
@@ -69,6 +84,7 @@ function LargeHeader() {
 }
 
 function SmallHeader() {
+  const { status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
@@ -82,11 +98,24 @@ function SmallHeader() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="p-2">
-          {headerLinks.map(({ href, label }, i) => (
-            <HeaderLink key={i} href={href} onClick={closeMenu}>
-              {label}
-            </HeaderLink>
-          ))}
+          {status === "unauthenticated" && (
+            <>
+              {headerLinks.map(({ href, label }, i) => (
+                <HeaderLink key={i} href={href} onClick={closeMenu}>
+                  {label}
+                </HeaderLink>
+              ))}
+            </>
+          )}
+          {status === "authenticated" && (
+            <>
+              {userLinks.map(({ href, label }, i) => (
+                <HeaderLink key={i} href={href} onClick={closeMenu}>
+                  {label}
+                </HeaderLink>
+              ))}
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
