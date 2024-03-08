@@ -29,9 +29,7 @@ export function useRequireNoAuth() {
 
   useEffect(() => {
     if (session.status === "authenticated") {
-      void router.replace(
-        session.data.user.role === "admin" ? "/admin" : "/requests",
-      );
+      void router.replace(session.data.user.role === "admin" ? "/admin" : "/");
     }
   }, [router, session.data?.user.role, session.status]);
 }

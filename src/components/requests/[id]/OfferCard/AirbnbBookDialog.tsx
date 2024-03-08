@@ -11,7 +11,6 @@ import {
   getNumNights,
   getTramonaFeeTotal,
 } from "@/utils/utils";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -62,7 +61,6 @@ export default function AirbnbBookDialog(
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
-  const session = useSession({ required: true });
 
   async function checkout() {
     const response = await createCheckout.mutateAsync({
@@ -74,7 +72,6 @@ export default function AirbnbBookDialog(
       description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
       images: offer.property.imageUrls,
-      userId: session.data?.user.id ?? "",
       totalSavings,
       phoneNumber: session.data?.user.phoneNumber ?? "",
     });

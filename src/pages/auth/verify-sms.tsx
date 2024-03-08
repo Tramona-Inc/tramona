@@ -1,8 +1,14 @@
-import { OTPInput } from "@/components/ui/otp-input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 export default function Page() {
   const [code, setCode] = useState("");
@@ -56,16 +62,20 @@ export default function Page() {
       <h1 className="text-center text-5xl font-bold tracking-tight">
         Please verify your phone number
       </h1>
-      <p className="text-muted-foreground">Check in your messages</p>
+      <p className="text-muted-foreground">Check your messages for code</p>
 
-      <OTPInput
+      <InputOTP
+        maxLength={6}
+        pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
         value={code}
-        onPaste={(e) => {
-          e.preventDefault();
-        }}
-        placeholder=""
-        type="number"
         onChange={(value) => setCode(value)}
+        render={({ slots }) => (
+          <InputOTPGroup>
+            {slots.map((slot, index) => (
+              <InputOTPSlot key={index} {...slot} />
+            ))}{" "}
+          </InputOTPGroup>
+        )}
       />
     </div>
   );

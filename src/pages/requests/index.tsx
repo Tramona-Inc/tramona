@@ -14,6 +14,7 @@ import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { useEffect, useState } from "react";
 import { useInterval } from "@/utils/useInterval";
 import { usePrevious } from "@uidotdev/usehooks";
+import DashboardLayout from "@/components/_common/DashboardLayout";
 
 function NewRequestButton() {
   return (
@@ -138,17 +139,20 @@ export default function Page() {
       <Head>
         <title>My Requests | Tramona</title>
       </Head>
-      <div className="px-4 pb-64 pt-16">
-        <div className="mx-auto max-w-5xl">
-          <div className="flex items-center">
-            <h1 className="flex-1 py-4 text-3xl font-bold text-black">
-              My Requests
-            </h1>
-            <NewRequestButton />
+
+      <DashboardLayout>
+        <div className="container col-span-10 px-4 pb-64 pt-5 2xl:col-span-11">
+          <div className="mx-auto">
+            <div className="flex items-center">
+              <h1 className="flex-1 py-4 text-4xl font-bold text-black">
+                My Requests
+              </h1>
+              <NewRequestButton />
+            </div>
+            <RequestsTabs />
           </div>
-          <RequestsTabs />
         </div>
-      </div>
+      </DashboardLayout>
     </>
   );
 }
