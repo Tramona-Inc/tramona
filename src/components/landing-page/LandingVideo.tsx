@@ -6,26 +6,21 @@ const LandingVideo = () => {
 
   const playVideo = () => {
     if (videoRef.current && !videoLoaded) {
-      videoRef.current
-        .play()
-        .then(() => setVideoLoaded(true))
-        .catch(() => {
-          // Handle error (like user didn't interact with the document yet)
-          // console.error("Error playing video:", error);
-        });
+      void videoRef.current.play().then(() => setVideoLoaded(true));
     }
   };
 
   React.useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      videoRef.current.addEventListener("loadeddata", playVideo);
+    const video = videoRef.current;
+    if (video) {
+      video.load();
+      video.addEventListener("loadeddata", playVideo);
     }
 
     // cleanup function to remove event listener
     return () => {
-      if (videoRef.current) {
-        videoRef.current.removeEventListener("loadeddata", playVideo);
+      if (video) {
+        video.removeEventListener("loadeddata", playVideo);
       }
     };
   }, []);
@@ -41,8 +36,8 @@ const LandingVideo = () => {
         className="absolute h-full w-full object-cover"
       />
       <div
-        className={`transition-duration-7000ms absolute inset-0 ${
-          videoLoaded ? "bg-black/0" : "bg-black"
+        className={`absolute inset-0 transition-colors duration-1000 ${
+          videoLoaded ? "bg-black/70" : "bg-black"
         }`}
       />
     </>

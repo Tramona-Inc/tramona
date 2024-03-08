@@ -7,36 +7,69 @@ import { Badge } from "@/components/ui/badge";
 import { referralStatuses } from "./data";
 import type { Referral } from "./referrals";
 import { DataTableColumnHeader } from "./ReferralColumnHeaders";
+import { formatCurrency } from "@/utils/utils";
+import { formatDate } from "date-fns";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const referralColumns: ColumnDef<Referral>[] = [
   {
-    accessorKey: "date",
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "createdAt",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Date" />
     ),
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("date")}</div>,
+    cell: ({ row }) => (
+      <div className="w-[80px]">
+        {formatDate(row.getValue("createdAt"), "MM/dd/yyyy")}
+      </div>
+    ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "referee",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Referee Name" />
     ),
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    cell: ({ row }) => {
+      const referee: { name: string } = row.getValue("referee");
+
+      return <div>{referee.name}</div>;
+    },
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "status",
+    accessorKey: "earningStatus",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
       const status = referralStatuses.find(
-        (status) => status.value === row.original.status,
+        (status) => status.value === row.original.earningStatus,
       );
 
       if (!status) {
@@ -55,22 +88,27 @@ export const referralColumns: ColumnDef<Referral>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "amount",
+    accessorKey: "offer",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount" />
     ),
-    cell: ({ row }) => <div>${row.getValue("amount")}</div>,
+    cell: ({ row }) => {
+      const offer: { totalPrice: number } = row.getValue("offer");
+      return <div>{formatCurrency(offer.totalPrice)}</div>;
+    },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     enableHiding: false,
   },
   {
-    accessorKey: "cashback",
+    accessorKey: "cashbackEarned",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Cash Back" />
     ),
-    cell: ({ row }) => <div>{row.getValue("cashback")}</div>,
+    cell: ({ row }) => (
+      <div>{formatCurrency(row.getValue("cashbackEarned"))}</div>
+    ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },

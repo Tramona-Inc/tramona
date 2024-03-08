@@ -1,5 +1,4 @@
 import UserAvatar from "@/components/_common/UserAvatar";
-import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import {
 import { type AppRouter } from "@/server/api/root";
 import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
+import { TAX_PERCENTAGE } from "@/utils/constants";
 import {
   cn,
   formatCurrency,
@@ -27,6 +27,7 @@ import { CheckIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
+import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 
 export type OfferWithDetails =
   inferRouterOutputs<AppRouter>["offers"]["getByIdWithDetails"];
@@ -72,7 +73,8 @@ export default function OfferPage({
   const tramonaServiceFee = getTramonaFeeTotal(
     originalTotal - offer.totalPrice,
   );
-  const tax = (offer.totalPrice + tramonaServiceFee) * 0.0725;
+
+  const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
   return (
     <div className="space-y-4">

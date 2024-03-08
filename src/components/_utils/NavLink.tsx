@@ -10,7 +10,7 @@ export default function NavLink({
   render: (props: { selected: boolean }) => ReactNode;
 }) {
   const { asPath } = useRouter();
-  const isCurrentPage = asPath.startsWith(href);
+  const isCurrentPage = asPath.endsWith(href);
 
   return <Link href={href}>{render({ selected: isCurrentPage })}</Link>;
 }

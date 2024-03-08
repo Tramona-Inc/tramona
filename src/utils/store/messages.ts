@@ -1,6 +1,8 @@
 import { LIMIT_MESSAGE } from "@/components/messages/ChatMessages";
 import { type MessageType } from "@/server/db/schema";
 import { create } from "zustand";
+import supabase from "../supabase-client";
+import { errorToast } from "../toasts";
 
 export type ChatMessageType = MessageType & {
   user: { name: string | null; email: string; image: string | null };
@@ -12,6 +14,7 @@ type ConversationsState = Record<
     messages: ChatMessageType[];
     page: number;
     hasMore: boolean;
+    alreadyFetched: boolean;
   }
 >;
 
@@ -19,12 +22,6 @@ type MessageState = {
   conversations: ConversationsState;
   currentConversationId: number | null;
   setCurrentConversationId: (id: number) => void;
-  setInitConversationMessages: (
-    conversationId: number,
-    messages: ChatMessageType[],
-    page: number,
-    hasMore: boolean,
-  ) => void;
   switchConversation: (conversationId: number) => void;
   addMessageToConversation: (
     conversationId: number,
@@ -36,32 +33,15 @@ type MessageState = {
     conversationId: number,
     moreMessages: ChatMessageType[],
   ) => void;
+  fetchInitialMessages: (conversationId: number) => Promise<void>;
 };
 
-export const useMessage = create<MessageState>((set) => ({
+export const useMessage = create<MessageState>((set, get) => ({
   conversations: {},
   currentConversationId: null,
   setCurrentConversationId: (id: number) => {
     set(() => ({
       currentConversationId: id,
-    }));
-  },
-  setInitConversationMessages: (
-    conversationId: number,
-    messages: ChatMessageType[],
-    page: number,
-    hasMore: boolean,
-  ) => {
-    set((state) => ({
-      ...state,
-      conversations: {
-        ...state.conversations,
-        [conversationId]: {
-          messages,
-          page,
-          hasMore,
-        },
-      },
     }));
   },
   switchConversation: (conversationId: number) => {
@@ -86,6 +66,8 @@ export const useMessage = create<MessageState>((set) => ({
           ],
           page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
           hasMore: updatedConversations[conversationId]?.hasMore ?? false,
+          alreadyFetched:
+            updatedConversations[conversationId]?.alreadyFetched ?? true,
         };
       } else {
         // If the conversation doesn't exist, create a new conversation with the new message
@@ -93,6 +75,7 @@ export const useMessage = create<MessageState>((set) => ({
           messages: [newMessage],
           page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
           hasMore: updatedConversations[conversationId]?.hasMore ?? false,
+          alreadyFetched: updatedConversations[conversationId]?.hasMore ?? true,
         };
       }
 
@@ -130,6 +113,8 @@ export const useMessage = create<MessageState>((set) => ({
           ],
           page: (updatedConversations[conversationId]?.page ?? 1) + 1,
           hasMore: moreMessages.length >= LIMIT_MESSAGE,
+          alreadyFetched:
+            updatedConversations[conversationId]?.alreadyFetched ?? true,
         };
       } else {
         // If the conversation doesn't exist, create a new conversation with the new message
@@ -137,6 +122,7 @@ export const useMessage = create<MessageState>((set) => ({
           messages: moreMessages,
           page: 1, // Set a default value for page
           hasMore: true,
+          alreadyFetched: true,
         };
       }
 
@@ -147,5 +133,65 @@ export const useMessage = create<MessageState>((set) => ({
 
       return updatedState;
     });
+  },
+  fetchInitialMessages: async (conversationId: number): Promise<void> => {
+    const state = get();
+
+    // Check if messages for this conversation have already been fetched
+    if (state.conversations[conversationId]?.alreadyFetched) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("messages")
+        .select(
+          `
+            *,
+            user(name, image, email)
+          `,
+        )
+        .range(0, LIMIT_MESSAGE)
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data) {
+        const chatMessages: ChatMessageType[] = data.map((message) => ({
+          id: message.id,
+          createdAt: new Date(message.created_at),
+          conversationId: message.conversation_id,
+          userId: message.user_id,
+          message: message.message,
+          read: message.read ?? null, // Provide a default value if needed
+          isEdit: message.is_edit ?? null, // Provide a default value if needed
+          user: {
+            name: message.user?.name ?? "",
+            image: message.user?.image ?? "",
+            email: message.user?.email ?? "",
+          },
+        }));
+
+        const hasMore = chatMessages.length >= LIMIT_MESSAGE;
+
+        set((state) => ({
+          ...state,
+          conversations: {
+            ...state.conversations,
+            [conversationId]: {
+              messages: chatMessages,
+              page: 1,
+              hasMore,
+              alreadyFetched: true, // Set the flag to true after fetching
+            },
+          },
+        }));
+      }
+    } catch (error) {
+      errorToast(error as string);
+    }
   },
 }));

@@ -24,13 +24,13 @@ function FooterLink({
 }
 
 export default function Footer() {
-  const [submittedEmail, setSubmittedEmail] = useState(false);
+  // const [submittedEmail, setSubmittedEmail] = useState(false);
 
   return (
-    <footer className="flex items-stretch bg-zinc-900">
+    <footer className="flex items-stretch bg-black">
       <div className="flex-1">
         <div className="mx-4 my-8 flex flex-col px-4 lg:mx-20">
-          <div>
+          {/* <div>
             <p className="pb-2 text-lg font-medium text-zinc-300">Newsletter</p>
             <form
               onSubmit={(e) => {
@@ -59,7 +59,7 @@ export default function Footer() {
                 <ArrowRightIcon />
               </button>
             </form>
-          </div>
+          </div> */}
           <div className="my-8 flex flex-col text-zinc-300 lg:flex-row">
             <div className="flex-1">
               <FooterLink href="/faq">FAQ</FooterLink>
@@ -100,7 +100,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <div className="hidden w-64 bg-[url(/assets/images/footer-img.png)] bg-cover bg-center sm:block" />
+      {/* <div className="hidden w-64 bg-[url(/assets/images/footer-img.png)] bg-cover bg-center sm:block" /> */}
     </footer>
   );
 }

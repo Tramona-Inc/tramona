@@ -8,6 +8,7 @@ import { usersRouter } from "./routers/usersRouter";
 import { myTripsRouter } from "./routers/myTripsRouter";
 import { referralCodesRouter } from "./routers/referralCodesRouter";
 import { messagesRouter } from "./routers/messagesRouter";
+import { twilioRouter } from "./routers/twilioRouter";
 import { filesRouter } from "./routers/filesRouter";
 
 /**
@@ -25,6 +26,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   myTrips: myTripsRouter,
   messages: messagesRouter,
+  twilio: twilioRouter,
   files: filesRouter,
 });
 
