@@ -57,7 +57,7 @@ export default function GroupDetailsDialog({
 
         <div className="space-y-4">
           {showInviteForm && <InviteByEmailForm request={request} />}
-          <div className="min-h-28 space-y-4">
+          <div className="min-h-44 space-y-4">
             <div className="space-y-1">
               {request.numGuests > 1 && (
                 <p className="text-sm font-semibold uppercase text-muted-foreground">
