@@ -165,7 +165,9 @@ export default function OTPDialog({
         setVerified(false);
         console.log(".");
         setOpen(false);
-        errorToast(err.message);
+        if (err instanceof Error) {
+          errorToast(err.message);
+        }
       }
     };
 

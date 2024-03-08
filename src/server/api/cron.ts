@@ -2,15 +2,18 @@ import { api } from "@/utils/api";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { users, requests } from "../db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNotNull } from "drizzle-orm";
 import { sendText } from "@/server/server-utils";
 
 async function cronJob() {
   const usersWithUnconfirmedRequests = await db
-    .selectDistinct({ id: users.id })
+    .selectDistinctOn([users.id], {
+      id: users.id,
+      phoneNumber: users.phoneNumber,
+    })
     .from(users)
     .leftJoin(requests, eq(users.id, requests.userId))
-    .where(eq(requests.hasApproved, false));
+    .where(and(eq(requests.hasApproved, false), isNotNull(users.phoneNumber)));
 
   try {
     // Get the current time
@@ -49,21 +52,11 @@ async function cronJob() {
             day: "2-digit",
             year: "numeric",
           });
-          ///const userPhoneNumber = await db.select({phoneNumber: users.phoneNumber}).from(users).where(eq(users.id, user.id)).limit(1);
 
-          const userData = await db.query.users.findFirst({
-            columns: {
-              phoneNumber: true
-            },
-            where: eq(users.id, user.id),
+          await sendText({
+            to: user.phoneNumber!,
+            content: `Tramona: You have an unconfirmed request to ${request.location} from ${formattedCheckIn} to ${formattedCheckOut}. Please [click here](${url}) to return to the site to confirm your request so we can get you the best travel deals.`,
           });
-
-          if (userData) {
-            await sendText({
-              to: userData.phoneNumber!,
-              content: `Tramona: You have an unconfirmed request to ${request.location} from ${formattedCheckIn} to ${formattedCheckOut}. Please [click here](${url}) to return to the site to confirm your request so we can get you the best travel deals.`,
-            });
-          }
 
           await db
             .update(requests)
