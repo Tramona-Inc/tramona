@@ -41,10 +41,10 @@ const headerLinks = [
   //   href: "/exclusive-offers",
   //   label: "Exclusive Offers",
   // },
-  {
-    href: "/feed",
-    label: "Social Feed",
-  },
+  // {
+  //   href: "/feed",
+  //   label: "Social Feed",
+  // },
 ];
 
 const userLinks = [
