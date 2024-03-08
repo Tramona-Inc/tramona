@@ -22,14 +22,10 @@ const SocialCard: React.FC<SocialCardProps> = ({
       <div className="flex flex-grow flex-col justify-start p-4">
         <div className="mb-2 flex items-center">
           <div className="flex-shrink-0">
-            {userAvatar ? (
-              <Avatar>
-                <AvatarImage src={userAvatar} style={{ objectFit: "cover" }} />
-                <AvatarFallback></AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className="h-6 w-6 rounded-full bg-gray-300 md:h-12 md:w-12"></div>
-            )}
+            <Avatar>
+              <AvatarImage src={userAvatar} style={{ objectFit: "cover" }} />
+              <AvatarFallback />
+            </Avatar>
           </div>
           <div className="ml-4 flex flex-col justify-start">
             <div className="text-xs font-semibold text-gray-900 md:text-sm">
