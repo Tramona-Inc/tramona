@@ -15,6 +15,8 @@ import {
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import { api } from "@/utils/api";
+
 
 // ! Necessary for stripe
 export const config = {
@@ -79,9 +81,10 @@ export default async function webhook(
           );
 
         const twilioMutation = api.twilio.sendSMS.useMutation();
+        paymentIntentSucceeded.metadata
 
         const sms = {
-          to: formatPhoneNumber(paymentIntentSucceeded.metadata.phone_number!),
+          to: formatPhoneNumber(paymentIntentSucceeded.metadata.phoneNumber),
           msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
         };
 
