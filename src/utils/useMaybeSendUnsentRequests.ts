@@ -1,4 +1,7 @@
-import { requestInsertSchema } from "@/server/db/schema";
+import {
+  MAX_REQUEST_GROUP_SIZE,
+  requestInsertSchema,
+} from "@/server/db/schema";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { api } from "./api";
@@ -25,6 +28,8 @@ export function useMaybeSendUnsentRequests() {
       // overwrite checkIn and checkOut because JSON.parse doesnt handle dates
       .extend({ checkIn: z.coerce.date(), checkOut: z.coerce.date() })
       .array()
+      .nonempty()
+      .max(MAX_REQUEST_GROUP_SIZE)
       .safeParse(JSON.parse(unsentRequestsJSON));
 
     if (!res.success) return;
@@ -39,7 +44,7 @@ export function useMaybeSendUnsentRequests() {
         await utils.requests.invalidate();
 
         if (unsentRequests.length === 1) {
-          const req = unsentRequests[0]!;
+          const req = unsentRequests[0];
           successfulRequestToast({
             ...req,
             numGuests: req.numGuests ?? 1,

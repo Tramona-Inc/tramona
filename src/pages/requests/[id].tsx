@@ -1,15 +1,15 @@
 import Spinner from "@/components/_common/Spinner";
 import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
 import OfferCard from "@/components/requests/[id]/OfferCard";
+import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
+import PaywallDialog from "@/components/requests/[id]/PaywallDialog";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
+import { getNumNights } from "@/utils/utils";
 import { TagIcon } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { getNumNights } from "@/utils/utils";
-import PaywallDialog from "@/components/requests/[id]/PaywallDialog";
-import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
 
 export default function Page() {
   const router = useRouter();
@@ -28,6 +28,16 @@ export default function Page() {
     .map((group) => group.requests)
     .flat(1)
     .find(({ id }) => id === requestId);
+
+  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
+    onSuccess: (conversationId) => {
+      void router.push(`/messages?conversationId=${conversationId}`);
+    },
+  });
+
+  function handleConversation() {
+    mutate();
+  }
 
   return (
     <>
@@ -65,6 +75,14 @@ export default function Page() {
                   checkIn={request.checkIn}
                   checkOut={request.checkOut}
                 >
+                  <Button
+                    onClick={() => handleConversation()}
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full"
+                  >
+                    Message
+                  </Button>
                   <Button size="lg" variant="outline" className="rounded-full">
                     <Link href={`/listings/${offer.id}`}>More details</Link>
                   </Button>

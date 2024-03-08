@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import { HistoryIcon, InboxIcon } from "lucide-react";
-import Spinner from "../_common/Spinner";
-import { type RequestWithUser } from "../requests/RequestCard";
-import RejectRequestDialog from "./RejectRequestDialog";
 import Link from "next/link";
+import Spinner from "../_common/Spinner";
+import { Icons } from "../_icons/icons";
+import { type RequestWithUser } from "../requests/RequestCard";
+import AdminUtility from "./AdminUtility";
 import DeleteRequestDialog from "./DeleteRequestDialog";
+import RejectRequestDialog from "./RejectRequestDialog";
 
 function IncomingRequestCards({
   requests,
@@ -86,6 +88,9 @@ export default function AdminRequestsTabs() {
         >
           <HistoryIcon /> Past Requests
         </TabsTrigger>
+        <TabsTrigger value="utility">
+          <Icons.adminTab /> Utility
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="incomingRequests">
         {requests?.incomingRequests.length !== 0 ? (
@@ -108,6 +113,9 @@ export default function AdminRequestsTabs() {
             </p>
           </div>
         )}
+      </TabsContent>
+      <TabsContent value="utility">
+        <AdminUtility />
       </TabsContent>
     </Tabs>
   );

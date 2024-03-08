@@ -1,8 +1,18 @@
 import { env } from "@/env";
+import {
+  createConversationWithAdmin,
+  fetchConversationWithAdmin,
+} from "@/server/api/routers/messagesRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
-import { offers, referralEarnings, requests, users } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import {
+  offers,
+  referralCodes,
+  referralEarnings,
+  requests,
+  users,
+} from "@/server/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 
@@ -87,6 +97,35 @@ export default async function webhook(
           await db
             .insert(referralEarnings)
             .values({ offerId, cashbackEarned, refereeId, referralCode });
+
+          await db
+            .update(referralCodes)
+            .set({
+              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${cashbackEarned}`,
+              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
+            })
+            .where(eq(referralCodes.referralCode, referralCode));
+        }
+
+        // TODO
+        // Add two two users to conversation
+        // void addTwoUserToConversation(
+        //   paymentIntentSucceeded.metadata.user_id!,
+        //   paymentIntentSucceeded.metadata.host_id!,
+        // );
+
+        // ! For now will add user to admin
+        if (paymentIntentSucceeded.metadata.user_id) {
+          const conversationId = await fetchConversationWithAdmin(
+            paymentIntentSucceeded.metadata.user_id,
+          );
+
+          // Create conversation with admin if it doesn't exist
+          if (!conversationId) {
+            await createConversationWithAdmin(
+              paymentIntentSucceeded.metadata.user_id,
+            );
+          }
         }
 
         break;

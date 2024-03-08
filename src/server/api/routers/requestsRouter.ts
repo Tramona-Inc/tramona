@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -13,7 +14,14 @@ import {
   requestSelectSchema,
   requests,
 } from "@/server/db/schema";
+import { sendSlackMessage } from "@/server/slack";
 import { getRequestStatus } from "@/utils/formatters";
+import {
+  formatCurrency,
+  formatDateRange,
+  getNumNights,
+  plural,
+} from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
@@ -225,6 +233,7 @@ export const requestsRouter = createTRPCRouter({
       requestInsertSchema
         .omit({ madeByGroupId: true, requestGroupId: true })
         .array()
+        .nonempty()
         .max(MAX_REQUEST_GROUP_SIZE),
     )
     .mutation(async ({ ctx, input }) => {
@@ -256,6 +265,33 @@ export const requestsRouter = createTRPCRouter({
           });
         }
       });
+
+      if (env.NODE_ENV !== "production") return;
+
+      const name = ctx.user.name ?? ctx.user.email ?? "Someone";
+
+      if (input.length > 1) {
+        sendSlackMessage(
+          `*${name} just made ${input.length} requests*`,
+          `<https://tramona.com/admin|Go to admin dashboard>`,
+        );
+
+        return;
+      }
+
+      const request = input[0];
+
+      const pricePerNight =
+        request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
+      const fmtdPrice = formatCurrency(pricePerNight);
+      const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
+      const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
+
+      sendSlackMessage(
+        `*${name} just made a request: ${request.location}*`,
+        `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+        `<https://tramona.com/admin|Go to admin dashboard>`,
+      );
     }),
 
   // resolving a request with no offers = reject
