@@ -3,12 +3,12 @@ import Footer from "./Footer";
 
 export default function MainLayout({ children }: React.PropsWithChildren) {
   return (
-    <>
-      <div className="flex min-h-screen flex-col" vaul-drawer-wrapper="">
+    <div vaul-drawer-wrapper="">
+      <div className="flex min-h-screen flex-col">
         <Header />
         <main className="flex-1 bg-background">{children}</main>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }

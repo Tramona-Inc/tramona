@@ -37,7 +37,6 @@ export default function MyTrips() {
 
       <div className="container col-span-10 flex flex-col gap-10 py-10 2xl:col-span-11">
         <h1 className="text-4xl font-bold">My Trips</h1>
-
         <div className="flex w-full flex-col gap-10 lg:flex-row">
           <div className="flex flex-col gap-8 lg:w-2/3">
             <div className="flex items-center justify-between">
@@ -75,6 +74,7 @@ export default function MyTrips() {
                         )}
                         address={trip.property.address ?? ""}
                         propertyImage={trip.property.imageUrls[0] ?? ""}
+                        checkInInfo={trip.property.checkInInfo ?? ""}
                       />
                     );
                   })

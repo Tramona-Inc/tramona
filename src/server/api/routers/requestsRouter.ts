@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -9,7 +10,14 @@ import {
   requestSelectSchema,
   requests,
 } from "@/server/db/schema";
+import { sendSlackMessage } from "@/server/slack";
 import { getRequestStatus } from "@/utils/formatters";
+import {
+  formatCurrency,
+  formatDateRange,
+  getNumNights,
+  plural,
+} from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
@@ -112,6 +120,21 @@ export const requestsRouter = createTRPCRouter({
         ...input,
         userId: ctx.user.id,
       });
+
+      const name = ctx.user.name ?? ctx.user.email ?? "Someone";
+      const pricePerNight =
+        input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
+      const fmtdPrice = formatCurrency(pricePerNight);
+      const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
+      const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
+
+      if (env.NODE_ENV === "production") {
+        sendSlackMessage(
+          `*${name} just made a request: ${input.location}*`,
+          `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+          `<https://tramona.com/admin|Go to admin dashboard>`,
+        );
+      }
     }),
 
   // 10 requests limit
@@ -135,6 +158,15 @@ export const requestsRouter = createTRPCRouter({
           ),
         ),
       );
+
+      const name = ctx.user.name ?? ctx.user.email ?? "Someone";
+
+      if (env.NODE_ENV === "production") {
+        sendSlackMessage(
+          `*${name} just made ${input.length} requests*`,
+          `<https://tramona.com/admin|Go to admin dashboard>`,
+        );
+      }
     }),
 
   // resolving a request with no offers = reject

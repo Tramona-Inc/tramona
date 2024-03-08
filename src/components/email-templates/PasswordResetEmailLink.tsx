@@ -1,14 +1,5 @@
-import {
-  Container,
-  Head,
-  Heading,
-  Hr,
-  Html,
-  Section,
-  Tailwind,
-  Text,
-} from "@react-email/components";
-import TramonaIcon from "../_icons/TramonaIcon";
+import { Layout, CustomButton } from "./EmailComponents";
+import { Text } from "@react-email/components";
 
 export function PasswordResetEmailLink({
   name,
@@ -18,44 +9,34 @@ export function PasswordResetEmailLink({
   url: string;
 }) {
   return (
-    <Html lang="en">
-      <Head>
-        <title>Reset Password</title>
-      </Head>
-      <Tailwind>
-        <Container className="mx-auto my-[40px] w-[465px] rounded border border-solid border-[#eaeaea] p-[20px]">
-          <Section className="mt-[32px]">
-            <TramonaIcon />
-          </Section>
-          <Heading as="h1">{name && `Hi ${name},`}</Heading>
-          <Text>
-            {`Please click on the following link to resetting your password`}
+    <Layout title="Reset Your Password">
+      <div className="pt-2" style={{ textAlign: "center" }}>
+        <div className="text-brand px-6 text-left text-base">
+          <Text className="text-brand text-left text-4xl font-bold">
+            {name ? `Hi ${name},` : ""}
           </Text>
-          <Text>
+          <Text className="text-brand text-left">
+            Please click on the following link to reset your password
+          </Text>
+          <Text className="text-brand">
             <i>
               Please note that this link will expire in <strong>30 mins</strong>
               .
             </i>
           </Text>
-          <Section className="mb-[32px] mt-[32px] text-center">
-            {/* <Button
-              className="rounded bg-[#7C3AED] text-center text-lg text-white no-underline"
-              href={url}
-            >
-              Reset Password
-            </Button> */}
-            {url}
-          </Section>
-          <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
-          <Text>
-            {`If you did not request this, please ignore this email and your password will remain unchanged.`}
+        </div>
+        <CustomButton link={url} title="Reset Password" />
+        <div className="text-brand px-6 text-left text-base">
+          <Text className="text-brand text-left">
+            If you did not request this, please ignore this email and your
+            password will remain unchanged.
           </Text>
-          <Text>{`Thanks,`}</Text>
-          <Text>
-            <strong>{`Tramona Team`}</strong>
+          <Text className="text-brand text-left">Thanks,</Text>
+          <Text className="text-brand text-left">
+            <strong>Tramona Team</strong>
           </Text>
-        </Container>
-      </Tailwind>
-    </Html>
+        </div>
+      </div>
+    </Layout>
   );
 }

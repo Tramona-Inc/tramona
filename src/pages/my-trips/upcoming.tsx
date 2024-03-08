@@ -44,11 +44,11 @@ export default function Upcoming() {
                     hostImage={trip.property.host?.image ?? ""}
                     date={formatDateRange(
                       trip.request.checkIn,
-                      trip.request.checkOut,
+                      trip.request.checkOut
                     )}
                     address={trip.property.address ?? ""}
-                    propertyImage={trip.property.imageUrls[0] ?? ""}
-                  />
+                    propertyImage={trip.property.imageUrls[0] ?? ""} 
+                    checkInInfo={trip.property.checkInInfo}                  />
                 );
               })
             ) : (

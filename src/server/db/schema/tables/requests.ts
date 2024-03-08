@@ -1,16 +1,17 @@
 import {
-  serial,
+  boolean,
   date,
   integer,
   pgTable,
+  serial,
   smallint,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { users } from "./users";
-import { propertyTypeEnum } from "./properties";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { propertyTypeEnum } from "./properties";
+import { users } from "./users";
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
@@ -28,6 +29,8 @@ export const requests = pgTable("requests", {
   note: varchar("note", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
+  hasApproved: boolean("has_approved").default(false).notNull(),
+  confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
 });
 
 export type Request = typeof requests.$inferSelect;

@@ -275,7 +275,7 @@ export default function HostWelcome() {
           <div className="flex">
             {contents.map((content) => (
               <button
-                className="items-cente flex w-1/3 flex-col gap-5 space-y-10 p-10 xl:space-y-0  "
+                className="flex w-1/3 flex-col items-center gap-5 space-y-10 p-10 xl:space-y-0  "
                 key={content.id}
                 onClick={() => handleTabChange(content)}
               >

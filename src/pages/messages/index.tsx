@@ -1,22 +1,18 @@
-import Head from "next/head";
-import { useState } from "react";
-
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
-import { type AppRouter } from "@/server/api/root";
-import { api } from "@/utils/api";
-import { type inferRouterOutputs } from "@trpc/server";
-import { useSession } from 'next-auth/react';
-
-export type Conversation =
-  inferRouterOutputs<AppRouter>["messages"]["getConversations"][number];
-
-export type Conversations =
-  inferRouterOutputs<AppRouter>["messages"]["getConversations"];
+import {
+  useConversation,
+  type Conversation,
+} from "@/utils/store/conversations";
+import { useSession } from "next-auth/react";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 export default function MessagePage() {
-  useSession({ required: true });
+  const [isViewed, setIsViewd] = useState(false);
 
+  const conversations = useConversation((state) => state.conversationList);
 
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
@@ -25,7 +21,28 @@ export default function MessagePage() {
     setSelectedConversation(conversation);
   };
 
-  const { data: conversations } = api.messages.getConversations.useQuery();
+  const { query } = useRouter();
+
+  useSession({ required: true });
+
+  // Allows us to open message from url query
+  useEffect(() => {
+    if (query.conversationId && conversations.length > 0 && !isViewed) {
+      const conversationIdToSelect = parseInt(query.conversationId as string);
+      const conversationToSelect = conversations.find(
+        (conversation) => conversation.id === conversationIdToSelect,
+      );
+
+      if (
+        conversationToSelect &&
+        selectedConversation?.id !== conversationToSelect.id
+      ) {
+        setSelectedConversation(conversationToSelect);
+      }
+
+      setIsViewd(true);
+    }
+  }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
     <>
@@ -35,7 +52,6 @@ export default function MessagePage() {
 
       <div className="grid h-[calc(100vh-5em)] grid-cols-1 bg-white md:grid-cols-6">
         <MessagesSidebar
-          conversations={conversations ?? []}
           selectedConversation={selectedConversation}
           setSelected={selectConversation}
         />

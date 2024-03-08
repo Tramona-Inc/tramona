@@ -47,7 +47,6 @@ import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import PlacesInput from "../_common/PlacesInput";
-import { map } from "@trpc/server/observable";
 import ErrorMsg from "../ui/ErrorMsg";
 
 const formSchema = z
