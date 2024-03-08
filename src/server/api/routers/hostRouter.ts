@@ -1,4 +1,21 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { db } from "@/server/db";
+import { hostProfiles } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
+
+export async function fetchIndividualHostInfo(userId: string) {
+  return await db.query.hostProfiles.findFirst({
+    columns: {
+      userId: true,
+      type: true,
+      becameHostAt: true,
+      profileUrl: true,
+      stripeAccountId: true,
+      chargesEnabled: true,
+    },
+    where: eq(hostProfiles.userId, userId),
+  });
+}
 
 export const hostRouter = createTRPCRouter({
   getHostsInfo: protectedProcedure.query(async ({ ctx }) => {
@@ -29,5 +46,8 @@ export const hostRouter = createTRPCRouter({
       email: item.hostUser.email,
       phoneNumber: item.hostUser.phoneNumber,
     }));
+  }),
+  getUserHostInfo: protectedProcedure.query(async ({ ctx }) => {
+    return fetchIndividualHostInfo(ctx.user.id);
   }),
 });

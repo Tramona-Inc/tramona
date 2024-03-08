@@ -1,5 +1,7 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { hostProfiles } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -98,4 +100,43 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
+  createStripeConnectAccount: protectedProcedure.mutation(async ({ ctx }) => {
+    const res = await ctx.db.query.hostProfiles.findFirst({
+      columns: {
+        stripeAccountId: true,
+        chargesEnabled: true,
+      },
+      where: eq(hostProfiles.userId, ctx.user.id),
+    });
+
+    if (
+      ctx.user.role === "host" &&
+      !res?.stripeAccountId &&
+      !res?.chargesEnabled
+    ) {
+      const stripeAccount = await stripe.accounts.create({
+        type: "express",
+        country: "US",
+        email: ctx.user.email,
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+          tax_reporting_us_1099_k: { requested: true },
+        },
+        business_type: "individual",
+        individual: {
+          email: ctx.user.email,
+        },
+      });
+
+      await ctx.db
+        .update(hostProfiles)
+        .set({ stripeAccountId: stripeAccount.id })
+        .where(eq(hostProfiles.userId, ctx.user.id));
+    }
+
+    // await stripe.accountLinks.create(
+    //   account: current_user.stripe
+    // )
+  }),
 });
