@@ -37,7 +37,7 @@ export default function HostDashboardSidebar({
   navLinks: NavLink[];
 }) {
   return (
-    <div className="sticky top-0 flex h-full flex-col justify-center gap-5 border-r">
+    <div className="sticky top-0 flex h-full flex-col justify-center gap-5">
       {navLinks.map((nav, index) => (
         <SidebarLink key={index} href={nav.href}>
           {nav.name}

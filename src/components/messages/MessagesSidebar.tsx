@@ -46,7 +46,7 @@ export function MessageConversation({
   return (
     <div
       className={cn(
-        "flex items-center justify-start border-b-2 border-zinc-100 px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
+        "flex items-center justify-start border-b border-zinc-100 px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
         isSelected && "bg-zinc-100",
       )}
       onClick={() => handleSelected()}
@@ -58,7 +58,7 @@ export function MessageConversation({
       />
 
       <div className="ml-4 md:ml-2">
-        <h1 className="text-xl font-bold">{displayParticipants}</h1>
+        <h1 className="font-bold">{displayParticipants}</h1>
         <p className="line-clamp-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
           {messages.length > 0 &&
             !messages[0]?.read &&
@@ -106,11 +106,11 @@ export default function MessagesSidebar({
   return (
     <div
       className={cn(
-        "col-span-1 block md:col-span-2 md:border-r-2 xl:col-span-1",
+        "col-span-1 block md:col-span-2 md:border-r xl:col-span-2",
         selectedConversation && "hidden md:block",
       )}
     >
-      <h1 className="flex h-[100px] w-full items-center border-b-2 p-4 text-4xl font-bold md:text-2xl md:font-semibold lg:p-8">
+      <h1 className="flex h-[100px] w-full items-center border-b p-4 text-4xl font-bold md:text-2xl md:font-semibold lg:p-8">
         Messages
       </h1>
 
