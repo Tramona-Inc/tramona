@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 export const hostRouter = createTRPCRouter({
-  getHostInfo: protectedProcedure.query(async ({ ctx }) => {
+  getHostsInfo: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.hostProfiles.findMany({
       columns: {
         userId: true,

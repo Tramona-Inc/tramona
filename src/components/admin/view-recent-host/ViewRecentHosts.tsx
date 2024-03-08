@@ -12,10 +12,10 @@ import { columns } from "./table/columns";
 import { DataTable } from "./table/data-table";
 
 export type HostsInfo =
-  inferRouterOutputs<AppRouter>["host"]["getHostInfo"][number];
+  inferRouterOutputs<AppRouter>["host"]["getHostsInfo"][number];
 
 export default function ViewRecentHosts() {
-  const { data } = api.host.getHostInfo.useQuery();
+  const { data } = api.host.getHostsInfo.useQuery();
 
   return (
     <Card>
