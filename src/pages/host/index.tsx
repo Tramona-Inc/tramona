@@ -7,6 +7,9 @@ export default function Page() {
       <Head>
         <title>Host Dashboard | Tramona</title>
       </Head>
+      <div className="w-full">
+        <h1>Host Layout</h1>
+      </div>
     </HostDashboardLayout>
   );
 }
