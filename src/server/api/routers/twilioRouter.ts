@@ -1,14 +1,18 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { env } from "@/env";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
+import { zodString } from "@/utils/zod-utils";
+import { MailService } from "@sendgrid/mail";
+import { TRPCError } from "@trpc/server";
 import { Twilio } from "twilio";
 import {
-  type ServiceListInstanceCreateOptions,
   type ServiceInstance,
+  type ServiceListInstanceCreateOptions,
 } from "twilio/lib/rest/verify/v2/service";
-import { MailService } from "@sendgrid/mail";
-import { env } from "@/env";
 import { z } from "zod";
-import { zodString } from "@/utils/zod-utils";
-import { db } from "@/server/db";
 
 const twilio = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
 
@@ -46,7 +50,6 @@ export const twilioRouter = createTRPCRouter({
         to,
       });
 
-      
       return response;
     }),
 
@@ -73,7 +76,7 @@ export const twilioRouter = createTRPCRouter({
       return response;
     }),
 
-  sendOTP: protectedProcedure
+  sendOTP: publicProcedure
     .input(z.object({ to: z.string() }))
     .mutation(async ({ input }) => {
       await createService();
@@ -92,7 +95,7 @@ export const twilioRouter = createTRPCRouter({
       return verification;
     }),
 
-  verifyOTP: protectedProcedure
+  verifyOTP: publicProcedure
     .input(z.object({ to: z.string(), code: z.string() }))
     .mutation(async ({ input }) => {
       await createService();
@@ -101,13 +104,20 @@ export const twilioRouter = createTRPCRouter({
 
       const { sid } = service;
 
-      const verificationCheck = await twilio.verify.v2
-        .services(sid)
-        .verificationChecks.create({
-          to,
-          code,
-        });
+      try {
+        const verificationCheck = await twilio.verify.v2
+          .services(sid)
+          .verificationChecks.create({
+            to,
+            code,
+          });
 
-      return verificationCheck;
+        return verificationCheck;
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User with this email already exists",
+        });
+      }
     }),
 });

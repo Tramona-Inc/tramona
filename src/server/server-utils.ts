@@ -4,6 +4,7 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 
+import sgMail from '@sendgrid/mail';
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// https://next-auth.js.org/configuration/pages
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -29,7 +26,6 @@ import { z } from "zod";
 const formSchema = z
   .object({
     email: zodEmail(),
-    // username: z.string().max(60),
     name: zodString({ minLen: 2 }),
     password: zodPassword(),
     confirm: z.string(),
@@ -71,6 +67,8 @@ export default function SignUp({
       .catch(() => errorToast("Couldn't sign up, please try again"));
   }
 
+  // TODO: Refactor later to separted form into its own component
+
   return (
     <>
       <Head>
@@ -101,19 +99,6 @@ export default function SignUp({
                     </FormItem>
                   )}
                 />
-                {/* <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="text"  />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
                 <FormField
                   control={form.control}
                   name="name"

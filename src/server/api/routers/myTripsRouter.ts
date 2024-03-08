@@ -1,13 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { offers, requests } from "@/server/db/schema";
+import { type TramonaDatabase } from "@/types";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
-import { type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { z } from "zod";
-
-export type TramonaDatabase = PostgresJsDatabase<
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  typeof import("@/server/db/schema")
->;
 
 const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
   const result = await db
@@ -55,6 +50,7 @@ const getDisplayTrips = async (
             name: true,
             imageUrls: true,
             address: true,
+            checkInInfo: true,
           },
         },
         request: {

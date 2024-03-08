@@ -115,3 +115,16 @@ export function zodPassword() {
       message: "Must contain at least one special character '!@#$%^&*'",
     });
 }
+
+export function zodPhone() {
+  return z.string().refine(
+    (value) => {
+      // Remove non-digit characters and check if the length is 10 or 11
+      const digitsOnly = value.replace(/\D/g, "");
+      return digitsOnly.length === 10 || digitsOnly.length === 11;
+    },
+    {
+      message: "Invalid phone number format",
+    },
+  );
+}

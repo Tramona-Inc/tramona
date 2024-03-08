@@ -1,17 +1,18 @@
 import {
-  serial,
+  boolean,
   date,
   integer,
   pgTable,
+  serial,
   smallint,
   text,
   timestamp,
   varchar,
   boolean,
 } from "drizzle-orm/pg-core";
-import { users } from "./users";
-import { propertyTypeEnum } from "./properties";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { propertyTypeEnum } from "./properties";
+import { users } from "./users";
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
