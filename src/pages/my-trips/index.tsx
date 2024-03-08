@@ -1,14 +1,17 @@
-import Spinner from "@/components/_common/Spinner";
+import Head from "next/head";
+import Link from "next/link";
+import { useMemo } from "react";
+
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
+import Spinner from "@/components/_common/Spinner";
+import DashboardLayout from "@/components/_common/DashboardLayout";
+
 import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
 import { type inferRouterOutputs } from "@trpc/server";
-import Head from "next/head";
-import Link from "next/link";
-import { useMemo } from "react";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
@@ -27,13 +30,13 @@ export default function MyTrips() {
   });
 
   return (
-    <>
+    <DashboardLayout>
       <Head>
         <title>My Trips | Tramona</title>
       </Head>
-      <div className="container flex flex-col gap-10 py-10">
-        <h1 className="text-4xl font-bold">My Trips</h1>
 
+      <div className="container col-span-10 flex flex-col gap-10 py-10 2xl:col-span-11">
+        <h1 className="text-4xl font-bold">My Trips</h1>
         <div className="flex w-full flex-col gap-10 lg:flex-row">
           <div className="flex flex-col gap-8 lg:w-2/3">
             <div className="flex items-center justify-between">
@@ -138,6 +141,6 @@ export default function MyTrips() {
           </div>
         </div>
       </div>
-    </>
+    </DashboardLayout>
   );
 }
