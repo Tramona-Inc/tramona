@@ -10,7 +10,6 @@ import {
   Section,
   Text,
   Hr,
-  Img,
 } from "@react-email/components";
 
 import { Tailwind } from "@react-email/tailwind";
@@ -72,8 +71,8 @@ interface EmailConfirmationCardProps {
 export const TramonaLogo = () => {
   return (
     <div className="text-brand flex items-center gap-2 bg-white text-lg font-bold">
-      <Img
-        src="https://www.tramona.com/assets/images/email_images/tramona_wbg.png"
+      <img
+        src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
         alt="Tramona Logo"
         style={{ width: "auto", height: "24px", marginRight: "5px" }}
       />
@@ -199,6 +198,7 @@ export const Footer = () => {
   );
 };
 
+// Please, do NOT change img tag! React's Img doesnt work well with tables
 export const SocialLinks: React.FC = () => {
   return (
     <>
@@ -211,8 +211,8 @@ export const SocialLinks: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Img
-                  src="https://www.tramona.com/assets/images/email_images/tramona_wbg.png"
+                <img
+                  src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
                   alt="Tramona Logo"
                   style={{ height: "16px" }}
                 />
@@ -225,8 +225,8 @@ export const SocialLinks: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Img
-                    src="https://www.tramona.com/assets/images/email_images/facebook_wbg.png"
+                  <img
+                    src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
                     alt="Facebook"
                     style={{
                       width: "16px",
@@ -240,8 +240,8 @@ export const SocialLinks: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Img
-                    src="https://www.tramona.com/assets/images/email_images/instagram_wbg.png"
+                  <img
+                    src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
                     alt="Instagram"
                     style={{ width: "16px", height: "16px" }}
                   />
@@ -299,7 +299,7 @@ export const EmailOfferCard: React.FC<EmailOfferCardProps> = ({
                   href={offer_link}
                   style={{ borderRadius: "8px 8px 0 0", display: "block" }}
                 >
-                  <Img
+                  <img
                     src={property_image_link}
                     alt="Offer Image"
                     style={{
@@ -481,7 +481,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
                   href={confirmation_link}
                   style={{ borderRadius: "8px 8px 0 0", display: "block" }}
                 >
-                  <Img
+                  <img
                     src={property_image_link}
                     alt="Place Image"
                     style={{
@@ -518,7 +518,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
                         href="https://www.tramona.com/"
                         style={{ borderRadius: "50%", display: "block" }}
                       >
-                        <Img
+                        <img
                           src={
                             hostImageUrl ?? "https://via.placeholder.com/150"
                           }
@@ -660,7 +660,7 @@ export const BookingCard: React.FC<BookingCardProps> = ({
                     lineHeight: "0",
                   }}
                 >
-                  <Img
+                  <img
                     src={property_image_link}
                     alt="Offer Image"
                     style={{ width: "100%", display: "block", border: "0" }}
