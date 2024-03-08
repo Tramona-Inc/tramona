@@ -13,7 +13,7 @@ import UserAvatar from "../../../_common/UserAvatar";
 import SaleTagIcon from "../../../_icons/SaleTagIcon";
 import { Badge } from "../../../ui/badge";
 import { Card, CardContent, CardFooter } from "../../../ui/card";
-import { type PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react"
 
 export type OfferWithProperty =
   inferRouterOutputs<AppRouter>["offers"]["getByRequestIdWithProperty"][number];

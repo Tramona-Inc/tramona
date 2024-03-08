@@ -56,6 +56,7 @@ const getDisplayTrips = async (tripIds: number[], limit?: number) => {
             name: true,
             imageUrls: true,
             address: true,
+            checkInInfo: true,
           },
         },
         request: {

@@ -2,6 +2,7 @@ import { render } from "@react-email/render";
 import nodemailler, { type TransportOptions } from "nodemailer";
 import { env } from "@/env";
 import { type ReactElement } from "react";
+import sgMail from "@sendgrid/mail";
 import { db } from "./db";
 import { and, eq, inArray } from "drizzle-orm";
 import { type User, groupInvites, groupMembers } from "./db/schema";
