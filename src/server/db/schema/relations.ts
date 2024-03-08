@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
+import { hostProfiles } from "./tables/hostProfiles";
 import {
   conversationParticipants,
   conversations,
@@ -20,6 +21,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   referralEarnings: many(referralEarnings),
   messages: many(messages),
   conversations: many(conversationParticipants),
+  hostProfile: one(hostProfiles),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -39,6 +41,13 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 export const referralCodesRelations = relations(referralCodes, ({ one }) => ({
   owner: one(users, {
     fields: [referralCodes.ownerId],
+    references: [users.id],
+  }),
+}));
+
+export const hostProfilesRelations = relations(hostProfiles, ({ one }) => ({
+  hostUser: one(users, {
+    fields: [hostProfiles.userId],
     references: [users.id],
   }),
 }));
@@ -110,3 +119,5 @@ export const conversationParticipantsRelations = relations(
     }),
   }),
 );
+
+

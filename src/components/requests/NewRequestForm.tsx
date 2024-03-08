@@ -20,7 +20,7 @@ import { FilterIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES, requests } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
 import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
@@ -59,6 +59,8 @@ import OTPDialog from "../otp-dialog/OTPDialog";
 import { formatPhoneNumber } from "@/utils/formatters";
 import PlacesInput from "../_common/PlacesInput";
 import ErrorMsg from "../ui/ErrorMsg";
+import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
 
 const formSchema = z
   .object({
@@ -212,6 +214,7 @@ export default function NewRequestForm({
           msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
           to: phoneRef.current,
         });
+
         successfulRequestToast(newRequest);
         form.reset();
       } catch (e) {
@@ -328,17 +331,18 @@ export default function NewRequestForm({
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>Phone number verification</DialogTitle>
+                  <DialogTitle>Enter your phone number</DialogTitle>
                   <DialogDescription>
-                    I want to receive sms texts through phone
+                    Please enter your phone number below and you will recieve a code via text.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 p-4 py-4">
                   <div className="flex flex-row items-center gap-4">
-                    <Label>Phone number</Label>
+                    
                     <Input
                       id="phone-number"
                       value={toPhoneNumber}
+                      placeholder="Phone Number"
                       onChange={(e) => {
                         setToPhoneNumber(e.target.value);
                       }}

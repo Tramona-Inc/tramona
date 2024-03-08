@@ -10,8 +10,13 @@ import {
   requests,
 } from "@/server/db/schema";
 import { getRequestStatus } from "@/utils/formatters";
+import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { sendText } from "@/server/server-utils";
+
+
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -19,6 +24,9 @@ export const requestsRouter = createTRPCRouter({
       .findMany({
         where: eq(requests.userId, ctx.user.id),
         with: {
+          madeByUser: {
+            columns: { email: true, phoneNumber: true },
+          },
           offers: {
             columns: {},
             with: {
@@ -146,6 +154,19 @@ export const requestsRouter = createTRPCRouter({
 
   // in the future, well need to validate that a host actually received the request,
   // or else a malicious host could reject any request
+  updateConfirmation: protectedProcedure
+    .input(z.object({requestId: z.number(), phoneNumber: z.string()}))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(requests)
+        .set({ confirmationSentAt: new Date()})
+        .where(eq(requests.id, input.requestId));
+
+      await sendText({
+        to: input.phoneNumber,
+        content: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      });
+    }),
 
   resolve: roleRestrictedProcedure(["admin"])
     .input(requestSelectSchema.pick({ id: true }))

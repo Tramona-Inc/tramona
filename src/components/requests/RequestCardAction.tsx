@@ -4,8 +4,19 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { ArrowRightIcon } from "lucide-react";
 import { type DetailedRequest } from "./RequestCard";
+import { RequestUnconfirmedButton } from "./RequestUnconfirmedButton";
+import { MouseEventHandler, useState } from "react";
+import { api } from "@/utils/api";
+import { State } from "postgres";
 
-export function RequestCardAction({ request }: { request: DetailedRequest }) {
+
+type RequestCardActionProps = {
+  request: DetailedRequest;
+  isWaiting: boolean | undefined;
+  onClick: () => void;
+};
+
+export function RequestCardAction({ request, isWaiting, onClick }: RequestCardActionProps) {
   switch (getRequestStatus(request)) {
     case "pending":
       return null;
@@ -24,5 +35,9 @@ export function RequestCardAction({ request }: { request: DetailedRequest }) {
     case "booked":
       // return <Button className={primaryBtn}>Request again</Button>;
       return null;
+    case "unconfirmed":
+      return (
+        request.madeByUser.phoneNumber && <RequestUnconfirmedButton request={request} isWaiting={isWaiting} onClick={onClick} />
+      );
   }
 }

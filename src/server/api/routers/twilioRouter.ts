@@ -8,6 +8,7 @@ import { MailService } from "@sendgrid/mail";
 import { env } from "@/env";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
+import { db } from "@/server/db";
 
 const twilio = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
 
@@ -45,6 +46,7 @@ export const twilioRouter = createTRPCRouter({
         to,
       });
 
+      
       return response;
     }),
 

@@ -105,7 +105,11 @@ export const properties = pgTable(
       .array()
       .notNull(),
     about: text("about").notNull(),
+    areaDescription: text("area_description"),
+    mapScreenshot: text("map_screenshot"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
+    airbnbMessageUrl: varchar("airbnb_message_url"),
+    checkInInfo: varchar("check_in_info"),
   },
   (t) => ({
     uniqueAirbnbUrls: unique("unique_airbnb_urls").on(t.airbnbUrl),

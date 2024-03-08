@@ -11,6 +11,9 @@ import { useSession } from "next-auth/react";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
 import Spinner from "@/components/_common/Spinner";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import { useEffect, useState } from "react";
+import { useInterval } from "@/utils/useInterval";
+import { usePrevious } from "@uidotdev/usehooks";
 
 function NewRequestButton() {
   return (
@@ -28,11 +31,50 @@ function RequestCards({
 }: {
   requests: DetailedRequest[] | undefined;
 }) {
+  const [isWaiting, setIsWaiting] = useState(false);
+  const utils = api.useUtils();
+
+  const previousRequests = usePrevious(requests);
+
+  useEffect(() => {
+    if (!requests || !previousRequests) return;
+    const newlyApprovedRequests = requests.filter(
+      (req) =>
+        req.hasApproved &&
+        !previousRequests.find((req2) => req2.id === req.id)?.hasApproved,
+    );
+    if (newlyApprovedRequests.length > 0) {
+      setIsWaiting(false);
+    }
+  }, [requests]);
+
+  // Start the interval to invalidate requests every 10 seconds
+  useInterval(
+    () => void utils.requests.getMyRequests.invalidate(),
+    isWaiting ? 10 * 1000 : null,
+  ); // 10 seconds
+
+  const handleResendConfirmation = () => {
+    // Start the timer for 3 minutes
+    setIsWaiting(true);
+    setTimeout(
+      () => {
+        setIsWaiting(false);
+      },
+      3 * 60 * 1000,
+    ); // 3 minutes
+  };
+
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
         <RequestCard key={request.id} request={request}>
-          <RequestCardAction request={request} />
+          <RequestCardAction
+            key={request.id}
+            request={request}
+            onClick={handleResendConfirmation}
+            isWaiting={isWaiting}
+          />
         </RequestCard>
       ))}
     </div>

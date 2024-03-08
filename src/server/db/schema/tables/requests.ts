@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { propertyTypeEnum } from "./properties";
@@ -28,6 +29,9 @@ export const requests = pgTable("requests", {
   note: varchar("note", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
+  hasApproved: boolean("has_approved").default(false).notNull(),
+  confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
+  haveSentFollowUp: boolean("has_approved").default(false).notNull(),
 });
 
 export type Request = typeof requests.$inferSelect;
