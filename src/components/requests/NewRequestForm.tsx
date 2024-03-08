@@ -106,8 +106,6 @@ export default function NewRequestForm({
   const utils = api.useUtils();
   const router = useRouter();
 
-
-
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   const fmtdFilters = getFmtdFilters({
     minNumBedrooms,
@@ -136,8 +134,6 @@ export default function NewRequestForm({
   const verifiedRef = useRef(verified);
   const phoneRef = useRef(toPhoneNumber);
 
-
-
   const waitForVerification = async () => {
     console.log(verifiedRef.current);
     console.log(verified);
@@ -162,8 +158,7 @@ export default function NewRequestForm({
   }, [verified]);
 
   useEffect(() => {
-
-    if(number) {
+    if (number) {
       phoneRef.current = number;
       verifiedRef.current = true;
     }
@@ -176,8 +171,6 @@ export default function NewRequestForm({
 
     await waitForVerification();
     setOpen(false);
-
-
 
     const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
     const checkIn = data.date.from;
@@ -200,7 +193,6 @@ export default function NewRequestForm({
       });
     } else {
       try {
-
         await createRequestsMutation.mutateAsync(newRequest).catch(() => {
           throw new Error();
         });
@@ -314,19 +306,14 @@ export default function NewRequestForm({
           </ErrorMsg>
         </FormItem>
 
-          <Button
-            //disabled={form.formState.isSubmitting}
-            size="lg"
-            type="submit"
-            className="col-span-full"
-            onClick={() => {
-              if (form.formState.isValid) {
-                setOpen(true);
-              }
-            }}
-          >
-            Request Deal
-          </Button>
+        <Button
+          //disabled={form.formState.isSubmitting}
+          size="lg"
+          type="submit"
+          className="col-span-full"
+        >
+          Request Deal
+        </Button>
 
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogContent className="sm:max-w-[500px]">
