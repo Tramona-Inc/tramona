@@ -9,14 +9,12 @@ import {
 } from "@/components/ui/form";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
-import { authOptions } from '@/server/auth';
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
 import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import { getServerSession } from 'next-auth';
+import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -41,7 +39,7 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function SignUp({
   providers,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) {
   useRequireNoAuth();
 
   const router = useRouter();
@@ -216,16 +214,7 @@ export default function SignUp({
   );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-
-  // If the user is already logged in, redirect.
-  // Note: Make sure not to redirect to the same page
-  // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: "/" } };
-  }
-
+export async function getStaticProps() {
   const providers = await getProviders();
 
   return {
