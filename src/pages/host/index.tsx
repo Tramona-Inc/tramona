@@ -1,10 +1,12 @@
+import HostDashboardLayout from "@/components/_common/DashboardLayout/Host";
 import Head from "next/head";
 
 export default function Page() {
   return (
-    <>
-      <Head>Host Dashboard | Tramona</Head>
-      <p className="p-8">host dashboard</p>
-    </>
+    <HostDashboardLayout>
+      <Head>
+        <title>Host Dashboard | Tramona</title>
+      </Head>
+    </HostDashboardLayout>
   );
 }
