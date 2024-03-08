@@ -3,11 +3,11 @@ import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface SocialCardProps {
-  image?: string;
-  username?: string;
-  caption?: string;
-  location?: string;
-  user_avatar?: string;
+  image: string;
+  username: string;
+  caption: string;
+  location: string;
+  userAvatar: string;
 }
 
 const SocialCard: React.FC<SocialCardProps> = ({
@@ -15,16 +15,16 @@ const SocialCard: React.FC<SocialCardProps> = ({
   username,
   caption,
   location,
-  user_avatar,
+  userAvatar,
 }) => {
   return (
-    <div className="border-#BFBFBF mb-1 flex items-start overflow-hidden rounded-2xl border bg-gray-400 bg-opacity-10 bg-clip-padding shadow-lg backdrop-blur-sm backdrop-filter">
+    <div className="mb-1 flex items-start overflow-hidden rounded-2xl border border-[#BFBFBF] bg-gray-400 bg-opacity-10 bg-clip-padding shadow-lg backdrop-blur-sm backdrop-filter">
       <div className="flex flex-grow flex-col justify-start p-4">
         <div className="mb-2 flex items-center">
           <div className="flex-shrink-0">
-            {user_avatar ? (
+            {userAvatar ? (
               <Avatar>
-                <AvatarImage src={user_avatar} style={{ objectFit: "cover" }} />
+                <AvatarImage src={userAvatar} style={{ objectFit: "cover" }} />
                 <AvatarFallback></AvatarFallback>
               </Avatar>
             ) : (
@@ -33,32 +33,23 @@ const SocialCard: React.FC<SocialCardProps> = ({
           </div>
           <div className="ml-4 flex flex-col justify-start">
             <div className="text-xs font-semibold text-gray-900 md:text-sm">
-              {username || "username"}
+              {username}
             </div>
-            {location && (
-              <div className="text-xs text-gray-500">{location}</div>
-            )}
+            <div className="text-xs text-gray-500">{location}</div>
           </div>
         </div>
         <div>
-          <p className="text-xs text-gray-800 md:text-sm">
-            {caption || ""}
-          </p>
+          <p className="text-xs text-gray-800 md:text-sm">{caption}</p>
         </div>
       </div>
-      {image && (
-        <div className="relative h-24 w-24 flex-shrink-0 md:h-48 md:w-48">
-          <Image
-            src={image}
-            alt={caption || "Image description"}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            style={{objectFit:"cover"}}
-            className="rounded-2xl p-2"
-            unoptimized
-          />
-        </div>
-      )}
+      <div className="relative h-24 w-24 flex-shrink-0 md:h-48 md:w-48">
+        <Image
+          src={image}
+          alt={caption}
+          fill
+          className="rounded-2xl object-cover p-2"
+        />
+      </div>
     </div>
   );
 };
@@ -69,9 +60,9 @@ const SocialFeed = () => {
       <div className="absolute inset-0 z-0">
         <Image
           src="/assets/images/landing-page/social_feed.png"
-          alt="Background"
+          alt=""
           fill
-          style={{objectFit:"cover", objectPosition:"center"}}
+          style={{ objectFit: "cover", objectPosition: "center" }}
           className="rounded-3xl p-2 md:px-2"
         />
       </div>
@@ -82,21 +73,21 @@ const SocialFeed = () => {
             username="anonymous"
             caption=""
             location="Santa Cruz, CA"
-            user_avatar="/assets/images/landing-page/us_1.jpeg"
+            userAvatar="/assets/images/landing-page/us_1.jpeg"
           />
           <SocialCard
             image="/assets/images/landing-page/post2.jpeg"
             username="nickshawl"
             caption="Loving the beach!"
             location="Santa Monica, CA"
-            user_avatar="/assets/images/landing-page/us_2.jpeg"
+            userAvatar="/assets/images/landing-page/us_2.jpeg"
           />
           <SocialCard
             image="/assets/images/landing-page/post3.jpeg"
             username="yamsnicole"
             caption=""
             location="Oregon Coast"
-            user_avatar="/assets/images/landing-page/us_3.jpeg"
+            userAvatar="/assets/images/landing-page/us_3.jpeg"
           />
         </div>
         <div className="mb-4 w-full md:mb-0 md:max-w-lg md:flex-1 md:pl-16 lg:pl-28">
