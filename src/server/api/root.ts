@@ -26,7 +26,6 @@ export const appRouter = createTRPCRouter({
   myTrips: myTripsRouter,
   twilio: twilioRouter,
   messages: messagesRouter,
-  twilio: twilioRouter,
 });
 
 // export type definition of API

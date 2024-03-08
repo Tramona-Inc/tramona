@@ -8,7 +8,6 @@ import {
   text,
   timestamp,
   varchar,
-  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { propertyTypeEnum } from "./properties";

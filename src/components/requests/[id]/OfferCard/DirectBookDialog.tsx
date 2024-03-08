@@ -81,6 +81,7 @@ export default function DirectBookDialog(
       images: offer.property.imageUrls,
       userId: session.data?.user.id ?? "",
       totalSavings,
+      phoneNumber: session.data?.user.phoneNumber ?? "",
     });
 
     const stripe = await stripePromise;
