@@ -43,6 +43,7 @@ import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
+import axios from "axios";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -137,15 +138,32 @@ export default function AdminOfferForm({
   const createPropertiesMutation = api.properties.create.useMutation();
   const createOffersMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
+  const downloadFileMutation = api.files.download.useMutation();
 
   const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
-    if (!file) {
-      throw new Error("screenshot not uploaded");
+    let url;
+
+    if (file) {
+      const fileName = file.name;
+
+      try {
+        const uploadUrlResponse = await uploadFileMutation.mutateAsync({
+          fileName,
+        });
+        await axios.put(uploadUrlResponse, file);
+        const downloadUrlResponse = await downloadFileMutation.mutateAsync({
+          fileName,
+        });
+        const downloadResponse = await axios.get(downloadUrlResponse);
+        const downloadUrl = downloadResponse.config.url;
+        url = downloadUrl;
+      } catch (error) {
+        throw new Error("error uploading file");
+      }
     }
-    console.log("Uploaded file:", file);
-    const url = await uploadFileMutation.mutateAsync({ file });
+
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
     // const totalPrice = offeredPriceUSD * 100;

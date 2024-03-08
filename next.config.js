@@ -73,7 +73,7 @@ const config = {
       },
       {
         protocol: "https",
-        hostname: "tramona-map-screenshots.s3.amazonaws.com",
+        hostname: "tramona-map-screenshots.s3.us-east-1.amazonaws.com",
       },
     ],
   },
