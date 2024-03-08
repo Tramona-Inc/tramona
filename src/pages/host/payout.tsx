@@ -1,6 +1,6 @@
 import Head from "next/head";
 
-export default function HostPayout() {
+export default function Payout() {
 
   
 
