@@ -327,7 +327,7 @@ devDependencies:
     version: 0.3.7
   npm:
     specifier: ^10.3.0
-    version: 10.3.0
+    version: 10.5.0
   postcss:
     specifier: ^8.4.33
     version: 8.4.35
@@ -13384,8 +13384,8 @@ packages:
       path-key: 4.0.0
     dev: true
 
-  /npm@10.3.0:
-    resolution: {integrity: sha512-9u5GFc1UqI2DLlGI7QdjkpIaBs3UhTtY8KoCqYJK24gV/j/tByaI4BA4R7RkOc+ASqZMzFPKt4Pj2Z8JcGo//A==}
+  /npm@10.5.0:
+    resolution: {integrity: sha512-Ejxwvfh9YnWVU2yA5FzoYLTW52vxHCz+MHrOFg9Cc8IFgF/6f5AGPAvb5WTay5DIUP1NIfN3VBZ0cLlGO0Ys+A==}
     engines: {node: ^18.17.0 || >=20.5.0}
     hasBin: true
     dev: true
@@ -13452,7 +13452,6 @@ packages:
       - semver
       - spdx-expression-parse
       - ssri
-      - strip-ansi
       - supports-color
       - tar
       - text-table
