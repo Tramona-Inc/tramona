@@ -10,7 +10,7 @@ export default function HostDashboardLayout({
   children,
 }: React.PropsWithChildren) {
   return (
-    <div className="container grid h-[calc(100vh-4em)] flex-1 gap-12 lg:grid-cols-[125px_1fr]">
+    <div className="container grid h-[calc(100vh-5em)] flex-1 gap-12 lg:grid-cols-[125px_1fr]">
       <aside className="hidden w-[125px] flex-col lg:flex">
         <HostDashboardSidebar navLinks={navLinks} />
       </aside>
