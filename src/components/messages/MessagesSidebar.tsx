@@ -46,7 +46,7 @@ export function MessageConversation({
   return (
     <div
       className={cn(
-        "flex items-center justify-start border-b border-zinc-100 px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
+        "flex items-center justify-start border-b px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
         isSelected && "bg-zinc-100",
       )}
       onClick={() => handleSelected()}

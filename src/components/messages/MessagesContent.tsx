@@ -28,7 +28,7 @@ export default function MessagesContent({
         </>
       ) : (
         // Main Message content
-        <div className="relative flex h-full w-full flex-col bg-white">
+        <div className="relative flex h-full w-full flex-col">
           <ChatHeader
             selectedConversation={selectedConversation}
             setSelected={setSelected}
