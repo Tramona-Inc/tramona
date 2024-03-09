@@ -100,7 +100,7 @@ dependencies:
     version: 7.0.2
   '@stripe/react-stripe-js':
     specifier: ^2.4.0
-    version: 2.4.0(@stripe/stripe-js@2.4.0)(react-dom@18.2.0)(react@18.2.0)
+    version: 2.5.1(@stripe/stripe-js@2.4.0)(react-dom@18.2.0)(react@18.2.0)
   '@stripe/stripe-js':
     specifier: ^2.4.0
     version: 2.4.0
@@ -7971,10 +7971,10 @@ packages:
       file-system-cache: 2.3.0
     dev: true
 
-  /@stripe/react-stripe-js@2.4.0(@stripe/stripe-js@2.4.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-1jVQEL3OuhuzNlf4OdfqovHt+MkWh8Uh8xpLxx/xUFUDdF+7/kDOrGKy+xJO3WLCfZUL7NAy+/ypwXbbYZi0tg==}
+  /@stripe/react-stripe-js@2.5.1(@stripe/stripe-js@2.4.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-95BwDhOkl1TwIn5sldWW35GYt6wx+uYuwGjebaMOpOdHGyBKcDnBhTjIww+bUdmA2oCmpUqKnoB4OZJuqK8tJA==}
     peerDependencies:
-      '@stripe/stripe-js': ^1.44.1 || ^2.0.0
+      '@stripe/stripe-js': ^1.44.1 || ^2.0.0 || ^3.0.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
