@@ -1,18 +1,18 @@
-import type { PropsWithChildren } from "react";
-import Link from "next/link";
-import React, { useState } from "react";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
-import { MenuIcon } from "lucide-react";
-import HeaderTopRight from "./HeaderTopRight";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MenuIcon } from "lucide-react";
+import Link from "next/link";
+import type { PropsWithChildren } from "react";
+import { useState } from "react";
+import HeaderTopRight from "./HeaderTopRight";
 
 import NavLink from "@/components/_utils/NavLink";
-import { cn } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 
 export default function Header() {
@@ -59,25 +59,27 @@ function LargeHeader() {
   const { status } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 flex items-center bg-white p-4 shadow-md">
-      <div className="flex flex-1 gap-4">
-        <TramonaLogo />
-      </div>
+    <header className="sticky top-0 z-50 bg-white p-4 shadow-md">
+      <div className="container flex items-center">
+        <div className="flex flex-1 gap-4">
+          <TramonaLogo />
+        </div>
 
-      <div className="flex items-center justify-center gap-2">
-        {status === "unauthenticated" && (
-          <>
-            {headerLinks.map(({ href, label }, i) => (
-              <HeaderLink key={i} href={href}>
-                {label}
-              </HeaderLink>
-            ))}
-          </>
-        )}
-      </div>
+        <div className="flex items-center justify-center gap-2">
+          {status === "unauthenticated" && (
+            <>
+              {headerLinks.map(({ href, label }, i) => (
+                <HeaderLink key={i} href={href}>
+                  {label}
+                </HeaderLink>
+              ))}
+            </>
+          )}
+        </div>
 
-      <div className="flex flex-1 justify-end">
-        <HeaderTopRight />
+        <div className="flex flex-1 justify-end">
+          <HeaderTopRight />
+        </div>
       </div>
     </header>
   );
