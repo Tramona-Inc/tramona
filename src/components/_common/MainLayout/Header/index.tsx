@@ -30,10 +30,9 @@ export default function Header() {
 
 const userLinks = [
   { href: "/", label: "Overview" },
-  { href: "/my-trips", label: "My Trips" },
   { href: "/requests", label: "Request/Offers" },
+  { href: "/my-trips", label: "My Trips" },
   { href: "/messages", label: "Messages" },
-  { href: "/faq", label: "FAQ" },
 ];
 
 function LargeHeader() {
