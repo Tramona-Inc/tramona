@@ -50,7 +50,7 @@ export default function SignIn({
       password: password,
       callbackUrl: query.isNewUser
         ? `${window.location.origin}/auth/welcome`
-        : window.location.origin,
+        : `${window.location.origin}/dashboard`,
     });
   };
 
