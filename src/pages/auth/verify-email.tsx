@@ -3,7 +3,7 @@ import { ExternalLinkIcon } from "lucide-react";
 
 export default function Page() {
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center gap-4">
+    <div className="flex min-h-screen-minus-header flex-col items-center justify-center gap-4">
       <h1 className="text-center text-5xl font-bold tracking-tight">
         Check your email
       </h1>

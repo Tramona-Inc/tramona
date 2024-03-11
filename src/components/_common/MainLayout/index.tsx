@@ -5,7 +5,7 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
   return (
     <div vaul-drawer-wrapper="">
       <Header />
-      <main className="min-h-screen flex-1 bg-background pt-[--header-height]">
+      <main className="min-h-screen-minus-header flex-1 bg-background">
         {children}
       </main>
       <Footer />
