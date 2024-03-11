@@ -58,14 +58,6 @@ const headerLinks = [
   },
 ];
 
-const userLinks = [
-  { href: "/", label: "Overview" },
-  { href: "/my-trips", label: "My Trips" },
-  { href: "/requests", label: "Request/Offers" },
-  { href: "/messages", label: "Messages" },
-  { href: "/faq", label: "FAQ" },
-];
-
 function LargeHeader({ type }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-white p-4 shadow-md">
