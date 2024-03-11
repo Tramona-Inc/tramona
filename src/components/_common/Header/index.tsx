@@ -16,6 +16,11 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
+import {
+  AdminNavLinks,
+  GuestNavLinks,
+  HostNavLinks,
+} from "../Layout/DashboardLayout";
 
 type HeaderProps = {
   type: "marketing" | "dashboard";
@@ -96,7 +101,7 @@ function LargeHeader({ type }: HeaderProps) {
 }
 
 function SmallHeader({ type }: HeaderProps) {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
 
   return (
     <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
@@ -108,10 +113,10 @@ function SmallHeader({ type }: HeaderProps) {
         </SheetTrigger>
         <SheetContent side="left">
           <SheetHeader>
-            <SheetTitle>Are you absolutely sure?</SheetTitle>
+            <SheetTitle>Tramona</SheetTitle>
             <SheetDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
+              {/* This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers. */}
             </SheetDescription>
           </SheetHeader>
 
@@ -124,13 +129,28 @@ function SmallHeader({ type }: HeaderProps) {
               ))}
             </>
           )}
-          {status === "authenticated" && (
+
+          {type === "dashboard" && (
             <>
-              {userLinks.map(({ href, label }, i) => (
-                <HeaderLink key={i} href={href}>
-                  {label}
-                </HeaderLink>
-              ))}
+              {session?.user.role === "admin"
+                ? AdminNavLinks.map(({ href, name }, i) => (
+                    <HeaderLink key={i} href={href}>
+                      {name}
+                    </HeaderLink>
+                  ))
+                : session?.user.role === "guest"
+                  ? GuestNavLinks.map(({ href, name }, i) => (
+                      <HeaderLink key={i} href={href}>
+                        {name}
+                      </HeaderLink>
+                    ))
+                  : session?.user.role === "host"
+                    ? HostNavLinks.map(({ href, name }, i) => (
+                        <HeaderLink key={i} href={href}>
+                          {name}
+                        </HeaderLink>
+                      ))
+                    : null}
             </>
           )}
         </SheetContent>
@@ -146,7 +166,7 @@ function SmallHeader({ type }: HeaderProps) {
         </Button>
       )}
 
-      {type === "dashboard" && (
+      {status === "authenticated" && (
         <div className="flex flex-1 justify-end">
           <HeaderTopRight />
         </div>

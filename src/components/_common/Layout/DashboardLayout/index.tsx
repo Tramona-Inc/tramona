@@ -4,7 +4,7 @@ import DashboardSidebar, {
 import Header from "../../Header";
 import Footer from "../Footer";
 
-const AdminNavLinks: NavLink[] = [
+export const AdminNavLinks: NavLink[] = [
   { href: "/admin", name: "Overview" },
   { href: "/admin/incoming-requests", name: "Incoming Request" },
   { href: "/admin/past-requests", name: "Past Requests" },
@@ -12,12 +12,12 @@ const AdminNavLinks: NavLink[] = [
   { href: "/messages", name: "Messages" },
 ];
 
-const HostNavLinks: NavLink[] = [
+export const HostNavLinks: NavLink[] = [
   { href: "/host", name: "Dashboard" },
   { href: "/messages", name: "Messages" },
 ];
 
-const GuestNavLinks: NavLink[] = [
+export const GuestNavLinks: NavLink[] = [
   { href: "/dashboard", name: "Oveview" },
   { href: "/my-trips", name: "My Trips" },
   { href: "/requests", name: "Request Offers" },
