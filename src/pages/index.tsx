@@ -14,7 +14,8 @@ export default function Home() {
     return <Spinner />;
   }
 
-  if (status === "unauthenticated") return <LandingPage />;
+  if (status === "unauthenticated") 
+    return <LandingPage />;
 
   return <DashboardPage />;
 }

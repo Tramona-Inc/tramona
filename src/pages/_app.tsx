@@ -6,7 +6,7 @@ import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
 
-import MainLayout from "@/components/_common/MainLayout";
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import TailwindIndicator from "@/components/_common/TailwindIndicator";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";

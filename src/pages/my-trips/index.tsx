@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useMemo } from "react";
 
-import DashboardLayout from "@/components/_common/DashboardLayout/Guest";
+import DashboardLayout from "@/components/_common/Layout/Dashboard/Guest";
 import Spinner from "@/components/_common/Spinner";
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";

@@ -1,5 +1,4 @@
-import DashboardLayout from "@/components/_common/DashboardLayout/Guest";
-import HostDashboardLayout from "@/components/_common/DashboardLayout/Host";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import {
@@ -66,15 +65,9 @@ export default function MessagePage() {
       <Head>
         <title>Messages | Tramona</title>
       </Head>
-      {session?.user.role === "host" ? (
-        <HostDashboardLayout>
-          <MessageDisplay />
-        </HostDashboardLayout>
-      ) : (
-        <DashboardLayout>
-          <MessageDisplay />
-        </DashboardLayout>
-      )}
+      <DashboardLayout type={session?.user.role === "host" ? "host" : "guest"}>
+        <MessageDisplay />
+      </DashboardLayout>
     </>
   );
 }

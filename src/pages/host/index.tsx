@@ -1,4 +1,4 @@
-import HostDashboardLayout from "@/components/_common/DashboardLayout/Host";
+import HostDashboardLayout from "@/components/_common/Layout/Dashboard/Host";
 import HostOverview from "@/components/dashboard/host/HostOverview";
 import Head from "next/head";
 
