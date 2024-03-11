@@ -105,7 +105,9 @@ function SmallHeader({ type }: HeaderProps) {
         </SheetTrigger>
         <SheetContent side="left">
           <SheetHeader>
-            <SheetTitle>Tramona</SheetTitle>
+            <SheetTitle>
+              <TramonaLogo />
+            </SheetTitle>
             <SheetDescription>
               {/* This action cannot be undone. This will permanently delete your
               account and remove your data from our servers. */}
@@ -158,7 +160,7 @@ function SmallHeader({ type }: HeaderProps) {
         </Button>
       )}
 
-      {status === "authenticated" && (
+      {type === 'dashboard' && (
         <div className="flex flex-1 justify-end">
           <HeaderTopRight />
         </div>
