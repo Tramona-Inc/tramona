@@ -49,7 +49,7 @@ export default function DashboadLayout({
             }
           />
         </aside>
-        <main className="flex min-h-screen-minus-small-header w-full flex-col overflow-hidden border-x sm:min-h-screen-minus-header">
+        <main className="flex min-h-screen-minus-small-header w-full flex-col overflow-hidden md:min-h-screen-minus-header lg:border-x">
           {children}
         </main>
       </div>
