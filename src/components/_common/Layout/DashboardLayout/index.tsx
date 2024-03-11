@@ -1,6 +1,7 @@
 import DashboardSidebar, {
   type NavLink,
 } from "@/components/dashboard/DashboardSidebar";
+import Header from "../../Header";
 
 const HostNavLinks: NavLink[] = [
   { href: "/host", name: "Overview" },
@@ -20,20 +21,23 @@ type DashboardLayoutProps = {
   type: "host" | "guest";
 };
 
-export default function DashboardLayout({
+export default function DashboadLayout({
   children,
   type,
 }: DashboardLayoutProps) {
   return (
-    <div className="container grid flex-1 gap-12 lg:grid-cols-[125px_1fr]">
-      <aside className="h-screen-minus-header sticky hidden w-[125px] flex-col lg:flex">
-        <DashboardSidebar
-          navLinks={type === "guest" ? GuestNavLinks : HostNavLinks}
-        />
-      </aside>
-      <main className="min-h-screen-minus-small-header sm:min-h-screen-minus-header flex w-full flex-col overflow-hidden border-x">
-        {children}
-      </main>
-    </div>
+    <>
+      <Header type={"dashboard"} />
+      <div className="container grid flex-1 gap-12 lg:grid-cols-[125px_1fr]">
+        <aside className="sticky hidden h-screen-minus-header w-[125px] flex-col lg:flex">
+          <DashboardSidebar
+            navLinks={type === "guest" ? GuestNavLinks : HostNavLinks}
+          />
+        </aside>
+        <main className="flex min-h-screen-minus-small-header w-full flex-col overflow-hidden border-x sm:min-h-screen-minus-header">
+          {children}
+        </main>
+      </div>
+    </>
   );
 }

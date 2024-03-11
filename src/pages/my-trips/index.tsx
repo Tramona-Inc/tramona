@@ -7,7 +7,7 @@ import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
 
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout/DashboardLayout";
 import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";

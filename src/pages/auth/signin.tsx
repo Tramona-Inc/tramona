@@ -12,7 +12,6 @@ import {
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
 import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,8 +32,6 @@ const formSchema = z.object({
 export default function SignIn({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  useRequireNoAuth();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -48,9 +45,7 @@ export default function SignIn({
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: query.isNewUser
-        ? `${window.location.origin}/auth/welcome`
-        : `${window.location.origin}/dashboard`,
+      callbackUrl: query.isNewUser ? "/auth/welcome" : "/dashboard",
     });
   };
 

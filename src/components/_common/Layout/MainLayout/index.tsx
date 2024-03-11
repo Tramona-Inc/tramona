@@ -1,10 +1,10 @@
+import Header from "../../Header";
 import Footer from "./Footer";
-import Header from "./Header";
 
 export default function MainLayout({ children }: React.PropsWithChildren) {
   return (
     <div vaul-drawer-wrapper="">
-      <Header />
+      <Header type="marketing" />
       <main className="bg-background">{children}</main>
       <Footer />
     </div>

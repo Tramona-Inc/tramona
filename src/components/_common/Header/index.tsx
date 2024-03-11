@@ -15,14 +15,18 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 
-export default function Header() {
+type HeaderProps = {
+  type: "marketing" | "dashboard";
+};
+
+export default function Header({ type }: HeaderProps) {
   return (
     <>
       <div className="contents lg:hidden">
-        <SmallHeader />
+        <SmallHeader type={type} />
       </div>
       <div className="hidden lg:contents">
-        <LargeHeader />
+        <LargeHeader type={type} />
       </div>
     </>
   );
@@ -55,9 +59,7 @@ const userLinks = [
   { href: "/faq", label: "FAQ" },
 ];
 
-function LargeHeader() {
-  const { status } = useSession();
-
+function LargeHeader({ type }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-white p-4 shadow-md">
       <div className="container flex items-center">
@@ -66,7 +68,7 @@ function LargeHeader() {
         </div>
 
         <div className="flex items-center justify-center gap-2">
-          {["unauthenticated", "loading"].includes(status) && (
+          {type === "marketing" && (
             <>
               {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
@@ -78,14 +80,20 @@ function LargeHeader() {
         </div>
 
         <div className="flex flex-1 justify-end">
-          <HeaderTopRight />
+          {type === "dashboard" ? (
+            <HeaderTopRight />
+          ) : (
+            <Button asChild variant="darkOutline">
+              <Link href="/auth/signin">Log in</Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
   );
 }
 
-function SmallHeader() {
+function SmallHeader({ type }: HeaderProps) {
   const { status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -124,9 +132,17 @@ function SmallHeader() {
 
       <TramonaLogo />
 
-      <div className="flex flex-1 justify-end">
-        <HeaderTopRight />
-      </div>
+      {type === "marketing" && (
+        <Button asChild variant="darkOutline">
+          <Link href="/auth/signin">Log in</Link>
+        </Button>
+      )}
+
+      {type === "dashboard" && (
+        <div className="flex flex-1 justify-end">
+          <HeaderTopRight />
+        </div>
+      )}
     </header>
   );
 }
