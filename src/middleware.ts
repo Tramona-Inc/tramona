@@ -10,9 +10,18 @@ export default withAuth(
       req.nextUrl.pathname.startsWith("/auth/signin") ||
       req.nextUrl.pathname.startsWith("/auth/signup");
 
+    const userRole = token?.role;
+
     if (isAuthPage) {
       if (isAuth) {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        switch (userRole) {
+          case "guest":
+            return NextResponse.redirect(new URL("/dashboard", req.url));
+          case "host":
+            return NextResponse.redirect(new URL("/host", req.url));
+          case "admin":
+            return NextResponse.redirect(new URL("/admin", req.url));
+        }
       }
 
       return null;
