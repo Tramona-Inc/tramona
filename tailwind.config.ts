@@ -17,6 +17,10 @@ module.exports = {
       },
     },
     extend: {
+      padding: {
+        header: "72px", // Default value
+        "header-sm": "56px", // Value for sm screen
+      },
       colors: {
         gold: "#FACF26",
         border: "hsl(var(--border))",
