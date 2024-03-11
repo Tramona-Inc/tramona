@@ -18,8 +18,12 @@ module.exports = {
     },
     extend: {
       padding: {
-        header: "72px", // Default value
-        "header-sm": "56px", // Value for sm screen
+        header: "72px",
+        "header-sm": "56px",
+      },
+      margin: {
+        header: "72px",
+        "header-sm": "56px",
       },
       colors: {
         gold: "#FACF26",
