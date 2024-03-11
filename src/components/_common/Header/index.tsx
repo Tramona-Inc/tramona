@@ -93,7 +93,7 @@ function LargeHeader({ type }: HeaderProps) {
 }
 
 function SmallHeader({ type }: HeaderProps) {
-  const { status, data: session } = useSession();
+  const { data: session } = useSession();
 
   return (
     <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
@@ -160,7 +160,7 @@ function SmallHeader({ type }: HeaderProps) {
         </Button>
       )}
 
-      {type === 'dashboard' && (
+      {type === "dashboard" && (
         <div className="flex flex-1 justify-end">
           <HeaderTopRight />
         </div>
