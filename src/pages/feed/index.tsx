@@ -5,6 +5,7 @@ import FeedCard from "@/components/feed/feed-card";
 
 // import { api } from "@/utils/api";
 import { liveFeedOffers } from "@/components/offer-card/data";
+import MainLayout from "@/components/_common/Layout/MainLayout";
 
 export default function Dashboard() {
   // const { data: offers, isLoading } = api.offers.getAllOffers.useQuery();
@@ -13,7 +14,7 @@ export default function Dashboard() {
     .sort((a, b) => b.discountPercent - a.discountPercent);
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Social Feed | Tramona</title>
       </Head>
@@ -46,6 +47,6 @@ export default function Dashboard() {
           })}
         </div>
       </section>
-    </>
+    </MainLayout>
   );
 }
