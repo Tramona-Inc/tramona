@@ -22,16 +22,10 @@ function SignUpBtn() {
 export default function HeaderTopRight() {
   const { data: session, status } = useSession();
 
-  switch (status) {
-    case "loading":
-      return <LogInBtn />;
-    case "unauthenticated":
-      return (
-        <div className="flex gap-2">
-          <LogInBtn />
-        </div>
-      );
-    case "authenticated":
-      return <AvatarDropdown session={session} />;
-  }
+  return (
+    <>
+      {(status === "loading" || status === "unauthenticated") && <LogInBtn />}
+      {status === "authenticated" && <AvatarDropdown session={session} />}
+    </>
+  );
 }

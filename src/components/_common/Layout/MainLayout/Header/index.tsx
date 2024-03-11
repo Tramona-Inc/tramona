@@ -66,7 +66,7 @@ function LargeHeader() {
         </div>
 
         <div className="flex items-center justify-center gap-2">
-          {status === "unauthenticated" && (
+          {["unauthenticated", "loading"].includes(status) && (
             <>
               {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
@@ -100,15 +100,16 @@ function SmallHeader() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="p-2">
-          {status === "unauthenticated" && (
-            <>
-              {headerLinks.map(({ href, label }, i) => (
-                <HeaderLink key={i} href={href} onClick={closeMenu}>
-                  {label}
-                </HeaderLink>
-              ))}
-            </>
-          )}
+          {["unauthenticated", "loading"].includes(status) ||
+            (status === "loading" && (
+              <>
+                {headerLinks.map(({ href, label }, i) => (
+                  <HeaderLink key={i} href={href} onClick={closeMenu}>
+                    {label}
+                  </HeaderLink>
+                ))}
+              </>
+            ))}
           {status === "authenticated" && (
             <>
               {userLinks.map(({ href, label }, i) => (
