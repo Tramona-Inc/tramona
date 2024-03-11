@@ -12,11 +12,13 @@ const navLinks: NavLink[] = [
 
 export default function DashboardLayout({ children }: React.PropsWithChildren) {
   return (
-    <>
-      <div className="grid min-h-[calc(100vh-4.5rem)] grid-cols-1 lg:grid-cols-12">
+    <div className="pt-header-sm sm:pt-header container grid h-screen flex-1 gap-12 lg:grid-cols-[125px_1fr]">
+      <aside className="hidden w-[125px] flex-col lg:flex">
         <DashboardSidebar navLinks={navLinks} />
+      </aside>
+      <main className="flex h-full w-full flex-1 flex-col overflow-hidden border-x">
         {children}
-      </div>
-    </>
+      </main>
+    </div>
   );
 }

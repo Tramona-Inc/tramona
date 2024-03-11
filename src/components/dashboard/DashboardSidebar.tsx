@@ -15,7 +15,7 @@ function SidebarLink({
       render={({ selected }) => (
         <div
           className={cn(
-            "py-2 font-medium",
+            "py-2 font-medium hover:text-gray-200",
             selected ? "text-black" : "text-muted-foreground",
           )}
         >
@@ -31,13 +31,13 @@ export type NavLink = {
   name: string;
 };
 
-export default function DashboardSidebar({
+export default function HostDashboardSidebar({
   navLinks,
 }: {
   navLinks: NavLink[];
 }) {
   return (
-    <div className="sticky top-0 col-span-2 hidden max-h-[100vh] flex-col justify-center gap-5 border-r-2 border-zinc-100 px-5 lg:flex 2xl:col-span-1">
+    <div className="sticky top-0 flex h-full flex-col justify-center gap-5">
       {navLinks.map((nav, index) => (
         <SidebarLink key={index} href={nav.href}>
           {nav.name}
