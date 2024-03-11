@@ -1,8 +1,8 @@
 import { useSession } from "next-auth/react";
 
+import LandingPage from "@/components/landing-page/LandingPage";
 import Spinner from "@/components/_common/Spinner";
 import DashboardPage from "@/components/dashboard/DashboardPage";
-import LandingPage from "@/components/landing-page/LandingPage";
 
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 

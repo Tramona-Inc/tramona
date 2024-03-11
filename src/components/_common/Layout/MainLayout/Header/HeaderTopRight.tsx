@@ -5,7 +5,7 @@ import AvatarDropdown from "./AvatarDropdown";
 
 function LogInBtn() {
   return (
-    <Button asChild className="rounded-full" variant="darkOutline">
+    <Button asChild variant="darkOutline">
       <Link href="/auth/signin">Log in</Link>
     </Button>
   );
@@ -24,12 +24,11 @@ export default function HeaderTopRight() {
 
   switch (status) {
     case "loading":
-      return <div className="h-10" />;
+      return <LogInBtn />;
     case "unauthenticated":
       return (
         <div className="flex gap-2">
           <LogInBtn />
-          <SignUpBtn />
         </div>
       );
     case "authenticated":

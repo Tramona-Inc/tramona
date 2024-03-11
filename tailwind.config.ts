@@ -21,6 +21,10 @@ module.exports = {
         "screen-minus-header": "calc(100vh - 72px)",
         "screen-minus-small-header": "calc(100vh - 56px)",
       },
+      height: {
+        "screen-minus-header": "calc(100vh - 72px)",
+        "screen-minus-small-header": "calc(100vh - 56px)",
+      },
       colors: {
         gold: "#FACF26",
         border: "hsl(var(--border))",
