@@ -25,13 +25,13 @@ export default function DashboardLayout({
   type,
 }: DashboardLayoutProps) {
   return (
-    <div className="container grid flex-1 gap-12 pt-header-sm sm:pt-header lg:grid-cols-[125px_1fr]">
+    <div className="min-h-screen-minus-small-header sm:min-h-screen-minus-header container grid flex-1 gap-12 lg:grid-cols-[125px_1fr]">
       <aside className="hidden w-[125px] flex-col lg:flex">
         <DashboardSidebar
           navLinks={type === "guest" ? GuestNavLinks : HostNavLinks}
         />
       </aside>
-      <main className="flex w-full flex-1 flex-col overflow-hidden border-x">
+      <main className="flex w-full flex-col overflow-hidden border-x">
         {children}
       </main>
     </div>

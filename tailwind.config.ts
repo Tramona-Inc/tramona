@@ -17,13 +17,9 @@ module.exports = {
       },
     },
     extend: {
-      padding: {
-        header: "72px",
-        "header-sm": "56px",
-      },
-      margin: {
-        header: "72px",
-        "header-sm": "56px",
+      minHeight: {
+        "screen-minus-header": "calc(100vh - 72px)",
+        "screen-minus-small-header": "calc(100vh - 56px)",
       },
       colors: {
         gold: "#FACF26",

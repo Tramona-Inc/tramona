@@ -17,7 +17,7 @@ const LandingVideo = dynamic(
 export default function MastHead() {
   return (
     <>
-      <section className="relative flex min-h-[calc(100vh-4rem)] flex-col justify-center">
+      <section className="min-h-screen-minus-small-header sm:min-h-screen-minus-header relative flex flex-col justify-center">
         <div className="absolute inset-0 bg-black" />
         <LandingVideo />
         <div className="z-10 flex flex-col justify-center gap-4 p-4">
