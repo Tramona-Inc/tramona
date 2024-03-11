@@ -5,6 +5,7 @@ import Header from "../../Header";
 import Footer from "../Footer";
 
 const AdminNavLinks: NavLink[] = [
+  { href: "/admin", name: "Overview" },
   { href: "/admin/incoming-requests", name: "Incoming Request" },
   { href: "/admin/past-requests", name: "Past Requests" },
   { href: "/admin/utility", name: "Utility" },
