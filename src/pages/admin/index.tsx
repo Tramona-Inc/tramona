@@ -1,3 +1,4 @@
+import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import AdminRequestsTabs from "@/components/admin/AdminRequestsTabs";
 import { useRequireRole } from "@/utils/auth-utils";
 import Head from "next/head";
@@ -6,7 +7,7 @@ export default function Page() {
   useRequireRole(["admin"]);
 
   return (
-    <>
+    <DashboadLayout type="admin">
       <Head>
         <title>Admin Dashboard | Tramona</title>
       </Head>
@@ -20,6 +21,6 @@ export default function Page() {
           <AdminRequestsTabs />
         </div>
       </div>
-    </>
+    </DashboadLayout>
   );
 }

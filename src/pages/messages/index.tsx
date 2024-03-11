@@ -65,7 +65,7 @@ export default function MessagePage() {
       <Head>
         <title>Messages | Tramona</title>
       </Head>
-      <DashboardLayout type={session?.user.role === "host" ? "host" : "guest"}>
+      <DashboardLayout type={session?.user.role ?? "guest"}>
         <MessageDisplay />
       </DashboardLayout>
     </>

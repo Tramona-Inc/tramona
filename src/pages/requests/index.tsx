@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout/DashboardLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
 import RequestCard, {
