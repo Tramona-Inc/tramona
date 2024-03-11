@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/_common/Layout/Dashboard/Guest";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +14,7 @@ export default function FAQ() {
         <title>FAQ | Tramona</title>
       </Head>
 
-      <DashboardLayout>
+      <DashboardLayout type="guest">
         <div className="col-span-10 mx-auto max-w-3xl p-4 pb-32 2xl:col-span-11">
           <h1 className="pb-12 pt-20 text-3xl font-bold">
             Frequently Asked Questions

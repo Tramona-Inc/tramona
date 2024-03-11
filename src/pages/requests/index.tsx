@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/_common/Layout/Dashboard/Guest";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
 import RequestCard, {
@@ -98,7 +98,7 @@ export default function Page() {
         <title>My Requests | Tramona</title>
       </Head>
 
-      <DashboardLayout>
+      <DashboardLayout type="guest">
         <div className="container col-span-10 px-4 pb-64 pt-5 2xl:col-span-11">
           <div className="mx-auto">
             <div className="flex items-center">
