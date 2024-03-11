@@ -1,5 +1,6 @@
 // https://next-auth.js.org/configuration/pages
 
+import MainLayout from '@/components/_common/Layout/MainLayout';
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -63,7 +64,7 @@ export default function SignIn({
   }, [query.error, query.isVerified]);
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Log in | Tramona</title>
       </Head>
@@ -169,7 +170,7 @@ export default function SignIn({
           </Link>
         </p>
       </div>
-    </>
+    </MainLayout>
   );
 }
 

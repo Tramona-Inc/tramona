@@ -1,17 +1,19 @@
 import TramonaIcon from "@/components/_icons/TramonaIcon";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import { useState } from "react";
 import HeaderTopRight from "./HeaderTopRight";
 
 import NavLink from "@/components/_utils/NavLink";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 
@@ -95,42 +97,48 @@ function LargeHeader({ type }: HeaderProps) {
 
 function SmallHeader({ type }: HeaderProps) {
   const { status } = useSession();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <DropdownMenuTrigger asChild className="lg:hidden">
+      <Sheet>
+        <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
             <MenuIcon />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="p-2">
-          {["unauthenticated", "loading"].includes(status) ||
-            (status === "loading" && (
-              <>
-                {headerLinks.map(({ href, label }, i) => (
-                  <HeaderLink key={i} href={href} onClick={closeMenu}>
-                    {label}
-                  </HeaderLink>
-                ))}
-              </>
-            ))}
-          {status === "authenticated" && (
+        </SheetTrigger>
+        <SheetContent side="left">
+          <SheetHeader>
+            <SheetTitle>Are you absolutely sure?</SheetTitle>
+            <SheetDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </SheetDescription>
+          </SheetHeader>
+
+          {type === "marketing" && (
             <>
-              {userLinks.map(({ href, label }, i) => (
-                <HeaderLink key={i} href={href} onClick={closeMenu}>
+              {headerLinks.map(({ href, label }, i) => (
+                <HeaderLink key={i} href={href}>
                   {label}
                 </HeaderLink>
               ))}
             </>
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          {status === "authenticated" && (
+            <>
+              {userLinks.map(({ href, label }, i) => (
+                <HeaderLink key={i} href={href}>
+                  {label}
+                </HeaderLink>
+              ))}
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
 
       <TramonaLogo />
+
+      <div className="flex-1" />
 
       {type === "marketing" && (
         <Button asChild variant="darkOutline">
