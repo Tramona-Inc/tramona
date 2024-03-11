@@ -18,7 +18,8 @@ export default withAuth(
           case "guest":
             return NextResponse.redirect(new URL("/dashboard", req.url));
           case "host":
-            return NextResponse.redirect(new URL("/host", req.url));
+            // return NextResponse.redirect(new URL("/host", req.url));
+            return NextResponse.redirect(new URL("/messages", req.url));
           case "admin":
             return NextResponse.redirect(new URL("/admin", req.url));
         }
