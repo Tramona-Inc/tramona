@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout/DashboardLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import {
   Accordion,
   AccordionContent,

@@ -13,7 +13,7 @@ const AdminNavLinks: NavLink[] = [
 ];
 
 const HostNavLinks: NavLink[] = [
-  { href: "/host", name: "Overview" },
+  { href: "/host", name: "Dashboard" },
   { href: "/messages", name: "Messages" },
 ];
 
