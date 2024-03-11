@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/_common/DashboardLayout";
+import DashboardLayout from "@/components/_common/DashboardLayout/Guest";
 import HostDashboardLayout from "@/components/_common/DashboardLayout/Host";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";

@@ -2,11 +2,11 @@ import Head from "next/head";
 import Link from "next/link";
 import { useMemo } from "react";
 
+import DashboardLayout from "@/components/_common/DashboardLayout/Guest";
+import Spinner from "@/components/_common/Spinner";
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
-import Spinner from "@/components/_common/Spinner";
-import DashboardLayout from "@/components/_common/DashboardLayout";
 
 import { type AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
