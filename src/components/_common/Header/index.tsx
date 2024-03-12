@@ -9,10 +9,9 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
+  SheetTrigger
 } from "@/components/ui/sheet";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
@@ -108,10 +107,6 @@ function SmallHeader({ type }: HeaderProps) {
             <SheetTitle>
               <TramonaLogo />
             </SheetTitle>
-            <SheetDescription>
-              {/* This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers. */}
-            </SheetDescription>
           </SheetHeader>
 
           {type === "marketing" && (
