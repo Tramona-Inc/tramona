@@ -27,7 +27,7 @@ export default function Footer() {
   // const [submittedEmail, setSubmittedEmail] = useState(false);
 
   return (
-    <footer className="flex items-stretch bg-zinc-900">
+    <footer className="flex items-stretch bg-black">
       <div className="flex-1">
         <div className="mx-4 my-8 flex flex-col px-4 lg:mx-20">
           {/* <div>
@@ -100,7 +100,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <div className="hidden w-64 bg-[url(/assets/images/footer-img.png)] bg-cover bg-center sm:block" />
+      {/* <div className="hidden w-64 bg-[url(/assets/images/footer-img.png)] bg-cover bg-center sm:block" /> */}
     </footer>
   );
 }

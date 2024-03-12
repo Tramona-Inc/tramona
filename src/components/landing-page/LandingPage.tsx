@@ -1,16 +1,16 @@
 import Head from "next/head";
 
-import CurrentState from "@/components/landing-page/_sections/CurrentState";
-import Hosts from "@/components/landing-page/_sections/Hosts";
-import How from "@/components/landing-page/_sections/How";
-import Jungle from "@/components/landing-page/_sections/Jungle";
 import MastHead from "@/components/landing-page/_sections/MastHead";
-import Reviews from "@/components/landing-page/_sections/Reviews";
-import TramonaLoop from "@/components/landing-page/_sections/TramonaLoop";
-import Gift from "@/components/landing-page/_sections/Gift";
-import Save from "@/components/landing-page/_sections/Save";
+import HowItWorks from "@/components/landing-page/_sections/HowItWorks";
+import SocialFeed from "@/components/landing-page/_sections/SocialFeed";
+import ForHosts from "@/components/landing-page/_sections/ForHosts";
+import ReferAndEarn from "@/components/landing-page/_sections/ReferAndEarn";
+import HelpEndThis from "@/components/landing-page/_sections/HelpEndThis";
+import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 
 export default function LandingPage() {
+  useMaybeSendUnsentRequests();
+
   return (
     <>
       <div className="relative overflow-x-hidden">
@@ -21,32 +21,37 @@ export default function LandingPage() {
         <MastHead />
 
         {/* Section 2: How it works  */}
-        <How />
+        {/* <How /> */}
+        <HowItWorks />
 
         {/* Section 3: Message to Host*/}
-        <Hosts />
+        {/* <Hosts /> */}
+        <SocialFeed />
 
         {/* Section 4: Travel More Save More */}
-        <Save />
+        {/* <Save /> */}
+        <ForHosts />
+        <ReferAndEarn />
+        <HelpEndThis />
 
         {/* Hack to display coin image out of bounds */}
         {/* without -> displays coin image below */}
         <div className="relative overflow-x-hidden overflow-y-hidden">
           {/* Section 5: Gift your friends */}
-          <Gift />
+          {/* <Gift /> */}
 
           {/* Section 5: Current State of Travel */}
-          <CurrentState />
+          {/* <CurrentState /> */}
         </div>
 
         {/* Section 5: Tramona Loop */}
-        <TramonaLoop />
+        {/* <TramonaLoop /> */}
 
         {/* Section 6: Reviews */}
-        <Reviews />
+        {/* <Reviews /> */}
 
         {/* Jungle Image */}
-        <Jungle />
+        {/* <Jungle /> */}
       </div>
     </>
   );

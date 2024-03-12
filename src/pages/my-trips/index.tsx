@@ -51,7 +51,7 @@ export default function MyTrips() {
 
               {data?.displayUpcomingTrips !== null && !isLoading && (
                 <Button variant={"darkPrimary"} asChild>
-                  <Link href={"/my-trips/previous"}>View More ...</Link>
+                  <Link href={"/my-trips/upcoming"}>View More ...</Link>
                 </Button>
               )}
             </div>
