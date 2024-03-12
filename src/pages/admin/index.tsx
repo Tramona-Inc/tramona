@@ -4,8 +4,6 @@ import { useRequireRole } from "@/utils/auth-utils";
 import Head from "next/head";
 
 export default function Page() {
-  useRequireRole(["admin"]);
-
   return (
     <DashboadLayout type="admin">
       <Head>

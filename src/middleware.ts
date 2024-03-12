@@ -12,6 +12,8 @@ export default withAuth(
 
     const userRole = token?.role;
 
+    const { pathname, origin } = req.nextUrl;
+
     if (isAuthPage) {
       if (isAuth) {
         switch (userRole) {
@@ -34,17 +36,35 @@ export default withAuth(
         from += req.nextUrl.search;
       }
 
+      // If not signed in
       return NextResponse.redirect(
-        new URL(`/login?from=${encodeURIComponent(from)}`, req.url),
+        new URL(`/auth/signin?from=${encodeURIComponent(from)}`, req.url),
       );
     }
   },
   {
     callbacks: {
-      async authorized() {
-        // This is a work-around for handling redirect on auth pages.
-        // We return true here so that the middleware function above
-        // is always called.
+      // async authorized() {
+      //   // This is a work-around for handling redirect on auth pages.
+      //   // We return true here so that the middleware function above
+      //   // is always called.
+      //   return true;
+      // },
+      authorized: ({ req, token }) => {
+        const path = req.nextUrl.pathname;
+
+        // Check if the middleware is processing the
+        // route which requires a specific role
+        if (path.startsWith("/admin")) {
+          return token?.role === "admin";
+        }
+
+        if (path.startsWith("/host")) {
+          return token?.role === "host";
+        }
+
+        // By default return true only if the token is not null
+        // (this forces the users to be signed in to access the page)
         return true;
       },
     },
@@ -52,5 +72,11 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/signin", "/auth/signup"],
+  matcher: [
+    "/dashboard/:path*",
+    "/auth/signin",
+    "/auth/signup",
+    "/admin/:path*",
+    "/host/:path*",
+  ],
 };

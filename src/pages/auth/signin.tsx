@@ -20,6 +20,7 @@ import { type InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -38,15 +39,20 @@ export default function SignIn({
   });
 
   const { query } = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async ({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
+    const callbackUrl =
+      searchParams?.get("from") ??
+      (query.isNewUser ? "/auth/welcome" : "/dashboard");
+
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: query.isNewUser && "/auth/welcome",
+      callbackUrl: callbackUrl,
     });
   };
 
