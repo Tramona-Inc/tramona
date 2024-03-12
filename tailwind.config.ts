@@ -18,8 +18,7 @@ module.exports = {
     },
     extend: {
       spacing: {
-        "screen-minus-header": "var(--screen-minus-header)",
-        test: "100px",
+        "screen-minus-header": "var(--screen-minus-header)"
       },
       colors: {
         gold: "#FACF26",

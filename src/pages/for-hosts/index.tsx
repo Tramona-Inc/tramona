@@ -1,11 +1,12 @@
-import { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
-import React from "react";
 import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
+import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
+import { liveFeedOffers } from "@/components/offer-card/data";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Carousel,
@@ -15,9 +16,9 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
-import { liveFeedOffers } from "@/components/offer-card/data";
+import React from "react";
 
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import { cn } from "@/utils/utils";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -91,7 +92,7 @@ export default function HostWelcome() {
   }, [api]);
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Hosts | Tramona</title>
       </Head>
@@ -372,6 +373,6 @@ export default function HostWelcome() {
           Invite your friends
         </Link>
       </div>
-    </>
+    </MainLayout>
   );
 }

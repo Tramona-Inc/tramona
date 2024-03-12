@@ -1,3 +1,12 @@
+import UserAvatar from "@/components/_common/UserAvatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils/utils";
 import {
   HomeIcon,
@@ -12,15 +21,6 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ForwardRefExoticComponent } from "react";
-import { Badge } from "../../../ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../../ui/dropdown-menu";
-import UserAvatar from "../../UserAvatar";
 
 function DropdownTop({ session }: { session: Session }) {
   const title = session.user.name ?? session.user.email ?? "Anonymous";

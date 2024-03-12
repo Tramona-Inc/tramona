@@ -1,3 +1,4 @@
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import HostSignUpForm from "@/components/sign-up/host/HostSignUpForm";
 import { Button } from "@/components/ui/button";
 import Icons from "@/components/ui/icons";
@@ -13,11 +14,11 @@ export default function SignUp({
   useRequireNoAuth();
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Sign up | Tramona</title>
       </Head>
-      <div className="flex min-h-screen flex-col items-center justify-center space-y-10 py-8">
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-center text-5xl font-bold tracking-tight">
           Sign up to message your guest
         </h1>
@@ -84,7 +85,7 @@ export default function SignUp({
           .
         </p>
       </div>
-    </>
+    </MainLayout>
   );
 }
 

@@ -1,5 +1,6 @@
 // https://next-auth.js.org/configuration/pages
 
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,7 +13,6 @@ import {
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
 import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,7 @@ import { type InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -33,24 +34,25 @@ const formSchema = z.object({
 export default function SignIn({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  useRequireNoAuth();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   const { query } = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async ({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
+    const callbackUrl =
+      searchParams?.get("from") ??
+      (query.isNewUser && "/auth/welcome");
+
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: query.isNewUser
-        ? `${window.location.origin}/auth/welcome`
-        : window.location.origin,
+      callbackUrl: callbackUrl,
     });
   };
 
@@ -68,11 +70,11 @@ export default function SignIn({
   }, [query.error, query.isVerified]);
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Log in | Tramona</title>
       </Head>
-      <div className="flex min-h-screen flex-col items-center justify-center space-y-10 py-8">
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-5xl font-bold tracking-tight">Log in to Tramona</h1>
 
         <section className="flex flex-col items-center justify-center space-y-5">
@@ -174,7 +176,7 @@ export default function SignIn({
           </Link>
         </p>
       </div>
-    </>
+    </MainLayout>
   );
 }
 

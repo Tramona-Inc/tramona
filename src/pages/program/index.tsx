@@ -1,11 +1,11 @@
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
-import { useSession } from "next-auth/react";
 
-import * as SliderPrimitive from "@radix-ui/react-slider";
 import PinkStarIcon from "@/components/_icons/PinkStarIcon";
+import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 import {
   Accordion,
   AccordionContent,
@@ -14,11 +14,12 @@ import {
 } from "@/components/ui/accordion";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
+import * as SliderPrimitive from "@radix-ui/react-slider";
 
-import { cn } from "@/utils/utils";
-import { api } from "@/utils/api";
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import Spinner from "@/components/_common/Spinner";
+import { api } from "@/utils/api";
+import { cn } from "@/utils/utils";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -415,20 +416,22 @@ function FAQ() {
 
 export default function Page() {
   return (
-    <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <Head>
-        <title>Partners | Tramona</title>
-      </Head>
+    <MainLayout>
+      <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
+        <Head>
+          <title>Partners | Tramona</title>
+        </Head>
 
-      <IntroSection />
+        <IntroSection />
 
-      <ProgramTiers />
+        <ProgramTiers />
 
-      <HowItWorks />
+        <HowItWorks />
 
-      <ExploreEarnings />
+        <ExploreEarnings />
 
-      <FAQ />
-    </div>
+        <FAQ />
+      </div>
+    </MainLayout>
   );
 }

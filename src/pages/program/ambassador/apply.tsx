@@ -1,9 +1,10 @@
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import StartIcon2 from "@/components/_icons/StartIcon2";
 import { ProgramFrom } from "@/components/ambassador/ProgramForm";
 
 export default function Page() {
   return (
-    <div>
+    <MainLayout>
       <div className="bg-[#3843D0] py-20">
         <div className="container flex max-w-[1000px] flex-col items-center justify-between gap-10 text-[#FFFFFF] lg:flex-row">
           {/* Partner Program */}
@@ -27,6 +28,6 @@ export default function Page() {
       <div className="container flex max-w-2xl flex-col py-10">
         <ProgramFrom />
       </div>
-    </div>
+    </MainLayout>
   );
 }
