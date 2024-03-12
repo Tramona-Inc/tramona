@@ -28,52 +28,18 @@ export default function Header() {
   );
 }
 
-const headerLinks = [
-  {
-    href: "/program",
-    label: "Refer and Earn",
-  },
-  {
-    href: "/for-hosts",
-    label: "For Hosts",
-  },
-  // {
-  //   href: "/exclusive-offers",
-  //   label: "Exclusive Offers",
-  // },
-  {
-    href: "/feed",
-    label: "Social Feed",
-  },
-];
-
 const userLinks = [
   { href: "/", label: "Overview" },
-  { href: "/my-trips", label: "My Trips" },
   { href: "/requests", label: "Request/Offers" },
+  { href: "/my-trips", label: "My Trips" },
   { href: "/messages", label: "Messages" },
-  { href: "/faq", label: "FAQ" },
 ];
 
 function LargeHeader() {
-  const { status } = useSession();
-
   return (
-    <header className="sticky top-0 z-50 flex items-center bg-white p-4 shadow-md">
+    <header className="sticky inset-x-0 top-0 z-50 flex items-center bg-white p-4 shadow-md">
       <div className="flex flex-1 gap-4">
         <TramonaLogo />
-      </div>
-
-      <div className="flex items-center justify-center gap-2">
-        {status === "unauthenticated" && (
-          <>
-            {headerLinks.map(({ href, label }, i) => (
-              <HeaderLink key={i} href={href}>
-                {label}
-              </HeaderLink>
-            ))}
-          </>
-        )}
       </div>
 
       <div className="flex flex-1 justify-end">
@@ -90,34 +56,23 @@ function SmallHeader() {
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <DropdownMenuTrigger asChild className="lg:hidden">
-          <Button variant="ghost" size="icon">
-            <MenuIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="p-2">
-          {status === "unauthenticated" && (
-            <>
-              {headerLinks.map(({ href, label }, i) => (
-                <HeaderLink key={i} href={href} onClick={closeMenu}>
-                  {label}
-                </HeaderLink>
-              ))}
-            </>
-          )}
-          {status === "authenticated" && (
-            <>
-              {userLinks.map(({ href, label }, i) => (
-                <HeaderLink key={i} href={href} onClick={closeMenu}>
-                  {label}
-                </HeaderLink>
-              ))}
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <header className="sticky inset-x-0 top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
+      {status === "authenticated" && (
+        <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+          <DropdownMenuTrigger asChild className="lg:hidden">
+            <Button variant="ghost" size="icon">
+              <MenuIcon />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="p-2">
+            {userLinks.map(({ href, label }, i) => (
+              <HeaderLink key={i} href={href} onClick={closeMenu}>
+                {label}
+              </HeaderLink>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       <TramonaLogo />
 

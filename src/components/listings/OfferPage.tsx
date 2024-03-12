@@ -163,8 +163,8 @@ export default function OfferPage({
             </div>
           </section>
           <section>
-            <div className="rounded-lg bg-zinc-200 px-4 py-2 text-zinc-600">
-              <div className="line-clamp-3 ">{property.about}</div>
+            <div className="rounded-lg bg-zinc-200 px-4 py-2 text-zinc-600 max-w-2xl">
+              <div className="line-clamp-3 break-words">{property.about}</div>
               <div className="flex justify-end">
                 <Dialog>
                   <DialogTrigger className="text-foreground underline underline-offset-2">
@@ -175,7 +175,7 @@ export default function OfferPage({
                     <DialogHeader>
                       <DialogTitle>About this property</DialogTitle>
                     </DialogHeader>
-                    <p className="whitespace-break-spaces">{property.about}</p>
+                    <p className="whitespace-break-spaces break-words">{property.about}</p>
                   </DialogContent>
                 </Dialog>
               </div>
