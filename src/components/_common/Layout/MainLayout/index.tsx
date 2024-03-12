@@ -15,7 +15,7 @@ export default function MainLayout({ children, type }: MainLayoutProps) {
       ) : (
         <Header type="marketing" />
       )}
-      <main className="bg-background">{children}</main>
+      <main className="bg-background min-h-screen-minus-header">{children}</main>
       <Footer />
     </div>
   );

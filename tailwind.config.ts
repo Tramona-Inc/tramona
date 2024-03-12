@@ -17,13 +17,8 @@ module.exports = {
       },
     },
     extend: {
-      minHeight: {
-        "screen-minus-header": "calc(100vh - 72px)",
-        "screen-minus-small-header": "calc(100vh - 56px)",
-      },
-      height: {
-        "screen-minus-header": "calc(100vh - 72px)",
-        "screen-minus-small-header": "calc(100vh - 56px)",
+      spacing: {
+        "screen-minus-header": "var(--screen-minus-header)"
       },
       colors: {
         gold: "#FACF26",
