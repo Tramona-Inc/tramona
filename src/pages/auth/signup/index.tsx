@@ -75,7 +75,7 @@ export default function SignUp({
       <Head>
         <title>Sign up | Tramona</title>
       </Head>
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
+      <div className="min-h-screen-minus-header flex flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-center text-5xl font-bold tracking-tight">
           Sign up to start traveling
         </h1>
@@ -94,7 +94,7 @@ export default function SignUp({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} autoFocus type="email" />
+                        <Input {...field} autoFocus inputMode="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
