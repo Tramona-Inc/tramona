@@ -1,11 +1,14 @@
-import { api } from "@/utils/api";
+import { type NextApiRequest, type NextApiResponse } from "next";
 import { env } from "@/env";
+
 import { db } from "@/server/db";
-import { users, requests } from "../db/schema";
+import { requests, users } from "@/server/db/schema";
 import { eq, and, isNotNull } from "drizzle-orm";
+
 import { sendText } from "@/server/server-utils";
 
-async function cronJob() {
+// eslint-disable-next-line import/no-anonymous-default-export
+export default async (req: NextApiRequest, res: NextApiResponse) => {
   const usersWithUnconfirmedRequests = await db
     .selectDistinctOn([users.id], {
       id: users.id,
@@ -68,18 +71,16 @@ async function cronJob() {
       }
       // Send Twilio message for this request
     }
+    res.status(200).send("Cron job executed successfully.");
   } catch (error) {
-    console.error("Error in cron job:", error);
+    res.status(500).send("An error occurred during cron job execution.");
   }
-}
+};
 
 // Function to check if a date is older than 24 hours
+
 function isOlderThan24Hours(createdAt: Date, currentTime: Date) {
   const timeDifference = currentTime.getTime() - new Date(createdAt).getTime();
   const hoursDifference = timeDifference / (1000 * 3600); // Convert milliseconds to hours
   return hoursDifference >= 24;
 }
-
-// Function to send Twilio message for a request
-
-await cronJob();

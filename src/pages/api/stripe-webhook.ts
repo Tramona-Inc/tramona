@@ -81,10 +81,9 @@ export default async function webhook(
           );
 
         const twilioMutation = api.twilio.sendSMS.useMutation();
-        paymentIntentSucceeded.metadata
 
         const sms = {
-          to: formatPhoneNumber(paymentIntentSucceeded.metadata.phoneNumber),
+          to: paymentIntentSucceeded.metadata.phoneNumber!,
           msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
         };
 
