@@ -47,7 +47,7 @@ export default function SignIn({
   }: z.infer<typeof formSchema>) => {
     const callbackUrl =
       searchParams?.get("from") ??
-      (query.isNewUser ? "/auth/welcome" : "/dashboard");
+      (query.isNewUser && "/auth/welcome");
 
     await signIn("credentials", {
       email: email,
