@@ -2,9 +2,8 @@ import { type Request } from "@/server/db/schema";
 import { capitalize } from "./utils";
 
 /**
- * This file is for miscellaneous helper functions that format data.
  * The difference from utils.ts is that these functions are specific
- * to our data, whereas utils.ts are small functions that you could
+ * to our data/project, whereas utils.ts are small functions that you could
  * copy paste between projects
  */
 
@@ -43,4 +42,9 @@ export function getRequestStatus(request: {
     return request.numOffers === 0 ? "rejected" : "booked";
   }
   return request.numOffers === 0 ? "pending" : "accepted";
+}
+
+// TODO: make this not specific to map screenshots
+export function getS3ImgUrl(fileName: string) {
+  return `https://tramona-map-screenshots.s3.us-east-1.amazonaws.com/${fileName}`;
 }

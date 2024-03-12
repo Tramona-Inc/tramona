@@ -44,6 +44,7 @@ import { Textarea } from "../ui/textarea";
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
 import axios from "axios";
+import { getS3ImgUrl } from "@/utils/formatters";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -142,12 +143,11 @@ export default function AdminOfferForm({
   const createPropertiesMutation = api.properties.create.useMutation();
   const createOffersMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
-  const downloadFileMutation = api.files.download.useMutation();
 
   const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
-    let url;
+    let url: string | null = null;
 
     if (file) {
       const fileName = file.name;
@@ -157,12 +157,7 @@ export default function AdminOfferForm({
           fileName,
         });
         await axios.put(uploadUrlResponse, file);
-        const downloadUrlResponse = await downloadFileMutation.mutateAsync({
-          fileName,
-        });
-        const downloadResponse = await axios.get(downloadUrlResponse);
-        const downloadUrl = downloadResponse.config.url;
-        url = downloadUrl;
+        url = getS3ImgUrl(fileName);
       } catch (error) {
         throw new Error("error uploading file");
       }
