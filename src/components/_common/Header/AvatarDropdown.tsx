@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils/utils";
 import {
-  HomeIcon,
+  ExternalLinkIcon,
+  LayoutDashboardIcon,
   LogOutIcon,
   UserCheck2Icon,
   UserCheckIcon,
@@ -55,10 +56,12 @@ function DropdownLink({
   href,
   Icon,
   hasChildPages = false,
+  newTab = false,
 }: React.PropsWithChildren<{
   href: string;
   Icon: ForwardRefExoticComponent<LucideProps>;
   hasChildPages?: boolean;
+  newTab?: boolean;
 }>) {
   const pathname = usePathname();
   const isSelected = hasChildPages
@@ -75,6 +78,7 @@ function DropdownLink({
             ? "pointer-events-none border-2 border-l-black bg-accent"
             : "",
         )}
+        target={newTab ? "_blank" : undefined}
       >
         <Icon
           className={cn("size-5", isSelected ? "opacity-100" : "opacity-40")}
@@ -116,20 +120,23 @@ export default function AvatarDropdown({ session }: { session: Session }) {
         )}
         {session.user.role === "guest" && (
           <>
+            <DropdownLink href="/dashboard" Icon={LayoutDashboardIcon}>
+              Dashboard
+            </DropdownLink>
+            <DropdownMenuSeparator />
             <DropdownLink href="/for-hosts/sign-up" Icon={UserCheck2Icon}>
               Become a Host
             </DropdownLink>
-            <DropdownMenuSeparator />
           </>
         )}
-        <DropdownLink href="/" Icon={HomeIcon}>
-          Home
-        </DropdownLink>
+
         <DropdownLink href="/profile" Icon={UserCogIcon}>
-          Profile
+          Profile Settings
+        </DropdownLink>
+        <DropdownLink newTab href="/" Icon={ExternalLinkIcon}>
+          Tramona Homepage
         </DropdownLink>
         <DropdownMenuSeparator />
-
         <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: `${window.location.origin}` })}
           className="group flex w-full cursor-pointer items-center gap-2 py-2 pl-3 text-destructive focus:bg-destructive focus:text-white"
