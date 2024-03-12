@@ -1,3 +1,4 @@
+import MainLayout from '@/components/_common/Layout/MainLayout';
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -53,45 +54,47 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex min-h-screen-minus-header flex-col items-center justify-center">
-      <section className="flex max-w-sm flex-col space-y-5">
-        <h1 className="text-4xl font-bold tracking-tight">
-          Forgot your password?
-        </h1>
-        <p>
-          Enter your email address, and we&apos;ll send you a link to get back
-          into your account.
-        </p>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="flex flex-col gap-4"
+    <MainLayout>
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center">
+        <section className="flex max-w-sm flex-col space-y-5">
+          <h1 className="text-4xl font-bold tracking-tight">
+            Forgot your password?
+          </h1>
+          <p>
+            Enter your email address, and we&apos;ll send you a link to get back
+            into your account.
+          </p>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="flex flex-col gap-4"
+            >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email address</FormLabel>
+                    <FormControl>
+                      <Input {...field} autoFocus />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={isLoading} className="block">
+                Send link
+              </Button>
+            </form>
+          </Form>
+          <Link
+            href="/support"
+            className="font-medium text-primary underline underline-offset-2"
           >
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email address</FormLabel>
-                  <FormControl>
-                    <Input {...field} autoFocus />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isLoading} className="block">
-              Send link
-            </Button>
-          </form>
-        </Form>
-        <Link
-          href="/support"
-          className="font-medium text-primary underline underline-offset-2"
-        >
-          Need support?
-        </Link>
-      </section>
-    </div>
+            Need support?
+          </Link>
+        </section>
+      </div>
+    </MainLayout>
   );
 }
