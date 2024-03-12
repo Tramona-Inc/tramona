@@ -104,16 +104,7 @@ export default function MessagesSidebar({
   }, [fetchedConversations, setConversationList]);
 
   return (
-    <div
-      className={cn(
-        "col-span-1 block md:col-span-2 md:border-r xl:col-span-2",
-        selectedConversation && "hidden md:block",
-      )}
-    >
-      <h1 className="flex h-[100px] w-full items-center border-b p-4 text-4xl font-bold md:text-2xl md:font-semibold lg:p-8">
-        Messages
-      </h1>
-
+    <div className="w-96 border-r">
       {!isLoading ? (
         conversations && conversations.length > 0 ? (
           conversations.map((conversation) => (
@@ -125,9 +116,9 @@ export default function MessagesSidebar({
             />
           ))
         ) : (
-          <p className="p-4 text-muted-foreground lg:p-8">
-            No messages to show!
-          </p>
+          <div className="grid h-full place-items-center text-muted-foreground">
+            <p>No conversations yet</p>
+          </div>
         )
       ) : (
         <Spinner />

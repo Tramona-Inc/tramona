@@ -1,6 +1,8 @@
 import { getToken } from "next-auth/jwt";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { getHomePageFromRole } from "./utils/formatters";
+import { userSelectSchema } from "./server/db/schema";
 
 export default withAuth(
   async function middleware(req) {
@@ -10,19 +12,13 @@ export default withAuth(
       req.nextUrl.pathname.startsWith("/auth/signin") ||
       req.nextUrl.pathname.startsWith("/auth/signup");
 
-    const userRole = token?.role;
+    const userRole = userSelectSchema.shape.role.safeParse(token?.role);
 
     if (isAuthPage) {
-      if (isAuth) {
-        switch (userRole) {
-          case "guest":
-            return NextResponse.redirect(new URL("/dashboard", req.url));
-          case "host":
-            // return NextResponse.redirect(new URL("/host", req.url));
-            return NextResponse.redirect(new URL("/messages", req.url));
-          case "admin":
-            return NextResponse.redirect(new URL("/admin", req.url));
-        }
+      if (isAuth && userRole.success) {
+        return NextResponse.redirect(
+          new URL(getHomePageFromRole(userRole.data), req.url),
+        );
       }
 
       return null;

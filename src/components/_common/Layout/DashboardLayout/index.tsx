@@ -1,29 +1,6 @@
-import DashboardSidebar, {
-  type NavLink,
-} from "@/components/dashboard/DashboardSidebar";
+import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "../../Header";
 import Footer from "../Footer";
-
-export const AdminNavLinks: NavLink[] = [
-  { href: "/admin", name: "Overview" },
-  { href: "/admin/incoming-requests", name: "Incoming Request" },
-  { href: "/admin/past-requests", name: "Past Requests" },
-  { href: "/admin/utility", name: "Utility" },
-  { href: "/messages", name: "Messages" },
-];
-
-export const HostNavLinks: NavLink[] = [
-  { href: "/host", name: "Dashboard" },
-  { href: "/messages", name: "Messages" },
-];
-
-export const GuestNavLinks: NavLink[] = [
-  { href: "/dashboard", name: "Oveview" },
-  { href: "/my-trips", name: "My Trips" },
-  { href: "/requests", name: "Request Offers" },
-  { href: "/messages", name: "Messages" },
-  { href: "/faq", name: "Faq" },
-];
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -36,22 +13,12 @@ export default function DashboadLayout({
 }: DashboardLayoutProps) {
   return (
     <>
-      <Header type={"dashboard"} />
-      <div className="container grid flex-1 gap-12 lg:grid-cols-[125px_1fr]">
-        <aside className="sticky hidden h-screen-minus-header w-[125px] flex-col lg:flex">
-          <DashboardSidebar
-            navLinks={
-              type === "guest"
-                ? GuestNavLinks
-                : type === "host"
-                  ? HostNavLinks
-                  : AdminNavLinks
-            }
-          />
+      <Header type="dashboard" sidebarType={type} />
+      <div className="flex">
+        <aside className="h-screen-minus-header sticky hidden bg-zinc-100 lg:block">
+          <Sidebar type={type} />
         </aside>
-        <main className="flex min-h-screen-minus-header w-full flex-col overflow-hidden lg:border-x">
-          {children}
-        </main>
+        <main className="flex-1">{children}</main>
       </div>
       <Footer />
     </>

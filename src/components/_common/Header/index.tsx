@@ -1,4 +1,3 @@
-import TramonaIcon from "@/components/_icons/TramonaIcon";
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
@@ -6,33 +5,26 @@ import HeaderTopRight from "./HeaderTopRight";
 
 import NavLink from "@/components/_utils/NavLink";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/utils/utils";
-import { useSession } from "next-auth/react";
-import {
-  AdminNavLinks,
-  GuestNavLinks,
-  HostNavLinks,
-} from "../Layout/DashboardLayout";
+import Sidebar from "@/components/dashboard/Sidebar";
+import { TramonaLogo } from "./TramonaLogo";
 
-type HeaderProps = {
-  type: "marketing" | "dashboard";
-};
+type HeaderProps =
+  | {
+      type: "dashboard";
+      sidebarType: "guest" | "host" | "admin";
+    }
+  | { type: "marketing" };
 
-export default function Header({ type }: HeaderProps) {
+export default function Header(props: HeaderProps) {
   return (
     <>
       <div className="contents lg:hidden">
-        <SmallHeader type={type} />
+        <SmallHeader {...props} />
       </div>
       <div className="hidden lg:contents">
-        <LargeHeader type={type} />
+        <LargeHeader {...props} />
       </div>
     </>
   );
@@ -57,16 +49,16 @@ const headerLinks = [
   },
 ];
 
-function LargeHeader({ type }: HeaderProps) {
+function LargeHeader(props: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-white p-4 shadow-md">
-      <div className="container flex items-center">
+      <div className="flex items-center">
         <div className="flex flex-1 gap-4">
           <TramonaLogo />
         </div>
 
         <div className="flex items-center justify-center gap-2">
-          {type === "marketing" && (
+          {props.type === "marketing" && (
             <>
               {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
@@ -78,7 +70,7 @@ function LargeHeader({ type }: HeaderProps) {
         </div>
 
         <div className="flex flex-1 justify-end">
-          {type === "dashboard" ? (
+          {props.type === "dashboard" ? (
             <HeaderTopRight />
           ) : (
             <Button asChild variant="darkOutline">
@@ -91,9 +83,7 @@ function LargeHeader({ type }: HeaderProps) {
   );
 }
 
-function SmallHeader({ type }: HeaderProps) {
-  const { data: session } = useSession();
-
+function SmallHeader(props: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
       <Sheet>
@@ -102,45 +92,19 @@ function SmallHeader({ type }: HeaderProps) {
             <MenuIcon />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left">
-          <SheetHeader>
-            <SheetTitle>
-              <TramonaLogo />
-            </SheetTitle>
-          </SheetHeader>
-
-          {type === "marketing" && (
-            <>
+        <SheetContent side="left" className="w-max p-0">
+          {props.type === "marketing" && (
+            <div className="flex w-80 flex-col gap-2 p-8 pr-16">
               {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
                   {label}
                 </HeaderLink>
               ))}
-            </>
+            </div>
           )}
 
-          {type === "dashboard" && (
-            <>
-              {session?.user.role === "admin"
-                ? AdminNavLinks.map(({ href, name }, i) => (
-                    <HeaderLink key={i} href={href}>
-                      {name}
-                    </HeaderLink>
-                  ))
-                : session?.user.role === "guest"
-                  ? GuestNavLinks.map(({ href, name }, i) => (
-                      <HeaderLink key={i} href={href}>
-                        {name}
-                      </HeaderLink>
-                    ))
-                  : session?.user.role === "host"
-                    ? HostNavLinks.map(({ href, name }, i) => (
-                        <HeaderLink key={i} href={href}>
-                          {name}
-                        </HeaderLink>
-                      ))
-                    : null}
-            </>
+          {props.type === "dashboard" && (
+            <Sidebar withLogo type={props.sidebarType} />
           )}
         </SheetContent>
       </Sheet>
@@ -149,13 +113,13 @@ function SmallHeader({ type }: HeaderProps) {
 
       <div className="flex-1" />
 
-      {type === "marketing" && (
+      {props.type === "marketing" && (
         <Button asChild variant="darkOutline">
           <Link href="/auth/signin">Log in</Link>
         </Button>
       )}
 
-      {type === "dashboard" && (
+      {props.type === "dashboard" && (
         <div className="flex flex-1 justify-end">
           <HeaderTopRight />
         </div>
@@ -184,14 +148,5 @@ function HeaderLink({
         </div>
       )}
     />
-  );
-}
-
-function TramonaLogo() {
-  return (
-    <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
-      <TramonaIcon />
-      Tramona
-    </Link>
   );
 }

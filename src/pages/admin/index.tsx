@@ -1,6 +1,5 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import AdminRequestsTabs from "@/components/admin/AdminRequestsTabs";
-import { useRequireRole } from "@/utils/auth-utils";
 import Head from "next/head";
 
 export default function Page() {

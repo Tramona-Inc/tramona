@@ -11,11 +11,13 @@ export default function MainLayout({ children, type }: MainLayoutProps) {
   return (
     <div vaul-drawer-wrapper="">
       {type === "auth" ? (
-        <Header type="dashboard" />
+        <Header type="dashboard" sidebarType="guest" />
       ) : (
         <Header type="marketing" />
       )}
-      <main className="bg-background min-h-screen-minus-header">{children}</main>
+      <main className="min-h-screen-minus-header bg-background">
+        {children}
+      </main>
       <Footer />
     </div>
   );
