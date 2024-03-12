@@ -415,7 +415,7 @@ function FAQ() {
 
 export default function Page() {
   return (
-    <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
+    <div className="[&>*]:flex [&>*]:min-h-screen-minus-header [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
       <Head>
         <title>Partners | Tramona</title>
       </Head>

@@ -16,7 +16,7 @@ export default function Page() {
         <title>Profile | Tramona</title>
       </Head>
 
-      <div className="flex min-h-[calc(100vh-4.5rem)]">
+      <div className="flex min-h-screen-minus-header">
         <ProfileSidebar />
         <div className="flex-1 overflow-clip">
           <Tabs

@@ -19,14 +19,14 @@ export default function MastHead() {
   return (
     <>
       <section className="bg-gray-100 p-2 md:px-2">
-        <section className="relative flex min-h-[calc(100vh-4rem)] flex-col justify-center">
+        <section className="relative flex min-h-screen-minus-header flex-col justify-center">
           <div className="absolute inset-0 z-0 rounded-3xl">
             <Image
               src="/assets/images/landing-page/main.jpeg"
               alt="Main Background"
               fill
               priority
-              style={{objectFit:"cover"}}
+              style={{ objectFit: "cover" }}
               className="rounded-3xl"
             />
           </div>

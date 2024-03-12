@@ -50,7 +50,7 @@ export default function MessagePage() {
         <title>Messages | Tramona</title>
       </Head>
 
-      <div className="grid h-[calc(100vh-5em)] grid-cols-1 bg-white md:grid-cols-6">
+      <div className="grid h-screen-minus-header grid-cols-1 bg-white md:grid-cols-6">
         <MessagesSidebar
           selectedConversation={selectedConversation}
           setSelected={selectConversation}
