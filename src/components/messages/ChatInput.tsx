@@ -37,6 +37,8 @@ export default function ChatInput({
     (state) => state.setConversationToTop,
   );
 
+  const { getParticipantsPhoneNumber } = useConversation();
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
       // TODO: might be better to update the state first then insert into db
@@ -69,6 +71,8 @@ export default function ChatInput({
             image: session.user.image ?? "",
           },
         };
+
+        const phoneNumbers = getParticipantsPhoneNumber(conversationId);
 
         setConversationToTop(conversationId, newMessage);
         addMessageToConversation(conversationId, newMessage);

@@ -18,9 +18,12 @@ type ConversationListState = {
     newMessage: MessageType,
   ) => void;
   setConversationReadState: (conversationId: number) => void;
+  getParticipantsPhoneNumber: (
+    conversationId: number,
+  ) => string[] | null;
 };
 
-export const useConversation = create<ConversationListState>((set) => ({
+export const useConversation = create<ConversationListState>((set, get) => ({
   conversationList: [],
   setConversationList: (conversationList: Conversations | []) => {
     set(() => ({ conversationList }));
@@ -81,5 +84,22 @@ export const useConversation = create<ConversationListState>((set) => ({
 
       return { conversationList: updatedConversations };
     });
+  },
+  getParticipantsPhoneNumber: (conversationId: number) => {
+    const conversation = get().conversationList.find(
+      (conv) => conv.id === conversationId,
+    );
+
+    if (!conversation?.participants) {
+      // Handle case where conversation or participants are not found
+      return [];
+    }
+
+    // Extract the phone numbers from the participants
+    const phoneNumbers = conversation.participants
+      .map((participant) => participant.phoneNumber)
+      .filter((phoneNumber): phoneNumber is string => phoneNumber !== null);
+
+    return phoneNumbers;
   },
 }));

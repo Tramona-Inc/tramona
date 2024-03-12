@@ -32,6 +32,7 @@ export async function fetchUsersConversations(userId: string) {
                       name: true,
                       email: true,
                       image: true,
+                      phoneNumber: true,
                     },
                   },
                 },
@@ -58,7 +59,9 @@ export async function fetchConversationWithAdmin(userId: string) {
                     columns: {
                       id: true,
                       name: true,
+                      email: true,
                       image: true,
+                      phoneNumber: true,
                     },
                   },
                 },
