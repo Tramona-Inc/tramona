@@ -1,8 +1,8 @@
 import { getToken } from "next-auth/jwt";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { getHomePageFromRole } from "./utils/formatters";
 import { userSelectSchema } from "./server/db/schema";
+import { getHomePageFromRole } from "./utils/formatters";
 
 export default withAuth(
   async function middleware(req) {
@@ -13,6 +13,9 @@ export default withAuth(
       req.nextUrl.pathname.startsWith("/auth/signup");
 
     const userRole = userSelectSchema.shape.role.safeParse(token?.role);
+    const userPhoneNumber = userSelectSchema.shape.role.safeParse(
+      token?.phoneNumber,
+    );
 
     if (isAuthPage) {
       if (isAuth && userRole.success) {
@@ -34,6 +37,10 @@ export default withAuth(
       return NextResponse.redirect(
         new URL(`/auth/signin?from=${encodeURIComponent(from)}`, req.url),
       );
+    }
+
+    if (userPhoneNumber) {
+      return NextResponse.redirect(new URL("/auth/onboarding", req.url));
     }
   },
   {
