@@ -29,7 +29,7 @@ export default function VerifyEmail() {
 
       void router.push({
         pathname: "/auth/signin",
-        query: { isNewUser: true, isVerified: true },
+        query: { isVerified: true },
       });
     },
   });
