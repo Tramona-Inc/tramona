@@ -1,8 +1,8 @@
 import { getToken } from "next-auth/jwt";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { getHomePageFromRole } from "./utils/formatters";
 import { userSelectSchema } from "./server/db/schema";
+import { getHomePageFromRole } from "./utils/formatters";
 
 export default withAuth(
   async function middleware(req) {
@@ -13,7 +13,11 @@ export default withAuth(
       req.nextUrl.pathname.startsWith("/auth/signup");
 
     const userRole = userSelectSchema.shape.role.safeParse(token?.role);
+    const userPhoneNumber = userSelectSchema.shape.phoneNumber.safeParse(
+      token?.phoneNumber,
+    );
 
+    // Redirect to role specific page
     if (isAuthPage) {
       if (isAuth && userRole.success) {
         return NextResponse.redirect(
@@ -34,6 +38,33 @@ export default withAuth(
       return NextResponse.redirect(
         new URL(`/auth/signin?from=${encodeURIComponent(from)}`, req.url),
       );
+    }
+
+    const isOnboardingPage =
+      req.nextUrl.pathname.startsWith("/auth/onboarding");
+
+    // If the user has already onboarded (phoneNumber is not null) and they are trying to access the onboarding page
+    if (
+      userPhoneNumber.success &&
+      userPhoneNumber.data !== null &&
+      isOnboardingPage
+    ) {
+      if (userRole.success) {
+        const role = userRole.data;
+        return NextResponse.redirect(
+          new URL(getHomePageFromRole(role), req.url),
+        );
+      }
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    // If the user has not onboarded (phoneNumber is null) and they are not trying to access the onboarding page
+    if (
+      userPhoneNumber.success &&
+      userPhoneNumber.data === null &&
+      !isOnboardingPage
+    ) {
+      return NextResponse.redirect(new URL("/auth/onboarding", req.url));
     }
   },
   {
@@ -66,5 +97,6 @@ export const config = {
     "/auth/signup",
     "/admin/:path*",
     "/host/:path*",
+    "/auth/onboarding",
   ],
 };

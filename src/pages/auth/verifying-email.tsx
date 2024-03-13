@@ -22,14 +22,12 @@ export default function VerifyEmail() {
   } = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
       if (conversationId && userId) {
-        console.log(userId);
-
         void addUserToConversation({ userId, conversationId });
       }
 
       void router.push({
         pathname: "/auth/signin",
-        query: { isNewUser: true, isVerified: true },
+        query: { isVerified: true },
       });
     },
   });

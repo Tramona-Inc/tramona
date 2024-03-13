@@ -163,7 +163,7 @@ export default function Welcome() {
   };
 
   return (
-    <MainLayout>
+    <MainLayout type='auth'>
       <Head>
         <title>Welcome | Tramona</title>
       </Head>
