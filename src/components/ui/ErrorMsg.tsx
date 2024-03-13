@@ -9,8 +9,8 @@ const ErrorMsg = forwardRef<
     <p
       ref={ref}
       className={cn(
-        "text-sm font-medium text-destructive transition-[height] duration-150",
-        !children || children === "" ? "h-0" : "h-4",
+        "text-xs font-medium text-destructive transition-all duration-150",
+        !children || children === "" ? "h-0 opacity-0" : "h-4 opacity-100",
         className,
       )}
       {...props}

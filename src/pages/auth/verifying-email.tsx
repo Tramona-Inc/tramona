@@ -41,7 +41,7 @@ export default function VerifyEmail() {
   }, [id, token]);
 
   return (
-    <main className="flex h-screen flex-col items-center justify-center">
+    <div className="flex h-screen-minus-header flex-col items-center justify-center">
       {isLoading && (
         <p className="text-muted-foreground">Verifying your email...</p>
       )}
@@ -50,6 +50,6 @@ export default function VerifyEmail() {
           Something went wrong, please try signing up again
         </p>
       )}
-    </main>
+    </div>
   );
 }
