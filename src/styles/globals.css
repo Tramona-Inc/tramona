@@ -28,6 +28,14 @@
     --input: var(--zinc-300);
     --ring: var(--black);
     --radius: 0.5rem;
+    --header-height: 56px;
+    --screen-minus-header: calc(100vh - var(--header-height));
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --header-height: 72px;
+    }
   }
 
   /* We don't have dark mode yet, but we will use this if we want to add it */

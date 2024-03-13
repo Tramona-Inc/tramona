@@ -1,4 +1,4 @@
-import { type Request } from "@/server/db/schema";
+import { type User, type Request } from "@/server/db/schema";
 import { capitalize } from "./utils";
 
 /**
@@ -42,6 +42,17 @@ export function getRequestStatus(request: {
     return request.numOffers === 0 ? "rejected" : "booked";
   }
   return request.numOffers === 0 ? "pending" : "accepted";
+}
+
+export function getHomePageFromRole(role: User["role"]) {
+  switch (role) {
+    case "guest":
+      return "/dashboard";
+    case "host":
+      return "/messages";
+    case "admin":
+      return "/admin";
+  }
 }
 
 // TODO: make this not specific to map screenshots

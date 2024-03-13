@@ -1,7 +1,5 @@
-import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useState } from "react";
 
 function FooterLink({
   children,

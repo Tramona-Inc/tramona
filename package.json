@@ -58,7 +58,7 @@
     "@stripe/react-stripe-js": "^2.4.0",
     "@stripe/stripe-js": "^2.4.0",
     "@supabase/supabase-js": "^2.39.7",
-    "@t3-oss/env-nextjs": "^0.7.3",
+    "@t3-oss/env-nextjs": "^0.9.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tanstack/react-query": "^4.36.1",
     "@tanstack/react-table": "^8.11.7",
@@ -78,13 +78,13 @@
     "cmdk": "^0.2.1",
     "date-fns": "^3.3.1",
     "dayjs": "^1.11.10",
-    "drizzle-orm": "^0.29.3",
+    "drizzle-orm": "^0.30.0",
     "drizzle-zod": "^0.5.1",
     "embla-carousel-autoplay": "8.0.0",
     "embla-carousel-react": "8.0.0",
     "input-otp": "^1.0.1",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.312.0",
+    "lucide-react": "^0.354.0",
     "micro": "^10.0.1",
     "multer": "1.4.5-lts.1",
     "next": "^14.0.4",
@@ -96,7 +96,7 @@
     "react-day-picker": "^8.10.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
-    "react-email": "2.0.0",
+    "react-email": "2.1.0",
     "react-hook-form": "^7.49.3",
     "resend": "^3.1.0",
     "stripe": "^14.14.0",
@@ -153,7 +153,7 @@
   "ct3aMetadata": {
     "initVersion": "7.25.1"
   },
-  "packageManager": "pnpm@8.14.1",
+  "packageManager": "pnpm@8.15.4",
   "readme": "ERROR: No README data found!",
   "_id": "tramona-trpc@0.1.0"
 }

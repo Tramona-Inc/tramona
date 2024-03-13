@@ -1,6 +1,7 @@
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import ProfileForm from "@/components/profile/ProfileForm";
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import ReferralDashboard from "@/components/profile/ReferralDashboard";
@@ -11,7 +12,7 @@ export default function Page() {
   useSession({ required: true });
 
   return (
-    <>
+    <MainLayout type={"auth"}>
       <Head>
         <title>Profile | Tramona</title>
       </Head>
@@ -47,6 +48,6 @@ export default function Page() {
           </Tabs>
         </div>
       </div>
-    </>
+    </MainLayout>
   );
 }

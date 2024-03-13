@@ -70,7 +70,7 @@ export default function HostSignUp() {
       <Head>
         <title>Host Onboarding | Tramona</title>
       </Head>
-      <div className="flex w-full flex-col md:min-h-screen lg:flex-row">
+      <div className="flex w-full flex-col md:min-h-screen-minus-header lg:flex-row">
         <Leftside newtab={tab} />
         <Rightside
           onValueChange={handleTabValueChange}

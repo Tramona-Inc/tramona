@@ -1,3 +1,4 @@
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -70,11 +71,11 @@ export default function SignUp({
   // TODO: Refactor later to separted form into its own component
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Sign up | Tramona</title>
       </Head>
-      <div className="flex min-h-screen flex-col items-center justify-center space-y-10 py-8">
+      <div className="min-h-screen-minus-header flex flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-center text-5xl font-bold tracking-tight">
           Sign up to start traveling
         </h1>
@@ -93,7 +94,7 @@ export default function SignUp({
                     <FormItem>
                       <FormLabel>Email address</FormLabel>
                       <FormControl>
-                        <Input {...field} autoFocus type="email" />
+                        <Input {...field} autoFocus inputMode="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -210,7 +211,7 @@ export default function SignUp({
           .
         </p>
       </div>
-    </>
+    </MainLayout>
   );
 }
 

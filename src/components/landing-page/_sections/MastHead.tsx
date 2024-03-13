@@ -1,19 +1,5 @@
-import FeedLanding from "../FeedLanding";
-// import DesktopSearchBar from '../../search-bar/desktop-search-bar';
-// import MobileSearchBar from '@/common/components/search-bar/mobile-search-bar';
-// import { useToast } from "../ui/use-toast";
-// import type { NewRequest } from '/common/lib/new-request-utils';
-// import { getSuccessfulRequestToast, makeRequest } from '/common/lib/new-request-utils';
-// import { useUserInfo } from '@/hooks/useUserInfo';
-// import { useEffect, useState } from 'react';
-import dynamic from "next/dynamic";
 import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
 import Image from "next/image";
-
-const LandingVideo = dynamic(
-  () => import("@/components/landing-page/LandingVideo"),
-  { ssr: false },
-);
 
 export default function MastHead() {
   return (
@@ -26,7 +12,7 @@ export default function MastHead() {
               alt="Main Background"
               fill
               priority
-              style={{objectFit:"cover"}}
+              style={{ objectFit: "cover" }}
               className="rounded-3xl"
             />
           </div>

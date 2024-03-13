@@ -13,6 +13,7 @@ import { BadgeDollarSign, CalendarCheck, PiggyBank } from "lucide-react";
 import { api } from "@/utils/api";
 import { cn, sleep } from "@/utils/utils";
 import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
+import MainLayout from '@/components/_common/Layout/MainLayout';
 
 function StepperContentLayout({
   children,
@@ -162,7 +163,7 @@ export default function Welcome() {
   };
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Welcome | Tramona</title>
       </Head>
@@ -197,6 +198,6 @@ export default function Welcome() {
           )}
         </div>
       </div>
-    </>
+    </MainLayout>
   );
 }

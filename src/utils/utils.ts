@@ -169,7 +169,7 @@ export function getDiscountPercentage(
 }
 
 export function useIsDesktop() {
- return (useWindowSize()?.width ?? 0) >= 640;
+  return (useWindowSize()?.width ?? 0) >= 640;
 }
 
 export function getTramonaFeeTotal(totalSavings: number) {
