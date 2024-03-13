@@ -13,10 +13,11 @@ export default withAuth(
       req.nextUrl.pathname.startsWith("/auth/signup");
 
     const userRole = userSelectSchema.shape.role.safeParse(token?.role);
-    const userPhoneNumber = userSelectSchema.shape.role.safeParse(
+    const userPhoneNumber = userSelectSchema.shape.phoneNumber.safeParse(
       token?.phoneNumber,
     );
 
+    // Redirect to role specific page
     if (isAuthPage) {
       if (isAuth && userRole.success) {
         return NextResponse.redirect(
@@ -25,6 +26,19 @@ export default withAuth(
       }
 
       return null;
+    }
+
+    // Redirect if they already did the onboarding
+    if (req.nextUrl.pathname.startsWith("/auth/onboarding")) {
+      if (isAuth && userPhoneNumber.success && userPhoneNumber.data) {
+        if (userRole.success) {
+          return NextResponse.redirect(
+            new URL(getHomePageFromRole(userRole.data), req.url),
+          );
+        }
+
+        return null;
+      }
     }
 
     if (!isAuth) {
@@ -39,7 +53,7 @@ export default withAuth(
       );
     }
 
-    if (userPhoneNumber) {
+    if (userPhoneNumber.success && userPhoneNumber.data === null) {
       return NextResponse.redirect(new URL("/auth/onboarding", req.url));
     }
   },
@@ -73,5 +87,6 @@ export const config = {
     "/auth/signup",
     "/admin/:path*",
     "/host/:path*",
+    "/auth/onboarding",
   ],
 };

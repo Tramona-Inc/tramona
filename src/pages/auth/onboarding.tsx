@@ -13,6 +13,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { PhoneInput } from "@/components/ui/input-phone";
+import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
@@ -31,6 +32,10 @@ export default function Onboarding() {
 
   const { mutateAsync: mutateSendOTP } = api.twilio.sendOTP.useMutation({
     onSuccess: () => {
+      toast({
+        title: "Code sent!",
+        description: "Please check your text messages.",
+      });
       setSent(true);
     },
   });
@@ -59,6 +64,11 @@ export default function Onboarding() {
             void mutateInsertPhone({
               userId: session.user.id,
               phone: phone,
+            });
+
+            toast({
+              title: "Successfully verified phone!",
+              description: "Your phone has been added to your account.",
             });
 
             void router.push({
