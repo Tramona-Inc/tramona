@@ -88,7 +88,7 @@ export default function ProfileForm() {
             <FormItem className="lg:col-span-2">
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" {...field} />
+                <Input inputMode="email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
