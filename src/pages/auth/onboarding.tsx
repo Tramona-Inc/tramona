@@ -1,4 +1,5 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
+import { Icons } from "@/components/_icons/icons";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +26,7 @@ export default function Onboarding() {
   const [phone, setPhone] = useState<string>("");
   const [sent, setSent] = useState<boolean>(false);
   const [code, setCode] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { data: session } = useSession();
 
@@ -134,11 +136,18 @@ export default function Onboarding() {
           ) : (
             <>
               <Button
-                className="w-full"
-                onClick={() => mutateSendOTP({ to: phone })}
+                onClick={() => {
+                  setIsLoading(true);
+                  void mutateSendOTP({ to: phone });
+                }}
+                disabled={isLoading}
               >
+                {isLoading && (
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Send Verification Code
               </Button>
+
               <p className="text-center text-xs text-muted-foreground">
                 We verify a phone number on account creation to ensure account
                 security. SMS & data charges may apply.

@@ -28,19 +28,6 @@ export default withAuth(
       return null;
     }
 
-    // Redirect if they already did the onboarding
-    if (req.nextUrl.pathname.startsWith("/auth/onboarding")) {
-      if (isAuth && userPhoneNumber.success && userPhoneNumber.data) {
-        if (userRole.success) {
-          return NextResponse.redirect(
-            new URL(getHomePageFromRole(userRole.data), req.url),
-          );
-        }
-
-        return null;
-      }
-    }
-
     if (!isAuth) {
       let from = req.nextUrl.pathname;
       if (req.nextUrl.search) {
@@ -53,7 +40,30 @@ export default withAuth(
       );
     }
 
-    if (userPhoneNumber.success && userPhoneNumber.data === null) {
+    const isOnboardingPage =
+      req.nextUrl.pathname.startsWith("/auth/onboarding");
+
+    // If the user has already onboarded (phoneNumber is not null) and they are trying to access the onboarding page
+    if (
+      userPhoneNumber.success &&
+      userPhoneNumber.data !== null &&
+      isOnboardingPage
+    ) {
+      if (userRole.success) {
+        const role = userRole.data;
+        return NextResponse.redirect(
+          new URL(getHomePageFromRole(role), req.url),
+        );
+      }
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    // If the user has not onboarded (phoneNumber is null) and they are not trying to access the onboarding page
+    if (
+      userPhoneNumber.success &&
+      userPhoneNumber.data === null &&
+      !isOnboardingPage
+    ) {
       return NextResponse.redirect(new URL("/auth/onboarding", req.url));
     }
   },
