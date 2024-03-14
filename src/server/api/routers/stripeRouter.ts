@@ -73,6 +73,11 @@ export const stripeRouter = createTRPCRouter({
         metadata: metadata, // metadata access for checkout session
         payment_intent_data: {
           metadata: metadata, // metadata access for payment intent (webhook access)
+
+          // TODO: this is where the money get's transferred
+          // transfer_data: {
+          //   destination: //stripe_account_id,
+          // }
         },
       });
     }),
