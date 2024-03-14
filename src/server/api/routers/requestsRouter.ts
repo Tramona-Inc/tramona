@@ -13,6 +13,7 @@ import {
   requestInsertSchema,
   requestSelectSchema,
   requests,
+  users,
 } from "@/server/db/schema";
 import { sendSlackMessage } from "@/server/slack";
 import { getRequestStatus } from "@/utils/formatters";
@@ -281,7 +282,7 @@ export const requestsRouter = createTRPCRouter({
         return;
       }
 
-      const request = input[0];
+      const request = input[0]!;
 
       const pricePerNight =
         request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
@@ -294,6 +295,12 @@ export const requestsRouter = createTRPCRouter({
         `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,
       );
+
+      void sendText({
+        to: ctx.user.phoneNumber!,
+        content:
+          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      });
     }),
 
   // resolving a request with no offers = reject
@@ -331,9 +338,7 @@ export const requestsRouter = createTRPCRouter({
           checkOut: true,
         },
         with: {
-          madeByUser: {
-            columns: { phoneNumber: true },
-          },
+          madeByGroup: { with: { members: true } },
         },
       });
 
@@ -346,10 +351,23 @@ export const requestsRouter = createTRPCRouter({
         .set({ resolvedAt: new Date() })
         .where(eq(requests.id, input.id));
 
-      void sendText({
-        to: request.madeByUser.phoneNumber!,
-        content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
-      });
+      const ownerId = request.madeByGroup.members.find(
+        (member) => member.isOwner,
+      )!.userId;
+
+      const ownerPhoneNumber = await ctx.db.query.users
+        .findFirst({
+          where: eq(users.id, ownerId),
+          columns: { phoneNumber: true },
+        })
+        .then((res) => res?.phoneNumber);
+
+      if (ownerPhoneNumber) {
+        void sendText({
+          to: ownerPhoneNumber,
+          content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
+        });
+      }
     }),
 
   delete: protectedProcedure

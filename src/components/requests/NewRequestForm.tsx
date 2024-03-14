@@ -20,7 +20,7 @@ import { FilterIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { ALL_PROPERTY_TYPES, requests } from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
 import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
@@ -199,10 +199,6 @@ export default function NewRequestForm({
         while (!phoneRef.current) {
           await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
         }
-        await smsMutation.mutateAsync({
-          msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-          to: phoneRef.current,
-        });
 
         successfulRequestToast(newRequest);
         form.reset();
