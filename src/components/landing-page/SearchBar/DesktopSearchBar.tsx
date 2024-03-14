@@ -51,7 +51,7 @@ const formSchema = z.object({
           path: ["date"],
         }),
     )
-    .nonempty(),
+    .min(1),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -78,8 +78,6 @@ export default function DesktopSearchBar({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ErrorState>(null);
   // const [combinedScrapedData, setCombinedScrapedData] = useState<string[]>([]); // State variable for combined scraped data
-
-  const MAX_TRIPS = 10;
 
   const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
@@ -254,8 +252,7 @@ export default function DesktopSearchBar({
                       }
                       form.setValue(
                         "data",
-                        // need `as` since zod nonempty arrays are typed as [T, ...T[]] but filter just returns T[]
-                        data.filter((_, j) => j !== i) as FormSchema["data"],
+                        data.filter((_, j) => j !== i),
                       );
                     }}
                     className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"

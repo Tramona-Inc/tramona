@@ -24,7 +24,7 @@ import Link from "next/link";
 dayjs.extend(relativeTime);
 
 export type OfferWithInfo =
-  inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
+  inferRouterOutputs<AppRouter>["offers"]["getAllPublicOffers"][number];
 
 type Props = {
   deal: OfferWithInfo;

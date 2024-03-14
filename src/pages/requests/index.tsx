@@ -130,22 +130,22 @@ function RequestsTabs() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
 
   return (
-    <Tabs defaultValue="activeRequests" className="space-y-4">
+    <Tabs defaultValue="activeRequestGroups" className="space-y-4">
       <TabsList>
         <TabsTrigger
-          value="activeRequests"
+          value="activeRequestGroups"
           count={requests?.activeRequestGroups.length ?? "blank"}
         >
           <TagIcon /> Current Requests
         </TabsTrigger>
         <TabsTrigger
-          value="inactiveRequests"
+          value="inactiveRequestGroups"
           count={requests?.inactiveRequestGroups.length ?? "blank"}
         >
           <HistoryIcon /> Past Requests
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="activeRequests">
+      <TabsContent value="activeRequestGroups">
         {requests ? (
           requests.activeRequestGroups.length !== 0 ? (
             <RequestCards requestGroups={requests.activeRequestGroups} />
@@ -161,7 +161,7 @@ function RequestsTabs() {
           <Spinner />
         )}
       </TabsContent>
-      <TabsContent value="inactiveRequests">
+      <TabsContent value="inactiveRequestGroups">
         {requests ? (
           requests.inactiveRequestGroups.length !== 0 ? (
             <RequestCards requestGroups={requests.inactiveRequestGroups} />

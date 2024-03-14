@@ -235,7 +235,7 @@ export const requestsRouter = createTRPCRouter({
       requestInsertSchema
         .omit({ madeByGroupId: true, requestGroupId: true })
         .array()
-        .nonempty()
+        .min(1)
         .max(MAX_REQUEST_GROUP_SIZE),
     )
     .mutation(async ({ ctx, input }) => {
