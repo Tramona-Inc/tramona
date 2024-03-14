@@ -40,6 +40,7 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
+import { useSession } from "next-auth/react";
 
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
@@ -84,6 +85,9 @@ export default function AdminOfferForm({
   request: Request;
   offer?: OfferWithProperty;
 }) {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const numberOfNights = getNumNights(request.checkIn, request.checkOut);
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
@@ -143,6 +147,7 @@ export default function AdminOfferForm({
   const createPropertiesMutation = api.properties.create.useMutation();
   const createOffersMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
+  const twilioMutation = api.twilio.sendSMS.useMutation();
 
   const utils = api.useUtils();
 
@@ -221,7 +226,12 @@ export default function AdminOfferForm({
       utils.requests.invalidate(),
     ]);
 
-    afterSubmit?.();
+    if (user?.phoneNumber) {
+      await twilioMutation.mutateAsync({
+        to: user.phoneNumber, // TODO: text the traveller, not the admin
+        msg: "You have a new offer for a request in your Tramona account!",
+      });
+    }
 
     successfulAdminOfferToast({
       propertyName: newProperty.name,
@@ -230,6 +240,8 @@ export default function AdminOfferForm({
       checkOut: request.checkOut,
       isUpdate: !!offer,
     });
+
+    afterSubmit?.();
   }
 
   const defaultNightlyPrice = 0;

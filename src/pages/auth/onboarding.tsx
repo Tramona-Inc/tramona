@@ -46,6 +46,8 @@ export default function Onboarding() {
   const { mutateAsync: mutateInsertPhone } =
     api.users.insertPhoneWithUserId.useMutation();
 
+  const { update } = useSession();
+
   useEffect(() => {
     const verifyCode = async () => {
       if (code.length === 6 && phone) {
@@ -72,6 +74,8 @@ export default function Onboarding() {
               title: "Successfully verified phone!",
               description: "Your phone has been added to your account.",
             });
+
+            void update();
 
             void router.push({
               pathname: "/auth/welcome",

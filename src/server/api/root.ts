@@ -26,9 +26,9 @@ export const appRouter = createTRPCRouter({
   stripe: stripeRouter,
   auth: authRouter,
   myTrips: myTripsRouter,
-  messages: messagesRouter,
   twilio: twilioRouter,
   host: hostRouter,
+  messages: messagesRouter,
   files: filesRouter,
 });
 

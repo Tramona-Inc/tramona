@@ -22,7 +22,13 @@ function RequestCards({
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
       {requests.map((request) => (
         <RequestCard key={request.id} request={request}>
-          <RequestCardAction request={request} />
+          <RequestCardAction
+            request={request}
+            isWaiting={false}
+            onClick={() => {
+              // todo
+            }}
+          />
         </RequestCard>
       ))}
     </div>
@@ -31,12 +37,12 @@ function RequestCards({
   );
 }
 
-function UpcomingTrips({
-  trips,
-}: {
-  trips: UpcomingTrip[] | null | undefined;
-}) {
-  return trips ? (
+function UpcomingTrips({ trips }: { trips: UpcomingTrip[] }) {
+  if (trips.length === 0) {
+    return <p className="text-muted-foreground">You have no trips yet.</p>;
+  }
+
+  return (
     <div className="grid grid-cols-1 gap-4">
       {trips.map((trip) => (
         <Link key={trip.id} href={`/listings/${trip.id}`}>
@@ -61,8 +67,6 @@ function UpcomingTrips({
         </Link>
       ))}
     </div>
-  ) : (
-    <Spinner />
   );
 }
 
@@ -98,11 +102,7 @@ export default function DashboardOverview() {
         <div className="col-span-1 lg:col-span-4 xl:col-span-3">
           <h2 className="text-3xl">Upcoming trips</h2>
           <div className="py-5">
-            {trips?.length !== 0 ? (
-              <UpcomingTrips trips={trips} />
-            ) : (
-              <p className="text-muted-foreground">You have no trips yet.</p>
-            )}
+            {trips ? <UpcomingTrips trips={trips} /> : <Spinner />}
           </div>
         </div>
       </div>

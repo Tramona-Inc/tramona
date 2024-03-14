@@ -55,6 +55,7 @@ const formSchema = z.object({
 });
 
 type FormSchema = z.infer<typeof formSchema>;
+type ErrorState = string | null;
 
 const defaultValues: Partial<FormSchema["data"][number]> = {
   propertyType: "any",
@@ -70,12 +71,14 @@ export default function DesktopSearchBar({
     defaultValues: {
       data: [defaultValues],
     },
-    context: {
-      test: 123,
-    },
   });
 
   const [curTab, setCurTab] = useState(0);
+  const [airbnbUrl, setAirbnbUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<ErrorState>(null);
+  // const [combinedScrapedData, setCombinedScrapedData] = useState<string[]>([]); // State variable for combined scraped data
+
   const MAX_TRIPS = 10;
 
   const mutation = api.requests.createMultiple.useMutation();
@@ -162,7 +165,49 @@ export default function DesktopSearchBar({
     afterSubmit?.();
   }
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/scrape", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: airbnbUrl }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to scrape data");
+      }
+
+      // Reset input field after successful scraping
+      setAirbnbUrl("");
+      setError(null);
+      const scrapedData = await response.json();
+      // grab this data, put it in local storage or in the db ---- scrapedData.combinedData
+    } catch (error) {
+      console.error("Error scraping data:", error);
+      setError("Failed to scrape data");
+    } finally {
+      setLoading(false);
+    }
+
+    // Add your Puppeteer scraping logic here
+    // For example:
+    // const browser = await puppeteer.launch();
+    //const page = await browser.newPage();
+    // await page.goto(airbnbUrl, { waitUntil: 'domcontentloaded' });
+    // await page.waitForTimeout(30000);
+
+    // // Other scraping operations...
+    // await browser.close();
+  };
+
   return (
+    // <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => onSubmit(data.data))}
@@ -312,6 +357,26 @@ export default function DesktopSearchBar({
       </form>
     </Form>
   );
+}
+{
+  /* <form onSubmit={(event) => handleSubmit(event)} className="mt-4">
+        <input
+          type="text"
+          value={airbnbUrl}
+          onChange={(event) => setAirbnbUrl(event.target.value)}
+          placeholder="Enter Airbnb URL"
+          className="border border-gray-300 rounded-md px-3 py-2 mr-2 focus:outline-none focus:border-indigo-500"
+          disabled={loading} // Disable input field while loading
+        />
+        <button type="submit" className="bg-indigo-500 text-white rounded-md px-4 py-2 focus:outline-none hover:bg-indigo-600" disabled={loading}>
+          {loading ? 'Scraping...' : 'Scrape'}
+        </button>
+        {combinedScrapedData && <div className="ml-4">Scraped Price: {combinedScrapedData}</div>}
+        {error && <div className="text-red-500 mt-2">{error}</div>}
+      </form> */
+}
+{
+  /* </> */
 }
 
 // const FiltersButton = forwardRef<

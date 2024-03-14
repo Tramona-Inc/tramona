@@ -18,6 +18,8 @@ import { users, type User as TramonaUser } from "./db/schema";
 const THIRTY_DAYS = 30 * 24 * 60 * 60;
 const THIRTY_MINUTES = 30 * 60;
 
+const adapter = CustomPgDrizzleAdapter(db); // custom adapter
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -55,22 +57,31 @@ export const authOptions: NextAuthOptions = {
         },
       };
     },
-    jwt({ token, user }) {
-      if (user) {
-        return {
-          ...token,
-          id: user.id,
-          role: user.role,
-          username: user.username,
-          referralCodeUsed: user.referralCodeUsed,
-          referralTier: user.referralTier,
-          phoneNumber: user.phoneNumber,
-        };
+    async jwt({ token, user, trigger }) {
+      const newToken = token;
+
+      if (trigger === "update" && token.sub) {
+        if (adapter && typeof adapter.getUser === "function") {
+          const latestUser = await adapter.getUser(token.sub);
+          if (latestUser) {
+            user = latestUser;
+          }
+        }
       }
-      return token;
+
+      if (user) {
+        newToken.id = user.id;
+        newToken.role = user.role;
+        newToken.username = user.username;
+        newToken.referralCodeUsed = user.referralCodeUsed;
+        newToken.referralTier = user.referralTier;
+        newToken.phoneNumber = user.phoneNumber;
+      }
+
+      return newToken;
     },
   },
-  adapter: CustomPgDrizzleAdapter(db), // custom adapter
+  adapter,
   providers: [
     // DiscordProvider({
     //   clientId: env.DISCORD_CLIENT_ID,
