@@ -1,3 +1,4 @@
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -7,7 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -20,7 +20,7 @@ import { FilterIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES, requests } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
 import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
@@ -32,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { forwardRef } from "react";
 
 import {
   NestedDrawer,
@@ -43,11 +42,25 @@ import {
   DrawerTitle,
 } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "../ui/label";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import OTPDialog from "../otp-dialog/OTPDialog";
+import { formatPhoneNumber } from "@/utils/formatters";
 import PlacesInput from "../_common/PlacesInput";
 import ErrorMsg from "../ui/ErrorMsg";
+import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
 
 const formSchema = z
   .object({
@@ -75,6 +88,8 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
+  const { status, data, update } = useSession();
+
   const isDesktop = useIsDesktop();
 
   const form = useForm<FormSchema>({
@@ -84,10 +99,12 @@ export default function NewRequestForm({
     },
   });
 
-  const mutation = api.requests.create.useMutation();
+  const createRequestsMutation = api.requests.create.useMutation();
+
+  const smsMutation = api.twilio.sendSMS.useMutation();
+
   const utils = api.useUtils();
   const router = useRouter();
-  const { status } = useSession();
 
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
   const fmtdFilters = getFmtdFilters({
@@ -106,12 +123,59 @@ export default function NewRequestForm({
     "note",
   ].filter((field) => invalidFields.includes(field)).length;
 
+  const [toPhoneNumber, setToPhoneNumber] = useState<string>("");
+
+  const [open, setOpen] = useState<boolean>(false);
+
+  const [verified, setVerified] = useState<boolean>(false);
+
+  const { data: number } = api.users.myPhoneNumber.useQuery();
+
+  const verifiedRef = useRef(verified);
+  const phoneRef = useRef(toPhoneNumber);
+
+  const waitForVerification = async () => {
+    console.log(verifiedRef.current);
+    console.log(verified);
+    return new Promise<void>((resolve) => {
+      if (verifiedRef.current) {
+        resolve();
+      } else {
+        const unsubscribe = () => {
+          if (verifiedRef.current) {
+            resolve();
+            clearInterval(interval);
+          }
+        };
+
+        const interval = setInterval(unsubscribe, 100);
+      }
+    });
+  };
+
+  useEffect(() => {
+    verifiedRef.current = verified;
+  }, [verified]);
+
+  useEffect(() => {
+    if (number) {
+      phoneRef.current = number;
+      verifiedRef.current = true;
+    }
+  }, [number]);
+
   async function onSubmit(data: FormSchema) {
+    if (!phoneRef.current) {
+      setOpen(true);
+    }
+
+    await waitForVerification();
+    setOpen(false);
+
     const { date: _date, maxNightlyPriceUSD, propertyType, ...restData } = data;
     const checkIn = data.date.from;
     const checkOut = data.date.to;
     const numNights = getNumNights(checkIn, checkOut);
-
     const newRequest = {
       checkIn: checkIn,
       checkOut: checkOut,
@@ -119,7 +183,6 @@ export default function NewRequestForm({
       propertyType: propertyType === "any" ? undefined : propertyType,
       ...restData,
     };
-
     if (status === "unauthenticated") {
       localStorage.setItem("unsentRequests", JSON.stringify(newRequest));
       void router.push("/auth/signin").then(() => {
@@ -130,17 +193,26 @@ export default function NewRequestForm({
       });
     } else {
       try {
-        await mutation.mutateAsync(newRequest).catch(() => {
+        await createRequestsMutation.mutateAsync(newRequest).catch(() => {
           throw new Error();
         });
         await utils.requests.invalidate();
+        await utils.users.invalidate();
+
+        while (!phoneRef.current) {
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+        }
+        await smsMutation.mutateAsync({
+          msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+          to: phoneRef.current,
+        });
+
         successfulRequestToast(newRequest);
         form.reset();
       } catch (e) {
         errorToast();
       }
     }
-
     afterSubmit?.();
   }
 
@@ -235,13 +307,45 @@ export default function NewRequestForm({
         </FormItem>
 
         <Button
-          disabled={form.formState.isSubmitting}
+          //disabled={form.formState.isSubmitting}
           size="lg"
           type="submit"
           className="col-span-full"
         >
           Request Deal
         </Button>
+
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Enter your phone number</DialogTitle>
+                  <DialogDescription>
+                    Please enter your phone number below and you will recieve a code via text.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 p-4 py-4">
+                  <div className="flex flex-row items-center gap-4">
+
+                    <Input
+                      id="phone-number"
+                      value={toPhoneNumber}
+                      placeholder="Phone Number"
+                      onChange={(e) => {
+                        setToPhoneNumber(e.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <OTPDialog
+                    toPhoneNumber={formatPhoneNumber(toPhoneNumber)}
+                    setVerified={setVerified}
+                    setPhoneNumber={setToPhoneNumber}
+                  />
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
       </form>
     </Form>
   );

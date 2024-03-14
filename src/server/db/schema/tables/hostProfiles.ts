@@ -1,4 +1,11 @@
-import { pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 export const ALL_HOST_TYPES = ["airbnb", "direct", "vrbo", "other"] as const;
@@ -12,4 +19,6 @@ export const hostProfiles = pgTable("host_profiles", {
   type: hostTypeEnum("type").notNull().default("other"),
   profileUrl: varchar("profile_url", { length: 1000 }),
   becameHostAt: timestamp("became_host_at").notNull().defaultNow(),
+  stripeAccountId: varchar("stripeAccountId"),
+  chargesEnabled: boolean("charges_enabled").default(false),
 });
