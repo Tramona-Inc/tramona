@@ -61,10 +61,8 @@ export const authOptions: NextAuthOptions = {
       const newToken = token;
 
       if (trigger === "update" && token.sub) {
-        if (adapter) {
-          // Add null check for adapter
+        if (adapter && typeof adapter.getUser === "function") {
           const latestUser = await adapter.getUser(token.sub);
-
           if (latestUser) {
             user = latestUser;
           }
