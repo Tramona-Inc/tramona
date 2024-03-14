@@ -20,7 +20,6 @@ import { type InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -39,19 +38,14 @@ export default function SignIn({
   });
 
   const { query } = useRouter();
-  const searchParams = useSearchParams();
 
   const handleSubmit = async ({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
-    const callbackUrl =
-      searchParams?.get("from") ?? (query.isNewUser && "/auth/welcome");
-
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: callbackUrl,
     });
   };
 
@@ -73,7 +67,7 @@ export default function SignIn({
       <Head>
         <title>Log in | Tramona</title>
       </Head>
-      <div className="min-h-screen-minus-header flex flex-col items-center justify-center space-y-10 py-8">
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-5xl font-bold tracking-tight">Log in to Tramona</h1>
 
         <section className="flex flex-col items-center justify-center space-y-5">
