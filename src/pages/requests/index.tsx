@@ -1,16 +1,20 @@
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HistoryIcon, Plus, TagIcon } from "lucide-react";
-import Head from "next/head";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import Spinner from "@/components/_common/Spinner";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
 import RequestCard, {
   type DetailedRequest,
 } from "@/components/requests/RequestCard";
-import { api } from "@/utils/api";
-import { useSession } from "next-auth/react";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
-import Spinner from "@/components/_common/Spinner";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api } from "@/utils/api";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import { useEffect, useState } from "react";
+import { useInterval } from "@/utils/useInterval";
+import { usePrevious } from "@uidotdev/usehooks";
+import { HistoryIcon, Plus, TagIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Head from "next/head";
 
 function NewRequestButton() {
   return (
@@ -24,11 +28,15 @@ function NewRequestButton() {
 }
 
 function RequestGroup({
-  groupId,
+  groupId: _, // well use it soon
   requests,
+  isWaiting,
+  startTimer,
 }: {
   groupId: number;
   requests: DetailedRequest[];
+  isWaiting: boolean;
+  startTimer: () => void;
 }) {
   if (requests.length === 0) return null;
 
@@ -36,7 +44,11 @@ function RequestGroup({
     const request = requests[0]!;
     return (
       <RequestCard request={request}>
-        <RequestCardAction request={request} />
+        <RequestCardAction
+          request={request}
+          isWaiting={isWaiting}
+          onClick={startTimer}
+        />
       </RequestCard>
     );
   }
@@ -52,7 +64,11 @@ function RequestGroup({
         {requests.map((request) => (
           <div key={request.id} className="min-w-96 *:h-full">
             <RequestCard request={request}>
-              <RequestCardAction request={request} />
+              <RequestCardAction
+                request={request}
+                isWaiting={isWaiting}
+                onClick={startTimer}
+              />
             </RequestCard>
           </div>
         ))}
@@ -66,10 +82,45 @@ function RequestCards({
 }: {
   requestGroups: { groupId: number; requests: DetailedRequest[] }[];
 }) {
+  const [isWaiting, setIsWaiting] = useState(false);
+  const utils = api.useUtils();
+
+  const requests = requestGroups.map((group) => group.requests).flat();
+  const previousRequests = usePrevious(requests);
+
+  useEffect(() => {
+    if (!requests || !previousRequests) return;
+    const newlyApprovedRequests = requests.filter(
+      (req) =>
+        req.hasApproved &&
+        !previousRequests.find((req2) => req2.id === req.id)?.hasApproved,
+    );
+    if (newlyApprovedRequests.length > 0) {
+      setIsWaiting(false);
+    }
+  }, [requests]);
+
+  // Start the interval to invalidate requests every 10 seconds
+  useInterval(
+    () => void utils.requests.getMyRequests.invalidate(),
+    isWaiting ? 10 * 1000 : null,
+  ); // 10 seconds
+
+  function startTimer() {
+    setIsWaiting(true);
+    setTimeout(() => setIsWaiting(false), 3 * 60 * 1000); // 3 minutes
+  }
+
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {requestGroups.map(({ groupId, requests }) => (
-        <RequestGroup key={groupId} groupId={groupId} requests={requests} />
+        <RequestGroup
+          key={groupId}
+          groupId={groupId}
+          requests={requests}
+          isWaiting={isWaiting}
+          startTimer={startTimer}
+        />
       ))}
     </div>
   );
@@ -138,17 +189,20 @@ export default function Page() {
       <Head>
         <title>My Requests | Tramona</title>
       </Head>
-      <div className="px-4 pb-64 pt-16">
-        <div className="mx-auto max-w-5xl">
-          <div className="flex items-center">
-            <h1 className="flex-1 py-4 text-3xl font-bold text-black">
-              My Requests
-            </h1>
-            <NewRequestButton />
+
+      <DashboardLayout type="guest">
+        <div className="container col-span-10 px-4 pb-64 pt-5 2xl:col-span-11">
+          <div className="mx-auto">
+            <div className="flex items-center">
+              <h1 className="flex-1 py-4 text-4xl font-bold text-black">
+                My Requests
+              </h1>
+              <NewRequestButton />
+            </div>
+            <RequestsTabs />
           </div>
-          <RequestsTabs />
         </div>
-      </div>
+      </DashboardLayout>
     </>
   );
 }

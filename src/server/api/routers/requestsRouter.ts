@@ -24,6 +24,8 @@ import {
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { sendText } from "@/server/server-utils";
 
 async function createGroup({
   ownerId,
@@ -303,14 +305,51 @@ export const requestsRouter = createTRPCRouter({
 
   // in the future, well need to validate that a host actually received the request,
   // or else a malicious host could reject any request
+  updateConfirmation: protectedProcedure
+    .input(z.object({ requestId: z.number(), phoneNumber: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(requests)
+        .set({ confirmationSentAt: new Date() })
+        .where(eq(requests.id, input.requestId));
+
+      await sendText({
+        to: input.phoneNumber,
+        content:
+          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      });
+    }),
 
   resolve: roleRestrictedProcedure(["admin"])
     .input(requestSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
+      const request = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+        columns: {
+          location: true,
+          checkIn: true,
+          checkOut: true,
+        },
+        with: {
+          madeByUser: {
+            columns: { phoneNumber: true },
+          },
+        },
+      });
+
+      if (!request) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
       await ctx.db
         .update(requests)
         .set({ resolvedAt: new Date() })
         .where(eq(requests.id, input.id));
+
+      void sendText({
+        to: request.madeByUser.phoneNumber!,
+        content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
+      });
     }),
 
   delete: protectedProcedure

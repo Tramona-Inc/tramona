@@ -83,7 +83,12 @@ export default function Page() {
                   >
                     Message
                   </Button>
-                  <Button size="lg" variant="outline" className="rounded-full">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full"
+                    asChild
+                  >
                     <Link href={`/listings/${offer.id}`}>More details</Link>
                   </Button>
                   {false /* offer.isPremium */ ? (

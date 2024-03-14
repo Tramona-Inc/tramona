@@ -11,12 +11,12 @@ import {
   getNumNights,
   getTramonaFeeTotal,
 } from "@/utils/utils";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
 import { useStripe } from "./HowToBookDialog";
+import { useSession } from "next-auth/react";
 
 export default function AirbnbBookDialog(
   props: React.PropsWithChildren<{
@@ -62,9 +62,13 @@ export default function AirbnbBookDialog(
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
+
   const session = useSession({ required: true });
 
   async function checkout() {
+    const user = session.data?.user;
+    if (!user) return;
+
     const response = await createCheckout.mutateAsync({
       listingId: offer.id,
       propertyId: offer.property.id,
@@ -74,8 +78,9 @@ export default function AirbnbBookDialog(
       description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
       images: offer.property.imageUrls,
-      userId: session.data?.user.id ?? "",
       totalSavings,
+      phoneNumber: user.phoneNumber ?? "",
+      userId: user.id,
     });
 
     const stripe = await stripePromise;

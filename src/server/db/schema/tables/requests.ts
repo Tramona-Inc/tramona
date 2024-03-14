@@ -34,6 +34,7 @@ export const requests = pgTable("requests", {
   resolvedAt: timestamp("resolved_at"),
   hasApproved: boolean("has_approved").default(false).notNull(),
   confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
+  haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),
 });
 
 export type Request = typeof requests.$inferSelect;

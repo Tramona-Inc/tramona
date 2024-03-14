@@ -22,14 +22,12 @@ export default function VerifyEmail() {
   } = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
       if (conversationId && userId) {
-        console.log(userId);
-
         void addUserToConversation({ userId, conversationId });
       }
 
       void router.push({
         pathname: "/auth/signin",
-        query: { isNewUser: true, isVerified: true },
+        query: { isVerified: true },
       });
     },
   });
@@ -41,7 +39,7 @@ export default function VerifyEmail() {
   }, [id, token]);
 
   return (
-    <main className="flex h-screen flex-col items-center justify-center">
+    <div className="flex h-screen-minus-header flex-col items-center justify-center">
       {isLoading && (
         <p className="text-muted-foreground">Verifying your email...</p>
       )}
@@ -50,6 +48,6 @@ export default function VerifyEmail() {
           Something went wrong, please try signing up again
         </p>
       )}
-    </main>
+    </div>
   );
 }

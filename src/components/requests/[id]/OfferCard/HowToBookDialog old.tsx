@@ -102,6 +102,7 @@ export default function HowToBookDialog(
       images: props.offer.property.imageUrls,
       userId: session.data?.user.id ?? "",
       totalSavings,
+      phoneNumber: session.data?.user.phoneNumber ?? "",
       // TODO: create conversation later based on hostId
       // hostId: props.offer.property.hostId,
     });

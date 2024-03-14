@@ -123,7 +123,7 @@ export default function HostSignUpForm() {
 
       if (isVerifiedHostUrl) {
         await createUserHost(newUserWithHostCheck)
-         .then(() =>
+          .then(() =>
             // ! Later fix to update to global
             // Verify Phone number first before addingin to db
             mutateSendOTP({
@@ -160,7 +160,7 @@ export default function HostSignUpForm() {
               <FormItem>
                 <FormLabel>Email address</FormLabel>
                 <FormControl>
-                  <Input {...field} autoFocus type="email" />
+                  <Input {...field} autoFocus inputMode="email" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

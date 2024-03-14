@@ -42,7 +42,7 @@ const getAllAcceptedOffers = async (userId: string) => {
 // Fetch the trips data to display
 const getDisplayTrips = async (tripIds: number[], limit?: number) => {
   if (tripIds.length === 0) {
-    return null;
+    return [];
   } else {
     return await db.query.offers.findMany({
       where: inArray(offers.id, tripIds),

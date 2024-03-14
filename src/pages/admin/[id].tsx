@@ -24,6 +24,8 @@ export default function Page() {
 
   const request = requests?.pastRequests.find(({ id }) => id === requestId);
 
+  const offerCount = offers?.length;
+
   return (
     <>
       <div className="relative">
@@ -40,7 +42,7 @@ export default function Page() {
           </div>
         </div>
         <Link
-          href="/admin"
+          href="/admin/past-requests"
           className="absolute left-4 top-4 rounded-full px-4 py-2 font-medium text-white hover:bg-white/10"
         >
           &larr; Back
@@ -58,10 +60,18 @@ export default function Page() {
                   key={offer.id}
                   offer={offer}
                   requestId={requestId}
-                  checkIn={request.checkIn}
-                  checkOut={request.checkOut}
+                  checkIn={request.checkIn} checkOut={request.checkOut}
                 >
-                  <RevokeOfferDialog offerId={offer.id}>
+                  <RevokeOfferDialog
+                    requestId={request.id}
+                    requestCheckIn={request.checkIn}
+                    requestCheckOut={request.checkOut}
+                    offerId={offer.id}
+                    propertyAddress={offer.property.address!}
+                    userPhoneNumber={request.madeByUser.phoneNumber!}
+                    propertyName={offer.property.name}
+                    offerCount={offerCount!}
+                  >
                     <Button variant="outline" className="rounded-full">
                       Revoke offer
                     </Button>

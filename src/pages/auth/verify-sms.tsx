@@ -1,8 +1,15 @@
-import { OTPInput } from "@/components/ui/otp-input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+
+import MainLayout from "@/components/_common/Layout/MainLayout";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 export default function Page() {
   const [code, setCode] = useState("");
@@ -52,21 +59,27 @@ export default function Page() {
   }, [code]);
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center gap-4">
-      <h1 className="text-center text-5xl font-bold tracking-tight">
-        Please verify your phone number
-      </h1>
-      <p className="text-muted-foreground">Check in your messages</p>
+    <MainLayout>
+      <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center gap-4">
+        <h1 className="text-center text-5xl font-bold tracking-tight">
+          Please verify your phone number
+        </h1>
+        <p className="text-muted-foreground">Check your messages for code</p>
 
-      <OTPInput
-        value={code}
-        onPaste={(e) => {
-          e.preventDefault();
-        }}
-        placeholder=""
-        type="number"
-        onChange={(value) => setCode(value)}
-      />
-    </div>
+        <InputOTP
+          maxLength={6}
+          pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+          value={code}
+          onChange={(value) => setCode(value)}
+          render={({ slots }) => (
+            <InputOTPGroup>
+              {slots.map((slot, index) => (
+                <InputOTPSlot key={index} {...slot} />
+              ))}{" "}
+            </InputOTPGroup>
+          )}
+        />
+      </div>
+    </MainLayout>
   );
 }

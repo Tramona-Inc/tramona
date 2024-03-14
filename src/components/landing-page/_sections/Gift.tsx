@@ -28,7 +28,7 @@ export default function Gift() {
           src="/assets/images/landing-page-props/paper_money.png"
           layout="fill"
           objectFit="contain"
-          alt="image dollar"
+          alt=""
         />
       </div>
     </section>

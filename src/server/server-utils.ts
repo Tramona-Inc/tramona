@@ -2,6 +2,8 @@ import { render } from "@react-email/render";
 import nodemailler, { type TransportOptions } from "nodemailer";
 import { env } from "@/env";
 import { type ReactElement } from "react";
+import { Twilio } from "twilio";
+
 import sgMail from "@sendgrid/mail";
 import { db } from "./db";
 import { and, eq, inArray } from "drizzle-orm";
@@ -16,6 +18,8 @@ const transporter = nodemailler.createTransport({
     pass: env.SMTP_PASSWORD,
   },
 } as TransportOptions);
+
+const twilio = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
 
 export async function sendEmail({
   to,
@@ -72,4 +76,19 @@ export async function addUserToGroups(user: Pick<User, "email" | "id">) {
         ),
       );
   });
+}
+
+export async function sendText({
+  to,
+  content,
+}: {
+  to: string;
+  content: string;
+}) {
+  const response = await twilio.messages.create({
+    body: content,
+    from: env.TWILIO_FROM,
+    to,
+  });
+  return response;
 }

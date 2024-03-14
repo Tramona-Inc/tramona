@@ -6,8 +6,22 @@ import { ArrowRightIcon, UserPlusIcon } from "lucide-react";
 import { type DetailedRequest } from "./RequestCard";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
+import { RequestUnconfirmedButton } from "./RequestUnconfirmedButton";
+import { MouseEventHandler, useState } from "react";
+import { api } from "@/utils/api";
+import { State } from "postgres";
 
-export function RequestCardAction({ request }: { request: DetailedRequest }) {
+type RequestCardActionProps = {
+  request: DetailedRequest;
+  isWaiting: boolean | undefined;
+  onClick: () => void;
+};
+
+export function RequestCardAction({
+  request,
+  isWaiting,
+  onClick,
+}: RequestCardActionProps) {
   const { data: session } = useSession({ required: true });
   if (!session) return null;
 
@@ -44,5 +58,15 @@ export function RequestCardAction({ request }: { request: DetailedRequest }) {
     case "booked":
       // return <Button className={primaryBtn}>Request again</Button>;
       return null;
+    case "unconfirmed":
+      return (
+        request.madeByUser.phoneNumber && (
+          <RequestUnconfirmedButton
+            request={request}
+            isWaiting={isWaiting}
+            onClick={onClick}
+          />
+        )
+      );
   }
 }

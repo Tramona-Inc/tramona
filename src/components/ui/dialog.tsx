@@ -134,7 +134,7 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) =>
   useIsDesktop() ? (
-    <div className={cn("space-y-1.5 text-left", className)} {...props} />
+    <div className={cn("space-y-1.5 text-center", className)} {...props} />
   ) : (
     <DrawerHeader className={className} {...props} />
   );

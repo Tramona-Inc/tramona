@@ -14,7 +14,8 @@ import { offers } from "..";
 // the tables depend on each other
 
 export const REFERRAL_CODE_LENGTH = 7;
-export const roleEnum = pgEnum("role", ["guest", "host", "admin"]);
+export const ALL_ROLES = ["guest", "host", "admin"] as const;
+export const roleEnum = pgEnum("role", ALL_ROLES);
 export const referralTierEnum = pgEnum("referral_tier", [
   "Partner",
   "Ambassador",
@@ -58,6 +59,8 @@ export const referralCodes = pgTable("referral_codes", {
   numBookingsUsingCode: integer("num_bookings_using_code").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const userSelectSchema = createSelectSchema(users);
 
 export const referralEarnings = pgTable("referral_earnings", {
   id: serial("id").primaryKey(),
