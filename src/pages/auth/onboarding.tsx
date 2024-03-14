@@ -1,5 +1,5 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import { Icons } from "@/components/_icons/icons";
+import SpinnerButton from "@/components/_icons/SpinnerButton";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -146,9 +146,7 @@ export default function Onboarding() {
                 }}
                 disabled={isLoading}
               >
-                {isLoading && (
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {isLoading && <SpinnerButton />}
                 Send Verification Code
               </Button>
 

@@ -6,17 +6,17 @@ import {
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
+  hostProfiles,
   offers,
   referralCodes,
   referralEarnings,
   requests,
   users,
 } from "@/server/db/schema";
+import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { api } from "@/utils/api";
-
 
 // ! Necessary for stripe
 export const config = {
@@ -164,6 +164,19 @@ export default async function webhook(
           // console.log("Checkout session was successful!");
         } else {
           // console.error("Metadata or listing_id is null or undefined");
+        }
+        break;
+
+      case "account.updated":
+        const account = event.data.object;
+
+        if (account.id) {
+          await db
+            .update(hostProfiles)
+            .set({
+              chargesEnabled: account.payouts_enabled,
+            })
+            .where(eq(hostProfiles.stripeAccountId, account.id));
         }
         break;
 

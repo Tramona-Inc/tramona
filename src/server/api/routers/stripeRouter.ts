@@ -112,6 +112,8 @@ export const stripeRouter = createTRPCRouter({
       where: eq(hostProfiles.userId, ctx.user.id),
     });
 
+    let stripeAccountId = res?.stripeAccountId; // Initialize if stripeAccountId excist
+
     if (
       ctx.user.role === "host" &&
       !res?.stripeAccountId &&
@@ -132,17 +134,21 @@ export const stripeRouter = createTRPCRouter({
         },
       });
 
-      await ctx.db
+      const updatedId = await ctx.db
         .update(hostProfiles)
         .set({ stripeAccountId: stripeAccount.id })
-        .where(eq(hostProfiles.userId, ctx.user.id));
+        .where(eq(hostProfiles.userId, ctx.user.id))
+        .returning({ updatedId: hostProfiles.stripeAccountId })
+        .then((updatedProfiles) => updatedProfiles[0]?.updatedId);
+
+      stripeAccountId = updatedId;
     }
 
-    if (res?.stripeAccountId) {
+    if (stripeAccountId) {
       const accountLink = await stripe.accountLinks.create({
-        account: res.stripeAccountId,
-        refresh_url: `${env.NEXTAUTH_URL}host/payout`,
-        return_url: `${env.NEXTAUTH_URL}host/payout`,
+        account: stripeAccountId,
+        refresh_url: `${env.NEXTAUTH_URL}/host/payout`,
+        return_url: `${env.NEXTAUTH_URL}/host/payout`,
         type: "account_onboarding",
       });
 
