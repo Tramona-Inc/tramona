@@ -3,6 +3,7 @@ import NavLink from "../_utils/NavLink";
 import { cn } from "@/utils/utils";
 import {
   BriefcaseIcon,
+  DollarSignIcon,
   HistoryIcon,
   InboxIcon,
   LayoutDashboardIcon,
@@ -57,6 +58,7 @@ const adminNavLinks = [
 
 const hostNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
+  { href: "/host/payout", name: "Payout", icon: DollarSignIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 

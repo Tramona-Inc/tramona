@@ -1,3 +1,4 @@
+import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
@@ -17,7 +18,7 @@ export default function Payout() {
     });
 
   return (
-    <>
+    <DashboadLayout type={"host"}>
       <Head>
         <title>Host Payout | Tramona</title>
       </Head>
@@ -37,6 +38,6 @@ export default function Payout() {
           </div>
         )}
       </main>
-    </>
+    </DashboadLayout>
   );
 }
