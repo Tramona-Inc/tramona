@@ -42,7 +42,7 @@ export default function Page() {
           </div>
         </div>
         <Link
-          href="/admin"
+          href="/admin/past-requests"
           className="absolute left-4 top-4 rounded-full px-4 py-2 font-medium text-white hover:bg-white/10"
         >
           &larr; Back

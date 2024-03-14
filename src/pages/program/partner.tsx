@@ -1,3 +1,4 @@
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import StarIcon from "@/components/_icons/StarIcon";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
@@ -11,7 +12,8 @@ const steps = [
   },
   {
     id: 2,
-    info: "Send your link to a friend, and when they sign up you will automatically start to earn when they book a trip.", displayStar: false,
+    info: "Send your link to a friend, and when they sign up you will automatically start to earn when they book a trip.",
+    displayStar: false,
   },
   {
     id: 3,
@@ -47,7 +49,7 @@ function Card({
 
 export default function Page() {
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Partners | Tramona</title>
       </Head>
@@ -94,6 +96,6 @@ export default function Page() {
           Start referring
         </Button>
       </div>
-    </>
+    </MainLayout>
   );
 }
