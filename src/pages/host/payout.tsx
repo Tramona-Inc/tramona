@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
+import router from "next/router";
 export default function Payout() {
   useSession({ required: true });
 
@@ -10,10 +11,12 @@ export default function Payout() {
 
   const utils = api.useUtils();
 
-  const { mutate: createStripeConnectAccount } =
+  const { mutateAsync: createStripeConnectAccount } =
     api.stripe.createStripeConnectAccount.useMutation({
-      onSuccess: () => {
+      onSuccess: (response) => {
         void utils.invalidate();
+
+        void router.push(response ?? "");
       },
     });
 

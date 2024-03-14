@@ -136,8 +136,15 @@ export const stripeRouter = createTRPCRouter({
         .where(eq(hostProfiles.userId, ctx.user.id));
     }
 
-    // await stripe.accountLinks.create(
-    //   account: current_user.stripe
-    // )
+    if (res?.stripeAccountId) {
+      const accountLink = await stripe.accountLinks.create({
+        account: res.stripeAccountId,
+        refresh_url: `${env.NEXTAUTH_URL}host/payout`,
+        return_url: `${env.NEXTAUTH_URL}host/payout`,
+        type: "account_onboarding",
+      });
+
+      return accountLink.url;
+    }
   }),
 });
