@@ -26,7 +26,7 @@ import { useSession } from "next-auth/react";
 interface OTPDialogProps {
   toPhoneNumber: string;
   setVerified: Dispatch<SetStateAction<boolean>>;
-  setPhoneNumber: Dispatch<SetStateAction<string>>;
+  setPhoneNumber?: Dispatch<SetStateAction<string>> | undefined;
 }
 
 export default function OTPDialog({
@@ -126,7 +126,7 @@ export default function OTPDialog({
       });
       void update((prev: typeof data) => ({ ...prev, user: res }));
       if (res[0]?.phoneNumber) {
-        setPhoneNumber(res[0]?.phoneNumber);
+        setPhoneNumber?.(res[0]?.phoneNumber);
       }
     }, onError: () => {
       errorToast("Error verifying phone number!");
