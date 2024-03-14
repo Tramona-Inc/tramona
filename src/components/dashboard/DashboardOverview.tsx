@@ -22,7 +22,13 @@ function RequestCards({
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
       {requests.map((request) => (
         <RequestCard key={request.id} request={request}>
-          <RequestCardAction request={request} />
+          <RequestCardAction
+            request={request}
+            isWaiting={false}
+            onClick={() => {
+              // todo
+            }}
+          />
         </RequestCard>
       ))}
     </div>
