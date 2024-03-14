@@ -9,7 +9,6 @@ import type { StepperConfig } from "@/components/ui/stepper";
 import { Stepper, StepperItem } from "@/components/ui/stepper";
 import { useStepper } from "@/components/ui/use-stepper";
 
-import { api } from "@/utils/api";
 import { cn, sleep } from "@/utils/utils";
 import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 
@@ -75,12 +74,12 @@ function Step2(): JSX.Element {
 
   return (
     <StepperContentLayout className="container gap-4 text-balance">
-      <div className="flex flex-col gap-10 text-center">
-        <h1 className="text-4xl font-bold lg:text-5xl">Get guest bookings with ease</h1>
-        <p className="text-lg font-bold lg:text-2xl">
-          It's as simple as inputting your property info and receiving offers from guests looking to travel to your city!
-        </p>
-      </div>
+        <div className="flex flex-col gap-10 text-center">
+          <h1 className="text-4xl font-bold lg:text-5xl">Get guest bookings with ease</h1>
+          <p className="text-lg font-bold lg:text-2xl">
+            It's as simple as inputting your property info and receiving offers from guests looking to travel to your city!
+          </p>
+        </div>
     </StepperContentLayout>
   );
 }
