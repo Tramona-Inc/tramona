@@ -63,7 +63,7 @@ export function MessageConversation({
           {messages.length > 0 &&
             !messages[0]?.read &&
             messages[0]?.userId !== session?.user.id && (
-              <div className="rounded-full bg-blue-500 p-1" />
+              <span className="rounded-full bg-blue-500 p-1" />
             )}
           {messages[0]?.userId === session?.user.id && "You: "}
           {messages[0]?.message ?? ""}
