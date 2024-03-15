@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -15,6 +16,8 @@ import {
   requestSelectSchema,
   requests,
 } from "@/server/db/schema";
+import { sendText } from "@/server/server-utils";
+import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
@@ -347,20 +350,73 @@ export const offersRouter = createTRPCRouter({
   delete: roleRestrictedProcedure(["admin", "host"])
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "host") {
-        const request = await ctx.db.query.offers.findFirst({
-          where: eq(offers.id, input.id),
-          columns: {},
-          with: {
-            property: { columns: { hostId: true } },
+      const offer = await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.id),
+        columns: {},
+        with: {
+          property: { columns: { hostId: true, name: true, address: true } },
+          request: {
+            columns: { checkIn: true, checkOut: true, id: true },
+            with: {
+              madeByGroup: {
+                with: {
+                  members: {
+                    with: { user: { columns: { phoneNumber: true } } },
+                  },
+                },
+              },
+            },
           },
-        });
+        },
+      });
 
-        if (request?.property.hostId !== ctx.user.id) {
+      if (!offer) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (ctx.user.role === "host") {
+        if (offer.property.hostId !== ctx.user.id) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
 
       await ctx.db.delete(offers).where(eq(offers.id, input.id));
+
+      const { request, property } = offer;
+      const groupOwner = request.madeByGroup.members.find(
+        (member) => member.isOwner,
+      );
+      if (!groupOwner) return;
+
+      const groupOwnerHasOtherOffers = await ctx.db.query.groupMembers
+        .findFirst({
+          where: eq(groupMembers.userId, groupOwner.userId),
+          columns: {},
+          with: {
+            group: {
+              columns: {},
+              with: {
+                requests: {
+                  columns: {},
+                  with: { offers: { columns: { id: true } } },
+                },
+              },
+            },
+          },
+        })
+        .then(
+          (res) =>
+            res && res.group.requests.some((req) => req.offers.length > 0),
+        );
+
+      const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
+      const url = `${env.NEXTAUTH_URL}/requests/${request.id}`;
+
+      if (groupOwner.user.phoneNumber) {
+        void sendText({
+          to: groupOwner.user.phoneNumber,
+          content: `Tramona: Hello, your ${property.name} in ${property.address} offer from ${fmtdDateRange} has expired.${groupOwnerHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
+        });
+      }
     }),
 });

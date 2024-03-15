@@ -87,18 +87,24 @@ function RequestCards({
 
   const requests = requestGroups.map((group) => group.requests).flat();
   const previousRequests = usePrevious(requests);
+  const newlyApprovedRequests =
+    requests && previousRequests
+      ? requests.filter(
+          (req) =>
+            req.hasApproved &&
+            !previousRequests.find((req2) => req2.id === req.id)?.hasApproved,
+        )
+      : [];
 
-  useEffect(() => {
-    if (!requests || !previousRequests) return;
-    const newlyApprovedRequests = requests.filter(
-      (req) =>
-        req.hasApproved &&
-        !previousRequests.find((req2) => req2.id === req.id)?.hasApproved,
-    );
-    if (newlyApprovedRequests.length > 0) {
-      setIsWaiting(false);
-    }
-  }, [requests]);
+  const areNewlyApprovedRequests = newlyApprovedRequests.length > 0;
+  console.log(areNewlyApprovedRequests);
+
+  // useEffect(() => {
+  //   console.log("running");
+  //   if (areNewlyApprovedRequests) {
+  //     setIsWaiting(false);
+  //   }
+  // }, [areNewlyApprovedRequests]);
 
   // Start the interval to invalidate requests every 10 seconds
   useInterval(

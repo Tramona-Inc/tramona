@@ -313,7 +313,7 @@ export const requestsRouter = createTRPCRouter({
   // in the future, well need to validate that a host actually received the request,
   // or else a malicious host could reject any request
   updateConfirmation: protectedProcedure
-    .input(z.object({ requestId: z.number(), phoneNumber: z.string() }))
+    .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(requests)
@@ -321,7 +321,7 @@ export const requestsRouter = createTRPCRouter({
         .where(eq(requests.id, input.requestId));
 
       await sendText({
-        to: input.phoneNumber,
+        to: ctx.user.phoneNumber!,
         content:
           "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
       });

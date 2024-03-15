@@ -7,9 +7,6 @@ import { type DetailedRequest } from "./RequestCard";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
 import { RequestUnconfirmedButton } from "./RequestUnconfirmedButton";
-import { MouseEventHandler, useState } from "react";
-import { api } from "@/utils/api";
-import { State } from "postgres";
 
 type RequestCardActionProps = {
   request: DetailedRequest;
@@ -26,9 +23,10 @@ export function RequestCardAction({
   if (!session) return null;
 
   const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
-  const userIsOwner = request.groupMembers.some(
-    (member) => member.id === session.user.id && member.isGroupOwner,
-  );
+  const groupOwner = request.groupMembers.find(
+    (member) => member.isGroupOwner,
+  )!;
+  const userIsOwner = groupOwner?.id === session.user.id;
 
   switch (getRequestStatus(request)) {
     case "pending":
@@ -60,7 +58,8 @@ export function RequestCardAction({
       return null;
     case "unconfirmed":
       return (
-        request.madeByUser.phoneNumber && (
+        userIsOwner &&
+        session.user.phoneNumber && (
           <RequestUnconfirmedButton
             request={request}
             isWaiting={isWaiting}

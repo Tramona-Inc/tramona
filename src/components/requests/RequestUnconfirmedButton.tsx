@@ -1,8 +1,7 @@
-import React, { useState, useEffect, MouseEventHandler } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { api } from "@/utils/api";
 import { type DetailedRequest } from "./RequestCard";
-import { useInterval } from "@/utils/useInterval";
 
 type ClickHandler = () => void;
 
@@ -12,34 +11,36 @@ type RequestUnconfirmedButtonProps = {
   onClick: ClickHandler;
 };
 
-export function RequestUnconfirmedButton({ request, isWaiting, onClick }: RequestUnconfirmedButtonProps) {
-
+export function RequestUnconfirmedButton({
+  request,
+  isWaiting,
+  onClick,
+}: RequestUnconfirmedButtonProps) {
   const [isSending, setIsSending] = useState(isWaiting);
 
   const confirmationMutation = api.requests.updateConfirmation.useMutation();
-  const number = request.madeByUser.phoneNumber;
 
   useEffect(() => {
     if (!isWaiting) {
       setIsSending(isWaiting);
     }
-  }, [isWaiting])
-
-
+  }, [isWaiting]);
 
   const handleClick = async () => {
-    if (number !== null) {
-      setIsSending(true)
-      await confirmationMutation.mutateAsync({requestId: request.id, phoneNumber: number});
-      onClick();
-    }
+    setIsSending(true);
+    await confirmationMutation.mutateAsync({
+      requestId: request.id,
+    });
+    onClick();
   };
 
-
-
   return (
-    <Button className="rounded-full pr-3" onClick={handleClick} disabled={isSending}>
-      {isSending ? "Awaiting Confirmation" :  "Resend Confirmation"}
+    <Button
+      className="rounded-full pr-3"
+      onClick={handleClick}
+      disabled={isSending}
+    >
+      {isSending ? "Awaiting Confirmation" : "Resend Confirmation"}
     </Button>
-  )
-};
+  );
+}

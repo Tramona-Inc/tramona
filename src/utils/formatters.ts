@@ -39,7 +39,6 @@ export function getRequestStatus(request: {
   numOffers: number;
   hasApproved: boolean;
 }) {
-
   if (request.resolvedAt) {
     return request.numOffers === 0 ? "rejected" : "booked";
   }

@@ -49,9 +49,9 @@ export const groupsRouter = createTRPCRouter({
           content: (
             <>
               {ctx.user.name ?? ctx.user.email ?? "An anonymous user"} invited
-              you to their request on Tramona. Sign up at
+              you to their request on Tramona! Sign up at
               https://tramona.com/auth/signup with this email to be added to the
-              group!
+              group.
             </>
           ),
         });

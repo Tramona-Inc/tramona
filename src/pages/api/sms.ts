@@ -2,8 +2,8 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
 
 import { db } from "@/server/db";
-import { requests, users } from "@/server/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { groupMembers, groups, requests, users } from "@/server/db/schema";
+import { eq, desc, exists, and } from "drizzle-orm";
 
 type TwilioRequestBody = {
   ToCountry: string;
@@ -42,11 +42,30 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (!userId) return res.status(500);
 
-  const mostRecentRequest = await db.query.requests.findFirst({
-    where: eq(requests.userId, userId),
-    orderBy: desc(requests.confirmationSentAt),
-    columns: { hasApproved: true, id: true, location: true },
-  });
+  const mostRecentRequest = await db
+    .select({
+      id: requests.id,
+      hasApproved: requests.hasApproved,
+      location: requests.location,
+    })
+    .from(groups)
+    .innerJoin(requests, eq(groups.id, requests.madeByGroupId))
+    .where(
+      exists(
+        db
+          .select()
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, groups.id),
+              eq(groupMembers.userId, userId),
+              eq(groupMembers.isOwner, true),
+            ),
+          ),
+      ),
+    )
+    .orderBy(desc(requests.confirmationSentAt))
+    .then((res) => res[0]);
 
   if (!mostRecentRequest) return res.status(500);
 

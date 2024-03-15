@@ -3,8 +3,6 @@ import nodemailler, { type TransportOptions } from "nodemailer";
 import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
-
-import sgMail from "@sendgrid/mail";
 import { db } from "./db";
 import { and, eq, inArray } from "drizzle-orm";
 import { type User, groupInvites, groupMembers } from "./db/schema";

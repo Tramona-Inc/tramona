@@ -60,7 +60,8 @@ export default function Page() {
                   key={offer.id}
                   offer={offer}
                   requestId={requestId}
-                  checkIn={request.checkIn} checkOut={request.checkOut}
+                  checkIn={request.checkIn}
+                  checkOut={request.checkOut}
                 >
                   <RevokeOfferDialog
                     requestId={request.id}
@@ -68,7 +69,6 @@ export default function Page() {
                     requestCheckOut={request.checkOut}
                     offerId={offer.id}
                     propertyAddress={offer.property.address!}
-                    userPhoneNumber={request.madeByUser.phoneNumber!}
                     propertyName={offer.property.name}
                     offerCount={offerCount!}
                   >
