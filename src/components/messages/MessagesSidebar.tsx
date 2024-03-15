@@ -144,7 +144,10 @@ export default function MessagesSidebar({
   setSelected,
 }: SidebarProps) {
   const { data: fetchedConversations, isLoading } =
-    api.messages.getConversations.useQuery();
+    api.messages.getConversations.useQuery(undefined, {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    });
 
   const conversations = useConversation((state) => state.conversationList);
 
