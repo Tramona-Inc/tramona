@@ -1,8 +1,12 @@
+import { type MessageDbType } from "@/types/supabase.message";
 import { api } from "@/utils/api";
 import {
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
+import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import supabase from "@/utils/supabase-client";
+import { errorToast } from "@/utils/toasts";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
@@ -18,6 +22,58 @@ export function MessageConversation({
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {
+  const optimisticIds = useMessage((state) => state.optimisticIds);
+
+  const setConversationToTop = useConversation(
+    (state) => state.setConversationToTop,
+  );
+
+  const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+    if (!optimisticIds.includes(payload.new.id)) {
+      const { data, error } = await supabase
+        .from("user")
+        .select("name, email, image")
+        .eq("id", payload.new.user_id)
+        .single();
+      if (error) {
+        errorToast(error.message);
+      } else {
+        const newMessage: ChatMessageType = {
+          id: payload.new.id,
+          conversationId: payload.new.conversation_id,
+          userId: payload.new.user_id,
+          message: payload.new.message,
+          isEdit: payload.new.is_edit,
+          createdAt: new Date(payload.new.created_at),
+          read: payload.new.read,
+          user: data,
+        };
+
+        setConversationToTop(payload.new.conversation_id, newMessage);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`${conversation.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload: { new: MessageDbType }) => void handlePostgresChange(payload),
+      )
+      .subscribe();
+
+    return () => {
+      void channel.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { participants, messages, id } = conversation;
 
   const displayParticipants = participants
