@@ -72,8 +72,14 @@ export default function ProfileForm() {
       });
       return;
     }
-
-    mutate(values);
+    if (user) {
+      mutate({
+        id: user.id,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        name: values.name,
+      });
+    }
   };
 
   return (

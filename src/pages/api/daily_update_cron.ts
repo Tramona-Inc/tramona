@@ -58,7 +58,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
           await sendText({
             to: user.phoneNumber!,
-            content: `Tramona: You have an unconfirmed request to ${request.location} from ${formattedCheckIn} to ${formattedCheckOut}. Please [click here](${url}) to return to the site to confirm your request so we can get you the best travel deals.`,
+            content: `Tramona: You have an unconfirmed request to ${request.location} from ${formattedCheckIn} to ${formattedCheckOut}. Please click the link below to return to the site to confirm your request so we can get you the best travel deals. ${url}`,
           });
 
           await db
@@ -81,6 +81,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
 function isOlderThan24Hours(createdAt: Date, currentTime: Date) {
   const timeDifference = currentTime.getTime() - new Date(createdAt).getTime();
-  const hoursDifference = timeDifference / (1000 * 3600); // Convert milliseconds to hours
+  const hoursDifference = timeDifference / (1000 * 3600);
   return hoursDifference >= 24;
 }

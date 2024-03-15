@@ -42,6 +42,7 @@ export const users = pgTable("user", {
   role: roleEnum("role").notNull().default("guest"),
   referralTier: referralTierEnum("referral_tier").notNull().default("Partner"),
   phoneNumber: varchar("phone_number", { length: 20 }),
+  lastTextAt: timestamp("last_text_at").defaultNow(),
 });
 
 export type User = typeof users.$inferSelect;
@@ -86,3 +87,9 @@ export const referralEarningsInsertSchema =
 export type ReferralCode = typeof referralCodes.$inferSelect;
 export const referralCodeSelectSchema = createSelectSchema(referralCodes);
 export const referralCodeInsertSchema = createInsertSchema(referralCodes);
+
+export const userInsertSchema = createInsertSchema(users);
+export const userSelectSchema = createSelectSchema(users);
+export const userUpdateSchema = userInsertSchema
+  .partial()
+  .required({ id: true });

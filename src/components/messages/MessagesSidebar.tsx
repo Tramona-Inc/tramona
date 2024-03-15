@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import UserAvatar from "../_common/UserAvatar";
 import Spinner from "../_common/Spinner";
+import { sub } from "date-fns";
 
 export function MessageConversation({
   conversation,
@@ -29,6 +30,9 @@ export function MessageConversation({
   const { mutateAsync: setMessageToReadMutate } =
     api.messages.setMessageToRead.useMutation();
 
+    const { mutate, isLoading } = api.users.updateProfile.useMutation({});
+
+
   const setConversationReadState = useConversation(
     (state) => state.setConversationReadState,
   );
@@ -36,6 +40,12 @@ export function MessageConversation({
   function handleSelected() {
     if (session?.user.id !== messages[0]?.userId && messages[0]?.id) {
       void setMessageToReadMutate({ messageId: messages[0]?.id });
+      if (session) {
+        mutate({
+          id: session.user.id,
+          lastTextAt: sub(new Date(), {hours: 2})
+        })
+      }
     }
     // Update local state to true
     setConversationReadState(conversation.id);
