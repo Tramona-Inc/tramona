@@ -36,7 +36,7 @@ const getDisplayTrips = async (
   limit?: number,
 ) => {
   if (tripIds.length === 0) {
-    return null;
+    return [];
   } else {
     return await db.query.offers.findMany({
       where: inArray(offers.id, tripIds),

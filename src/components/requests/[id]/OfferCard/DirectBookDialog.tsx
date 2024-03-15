@@ -70,6 +70,9 @@ export default function DirectBookDialog(
   const totalPriceWithFees = offer.totalPrice + tramonaServiceFee + tax;
 
   async function checkout() {
+    const user = session.data?.user;
+    if (!user) return;
+    
     const response = await createCheckout.mutateAsync({
       listingId: offer.id,
       propertyId: offer.property.id,
@@ -81,6 +84,7 @@ export default function DirectBookDialog(
       images: offer.property.imageUrls,
       totalSavings,
       phoneNumber: session.data?.user.phoneNumber ?? "",
+      userId: user.id,
     });
 
     const stripe = await stripePromise;

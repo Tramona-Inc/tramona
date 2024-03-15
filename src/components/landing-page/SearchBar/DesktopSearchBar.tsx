@@ -71,9 +71,6 @@ export default function DesktopSearchBar({
     defaultValues: {
       data: [defaultValues],
     },
-    context: {
-      test: 123,
-    },
   });
 
   const [curTab, setCurTab] = useState(0);

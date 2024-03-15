@@ -12,56 +12,28 @@ import { Button } from "../ui/button";
 import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import { DatetimeFsp } from "drizzle-orm/mysql-core";
+import { type Request } from "@/server/db/schema";
 
 export default function RejectRequestDialog({
   children,
-  requestId,
-  requestCheckIn,
-  requestCheckOut,
-  userPhoneNumber,
-  location
-
+  request,
 }: PropsWithChildren<{
-    requestId: number,
-    requestCheckIn: Date,
-    requestCheckOut: Date,
-    userPhoneNumber: string,
-    location: string,
-  }>) {
+  request: Pick<Request, "checkIn" | "checkOut" | "location" | "id">;
+}>) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const utils = api.useUtils();
   const mutation = api.requests.resolve.useMutation();
-  const twilioMutation = api.twilio.sendSMS.useMutation();
-
 
   async function rejectRequest() {
     setIsLoading(true);
 
     await mutation
-      .mutateAsync({ id: requestId })
+      .mutateAsync({ id: request.id })
       .then(() => utils.requests.invalidate())
       .then(() => toast({ title: "Sucessfully rejected request" }))
       .catch(() => errorToast());
-
-      const formattedCheckIn = new Date(requestCheckIn).toLocaleDateString('en-US', {
-        month: 'short', // Short month name (e.g., "Feb")
-        day: '2-digit', // Two-digit day (e.g., "27")
-        year: 'numeric', // Full year (e.g., "2024")
-      });
-
-      const formattedCheckOut = new Date(requestCheckOut).toLocaleDateString('en-US', {
-        month: 'short', // Short month name (e.g., "Feb")
-        day: '2-digit', // Two-digit day (e.g., "27")
-        year: 'numeric', // Full year (e.g., "2024")
-      });
-
-      await twilioMutation.mutateAsync({
-        to: userPhoneNumber, // TODO: text the traveller, not the admin
-        msg: `Tramona: Your request to ${location} on ${formattedCheckIn} - ${formattedCheckOut} has been rejected. Please submit another request with less requirements.`,
-      });
 
     setIsLoading(false);
     setIsOpen(false);

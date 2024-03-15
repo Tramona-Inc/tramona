@@ -1,11 +1,11 @@
+import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Button } from "../../../ui/button";
 import AvatarDropdown from "./AvatarDropdown";
 
 function LogInBtn() {
   return (
-    <Button asChild className="rounded-full" variant="darkOutline">
+    <Button asChild variant="darkOutline">
       <Link href="/auth/signin">Log in</Link>
     </Button>
   );
@@ -22,17 +22,10 @@ function SignUpBtn() {
 export default function HeaderTopRight() {
   const { data: session, status } = useSession();
 
-  switch (status) {
-    case "loading":
-      return <div className="h-10" />;
-    case "unauthenticated":
-      return (
-        <div className="flex gap-2">
-          <LogInBtn />
-          <SignUpBtn />
-        </div>
-      );
-    case "authenticated":
-      return <AvatarDropdown session={session} />;
-  }
+  return (
+    <>
+      {(status === "loading" || status === "unauthenticated") && <LogInBtn />}
+      {status === "authenticated" && <AvatarDropdown session={session} />}
+    </>
+  );
 }
