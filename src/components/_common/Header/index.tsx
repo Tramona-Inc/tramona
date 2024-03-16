@@ -31,21 +31,25 @@ export default function Header(props: HeaderProps) {
 }
 
 const headerLinks = [
-  {
-    href: "/program",
-    label: "Refer and Earn",
-  },
-  {
-    href: "/for-hosts",
-    label: "For Hosts",
-  },
+  // {
+  //   href: "/program",
+  //   label: "Refer and Earn",
+  // },
+  // {
+  //   href: "/for-hosts",
+  //   label: "For Hosts",
+  // },
   // {
   //   href: "/exclusive-offers",
   //   label: "Exclusive Offers",
   // },
+  // {
+  //   href: "/feed",
+  //   label: "Social Feed",
+  // },
   {
-    href: "/feed",
-    label: "Social Feed",
+    href: "/about",
+    label: "About Us",
   },
 ];
 

@@ -1,5 +1,13 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { Instagram, Facebook, Linkedin } from "lucide-react";
+
+type FooterLinkProps = {
+  children: React.ReactNode;
+  href: string;
+  external?: boolean;
+};
 
 function FooterLink({
   children,
@@ -21,84 +29,62 @@ function FooterLink({
   );
 }
 
-export default function Footer() {
-  // const [submittedEmail, setSubmittedEmail] = useState(false);
+const Footer: React.FC = () => {
+  const [email, setEmail] = useState('');
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // handle the email submission
+    setEmail('');
+  };
 
   return (
-    <footer className="flex items-stretch bg-black">
-      <div className="flex-1">
-        <div className="mx-4 my-8 flex flex-col px-4 lg:mx-20">
-          {/* <div>
-            <p className="pb-2 text-lg font-medium text-zinc-300">Newsletter</p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                // const formData = new FormData(e.currentTarget);
-                // const email = formData.get('email');
-                setSubmittedEmail(true);
-
-                e.currentTarget.reset();
-              }}
-              className="relative max-w-lg"
+    <footer className="bg-black text-white py-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-start">
+          <p className="text-base md:text-lg font-base">Subscribe to our newsletter</p>
+          <form onSubmit={handleSubmit} className="mt-2 flex w-full sm:max-w-xs">
+            <input
+              type="email"
+              placeholder="Your email"
+              className="rounded-l-full bg-gray-800 p-2 text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-gray-700"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="rounded-r-full bg-gray-800 p-2 text-white transition duration-300 hover:bg-gray-700"
             >
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder={
-                  submittedEmail ? "Thanks, we'll be in touch!" : "Your Email"
-                }
-                className="w-full rounded-full bg-zinc-700 px-6 py-3 font-semibold text-white placeholder:text-zinc-400"
-              />
-              <button
-                type="submit"
-                className="absolute inset-y-1 right-1 grid h-10 w-10 place-items-center rounded-full bg-black text-xl text-white"
-              >
-                <ArrowRightIcon />
-              </button>
-            </form>
-          </div> */}
-          <div className="my-8 flex flex-col text-zinc-300 lg:flex-row">
-            <div className="flex-1">
-              <FooterLink href="/faq">FAQ</FooterLink>
-
-              <FooterLink href="/auth/signup">Sign up</FooterLink>
-              <FooterLink href="/auth/signin">Log in</FooterLink>
-            </div>
-            <div className="flex-1">
-              <FooterLink href="/support">Contact us</FooterLink>
-              <FooterLink href="/support">Request a Feature</FooterLink>
-              <FooterLink href="/support">Report a Bug</FooterLink>
-            </div>
-            <div className="flex-1">
-              <FooterLink
-                external
-                href="https://www.instagram.com/shoptramona/"
-              >
-                Instagram
-              </FooterLink>
-
-              <FooterLink
-                external
-                href="https://www.facebook.com/ShopTramona?mibextid=LQQJ4d"
-              >
-                Facebook
-              </FooterLink>
-
-              <FooterLink
-                external
-                href="https://www.linkedin.com/company/tramona/"
-              >
-                LinkedIn
-              </FooterLink>
-            </div>
+              &rarr;
+            </button>
+          </form>
+          <div className="mt-6 flex flex-wrap justify-center gap-4">
+            <FooterLink href="/signup">Sign up</FooterLink>
+            <FooterLink href="/signin">Sign in</FooterLink>
+            <FooterLink href="/faq">FAQ</FooterLink>
+            <FooterLink href="/support">Contact us</FooterLink>
+            <FooterLink href="/support">Request a feature</FooterLink>
+            <FooterLink href="/support">Report a bug</FooterLink>
           </div>
-          <div className="mx-auto text-zinc-500">
-            <FooterLink href="/">Tramona Inc.</FooterLink>
+        </div>
+        <hr className="my-6 h-px border-none bg-white" />
+        <div className="flex justify-between items-center w-full">
+          <div className="text-sm text-gray-400">© 2024 Tramona. All rights reserved.</div>
+          <div className="flex gap-4">
+            <FooterLink external href="https://www.instagram.com">
+              <Instagram size={20} />
+            </FooterLink>
+            <FooterLink external href="https://www.facebook.com">
+              <Facebook size={20} />
+            </FooterLink>
+            <FooterLink external href="https://www.linkedin.com">
+              <Linkedin size={20} />
+            </FooterLink>
           </div>
         </div>
       </div>
-      {/* <div className="hidden w-64 bg-[url(/assets/images/footer-img.png)] bg-cover bg-center sm:block" /> */}
     </footer>
   );
-}
+};
+
+export default Footer;

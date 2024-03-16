@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface StepProps {
   number: number;
@@ -55,6 +56,11 @@ const HowItWorks: React.FC = () => (
               ),
             )}
           </h2>
+          <Link href="/about">
+            <button className="mt-12 rounded-3xl bg-white px-4 py-2 text-black">
+              Learn more
+            </button>
+          </Link>
         </div>
       </div>
       <div className="flex w-full rounded-3xl bg-black p-10 shadow md:ml-4 md:w-8/12">

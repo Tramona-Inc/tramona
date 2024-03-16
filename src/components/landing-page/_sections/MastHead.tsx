@@ -18,7 +18,7 @@ export default function MastHead() {
           </div>
           {/* <LandingVideo /> */}
           <div className="z-10 flex flex-col justify-center gap-4 p-4">
-            <div className="mx-auto max-w-3xl space-y-4">
+            <div className="mx-auto max-w-3xl space-y-4 mb-8">
               <h1 className="text-center text-3xl font-bold text-black md:text-6xl">
                 Tramona is a name your own price tool
               </h1>
