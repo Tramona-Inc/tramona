@@ -14,6 +14,7 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 import { api } from "@/utils/api";
 import { cn, sleep } from "@/utils/utils";
+import Link from "next/link";
 
 function StepperContentLayout({
   children,
@@ -151,17 +152,6 @@ export default function Welcome() {
     steps,
   });
 
-  const router = useRouter();
-
-  const startExploring = () => {
-    nextStep();
-    sleep(1500)
-      .then(() => router.push("/dashboard"))
-      .catch(() => {
-        return;
-      });
-  };
-
   return (
     <MainLayout type="auth">
       <Head>
@@ -188,12 +178,15 @@ export default function Welcome() {
         <div className="flex items-center justify-center gap-2">
           {activeStep === steps.length ? (
             <Step3 />
+          ) : isLastStep ? (
+            <Button className="rounded-full px-8" asChild>
+              <Link href="/dashboard" prefetch>
+                Make a request now
+              </Link>
+            </Button>
           ) : (
-            <Button
-              onClick={isLastStep ? startExploring : nextStep}
-              className="rounded-full px-8"
-            >
-              {isLastStep ? "Make a request now" : "Continue"}
+            <Button onClick={nextStep} className="rounded-full px-8">
+              Continue
             </Button>
           )}
         </div>
