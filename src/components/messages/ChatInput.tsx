@@ -49,7 +49,6 @@ export default function ChatInput({
 
   const { data: participantPhoneNumbers } =
     api.messages.getParticipantsPhoneNumbers.useQuery({ conversationId });
-  const { data: getLastTextAt } = api.users.getLastTextAt.useQuery();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
