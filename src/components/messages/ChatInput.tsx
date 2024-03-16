@@ -3,6 +3,7 @@ import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { nanoid } from "nanoid";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -39,40 +40,43 @@ export default function ChatInput({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
-      // TODO: might be better to update the state first then insert into db
-      const { data, error } = await supabase
+      const newMessage = {
+        id: nanoid(),
+        createdAt: new Date(),
+        conversationId: conversationId,
+        userId: session.user.id,
+        message: values.message,
+        read: false,
+        isEdit: false,
+        user: {
+          name: session.user.name,
+          email: session.user.email,
+          image: session.user.image,
+        },
+      };
+
+      const newMessageToDb = {
+        ...newMessage,
+        created_at: newMessage.createdAt.toISOString(), // Supbase requires ISOstring
+        conversation_id: newMessage.conversationId,
+        user_id: newMessage.userId,
+        is_edit: newMessage.isEdit,
+      };
+
+      setConversationToTop(conversationId, newMessage);
+      addMessageToConversation(conversationId, newMessage);
+      setOptimisticIds(newMessage.id);
+
+      // ! Optimistic UI first then add to db
+      const { error } = await supabase
         .from("messages")
-        .insert({
-          conversation_id: conversationId,
-          user_id: session?.user.id,
-          message: values.message,
-        })
+        .insert(newMessageToDb)
         .select("*, user(email, name, image)")
         .single();
 
+      // TODO: removed recently added message from the state
       if (error) {
         errorToast(error.message);
-      }
-
-      if (data) {
-        const newMessage = {
-          id: data.id,
-          createdAt: new Date(data.created_at),
-          conversationId: data.conversation_id,
-          userId: data.user_id,
-          message: data.message,
-          read: data.read,
-          isEdit: data.is_edit,
-          user: {
-            name: session.user.name,
-            email: session.user.email,
-            image: session.user.image ?? "",
-          },
-        };
-
-        setConversationToTop(conversationId, newMessage);
-        addMessageToConversation(conversationId, newMessage);
-        setOptimisticIds(newMessage.id);
       }
 
       form.reset();
