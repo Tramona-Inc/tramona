@@ -10,7 +10,6 @@ import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 
 import { api } from "@/utils/api";
-import MessagesSidebar from "./MessagesSidebar";
 import { sub } from "date-fns";
 
 const formSchema = z.object({
@@ -37,19 +36,17 @@ export default function ChatInput({
 
   const utils = api.useUtils();
 
-
   const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
   const setConversationToTop = useConversation(
     (state) => state.setConversationToTop,
   );
 
-  const { mutate, isLoading } = api.users.updateProfile.useMutation({});
-  const twilioMutation = api.twilio.sendSMS.useMutation();
+  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { mutateAsync: sendSMS } = api.twilio.sendSMS.useMutation();
 
   const { data: participantPhoneNumbers } =
     api.messages.getParticipantsPhoneNumbers.useQuery({ conversationId });
-  const { data: getLastTextAt } = api.users.getLastTextAt.useQuery();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
@@ -88,29 +85,28 @@ export default function ChatInput({
         addMessageToConversation(conversationId, newMessage);
         setOptimisticIds(newMessage.id);
 
-
-
-          if (participantPhoneNumbers){
+        if (participantPhoneNumbers) {
+          void Promise.all(
             participantPhoneNumbers.map(
               async ({ id, lastTextAt, phoneNumber }) => {
-                console.log(lastTextAt);
-                if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1})) {
+                if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1 })) {
                   if (phoneNumber) {
-                    await twilioMutation.mutateAsync({
+                    await sendSMS({
                       to: phoneNumber,
                       msg: "You have a new unread message!",
                     });
-                    mutate({
+                    await updateProfile({
+                      id: id,
                       lastTextAt: new Date(),
-                      id: id
-                    })
+                    });
                     await utils.messages.invalidate();
                   }
                 }
               },
-            );
-          }
+            ),
+          );
         }
+      }
     }
 
     form.reset();
