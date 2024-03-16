@@ -56,10 +56,12 @@ export default function ChatInput({
       };
 
       const newMessageToDb = {
-        ...newMessage,
-        created_at: newMessage.createdAt.toISOString(), // Supbase requires ISOstring
-        conversation_id: newMessage.conversationId,
+        id: newMessage.id,
+        created_at: newMessage.createdAt.toISOString(),
+        conversation_id: conversationId,
         user_id: newMessage.userId,
+        message: newMessage.message,
+        read: newMessage.read,
         is_edit: newMessage.isEdit,
       };
 
