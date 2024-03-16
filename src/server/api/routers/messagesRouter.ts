@@ -3,10 +3,12 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
 import { zodNumber, zodString } from "@/utils/zod-utils";
-import { eq } from "drizzle-orm";
+import { eq, and, ne, inArray} from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
+import { sub } from "date-fns";
+import { uniqueKeyName } from "drizzle-orm/mysql-core";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
 
@@ -226,4 +228,65 @@ export const messagesRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       await addTwoUserToConversation(input.user1Id, input.user2Id);
     }),
+
+  // getMessageWithParticipants: protectedProcedure
+  //   .input(z.object({ id: z.string() }))
+  //   .query(async ({ ctx, input }) => {
+  //     const message = await db.query.messages.findFirst({
+  //       columns: {
+  //         read: true,
+  //         conversationId: true,
+  //         userId: true,
+  //       },
+  //       where: eq(messages.id, input.id),
+  //     });
+  //     return message;
+  //   }),
+  getMessageWithParticipants: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const messageWithParticipants = await db.query.messages.findFirst({
+        columns: {
+          read: true,
+          conversationId: true,
+          userId: true,
+        },
+        where: and(eq(messages.id, input.id), eq(messages.read, false)),
+        with: {
+          participants: {
+            columns: { userId: true },
+            where:
+              and(
+                eq(
+                  conversationParticipants.conversationId,
+                  messages.conversationId,
+                ),
+                ne(conversationParticipants.userId, messages.userId),
+              ),
+
+          },
+        },
+      });
+
+      return messageWithParticipants;
+    }),
+
+  getParticipantsPhoneNumbers: protectedProcedure
+    .input(z.object({conversationId: zodNumber()}))
+    .query(async({ctx, input}) => {
+      const participants = await db
+        .select({ id: users.id, phoneNumber: users.phoneNumber, lastTextAt: users.lastTextAt })
+        .from(conversationParticipants)
+        .innerJoin(users, eq(conversationParticipants.userId, users.id))
+        .where(
+          and(
+            eq(
+              conversationParticipants.conversationId,
+              input.conversationId,
+            ),
+            ne(conversationParticipants.userId, ctx.user.id),
+          ),
+        );
+      return participants;
+    })
 });

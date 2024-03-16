@@ -89,6 +89,7 @@
     "next": "^14.0.4",
     "next-auth": "^4.24.5",
     "nodemailer": "^6.9.8",
+    "perf_hooks": "^0.0.1",
     "pg": "^8.11.3",
     "postgres": "^3.4.3",
     "puppeteer": "^22.4.1",

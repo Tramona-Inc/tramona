@@ -31,13 +31,15 @@ export function MessageConversation({
     api.messages.setMessageToRead.useMutation();
 
     const { mutate, isLoading } = api.users.updateProfile.useMutation({});
+    const utils = api.useUtils();
+
 
 
   const setConversationReadState = useConversation(
     (state) => state.setConversationReadState,
   );
 
-  function handleSelected() {
+  async function handleSelected() {
     if (session?.user.id !== messages[0]?.userId && messages[0]?.id) {
       void setMessageToReadMutate({ messageId: messages[0]?.id });
       if (session) {
@@ -45,6 +47,7 @@ export function MessageConversation({
           id: session.user.id,
           lastTextAt: sub(new Date(), {hours: 2})
         })
+        await utils.messages.invalidate();
       }
     }
     // Update local state to true

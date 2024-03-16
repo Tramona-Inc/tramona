@@ -8,16 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
-import { db } from "@/server/db";
-import {
-  requests,
-  users,
-  messages,
-  conversations,
-  conversationParticipants,
-} from "@/server/db/schema";
-import { eq, and, ne, inArray } from "drizzle-orm";
-import { sendText } from "@/server/server-utils";
+
 import { api } from "@/utils/api";
 import MessagesSidebar from "./MessagesSidebar";
 import { sub } from "date-fns";
@@ -44,6 +35,9 @@ export default function ChatInput({
     (state) => state.addMessageToConversation,
   );
 
+  const utils = api.useUtils();
+
+
   const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
   const setConversationToTop = useConversation(
@@ -51,7 +45,11 @@ export default function ChatInput({
   );
 
   const { mutate, isLoading } = api.users.updateProfile.useMutation({});
+  const twilioMutation = api.twilio.sendSMS.useMutation();
 
+  const { data: participantPhoneNumbers } =
+    api.messages.getParticipantsPhoneNumbers.useQuery({ conversationId });
+  const { data: getLastTextAt } = api.users.getLastTextAt.useQuery();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
@@ -90,85 +88,32 @@ export default function ChatInput({
         addMessageToConversation(conversationId, newMessage);
         setOptimisticIds(newMessage.id);
 
-        const messageId = data.id;
 
-        const user = await db.query.users.findFirst({
-          columns: {
-            id: true,
-            lastTextAt: true,
-          },
-          where: eq(messages.userId, users.id),
-        });
 
-        if (user?.lastTextAt) {
-          // const lastTextTime = new Date(user.lastTextAt);
-          // const currentTime = new Date();
-          // const hourAgo = new Date(currentTime.getTime() - 60 * 60 * 1000);
-          if (user.lastTextAt <= sub(new Date(), { hours: 1})) {
-            const message = await db.query.messages.findFirst({
-              columns: {
-                read: true,
-                conversationId: true,
-                userId: true,
+          if (participantPhoneNumbers){
+            participantPhoneNumbers.map(
+              async ({ id, lastTextAt, phoneNumber }) => {
+                console.log(lastTextAt);
+                if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1})) {
+                  if (phoneNumber) {
+                    await twilioMutation.mutateAsync({
+                      to: phoneNumber,
+                      msg: "You have a new unread message!",
+                    });
+                    mutate({
+                      lastTextAt: new Date(),
+                      id: id
+                    })
+                    await utils.messages.invalidate();
+                  }
+                }
               },
-              where: eq(messages.id, messageId),
-            });
-
-            if (message && !message.read) {
-              // If the message exists and has not been read, send a text to conversation participants
-
-              const participants = await db
-                .select({ userId: conversationParticipants.userId })
-                .from(conversationParticipants)
-                .where(
-                  and(
-                    eq(
-                      conversationParticipants.conversationId,
-                      message.conversationId,
-                    ),
-                    ne(conversationParticipants.userId, message.userId),
-                  ),
-                );
-
-              const participantIds = participants.flatMap(
-                (participant) => participant.userId,
-              );
-
-              if (participants) {
-                const participantPhoneNumbers = await db
-                  .select({ phoneNumber: users.phoneNumber })
-                  .from(users)
-                  .where(inArray(users.id, participantIds))
-                  .leftJoin(
-                    conversationParticipants,
-                    eq(users.id, conversationParticipants.userId),
-                  );
-
-                const promises = participantPhoneNumbers.map(
-                  async (participant) => {
-                    if (participant.phoneNumber) {
-                      await sendText({
-                        to: participant.phoneNumber,
-                        content: "You have a new unread message!",
-                      });
-                    }
-                  },
-                );
-
-                // Wait for all promises to resolve
-                await Promise.all(promises);
-                mutate({
-                  id: user.id,
-                  lastTextAt: new Date()
-                })
-              }
-            }
+            );
           }
         }
-
-        form.reset();
-      }
     }
+
+    form.reset();
   };
 
   return (

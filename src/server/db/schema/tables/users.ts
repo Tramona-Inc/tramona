@@ -61,8 +61,6 @@ export const referralCodes = pgTable("referral_codes", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const userSelectSchema = createSelectSchema(users);
-
 export const referralEarnings = pgTable("referral_earnings", {
   id: serial("id").primaryKey(),
   referralCode: text("referral_code")
