@@ -70,7 +70,7 @@ export default function ChatInput({
           },
         };
 
-        // setConversationToTop(conversationId, newMessage);
+        setConversationToTop(conversationId, newMessage);
         addMessageToConversation(conversationId, newMessage);
         setOptimisticIds(newMessage.id);
       }

@@ -16,9 +16,10 @@ export default function ChatMessages({
     // Update conversation state
     switchConversation(conversationId);
 
+    console.log("CALLED");
     // Fetch initial messages when the component mounts
     void fetchInitialMessages(conversationId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 
   return (
