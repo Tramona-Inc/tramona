@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useInterval } from "@/utils/useInterval";
 import { usePrevious } from "@uidotdev/usehooks";
 import { HistoryIcon, Plus, TagIcon } from "lucide-react";
@@ -85,7 +85,11 @@ function RequestCards({
   const [isWaiting, setIsWaiting] = useState(false);
   const utils = api.useUtils();
 
-  const requests = requestGroups.map((group) => group.requests).flat();
+  const requests = useMemo(
+    () => requestGroups.map((group) => group.requests).flat(),
+    [requestGroups],
+  );
+
   const previousRequests = usePrevious(requests);
   const newlyApprovedRequests =
     requests && previousRequests
@@ -96,15 +100,11 @@ function RequestCards({
         )
       : [];
 
-  const areNewlyApprovedRequests = newlyApprovedRequests.length > 0;
-  console.log(areNewlyApprovedRequests);
-
-  // useEffect(() => {
-  //   console.log("running");
-  //   if (areNewlyApprovedRequests) {
-  //     setIsWaiting(false);
-  //   }
-  // }, [areNewlyApprovedRequests]);
+  useEffect(() => {
+    if (newlyApprovedRequests.length > 0) {
+      setIsWaiting(false);
+    }
+  }, [newlyApprovedRequests.length]);
 
   // Start the interval to invalidate requests every 10 seconds
   useInterval(
