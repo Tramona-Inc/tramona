@@ -16,7 +16,7 @@ const formSchema = z.object({
 export default function ChatInput({
   conversationId,
 }: {
-  conversationId: number;
+  conversationId: string;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

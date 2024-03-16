@@ -61,15 +61,15 @@ export type SupabaseDatabase = {
       }
       conversation_participants: {
         Row: {
-          conversation_id: number
+          conversation_id: string
           user_id: string
         }
         Insert: {
-          conversation_id: number
+          conversation_id: string
           user_id: string
         }
         Update: {
-          conversation_id?: number
+          conversation_id?: string
           user_id?: string
         }
         Relationships: [
@@ -92,44 +92,79 @@ export type SupabaseDatabase = {
       conversations: {
         Row: {
           created_at: string
-          id: number
+          id: string
           name: string | null
         }
         Insert: {
           created_at?: string
-          id?: number
+          id: string
           name?: string | null
         }
         Update: {
           created_at?: string
-          id?: number
+          id?: string
           name?: string | null
         }
         Relationships: []
       }
+      host_profiles: {
+        Row: {
+          became_host_at: string
+          charges_enabled: boolean | null
+          profile_url: string | null
+          stripeAccountId: string | null
+          type: Database["public"]["Enums"]["host_type"]
+          user_id: string
+        }
+        Insert: {
+          became_host_at?: string
+          charges_enabled?: boolean | null
+          profile_url?: string | null
+          stripeAccountId?: string | null
+          type?: Database["public"]["Enums"]["host_type"]
+          user_id: string
+        }
+        Update: {
+          became_host_at?: string
+          charges_enabled?: boolean | null
+          profile_url?: string | null
+          stripeAccountId?: string | null
+          type?: Database["public"]["Enums"]["host_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_profiles_user_id_user_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       messages: {
         Row: {
-          conversation_id: number
+          conversation_id: string
           created_at: string
-          id: number
+          id: string
           is_edit: boolean | null
           message: string
           read: boolean | null
           user_id: string
         }
         Insert: {
-          conversation_id: number
+          conversation_id: string
           created_at?: string
-          id?: number
+          id: string
           is_edit?: boolean | null
           message: string
           read?: boolean | null
           user_id: string
         }
         Update: {
-          conversation_id?: number
+          conversation_id?: string
           created_at?: string
-          id?: number
+          id?: string
           is_edit?: boolean | null
           message?: string
           read?: boolean | null
@@ -207,65 +242,77 @@ export type SupabaseDatabase = {
         Row: {
           about: string
           address: string | null
+          airbnb_message_url: string | null
           airbnb_url: string | null
+          area_description: string | null
           avg_rating: number
+          check_in_info: string | null
           created_at: string
           host_id: string | null
           host_name: string | null
           id: number
           image_url: string[]
+          map_screenshot: string | null
           max_num_guests: number
           name: string
           num_bedrooms: number
           num_beds: number
           num_ratings: number
           original_nightly_price: number
-          property_amenities: SupabaseDatabase["public"]["Enums"]["property_amenities"][]
-          property_safety_items: SupabaseDatabase["public"]["Enums"]["property_safety_items"][]
-          property_standout_amenities: SupabaseDatabase["public"]["Enums"]["property_standout_amenities"][]
-          property_type: SupabaseDatabase["public"]["Enums"]["property_type"]
+          property_amenities: Database["public"]["Enums"]["property_amenities"][]
+          property_safety_items: Database["public"]["Enums"]["property_safety_items"][]
+          property_standout_amenities: Database["public"]["Enums"]["property_standout_amenities"][]
+          property_type: Database["public"]["Enums"]["property_type"]
         }
         Insert: {
           about: string
           address?: string | null
+          airbnb_message_url?: string | null
           airbnb_url?: string | null
+          area_description?: string | null
           avg_rating: number
+          check_in_info?: string | null
           created_at?: string
           host_id?: string | null
           host_name?: string | null
           id?: number
           image_url: string[]
+          map_screenshot?: string | null
           max_num_guests: number
           name: string
           num_bedrooms: number
           num_beds: number
           num_ratings: number
           original_nightly_price: number
-          property_amenities: SupabaseDatabase["public"]["Enums"]["property_amenities"][]
-          property_safety_items: SupabaseDatabase["public"]["Enums"]["property_safety_items"][]
-          property_standout_amenities: SupabaseDatabase["public"]["Enums"]["property_standout_amenities"][]
-          property_type: SupabaseDatabase["public"]["Enums"]["property_type"]
+          property_amenities: Database["public"]["Enums"]["property_amenities"][]
+          property_safety_items: Database["public"]["Enums"]["property_safety_items"][]
+          property_standout_amenities: Database["public"]["Enums"]["property_standout_amenities"][]
+          property_type: Database["public"]["Enums"]["property_type"]
         }
         Update: {
           about?: string
           address?: string | null
+          airbnb_message_url?: string | null
           airbnb_url?: string | null
+          area_description?: string | null
           avg_rating?: number
+          check_in_info?: string | null
           created_at?: string
           host_id?: string | null
           host_name?: string | null
           id?: number
           image_url?: string[]
+          map_screenshot?: string | null
           max_num_guests?: number
           name?: string
           num_bedrooms?: number
           num_beds?: number
           num_ratings?: number
           original_nightly_price?: number
-          property_amenities?: SupabaseDatabase["public"]["Enums"]["property_amenities"][]
-          property_safety_items?: SupabaseDatabase["public"]["Enums"]["property_safety_items"][]
-          property_standout_amenities?: SupabaseDatabase["public"]["Enums"]["property_standout_amenities"][]
-          property_type?: SupabaseDatabase["public"]["Enums"]["property_type"]
+          property_amenities?: Database["public"]["Enums"]["property_amenities"][]
+          property_safety_items?: Database["public"]["Enums"]["property_safety_items"][]
+          property_standout_amenities?: Database["public"]["Enums"]["property_standout_amenities"][]
+          property_type?: Database["public"]["Enums"]["property_type"]
         }
         Relationships: [
           {
@@ -316,7 +363,7 @@ export type SupabaseDatabase = {
         Row: {
           cashback_earned: number
           created_at: string
-          earning_status: SupabaseDatabase["public"]["Enums"]["earning_status"]
+          earning_status: Database["public"]["Enums"]["earning_status"]
           id: number
           offer_id: number
           referee_id: string
@@ -325,7 +372,7 @@ export type SupabaseDatabase = {
         Insert: {
           cashback_earned: number
           created_at?: string
-          earning_status?: SupabaseDatabase["public"]["Enums"]["earning_status"]
+          earning_status?: Database["public"]["Enums"]["earning_status"]
           id?: number
           offer_id: number
           referee_id: string
@@ -334,7 +381,7 @@ export type SupabaseDatabase = {
         Update: {
           cashback_earned?: number
           created_at?: string
-          earning_status?: SupabaseDatabase["public"]["Enums"]["earning_status"]
+          earning_status?: Database["public"]["Enums"]["earning_status"]
           id?: number
           offer_id?: number
           referee_id?: string
@@ -368,7 +415,10 @@ export type SupabaseDatabase = {
         Row: {
           check_in: string
           check_out: string
+          confirmation_sent_at: string
           created_at: string
+          has_approved: boolean
+          have_sent_follow_up: boolean
           id: number
           location: string
           max_total_price: number
@@ -376,14 +426,17 @@ export type SupabaseDatabase = {
           min_num_beds: number | null
           note: string | null
           num_guests: number
-          property_type: SupabaseDatabase["public"]["Enums"]["property_type"] | null
+          property_type: Database["public"]["Enums"]["property_type"] | null
           resolved_at: string | null
           user_id: string
         }
         Insert: {
           check_in: string
           check_out: string
+          confirmation_sent_at?: string
           created_at?: string
+          has_approved?: boolean
+          have_sent_follow_up?: boolean
           id?: number
           location: string
           max_total_price: number
@@ -391,14 +444,17 @@ export type SupabaseDatabase = {
           min_num_beds?: number | null
           note?: string | null
           num_guests?: number
-          property_type?: SupabaseDatabase["public"]["Enums"]["property_type"] | null
+          property_type?: Database["public"]["Enums"]["property_type"] | null
           resolved_at?: string | null
           user_id: string
         }
         Update: {
           check_in?: string
           check_out?: string
+          confirmation_sent_at?: string
           created_at?: string
+          has_approved?: boolean
+          have_sent_follow_up?: boolean
           id?: number
           location?: string
           max_total_price?: number
@@ -406,7 +462,7 @@ export type SupabaseDatabase = {
           min_num_beds?: number | null
           note?: string | null
           num_guests?: number
-          property_type?: SupabaseDatabase["public"]["Enums"]["property_type"] | null
+          property_type?: Database["public"]["Enums"]["property_type"] | null
           resolved_at?: string | null
           user_id?: string
         }
@@ -456,8 +512,8 @@ export type SupabaseDatabase = {
           password: string | null
           phone_number: string | null
           referral_code_used: string | null
-          referral_tier: SupabaseDatabase["public"]["Enums"]["referral_tier"]
-          role: SupabaseDatabase["public"]["Enums"]["role"]
+          referral_tier: Database["public"]["Enums"]["referral_tier"]
+          role: Database["public"]["Enums"]["role"]
           username: string | null
         }
         Insert: {
@@ -469,8 +525,8 @@ export type SupabaseDatabase = {
           password?: string | null
           phone_number?: string | null
           referral_code_used?: string | null
-          referral_tier?: SupabaseDatabase["public"]["Enums"]["referral_tier"]
-          role?: SupabaseDatabase["public"]["Enums"]["role"]
+          referral_tier?: Database["public"]["Enums"]["referral_tier"]
+          role?: Database["public"]["Enums"]["role"]
           username?: string | null
         }
         Update: {
@@ -482,8 +538,8 @@ export type SupabaseDatabase = {
           password?: string | null
           phone_number?: string | null
           referral_code_used?: string | null
-          referral_tier?: SupabaseDatabase["public"]["Enums"]["referral_tier"]
-          role?: SupabaseDatabase["public"]["Enums"]["role"]
+          referral_tier?: Database["public"]["Enums"]["referral_tier"]
+          role?: Database["public"]["Enums"]["role"]
           username?: string | null
         }
         Relationships: []
@@ -514,8 +570,8 @@ export type SupabaseDatabase = {
       [_ in never]: never
     }
     Enums: {
-      conversation_type: "single" | "group"
       earning_status: "pending" | "paid" | "cancelled"
+      host_type: "airbnb" | "direct" | "vrbo" | "other"
       property_amenities:
         | "Wifi"
         | "TV"
@@ -548,7 +604,6 @@ export type SupabaseDatabase = {
       property_type: "house" | "guesthouse" | "apartment" | "room" | "townhouse"
       referral_tier: "Partner" | "Ambassador"
       role: "guest" | "host" | "admin"
-      status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -558,23 +613,23 @@ export type SupabaseDatabase = {
 
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (SupabaseDatabase["public"]["Tables"] & SupabaseDatabase["public"]["Views"])
-    | { schema: keyof SupabaseDatabase },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
-    ? keyof (SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"] &
-        SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Views"])
+    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
     : never = never
-> = PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
-  ? (SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"] &
-      SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (SupabaseDatabase["public"]["Tables"] &
-      SupabaseDatabase["public"]["Views"])
-  ? (SupabaseDatabase["public"]["Tables"] &
-      SupabaseDatabase["public"]["Views"])[PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
+      Database["public"]["Views"])
+  ? (Database["public"]["Tables"] &
+      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
       Row: infer R
     }
     ? R
@@ -583,19 +638,19 @@ export type Tables<
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof SupabaseDatabase["public"]["Tables"]
-    | { schema: keyof SupabaseDatabase },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
-    ? keyof SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"]
+    | keyof Database["public"]["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never
-> = PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
-  ? SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof SupabaseDatabase["public"]["Tables"]
-  ? SupabaseDatabase["public"]["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
+  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
       Insert: infer I
     }
     ? I
@@ -604,19 +659,19 @@ export type TablesInsert<
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof SupabaseDatabase["public"]["Tables"]
-    | { schema: keyof SupabaseDatabase },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
-    ? keyof SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"]
+    | keyof Database["public"]["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never
-> = PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
-  ? SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof SupabaseDatabase["public"]["Tables"]
-  ? SupabaseDatabase["public"]["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
+  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
       Update: infer U
     }
     ? U
@@ -625,13 +680,13 @@ export type TablesUpdate<
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof SupabaseDatabase["public"]["Enums"]
-    | { schema: keyof SupabaseDatabase },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof SupabaseDatabase }
-    ? keyof SupabaseDatabase[PublicEnumNameOrOptions["schema"]]["Enums"]
+    | keyof Database["public"]["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
     : never = never
-> = PublicEnumNameOrOptions extends { schema: keyof SupabaseDatabase }
-  ? SupabaseDatabase[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof SupabaseDatabase["public"]["Enums"]
-  ? SupabaseDatabase["public"]["Enums"][PublicEnumNameOrOptions]
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
+  ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never

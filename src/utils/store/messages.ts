@@ -9,7 +9,7 @@ export type ChatMessageType = MessageType & {
 };
 
 type ConversationsState = Record<
-  number,
+  string,
   {
     messages: ChatMessageType[];
     page: number;
@@ -20,35 +20,35 @@ type ConversationsState = Record<
 
 type MessageState = {
   conversations: ConversationsState;
-  currentConversationId: number | null;
-  setCurrentConversationId: (id: number) => void;
-  switchConversation: (conversationId: number) => void;
+  currentConversationId: string | null;
+  setCurrentConversationId: (id: string) => void;
+  switchConversation: (conversationId: string) => void;
   addMessageToConversation: (
-    conversationId: number,
+    conversationId: string,
     messages: ChatMessageType,
   ) => void;
-  optimisticIds: number[];
-  setOptimisticIds: (id: number) => void;
+  optimisticIds: string[];
+  setOptimisticIds: (id: string) => void;
   setMoreMessagesToConversation: (
-    conversationId: number,
+    conversationId: string,
     moreMessages: ChatMessageType[],
   ) => void;
-  fetchInitialMessages: (conversationId: number) => Promise<void>;
+  fetchInitialMessages: (conversationId: string) => Promise<void>;
 };
 
 export const useMessage = create<MessageState>((set, get) => ({
   conversations: {},
   currentConversationId: null,
-  setCurrentConversationId: (id: number) => {
+  setCurrentConversationId: (id: string) => {
     set(() => ({
       currentConversationId: id,
     }));
   },
-  switchConversation: (conversationId: number) => {
+  switchConversation: (conversationId: string) => {
     set({ currentConversationId: conversationId });
   },
   addMessageToConversation: (
-    conversationId: number,
+    conversationId: string,
     newMessage: ChatMessageType,
   ) => {
     set((state) => {
@@ -90,12 +90,12 @@ export const useMessage = create<MessageState>((set, get) => ({
     });
   },
   optimisticIds: [],
-  setOptimisticIds: (id: number) =>
+  setOptimisticIds: (id: string) =>
     set((state) => ({
       optimisticIds: [...state.optimisticIds, id],
     })),
   setMoreMessagesToConversation: (
-    conversationId: number,
+    conversationId: string,
     moreMessages: ChatMessageType[],
   ) => {
     set((state) => {
@@ -134,7 +134,7 @@ export const useMessage = create<MessageState>((set, get) => ({
       return updatedState;
     });
   },
-  fetchInitialMessages: async (conversationId: number): Promise<void> => {
+  fetchInitialMessages: async (conversationId: string): Promise<void> => {
     const state = get();
 
     // Check if messages for this conversation have already been fetched

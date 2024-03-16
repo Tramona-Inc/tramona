@@ -2,7 +2,7 @@ import { env } from "@/env";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
-import { zodNumber, zodString } from "@/utils/zod-utils";
+import { zodString } from "@/utils/zod-utils";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
@@ -109,7 +109,7 @@ export async function createConversationWithAdmin(userId: string) {
   }
 }
 
-async function addUserToConversation(userId: string, conversationId: number) {
+async function addUserToConversation(userId: string, conversationId: string) {
   await db
     .insert(conversationParticipants)
     .values({ conversationId: conversationId, userId: userId });
@@ -200,13 +200,13 @@ export const messagesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await addUserToConversation(input.userId, parseInt(input.conversationId));
+      await addUserToConversation(input.userId, input.conversationId);
     }),
 
   setMessageToRead: protectedProcedure
     .input(
       z.object({
-        messageId: zodNumber(),
+        messageId: zodString(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
