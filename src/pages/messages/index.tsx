@@ -27,7 +27,7 @@ function MessageDisplay() {
   // Allows us to open message from url query
   useEffect(() => {
     if (query.conversationId && conversations.length > 0 && !isViewed) {
-      const conversationIdToSelect = parseInt(query.conversationId as string);
+      const conversationIdToSelect = query.conversationId as string;
       const conversationToSelect = conversations.find(
         (conversation) => conversation.id === conversationIdToSelect,
       );

@@ -7,7 +7,7 @@ export const LIMIT_MESSAGE = 9;
 export default function ChatMessages({
   conversationId,
 }: {
-  conversationId: number;
+  conversationId: string;
 }) {
   const { switchConversation, fetchInitialMessages } = useMessage();
 
