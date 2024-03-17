@@ -21,6 +21,7 @@ export default function MessagesSidebar({
   selectedConversation,
   setSelected,
 }: SidebarProps) {
+  // Fetch only once on mount
   const { data: fetchedConversations, isLoading } =
     api.messages.getConversations.useQuery(undefined, {
       refetchOnWindowFocus: false,
