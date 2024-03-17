@@ -3,19 +3,15 @@ import { Button } from "../ui/button";
 import { api } from "@/utils/api";
 import { type DetailedRequest } from "./RequestCard";
 
-type ClickHandler = () => void;
-
-type RequestUnconfirmedButtonProps = {
-  request: DetailedRequest;
-  isWaiting: boolean | undefined;
-  onClick: ClickHandler;
-};
-
 export function RequestUnconfirmedButton({
   request,
-  isWaiting,
+  isWaiting = false,
   onClick,
-}: RequestUnconfirmedButtonProps) {
+}: {
+  request: DetailedRequest;
+  isWaiting?: boolean;
+  onClick: () => void;
+}) {
   const [isSending, setIsSending] = useState(isWaiting);
 
   const confirmationMutation = api.requests.updateConfirmation.useMutation();
@@ -38,7 +34,7 @@ export function RequestUnconfirmedButton({
     <Button
       className="rounded-full pr-3"
       onClick={handleClick}
-      disabled={isSending}
+      disabled={isSending || isWaiting}
     >
       {isSending ? "Awaiting Confirmation" : "Resend Confirmation"}
     </Button>

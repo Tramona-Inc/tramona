@@ -145,6 +145,7 @@ export default function DesktopSearchBar({
 
         // we need to do this instead of form.reset() since i
         // worked around needing to give defaultValues to useForm
+        form.reset();
         form.setValue("data", [defaultValues] as FormSchema["data"]);
         setCurTab(0);
 

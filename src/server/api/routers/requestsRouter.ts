@@ -262,11 +262,14 @@ export const requestsRouter = createTRPCRouter({
           }),
         );
 
-        if (results.some((result) => result.status === "rejected")) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-          });
-        }
+        results.forEach((result) => {
+          if (result.status === "rejected") {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: JSON.stringify(result.reason),
+            });
+          }
+        });
       });
 
       if (env.NODE_ENV !== "production") return;
