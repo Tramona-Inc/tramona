@@ -10,7 +10,7 @@ import { RequestUnconfirmedButton } from "./RequestUnconfirmedButton";
 
 type RequestCardActionProps = {
   request: DetailedRequest;
-  isWaiting: boolean | undefined;
+  isWaiting: boolean;
   onClick: () => void;
 };
 

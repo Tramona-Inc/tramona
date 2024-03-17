@@ -51,7 +51,6 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "../ui/label";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -59,8 +58,6 @@ import OTPDialog from "../otp-dialog/OTPDialog";
 import { formatPhoneNumber } from "@/utils/formatters";
 import PlacesInput from "../_common/PlacesInput";
 import ErrorMsg from "../ui/ErrorMsg";
-import { db } from "@/server/db";
-import { eq } from "drizzle-orm";
 
 const formSchema = z
   .object({
@@ -132,8 +129,6 @@ export default function NewRequestForm({
   const phoneRef = useRef(toPhoneNumber);
 
   const waitForVerification = async () => {
-    console.log(verifiedRef.current);
-    console.log(verified);
     return new Promise<void>((resolve) => {
       if (verifiedRef.current) {
         resolve();

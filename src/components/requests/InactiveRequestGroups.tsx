@@ -7,7 +7,7 @@ export default function InactiveRequestGroups() {
 
   if (!requests) return <Spinner />;
 
-  return requests.activeRequestGroups.length !== 0 ? (
+  return requests.inactiveRequestGroups.length !== 0 ? (
     <RequestCards requestGroups={requests.inactiveRequestGroups} />
   ) : (
     <div className="flex flex-col items-center gap-4 pt-32">
