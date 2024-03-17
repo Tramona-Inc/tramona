@@ -76,7 +76,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     userResponse.toLowerCase().trim() === "yes"
   ) {
     twiml.message(
-      `Thank you for confirming your request to ${mostRecentRequest.location}`,
+      `Thank you for confirming your request to ${mostRecentRequest.location}! It has been sent to our network of hosts, and we will text you when you receive any new offers.`,
     );
 
     await db
