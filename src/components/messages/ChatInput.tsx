@@ -80,7 +80,6 @@ export default function ChatInput({
         .select("*, user(email, name, image)")
         .single();
 
-      // TODO: removed recently added message from the state
       if (error) {
         removeMessageFromConversation(conversationId, newMessage.id);
 
