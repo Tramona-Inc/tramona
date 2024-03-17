@@ -69,15 +69,18 @@ export const useMessage = create<MessageState>((set, get) => ({
           alreadyFetched:
             updatedConversations[conversationId]?.alreadyFetched ?? true,
         };
-      } else {
-        // If the conversation doesn't exist, create a new conversation with the new message
-        updatedConversations[conversationId] = {
-          messages: [newMessage],
-          page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
-          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
-          alreadyFetched: updatedConversations[conversationId]?.hasMore ?? true,
-        };
       }
+      // if (!updatedConversations[conversationId]) {
+      //   console.log("CALLED IN HERE");
+
+      //   // // If the conversation doesn't exist, create a new conversation with the new message
+      //   // updatedConversations[conversationId] = {
+      //   //   messages: [newMessage],
+      //   //   page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
+      //   //   hasMore: updatedConversations[conversationId]?.hasMore ?? false,
+      //   //   alreadyFetched: updatedConversations[conversationId]?.hasMore ?? true,
+      //   // };
+      // }
 
       // Ensure TypeScript understands that this is a ChatMessageType[]
       const updatedState: MessageState = {

@@ -1,8 +1,4 @@
-import {
-  useConversation,
-  type Conversation,
-} from "@/utils/store/conversations";
-import { useMessage } from "@/utils/store/messages";
+import { type Conversation } from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
@@ -17,12 +13,6 @@ export default function MessagesContent({
   selectedConversation,
   setSelected,
 }: ContentProps) {
-  const message = useMessage((state) => state.conversations);
-  const conversationList = useConversation((state) => state.conversationList);
-
-  console.log("Messages", message);
-  console.log("Conversations", conversationList);
-
   return (
     <div
       className={cn(

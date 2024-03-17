@@ -11,6 +11,9 @@ export default function ChatMessages({
 }) {
   const { switchConversation, fetchInitialMessages } = useMessage();
 
+  const message = useMessage((state) => state.conversations);
+  console.log("Messages", message);
+
   // Fetch conversation on the client
   useEffect(() => {
     // Update conversation state

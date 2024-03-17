@@ -1,10 +1,10 @@
-import { MessageDbType } from "@/types/supabase.message";
+import { type MessageDbType } from "@/types/supabase.message";
 import { api } from "@/utils/api";
 import {
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
-import { ChatMessageType, useMessage } from "@/utils/store/messages";
+import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { useSession } from "next-auth/react";
@@ -88,21 +88,27 @@ export default function MessagesSidebar({
         if (error) {
           errorToast(error.message);
         } else {
-          const channels = conversationIds.map((conversationId) =>
-            supabase
-              .channel(conversationId.conversation_id)
-              .on(
-                "postgres_changes",
-                {
-                  event: "INSERT",
-                  schema: "public",
-                  table: "messages",
-                },
-                (payload: { new: MessageDbType }) =>
-                  void handlePostgresChange(payload),
-              )
-              .subscribe(),
-          );
+          const channels = conversationIds
+            // When channel is selected turn of here so it can listen in the child
+            .filter(
+              (conversationId) =>
+                conversationId.conversation_id !== selectedConversation?.id,
+            )
+            .map((conversationId) =>
+              supabase
+                .channel(conversationId.conversation_id)
+                .on(
+                  "postgres_changes",
+                  {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "messages",
+                  },
+                  (payload: { new: MessageDbType }) =>
+                    void handlePostgresChange(payload),
+                )
+                .subscribe(),
+            );
 
           return () => {
             channels.forEach((channel) => void channel.unsubscribe());
@@ -112,7 +118,9 @@ export default function MessagesSidebar({
     };
 
     void fetchConversationIds();
-  }, [optimisticIds, session, setConversationToTop]);
+  }, [optimisticIds, selectedConversation?.id, session, setConversationToTop]);
+
+  console.log("Conversations", conversations);
 
   return (
     <div className="w-96 border-r">
