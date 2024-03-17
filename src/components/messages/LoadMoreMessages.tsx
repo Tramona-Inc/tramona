@@ -15,6 +15,10 @@ export default function LoadMoreMessages() {
     ? conversations[currentConversationId]?.page ?? 1
     : 1;
 
+  const totalMessagesCount = currentConversationId
+    ? conversations[currentConversationId]?.messages.length ?? 0
+    : 0;
+
   const setMoreMessagesToConversation = useMessage(
     (state) => state.setMoreMessagesToConversation,
   );
@@ -23,16 +27,28 @@ export default function LoadMoreMessages() {
   const fetchConversation = async () => {
     const { from, to } = getFromAndTo(page, LIMIT_MESSAGE);
 
+    // Case for optimistic ui/ create the new offset
+    // for the inital fetch convo with new optimistic ui
+    let offset = 0;
+
+    if (totalMessagesCount > 0) {
+      offset = totalMessagesCount - page * LIMIT_MESSAGE;
+    }
+
+    if (offset < 0) {
+      offset = 0;
+    }
+
     if (currentConversationId) {
       const { data, error } = await supabase
         .from("messages")
         .select(
           `
-          *,
-          user(name, image, email)
-        `,
+        *,
+        user(name, image, email)
+      `,
         )
-        .range(from, to)
+        .range(from + offset, to + offset)
         .eq("conversation_id", currentConversationId)
         .order("created_at", { ascending: false });
 
