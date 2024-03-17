@@ -17,6 +17,9 @@ import ErrorMsg from "../../ui/ErrorMsg";
 import { toast } from "../../ui/use-toast";
 import React from "react";
 
+const formSchema = z.object({ email: zodEmail() });
+type FormValues = z.infer<typeof formSchema>;
+
 export function InviteByEmailForm({
   request,
 }: {
@@ -24,8 +27,6 @@ export function InviteByEmailForm({
 }) {
   const mutation = api.groups.inviteUserByEmail.useMutation();
 
-  const formSchema = z.object({ email: zodEmail() });
-  type FormValues = z.infer<typeof formSchema>;
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     reValidateMode: "onSubmit",
@@ -41,9 +42,7 @@ export function InviteByEmailForm({
       (res, rej) => {
         mutation.mutate(input, {
           onError: (err) => rej(err.message),
-          onSuccess: (data) => {
-            void utils.invalidate().then(() => res(data));
-          },
+          onSuccess: (data) => res(data),
         });
       },
     );

@@ -16,7 +16,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { sendSlackMessage } from "@/server/slack";
-import { getRequestStatus } from "@/utils/formatters";
+import { isIncoming } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
@@ -223,12 +223,12 @@ export const requestsRouter = createTRPCRouter({
               a.createdAt.getTime() - b.createdAt.getTime(),
           ),
       )
-      .then((res) => ({
-        incomingRequests: res.filter(
-          (req) => getRequestStatus(req) === "pending",
-        ),
-        pastRequests: res.filter((req) => getRequestStatus(req) !== "pending"),
-      }));
+      .then((res) => {
+        return {
+          incomingRequests: res.filter((req) => isIncoming(req)),
+          pastRequests: res.filter((req) => !isIncoming(req)),
+        };
+      });
   }),
 
   createMultiple: protectedProcedure

@@ -49,6 +49,11 @@ export function getRequestStatus(request: {
   }
 }
 
+export function isIncoming(request: Parameters<typeof getRequestStatus>[0]) {
+  const status = getRequestStatus(request);
+  return status === "unconfirmed" || status === "pending";
+}
+
 export function formatPhoneNumber(phoneNumber: string) {
   const removeNonDigit = phoneNumber.replace(/\D/g, "");
   return "+1" + removeNonDigit;

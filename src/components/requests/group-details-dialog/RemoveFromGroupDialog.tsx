@@ -52,8 +52,8 @@ export function RemoveFromGroupDialog({
         <DialogHeader>
           <DialogTitle>Are you sure you want to remove this user?</DialogTitle>
           <DialogDescription>
-            This will remove the request from their dashboard. You can still add
-            them back to the group later.
+            This will remove the request from their dashboard. You can add them
+            back if you change your mind.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
