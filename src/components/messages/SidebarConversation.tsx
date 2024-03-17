@@ -32,7 +32,11 @@ export function SidebarConversation({
   );
 
   function handleSelected() {
-    if (session?.user.id !== messages[0]?.userId && messages[0]?.id) {
+    if (
+      session?.user.id !== messages[0]?.userId &&
+      messages[0]?.id &&
+      !messages[0].read
+    ) {
       void setMessageToReadMutate({ messageId: messages[0]?.id });
     }
     // Update local state to true
