@@ -11,15 +11,11 @@ export default function ChatMessages({
 }) {
   const { switchConversation, fetchInitialMessages } = useMessage();
 
-  const message = useMessage((state) => state.conversations);
-  console.log("Messages", message);
-
   // Fetch conversation on the client
   useEffect(() => {
     // Update conversation state
     switchConversation(conversationId);
 
-    console.log("CALLED");
     // Fetch initial messages when the component mounts
     void fetchInitialMessages(conversationId);
     // eslint-disable-next-line react-hooks/exhaustive-deps

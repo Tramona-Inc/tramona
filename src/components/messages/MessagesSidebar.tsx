@@ -120,8 +120,6 @@ export default function MessagesSidebar({
     void fetchConversationIds();
   }, [optimisticIds, selectedConversation?.id, session, setConversationToTop]);
 
-  console.log("Conversations", conversations);
-
   return (
     <div className="w-96 border-r">
       {!isLoading ? (
