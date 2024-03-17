@@ -31,7 +31,7 @@ const Step: React.FC<StepProps> = ({ number, title, description, isLast }) => (
 const HowItWorks: React.FC = () => (
   <section className="relative bg-gray-100 p-2 md:px-2">
     <div className="flex flex-col md:flex-row">
-      <div className="relative mb-4 flex w-full flex-col justify-between rounded-3xl bg-black p-6 text-left shadow md:mb-0 md:w-4/12">
+      <div className="relative mb-4 flex w-full flex-col justify-between rounded-3xl bg-zinc-900 p-6 text-left shadow md:mb-0 md:w-4/12">
         <div className="absolute inset-0 z-0">
           <Image
             src="/assets/images/landing-page/how_it_works.jpeg"
@@ -56,14 +56,14 @@ const HowItWorks: React.FC = () => (
               ),
             )}
           </h2>
-          <Link href="/about">
+          {/* <Link href="/about">
             <button className="mt-12 rounded-3xl bg-white px-4 py-2 text-black">
               Learn more
             </button>
-          </Link>
+          </Link> */}
         </div>
       </div>
-      <div className="flex w-full rounded-3xl bg-black p-10 shadow md:ml-4 md:w-8/12">
+      <div className="flex w-full rounded-3xl bg-neutral-900 p-10 shadow md:ml-4 md:w-8/12">
         <div className="flex h-full flex-col justify-between">
           <Step
             number={1}

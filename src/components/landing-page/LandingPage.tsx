@@ -23,16 +23,16 @@ export default function LandingPage() {
           <title>Tramona</title>
         </Head>
         {isBannerVisible && (
-          <div className="mb-0 mt-0 w-full place-items-center overflow-x-scroll rounded-lg p-2 lg:overflow-visible">
+          <div className="mb-0 mt-0 w-full place-items-center overflow-x-scroll rounded-lg pt-2 px-2 lg:overflow-visible">
             <div
               role="alert"
-              className="font-regular relative block flex w-full items-center justify-center rounded-lg bg-black px-4 py-4 text-base text-white"
+              className="font-regular relative block flex w-full items-center justify-center rounded-lg bg-neutral-900 px-4 py-4 text-base text-white"
               onClick={handleBannerClick} 
             >
-              <div className="flex-grow px-6 text-center">
-                <p className="text-xs font-base text-white md:text-base">
+              <div className="flex-grow px-4 md:px-6 text-left md:text-center">
+                <p className="text-xs md:font-semibold text-white md:text-base">
                   A platform designed solely so you can experience more of the
-                  world
+                  world.
                 </p>
               </div>
               <button

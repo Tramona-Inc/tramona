@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function MastHead() {
   return (
     <>
-      <section className="bg-gray-100 p-2 md:px-2">
+      <section className="bg-gray-100 p-2 pt-4 md:px-2">
         <section className="relative flex min-h-[calc(100vh-4rem)] flex-col justify-center">
           <div className="absolute inset-0 z-0 rounded-3xl">
             <Image
@@ -18,7 +18,7 @@ export default function MastHead() {
           </div>
           {/* <LandingVideo /> */}
           <div className="z-10 flex flex-col justify-center gap-4 p-4">
-            <div className="mx-auto max-w-3xl space-y-4 mb-8">
+            <div className="mx-auto mb-8 max-w-3xl space-y-4">
               <h1 className="text-center text-3xl font-bold text-black md:text-6xl">
                 Tramona is a name your own price tool
               </h1>
