@@ -34,6 +34,10 @@ type MessageState = {
     moreMessages: ChatMessageType[],
   ) => void;
   fetchInitialMessages: (conversationId: string) => Promise<void>;
+  removeMessageFromConversation: (
+    conversationId: string,
+    messageId: string,
+  ) => void;
 };
 
 export const useMessage = create<MessageState>((set, get) => ({
@@ -184,5 +188,38 @@ export const useMessage = create<MessageState>((set, get) => ({
     } catch (error) {
       errorToast(error as string);
     }
+  },
+  removeMessageFromConversation: (
+    conversationId: string,
+    messageId: string,
+  ) => {
+    set((state) => {
+      const updatedConversations: ConversationsState = {
+        ...state.conversations,
+      };
+
+      // Check if the conversation exists in the state
+      if (updatedConversations[conversationId]) {
+        // Remove the message from the existing conversation
+        updatedConversations[conversationId] = {
+          messages:
+            updatedConversations[conversationId]?.messages.filter(
+              (message) => message.id !== messageId,
+            ) ?? [],
+          page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
+          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
+          alreadyFetched:
+            updatedConversations[conversationId]?.alreadyFetched ?? true,
+        };
+      }
+
+      const updatedState: MessageState = {
+        ...state,
+        conversations: updatedConversations,
+        optimisticIds: state.optimisticIds.filter((id) => id !== messageId),
+      };
+
+      return updatedState;
+    });
   },
 }));

@@ -38,6 +38,10 @@ export default function ChatInput({
     (state) => state.setConversationToTop,
   );
 
+  const removeMessageFromConversation = useMessage(
+    (state) => state.removeMessageFromConversation,
+  );
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
       const newMessage = {
@@ -78,7 +82,10 @@ export default function ChatInput({
 
       // TODO: removed recently added message from the state
       if (error) {
-        errorToast(error.message);
+        removeMessageFromConversation(conversationId, newMessage.id);
+
+        // errorToast(error.message);
+        errorToast("error");
       }
 
       form.reset();
