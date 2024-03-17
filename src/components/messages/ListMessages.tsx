@@ -4,9 +4,11 @@ import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
 // import LoadMoreMessages from "./LoadMoreMessages";
+import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import LoadMoreMessages from "./LoadMoreMessages";
 import { Message } from "./Message";
+import { useSession } from 'next-auth/react';
 
 function NoMessages() {
   return (
@@ -36,6 +38,22 @@ export default function ListMessages() {
   const messages = currentConversationId
     ? conversations[currentConversationId]?.messages ?? []
     : [];
+
+  const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
+
+
+  const { data: session } = useSession();
+
+  // Set all the messages to read when loaded
+  useEffect(() => {
+    const unreadMessageIds = messages
+      .filter((message) => message.read === false && message.userId !== session?.user.id)
+      .map((message) => message.id);
+
+    if (unreadMessageIds.length > 0) {
+      void mutateAsync({ unreadMessageIds });
+    }
+  }, [messages]);
 
   const hasMore = currentConversationId
     ? conversations[currentConversationId]?.hasMore ?? false

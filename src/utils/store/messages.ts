@@ -161,8 +161,8 @@ export const useMessage = create<MessageState>((set, get) => ({
           conversationId: message.conversation_id,
           userId: message.user_id,
           message: message.message,
-          read: message.read ?? null, // Provide a default value if needed
-          isEdit: message.is_edit ?? null, // Provide a default value if needed
+          read: message.read ?? false, // since fetched means it's read
+          isEdit: message.is_edit ?? false, // Provide a default value if needed
           user: {
             name: message.user?.name ?? "",
             image: message.user?.image ?? "",
