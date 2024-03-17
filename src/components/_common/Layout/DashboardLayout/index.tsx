@@ -14,8 +14,8 @@ export default function DashboadLayout({
   return (
     <>
       <Header type="dashboard" sidebarType={type} />
-      <div className="relative flex">
-        <aside className="sticky bottom-0 top-header hidden h-screen-minus-header bg-zinc-100 lg:block">
+      <div className="flex">
+        <aside className="h-screen-minus-header sticky hidden bg-zinc-100 lg:block">
           <Sidebar type={type} />
         </aside>
         <main className="flex-1">{children}</main>

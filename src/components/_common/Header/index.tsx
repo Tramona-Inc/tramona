@@ -108,9 +108,7 @@ function SmallHeader(props: HeaderProps) {
           )}
 
           {props.type === "dashboard" && (
-            <aside className="sticky bottom-0 top-header hidden h-screen-minus-header bg-zinc-100 lg:block">
-              <Sidebar withLogo type={props.sidebarType} />
-            </aside>
+            <Sidebar withLogo type={props.sidebarType} />
           )}
         </SheetContent>
       </Sheet>
