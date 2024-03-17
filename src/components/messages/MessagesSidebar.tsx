@@ -50,6 +50,7 @@ export default function MessagesSidebar({
 
   const { data: session } = useSession();
 
+  // Map and listen to all the connects the user is part of
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
       if (!optimisticIds.includes(payload.new.id)) {
