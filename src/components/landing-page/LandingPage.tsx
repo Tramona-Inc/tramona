@@ -23,14 +23,14 @@ export default function LandingPage() {
           <title>Tramona</title>
         </Head>
         {isBannerVisible && (
-          <div className="mb-0 mt-0 w-full place-items-center overflow-x-scroll rounded-lg pt-2 px-2 lg:overflow-visible">
+          <div className="mb-0 mt-0 w-full place-items-center overflow-x-scroll rounded-lg px-2 pt-2 lg:overflow-visible">
             <div
               role="alert"
-              className="font-regular relative block flex w-full items-center justify-center rounded-lg bg-neutral-900 px-4 py-4 text-base text-white"
-              onClick={handleBannerClick} 
+              className="relative flex w-full items-center justify-center rounded-lg bg-neutral-900 px-4 py-4 text-base text-white"
+              onClick={handleBannerClick}
             >
-              <div className="flex-grow px-4 md:px-6 text-left md:text-center">
-                <p className="text-xs md:font-semibold text-white md:text-base">
+              <div className="flex-grow px-4 text-left md:px-6 md:text-center">
+                <p className="text-xs text-white md:text-base md:font-semibold">
                   A platform designed solely so you can experience more of the
                   world.
                 </p>
@@ -41,7 +41,7 @@ export default function LandingPage() {
                 onClick={(e) => {
                   e.stopPropagation();
                   handleBannerClick();
-                }} 
+                }}
               >
                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
                   <svg
@@ -63,42 +63,13 @@ export default function LandingPage() {
             </div>
           </div>
         )}
-        {/* Section 1: hero & form */}
+
         <MastHead />
-
-        {/* Section 2: How it works  */}
-        {/* <How /> */}
         <HowItWorks />
-
-        {/* Section 3: Message to Host*/}
-        {/* <Hosts /> */}
         <SocialFeed />
-
-        {/* Section 4: Travel More Save More */}
-        {/* <Save /> */}
         <ReferAndEarn />
         <ForHosts />
-
         <HelpEndThis />
-
-        {/* Hack to display coin image out of bounds */}
-        {/* without -> displays coin image below */}
-        <div className="relative overflow-x-hidden overflow-y-hidden">
-          {/* Section 5: Gift your friends */}
-          {/* <Gift /> */}
-
-          {/* Section 5: Current State of Travel */}
-          {/* <CurrentState /> */}
-        </div>
-
-        {/* Section 5: Tramona Loop */}
-        {/* <TramonaLoop /> */}
-
-        {/* Section 6: Reviews */}
-        {/* <Reviews /> */}
-
-        {/* Jungle Image */}
-        {/* <Jungle /> */}
       </div>
     </>
   );

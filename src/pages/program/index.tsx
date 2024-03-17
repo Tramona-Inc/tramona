@@ -308,7 +308,7 @@ function HowItWorks() {
               Earn
             </h2>
             <p className="text-lg font-medium tracking-tight sm:text-xl">
-              <mark> Earn </mark> based on every persons travel you refer
+              <mark>Earn</mark> based on every persons travel you refer
             </p>
           </div>
         </div>
