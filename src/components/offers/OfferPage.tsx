@@ -10,8 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
-import { type RouterOutputs, api } from "@/utils/api";
-import { TAX_PERCENTAGE } from "@/utils/constants";
+import { api, type RouterOutputs } from "@/utils/api";
 import {
   cn,
   formatCurrency,
@@ -247,10 +246,10 @@ export default function OfferPage({
                   <p className="underline">Tramona service fee</p>
                   <p>{formatCurrency(tramonaServiceFee)}</p>
                 </div>
-                <div className="flex justify-between py-2">
+                {/* <div className="flex justify-between py-2">
                   <p className="underline">Taxes</p>
                   <p>{formatCurrency(tax)}</p>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="flex justify-between py-2">
