@@ -5,6 +5,7 @@ import {
   pgTable,
   serial,
   smallint,
+  text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -14,6 +15,7 @@ import { groups } from "./groups";
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
+  userId: text("user_id"),
   madeByGroupId: integer("made_by_group_id")
     .notNull()
     // for this onDelete cascade to do anything, well need to delete groups with no members
