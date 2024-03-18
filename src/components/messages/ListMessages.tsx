@@ -180,19 +180,9 @@ export default function ListMessages() {
                     (participant) => participant.id === message.userId,
                   );
 
-                  const user = participantUser && {
-                    id: participantUser.id,
-                    name: participantUser.name ?? null,
-                    email: participantUser.email,
-                    image: participantUser.image ?? null,
-                  };
+                  const user = participantUser;
 
-                  const self = session.user && {
-                    id: session.user.id,
-                    name: session.user.name ?? null,
-                    email: session.user.email,
-                    image: session.user.image ?? null,
-                  };
+                  const self = session.user;
 
                   if (user ?? self) {
                     return (
