@@ -31,22 +31,26 @@ export default function Header(props: HeaderProps) {
 }
 
 const headerLinks = [
-  {
-    href: "/program",
-    label: "Refer and Earn",
-  },
-  {
-    href: "/for-hosts",
-    label: "For Hosts",
-  },
+  // {
+  //   href: "/program",
+  //   label: "Refer and Earn",
+  // },
+  // {
+  //   href: "/for-hosts",
+  //   label: "For Hosts",
+  // },
   // {
   //   href: "/exclusive-offers",
   //   label: "Exclusive Offers",
   // },
-  {
-    href: "/feed",
-    label: "Social Feed",
-  },
+  // {
+  //   href: "/feed",
+  //   label: "Social Feed",
+  // },
+  // {
+  //   href: "/about",
+  //   label: "About Us",
+  // },
 ];
 
 function LargeHeader(props: HeaderProps) {
@@ -60,11 +64,11 @@ function LargeHeader(props: HeaderProps) {
         <div className="flex items-center justify-center gap-2">
           {props.type === "marketing" && (
             <>
-              {headerLinks.map(({ href, label }, i) => (
+              {/* {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
                   {label}
                 </HeaderLink>
-              ))}
+              ))} */}
             </>
           )}
         </div>
@@ -95,18 +99,16 @@ function SmallHeader(props: HeaderProps) {
         <SheetContent side="left" className="w-max p-0">
           {props.type === "marketing" && (
             <div className="flex w-80 flex-col gap-2 p-8 pr-16">
-              {headerLinks.map(({ href, label }, i) => (
+              {/* {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
                   {label}
                 </HeaderLink>
-              ))}
+              ))} */}
             </div>
           )}
 
           {props.type === "dashboard" && (
-            <aside className="sticky bottom-0 top-header hidden h-screen-minus-header bg-zinc-100 lg:block">
-              <Sidebar withLogo type={props.sidebarType} />
-            </aside>
+            <Sidebar withLogo type={props.sidebarType} />
           )}
         </SheetContent>
       </Sheet>
