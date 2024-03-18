@@ -1,6 +1,5 @@
 import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
-import { NewRequestButton } from "../../pages/requests";
 import { RequestCards } from "@/components/requests/RequestCards";
 
 export default function ActiveRequestGroups() {
@@ -15,7 +14,7 @@ export default function ActiveRequestGroups() {
       <p className="text-center text-muted-foreground">
         No requests yet, make a request to get started!
       </p>
-      <NewRequestButton />
+      {/* <NewRequestButton /> */}
     </div>
   );
 }
