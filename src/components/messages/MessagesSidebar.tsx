@@ -55,7 +55,7 @@ export default function MessagesSidebar({
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
       if (!optimisticIds.includes(payload.new.id)) {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from("user")
           .select("name, email, image")
           .eq("id", payload.new.user_id)
