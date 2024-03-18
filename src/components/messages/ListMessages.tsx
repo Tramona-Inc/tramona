@@ -150,7 +150,7 @@ export default function ListMessages() {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   };
 
-  // Get all participants 
+  // Get all participants
   const { conversationList } = useConversation();
 
   const conversationIndex = conversationList.findIndex(
@@ -174,14 +174,37 @@ export default function ListMessages() {
               .slice()
               .reverse()
               .map((message) => {
-                if (participants) {
-                  const user = participants.find(
+                // Display message with user
+                if (participants && session) {
+                  const participantUser = participants.find(
                     (participant) => participant.id === message.userId,
                   );
 
-                  return (
-                    <Message key={message.id} message={message} user={user!} />
-                  );
+                  const user = participantUser && {
+                    id: participantUser.id,
+                    name: participantUser.name ?? null,
+                    email: participantUser.email,
+                    image: participantUser.image ?? null,
+                  };
+
+                  const self = session.user && {
+                    id: session.user.id,
+                    name: session.user.name ?? null,
+                    email: session.user.email,
+                    image: session.user.image ?? null,
+                  };
+
+                  if (user ?? self) {
+                    return (
+                      <Message
+                        key={message.id}
+                        message={message}
+                        user={user ?? self}
+                      />
+                    );
+                  }
+
+                  return null;
                 }
               })}
         </div>

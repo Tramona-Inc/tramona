@@ -13,28 +13,15 @@ export type MessageProp = {
   };
 };
 
-function convertUTCDateToLocalDate(date: Date) {
-  const newDate = new Date(
-    date.getTime() + date.getTimezoneOffset() * 60 * 1000,
-  );
-
-  const offset = date.getTimezoneOffset() / 60;
-  const hours = date.getHours();
-
-  newDate.setHours(hours - offset);
-
-  return newDate;
-}
-
 export function Message({ message, user }: MessageProp) {
   const { data: session } = useSession();
 
   return (
     <div className="flex items-start gap-3 p-5">
       <UserAvatar
-        email={user.email}
-        image={user.image}
-        name={user.name}
+        email={user.email ?? ""}
+        image={user.image ?? ""}
+        name={user.name ?? ""}
         size="lg"
       />
 
@@ -42,10 +29,7 @@ export function Message({ message, user }: MessageProp) {
         <div className="flex items-baseline gap-2">
           <p className="text-2xl font-bold">{user.name}</p>
           <p className="text-sm text-muted-foreground">
-            {format(
-              convertUTCDateToLocalDate(message.createdAt),
-              "M/dd h:mm aaaa",
-            )}
+            {format(message.createdAt, "M/dd h:mm aaaa")}
           </p>
           {session?.user.id === message.userId && message.read && (
             <p className="text-sm text-muted-foreground">read</p>
