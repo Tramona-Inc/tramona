@@ -1,6 +1,4 @@
-import type { AppRouter } from "@/server/api/root";
-import { api } from "@/utils/api";
-import { type inferRouterOutputs } from "@trpc/server";
+import { type RouterOutputs, api } from "@/utils/api";
 import {
   Card,
   CardContent,
@@ -11,8 +9,7 @@ import {
 import { columns } from "./table/columns";
 import { DataTable } from "./table/data-table";
 
-export type HostsInfo =
-  inferRouterOutputs<AppRouter>["users"]["getHostInfo"][number];
+export type HostsInfo = RouterOutputs["users"]["getHostInfo"][number];
 
 export default function ViewRecentHosts() {
   const { data } = api.users.getHostInfo.useQuery();

@@ -10,19 +10,16 @@ import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import { type inferRouterOutputs } from "@trpc/server";
-import { type AppRouter } from "@/server/api/root";
 import RequestGroupAvatars from "./RequestCardGroupAvatars";
+import { type RouterOutputs } from "@/utils/api";
 
-export type DetailedRequest =
-  inferRouterOutputs<AppRouter>["requests"]["getMyRequests"][
-    | "activeRequestGroups"
-    | "inactiveRequestGroups"][number]["requests"][number];
+export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
+  | "activeRequestGroups"
+  | "inactiveRequestGroups"][number]["requests"][number];
 
-export type RequestWithUser =
-  inferRouterOutputs<AppRouter>["requests"]["getAll"][
-    | "incomingRequests"
-    | "pastRequests"][number];
+export type RequestWithUser = RouterOutputs["requests"]["getAll"][
+  | "incomingRequests"
+  | "pastRequests"][number];
 
 export default function RequestCard({
   request,
