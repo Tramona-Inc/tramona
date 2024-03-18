@@ -71,7 +71,6 @@ export default function MessagesSidebar({
             isEdit: payload.new.is_edit,
             createdAt: new Date(payload.new.created_at),
             read: payload.new.read,
-            user: data,
           };
 
           setConversationToTop(payload.new.conversation_id, newMessage);

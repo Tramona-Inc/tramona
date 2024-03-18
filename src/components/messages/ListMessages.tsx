@@ -3,13 +3,13 @@ import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
-// import LoadMoreMessages from "./LoadMoreMessages";
 import { api } from "@/utils/api";
+import { useConversation } from "@/utils/store/conversations";
 import { errorToast } from "@/utils/toasts";
-import LoadMoreMessages from "./LoadMoreMessages";
-import { MessageGroup } from "./MessageGroup";
 import { useSession } from "next-auth/react";
+import LoadMoreMessages from "./LoadMoreMessages";
 import { groupMessages } from "./groupMessages";
+import { MessageGroup } from "./MessageGroup";
 
 function NoMessages() {
   return (
@@ -64,7 +64,7 @@ export default function ListMessages() {
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     if (!optimisticIds.includes(payload.new.id)) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("user")
         .select("name, email, image")
         .eq("id", payload.new.user_id)
@@ -80,7 +80,6 @@ export default function ListMessages() {
           isEdit: payload.new.is_edit,
           createdAt: new Date(payload.new.created_at),
           read: payload.new.read,
-          user: data,
         };
         addMessageToConversation(payload.new.conversation_id, newMessage);
       }
@@ -151,6 +150,32 @@ export default function ListMessages() {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   };
 
+  // Get all participants
+  const { conversationList } = useConversation();
+
+  const conversationIndex = conversationList.findIndex(
+    (conversation) => conversation.id === currentConversationId,
+  );
+
+  const participants = conversationList[conversationIndex]?.participants;
+
+  const messagesWithUser = messages
+    .slice()
+    .reverse()
+    .map((message) => {
+      // Display message with user
+      if (!participants || !session) return null;
+      const participantUser = participants.find(
+        (participant) => participant.id === message.userId,
+      );
+
+      const user = participantUser ?? session.user;
+      return { message, user };
+    })
+    .filter(Boolean);
+
+  const messageGroups = groupMessages(messagesWithUser);
+
   return (
     <>
       <div
@@ -161,13 +186,12 @@ export default function ListMessages() {
         <div className="flex-1"></div>
         <div className="absolute w-full space-y-4 p-4 pt-12">
           {hasMore && <LoadMoreMessages />}
-          {messages.length > 0 &&
-            groupMessages(messages.slice().reverse()).map((messageGroup) => (
-              <MessageGroup
-                key={messageGroup.messages[0]?.id}
-                messageGroup={messageGroup}
-              />
-            ))}
+          {messageGroups.map((messageGroup) => (
+            <MessageGroup
+              key={messageGroup.messages[0]?.id}
+              messageGroup={messageGroup}
+            />
+          ))}
         </div>
         {messages.length === 0 && (
           <div className="flex h-full w-full items-center justify-center">
@@ -175,6 +199,8 @@ export default function ListMessages() {
           </div>
         )}
       </div>
+      {/* {JSON.stringify(messagesWithUser, null, 2)}
+      {JSON.stringify(messageGroups, null, 2)} */}
       {userScrolled && (
         <div
           className="absolute bottom-16 flex w-full items-center justify-center"

@@ -15,7 +15,7 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
       <UserAvatar {...user} />
       <div>
         <div className="flex items-baseline gap-2">
-          <p className="font-semibold">{user.name}</p>
+          <p className="font-semibold leading-none">{user.name}</p>
           <p className="text-xs text-muted-foreground">
             {formatRelative(firstMessage.createdAt, new Date())}
             {session.user.id === firstMessage.userId && firstMessage.read && (
@@ -24,9 +24,11 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
           </p>
         </div>
 
-        {messages.map((message) => (
-          <Message key={message.id} message={message} />
-        ))}
+        <div className="space-y-1">
+          {messages.map((message) => (
+            <Message key={message.id} message={message} />
+          ))}
+        </div>
       </div>
     </div>
   );
