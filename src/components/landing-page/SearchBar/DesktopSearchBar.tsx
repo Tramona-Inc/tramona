@@ -17,7 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import LPDateRangePicker, {
@@ -29,7 +29,9 @@ import LPDateRangePicker, {
   classNames,
 } from "./components";
 
-const formSchema = z.object({
+type ErrorState = string | null;
+
+const baseFormSchema = z.object({
   data: z
     .array(
       z
@@ -54,18 +56,28 @@ const formSchema = z.object({
     .nonempty(),
 });
 
-type FormSchema = z.infer<typeof formSchema>;
-type ErrorState = string | null;
-
-const defaultValues: Partial<FormSchema["data"][number]> = {
-  propertyType: "any",
-};
+type FormSchema = z.infer<typeof baseFormSchema>;
 
 export default function DesktopSearchBar({
   afterSubmit,
 }: {
   afterSubmit?: () => void;
 }) {
+  const utils = api.useUtils();
+
+  const formSchema = baseFormSchema.superRefine(async ({ data }, ctx) => {
+    const um = await utils.misc.getPriceEstimation.fetch({
+      checkIn: data[0].date.from,
+      checkOut: data[0].date.to,
+      location: data[0].location,
+      numGuests: data[0].numGuests,
+    });
+  });
+
+  const defaultValues: Partial<FormSchema["data"][number]> = {
+    propertyType: "any",
+  };
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,12 +94,14 @@ export default function DesktopSearchBar({
   const MAX_TRIPS = 10;
 
   const mutation = api.requests.createMultiple.useMutation();
-  const utils = api.useUtils();
   const router = useRouter();
   const { status } = useSession();
 
   const { data } = form.watch();
   const numTabs = data.length;
+
+  // const { data: priceEstimate, isLoading } =
+  //   api.misc.getPriceEstimation.useQuery(data[0]);
 
   const tabsWithErrors =
     form.formState.errors.data
@@ -206,6 +220,19 @@ export default function DesktopSearchBar({
     // await browser.close();
   };
 
+  // useEffect(() => {
+  // if (
+  //   data[0].location !== undefined &&
+  //   data[0].date !== undefined &&
+  //   data[0].numGuests !== undefined &&
+  //   data[0].maxNightlyPriceUSD !== undefined
+  // ) {
+  //   fetchData();
+  // console.log(env.RAPIDAPI_KEY);
+  // }
+  // invalidate the query
+  // }, [data]);
+
   return (
     // <>
     <Form {...form}>
@@ -312,6 +339,13 @@ export default function DesktopSearchBar({
             )}
           />
 
+          <LPDateRangePicker
+            control={form.control}
+            name={`data.${curTab}.date`}
+            formLabel="Check in/Check out"
+            className="col-span-full lg:col-span-3"
+          />
+
           <FormField
             control={form.control}
             name={`data.${curTab}.maxNightlyPriceUSD`}
@@ -329,13 +363,6 @@ export default function DesktopSearchBar({
                 <LPFormMessage />
               </LPFormItem>
             )}
-          />
-
-          <LPDateRangePicker
-            control={form.control}
-            name={`data.${curTab}.date`}
-            formLabel="Check in/Check out"
-            className="col-span-full lg:col-span-3"
           />
 
           <div className="col-span-full">
