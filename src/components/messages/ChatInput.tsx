@@ -73,6 +73,8 @@ export default function ChatInput({
       addMessageToConversation(conversationId, newMessage);
       setOptimisticIds(newMessage.id);
 
+      form.reset();
+
       // ! Optimistic UI first then add to db
       const { error } = await supabase
         .from("messages")
@@ -87,7 +89,6 @@ export default function ChatInput({
         errorToast("error");
       }
 
-      form.reset();
     }
   };
 
