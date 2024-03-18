@@ -170,7 +170,9 @@ function IntroSection() {
 
 function ProgramTiers() {
   const { status } = useSession();
-  const { data } = api.users.myReferralCode.useQuery();
+  const { data } = api.users.myReferralCode.useQuery(undefined, {
+    enabled: status === "authenticated",
+  });
 
   return (
     <div className="[&>*]:flex [&>*]:min-h-[calc(50vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
