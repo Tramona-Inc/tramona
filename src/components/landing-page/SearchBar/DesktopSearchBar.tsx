@@ -17,7 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import LPDateRangePicker, {
@@ -28,8 +28,6 @@ import LPDateRangePicker, {
   LPLocationInput,
   classNames,
 } from "./components";
-
-type ErrorState = string | null;
 
 const baseFormSchema = z.object({
   data: z
@@ -66,12 +64,26 @@ export default function DesktopSearchBar({
   const utils = api.useUtils();
 
   const formSchema = baseFormSchema.superRefine(async ({ data }, ctx) => {
-    const um = await utils.misc.getPriceEstimation.fetch({
-      checkIn: data[0].date.from,
-      checkOut: data[0].date.to,
-      location: data[0].location,
-      numGuests: data[0].numGuests,
-    });
+    await Promise.all(
+      data.map(async (request, i) => {
+        const minAcceptablePrice = await utils.misc.getMinAcceptablePrice.fetch(
+          {
+            checkIn: request.date.from,
+            checkOut: request.date.to,
+            location: request.location,
+            numGuests: request.numGuests,
+          },
+        );
+
+        if (request.maxNightlyPriceUSD < minAcceptablePrice) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Too low, please try a higher price",
+            path: ["data", i, "maxNightlyPriceUSD"],
+          });
+        }
+      }),
+    );
   });
 
   const defaultValues: Partial<FormSchema["data"][number]> = {
@@ -83,13 +95,10 @@ export default function DesktopSearchBar({
     defaultValues: {
       data: [defaultValues],
     },
+    reValidateMode: "onBlur",
   });
 
   const [curTab, setCurTab] = useState(0);
-  const [airbnbUrl, setAirbnbUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorState>(null);
-  // const [combinedScrapedData, setCombinedScrapedData] = useState<string[]>([]); // State variable for combined scraped data
 
   const MAX_TRIPS = 10;
 
@@ -100,21 +109,10 @@ export default function DesktopSearchBar({
   const { data } = form.watch();
   const numTabs = data.length;
 
-  // const { data: priceEstimate, isLoading } =
-  //   api.misc.getPriceEstimation.useQuery(data[0]);
-
   const tabsWithErrors =
     form.formState.errors.data
       ?.map?.((error, index) => (error ? index : null))
       .filter((i): i is number => i !== null) ?? [];
-
-  // const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
-  // const fmtdFilters = getFmtdFilters({
-  //   minNumBedrooms,
-  //   minNumBeds,
-  //   propertyType: propertyType === "any" ? undefined : propertyType,
-  //   note,
-  // });
 
   async function onSubmit(data: FormSchema["data"]) {
     const newRequests = data.map((request) => {
@@ -178,60 +176,6 @@ export default function DesktopSearchBar({
 
     afterSubmit?.();
   }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/scrape", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: airbnbUrl }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to scrape data");
-      }
-
-      // Reset input field after successful scraping
-      setAirbnbUrl("");
-      setError(null);
-      const scrapedData = await response.json();
-      // grab this data, put it in local storage or in the db ---- scrapedData.combinedData
-    } catch (error) {
-      console.error("Error scraping data:", error);
-      setError("Failed to scrape data");
-    } finally {
-      setLoading(false);
-    }
-
-    // Add your Puppeteer scraping logic here
-    // For example:
-    // const browser = await puppeteer.launch();
-    //const page = await browser.newPage();
-    // await page.goto(airbnbUrl, { waitUntil: 'domcontentloaded' });
-    // await page.waitForTimeout(30000);
-
-    // // Other scraping operations...
-    // await browser.close();
-  };
-
-  // useEffect(() => {
-  // if (
-  //   data[0].location !== undefined &&
-  //   data[0].date !== undefined &&
-  //   data[0].numGuests !== undefined &&
-  //   data[0].maxNightlyPriceUSD !== undefined
-  // ) {
-  //   fetchData();
-  // console.log(env.RAPIDAPI_KEY);
-  // }
-  // invalidate the query
-  // }, [data]);
 
   return (
     // <>
@@ -325,6 +269,13 @@ export default function DesktopSearchBar({
             className="col-span-full lg:col-span-4"
           />
 
+          <LPDateRangePicker
+            control={form.control}
+            name={`data.${curTab}.date`}
+            formLabel="Check in/Check out"
+            className="col-span-full lg:col-span-3"
+          />
+
           <FormField
             control={form.control}
             name={`data.${curTab}.numGuests`}
@@ -337,13 +288,6 @@ export default function DesktopSearchBar({
                 <LPFormMessage />
               </LPFormItem>
             )}
-          />
-
-          <LPDateRangePicker
-            control={form.control}
-            name={`data.${curTab}.date`}
-            formLabel="Check in/Check out"
-            className="col-span-full lg:col-span-3"
           />
 
           <FormField

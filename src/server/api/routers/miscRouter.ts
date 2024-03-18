@@ -1,23 +1,19 @@
 import { requestSelectSchema } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
+import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
-type PricesResponse = {
-  price: {
-    rate: number;
-    currency: string;
-    total: number;
-  };
-};
-
-type APIResponse = {
-  error: boolean;
-  headers: any;
-  results: PricesResponse[];
-};
+const priceEstimateSchema = z.object({
+  price: z.object({
+    rate: z.number(),
+    currency: z.string(),
+    total: z.number(),
+  }),
+});
 
 export const miscRouter = createTRPCRouter({
-  getPriceEstimation: publicProcedure
+  getMinAcceptablePrice: publicProcedure
     .input(
       requestSelectSchema.pick({
         location: true,
@@ -27,13 +23,16 @@ export const miscRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      return await fetch(
-        `https://${env.RAPIDAPI_HOST}/search-location?${new URLSearchParams({
-          location: input.location,
-          checkin: input.checkIn.toString(),
-          checkout: input.checkOut.toString(),
-          adults: input.numGuests.toString(),
-        })}`,
+      return 100;
+
+      const price = await fetch(
+        `https://${env.RAPIDAPI_HOST}/search-location` +
+          new URLSearchParams({
+            location: input.location,
+            checkin: input.checkIn.toString(),
+            checkout: input.checkOut.toString(),
+            adults: input.numGuests.toString(),
+          }).toString(),
         {
           method: "GET",
           headers: {
@@ -43,6 +42,14 @@ export const miscRouter = createTRPCRouter({
         },
       )
         .then((res) => res.json())
-        .then((res) => {});
+        .then((res) => priceEstimateSchema.parse(res).price);
+
+      if (price.currency !== "USD") {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      // TODO: do some math to figure out the minimum acceptable price
+
+      return price.total;
     }),
 });
