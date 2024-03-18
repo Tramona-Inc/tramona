@@ -7,8 +7,9 @@ import { Icons } from "../_icons/icons";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import LoadMoreMessages from "./LoadMoreMessages";
-import { Message } from "./Message";
-import { useSession } from 'next-auth/react';
+import { MessageGroup } from "./MessageGroup";
+import { useSession } from "next-auth/react";
+import { groupMessages } from "./groupMessages";
 
 function NoMessages() {
   return (
@@ -41,13 +42,15 @@ export default function ListMessages() {
 
   const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
 
-
   const { data: session } = useSession();
 
   // Set all the messages to read when loaded
   useEffect(() => {
     const unreadMessageIds = messages
-      .filter((message) => message.read === false && message.userId !== session?.user.id)
+      .filter(
+        (message) =>
+          message.read === false && message.userId !== session?.user.id,
+      )
       .map((message) => message.id);
 
     if (unreadMessageIds.length > 0) {
@@ -153,16 +156,18 @@ export default function ListMessages() {
       <div
         ref={scrollRef}
         onScroll={handleOnScroll}
-        className="relative flex flex-1 flex-col overflow-y-auto scroll-smooth"
+        className="relative flex flex-1 flex-col overflow-y-auto"
       >
         <div className="flex-1"></div>
-        <div className="absolute w-full">
+        <div className="absolute w-full space-y-4 p-4 pt-12">
           {hasMore && <LoadMoreMessages />}
           {messages.length > 0 &&
-            messages
-              .slice()
-              .reverse()
-              .map((message) => <Message key={message.id} message={message} />)}
+            groupMessages(messages.slice().reverse()).map((messageGroup) => (
+              <MessageGroup
+                key={messageGroup.messages[0]?.id}
+                messageGroup={messageGroup}
+              />
+            ))}
         </div>
         {messages.length === 0 && (
           <div className="flex h-full w-full items-center justify-center">

@@ -61,7 +61,7 @@ export default function ChatInput({
 
       const newMessageToDb = {
         id: newMessage.id,
-        created_at: newMessage.createdAt.toISOString(),
+        // created_at: newMessage.createdAt.toISOString(),
         conversation_id: conversationId,
         user_id: newMessage.userId,
         message: newMessage.message,
@@ -88,7 +88,6 @@ export default function ChatInput({
         // errorToast(error.message);
         errorToast("error");
       }
-
     }
   };
 
