@@ -1,5 +1,5 @@
 import { useConversation } from "@/utils/store/conversations";
-import { useMessage } from "@/utils/store/messages";
+import { ChatMessageType, useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +44,7 @@ export default function ChatInput({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
-      const newMessage = {
+      const newMessage: ChatMessageType = {
         id: nanoid(),
         createdAt: new Date(),
         conversationId: conversationId,
@@ -52,11 +52,6 @@ export default function ChatInput({
         message: values.message,
         read: false,
         isEdit: false,
-        user: {
-          name: session.user.name,
-          email: session.user.email,
-          image: session.user.image,
-        },
       };
 
       const newMessageToDb = {
@@ -88,7 +83,6 @@ export default function ChatInput({
         // errorToast(error.message);
         errorToast("error");
       }
-
     }
   };
 

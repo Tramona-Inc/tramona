@@ -4,9 +4,7 @@ import { create } from "zustand";
 import supabase from "../supabase-client";
 import { errorToast } from "../toasts";
 
-export type ChatMessageType = MessageType & {
-  user: { name: string | null; email: string; image: string | null };
-};
+export type ChatMessageType = MessageType;
 
 type ConversationsState = Record<
   string,

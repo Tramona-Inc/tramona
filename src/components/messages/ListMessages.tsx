@@ -5,10 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
 // import LoadMoreMessages from "./LoadMoreMessages";
 import { api } from "@/utils/api";
+import { useConversation } from "@/utils/store/conversations";
 import { errorToast } from "@/utils/toasts";
+import { useSession } from "next-auth/react";
 import LoadMoreMessages from "./LoadMoreMessages";
 import { Message } from "./Message";
-import { useSession } from 'next-auth/react';
 
 function NoMessages() {
   return (
@@ -41,13 +42,15 @@ export default function ListMessages() {
 
   const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
 
-
   const { data: session } = useSession();
 
   // Set all the messages to read when loaded
   useEffect(() => {
     const unreadMessageIds = messages
-      .filter((message) => message.read === false && message.userId !== session?.user.id)
+      .filter(
+        (message) =>
+          message.read === false && message.userId !== session?.user.id,
+      )
       .map((message) => message.id);
 
     if (unreadMessageIds.length > 0) {
@@ -61,7 +64,7 @@ export default function ListMessages() {
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     if (!optimisticIds.includes(payload.new.id)) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("user")
         .select("name, email, image")
         .eq("id", payload.new.user_id)
@@ -77,7 +80,6 @@ export default function ListMessages() {
           isEdit: payload.new.is_edit,
           createdAt: new Date(payload.new.created_at),
           read: payload.new.read,
-          user: data,
         };
         addMessageToConversation(payload.new.conversation_id, newMessage);
       }
@@ -148,6 +150,15 @@ export default function ListMessages() {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   };
 
+  // Get all participants 
+  const { conversationList } = useConversation();
+
+  const conversationIndex = conversationList.findIndex(
+    (conversation) => conversation.id === currentConversationId,
+  );
+
+  const participants = conversationList[conversationIndex]?.participants;
+
   return (
     <>
       <div
@@ -162,7 +173,17 @@ export default function ListMessages() {
             messages
               .slice()
               .reverse()
-              .map((message) => <Message key={message.id} message={message} />)}
+              .map((message) => {
+                if (participants) {
+                  const user = participants.find(
+                    (participant) => participant.id === message.userId,
+                  );
+
+                  return (
+                    <Message key={message.id} message={message} user={user!} />
+                  );
+                }
+              })}
         </div>
         {messages.length === 0 && (
           <div className="flex h-full w-full items-center justify-center">

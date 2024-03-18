@@ -5,6 +5,12 @@ import UserAvatar from "../_common/UserAvatar";
 
 export type MessageProp = {
   message: ChatMessageType;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+  };
 };
 
 function convertUTCDateToLocalDate(date: Date) {
@@ -20,21 +26,21 @@ function convertUTCDateToLocalDate(date: Date) {
   return newDate;
 }
 
-export function Message({ message }: MessageProp) {
+export function Message({ message, user }: MessageProp) {
   const { data: session } = useSession();
 
   return (
     <div className="flex items-start gap-3 p-5">
       <UserAvatar
-        email={undefined}
-        image={message.user.image}
-        name={message.user.name}
+        email={user.email}
+        image={user.image}
+        name={user.name}
         size="lg"
       />
 
       <div>
         <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold">{message.user.name}</p>
+          <p className="text-2xl font-bold">{user.name}</p>
           <p className="text-sm text-muted-foreground">
             {format(
               convertUTCDateToLocalDate(message.createdAt),
