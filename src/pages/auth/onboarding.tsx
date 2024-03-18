@@ -88,6 +88,18 @@ export default function Onboarding() {
     void verifyCode(); // Call the asynchronous function here
   }, [code]);
 
+  const handlePhoneInputKeyDown = (event: { key: string }) => {
+    if (event.key === "Enter" && !sent) {
+      setIsLoading(true);
+      void mutateSendOTP({ to: phone });
+    }
+  };
+
+  function handleOnSubmit() {
+    setIsLoading(true);
+    void mutateSendOTP({ to: phone });
+  }
+
   return (
     <MainLayout
       type="auth"
@@ -121,6 +133,7 @@ export default function Onboarding() {
             <PhoneInput
               defaultCountry={"US"}
               onChange={(value) => setPhone(value)}
+              onKeyDown={handlePhoneInputKeyDown}
             />
           )}
         </CardContent>
@@ -139,13 +152,7 @@ export default function Onboarding() {
             </>
           ) : (
             <>
-              <Button
-                onClick={() => {
-                  setIsLoading(true);
-                  void mutateSendOTP({ to: phone });
-                }}
-                disabled={isLoading}
-              >
+              <Button onClick={() => handleOnSubmit()} disabled={isLoading}>
                 {isLoading && (
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 )}
