@@ -40,23 +40,23 @@ export default withAuth(
       );
     }
 
-    // const isOnboardingPage =
-    //   req.nextUrl.pathname.startsWith("/auth/onboarding");
+    const isOnboardingPage =
+      req.nextUrl.pathname.startsWith("/auth/onboarding");
 
-    // // If the user has already onboarded (phoneNumber is not null) and they are trying to access the onboarding page
-    // if (
-    //   isOnboardingPage &&
-    //   userPhoneNumber.success &&
-    //   userPhoneNumber.data !== null
-    // ) {
-    //   if (userRole.success) {
-    //     const role = userRole.data;
-    //     return NextResponse.redirect(
-    //       new URL(getHomePageFromRole(role), req.url),
-    //     );
-    //   }
-    //   return NextResponse.redirect(new URL("/dashboard", req.url));
-    // }
+    // If the user has already onboarded (phoneNumber is not null) and they are trying to access the onboarding page
+    if (
+      isOnboardingPage &&
+      userPhoneNumber.success &&
+      userPhoneNumber.data !== null
+    ) {
+      if (userRole.success) {
+        const role = userRole.data;
+        return NextResponse.redirect(
+          new URL(getHomePageFromRole(role), req.url),
+        );
+      }
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
 
     // // If the user has not onboarded (phoneNumber is null) and they are not trying to access the onboarding page
 
@@ -98,5 +98,6 @@ export const config = {
     "/auth/signup",
     "/admin/:path*",
     "/host/:path*",
+    "/auth/onboarding",
   ],
 };
