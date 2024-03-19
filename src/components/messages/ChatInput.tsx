@@ -46,11 +46,9 @@ export default function ChatInput({
     if (session) {
       const utcDate = new Date(Date.now());
 
-      console.log(utcDate.toISOString().slice(0, -5));
-
       const newMessage: ChatMessageType = {
         id: nanoid(),
-        createdAt: new Date().toISOString().slice(0, -5),
+        createdAt: new Date().toISOString().slice(0, -1),
         conversationId: conversationId,
         userId: session.user.id,
         message: values.message,
