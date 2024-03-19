@@ -110,7 +110,7 @@ function SmallSidebar(props: HeaderProps) {
           )}
 
           {props.type === "dashboard" && (
-            <aside className="sticky bottom-0 top-header h-screen-minus-header">
+            <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
               <Sidebar withLogo type={props.sidebarType} />
             </aside>
           )}
