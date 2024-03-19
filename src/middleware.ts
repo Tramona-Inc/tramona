@@ -94,8 +94,10 @@ export default withAuth(
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/auth/signin",
+    "/auth/signup",
     "/admin/:path*",
     "/host/:path*",
-    "/auth/:path*",
+    "/auth/onboarding",
   ],
 };
