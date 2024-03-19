@@ -12,11 +12,14 @@ import { Button } from "../ui/button";
 import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import { type Request } from "@/server/db/schema";
 
 export default function RejectRequestDialog({
   children,
-  requestId,
-}: PropsWithChildren<{ requestId: number }>) {
+  request,
+}: PropsWithChildren<{
+  request: Pick<Request, "checkIn" | "checkOut" | "location" | "id">;
+}>) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,7 +30,7 @@ export default function RejectRequestDialog({
     setIsLoading(true);
 
     await mutation
-      .mutateAsync({ id: requestId })
+      .mutateAsync({ id: request.id })
       .then(() => utils.requests.invalidate())
       .then(() => toast({ title: "Sucessfully rejected request" }))
       .catch(() => errorToast());

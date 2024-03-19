@@ -24,6 +24,8 @@ export default function Page() {
 
   const request = requests?.pastRequests.find(({ id }) => id === requestId);
 
+  const offerCount = offers?.length;
+
   return (
     <>
       <div className="relative">
@@ -33,7 +35,7 @@ export default function Page() {
         <div className="px-4 py-16">
           <div className="mx-auto max-w-xl">
             {request ? (
-              <RequestCard withUser request={request} />
+              <RequestCard isAdminDashboard request={request} />
             ) : (
               <Card className="h-56" />
             )}
@@ -61,7 +63,15 @@ export default function Page() {
                   checkIn={request.checkIn}
                   checkOut={request.checkOut}
                 >
-                  <RevokeOfferDialog offerId={offer.id}>
+                  <RevokeOfferDialog
+                    requestId={request.id}
+                    requestCheckIn={request.checkIn}
+                    requestCheckOut={request.checkOut}
+                    offerId={offer.id}
+                    propertyAddress={offer.property.address!}
+                    propertyName={offer.property.name}
+                    offerCount={offerCount!}
+                  >
                     <Button variant="outline" className="rounded-full">
                       Revoke offer
                     </Button>

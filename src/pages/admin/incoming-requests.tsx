@@ -17,13 +17,13 @@ function IncomingRequestCards({
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
-        <RequestCard withUser key={request.id} request={request}>
+        <RequestCard isAdminDashboard key={request.id} request={request}>
           <DeleteRequestDialog requestId={request.id}>
             <Button className="rounded-full" variant="outline">
               Delete
             </Button>
           </DeleteRequestDialog>
-          <RejectRequestDialog requestId={request.id}>
+          <RejectRequestDialog request={request}>
             <Button className="rounded-full" variant="outline">
               Reject
             </Button>

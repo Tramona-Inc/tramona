@@ -74,47 +74,41 @@ export const propertySafetyItemsEnum = pgEnum(
   ALL_PROPERTY_SAFETY_ITEMS,
 );
 
-export const properties = pgTable(
-  "properties",
-  {
-    id: serial("id").primaryKey(),
-    hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 255 }).notNull(),
+export const properties = pgTable("properties", {
+  id: serial("id").primaryKey(),
+  hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
 
-    // for when blake/preju manually upload, otherwise get the host's name via hostId
-    hostName: varchar("host_name", { length: 255 }),
+  // for when blake/preju manually upload, otherwise get the host's name via hostId
+  hostName: varchar("host_name", { length: 255 }),
 
-    // how many guests does this property accomodate at most?
-    address: varchar("address", { length: 1000 }),
-    maxNumGuests: smallint("max_num_guests").notNull(),
-    numBeds: smallint("num_beds").notNull(),
-    numBedrooms: smallint("num_bedrooms").notNull(),
-    avgRating: doublePrecision("avg_rating").notNull(),
-    numRatings: integer("num_ratings").notNull(),
-    airbnbUrl: varchar("airbnb_url"),
-    airbnbMessageUrl: varchar("airbnb_message_url"),
-    imageUrls: varchar("image_url").array().notNull(),
-    originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
-    propertyType: propertyTypeEnum("property_type").notNull(),
-    amenities: propertyAmenitiesEnum("property_amenities").array().notNull(),
-    checkInInfo: varchar("check_in_info"),
-    standoutAmenities: propertyStandoutAmenitiesEnum(
-      "property_standout_amenities",
-    )
-      .array()
-      .notNull(),
-    safetyItems: propertySafetyItemsEnum("property_safety_items")
-      .array()
-      .notNull(),
-    about: text("about").notNull(),
-    areaDescription: text("area_description"),
-    mapScreenshot: text("map_screenshot"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-  },
-  (t) => ({
-    uniqueAirbnbUrls: unique("unique_airbnb_urls").on(t.airbnbUrl),
-  }),
-);
+  // how many guests does this property accomodate at most?
+  address: varchar("address", { length: 1000 }),
+  maxNumGuests: smallint("max_num_guests").notNull(),
+  numBeds: smallint("num_beds").notNull(),
+  numBedrooms: smallint("num_bedrooms").notNull(),
+  avgRating: doublePrecision("avg_rating").notNull(),
+  numRatings: integer("num_ratings").notNull(),
+  airbnbUrl: varchar("airbnb_url"),
+  airbnbMessageUrl: varchar("airbnb_message_url"),
+  imageUrls: varchar("image_url").array().notNull(),
+  originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
+  propertyType: propertyTypeEnum("property_type").notNull(),
+  amenities: propertyAmenitiesEnum("property_amenities").array().notNull(),
+  checkInInfo: varchar("check_in_info"),
+  standoutAmenities: propertyStandoutAmenitiesEnum(
+    "property_standout_amenities",
+  )
+    .array()
+    .notNull(),
+  safetyItems: propertySafetyItemsEnum("property_safety_items")
+    .array()
+    .notNull(),
+  about: text("about").notNull(),
+  areaDescription: text("area_description"),
+  mapScreenshot: text("map_screenshot"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
 
 export type Property = typeof properties.$inferSelect;
 export const propertySelectSchema = createSelectSchema(properties);

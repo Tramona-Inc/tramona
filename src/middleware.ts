@@ -45,9 +45,9 @@ export default withAuth(
 
     // If the user has already onboarded (phoneNumber is not null) and they are trying to access the onboarding page
     if (
+      isOnboardingPage &&
       userPhoneNumber.success &&
-      userPhoneNumber.data !== null &&
-      isOnboardingPage
+      userPhoneNumber.data !== null
     ) {
       if (userRole.success) {
         const role = userRole.data;
@@ -59,10 +59,11 @@ export default withAuth(
     }
 
     // If the user has not onboarded (phoneNumber is null) and they are not trying to access the onboarding page
+
     if (
+      !isOnboardingPage &&
       userPhoneNumber.success &&
-      userPhoneNumber.data === null &&
-      !isOnboardingPage
+      userPhoneNumber.data === null
     ) {
       return NextResponse.redirect(new URL("/auth/onboarding", req.url));
     }

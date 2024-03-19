@@ -46,6 +46,8 @@ export default function Onboarding() {
   const { mutateAsync: mutateInsertPhone } =
     api.users.insertPhoneWithUserId.useMutation();
 
+  const { update } = useSession();
+
   useEffect(() => {
     const verifyCode = async () => {
       if (code.length === 6 && phone) {
@@ -73,6 +75,8 @@ export default function Onboarding() {
               description: "Your phone has been added to your account.",
             });
 
+            void update();
+
             void router.push({
               pathname: "/auth/welcome",
             });
@@ -83,6 +87,18 @@ export default function Onboarding() {
 
     void verifyCode(); // Call the asynchronous function here
   }, [code]);
+
+  const handlePhoneInputKeyDown = (event: { key: string }) => {
+    if (event.key === "Enter" && !sent) {
+      setIsLoading(true);
+      void mutateSendOTP({ to: phone });
+    }
+  };
+
+  function handleOnSubmit() {
+    setIsLoading(true);
+    void mutateSendOTP({ to: phone });
+  }
 
   return (
     <MainLayout
@@ -117,6 +133,7 @@ export default function Onboarding() {
               autoFocus
               defaultCountry={"US"}
               onChange={(value) => setPhone(value)}
+              onKeyDown={handlePhoneInputKeyDown}
             />
           )}
         </CardContent>
@@ -135,13 +152,7 @@ export default function Onboarding() {
             </>
           ) : (
             <>
-              <Button
-                onClick={() => {
-                  setIsLoading(true);
-                  void mutateSendOTP({ to: phone });
-                }}
-                disabled={isLoading}
-              >
+              <Button onClick={() => handleOnSubmit()} disabled={isLoading}>
                 {isLoading && (
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 )}

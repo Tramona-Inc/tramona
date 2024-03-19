@@ -37,11 +37,26 @@ export function getFmtdFilters(
 export function getRequestStatus(request: {
   resolvedAt: Date | null;
   numOffers: number;
+  hasApproved: boolean;
 }) {
   if (request.resolvedAt) {
     return request.numOffers === 0 ? "rejected" : "booked";
   }
-  return request.numOffers === 0 ? "pending" : "accepted";
+  if (request.hasApproved) {
+    return request.numOffers === 0 ? "pending" : "accepted";
+  } else {
+    return "unconfirmed";
+  }
+}
+
+export function isIncoming(request: Parameters<typeof getRequestStatus>[0]) {
+  const status = getRequestStatus(request);
+  return status === "unconfirmed" || status === "pending";
+}
+
+export function formatPhoneNumber(phoneNumber: string) {
+  const removeNonDigit = phoneNumber.replace(/\D/g, "");
+  return "+1" + removeNonDigit;
 }
 
 export function getHomePageFromRole(role: User["role"]) {

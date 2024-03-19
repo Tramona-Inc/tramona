@@ -47,10 +47,11 @@ const DrawerContent = React.forwardRef<
         "fixed inset-x-0 bottom-0 z-50 mt-24 flex !h-auto flex-col space-y-4 rounded-t-2xl bg-background px-4 py-6 pt-3 outline-none",
         className,
       )}
+      onCloseAutoFocus={(e) => e.preventDefault()}
       {...props}
     >
       <div className="mx-auto h-1.5 w-20 rounded-full bg-accent" />
-      <ScrollArea data-asdf className="max-h-[calc(100vh-8rem)] px-2">
+      <ScrollArea data-asdf className="max-h-screen-minus-header px-2">
         {children}
       </ScrollArea>
     </DrawerPrimitive.Content>

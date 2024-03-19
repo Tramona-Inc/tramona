@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES, MAX_REQUEST_GROUP_SIZE } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { capitalize, cn, getNumNights } from "@/utils/utils";
@@ -51,10 +51,11 @@ const formSchema = z.object({
           path: ["date"],
         }),
     )
-    .nonempty(),
+    .min(1),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
+type ErrorState = string | null;
 
 const defaultValues: Partial<FormSchema["data"][number]> = {
   propertyType: "any",
@@ -70,13 +71,13 @@ export default function DesktopSearchBar({
     defaultValues: {
       data: [defaultValues],
     },
-    context: {
-      test: 123,
-    },
   });
 
   const [curTab, setCurTab] = useState(0);
-  const MAX_TRIPS = 10;
+  const [airbnbUrl, setAirbnbUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<ErrorState>(null);
+  // const [combinedScrapedData, setCombinedScrapedData] = useState<string[]>([]); // State variable for combined scraped data
 
   const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
@@ -144,6 +145,7 @@ export default function DesktopSearchBar({
 
         // we need to do this instead of form.reset() since i
         // worked around needing to give defaultValues to useForm
+        form.reset();
         form.setValue("data", [defaultValues] as FormSchema["data"]);
         setCurTab(0);
 
@@ -162,7 +164,49 @@ export default function DesktopSearchBar({
     afterSubmit?.();
   }
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/scrape", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: airbnbUrl }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to scrape data");
+      }
+
+      // Reset input field after successful scraping
+      setAirbnbUrl("");
+      setError(null);
+      const scrapedData = await response.json();
+      // grab this data, put it in local storage or in the db ---- scrapedData.combinedData
+    } catch (error) {
+      console.error("Error scraping data:", error);
+      setError("Failed to scrape data");
+    } finally {
+      setLoading(false);
+    }
+
+    // Add your Puppeteer scraping logic here
+    // For example:
+    // const browser = await puppeteer.launch();
+    //const page = await browser.newPage();
+    // await page.goto(airbnbUrl, { waitUntil: 'domcontentloaded' });
+    // await page.waitForTimeout(30000);
+
+    // // Other scraping operations...
+    // await browser.close();
+  };
+
   return (
+    // <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => onSubmit(data.data))}
@@ -209,8 +253,7 @@ export default function DesktopSearchBar({
                       }
                       form.setValue(
                         "data",
-                        // need `as` since zod nonempty arrays are typed as [T, ...T[]] but filter just returns T[]
-                        data.filter((_, j) => j !== i) as FormSchema["data"],
+                        data.filter((_, j) => j !== i),
                       );
                     }}
                     className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
@@ -221,7 +264,7 @@ export default function DesktopSearchBar({
               </Comp>
             );
           })}
-          {numTabs < MAX_TRIPS && (
+          {numTabs < MAX_REQUEST_GROUP_SIZE && (
             <button
               key=""
               type="button"
@@ -238,11 +281,6 @@ export default function DesktopSearchBar({
               <PlusIcon className="size-4" />
               Add another trip
             </button>
-          )}
-          {numTabs >= MAX_TRIPS && (
-            <div className="text-sm text-red-500">
-              Maximum of {MAX_TRIPS} trips reached.
-            </div>
           )}
         </div>
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
@@ -312,6 +350,26 @@ export default function DesktopSearchBar({
       </form>
     </Form>
   );
+}
+{
+  /* <form onSubmit={(event) => handleSubmit(event)} className="mt-4">
+        <input
+          type="text"
+          value={airbnbUrl}
+          onChange={(event) => setAirbnbUrl(event.target.value)}
+          placeholder="Enter Airbnb URL"
+          className="border border-gray-300 rounded-md px-3 py-2 mr-2 focus:outline-none focus:border-indigo-500"
+          disabled={loading} // Disable input field while loading
+        />
+        <button type="submit" className="bg-indigo-500 text-white rounded-md px-4 py-2 focus:outline-none hover:bg-indigo-600" disabled={loading}>
+          {loading ? 'Scraping...' : 'Scrape'}
+        </button>
+        {combinedScrapedData && <div className="ml-4">Scraped Price: {combinedScrapedData}</div>}
+        {error && <div className="text-red-500 mt-2">{error}</div>}
+      </form> */
+}
+{
+  /* </> */
 }
 
 // const FiltersButton = forwardRef<

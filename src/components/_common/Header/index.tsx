@@ -1,12 +1,12 @@
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 import HeaderTopRight from "./HeaderTopRight";
 
 import NavLink from "@/components/_utils/NavLink";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn } from "@/utils/utils";
+import { cn, useIsLg } from "@/utils/utils";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { TramonaLogo } from "./TramonaLogo";
 
@@ -31,22 +31,26 @@ export default function Header(props: HeaderProps) {
 }
 
 const headerLinks = [
-  {
-    href: "/program",
-    label: "Refer and Earn",
-  },
-  {
-    href: "/for-hosts",
-    label: "For Hosts",
-  },
+  // {
+  //   href: "/program",
+  //   label: "Refer and Earn",
+  // },
+  // {
+  //   href: "/for-hosts",
+  //   label: "For Hosts",
+  // },
   // {
   //   href: "/exclusive-offers",
   //   label: "Exclusive Offers",
   // },
-  {
-    href: "/feed",
-    label: "Social Feed",
-  },
+  // {
+  //   href: "/feed",
+  //   label: "Social Feed",
+  // },
+  // {
+  //   href: "/about",
+  //   label: "About Us",
+  // },
 ];
 
 function LargeHeader(props: HeaderProps) {
@@ -60,11 +64,11 @@ function LargeHeader(props: HeaderProps) {
         <div className="flex items-center justify-center gap-2">
           {props.type === "marketing" && (
             <>
-              {headerLinks.map(({ href, label }, i) => (
+              {/* {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
                   {label}
                 </HeaderLink>
-              ))}
+              ))} */}
             </>
           )}
         </div>
@@ -83,47 +87,57 @@ function LargeHeader(props: HeaderProps) {
   );
 }
 
-function SmallHeader(props: HeaderProps) {
+function SmallSidebar(props: HeaderProps) {
+  const isVisible = !useIsLg();
+
   return (
-    <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MenuIcon />
-          </Button>
-        </SheetTrigger>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MenuIcon />
+        </Button>
+      </SheetTrigger>
+      {isVisible && (
         <SheetContent side="left" className="w-max p-0">
           {props.type === "marketing" && (
             <div className="flex w-80 flex-col gap-2 p-8 pr-16">
-              {headerLinks.map(({ href, label }, i) => (
+              {/* {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
                   {label}
                 </HeaderLink>
-              ))}
+              ))} */}
             </div>
           )}
 
           {props.type === "dashboard" && (
-            <Sidebar withLogo type={props.sidebarType} />
+            <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
+              <Sidebar withLogo type={props.sidebarType} />
+            </aside>
           )}
         </SheetContent>
-      </Sheet>
+      )}
+    </Sheet>
+  );
+}
+
+function SmallHeader(props: HeaderProps) {
+  return (
+    <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
+      <div className="flex-1">
+        <SmallSidebar {...props} />
+      </div>
 
       <TramonaLogo />
 
-      <div className="flex-1" />
+      <div className="flex flex-1 justify-end gap-2">
+        {props.type === "marketing" && (
+          <Button asChild variant="darkOutline">
+            <Link href="/auth/signin">Log in</Link>
+          </Button>
+        )}
 
-      {props.type === "marketing" && (
-        <Button asChild variant="darkOutline">
-          <Link href="/auth/signin">Log in</Link>
-        </Button>
-      )}
-
-      {props.type === "dashboard" && (
-        <div className="flex flex-1 justify-end">
-          <HeaderTopRight />
-        </div>
-      )}
+        {props.type === "dashboard" && <HeaderTopRight />}
+      </div>
     </header>
   );
 }

@@ -5,19 +5,22 @@ import {
   pgTable,
   serial,
   smallint,
-  text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { propertyTypeEnum } from "./properties";
-import { users } from "./users";
+import { groups } from "./groups";
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
-  userId: text("user_id")
+  madeByGroupId: integer("made_by_group_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    // for this onDelete cascade to do anything, well need to delete groups with no members
+    .references(() => groups.id, { onDelete: "cascade" }),
+  requestGroupId: integer("request_group_id")
+    .notNull()
+    .references(() => requestGroups.id, { onDelete: "cascade" }),
   maxTotalPrice: integer("max_total_price").notNull(), // in cents
   location: varchar("location", { length: 255 }).notNull(), // TODO: use postGIS
   checkIn: date("check_in", { mode: "date" }).notNull(),
@@ -31,9 +34,16 @@ export const requests = pgTable("requests", {
   resolvedAt: timestamp("resolved_at"),
   hasApproved: boolean("has_approved").default(false).notNull(),
   confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
+  haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),
 });
 
 export type Request = typeof requests.$inferSelect;
 export type NewRequest = typeof requests.$inferInsert;
 export const requestSelectSchema = createSelectSchema(requests);
 export const requestInsertSchema = createInsertSchema(requests);
+
+export const MAX_REQUEST_GROUP_SIZE = 10;
+
+export const requestGroups = pgTable("request_groups", {
+  id: serial("id").primaryKey(),
+});
