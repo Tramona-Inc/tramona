@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
   InputOTP,
@@ -87,23 +87,22 @@ export default function Onboarding() {
   return (
     <MainLayout
       type="auth"
-      className="container flex flex-col items-center justify-center"
+      className="container flex flex-col items-center justify-center gap-5"
     >
-      <h1 className="text-center text-4xl font-bold">
-        First, let&apos;s setup your account!
+      <h1 className="text-center text-4xl font-bold tracking-tight">
+        Let&apos;s set up your account
       </h1>
-      <Card className="my-5 flex min-w-[400px] flex-col gap-5">
+      <Card className=" min-w-[400px]">
         <CardHeader>
-          <CardDescription className="text-2xl">
-            Verify a mobile phone number
-          </CardDescription>
+          <CardTitle>Verify your phone number</CardTitle>
         </CardHeader>
-        <CardContent className="flex justify-center">
+        <CardContent className="flex justify-center pt-8">
           {sent ? (
             <InputOTP
               maxLength={6}
               pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
               value={code}
+              autoFocus
               onChange={(value) => setCode(value)}
               render={({ slots }) => (
                 <InputOTPGroup>
@@ -115,6 +114,7 @@ export default function Onboarding() {
             />
           ) : (
             <PhoneInput
+              autoFocus
               defaultCountry={"US"}
               onChange={(value) => setPhone(value)}
             />
@@ -149,8 +149,8 @@ export default function Onboarding() {
               </Button>
 
               <p className="text-center text-xs text-muted-foreground">
-                We verify a phone number on account creation to ensure account
-                security. SMS & data charges may apply.
+                We verify your phone number on account creation to ensure
+                account security. SMS & data charges may apply.
               </p>
             </>
           )}

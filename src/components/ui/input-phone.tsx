@@ -61,7 +61,7 @@ PhoneInput.displayName = "PhoneInput";
 const InputComponent = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, ...props }, ref) => (
     <Input
-      placeholder="Enter a phone number"
+      placeholder="Enter phone number"
       className={cn("w-[300px]", className)}
       {...props}
       ref={ref}
