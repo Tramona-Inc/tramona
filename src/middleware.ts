@@ -96,6 +96,6 @@ export const config = {
     "/dashboard/:path*",
     "/admin/:path*",
     "/host/:path*",
-    "/auth/*",
+    "/auth/:path*",
   ],
 };
