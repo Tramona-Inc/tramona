@@ -88,7 +88,7 @@ export default function Sidebar({
   const userId = session?.user.id
   
   // '512b248b-229d-4e04-a63a-8a3f52cab3f5'
-  const response = api.messages.showUnreadMessages.useQuery({ userId: userId })
+  const response = api.messages.showUnreadMessages.useQuery({ userId: userId! })
 
   useEffect(() => {
     response.data?.length && notifyMe
