@@ -3,17 +3,16 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { referralCodes, userSelectSchema, userUpdateSchema, users, conversationParticipants } from "@/server/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { referralCodes, userUpdateSchema, users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
-import { zodEmail, zodString, zodMMDDYYYY } from "@/utils/zod-utils";
+import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-
 
 export const usersRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
