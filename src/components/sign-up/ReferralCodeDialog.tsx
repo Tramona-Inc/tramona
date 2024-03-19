@@ -104,10 +104,9 @@ function ReferralCodeForm() {
     successSlide ?? (
       <>
         <DialogHeader>
-          <DialogTitle>Did someone refer you?</DialogTitle>
-          <DialogDescription>
-            Please input their referral code!
-          </DialogDescription>
+          <DialogTitle className="text-center font-bold text-3xl">
+            Did someone refer you?
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -120,7 +119,7 @@ function ReferralCodeForm() {
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Enter referral code"
+                      placeholder="Please input their referral code here"
                       onChange={(e) =>
                         field.onChange(e.target.value.toUpperCase())
                       }
