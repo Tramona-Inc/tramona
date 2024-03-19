@@ -6,12 +6,17 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
+  MAX_REQUEST_GROUP_SIZE,
+  groupMembers,
+  groups,
+  requestGroups,
   requestInsertSchema,
   requestSelectSchema,
   requests,
+  users,
 } from "@/server/db/schema";
 import { sendSlackMessage } from "@/server/slack";
-import { getRequestStatus } from "@/utils/formatters";
+import { isIncoming } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
@@ -23,28 +28,93 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { sendText } from "@/server/server-utils";
 
+async function createGroup({
+  ownerId,
+  _db = db,
+}: {
+  ownerId?: string;
+  _db?: typeof db;
+}) {
+  const groupId = await _db
+    .insert(groups)
+    .values({})
+    .returning()
+    .then((res) => res[0]!.id);
+
+  if (ownerId) {
+    await _db
+      .insert(groupMembers)
+      .values({ groupId, userId: ownerId, isOwner: true });
+  }
+
+  return groupId;
+}
+
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
-    const myRequests = await db.query.requests
+    const groupedRequests = await ctx.db.query.groupMembers
       .findMany({
-        where: eq(requests.userId, ctx.user.id),
+        where: eq(groupMembers.userId, ctx.user.id),
         with: {
-          madeByUser: {
-            columns: { email: true, phoneNumber: true },
-          },
-          offers: {
-            columns: {},
+          group: {
             with: {
-              property: {
-                columns: {},
-                with: { host: { columns: { image: true } } },
+              requests: {
+                with: {
+                  offers: {
+                    with: {
+                      property: {
+                        with: {
+                          host: {
+                            columns: {
+                              name: true,
+                              email: true,
+                              image: true,
+                              id: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
               },
+              members: {
+                with: {
+                  user: {
+                    columns: { name: true, email: true, image: true, id: true },
+                  },
+                },
+              },
+              invites: true,
             },
           },
         },
       })
+
+      // 1. turn the data into a nicer shape
       .then((res) =>
         res
+          .map((groupMember) => {
+            const {
+              group: { requests, members, invites },
+            } = groupMember;
+
+            return requests.map((request) => ({
+              ...request,
+              groupMembers: members.map((member) => ({
+                ...member.user,
+                isGroupOwner: member.isOwner,
+              })),
+              groupInvites: invites,
+            }));
+          })
+          .flat(1),
+      )
+
+      .then((res) => {
+        const ungroupedRequests = res
+
+          // 2. extract host images & offers count
           .map((request) => {
             const hostImages = request.offers
               .map((offer) => offer.property.host?.image)
@@ -56,27 +126,53 @@ export const requestsRouter = createTRPCRouter({
 
             return { ...requestExceptOffers, hostImages, numOffers };
           })
+
+          // 3. sort
           .sort(
             (a, b) =>
               b.numOffers - a.numOffers ||
               b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
-      );
+          );
 
-    const activeRequests = myRequests
-      .filter((request) => request.resolvedAt === null)
-      .map((request) => ({ ...request, resolvedAt: null })); // because ts is dumb
+        // 4. group
+        const groupedRequests: {
+          groupId: number;
+          requests: typeof ungroupedRequests;
+        }[] = [];
 
-    const inactiveRequests = myRequests
-      .filter((request) => request.resolvedAt !== null)
-      .map((request) => ({
-        ...request,
-        resolvedAt: request.resolvedAt ?? new Date(),
-      })); // because ts is dumb, new Date will never actually happen
+        for (const request of ungroupedRequests) {
+          const group = groupedRequests.find(
+            ({ groupId }) => groupId === request.requestGroupId,
+          );
+
+          if (group) {
+            group.requests.push(request);
+          } else {
+            groupedRequests.push({
+              groupId: request.requestGroupId,
+              requests: [request],
+            });
+          }
+        }
+
+        return groupedRequests;
+      });
+
+    // 5. group by active/inactive (and put partially-active groups on active)
+
+    const activeRequestGroups = groupedRequests.filter((group) =>
+      group.requests.some((request) => request.resolvedAt === null),
+    );
+
+    const inactiveRequestGroups = groupedRequests.filter(
+      (group) => !activeRequestGroups.includes(group),
+    );
+
+    // 5. all done
 
     return {
-      activeRequests,
-      inactiveRequests,
+      activeRequestGroups,
+      inactiveRequestGroups,
     };
   }),
 
@@ -84,8 +180,23 @@ export const requestsRouter = createTRPCRouter({
     return await db.query.requests
       .findMany({
         with: {
-          madeByUser: {
-            columns: { email: true, phoneNumber: true },
+          madeByGroup: {
+            with: {
+              members: {
+                with: {
+                  user: {
+                    columns: {
+                      name: true,
+                      email: true,
+                      image: true,
+                      phoneNumber: true,
+                      id: true,
+                    },
+                  },
+                },
+              },
+              invites: true,
+            },
           },
           offers: { columns: { id: true } },
         },
@@ -95,8 +206,16 @@ export const requestsRouter = createTRPCRouter({
       .then((res) =>
         res
           .map((req) => {
-            const { offers, ...reqWithoutOffers } = req;
-            return { ...reqWithoutOffers, numOffers: offers.length };
+            const { offers, madeByGroup, ...reqWithoutOffers } = req;
+            return {
+              ...reqWithoutOffers,
+              numOffers: offers.length,
+              groupMembers: madeByGroup.members.map((member) => ({
+                ...member.user,
+                isGroupOwner: member.isOwner,
+              })),
+              groupInvites: madeByGroup.invites,
+            };
           })
           .sort(
             (a, b) =>
@@ -104,74 +223,87 @@ export const requestsRouter = createTRPCRouter({
               a.createdAt.getTime() - b.createdAt.getTime(),
           ),
       )
-      .then((res) => ({
-        incomingRequests: res.filter(
-          (req) => getRequestStatus(req) === "pending",
-        ),
-        pastRequests: res.filter((req) => getRequestStatus(req) !== "pending"),
-      }));
+      .then((res) => {
+        return {
+          incomingRequests: res.filter((req) => isIncoming(req)),
+          pastRequests: res.filter((req) => !isIncoming(req)),
+        };
+      });
   }),
 
-  // getAllIncoming: roleRestrictedProcedure(["host", "admin"]).query(
-  //   async ({ ctx, input }) => {
-  //     // get the requests close to this users properties
-  //   },
-  // ),
-
-  create: protectedProcedure
-    .input(requestInsertSchema.omit({ userId: true }))
+  createMultiple: protectedProcedure
+    .input(
+      requestInsertSchema
+        .omit({ madeByGroupId: true, requestGroupId: true })
+        .array()
+        .min(1)
+        .max(MAX_REQUEST_GROUP_SIZE),
+    )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(requests).values({
-        ...input,
-        userId: ctx.user.id,
+      await ctx.db.transaction(async (tx) => {
+        const requestGroupId = await tx
+          .insert(requestGroups)
+          .values({})
+          .returning()
+          .then((res) => res[0]!.id);
+
+        const results = await Promise.allSettled(
+          input.map(async (req) => {
+            const madeByGroupId = await createGroup({
+              ownerId: ctx.user.id,
+              _db: tx,
+            });
+
+            await tx.insert(requests).values({
+              ...req,
+              madeByGroupId,
+              requestGroupId,
+            });
+          }),
+        );
+
+        results.forEach((result) => {
+          if (result.status === "rejected") {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: JSON.stringify(result.reason),
+            });
+          }
+        });
       });
 
-      const name = ctx.user.name ?? ctx.user.email ?? "Someone";
-      const pricePerNight =
-        input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
-      const fmtdPrice = formatCurrency(pricePerNight);
-      const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
-      const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
-
-      if (env.NODE_ENV === "production") {
-        sendSlackMessage(
-          `*${name} just made a request: ${input.location}*`,
-          `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-          `<https://tramona.com/admin|Go to admin dashboard>`,
-        );
-      }
-    }),
-
-  // 10 requests limit
-  createMultiple: protectedProcedure
-    .input(requestInsertSchema.omit({ userId: true }).array())
-    .mutation(async ({ ctx, input }) => {
-      if (input.length > 10) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot create more than 10 requests at a time",
-        });
-      }
-
-      await ctx.db.transaction((tx) =>
-        Promise.allSettled(
-          input.map((req) =>
-            tx.insert(requests).values({
-              ...req,
-              userId: ctx.user.id,
-            }),
-          ),
-        ),
-      );
+      if (env.NODE_ENV !== "production") return;
 
       const name = ctx.user.name ?? ctx.user.email ?? "Someone";
 
-      if (env.NODE_ENV === "production") {
+      if (input.length > 1) {
         sendSlackMessage(
           `*${name} just made ${input.length} requests*`,
           `<https://tramona.com/admin|Go to admin dashboard>`,
         );
+
+        return;
       }
+
+      const request = input[0]!;
+
+      const pricePerNight =
+        request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
+      const fmtdPrice = formatCurrency(pricePerNight);
+      const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
+      const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
+
+      sendSlackMessage(
+        `*${name} just made a request: ${request.location}*`,
+        `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+        `<https://tramona.com/admin|Go to admin dashboard>`,
+      );
+
+      void sendText({
+        to: ctx.user.phoneNumber!,
+        content:
+          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      });
     }),
 
   // resolving a request with no offers = reject
@@ -184,7 +316,7 @@ export const requestsRouter = createTRPCRouter({
   // in the future, well need to validate that a host actually received the request,
   // or else a malicious host could reject any request
   updateConfirmation: protectedProcedure
-    .input(z.object({ requestId: z.number(), phoneNumber: z.string() }))
+    .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(requests)
@@ -192,7 +324,7 @@ export const requestsRouter = createTRPCRouter({
         .where(eq(requests.id, input.requestId));
 
       await sendText({
-        to: input.phoneNumber,
+        to: ctx.user.phoneNumber!,
         content:
           "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
       });
@@ -209,9 +341,7 @@ export const requestsRouter = createTRPCRouter({
           checkOut: true,
         },
         with: {
-          madeByUser: {
-            columns: { phoneNumber: true },
-          },
+          madeByGroup: { with: { members: true } },
         },
       });
 
@@ -224,27 +354,52 @@ export const requestsRouter = createTRPCRouter({
         .set({ resolvedAt: new Date() })
         .where(eq(requests.id, input.id));
 
-      void sendText({
-        to: request.madeByUser.phoneNumber!,
-        content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
-      });
+      const ownerId = request.madeByGroup.members.find(
+        (member) => member.isOwner,
+      )!.userId;
+
+      const ownerPhoneNumber = await ctx.db.query.users
+        .findFirst({
+          where: eq(users.id, ownerId),
+          columns: { phoneNumber: true },
+        })
+        .then((res) => res?.phoneNumber);
+
+      if (ownerPhoneNumber) {
+        void sendText({
+          to: ownerPhoneNumber,
+          content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
+        });
+      }
     }),
 
   delete: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
-      const request = await ctx.db.query.requests.findFirst({
-        where: eq(requests.id, input.id),
-        columns: {
-          userId: true,
-        },
-      });
+      // Only group owner and admin can delete
+      // (or anyone if theres no group owner for whatever reason)
 
-      // Only users and admin can delete
-      if (ctx.user.role === "admin" || request?.userId === ctx.user.id) {
-        await ctx.db.delete(requests).where(eq(requests.id, input.id));
-      } else {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (ctx.user.role !== "admin") {
+        const groupOwnerId = await ctx.db.query.requests
+          .findFirst({
+            where: eq(requests.id, input.id),
+            with: {
+              madeByGroup: {
+                with: { members: { where: eq(groupMembers.isOwner, true) } },
+              },
+            },
+          })
+          .then((request) => request?.madeByGroup.members[0]?.userId);
+
+        if (!groupOwnerId) {
+          throw new TRPCError({ code: "BAD_REQUEST" });
+        }
+
+        if (ctx.user.id !== groupOwnerId) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
       }
+
+      await ctx.db.delete(requests).where(eq(requests.id, input.id));
     }),
 });

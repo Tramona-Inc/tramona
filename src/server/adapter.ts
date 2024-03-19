@@ -9,15 +9,16 @@ import {
   referralCodes,
 } from "./db/schema";
 import { generateReferralCode, retry } from "@/utils/utils";
+import { addUserToGroups } from "./server-utils";
 
 export function CustomPgDrizzleAdapter(
   db: InstanceType<typeof PgDatabase>,
 ): Adapter {
   return {
     async createUser(user) {
-      return await db.transaction(async (tx) => {
-        const userId = crypto.randomUUID();
+      const userId = crypto.randomUUID();
 
+      const newUser = await db.transaction(async (tx) => {
         const ret = await tx
           .insert(users)
           .values({ ...user, id: userId })
@@ -35,6 +36,10 @@ export function CustomPgDrizzleAdapter(
 
         return ret;
       });
+
+      await addUserToGroups({ email: user.email, id: userId });
+
+      return newUser;
     },
     async getUser(userId) {
       return await db

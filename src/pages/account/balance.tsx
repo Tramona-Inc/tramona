@@ -7,12 +7,10 @@ import { ReferralTable } from "@/components/account/cashback/ReferralTable";
 import { referralColumns } from "@/components/account/cashback/ReferralColumns";
 import Spinner from "@/components/_common/Spinner";
 
-import { api } from "@/utils/api";
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "@/server/api/root";
+import { type RouterOutputs, api } from "@/utils/api";
 
 export type ReferralTableData =
-  inferRouterOutputs<AppRouter>["referralCodes"]["getReferralEarnings"];
+  RouterOutputs["referralCodes"]["getReferralEarnings"];
 
 export default function CashbackBalance() {
   useSession({ required: true });
