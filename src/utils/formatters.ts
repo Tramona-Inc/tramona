@@ -39,7 +39,6 @@ export function getRequestStatus(request: {
   numOffers: number;
   hasApproved: boolean;
 }) {
-
   if (request.resolvedAt) {
     return request.numOffers === 0 ? "rejected" : "booked";
   }
@@ -48,6 +47,11 @@ export function getRequestStatus(request: {
   } else {
     return "unconfirmed";
   }
+}
+
+export function isIncoming(request: Parameters<typeof getRequestStatus>[0]) {
+  const status = getRequestStatus(request);
+  return status === "unconfirmed" || status === "pending";
 }
 
 export function formatPhoneNumber(phoneNumber: string) {

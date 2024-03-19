@@ -3,9 +3,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
 import { cn } from "@/utils/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 const buttonVariants = cva(
-  "inline-flex items-center gap-2 text-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center gap-2 text-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       size: {
@@ -22,17 +23,19 @@ const buttonVariants = cva(
           "border-2 border-primary bg-background text-primary hover:bg-primary/10 focus-visible:bg-primary/10",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-accent text-zinc-800",
         link: "text-primary underline-offset-4 hover:underline",
         emptyInput:
-          "w-full bg-accent/70 text-zinc-500 px-3 hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50",
+          "w-full bg-accent/70 text-zinc-500 px-3 hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50",
         filledInput:
-          "w-full bg-primary-foreground px-3 font-normal text-black hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50",
+          "w-full bg-primary-foreground px-3 font-normal text-black hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50",
         darkPrimary: "bg-black text-white hover:bg-black/80",
         darkOutline: "border-2 border-black hover:bg-zinc-200",
         darkOutlineWhite: "border-2 border-white text-white",
         gold: "bg-gold text-black hover:bg-gold/90",
         white: "bg-white text-black hover:bg-zinc-200",
+        wrapper:
+          "hover:bg-accent hover:text-accent-foreground gap-0 -m-1 h-auto rounded-full p-1",
       },
     },
     defaultVariants: {
@@ -47,6 +50,8 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
+  tooltip?: React.ReactNode;
+  tooltipOptions?: React.ComponentProps<typeof TooltipContent>;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -57,13 +62,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       isLoading = false,
+      tooltip,
+      tooltipOptions = {},
       children,
       ...props
     },
     ref,
   ) => {
     const Comp = asChild ? Slot : "button";
-    return (
+    const button = (
       <Comp
         className={cn(buttonVariants({ variant, size, className }), "group")}
         ref={ref}
@@ -72,6 +79,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {children}
       </Comp>
+    );
+    return tooltip ? (
+      <Tooltip>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent {...tooltipOptions}>{tooltip}</TooltipContent>
+      </Tooltip>
+    ) : (
+      button
     );
   },
 );

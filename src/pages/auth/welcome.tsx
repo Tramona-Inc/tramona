@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import type { StepperConfig } from "@/components/ui/stepper";
 import { Stepper, StepperItem } from "@/components/ui/stepper";
 import { useStepper } from "@/components/ui/use-stepper";
-import { BadgeDollarSign, CalendarCheck, PiggyBank } from "lucide-react";
 
+import MainLayout from "@/components/_common/Layout/MainLayout";
+import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 import { api } from "@/utils/api";
 import { cn, sleep } from "@/utils/utils";
-import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
-import MainLayout from '@/components/_common/Layout/MainLayout';
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 function StepperContentLayout({
   children,
@@ -30,15 +31,9 @@ function StepperContentLayout({
 }
 
 function Step1(): JSX.Element {
-  // Get 3 offers with the highest discount %
-  const offers = liveFeedOffers
-    .filter((offer) => offer.discountPercent > 30)
-    .sort((a, b) => b.discountPercent - a.discountPercent)
-    .slice(0, 3);
-
   return (
     <StepperContentLayout className="container gap-4 text-balance">
-      <div className="flex flex-col gap-10 text-center">
+      <div className="my-3 flex flex-col gap-10 text-center">
         <h1 className="text-4xl font-bold lg:text-5xl">
           Welcome to the New Era of Travel!
         </h1>
@@ -47,10 +42,12 @@ function Step1(): JSX.Element {
         </p>
       </div>
 
-      <div className="flex flex-col items-center gap-3 text-pretty lg:gap-4">
+      <div className="flex flex-col items-center gap-3 text-pretty rounded-md border-0 bg-zinc-100 py-8 lg:gap-4">
         <div className="flex max-w-[500px] items-center gap-4">
           <div>
-            <CalendarCheck className="h-8 w-8 text-primary lg:h-10 lg:w-10" />
+            <p className="flex h-10 w-10 items-center justify-center rounded-full border bg-black text-2xl font-semibold text-white">
+              1
+            </p>
           </div>
           <p className="font-medium lg:text-lg">
             Tramona works by matching you with one of the many hosts in our
@@ -60,7 +57,9 @@ function Step1(): JSX.Element {
 
         <div className="flex max-w-[500px] items-center gap-4">
           <div>
-            <BadgeDollarSign className="h-8 w-8 text-primary lg:h-10 lg:w-10" />
+            <p className="flex h-10 w-10 items-center justify-center rounded-full border bg-black text-2xl font-semibold text-white">
+              2
+            </p>
           </div>
           <p className="font-medium lg:text-lg">
             We also talk to the host directly, avoiding those nasty fees other
@@ -70,20 +69,15 @@ function Step1(): JSX.Element {
 
         <div className="flex max-w-[500px] items-center gap-4">
           <div>
-            <PiggyBank className="h-8 w-8 text-primary lg:h-10 lg:w-10" />
+            <p className="flex h-10 w-10 items-center justify-center rounded-full border bg-black text-2xl font-semibold text-white">
+              3
+            </p>
           </div>
           <p className="font-medium lg:text-lg">
             Because of this, we can guarantee you a price that is not available
-            anywhere else. <mark className="bg-gold px-1">Make a request</mark>{" "}
-            and see for yourself.
+            anywhere else. Make a request and see for yourself.
           </p>
         </div>
-      </div>
-
-      <div className="my-4 flex min-w-full flex-1 flex-col space-y-4 self-center rounded-3xl bg-primary p-4 md:min-w-[400px] lg:min-w-[500px] xl:min-w-[600px]">
-        {offers.map((offer) => (
-          <OfferCard key={offer.id} offer={offer} />
-        ))}
       </div>
     </StepperContentLayout>
   );
@@ -97,12 +91,12 @@ function Step2(): JSX.Element {
       <div className="flex flex-col gap-10 text-center">
         <h1 className="text-4xl font-bold lg:text-5xl">Invite your friends!</h1>
         <p className="text-lg font-medium lg:text-xl">
-          We offer a generous <mark className="bg-gold px-1">30%</mark> base
-          profit split with people you bring to the platform.
+          We offer a generous 30% base profit split with people you bring to the
+          platform.
         </p>
       </div>
 
-      <div className="my-10 flex flex-col items-center gap-4 font-medium text-zinc-500">
+      <div className="my-6 flex flex-col items-center gap-4 font-medium text-zinc-500">
         <p className="text-lg lg:text-xl">Here is your referral code</p>
         <p className="text-sm font-normal lg:text-base">
           Share your code and start earning on other peoples travel
@@ -121,19 +115,24 @@ function Step2(): JSX.Element {
 }
 
 function Step3(): JSX.Element {
+  const offers = liveFeedOffers
+    .filter((offer) => offer.discountPercent > 30)
+    .sort((a, b) => b.discountPercent - a.discountPercent)
+    .slice(0, 3);
+
   return (
     <StepperContentLayout className="container gap-4 text-balance text-center">
-      <h1 className="text-4xl font-bold lg:text-5xl">Become a host</h1>
-      <div className="my-10 space-y-10 self-center font-medium lg:max-w-[600px]">
+      <h1 className="text-4xl font-bold lg:text-5xl">Make a Request</h1>
+      <div className="my-4 self-center font-medium lg:max-w-[600px]">
         <p className="text-xl lg:text-2xl">
-          Sign up in the menu to start to get offers sent directly to you,
-          however you prefer.
+          Either name your own price or submit a link, and we will get you the
+          same property or a similar one at a discount
         </p>
-        <p className="text-lg lg:text-xl">
-          You will get requests in your area sent directly to you.{" "}
-          <mark className="bg-gold px-1">Make more money</mark> and{" "}
-          <mark className="bg-gold px-1">reduce vacancies!</mark>
-        </p>
+      </div>
+      <div className="my-4 flex min-w-full flex-1 flex-col space-y-4 self-center rounded-3xl bg-primary p-4 md:min-w-[400px] lg:min-w-[500px] xl:min-w-[600px]">
+        {offers.map((offer) => (
+          <OfferCard key={offer.id} offer={offer} />
+        ))}
       </div>
     </StepperContentLayout>
   );
@@ -151,19 +150,8 @@ export default function Welcome() {
     steps,
   });
 
-  const router = useRouter();
-
-  const startExploring = () => {
-    nextStep();
-    sleep(1500)
-      .then(() => router.push("/"))
-      .catch(() => {
-        return;
-      });
-  };
-
   return (
-    <MainLayout type='auth'>
+    <MainLayout type="auth">
       <Head>
         <title>Welcome | Tramona</title>
       </Head>
@@ -185,15 +173,16 @@ export default function Welcome() {
             </StepperItem>
           ))}
         </Stepper>
-        <div className="flex items-center justify-center gap-2">
-          {activeStep === steps.length ? (
-            <Step3 />
+        <div className="flex justify-center">
+          {isLastStep ? (
+            <Button size="lg" asChild className="rounded-full pr-4">
+              <Link href="/dashboard">
+                Continue to dashboard <ChevronRight className="opacity-80" />
+              </Link>
+            </Button>
           ) : (
-            <Button
-              onClick={isLastStep ? startExploring : nextStep}
-              className="rounded-full px-8"
-            >
-              {isLastStep ? "Make a request now" : "Continue"}
+            <Button size="lg" onClick={nextStep} className="rounded-full pr-4">
+              Next <ChevronRight className="opacity-80" />
             </Button>
           )}
         </div>

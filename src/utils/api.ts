@@ -18,31 +18,47 @@ export function getBaseUrl() {
 
 /** A set of type-safe react-query hooks for your tRPC API. */
 export const api = createTRPCNext<AppRouter>({
-  config() {
-    return {
-      /**
-       * Transformer used for data de-serialization from the server.
-       *
-       * @see https://trpc.io/docs/data-transformers
-       */
-      transformer: superjson,
+  config: () => ({
+    /**
+     * Transformer used for data de-serialization from the server.
+     *
+     * @see https://trpc.io/docs/data-transformers
+     */
+    transformer: superjson,
 
+    /**
+     * Links used to determine request flow from client to server.
+     *
+     * @see https://trpc.io/docs/links
+     */
+    links: [
+      loggerLink({
+        enabled: (opts) =>
+          process.env.NODE_ENV === "development" ||
+          (opts.direction === "down" && opts.result instanceof Error),
+      }),
+      httpBatchLink({
+        url: `${getBaseUrl()}/api/trpc`,
+      }),
+    ],
+  }),
+  overrides: {
+    useMutation: {
       /**
-       * Links used to determine request flow from client to server.
-       *
-       * @see https://trpc.io/docs/links
-       */
-      links: [
-        loggerLink({
-          enabled: (opts) =>
-            process.env.NODE_ENV === "development" ||
-            (opts.direction === "down" && opts.result instanceof Error),
-        }),
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-        }),
-      ],
-    };
+       * This function is called whenever a `.useMutation` succeeds
+       **/
+      async onSuccess(opts) {
+        /**
+         * @note that order here matters:
+         * The order here allows route changes in `onSuccess` without
+         * having a flash of content change whilst redirecting.
+         **/
+        // Calls the `onSuccess` defined in the `useQuery()`-options:
+        await opts.originalFn();
+        // Invalidate all queries in the react-query cache:
+        await opts.queryClient.invalidateQueries();
+      },
+    },
   },
   /**
    * Whether tRPC should await queries when server rendering pages.
