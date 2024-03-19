@@ -58,7 +58,7 @@ export default function LoadMoreMessages() {
         const loadedMessages: ChatMessageType[] = data.map((message) => ({
           conversationId: message.conversation_id,
           id: message.id,
-          createdAt: new Date(message.created_at),
+          createdAt: message.created_at,
           userId: message.user_id,
           message: message.message,
           read: message.read,
