@@ -1,5 +1,5 @@
 import { useConversation } from "@/utils/store/conversations";
-import { ChatMessageType, useMessage } from "@/utils/store/messages";
+import { type ChatMessageType, useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";

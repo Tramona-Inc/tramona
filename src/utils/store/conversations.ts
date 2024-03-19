@@ -1,14 +1,12 @@
-import { type AppRouter } from "@/server/api/root";
 import { type MessageType } from "@/server/db/schema";
-import { type inferRouterOutputs } from "@trpc/server";
 
 import { create } from "zustand";
+import { type RouterOutputs } from "../api";
 
 export type Conversation =
-  inferRouterOutputs<AppRouter>["messages"]["getConversations"][number];
+  RouterOutputs["messages"]["getConversations"][number];
 
-export type Conversations =
-  inferRouterOutputs<AppRouter>["messages"]["getConversations"];
+export type Conversations = RouterOutputs["messages"]["getConversations"];
 
 type ConversationListState = {
   conversationList: Conversations | [];

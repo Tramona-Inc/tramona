@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES, MAX_REQUEST_GROUP_SIZE } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { capitalize, cn, getNumNights } from "@/utils/utils";
@@ -51,7 +51,7 @@ const formSchema = z.object({
           path: ["date"],
         }),
     )
-    .nonempty(),
+    .min(1),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -78,8 +78,6 @@ export default function DesktopSearchBar({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ErrorState>(null);
   // const [combinedScrapedData, setCombinedScrapedData] = useState<string[]>([]); // State variable for combined scraped data
-
-  const MAX_TRIPS = 10;
 
   const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
@@ -117,7 +115,7 @@ export default function DesktopSearchBar({
       return {
         checkIn: checkIn,
         checkOut: checkOut,
-        maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
+        maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
         propertyType: propertyType === "any" ? undefined : propertyType,
         ...restData,
       };
@@ -147,6 +145,7 @@ export default function DesktopSearchBar({
 
         // we need to do this instead of form.reset() since i
         // worked around needing to give defaultValues to useForm
+        form.reset();
         form.setValue("data", [defaultValues] as FormSchema["data"]);
         setCurTab(0);
 
@@ -254,8 +253,7 @@ export default function DesktopSearchBar({
                       }
                       form.setValue(
                         "data",
-                        // need `as` since zod nonempty arrays are typed as [T, ...T[]] but filter just returns T[]
-                        data.filter((_, j) => j !== i) as FormSchema["data"],
+                        data.filter((_, j) => j !== i),
                       );
                     }}
                     className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
@@ -266,7 +264,7 @@ export default function DesktopSearchBar({
               </Comp>
             );
           })}
-          {numTabs < MAX_TRIPS && (
+          {numTabs < MAX_REQUEST_GROUP_SIZE && (
             <button
               key=""
               type="button"
@@ -283,11 +281,6 @@ export default function DesktopSearchBar({
               <PlusIcon className="size-4" />
               Add another trip
             </button>
-          )}
-          {numTabs >= MAX_TRIPS && (
-            <div className="text-sm text-red-500">
-              Maximum of {MAX_TRIPS} trips reached.
-            </div>
           )}
         </div>
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">

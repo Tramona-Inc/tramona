@@ -15,16 +15,15 @@ import {
 } from "@/components/ui/carousel";
 import CarouselDots from "@/components/feed/carousel-dots";
 
-import type { AppRouter } from "@/server/api/root";
-import type { inferRouterOutputs } from "@trpc/server";
 import { formatCurrency } from "@/utils/utils";
 import Link from "next/link";
+import { type RouterOutputs } from "@/utils/api";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
 export type OfferWithInfo =
-  inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
+  RouterOutputs["offers"]["getAllPublicOffers"][number];
 
 type Props = {
   deal: OfferWithInfo;

@@ -3,6 +3,7 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 
 import { cn } from "@/utils/utils";
+import { Dialog, DialogContent, DialogTrigger } from "./dialog";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -62,9 +63,10 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover py-2 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className,
       )}
+      onCloseAutoFocus={(e) => e.preventDefault()}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
@@ -80,7 +82,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-default select-none items-center text-sm font-medium outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       inset && "pl-8",
       className,
     )}
@@ -178,6 +180,35 @@ const DropdownMenuShortcut = ({
 };
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
 
+const DropdownMenuDialogItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuItem> & {
+    trigger: React.ReactNode;
+    onSelect: () => void;
+    onOpenChange: React.ComponentProps<typeof Dialog>["onOpenChange"];
+  }
+>(({ trigger, children, onSelect, onOpenChange, ...props }, ref) => {
+  return (
+    <Dialog onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <DropdownMenuItem
+          {...props}
+          ref={ref}
+          onSelect={(event) => {
+            event.preventDefault();
+            onSelect?.();
+          }}
+        >
+          {trigger}
+        </DropdownMenuItem>
+      </DialogTrigger>
+      <DialogContent>{children}</DialogContent>
+    </Dialog>
+  );
+});
+
+DropdownMenuDialogItem.displayName = "DropdownMenuDialogItem";
+
 export {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -194,4 +225,5 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
+  DropdownMenuDialogItem,
 };

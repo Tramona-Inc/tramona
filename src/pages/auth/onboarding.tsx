@@ -96,7 +96,7 @@ export default function Onboarding() {
       <h1 className="text-center text-4xl font-bold">
         First, let&apos;s setup your account!
       </h1>
-      <Card className="my-5 flex min-w-[400px] flex-col gap-5">
+      <Card className="my-5 flex max-w-[400px] flex-col gap-5">
         <CardHeader>
           <CardDescription className="text-2xl">
             Verify a mobile phone number
@@ -138,7 +138,7 @@ export default function Onboarding() {
               </p>
             </>
           ) : (
-            <>
+            <div className="flex flex-col gap-5">
               <Button
                 onClick={() => {
                   setIsLoading(true);
@@ -156,7 +156,7 @@ export default function Onboarding() {
                 We verify a phone number on account creation to ensure account
                 security. SMS & data charges may apply.
               </p>
-            </>
+            </div>
           )}
         </CardFooter>
       </Card>

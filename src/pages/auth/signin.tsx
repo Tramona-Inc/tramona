@@ -160,7 +160,7 @@ export default function SignIn({
         </section>
 
         <p>
-          Don&apos; have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/auth/signup"
             className="font-semibold text-primary underline underline-offset-2"

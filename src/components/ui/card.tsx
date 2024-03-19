@@ -4,7 +4,7 @@ import { cn } from "@/utils/utils";
 import { type VariantProps, cva } from "class-variance-authority";
 
 const cardVariants = cva(
-  "@container border text-card-foreground flex flex-col shadow-md bg-card border-zinc-100",
+  "border text-card-foreground relative flex flex-col shadow-md bg-card border-zinc-100",
   {
     variants: {
       size: {
@@ -81,7 +81,7 @@ const CardFooter = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "flex flex-col items-stretch gap-2 @sm:flex-row @sm:items-center @sm:justify-end",
+      "flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end",
       className,
     )}
     {...props}

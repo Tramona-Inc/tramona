@@ -1,45 +1,46 @@
-import React, { useState, useEffect, MouseEventHandler } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { api } from "@/utils/api";
 import { type DetailedRequest } from "./RequestCard";
-import { useInterval } from "@/utils/useInterval";
+import { toast } from "../ui/use-toast";
 
-type ClickHandler = () => void;
-
-type RequestUnconfirmedButtonProps = {
+export function RequestUnconfirmedButton({
+  request,
+  isWaiting,
+  onClick,
+}: {
   request: DetailedRequest;
-  isWaiting: boolean | undefined;
-  onClick: ClickHandler;
-};
-
-export function RequestUnconfirmedButton({ request, isWaiting, onClick }: RequestUnconfirmedButtonProps) {
-
+  isWaiting: boolean;
+  onClick: () => void;
+}) {
   const [isSending, setIsSending] = useState(isWaiting);
 
-  const confirmationMutation = api.requests.updateConfirmation.useMutation();
-  const number = request.madeByUser.phoneNumber;
+  const { mutateAsync: resendConfirmation } =
+    api.requests.updateConfirmation.useMutation();
 
   useEffect(() => {
     if (!isWaiting) {
       setIsSending(isWaiting);
     }
-  }, [isWaiting])
-
-
+  }, [isWaiting]);
 
   const handleClick = async () => {
-    if (number !== null) {
-      setIsSending(true)
-      await confirmationMutation.mutateAsync({requestId: request.id, phoneNumber: number});
-      onClick();
-    }
+    setIsSending(true);
+    await resendConfirmation({ requestId: request.id });
+    toast({
+      title: "Successfully resent confirmation text",
+      description: "Please check your messages",
+    });
+    onClick();
   };
 
-
-
   return (
-    <Button className="rounded-full pr-3" onClick={handleClick} disabled={isSending}>
-      {isSending ? "Awaiting Confirmation" :  "Resend Confirmation"}
+    <Button
+      className="rounded-full pr-3"
+      onClick={handleClick}
+      disabled={isSending || isWaiting}
+    >
+      {isSending ? "Awaiting Confirmation" : "Resend Confirmation"}
     </Button>
-  )
-};
+  );
+}

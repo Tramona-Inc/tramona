@@ -43,6 +43,7 @@ export const users = pgTable("user", {
   role: roleEnum("role").notNull().default("guest"),
   referralTier: referralTierEnum("referral_tier").notNull().default("Partner"),
   phoneNumber: varchar("phone_number", { length: 20 }),
+  lastTextAt: timestamp("last_text_at").defaultNow(),
 });
 
 export type User = typeof users.$inferSelect;
