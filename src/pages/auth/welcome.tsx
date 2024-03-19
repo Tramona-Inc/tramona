@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useRouter } from "next/router";
+import router from "next/router";
 
 import Undone from "@/components/_icons/UndoneIcon";
 import OfferCard from "@/components/offer-card/OfferCard";
@@ -12,7 +12,7 @@ import { useStepper } from "@/components/ui/use-stepper";
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 import { api } from "@/utils/api";
-import { cn, sleep } from "@/utils/utils";
+import { cn} from "@/utils/utils";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
@@ -175,10 +175,10 @@ export default function Welcome() {
         </Stepper>
         <div className="flex justify-center">
           {isLastStep ? (
-            <Button size="lg" asChild className="rounded-full pr-4">
-              <Link href="/dashboard">
+            <Button size="lg" asChild className="rounded-full pr-4" onClick={() => router.push('/dashboard')}>
+              {/* <Link href="/dashboard"> */}
                 Continue to dashboard <ChevronRight className="opacity-80" />
-              </Link>
+              {/* </Link> */}
             </Button>
           ) : (
             <Button size="lg" onClick={nextStep} className="rounded-full pr-4">

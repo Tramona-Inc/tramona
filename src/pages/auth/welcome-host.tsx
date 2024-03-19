@@ -77,7 +77,7 @@ function Step2(): JSX.Element {
         <div className="flex flex-col gap-10 text-center">
           <h1 className="text-4xl font-bold lg:text-5xl">Get guest bookings with ease</h1>
           <p className="text-lg font-bold lg:text-2xl">
-            It's as simple as inputting your property info and receiving offers from guests looking to travel to your city!
+            It&apos;s as simple as inputting your property info and receiving offers from guests looking to travel to your city!
           </p>
         </div>
     </StepperContentLayout>
