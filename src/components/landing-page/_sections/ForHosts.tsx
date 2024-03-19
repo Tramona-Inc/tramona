@@ -11,7 +11,7 @@ const ForHosts = () => {
           <p className="mb-4 text-lg">
             We turn your vacant calendar dates into bookings!
           </p>
-          <Link href="/auth/signup">
+          <Link href="/for-hosts">
             <button className="rounded-full bg-black px-4 py-2 text-white">
               Learn more
             </button>

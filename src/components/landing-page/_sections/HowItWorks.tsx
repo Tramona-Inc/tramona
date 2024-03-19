@@ -73,7 +73,7 @@ const HowItWorks: React.FC = () => (
           <Step
             number={2}
             title="Receive offers"
-            description="We send you offer to the best performing hosts across all the big platforms."
+            description="We send your offer to the best performing hosts across all the big platforms."
           />
           <Step
             number={3}
