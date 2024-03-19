@@ -1,3 +1,4 @@
+import { useConversation } from "@/utils/store/conversations";
 import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
@@ -32,6 +33,10 @@ export default function ChatInput({
 
   const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
+  const setConversationToTop = useConversation(
+    (state) => state.setConversationToTop,
+  );
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
       // TODO: might be better to update the state first then insert into db
@@ -65,6 +70,7 @@ export default function ChatInput({
           },
         };
 
+        setConversationToTop(conversationId, newMessage);
         addMessageToConversation(conversationId, newMessage);
         setOptimisticIds(newMessage.id);
       }
@@ -75,7 +81,7 @@ export default function ChatInput({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mx-2 space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="m-2">
         <FormField
           control={form.control}
           name="message"

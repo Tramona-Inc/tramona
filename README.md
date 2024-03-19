@@ -23,10 +23,6 @@ The idea behind shadcn is that you copy paste their components as a starting poi
 1. Read the [introduction page](https://ui.shadcn.com/docs) and the [theming page](https://ui.shadcn.com/docs/theming). Then look at our [globals.css](/src/styles/globals.css) file. **Use these semantic colors whenever possible.**
 2. Skim throught the shadcn/ui docs to see all of the components shadcn offers, and **use them as much as possible too**.
 3. Use either our code or the examples in the shadcn docs as reference.
-4. Keep the following tips in mind:
-
-- Don't use `asChild` for link buttons, use the `buttonVariant` strategy instead ([docs](https://ui.shadcn.com/docs/components/button#link)).
-- thats it for now
 
 ## Other
 

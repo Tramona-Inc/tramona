@@ -10,9 +10,10 @@ import { Stepper, StepperItem } from "@/components/ui/stepper";
 import { useStepper } from "@/components/ui/use-stepper";
 import { BadgeDollarSign, CalendarCheck, PiggyBank } from "lucide-react";
 
+import MainLayout from "@/components/_common/Layout/MainLayout";
+import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 import { api } from "@/utils/api";
 import { cn, sleep } from "@/utils/utils";
-import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 
 function StepperContentLayout({
   children,
@@ -155,14 +156,14 @@ export default function Welcome() {
   const startExploring = () => {
     nextStep();
     sleep(1500)
-      .then(() => router.push("/"))
+      .then(() => router.push("/dashboard"))
       .catch(() => {
         return;
       });
   };
 
   return (
-    <>
+    <MainLayout type="auth">
       <Head>
         <title>Welcome | Tramona</title>
       </Head>
@@ -197,6 +198,6 @@ export default function Welcome() {
           )}
         </div>
       </div>
-    </>
+    </MainLayout>
   );
 }

@@ -1,4 +1,3 @@
-import { type AppRouter } from "@/server/api/root";
 import {
   cn,
   formatCurrency,
@@ -7,16 +6,16 @@ import {
   plural,
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
-import { type inferRouterOutputs } from "@trpc/server";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
 import UserAvatar from "../../../_common/UserAvatar";
 import SaleTagIcon from "../../../_icons/SaleTagIcon";
 import { Badge } from "../../../ui/badge";
 import { Card, CardContent, CardFooter } from "../../../ui/card";
 import { type PropsWithChildren } from "react";
+import { type RouterOutputs } from "@/utils/api";
 
 export type OfferWithProperty =
-  inferRouterOutputs<AppRouter>["offers"]["getByRequestIdWithProperty"][number];
+  RouterOutputs["offers"]["getByRequestIdWithProperty"][number];
 
 export default function OfferCard({
   offer: { property, ...offer },

@@ -10,26 +10,24 @@ import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import { type inferRouterOutputs } from "@trpc/server";
-import { type AppRouter } from "@/server/api/root";
+import RequestGroupAvatars from "./RequestCardGroupAvatars";
+import { type RouterOutputs } from "@/utils/api";
 
-export type DetailedRequest =
-  inferRouterOutputs<AppRouter>["requests"]["getMyRequests"][
-    | "activeRequests"
-    | "inactiveRequests"][number];
+export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
+  | "activeRequestGroups"
+  | "inactiveRequestGroups"][number]["requests"][number];
 
-export type RequestWithUser =
-  inferRouterOutputs<AppRouter>["requests"]["getAll"][
-    | "incomingRequests"
-    | "pastRequests"][number];
+export type RequestWithUser = RouterOutputs["requests"]["getAll"][
+  | "incomingRequests"
+  | "pastRequests"][number];
 
 export default function RequestCard({
-  withUser,
   request,
+  isAdminDashboard,
   children,
 }: React.PropsWithChildren<
-  | { request: DetailedRequest; withUser?: false | undefined }
-  | { request: RequestWithUser; withUser: true }
+  | { request: DetailedRequest; isAdminDashboard?: false | undefined }
+  | { request: RequestWithUser; isAdminDashboard: true }
 >) {
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
@@ -42,24 +40,25 @@ export default function RequestCard({
     excludeDefaults: true,
   });
 
+  const showAvatars = request.numGuests > 1 || isAdminDashboard;
+
   return (
     <Card key={request.id}>
       <CardContent className="space-y-2">
-        <div className="flex items-start justify-between gap-1">
-          <div className="flex-1">
-            {withUser && (
-              <p className="text-xs font-medium text-zinc-500">
-                {request.madeByUser.email}
-              </p>
-            )}
-            <div className="flex items-start gap-1">
-              <MapPinIcon className="shrink-0 text-zinc-300" />
-              <h2 className="text-lg font-semibold text-zinc-700">
-                {request.location}
-              </h2>
-            </div>
-          </div>
-          <RequestCardBadge request={request} />
+        <RequestCardBadge request={request} />
+        <div className="absolute right-4 top-2">
+          {showAvatars && (
+            <RequestGroupAvatars
+              request={request}
+              isAdminDashboard={isAdminDashboard}
+            />
+          )}
+        </div>
+        <div className="flex items-start gap-1">
+          <MapPinIcon className="shrink-0 text-zinc-300" />
+          <h2 className="text-lg font-semibold text-zinc-700">
+            {request.location}
+          </h2>
         </div>
         <div className="text-zinc-500">
           <p>
@@ -126,5 +125,7 @@ function RequestCardBadge({
       return <Badge variant="red">Rejected</Badge>;
     case "booked":
       return <Badge variant="blue">Booked</Badge>;
+    case "unconfirmed":
+      return <Badge variant="secondary">Unconfirmed</Badge>;
   }
 }

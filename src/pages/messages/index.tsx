@@ -1,22 +1,19 @@
-import Head from "next/head";
-import { useState } from "react";
-
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
-import { type AppRouter } from "@/server/api/root";
-import { api } from "@/utils/api";
-import { type inferRouterOutputs } from "@trpc/server";
-import { useSession } from 'next-auth/react';
+import {
+  useConversation,
+  type Conversation,
+} from "@/utils/store/conversations";
+import { useSession } from "next-auth/react";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
-export type Conversation =
-  inferRouterOutputs<AppRouter>["messages"]["getConversations"][number];
+function MessageDisplay() {
+  const [isViewed, setIsViewd] = useState(false);
 
-export type Conversations =
-  inferRouterOutputs<AppRouter>["messages"]["getConversations"];
-
-export default function MessagePage() {
-  useSession({ required: true });
-
+  const conversations = useConversation((state) => state.conversationList);
 
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
@@ -25,25 +22,54 @@ export default function MessagePage() {
     setSelectedConversation(conversation);
   };
 
-  const { data: conversations } = api.messages.getConversations.useQuery();
+  const { query } = useRouter();
+
+  // Allows us to open message from url query
+  useEffect(() => {
+    if (query.conversationId && conversations.length > 0 && !isViewed) {
+      const conversationIdToSelect = parseInt(query.conversationId as string);
+      const conversationToSelect = conversations.find(
+        (conversation) => conversation.id === conversationIdToSelect,
+      );
+
+      if (
+        conversationToSelect &&
+        selectedConversation?.id !== conversationToSelect.id
+      ) {
+        setSelectedConversation(conversationToSelect);
+      }
+
+      setIsViewd(true);
+    }
+  }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
+
+  return (
+    <div className="min-h-screen-minus-header flex">
+      <MessagesSidebar
+        selectedConversation={selectedConversation}
+        setSelected={selectConversation}
+      />
+      <div className="flex-1">
+        <MessagesContent
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default function MessagePage() {
+  const { data: session } = useSession({ required: true });
 
   return (
     <>
       <Head>
         <title>Messages | Tramona</title>
       </Head>
-
-      <div className="grid h-[calc(100vh-5em)] grid-cols-1 bg-white md:grid-cols-6">
-        <MessagesSidebar
-          conversations={conversations ?? []}
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-        />
-        <MessagesContent
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-        />
-      </div>
+      <DashboardLayout type={session?.user.role ?? "guest"}>
+        <MessageDisplay />
+      </DashboardLayout>
     </>
   );
 }

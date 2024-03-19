@@ -37,6 +37,7 @@ export type Icon = LucideIcon;
 // type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
+  spinner: Loader2,
   dotHorizontal: MoreHorizontal,
   eyeOff: EyeOff,
   arrowUp: ArrowUp,

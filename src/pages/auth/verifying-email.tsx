@@ -7,35 +7,47 @@ export default function VerifyEmail() {
 
   const id = router.query.id as string;
   const token = router.query.token as string;
+  const conversationId = router.query.conversationId as string;
+  const userId = router.query.userId as string;
 
   const date = useMemo(() => new Date(), []); // useMemo from React
 
-  const mutation = api.auth.verifyEmailToken.useMutation({
+  const { mutateAsync: addUserToConversation } =
+    api.messages.addUserToConversation.useMutation();
+
+  const {
+    mutate: verifyEmailToken,
+    isLoading,
+    error,
+  } = api.auth.verifyEmailToken.useMutation({
     onSuccess: () => {
+      if (conversationId && userId) {
+        void addUserToConversation({ userId, conversationId });
+      }
+
       void router.push({
         pathname: "/auth/signin",
-        query: { isNewUser: true, isVerified: true },
+        query: { isVerified: true },
       });
     },
   });
 
   useEffect(() => {
     if (id && token) {
-      mutation.mutate({ id: id, token: token, date: date });
+      verifyEmailToken({ id: id, token: token, date: date });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, token]);
 
   return (
-    <main className="flex h-screen flex-col items-center justify-center">
-      {mutation.isLoading && (
+    <div className="flex h-screen-minus-header flex-col items-center justify-center">
+      {isLoading && (
         <p className="text-muted-foreground">Verifying your email...</p>
       )}
-      {mutation.error && (
+      {error && (
         <p className="text-muted-foreground">
           Something went wrong, please try signing up again
         </p>
       )}
-    </main>
+    </div>
   );
 }

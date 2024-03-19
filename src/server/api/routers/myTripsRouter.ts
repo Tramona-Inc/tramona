@@ -1,10 +1,10 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { offers, requests } from "@/server/db/schema";
-import { type TramonaDatabase } from "@/types";
-import { and, eq, inArray, isNotNull } from "drizzle-orm";
+import { db } from "@/server/db";
+import { groupMembers, offers, requests } from "@/server/db/schema";
+import { and, eq, exists, inArray, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 
-const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
+const getAllAcceptedOffers = async (userId: string) => {
   const result = await db
     .select({
       offerId: offers.id,
@@ -18,7 +18,17 @@ const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
         isNotNull(offers.acceptedAt),
         isNotNull(offers.paymentIntentId),
         isNotNull(offers.checkoutSessionId),
-        eq(requests.userId, userId),
+        exists(
+          db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.userId, userId),
+                eq(groupMembers.groupId, requests.madeByGroupId),
+              ),
+            ),
+        ),
       ),
     );
 
@@ -30,17 +40,13 @@ const getAllAcceptedOffers = async (userId: string, db: TramonaDatabase) => {
 };
 
 // Fetch the trips data to display
-const getDisplayTrips = async (
-  tripIds: number[],
-  db: TramonaDatabase,
-  limit?: number,
-) => {
+const getDisplayTrips = async (tripIds: number[], limit?: number) => {
   if (tripIds.length === 0) {
-    return null;
+    return [];
   } else {
     return await db.query.offers.findMany({
       where: inArray(offers.id, tripIds),
-      limit: limit ?? undefined,
+      limit: limit,
       with: {
         property: {
           with: {
@@ -50,17 +56,34 @@ const getDisplayTrips = async (
             name: true,
             imageUrls: true,
             address: true,
+            checkInInfo: true,
           },
         },
         request: {
           columns: {
-            userId: true,
             checkIn: true,
             checkOut: true,
             resolvedAt: true,
           },
           with: {
-            madeByUser: { columns: { name: true } }, // Fetch user name
+            madeByGroup: {
+              with: {
+                members: {
+                  with: {
+                    user: {
+                      columns: {
+                        name: true,
+                        email: true,
+                        image: true,
+                        phoneNumber: true,
+                        id: true,
+                      },
+                    },
+                  },
+                },
+                invites: true,
+              },
+            },
           },
         },
       },
@@ -103,7 +126,7 @@ export const myTripsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       // Get all accepted offers
       const allAcceptedOffers = (
-        await getAllAcceptedOffers(ctx.user.id, ctx.db)
+        await getAllAcceptedOffers(ctx.user.id)
       ).filter((id) => id !== null);
 
       // Get upcoming trips
@@ -113,11 +136,7 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayUpcomingTrips = await getDisplayTrips(
-        upcomingTripIds,
-        ctx.db,
-        2,
-      );
+      const displayUpcomingTrips = await getDisplayTrips(upcomingTripIds, 2);
 
       // Get previous trips
       const previousTripIds = await getCertainTrips(
@@ -126,11 +145,7 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayPreviousTrips = await getDisplayTrips(
-        previousTripIds,
-        ctx.db,
-        2,
-      );
+      const displayPreviousTrips = await getDisplayTrips(previousTripIds, 2);
 
       return {
         totalUpcomingTrips: upcomingTripIds.length,
@@ -147,7 +162,7 @@ export const myTripsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Get all accepted offers
-      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id);
 
       // Get upcoming trips
       const upcomingTripIds = await getCertainTrips(
@@ -156,10 +171,7 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayAllUpcomingTrips = await getDisplayTrips(
-        upcomingTripIds,
-        ctx.db,
-      );
+      const displayAllUpcomingTrips = await getDisplayTrips(upcomingTripIds);
 
       return displayAllUpcomingTrips;
     }),
@@ -171,7 +183,7 @@ export const myTripsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Get all accepted offers
-      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id, ctx.db);
+      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id);
 
       // Get upcoming trips
       const upcomingTripIds = await getCertainTrips(
@@ -180,10 +192,7 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayAllUpcomingTrips = await getDisplayTrips(
-        upcomingTripIds,
-        ctx.db,
-      );
+      const displayAllUpcomingTrips = await getDisplayTrips(upcomingTripIds);
 
       return displayAllUpcomingTrips;
     }),

@@ -1,4 +1,4 @@
-import { type Conversation } from "@/pages/messages";
+import { type Conversation } from "@/utils/store/conversations";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
@@ -14,7 +14,7 @@ export default function ChatHeader({
   setSelected,
 }: ContentProps) {
   return (
-    <div className="flex h-[100px] items-center justify-between border-b-2 px-4 lg:px-8">
+    <div className="flex h-[100px] items-center justify-between border-b px-4 lg:px-8">
       <div className="flex items-center gap-2 lg:gap-3">
         <div className="block md:hidden">
           <Button variant="ghost" size="icon" onClick={() => setSelected(null)}>

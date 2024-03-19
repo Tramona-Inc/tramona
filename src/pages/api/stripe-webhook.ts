@@ -1,4 +1,8 @@
 import { env } from "@/env";
+import {
+  createConversationWithAdmin,
+  fetchConversationWithAdmin,
+} from "@/server/api/routers/messagesRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
@@ -11,6 +15,8 @@ import {
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import { api } from "@/utils/api";
+
 
 // ! Necessary for stripe
 export const config = {
@@ -73,6 +79,16 @@ export default async function webhook(
               parseInt(paymentIntentSucceeded.metadata.request_id!),
             ),
           );
+
+        const twilioMutation = api.twilio.sendSMS.useMutation();
+
+        const sms = {
+          to: paymentIntentSucceeded.metadata.phoneNumber!,
+          msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
+        };
+
+        await twilioMutation.mutateAsync(sms);
+
         // console.log("PaymentIntent was successful!");
         const user = await db.query.users.findFirst({
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
@@ -101,6 +117,27 @@ export default async function webhook(
               numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
             })
             .where(eq(referralCodes.referralCode, referralCode));
+        }
+
+        // TODO
+        // Add two two users to conversation
+        // void addTwoUserToConversation(
+        //   paymentIntentSucceeded.metadata.user_id!,
+        //   paymentIntentSucceeded.metadata.host_id!,
+        // );
+
+        // ! For now will add user to admin
+        if (paymentIntentSucceeded.metadata.user_id) {
+          const conversationId = await fetchConversationWithAdmin(
+            paymentIntentSucceeded.metadata.user_id,
+          );
+
+          // Create conversation with admin if it doesn't exist
+          if (!conversationId) {
+            await createConversationWithAdmin(
+              paymentIntentSucceeded.metadata.user_id,
+            );
+          }
         }
 
         break;

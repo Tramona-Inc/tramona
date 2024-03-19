@@ -1,4 +1,4 @@
-import { type Conversation } from "@/pages/messages";
+import { type Conversation } from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
@@ -16,7 +16,7 @@ export default function MessagesContent({
   return (
     <div
       className={cn(
-        "col-span-5 flex h-full items-center justify-center md:col-span-4 xl:col-span-5",
+        "col-span-5 flex h-full items-center justify-center md:col-span-4 xl:col-span-4",
         !selectedConversation && "hidden md:flex",
       )}
     >
@@ -28,13 +28,13 @@ export default function MessagesContent({
         </>
       ) : (
         // Main Message content
-        <div className="relative flex h-full w-full flex-col bg-white">
+        <div className="relative flex h-full w-full flex-col">
           <ChatHeader
             selectedConversation={selectedConversation}
             setSelected={setSelected}
           />
           <ChatMessages conversationId={selectedConversation.id} />
-          <ChatInput conversationId={selectedConversation.id}/>
+          <ChatInput conversationId={selectedConversation.id} />
         </div>
       )}
     </div>
