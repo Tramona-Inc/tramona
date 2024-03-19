@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { api } from "@/utils/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
 function SidebarLink({
@@ -88,15 +88,13 @@ export default function Sidebar({
   const userId = session?.user.id
   
   // '512b248b-229d-4e04-a63a-8a3f52cab3f5'
-  const response = api.messages.showUnreadMessages.useQuery({ userId: userId! })
-  
-  useEffect(() => {
-    response.data?.length && notifyMe()
-    console.log('userId:', userId)
-  }, [response.data?.length])
+  const response = api.messages.showUnreadMessages.useQuery({ userId: userId })
 
+  useEffect(() => {
+    response.data?.length && notifyMe
+  }, [response.data?.length])
   
-const notifyMe = () => {
+  const notifyMe = () => {
   if (!("Notification" in window) || !response.data) {
     // Check if the browser supports notifications
     alert("This browser does not support desktop notification");
@@ -109,8 +107,8 @@ const notifyMe = () => {
     const icon = 'https://img.apmcdn.org/d7e015791079e6474a04b6cff4825a9c9e3a7a36/square/50a6ba-20231003-panda-diplomacy1-webp2000.webp'
     const body = `You have ${response.data.length} unread message${response.data.length > 1 ? 's' : ''}.`
     const notification = new Notification(title, { body, icon });
-    // …
     console.log('notification', notification)
+    alert('notification successful!')
 
   } else if (Notification.permission !== "denied") {
     // We need to ask the user for permission
