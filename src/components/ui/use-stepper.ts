@@ -10,7 +10,7 @@ interface useStepperProps {
   >[];
 }
 
-type useStepperReturn = {
+type UseStepperReturn = {
   activeStep: number;
   isDisabledStep: boolean;
   isLastStep: boolean;
@@ -21,7 +21,7 @@ type useStepperReturn = {
   setStep: (step: number) => void;
 };
 
-function useStepper({ initialStep, steps }: useStepperProps): useStepperReturn {
+function useStepper({ initialStep, steps }: useStepperProps): UseStepperReturn {
   const [activeStep, setActiveStep] = React.useState(initialStep);
 
   const isDisabledStep = React.useMemo(() => activeStep === 0, [activeStep]);

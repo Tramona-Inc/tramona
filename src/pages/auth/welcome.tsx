@@ -14,6 +14,7 @@ import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 import { api } from "@/utils/api";
 import { cn, sleep } from "@/utils/utils";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 function StepperContentLayout({
   children,
@@ -172,19 +173,16 @@ export default function Welcome() {
             </StepperItem>
           ))}
         </Stepper>
-        <div className="flex items-center justify-center gap-2">
-          {activeStep === steps.length ? (
-            <Step3 />
-          ) : isLastStep ? (
-            <Button asChild className="rounded-full">
-              <Link href="/dashboard">Make a request now</Link>
+        <div className="flex justify-center">
+          {isLastStep ? (
+            <Button size="lg" asChild className="rounded-full pr-4">
+              <Link href="/dashboard">
+                Continue to dashboard <ChevronRight className="opacity-80" />
+              </Link>
             </Button>
           ) : (
-            <Button
-              onClick={isLastStep ? startExploring : nextStep}
-              className="rounded-full px-8 text-lg"
-            >
-              {isLastStep ? "Finish" : "Next"}
+            <Button size="lg" onClick={nextStep} className="rounded-full pr-4">
+              Next <ChevronRight className="opacity-80" />
             </Button>
           )}
         </div>
