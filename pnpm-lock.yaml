@@ -315,7 +315,7 @@ devDependencies:
     version: 8.56.6
   '@types/google.maps':
     specifier: ^3.55.3
-    version: 3.55.4
+    version: 3.55.5
   '@types/multer':
     specifier: ^1.4.11
     version: 1.4.11
@@ -8584,8 +8584,8 @@ packages:
     resolution: {integrity: sha512-frsJrz2t/CeGifcu/6uRo4b+SzAwT4NYCVPu1GN8IB9XTzrpPkGuV0tmh9mN+/L0PklAlsC3u5Fxt0ju00LXIw==}
     dev: true
 
-  /@types/google.maps@3.55.4:
-    resolution: {integrity: sha512-Ip3IfRs3RZjeC88V8FGnWQTQXeS5gkJedPSosN6DMi9Xs8buGTpsPq6UhREoZsGH+62VoQ6jiRBUR8R77If69w==}
+  /@types/google.maps@3.55.5:
+    resolution: {integrity: sha512-U1QwCo1GeeLm0YI/GoHvfd1VfwgnoUSBcKCMXXFAM+2izSSuqqwZUJ9XNO6NxZxmYKjBNI+NF5eGF6uUSb1aSg==}
     dev: true
 
   /@types/graceful-fs@4.1.9:
