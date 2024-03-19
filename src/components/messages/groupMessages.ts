@@ -1,4 +1,4 @@
-import { type User, type MessageType } from "@/server/db/schema";
+import { type MessageType, type User } from "@/server/db/schema";
 import { type ChatMessageType } from "@/utils/store/messages";
 
 export type MessageGroup = {
@@ -26,9 +26,12 @@ export function groupMessages(
       });
     } else {
       const lastMessage = lastGroup?.messages[lastGroup.messages.length - 1];
+      
       if (
         lastMessage &&
-        message.createdAt.getTime() - lastMessage.createdAt.getTime() <= 120000
+        new Date(message.createdAt).getTime() -
+          new Date(lastMessage.createdAt).getTime() <=
+          120000
       ) {
         lastGroup.messages.push(message);
       } else {

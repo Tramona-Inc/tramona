@@ -78,7 +78,7 @@ export default function ListMessages() {
           userId: payload.new.user_id,
           message: payload.new.message,
           isEdit: payload.new.is_edit,
-          createdAt: new Date(payload.new.created_at),
+          createdAt: payload.new.created_at,
           read: payload.new.read,
         };
         addMessageToConversation(payload.new.conversation_id, newMessage);
@@ -175,6 +175,8 @@ export default function ListMessages() {
     .filter(Boolean);
 
   const messageGroups = groupMessages(messagesWithUser);
+
+  console.log(messages);
 
   return (
     <>

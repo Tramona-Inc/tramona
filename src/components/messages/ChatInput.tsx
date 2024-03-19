@@ -44,9 +44,11 @@ export default function ChatInput({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
+      const utcDate = new Date(Date.now());
+
       const newMessage: ChatMessageType = {
         id: nanoid(),
-        createdAt: new Date(),
+        createdAt: new Date().toISOString().slice(0, -1),
         conversationId: conversationId,
         userId: session.user.id,
         message: values.message,
@@ -56,7 +58,7 @@ export default function ChatInput({
 
       const newMessageToDb = {
         id: newMessage.id,
-        // created_at: newMessage.createdAt.toISOString(),
+        created_at: new Date().toISOString(),
         conversation_id: conversationId,
         user_id: newMessage.userId,
         message: newMessage.message,

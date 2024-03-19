@@ -69,7 +69,7 @@ export default function MessagesSidebar({
             userId: payload.new.user_id,
             message: payload.new.message,
             isEdit: payload.new.is_edit,
-            createdAt: new Date(payload.new.created_at),
+            createdAt: payload.new.created_at,
             read: payload.new.read,
           };
 
