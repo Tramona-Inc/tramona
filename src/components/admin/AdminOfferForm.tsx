@@ -208,9 +208,7 @@ export default function AdminOfferForm({
     } else {
       const propertyId = await createPropertiesMutation
         .mutateAsync(newProperty)
-        .catch((err) =>
-          errorToast(err instanceof Error ? err.message : JSON.stringify(err)),
-        );
+        .catch(() => errorToast());
 
       if (!propertyId) {
         form.setError("root", {
