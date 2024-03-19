@@ -80,7 +80,7 @@
     "drizzle-zod": "^0.5.1",
     "embla-carousel-autoplay": "8.0.0",
     "embla-carousel-react": "8.0.0",
-    "input-otp": "^1.0.1",
+    "input-otp": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.358.0",
     "micro": "^10.0.1",
@@ -154,7 +154,7 @@
   "ct3aMetadata": {
     "initVersion": "7.25.1"
   },
-  "packageManager": "pnpm@8.15.4",
+  "packageManager": "pnpm@8.15.5",
   "readme": "ERROR: No README data found!",
   "_id": "tramona-trpc@0.1.0"
 }
