@@ -115,7 +115,7 @@ export default function DesktopSearchBar({
       return {
         checkIn: checkIn,
         checkOut: checkOut,
-        maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
+        maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
         propertyType: propertyType === "any" ? undefined : propertyType,
         ...restData,
       };
