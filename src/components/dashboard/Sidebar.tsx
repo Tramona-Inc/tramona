@@ -11,6 +11,9 @@ import {
   WrenchIcon,
 } from "lucide-react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
+import { api } from "@/utils/api";
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 function SidebarLink({
   href,
@@ -80,6 +83,50 @@ export default function Sidebar({
       : type === "host"
         ? hostNavLinks
         : guestNavLinks;
+  
+  const { data: session } = useSession()
+  const userId = session?.user.id
+  
+  // '512b248b-229d-4e04-a63a-8a3f52cab3f5'
+  const response = api.messages.showUnreadMessages.useQuery({ userId: userId! })
+  
+  useEffect(() => {
+    response.data?.length && notifyMe()
+    console.log('userId:', userId)
+  }, [response.data?.length])
+
+  
+const notifyMe = () => {
+  if (!("Notification" in window) || !response.data) {
+    // Check if the browser supports notifications
+    alert("This browser does not support desktop notification");
+    // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
+  } else if (Notification.permission === "granted") {
+    // Check whether notification permissions have already been granted;
+    // if so, create a notification
+    console.log('permission granted')
+    const title = 'Tramona Messages'
+    const icon = 'https://img.apmcdn.org/d7e015791079e6474a04b6cff4825a9c9e3a7a36/square/50a6ba-20231003-panda-diplomacy1-webp2000.webp'
+    const body = `You have ${response.data.length} unread message${response.data.length > 1 ? 's' : ''}.`
+    const notification = new Notification(title, { body, icon });
+    // …
+    console.log('notification', notification)
+
+  } else if (Notification.permission !== "denied") {
+    // We need to ask the user for permission
+    console.log('permission denied')
+    Notification.requestPermission().then((permission) => {
+      // If the user accepts, let's create a notification
+      if (permission === "granted") {
+        const notification = new Notification("Hi there!");
+        // …
+      }
+    });
+  }
+
+  // At last, if the user has denied notifications, and you
+  // want to be respectful there is no need to bother them anymore.
+}
 
   return (
     <div className="sticky top-0 flex h-full w-64 flex-col border-r">
@@ -95,6 +142,8 @@ export default function Sidebar({
           </SidebarLink>
         ))}
       </div>
+      <button onClick={notifyMe}>NOTIFICATION</button>
+      <p>{`You have ${response.data?.length} unread message(s).` }</p>
     </div>
   );
 }
