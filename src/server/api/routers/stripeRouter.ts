@@ -25,6 +25,8 @@ export const stripeRouter = createTRPCRouter({
         description: z.string(),
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
+        userId: z.string(),
+        phoneNumber: z.string(),
         totalSavings: z.number(),
         // hostId: z.string(),
       }),
@@ -41,7 +43,7 @@ export const stripeRouter = createTRPCRouter({
         price: input.price,
         total_savings: input.totalSavings,
         confirmed_at: currentDate.toISOString(),
-        phone_number: ctx.user.phoneNumber,
+        phone_number: input.phoneNumber,
         // host_id: input.hostId,
       };
 

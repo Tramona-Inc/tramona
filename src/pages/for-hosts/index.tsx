@@ -1,11 +1,12 @@
-import { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
-import React from "react";
 import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
+import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
+import { liveFeedOffers } from "@/components/offer-card/data";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Carousel,
@@ -15,9 +16,9 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
-import { liveFeedOffers } from "@/components/offer-card/data";
+import React from "react";
 
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import { cn } from "@/utils/utils";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -91,7 +92,7 @@ export default function HostWelcome() {
   }, [api]);
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Hosts | Tramona</title>
       </Head>
@@ -218,7 +219,7 @@ export default function HostWelcome() {
       </div>
 
       {/** Social Feed */}
-      <div className="bg-[#EC4899] text-white sm:p-16">
+      {/* <div className="bg-[#EC4899] text-white sm:p-16">
         <div className="container flex h-fit flex-row p-5 text-white sm:p-0 md:space-x-5 md:py-24 lg:space-x-20 lg:p-10">
           <div className=" flex flex-col items-center space-y-10 py-10 md:w-5/12 md:justify-center lg:w-1/2">
             <h3 className="w-full text-xl font-semibold">SOCIAL FEED</h3>
@@ -247,7 +248,7 @@ export default function HostWelcome() {
             <OfferCardsFeed offers={selectedOffers} />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/** Why */}
       <div className="container h-fit space-y-5 py-10 md:py-20 ">
@@ -372,6 +373,6 @@ export default function HostWelcome() {
           Invite your friends
         </Link>
       </div>
-    </>
+    </MainLayout>
   );
 }

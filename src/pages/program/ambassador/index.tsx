@@ -1,3 +1,4 @@
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import StarIcon from "@/components/_icons/StarIcon";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
@@ -34,7 +35,7 @@ function Card({ id, info }: { id: number; info: string }) {
 
 export default function Page() {
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Ambassador | Tramona</title>
       </Head>
@@ -82,6 +83,6 @@ export default function Page() {
           </Button>
         </Link>
       </div>
-    </>
+    </MainLayout>
   );
 }

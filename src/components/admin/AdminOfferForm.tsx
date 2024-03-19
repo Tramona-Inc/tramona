@@ -40,15 +40,19 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
+import { useSession } from "next-auth/react";
 
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
+import axios from "axios";
+import { getS3ImgUrl } from "@/utils/formatters";
 
 const formSchema = z.object({
   propertyName: zodString(),
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
   address: optional(zodString({ maxLen: 1000 })),
+  areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
@@ -65,6 +69,7 @@ const formSchema = z.object({
   airbnbMessageUrl: optional(zodUrl()),
   checkInInfo: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
+  mapScreenshot: zodString(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -80,6 +85,9 @@ export default function AdminOfferForm({
   request: Request;
   offer?: OfferWithProperty;
 }) {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const numberOfNights = getNumNights(request.checkIn, request.checkOut);
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
@@ -104,6 +112,8 @@ export default function AdminOfferForm({
             // ?? undefineds are to turn string | null into string | undefined
             hostName: offer.property.hostName ?? undefined,
             address: offer.property.address ?? undefined,
+            areaDescription: offer.property.areaDescription ?? undefined,
+            mapScreenshot: offer.property.mapScreenshot ?? undefined,
             maxNumGuests: offer.property.maxNumGuests,
             numBeds: offer.property.numBeds,
             numBedrooms: offer.property.numBedrooms,
@@ -136,10 +146,28 @@ export default function AdminOfferForm({
   const updateOffersMutation = api.offers.update.useMutation();
   const createPropertiesMutation = api.properties.create.useMutation();
   const createOffersMutation = api.offers.create.useMutation();
+  const uploadFileMutation = api.files.upload.useMutation();
+  const twilioMutation = api.twilio.sendSMS.useMutation();
 
   const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
+    let url: string | null = null;
+
+    if (file) {
+      const fileName = file.name;
+
+      try {
+        const uploadUrlResponse = await uploadFileMutation.mutateAsync({
+          fileName,
+        });
+        await axios.put(uploadUrlResponse, file);
+        url = getS3ImgUrl(fileName);
+      } catch (error) {
+        throw new Error("error uploading file");
+      }
+    }
+
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
     // const totalPrice = offeredPriceUSD * 100;
@@ -152,6 +180,7 @@ export default function AdminOfferForm({
       originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
+      mapScreenshot: url,
     };
 
     // if offer wasnt null then this is an "update offer" form
@@ -197,7 +226,12 @@ export default function AdminOfferForm({
       utils.requests.invalidate(),
     ]);
 
-    afterSubmit?.();
+    if (user?.phoneNumber) {
+      await twilioMutation.mutateAsync({
+        to: user.phoneNumber, // TODO: text the traveller, not the admin
+        msg: "You have a new offer for a request in your Tramona account!",
+      });
+    }
 
     successfulAdminOfferToast({
       propertyName: newProperty.name,
@@ -206,6 +240,8 @@ export default function AdminOfferForm({
       checkOut: request.checkOut,
       isUpdate: !!offer,
     });
+
+    afterSubmit?.();
   }
 
   const defaultNightlyPrice = 0;
@@ -215,6 +251,7 @@ export default function AdminOfferForm({
   );
 
   const totalPrice = nightlyPrice * numberOfNights;
+  const [file, setFile] = useState<File | null>(null);
 
   return (
     <Form {...form}>
@@ -537,6 +574,43 @@ export default function AdminOfferForm({
               <FormLabel>Check In Info (optional)</FormLabel>
               <FormControl>
                 <Textarea {...field} className="resize-y" rows={2} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="mapScreenshot"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Screenshot of Map</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => {
+                    const selectedFile = event.target.files?.[0];
+                    setFile(selectedFile ?? null);
+                    field.onChange(event);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="areaDescription"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Area Description (optional)</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" />
               </FormControl>
               <FormMessage />
             </FormItem>

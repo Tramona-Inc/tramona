@@ -18,8 +18,7 @@ module.exports = {
     },
     extend: {
       spacing: {
-        "screen-minus-header": "var(--screen-minus-header)",
-        test: "100px",
+        "screen-minus-header": "var(--screen-minus-header)"
       },
       colors: {
         gold: "#FACF26",
@@ -81,5 +80,6 @@ module.exports = {
   plugins: [
     require("tailwindcss-animate"),
     require("@tailwindcss/container-queries"),
+    require('tailwind-scrollbar-hide'),
   ],
 };

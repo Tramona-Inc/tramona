@@ -2,24 +2,22 @@ import Head from "next/head";
 import Link from "next/link";
 import { useMemo } from "react";
 
+import Spinner from "@/components/_common/Spinner";
 import PreviousCard from "@/components/my-trips/PreviousCard";
 import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
-import Spinner from "@/components/_common/Spinner";
-import DashboardLayout from "@/components/_common/DashboardLayout";
 
-import { type AppRouter } from "@/server/api/root";
-import { api } from "@/utils/api";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import { type RouterOutputs, api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
-import { type inferRouterOutputs } from "@trpc/server";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
 export type UpcomingTrip = MyTripsType<
-  inferRouterOutputs<AppRouter>["myTrips"]["getUpcomingTrips"]
+  RouterOutputs["myTrips"]["getUpcomingTrips"]
 >;
 export type PreviousTrip = MyTripsType<
-  inferRouterOutputs<AppRouter>["myTrips"]["getPreviousTrips"]
+  RouterOutputs["myTrips"]["getPreviousTrips"]
 >;
 
 export default function MyTrips() {
@@ -30,7 +28,7 @@ export default function MyTrips() {
   });
 
   return (
-    <DashboardLayout>
+    <DashboardLayout type="guest">
       <Head>
         <title>My Trips | Tramona</title>
       </Head>

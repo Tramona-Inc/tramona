@@ -29,6 +29,23 @@ export const usersRouter = createTRPCRouter({
       referralCodeUsed: res?.referralCodeUsed ?? null,
     };
   }),
+
+  myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
+    const phone = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        phoneNumber: true,
+      },
+    })
+    .then((res) => {
+      return res?.phoneNumber ?? null
+    });
+
+
+    return phone;
+
+  }),
+
   myReferralCode: protectedProcedure.query(async ({ ctx }) => {
     const referralCode = await ctx.db.query.users
       .findFirst({
@@ -115,6 +132,19 @@ export const usersRouter = createTRPCRouter({
         .set({ phoneNumber: input.phone })
         .where(eq(users.email, input.email));
     }),
+  insertPhoneWithUserId: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        phone: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .update(users)
+        .set({ phoneNumber: input.phone })
+        .where(eq(users.id, input.userId));
+    }),
   getHostInfo: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.hostProfiles.findMany({
       columns: {
@@ -144,4 +174,22 @@ export const usersRouter = createTRPCRouter({
       phoneNumber: item.hostUser.phoneNumber,
     }));
   }),
+
+    updatePhoneNumber: protectedProcedure
+      .input(
+        z.object({
+          phoneNumber: zodString({ maxLen: 20 }),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const updatedUser = await ctx.db
+          .update(users)
+          .set({
+            phoneNumber: input.phoneNumber,
+          })
+          .where(eq(users.id, ctx.user.id))
+          .returning();
+
+        return updatedUser;
+      })
 });

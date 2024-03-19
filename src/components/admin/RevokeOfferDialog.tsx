@@ -13,10 +13,17 @@ import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 
-export default function RevokeOfferDialog({
-  children,
-  offerId,
-}: PropsWithChildren<{ offerId: number }>) {
+export default function RevokeOfferDialog(
+  props: PropsWithChildren<{
+    requestId: number;
+    requestCheckIn: Date;
+    requestCheckOut: Date;
+    propertyName: string;
+    propertyAddress: string;
+    offerId: number;
+    offerCount: number;
+  }>,
+) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
@@ -24,7 +31,7 @@ export default function RevokeOfferDialog({
 
   async function deleteOffer() {
     await mutation
-      .mutateAsync({ id: offerId })
+      .mutateAsync({ id: props.offerId })
       .then(() => utils.offers.invalidate())
       .then(() => toast({ title: "Sucessfully revoked offer" }))
       .catch(() => errorToast())
@@ -33,7 +40,7 @@ export default function RevokeOfferDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild>{props.children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Are you sure you want to revoke this offer?</DialogTitle>

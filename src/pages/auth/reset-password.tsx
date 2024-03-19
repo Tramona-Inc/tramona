@@ -1,3 +1,4 @@
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -110,58 +111,60 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="flex min-h-screen-minus-header flex-col items-center justify-center">
-      <section className="flex max-w-sm flex-col space-y-5">
-        <h1 className="text-4xl font-bold tracking-tight">
-          Reset your password
-        </h1>
-        <p>
-          Enter your email address, and we&apos;ll send you a link to get back
-          into your account.
-        </p>
+    <MainLayout>
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center">
+        <section className="flex max-w-sm flex-col space-y-5">
+          <h1 className="text-4xl font-bold tracking-tight">
+            Reset your password
+          </h1>
+          <p>
+            Enter your email address, and we&apos;ll send you a link to get back
+            into your account.
+          </p>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-            <FormField
-              control={form.control}
-              name="newPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>New Password</FormLabel>
-                  <FormControl>
-                    <Input {...field} type={"password"} autoFocus />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="verifyPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Verify Password</FormLabel>
-                  <FormControl>
-                    <Input {...field} type={"password"} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormMessage />
-            <Button
-              type="submit"
-              disabled={isLoadingResetPassword}
-              className="w-full"
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
             >
-              Reset password
-            </Button>
-          </form>
-        </Form>
-      </section>
-    </div>
+              <FormField
+                control={form.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} type={"password"} autoFocus />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="verifyPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Verify Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} type={"password"} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormMessage />
+              <Button
+                type="submit"
+                disabled={isLoadingResetPassword}
+                className="w-full"
+              >
+                Reset password
+              </Button>
+            </form>
+          </Form>
+        </section>
+      </div>
+    </MainLayout>
   );
 }

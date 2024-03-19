@@ -43,6 +43,10 @@ export const env = createEnv({
     SENDGRID_FROM: z.string(),
     TRAMONA_ADMIN_USER_ID: z.string(),
     SLACK_TOKEN: z.string(),
+    AWS_ACCESS_KEY_ID: z.string(),
+    AWS_SECRET_ACCESS_KEY: z.string(),
+    REGION: z.string(),
+    MAP_SCREENSHOTS_BUCKET_NAME: z.string(),
   },
 
   /**
@@ -91,6 +95,10 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     SLACK_TOKEN: process.env.SLACK_TOKEN,
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+    REGION: process.env.REGION,
+    MAP_SCREENSHOTS_BUCKET_NAME: process.env.MAP_SCREENSHOTS_BUCKET_NAME,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

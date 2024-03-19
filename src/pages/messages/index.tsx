@@ -1,3 +1,4 @@
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import {
@@ -9,7 +10,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-export default function MessagePage() {
+function MessageDisplay() {
   const [isViewed, setIsViewd] = useState(false);
 
   const conversations = useConversation((state) => state.conversationList);
@@ -22,8 +23,6 @@ export default function MessagePage() {
   };
 
   const { query } = useRouter();
-
-  useSession({ required: true });
 
   // Allows us to open message from url query
   useEffect(() => {
@@ -45,21 +44,32 @@ export default function MessagePage() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <>
-      <Head>
-        <title>Messages | Tramona</title>
-      </Head>
-
-      <div className="grid h-screen-minus-header grid-cols-1 bg-white md:grid-cols-6">
-        <MessagesSidebar
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-        />
+    <div className="flex min-h-screen-minus-header">
+      <MessagesSidebar
+        selectedConversation={selectedConversation}
+        setSelected={selectConversation}
+      />
+      <div className="flex-1">
         <MessagesContent
           selectedConversation={selectedConversation}
           setSelected={selectConversation}
         />
       </div>
+    </div>
+  );
+}
+
+export default function MessagePage() {
+  const { data: session } = useSession({ required: true });
+
+  return (
+    <>
+      <Head>
+        <title>Messages | Tramona</title>
+      </Head>
+      <DashboardLayout type={session?.user.role ?? "guest"}>
+        <MessageDisplay />
+      </DashboardLayout>
     </>
   );
 }

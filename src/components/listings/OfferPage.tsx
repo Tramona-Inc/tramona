@@ -9,9 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type AppRouter } from "@/server/api/root";
 import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
-import { api } from "@/utils/api";
+import { type RouterOutputs, api } from "@/utils/api";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import {
   cn,
@@ -20,17 +19,16 @@ import {
   getDiscountPercentage,
   getNumNights,
   getTramonaFeeTotal,
+  plural,
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
-import { type inferRouterOutputs } from "@trpc/server";
 import { CheckIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 
-export type OfferWithDetails =
-  inferRouterOutputs<AppRouter>["offers"]["getByIdWithDetails"];
+export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export default function OfferPage({
   offer: { property, request, ...offer },
@@ -84,7 +82,7 @@ export default function OfferPage({
       >
         &larr; Back to all offers
       </Link>
-      <div className="grid h-[50vh] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
+      <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
         <div className="relative col-span-2 row-span-2 bg-accent">
           <Image
             src={property.imageUrls[0]!}
@@ -108,7 +106,7 @@ export default function OfferPage({
         </div>
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
-        <div className="flex-[2] space-y-4">
+        <div className="flex-[2] space-y-6">
           <h1 className="items-center text-lg font-semibold sm:text-3xl">
             {property.name}{" "}
             <Badge className=" -translate-y-1 bg-primary text-white">
@@ -119,6 +117,12 @@ export default function OfferPage({
             <div className="flex flex-wrap items-center gap-1">
               <Badge variant="secondary" icon={<StarFilledIcon />}>
                 {property.avgRating} ({property.numRatings})
+              </Badge>
+              <Badge variant="secondary">
+                {plural(property.numBedrooms, "bedroom")}
+              </Badge>
+              <Badge variant="secondary">
+                {plural(property.numBeds, "bed")}
               </Badge>
               <Badge variant="secondary">{property.propertyType}</Badge>
               {property.amenities.map((amenity) => (
@@ -131,7 +135,7 @@ export default function OfferPage({
               {property.standoutAmenities.map((amenity) => (
                 <Badge
                   variant="secondary"
-                  icon={<CheckIcon className="size-4" />}
+                  // icon={<CheckIcon className="size-4" />}
                   key={amenity}
                 >
                   {amenity}
@@ -163,8 +167,8 @@ export default function OfferPage({
             </div>
           </section>
           <section>
-            <div className="rounded-lg bg-zinc-200 px-4 py-2 text-zinc-600">
-              <div className="line-clamp-3 ">{property.about}</div>
+            <div className="max-w-2xl rounded-lg bg-zinc-200 px-4 py-2 text-zinc-700">
+              <div className="line-clamp-3 break-words">{property.about}</div>
               <div className="flex justify-end">
                 <Dialog>
                   <DialogTrigger className="text-foreground underline underline-offset-2">
@@ -175,12 +179,35 @@ export default function OfferPage({
                     <DialogHeader>
                       <DialogTitle>About this property</DialogTitle>
                     </DialogHeader>
-                    <p className="whitespace-break-spaces">{property.about}</p>
+                    <p className="whitespace-break-spaces break-words">
+                      {property.about}
+                    </p>
                   </DialogContent>
                 </Dialog>
               </div>
             </div>
           </section>
+          {(property.mapScreenshot !== null ||
+            property.areaDescription !== null) && (
+            <section className="space-y-1">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Where you&apos;ll be
+              </h2>
+              <div className="overflow-clip rounded-lg bg-accent">
+                {property.mapScreenshot && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={property.mapScreenshot}
+                    alt=""
+                    className="h-auto w-full"
+                  />
+                )}
+                <p className="px-4 py-2 text-zinc-700">
+                  {property.areaDescription}
+                </p>
+              </div>
+            </section>
+          )}
         </div>
         <div className="flex-1">
           <div className="rounded-t-lg bg-black py-2 text-center font-bold text-white">

@@ -11,7 +11,7 @@ const ForHosts = () => {
           <p className="mb-4 text-lg">
             We turn your vacant calendar dates into bookings!
           </p>
-          <Link href="/for-hosts">
+          <Link href="/auth/signup">
             <button className="rounded-full bg-black px-4 py-2 text-white">
               Learn more
             </button>
@@ -22,8 +22,8 @@ const ForHosts = () => {
             src="/assets/images/landing-page/forhosts.jpeg"
             alt=""
             width={384}
-            height={192}
-            className="rounded-lg object-cover object-center"
+            height={300}
+            className="h-[300px] w-[384px] rounded-lg object-cover object-center"
           />
         </div>
       </div>

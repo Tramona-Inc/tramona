@@ -1,3 +1,4 @@
+import MainLayout from "@/components/_common/Layout/MainLayout";
 import HostSignUpForm from "@/components/sign-up/host/HostSignUpForm";
 import { Button } from "@/components/ui/button";
 import Icons from "@/components/ui/icons";
@@ -13,7 +14,7 @@ export default function SignUp({
   useRequireNoAuth();
 
   return (
-    <>
+    <MainLayout>
       <Head>
         <title>Sign up | Tramona</title>
       </Head>
@@ -84,7 +85,7 @@ export default function SignUp({
           .
         </p>
       </div>
-    </>
+    </MainLayout>
   );
 }
 

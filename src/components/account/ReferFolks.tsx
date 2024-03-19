@@ -37,7 +37,7 @@ export default function ReferFolks() {
           <Input
             id="email"
             name="email"
-            type="email"
+            inputMode="email"
             placeholder="Friend's Email"
             className="basis-full"
           />

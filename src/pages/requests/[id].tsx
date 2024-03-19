@@ -24,7 +24,10 @@ export default function Page() {
 
   const { data: requests } = api.requests.getMyRequests.useQuery();
 
-  const request = requests?.activeRequests.find(({ id }) => id === requestId);
+  const request = requests?.activeRequestGroups
+    .map((group) => group.requests)
+    .flat(1)
+    .find(({ id }) => id === requestId);
 
   const { mutate } = api.messages.createConversationWithAdmin.useMutation({
     onSuccess: (conversationId) => {
@@ -80,7 +83,12 @@ export default function Page() {
                   >
                     Message
                   </Button>
-                  <Button size="lg" variant="outline" className="rounded-full">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full"
+                    asChild
+                  >
                     <Link href={`/listings/${offer.id}`}>More details</Link>
                   </Button>
                   {false /* offer.isPremium */ ? (

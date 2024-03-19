@@ -17,6 +17,10 @@ import { Button } from "@/components/ui/button";
 
 import { zodEmail, zodString } from "@/utils/zod-utils";
 import { api } from "@/utils/api";
+import { useState } from "react";
+
+import OTPDialog from "../otp-dialog/OTPDialog";
+import { formatPhoneNumber } from "@/utils/formatters";
 
 const formSchema = z.object({
   name: zodString(),
@@ -29,6 +33,8 @@ export default function ProfileForm() {
   const user = session?.user;
 
   const { toast } = useToast();
+
+  const [verified, setVerified] = useState<boolean>(false);
 
   const { mutate, isLoading } = api.users.updateProfile.useMutation({
     onSuccess: (res) => {
@@ -59,6 +65,14 @@ export default function ProfileForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!verified) {
+      toast({
+        variant: "destructive",
+        title: "Please verify phone number!",
+      });
+      return;
+    }
+
     mutate(values);
   };
 
@@ -88,7 +102,7 @@ export default function ProfileForm() {
             <FormItem className="lg:col-span-2">
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" {...field} />
+                <Input inputMode="email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -103,6 +117,10 @@ export default function ProfileForm() {
               <FormControl>
                 <Input {...field} />
               </FormControl>
+              <OTPDialog
+                toPhoneNumber={formatPhoneNumber(form.getValues("phoneNumber"))}
+                setVerified={setVerified}
+              />
               <FormMessage />
             </FormItem>
           )}

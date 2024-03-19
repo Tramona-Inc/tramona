@@ -6,8 +6,8 @@ import {
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import UserAvatar from "../_common/UserAvatar";
 import Spinner from "../_common/Spinner";
+import UserAvatar from "../_common/UserAvatar";
 
 export function MessageConversation({
   conversation,
@@ -46,7 +46,7 @@ export function MessageConversation({
   return (
     <div
       className={cn(
-        "flex items-center justify-start border-b-2 border-zinc-100 px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
+        "flex items-center justify-start border-b px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
         isSelected && "bg-zinc-100",
       )}
       onClick={() => handleSelected()}
@@ -58,7 +58,7 @@ export function MessageConversation({
       />
 
       <div className="ml-4 md:ml-2">
-        <h1 className="text-xl font-bold">{displayParticipants}</h1>
+        <h1 className="font-bold">{displayParticipants}</h1>
         <p className="line-clamp-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
           {messages.length > 0 &&
             !messages[0]?.read &&
@@ -104,16 +104,7 @@ export default function MessagesSidebar({
   }, [fetchedConversations, setConversationList]);
 
   return (
-    <div
-      className={cn(
-        "col-span-1 block md:col-span-2 md:border-r-2 xl:col-span-1",
-        selectedConversation && "hidden md:block",
-      )}
-    >
-      <h1 className="flex h-[100px] w-full items-center border-b-2 p-4 text-4xl font-bold md:text-2xl md:font-semibold lg:p-8">
-        Messages
-      </h1>
-
+    <div className="w-96 border-r">
       {!isLoading ? (
         conversations && conversations.length > 0 ? (
           conversations.map((conversation) => (
@@ -125,9 +116,9 @@ export default function MessagesSidebar({
             />
           ))
         ) : (
-          <p className="p-4 text-muted-foreground lg:p-8">
-            No messages to show!
-          </p>
+          <div className="grid h-full place-items-center text-muted-foreground">
+            <p>No conversations yet</p>
+          </div>
         )
       ) : (
         <Spinner />

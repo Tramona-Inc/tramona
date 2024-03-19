@@ -168,9 +168,16 @@ export function getDiscountPercentage(
   return Math.round((1 - discountPrice / originalPrice) * 100);
 }
 
-export function useIsDesktop() {
- return (useWindowSize()?.width ?? 0) >= 640;
-}
+// functions for when css doesnt cut it for showing/hiding stuff on screens
+// use these as a last resort cuz it can cause jank with ssr (unless the element isnt
+// visible on the first render in which case it doesnt matter for ssr)
+
+// https://tailwindcss.com/docs/screens + tailwind.config.ts
+
+export const useScreenWidth = () => useWindowSize()?.width ?? 0;
+export const useIsDesktop = () => useScreenWidth() >= 640;
+export const useIsMd = () => useScreenWidth() >= 768;
+export const useIsLg = () => useScreenWidth() >= 1024;
 
 export function getTramonaFeeTotal(totalSavings: number) {
   const fee = 0.2 * totalSavings;

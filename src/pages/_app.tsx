@@ -6,7 +6,6 @@ import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
 
-import MainLayout from "@/components/_common/MainLayout";
 import TailwindIndicator from "@/components/_common/TailwindIndicator";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,17 +17,15 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     // <HydrationOverlay>
-    <TooltipProvider delayDuration={50}>
+    <TooltipProvider delayDuration={50} disableHoverableContent>
       <SessionProvider session={session}>
-        <MainLayout>
-          <Head>
-            <meta
-              name="viewport"
-              content="width=device-width, initial-scale=1, maximum-scale=1"
-            />
-          </Head>
-          <Component {...pageProps} />
-        </MainLayout>
+        <Head>
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1"
+          />
+        </Head>
+        <Component {...pageProps} />
 
         {/* Helps display screen size (Only in developer mode) */}
         <TailwindIndicator />
