@@ -148,7 +148,7 @@ dependencies:
     version: 2.4.1(react-dom@18.2.0)(react@18.2.0)
   aws-sdk:
     specifier: ^2.1569.0
-    version: 2.1579.0
+    version: 2.1580.0
   axios:
     specifier: ^1.6.7
     version: 1.6.8
@@ -189,8 +189,8 @@ dependencies:
     specifier: ^9.0.2
     version: 9.0.2
   lucide-react:
-    specifier: ^0.358.0
-    version: 0.358.0(react@18.2.0)
+    specifier: ^0.359.0
+    version: 0.359.0(react@18.2.0)
   micro:
     specifier: ^10.0.1
     version: 10.0.1
@@ -9605,8 +9605,8 @@ packages:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  /aws-sdk@2.1579.0:
-    resolution: {integrity: sha512-TYv/bK2kVT/dfrpjAPL6sEhku4uH9EB18gRa6p9gi0fPtmhe49HrYoN2xmPNSqLPj4/CtSXmZhg91Ny1DhG8/Q==}
+  /aws-sdk@2.1580.0:
+    resolution: {integrity: sha512-jR9EWyo1UY6QrYs+jhXCpqxBYXU6QYmqNejpsPgU5OzAWxUgalbXfQPAaw0A/DBxXU99qHO+j6RUYof82veiKw==}
     engines: {node: '>= 10.0.0'}
     requiresBuild: true
     dependencies:
@@ -14094,8 +14094,8 @@ packages:
       es5-ext: 0.10.64
     dev: true
 
-  /lucide-react@0.358.0(react@18.2.0):
-    resolution: {integrity: sha512-rBSptRjZTMBm24zsFhR6pK/NgbT18JegZGKcH4+1H3+UigMSRpeoWLtR/fAwMYwYnlJOZB+y8WpeHne9D6X6Kg==}
+  /lucide-react@0.359.0(react@18.2.0):
+    resolution: {integrity: sha512-bxVL+rM/wacjpT0BKShA6r5IIKb6LCRg+ltFG9pnnIwaRX8kK3hq8v5JwMpT7RC6XeqB5cSaaV6GapPWWmtliw==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
