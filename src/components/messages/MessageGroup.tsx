@@ -1,7 +1,7 @@
+import { type MessageType } from "@/server/db/schema";
 import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
-import { type MessageType } from "@/server/db/schema";
 import { type MessageGroup } from "./groupMessages";
 
 export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
@@ -10,6 +10,11 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   const firstMessage = messages[0];
   if (!firstMessage || !session) return null;
 
+  // Helps convert UTC time to local time offset
+  const utcTime = new Date(firstMessage.createdAt);
+  const localOffset = utcTime.getTimezoneOffset();
+  const localTime = new Date(utcTime.getTime() - localOffset * 60000); // Adjust for local time zone offset
+
   return (
     <div className="flex items-start gap-2">
       <UserAvatar {...user} />
@@ -17,7 +22,7 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
         <div className="flex items-baseline gap-2">
           <p className="font-semibold leading-none">{user.name}</p>
           <p className="text-xs text-muted-foreground">
-            {formatRelative(firstMessage.createdAt, new Date())}
+            {formatRelative(localTime, new Date())}
             {session.user.id === firstMessage.userId && firstMessage.read && (
               <> • read</>
             )}

@@ -155,7 +155,7 @@ export const useMessage = create<MessageState>((set, get) => ({
       if (data) {
         const chatMessages: ChatMessageType[] = data.map((message) => ({
           id: message.id,
-          createdAt: new Date(message.created_at),
+          createdAt: message.created_at,
           conversationId: message.conversation_id,
           userId: message.user_id,
           message: message.message,

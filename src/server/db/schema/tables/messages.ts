@@ -29,7 +29,9 @@ export const messages = pgTable(
     message: varchar("message", { length: 1500 }).notNull(),
     read: boolean("read").default(false),
     isEdit: boolean("is_edit").default(false),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
     conversationIndex: index("conversationIndex").on(t.conversationId),
