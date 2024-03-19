@@ -229,48 +229,6 @@ export const messagesRouter = createTRPCRouter({
       await addTwoUserToConversation(input.user1Id, input.user2Id);
     }),
 
-  // getMessageWithParticipants: protectedProcedure
-  //   .input(z.object({ id: z.string() }))
-  //   .query(async ({ ctx, input }) => {
-  //     const message = await db.query.messages.findFirst({
-  //       columns: {
-  //         read: true,
-  //         conversationId: true,
-  //         userId: true,
-  //       },
-  //       where: eq(messages.id, input.id),
-  //     });
-  //     return message;
-  //   }),
-  getMessageWithParticipants: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const messageWithParticipants = await db.query.messages.findFirst({
-        columns: {
-          read: true,
-          conversationId: true,
-          userId: true,
-        },
-        where: and(eq(messages.id, input.id), eq(messages.read, false)),
-        with: {
-          participants: {
-            columns: { userId: true },
-            where:
-              and(
-                eq(
-                  conversationParticipants.conversationId,
-                  messages.conversationId,
-                ),
-                ne(conversationParticipants.userId, messages.userId),
-              ),
-
-          },
-        },
-      });
-
-      return messageWithParticipants;
-    }),
-
   getParticipantsPhoneNumbers: protectedProcedure
     .input(z.object({conversationId: zodNumber()}))
     .query(async({ctx, input}) => {
