@@ -7,6 +7,7 @@ import {
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
+import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import Spinner from "../_common/Spinner";
@@ -121,7 +122,15 @@ export default function MessagesSidebar({
   }, [optimisticIds, selectedConversation?.id, session, setConversationToTop]);
 
   return (
-    <div className="w-96 border-r">
+    <div
+      className={cn(
+        "col-span-1 block md:col-span-3 md:border-r xl:col-span-2",
+        selectedConversation && "hidden md:block",
+      )}
+    >
+      <h1 className="flex h-[100px] w-full items-center border-b p-4 text-4xl font-bold md:text-2xl md:font-semibold lg:p-8">
+        Messages
+      </h1>
       {!isLoading ? (
         conversations && conversations.length > 0 ? (
           conversations.map((conversation) => (

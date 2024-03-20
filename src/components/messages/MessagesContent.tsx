@@ -16,7 +16,7 @@ export default function MessagesContent({
   return (
     <div
       className={cn(
-        "col-span-5 flex h-full items-center justify-center md:col-span-4 xl:col-span-4",
+        "col-span-5 flex h-full items-center justify-center md:col-span-3 xl:col-span-4",
         !selectedConversation && "hidden md:flex",
       )}
     >
