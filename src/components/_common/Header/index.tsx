@@ -64,6 +64,7 @@ function LargeHeader(props: HeaderProps) {
 
 function SmallSidebar(props: HeaderProps) {
   const isVisible = !useIsLg();
+  if (!isVisible || props.type === "marketing") return null;
 
   return (
     <Sheet>
@@ -72,25 +73,13 @@ function SmallSidebar(props: HeaderProps) {
           <MenuIcon />
         </Button>
       </SheetTrigger>
-      {isVisible && (
-        <SheetContent side="left" className="w-max p-0">
-          {props.type === "marketing" && (
-            <div className="flex w-80 flex-col gap-2 p-8 pr-16">
-              {/* {headerLinks.map(({ href, label }, i) => (
-                <HeaderLink key={i} href={href}>
-                  {label}
-                </HeaderLink>
-              ))} */}
-            </div>
-          )}
-
-          {props.type === "dashboard" && (
-            <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
-              <Sidebar withLogo type={props.sidebarType} />
-            </aside>
-          )}
-        </SheetContent>
-      )}
+      <SheetContent side="left" className="w-max p-0">
+        {props.type === "dashboard" && (
+          <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
+            <Sidebar withLogo type={props.sidebarType} />
+          </aside>
+        )}
+      </SheetContent>
     </Sheet>
   );
 }
