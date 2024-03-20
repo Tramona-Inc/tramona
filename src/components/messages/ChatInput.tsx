@@ -93,7 +93,7 @@ export default function ChatInput({
                   if (phoneNumber) {
                     await sendSMS({
                       to: phoneNumber,
-                      msg: "You have a new unread message!",
+                      msg: "You have a new unread message in Tramona!",
                     });
                     await updateProfile({
                       id: id,
