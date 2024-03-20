@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   varchar,
+  index,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
@@ -49,9 +50,10 @@ export const users = pgTable(
     phoneNumber: varchar("phone_number", { length: 20 }),
     lastTextAt: timestamp("last_text_at").defaultNow(),
   },
-  // (t) => ({
-  //   uniquePhoneNumber: unique().on(t.phoneNumber),
-  // }),
+  (t) => ({
+    phoneNumberIdx: index("phone_number_idx").on(t.phoneNumber),
+    emailIdx: index("email_idx").on(t.email),
+  }),
 );
 
 export type User = typeof users.$inferSelect;
