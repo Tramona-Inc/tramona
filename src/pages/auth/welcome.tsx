@@ -12,8 +12,8 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import router from "next/router";
 
 function StepperContentLayout({
   children,
@@ -174,10 +174,15 @@ export default function Welcome() {
         </Stepper>
         <div className="flex justify-center">
           {isLastStep ? (
-            <Button size="lg" asChild className="rounded-full pr-4">
-              <Link href="/dashboard">
-                Continue to dashboard <ChevronRight className="opacity-80" />
-              </Link>
+            <Button
+              size="lg"
+              // asChild
+              className="rounded-full pr-4"
+              onClick={() => router.push("/dashboard")}
+            >
+              {/* <Link href="/dashboard"> */}
+              Continue to dashboard <ChevronRight className="opacity-80" />
+              {/* </Link> */}
             </Button>
           ) : (
             <Button size="lg" onClick={nextStep} className="rounded-full pr-4">
