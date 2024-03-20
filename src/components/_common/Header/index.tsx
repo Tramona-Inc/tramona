@@ -1,12 +1,10 @@
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
-import { type PropsWithChildren } from "react";
 import HeaderTopRight from "./HeaderTopRight";
 
-import NavLink from "@/components/_utils/NavLink";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn, useIsLg } from "@/utils/utils";
+import { useIsLg } from "@/utils/utils";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { TramonaLogo } from "./TramonaLogo";
 
@@ -29,29 +27,6 @@ export default function Header(props: HeaderProps) {
     </>
   );
 }
-
-const headerLinks = [
-  // {
-  //   href: "/program",
-  //   label: "Refer and Earn",
-  // },
-  // {
-  //   href: "/for-hosts",
-  //   label: "For Hosts",
-  // },
-  // {
-  //   href: "/exclusive-offers",
-  //   label: "Exclusive Offers",
-  // },
-  // {
-  //   href: "/feed",
-  //   label: "Social Feed",
-  // },
-  // {
-  //   href: "/about",
-  //   label: "About Us",
-  // },
-];
 
 function LargeHeader(props: HeaderProps) {
   return (
@@ -139,28 +114,5 @@ function SmallHeader(props: HeaderProps) {
         {props.type === "dashboard" && <HeaderTopRight />}
       </div>
     </header>
-  );
-}
-
-function HeaderLink({
-  href,
-  children,
-  onClick,
-}: PropsWithChildren<{ href: string; onClick?: () => void }>) {
-  return (
-    <NavLink
-      href={href}
-      render={({ selected }) => (
-        <div
-          onClick={onClick} // close dropdown when link is clicked
-          className={cn(
-            "rounded-lg px-5 py-2 font-medium",
-            selected ? "bg-black text-white" : "text-black hover:bg-zinc-200",
-          )}
-        >
-          {children}
-        </div>
-      )}
-    />
   );
 }

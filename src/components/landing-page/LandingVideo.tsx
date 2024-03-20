@@ -4,11 +4,11 @@ const LandingVideo = () => {
   const [videoLoaded, setVideoLoaded] = React.useState(false);
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
 
-  const playVideo = () => {
+  const playVideo = React.useCallback(() => {
     if (videoRef.current && !videoLoaded) {
       void videoRef.current.play().then(() => setVideoLoaded(true));
     }
-  };
+  }, [videoLoaded]);
 
   React.useEffect(() => {
     const video = videoRef.current;
@@ -23,7 +23,7 @@ const LandingVideo = () => {
         video.removeEventListener("loadeddata", playVideo);
       }
     };
-  }, []);
+  }, [playVideo]);
 
   return (
     <>

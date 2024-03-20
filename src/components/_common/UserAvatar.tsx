@@ -1,4 +1,5 @@
 import {
+  AnonymousAvatar,
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -23,11 +24,12 @@ export default function UserAvatar({
   email: string | null | undefined;
   image: string | null | undefined;
 } & AvatarVariants) {
+  if (!name && !email) return <AnonymousAvatar size={size} />;
   const fallback = name ? getInitials(name) : email?.[0] ?? "?";
 
   return (
     <Avatar size={size}>
-      {image && <AvatarImage src={image} alt="" style={{ objectFit: 'cover' }} />}
+      {image && <AvatarImage src={image} alt="" />}
       <AvatarFallback>{fallback}</AvatarFallback>
     </Avatar>
   );

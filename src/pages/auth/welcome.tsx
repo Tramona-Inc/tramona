@@ -1,5 +1,4 @@
 import Head from "next/head";
-import router from "next/router";
 
 import Undone from "@/components/_icons/UndoneIcon";
 import OfferCard from "@/components/offer-card/OfferCard";
@@ -14,6 +13,7 @@ import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import { ChevronRight } from "lucide-react";
+import router from "next/router";
 
 function StepperContentLayout({
   children,

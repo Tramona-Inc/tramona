@@ -1,8 +1,9 @@
 import { useConversation } from "@/utils/store/conversations";
-import { useMessage } from "@/utils/store/messages";
+import { type ChatMessageType, useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { nanoid } from "nanoid";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,7 +17,7 @@ const formSchema = z.object({
 export default function ChatInput({
   conversationId,
 }: {
-  conversationId: number;
+  conversationId: string;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,45 +38,49 @@ export default function ChatInput({
     (state) => state.setConversationToTop,
   );
 
+  const removeMessageFromConversation = useMessage(
+    (state) => state.removeMessageFromConversation,
+  );
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
-      // TODO: might be better to update the state first then insert into db
-      const { data, error } = await supabase
+      const newMessage: ChatMessageType = {
+        id: nanoid(),
+        createdAt: new Date().toISOString().slice(0, -1),
+        conversationId: conversationId,
+        userId: session.user.id,
+        message: values.message,
+        read: false,
+        isEdit: false,
+      };
+
+      const newMessageToDb = {
+        id: newMessage.id,
+        created_at: new Date().toISOString(),
+        conversation_id: conversationId,
+        user_id: newMessage.userId,
+        message: newMessage.message,
+        read: newMessage.read,
+        is_edit: newMessage.isEdit,
+      };
+
+      setConversationToTop(conversationId, newMessage);
+      addMessageToConversation(conversationId, newMessage);
+      setOptimisticIds(newMessage.id);
+
+      form.reset();
+
+      // ! Optimistic UI first then add to db
+      const { error } = await supabase
         .from("messages")
-        .insert({
-          conversation_id: conversationId,
-          user_id: session?.user.id,
-          message: values.message,
-        })
+        .insert(newMessageToDb)
         .select("*, user(email, name, image)")
         .single();
 
       if (error) {
-        errorToast(error.message);
+        removeMessageFromConversation(conversationId, newMessage.id);
+        errorToast();
       }
-
-      if (data) {
-        const newMessage = {
-          id: data.id,
-          createdAt: new Date(data.created_at),
-          conversationId: data.conversation_id,
-          userId: data.user_id,
-          message: data.message,
-          read: data.read,
-          isEdit: data.is_edit,
-          user: {
-            name: session.user.name,
-            email: session.user.email,
-            image: session.user.image ?? "",
-          },
-        };
-
-        setConversationToTop(conversationId, newMessage);
-        addMessageToConversation(conversationId, newMessage);
-        setOptimisticIds(newMessage.id);
-      }
-
-      form.reset();
     }
   };
 
@@ -91,6 +96,7 @@ export default function ChatInput({
                 <Input
                   placeholder="Type a message"
                   className="rounded-full"
+                  autoFocus
                   {...field}
                 />
               </FormControl>
