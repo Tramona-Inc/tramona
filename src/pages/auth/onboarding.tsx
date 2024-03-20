@@ -8,13 +8,7 @@ import {
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Icons } from "@/components/_icons/icons";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   InputOTP,
   InputOTPGroup,
@@ -140,17 +134,11 @@ export default function Onboarding() {
   }, [code]);
 
   return (
-    <MainLayout
-      type="auth"
-      className="container flex flex-col items-center justify-center gap-5"
-    >
+    <MainLayout type="auth" className="flex flex-col justify-center gap-5 p-4">
       <h1 className="text-center text-4xl font-bold tracking-tight">
-        Let&apos;s set up your account
+        Verify your phone number
       </h1>
-      <Card className="max-w-sm">
-        <CardHeader>
-          <CardTitle>Verify your phone number</CardTitle>
-        </CardHeader>
+      <Card className="mx-auto max-w-md">
         <CardContent>
           {sent ? (
             <InputOTP

@@ -7,7 +7,6 @@ import {
   timestamp,
   varchar,
   index,
-  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
@@ -53,7 +52,7 @@ export const users = pgTable(
   },
   (t) => ({
     phoneNumberIdx: index("phone_number_idx").on(t.phoneNumber),
-    emailIdx: uniqueIndex("email_idx").on(t.email),
+    emailIdx: index("email_idx").on(t.email),
   }),
 );
 
