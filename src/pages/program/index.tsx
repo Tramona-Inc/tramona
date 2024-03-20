@@ -20,6 +20,7 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
+import HowItWorks from "@/components/_common/HowItWorks";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -319,59 +320,6 @@ function ProgramTiers() {
 //   );
 // }
 
-interface FeatureProps {
-  number: string;
-  title: string;
-  description: string;
-}
-
-const Feature: React.FC<FeatureProps> = ({ number, title, description }) => {
-  return (
-    <div className="flex flex-col items-center space-y-4 text-center md:items-start md:text-left">
-      <div
-        className={`flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900 text-2xl text-white`}
-      >
-        {number}
-      </div>
-      <h3 className="text-2xl font-semibold">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
-  );
-};
-
-const HowItWorks: React.FC = () => {
-  return (
-    <div className="bg-white px-6 py-16 lg:px-0">
-      <hr className="mx-24 mb-24 h-px border-0 bg-neutral-300"></hr>
-      <div className="mx-auto max-w-6xl">
-        <div className="space-y-6 text-center">
-          <h2 className="text-4xl font-bold">How Tramona Partnership Works?</h2>
-        </div>
-        <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
-          <Feature
-            number="1"
-            title="Sign Up"
-            description="Sign up, access our partner portal, and get your
-            custom affiliate link."
-          />
-          <Feature
-            number="2"
-            title="Share"
-            description="Share your link with your contacts and social media
-            followers."
-          />
-          <Feature
-            number="3"
-            title="Earn"
-            description="Earn based on every persons travel you refer."
-          />
-        </div>
-      </div>
-      <hr className="mx-24 mt-24 h-px border-0 bg-neutral-300"></hr>
-    </div>
-  );
-};
-
 function ExploreEarnings() {
   return (
     <section className="bg-slate-900">
@@ -481,6 +429,25 @@ function FAQ() {
 }
 
 export default function Page() {
+  const partnershipSteps = [
+    {
+      number: "1",
+      title: "Sign Up",
+      description:
+        "Sign up, access our partner portal, and get your custom affiliate link.",
+    },
+    {
+      number: "2",
+      title: "Share",
+      description:
+        "Share your link with your contacts and social media followers.",
+    },
+    {
+      number: "3",
+      title: "Earn",
+      description: "Earn based on every person's travel you refer.",
+    },
+  ];
   return (
     <MainLayout>
       <div className="relative bg-white">
@@ -496,7 +463,10 @@ export default function Page() {
         </div>
 
         <div className="">
-          <HowItWorks />
+          <HowItWorks
+            title="How Tramona Partnership Works?"
+            steps={partnershipSteps}
+          />
         </div>
         <div className="">
           <FAQ />

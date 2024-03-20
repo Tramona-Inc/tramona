@@ -26,7 +26,7 @@ const ForHosts = () => {
         <div className="w-full md:w-1/2">
           <div className="h-64 w-full overflow-hidden rounded-lg md:h-auto">
             <Image
-              src="/assets/images/landing-page/forhosts2.jpg"
+              src="/assets/images/landing-page/forhosts.jpg"
               alt=""
               width={384}
               height={300}

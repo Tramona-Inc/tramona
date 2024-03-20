@@ -21,6 +21,7 @@ import React from "react";
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { cn } from "@/utils/utils";
 import Autoplay from "embla-carousel-autoplay";
+import HowItWorks from "@/components/_common/HowItWorks";
 
 type Tabs = {
   id: number;
@@ -119,61 +120,6 @@ function GrowWithTramona() {
   );
 }
 
-interface FeatureProps {
-  number: string;
-  title: string;
-  description: string;
-}
-
-const Feature: React.FC<FeatureProps> = ({ number, title, description }) => {
-  return (
-    <div className="flex flex-col items-center space-y-4 text-center md:items-start md:text-left">
-      <div
-        className={`flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900 text-2xl text-white`}
-      >
-        {number}
-      </div>
-      <h3 className="text-2xl font-semibold">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
-  );
-};
-
-const HowItWorks: React.FC = () => {
-  return (
-    <div className="bg-white px-6 py-16 lg:px-0">
-      <hr className="mx-24 mb-24 h-px border-0 bg-neutral-300"></hr>
-      <div className="mx-auto max-w-6xl">
-        <div className="space-y-6 text-center">
-          <h2 className="text-4xl font-bold">How Tramona Host Works?</h2>
-          {/* <p className="text-gray-600">See FAQ section for more information.</p> */}
-        </div>
-        <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
-          <Feature
-            number="1"
-            title="Travelers Request an Offer"
-            description="Travelers come to us and tell us how much they want to spend and
-            where they want to go."
-          />
-          <Feature
-            number="2"
-            title="Review Traveler Requests"
-            description="In your host dashboard, you can see requests of people wanting to
-            travel in your area."
-          />
-          <Feature
-            number="3"
-            title="Respond to Requests"
-            description="You can then respond to that traveler and accept, deny, or counter
-            their request."
-          />
-        </div>
-      </div>
-      <hr className="mx-24 mt-24 h-px border-0 bg-neutral-300"></hr>
-    </div>
-  );
-};
-
 export default function HostWelcome() {
   // State to track selected tab and image opacity
   const [tab, setTab] = useState<number>(0);
@@ -214,6 +160,26 @@ export default function HostWelcome() {
       setTab(api.selectedScrollSnap());
     });
   }, [api]);
+  const steps = [
+    {
+      number: "1",
+      title: "Travelers Request an Offer",
+      description:
+        "Travelers come to us and tell us how much they want to spend and where they want to go.",
+    },
+    {
+      number: "2",
+      title: "Review Traveler Requests",
+      description:
+        "In your host dashboard, you can see requests of people wanting to travel in your area.",
+    },
+    {
+      number: "3",
+      title: "Respond to Requests",
+      description:
+        "You can then respond to that traveler and accept, deny, or counter their request.",
+    },
+  ];
 
   return (
     <MainLayout>
@@ -248,7 +214,7 @@ export default function HostWelcome() {
       </div>
 
       <div className="">
-        <HowItWorks />
+        <HowItWorks steps={steps} title="How Tramona Host Works?" />
       </div>
 
       {/** How */}
