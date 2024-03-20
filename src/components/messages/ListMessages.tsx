@@ -70,7 +70,7 @@ export default function ListMessages() {
         .eq("id", payload.new.user_id)
         .single();
       if (error) {
-        errorToast(error.message);
+        errorToast();
       } else {
         const newMessage: ChatMessageType = {
           id: payload.new.id,

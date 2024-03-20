@@ -79,9 +79,7 @@ export default function ChatInput({
 
       if (error) {
         removeMessageFromConversation(conversationId, newMessage.id);
-
-        // errorToast(error.message);
-        errorToast("error");
+        errorToast();
       }
     }
   };

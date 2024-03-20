@@ -23,9 +23,9 @@ export const messages = pgTable(
     conversationId: varchar("conversation_id")
       .notNull()
       .references(() => conversations.id),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     message: varchar("message", { length: 1500 }).notNull(),
     read: boolean("read").default(false),
     isEdit: boolean("is_edit").default(false),
