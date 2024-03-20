@@ -1,3 +1,4 @@
+import { type RouterOutputs } from "@/utils/api";
 import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
@@ -11,7 +12,6 @@ import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import RequestGroupAvatars from "./RequestCardGroupAvatars";
-import { type RouterOutputs } from "@/utils/api";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
