@@ -6,7 +6,6 @@ import {
   text,
   timestamp,
   varchar,
-  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";

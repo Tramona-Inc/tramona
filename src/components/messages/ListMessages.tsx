@@ -56,6 +56,7 @@ export default function ListMessages() {
     if (unreadMessageIds.length > 0) {
       void mutateAsync({ unreadMessageIds });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   const hasMore = currentConversationId

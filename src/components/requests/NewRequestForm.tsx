@@ -85,7 +85,7 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
-  const { status, data, update } = useSession();
+  const { status } = useSession();
 
   const isDesktop = useIsDesktop();
 

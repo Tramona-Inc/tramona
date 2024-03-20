@@ -3,7 +3,7 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "@/utils/utils";
 import { type VariantProps, cva } from "class-variance-authority";
-import { LucideIcon, User2Icon } from "lucide-react";
+import { User2Icon } from "lucide-react";
 
 const avatarVariants = cva(
   "relative flex shrink-0 overflow-hidden rounded-full",

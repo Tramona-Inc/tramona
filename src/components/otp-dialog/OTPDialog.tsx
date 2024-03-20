@@ -112,7 +112,6 @@ export default function OTPDialog({
         description: "Code is valid for 10 minutes.",
       });
     } catch (err) {
-      console.log("askdlfjaskdf");
       setOpen(false);
       setVerified(false);
       errorToast();
@@ -154,17 +153,16 @@ export default function OTPDialog({
           clear();
           return;
         } else {
-          console.log("yay");
           mutate({ phoneNumber: toPhoneNumber });
         }
 
         //add phoneNumber to database
-        console.log("?");
+
         setVerified(true);
         setOpen(false);
       } catch (err) {
         setVerified(false);
-        console.log(".");
+
         setOpen(false);
         if (err instanceof Error) {
           errorToast();
@@ -173,7 +171,6 @@ export default function OTPDialog({
     };
 
     if (otpSent && allFilled) {
-      console.log("voided");
       void verify();
     }
   }, [allFilled]);
