@@ -31,7 +31,6 @@ export function InviteByEmailForm({
     resolver: zodResolver(formSchema),
     reValidateMode: "onSubmit",
   });
-  const utils = api.useUtils();
 
   const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
 

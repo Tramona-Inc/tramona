@@ -45,9 +45,11 @@ export const conversationParticipants = pgTable(
     conversationId: varchar("conversation_id")
       .notNull()
       .references(() => conversations.id),
-    userId: text("user_id").references(() => users.id, {
-      onDelete: "set null",
-    }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.conversationId, vt.userId] }),

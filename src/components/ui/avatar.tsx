@@ -3,7 +3,7 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "@/utils/utils";
 import { type VariantProps, cva } from "class-variance-authority";
-import { LucideIcon, User2Icon } from "lucide-react";
+import { User2Icon } from "lucide-react";
 
 const avatarVariants = cva(
   "relative flex shrink-0 overflow-hidden rounded-full",
@@ -55,7 +55,7 @@ const AvatarFallback = React.forwardRef<
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
-      "flex h-full w-full items-center justify-center rounded-full border border-zinc-300 bg-gradient-to-b from-zinc-300 to-white text-accent-foreground",
+      "flex h-full w-full items-center justify-center overflow-clip rounded-full border border-zinc-300 bg-gradient-to-b from-zinc-300 to-white text-accent-foreground",
       className,
     )}
     {...props}
@@ -72,7 +72,9 @@ const AnonymousAvatar = React.forwardRef<
     className={cn(avatarVariants({ size }), className)}
     {...props}
   >
-    <User2Icon className="aspect-square h-full w-full object-cover" />
+    <AvatarFallback className="text-muted-foreground">
+      <User2Icon className="aspect-square h-full w-full object-cover" />
+    </AvatarFallback>
   </AvatarPrimitive.Root>
 ));
 AnonymousAvatar.displayName = AvatarPrimitive.Root.displayName;

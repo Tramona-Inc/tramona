@@ -4,7 +4,6 @@ import { GroupMember } from "./GroupMember";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import { ReloadIcon } from "@radix-ui/react-icons";
 
 export default function GroupInviteesList({
   request,

@@ -48,7 +48,7 @@ async function insertUserAuth(
   name: string,
   email: string,
   hashedPassword: string,
-  makeHost: boolean = false,
+  makeHost = false,
 ) {
   return await db
     .insert(users)
