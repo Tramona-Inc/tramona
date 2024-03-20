@@ -50,9 +50,9 @@ export const users = pgTable(
     phoneNumber: varchar("phone_number", { length: 20 }),
     lastTextAt: timestamp("last_text_at").defaultNow(),
   },
-  (t) => ({
-    uniquePhoneNumber: unique().on(t.phoneNumber),
-  }),
+  // (t) => ({
+  //   uniquePhoneNumber: unique().on(t.phoneNumber),
+  // }),
 );
 
 export type User = typeof users.$inferSelect;
