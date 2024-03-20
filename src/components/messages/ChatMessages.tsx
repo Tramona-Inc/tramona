@@ -7,7 +7,7 @@ export const LIMIT_MESSAGE = 9;
 export default function ChatMessages({
   conversationId,
 }: {
-  conversationId: number;
+  conversationId: string;
 }) {
   const { switchConversation, fetchInitialMessages } = useMessage();
 
@@ -18,7 +18,7 @@ export default function ChatMessages({
 
     // Fetch initial messages when the component mounts
     void fetchInitialMessages(conversationId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 
   return (

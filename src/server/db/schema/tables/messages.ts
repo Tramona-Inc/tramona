@@ -1,18 +1,17 @@
 import {
   boolean,
   index,
-  integer,
   pgTable,
   primaryKey,
-  serial,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { nanoid } from "nanoid";
 import { users } from "./users";
 
 export const conversations = pgTable("conversations", {
-  id: serial("id").primaryKey(),
+  id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
   name: varchar("name", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -20,8 +19,8 @@ export const conversations = pgTable("conversations", {
 export const messages = pgTable(
   "messages",
   {
-    id: serial("id").primaryKey(),
-    conversationId: integer("conversation_id")
+    id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
+    conversationId: varchar("conversation_id")
       .notNull()
       .references(() => conversations.id),
     userId: text("user_id")
@@ -30,7 +29,9 @@ export const messages = pgTable(
     message: varchar("message", { length: 1500 }).notNull(),
     read: boolean("read").default(false),
     isEdit: boolean("is_edit").default(false),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
     conversationIndex: index("conversationIndex").on(t.conversationId),
@@ -41,17 +42,16 @@ export const messages = pgTable(
 export const conversationParticipants = pgTable(
   "conversation_participants",
   {
-    conversationId: integer("conversation_id")
+    conversationId: varchar("conversation_id")
       .notNull()
       .references(() => conversations.id),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.conversationId, vt.userId] }),
   }),
 );
-
 
 export type MessageType = typeof messages.$inferSelect;
