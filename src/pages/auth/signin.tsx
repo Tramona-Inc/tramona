@@ -46,6 +46,7 @@ export default function SignIn({
     await signIn("credentials", {
       email: email,
       password: password,
+      callbackUrl: `${window.location.origin}/auth/onboarding`,
     });
   };
 
