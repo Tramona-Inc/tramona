@@ -30,9 +30,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { isValidPhoneNumber } from "react-phone-number-input";
+import { type Country, isValidPhoneNumber } from "react-phone-number-input";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
+
+// feel free to refactor this lol
 
 export default function Onboarding() {
   const formSchema = z.object({
@@ -41,12 +43,13 @@ export default function Onboarding() {
     }),
   });
 
+  const [country, setCountry] = useState<Country | undefined>("US");
+
   type FormValues = z.infer<typeof formSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { phoneNumber: "" },
-    reValidateMode: "onSubmit",
   });
 
   const { data: session } = useSession();
@@ -74,6 +77,19 @@ export default function Onboarding() {
   const { update } = useSession();
 
   async function onPhoneSubmit({ phoneNumber }: FormValues) {
+    if (!country) {
+      form.setError("phoneNumber", { message: "Invalid phone number" });
+      return;
+    }
+    // i feel like i remember this being mentioned in a meeting but idk
+    // so uncomment it out if you want
+
+    // if (country !== "US") {
+    //   form.setError("phoneNumber", {
+    //     message: "We only accept US phone numbers for now",
+    //   });
+    //   return;
+    // }
     if (await phoneNumberIsTaken({ phoneNumber })) {
       form.setError("phoneNumber", {
         message: "Phone number already in use, please try again",
@@ -131,11 +147,11 @@ export default function Onboarding() {
       <h1 className="text-center text-4xl font-bold tracking-tight">
         Let&apos;s set up your account
       </h1>
-      <Card className="my-5 flex max-w-[400px] flex-col gap-5">
+      <Card className="max-w-sm">
         <CardHeader>
           <CardTitle>Verify your phone number</CardTitle>
         </CardHeader>
-        <CardContent className="flex justify-center pt-8">
+        <CardContent>
           {sent ? (
             <InputOTP
               maxLength={6}
@@ -166,6 +182,7 @@ export default function Onboarding() {
                         <PhoneInput
                           placeholder="Enter phone number"
                           defaultCountry="US"
+                          onCountryChange={setCountry}
                           autoFocus
                           {...field}
                         />
