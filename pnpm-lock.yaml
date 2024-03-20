@@ -185,6 +185,9 @@ dependencies:
   framer-motion:
     specifier: ^11.0.15
     version: 11.0.15(react-dom@18.2.0)(react@18.2.0)
+  fs:
+    specifier: 0.0.1-security
+    version: 0.0.1-security
   input-otp:
     specifier: ^1.2.0
     version: 1.2.2(react-dom@18.2.0)(react@18.2.0)
@@ -203,6 +206,9 @@ dependencies:
   nanoid:
     specifier: ^5.0.6
     version: 5.0.6
+  net:
+    specifier: ^1.0.2
+    version: 1.0.2
   next:
     specifier: ^14.0.4
     version: 14.1.4(@babel/core@7.23.7)(react-dom@18.2.0)(react@18.2.0)
@@ -212,6 +218,9 @@ dependencies:
   nodemailer:
     specifier: ^6.9.8
     version: 6.9.12
+  perf_hooks:
+    specifier: ^0.0.1
+    version: 0.0.1
   pg:
     specifier: ^8.11.3
     version: 8.11.3
@@ -260,6 +269,9 @@ dependencies:
   tailwindcss-animate:
     specifier: ^1.0.7
     version: 1.0.7(tailwindcss@3.4.1)
+  tls:
+    specifier: ^0.0.1
+    version: 0.0.1
   twilio:
     specifier: ^4.22.0
     version: 4.23.0
@@ -12779,6 +12791,10 @@ packages:
   /fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
+  /fs@0.0.1-security:
+    resolution: {integrity: sha512-3XY9e1pP0CVEUCdj5BmfIZxRBTSDycnbqhIOGec9QYtmVH2fbLpj86CFWkrNOkt/Fvty4KZG5lTglL9j/gJ87w==}
+    dev: false
+
   /fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -14579,6 +14595,10 @@ packages:
   /neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
 
+  /net@1.0.2:
+    resolution: {integrity: sha512-kbhcj2SVVR4caaVnGLJKmlk2+f+oLkjqdKeQlmUtz6nGzOpbcobwVIeSURNgraV/v3tlmGIX82OcPCl0K6RbHQ==}
+    dev: false
+
   /netmask@2.0.2:
     resolution: {integrity: sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==}
     engines: {node: '>= 0.4.0'}
@@ -15369,6 +15389,10 @@ packages:
 
   /pend@1.2.0:
     resolution: {integrity: sha512-F3asv42UuXchdzt+xXqfW1OGlVBe+mxa2mqI0pg5yAHZPvFmY3Y6drSf/GQ1A86WgWEN9Kzh/WrgKa6iGcHXLg==}
+
+  /perf_hooks@0.0.1:
+    resolution: {integrity: sha512-qG/D9iA4KDme+KF4vCObJy6Bouu3BlQnmJ8jPydVPm32NJBD9ZK1ZNgXSYaZKHkVC1sKSqUiLgFvAZPUiIEnBw==}
+    dev: false
 
   /pg-cloudflare@1.1.1:
     resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
@@ -17751,6 +17775,10 @@ packages:
     resolution: {integrity: sha512-KYad6Vy5VDWV4GH3fjpseMQ/XU2BhIYP7Vzd0LG44qRWm/Yt2WCOTicFdvmgo6gWaqooMQCawTtILVQJupKu7A==}
     engines: {node: '>=14.0.0'}
     dev: true
+
+  /tls@0.0.1:
+    resolution: {integrity: sha512-GzHpG+hwupY8VMR6rYsnAhTHqT/97zT45PG8WD5eTT1lq+dFE0nN+1PYpsoBcHJgSmTz5ceK2Cv88IkPmIPOtQ==}
+    dev: false
 
   /tmpl@1.0.5:
     resolution: {integrity: sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw==}
