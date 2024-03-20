@@ -144,50 +144,6 @@ export default function OTPDialog({
     },
   });
 
-  // useEffect(() => {
-  //   const verify = async () => {
-  //     try {
-  //       const verifyOTPResponse = await verifyOTPMutation.mutateAsync({
-  //         to: toPhoneNumber,
-  //         code: code.join(""),
-  //       });
-
-  //       const { status } = verifyOTPResponse; // pending | approved | canceled
-
-  //       if (status !== "approved") {
-  //         toast({
-  //           variant: "destructive",
-  //           title: "Incorrect code!",
-  //           description: "Try re-entering verification code.",
-  //         });
-
-  //         clear();
-  //         return;
-  //       } else {
-  //         console.log("yay");
-  //         mutate({ phoneNumber: toPhoneNumber });
-  //       }
-
-  //       //add phoneNumber to database
-  //       console.log("?");
-  //       setVerified(true);
-  //       setOpen(false);
-  //     } catch (err) {
-  //       setVerified(false);
-  //       console.log(".");
-  //       setOpen(false);
-  //       if (err instanceof Error) {
-  //         errorToast(err.message);
-  //       }
-  //     }
-  //   };
-
-  //   if (otpSent && allFilled) {
-  //     console.log("voided");
-  //     void verify();
-  //   }
-  // }, [allFilled]);
-
   useEffect(() => {
     const verifyCode = async () => {
       if (code.length === 6 && toPhoneNumber) {
@@ -203,16 +159,24 @@ export default function OTPDialog({
           errorToast("Incorrect code!");
           return;
         } else {
-          // insert email
           mutate({ phoneNumber: toPhoneNumber });
         }
         setVerified(true);
         setOpen(false);
+      } catch (err) {
+        setVerified(false);
+
+        setOpen(false);
+        if (err instanceof Error) {
+          errorToast();
+        }
       }
     };
 
-    void verifyCode(); // Call the asynchronous function here
-  }, [code]);
+    if (otpSent && allFilled) {
+      void verify();
+    }
+  }, [allFilled]);
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>

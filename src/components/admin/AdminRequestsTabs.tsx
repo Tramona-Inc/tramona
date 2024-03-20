@@ -1,4 +1,3 @@
-import { api } from "@/utils/api";
 import Link from "next/link";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
@@ -21,13 +20,11 @@ const navs = [
 ];
 
 export default function AdminRequestsTabs() {
-  const { data: requests } = api.requests.getAll.useQuery();
-
   return (
     <div className="grid grid-cols-2 gap-5">
       {navs.map((nav, index) => {
         return (
-          <Card key="index">
+          <Card key={index}>
             <Link href={nav.href}>
               <CardHeader>
                 <CardTitle>{nav.title}</CardTitle>
