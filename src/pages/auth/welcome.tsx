@@ -174,10 +174,15 @@ export default function Welcome() {
         </Stepper>
         <div className="flex justify-center">
           {isLastStep ? (
-            <Button size="lg" asChild className="rounded-full pr-4">
-              <Link href="/dashboard">
-                Continue to dashboard <ChevronRight className="opacity-80" />
-              </Link>
+            <Button
+              size="lg"
+              // asChild
+              className="rounded-full pr-4"
+              onClick={() => router.push("/dashboard")}
+            >
+              {/* <Link href="/dashboard"> */}
+              Continue to dashboard <ChevronRight className="opacity-80" />
+              {/* </Link> */}
             </Button>
           ) : (
             <Button size="lg" onClick={nextStep} className="rounded-full pr-4">
