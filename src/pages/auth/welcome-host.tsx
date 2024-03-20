@@ -29,40 +29,47 @@ function StepperContentLayout({
 function Step1(): JSX.Element {
   return (
     <StepperContentLayout className="container gap-4 text-balance">
-      <div className="flex flex-col gap-10 text-center my-3">
-        <h1 className="text-4xl font-bold lg:text-5xl">
-          Welcome Hosts!
-        </h1>
+      <div className="my-3 flex flex-col gap-10 text-center">
+        <h1 className="text-4xl font-bold lg:text-5xl">Welcome Hosts!</h1>
         <p className="text-xl font-bold lg:text-2xl">
           Tramona is a website that helps you fill your vacancies
         </p>
       </div>
 
-      <div className="flex flex-col items-center gap-3 text-pretty lg:gap-4 bg-zinc-100 border-0 rounded-md py-8">
+      <div className="flex flex-col items-center gap-3 text-pretty rounded-md border-0 bg-zinc-100 py-8 lg:gap-4">
         <div className="flex max-w-[500px] items-center gap-4">
           <div>
-            <p className="h-10 w-10 rounded-full border flex items-center justify-center text-white font-semibold bg-black text-2xl">1</p>
+            <p className="flex h-10 w-10 items-center justify-center rounded-full border bg-black text-2xl font-semibold text-white">
+              1
+            </p>
           </div>
           <p className="font-medium lg:text-lg">
-            Travelers come to us and tell us how much they want to spend and where they want to go.
+            Travelers come to us and tell us how much they want to spend and
+            where they want to go.
           </p>
         </div>
 
         <div className="flex max-w-[500px] items-center gap-4">
           <div>
-            <p className="h-10 w-10 rounded-full border flex items-center justify-center text-white font-semibold bg-black text-2xl">2</p>
+            <p className="flex h-10 w-10 items-center justify-center rounded-full border bg-black text-2xl font-semibold text-white">
+              2
+            </p>
           </div>
           <p className="font-medium lg:text-lg">
-            In your host dashboard, you can see requests of people wanting to travel in your area.
+            In your host dashboard, you can see requests of people wanting to
+            travel in your area.
           </p>
         </div>
 
         <div className="flex max-w-[500px] items-center gap-4">
           <div>
-            <p className="h-10 w-10 rounded-full border flex items-center justify-center text-white font-semibold bg-black text-2xl">3</p>
+            <p className="flex h-10 w-10 items-center justify-center rounded-full border bg-black text-2xl font-semibold text-white">
+              3
+            </p>
           </div>
           <p className="font-medium lg:text-lg">
-            You can then respond to that traveler and accept, deny, or counter their request.
+            You can then respond to that traveler and accept, deny, or counter
+            their request.
           </p>
         </div>
       </div>
@@ -71,15 +78,17 @@ function Step1(): JSX.Element {
 }
 
 function Step2(): JSX.Element {
-
   return (
     <StepperContentLayout className="container gap-4 text-balance">
-        <div className="flex flex-col gap-10 text-center">
-          <h1 className="text-4xl font-bold lg:text-5xl">Get guest bookings with ease</h1>
-          <p className="text-lg font-bold lg:text-2xl">
-            It's as simple as inputting your property info and receiving offers from guests looking to travel to your city!
-          </p>
-        </div>
+      <div className="flex flex-col gap-10 text-center">
+        <h1 className="text-4xl font-bold lg:text-5xl">
+          Get guest bookings with ease
+        </h1>
+        <p className="text-lg font-bold lg:text-2xl">
+          It&apos;s as simple as inputting your property info and receiving
+          offers from guests looking to travel to your city!
+        </p>
+      </div>
     </StepperContentLayout>
   );
 }
@@ -92,10 +101,13 @@ function Step3(): JSX.Element {
 
   return (
     <StepperContentLayout className="container gap-4 text-balance text-center">
-      <h1 className="text-4xl font-bold lg:text-5xl">Do you know other hosts?</h1>
+      <h1 className="text-4xl font-bold lg:text-5xl">
+        Do you know other hosts?
+      </h1>
       <div className="my-4 self-center font-medium lg:max-w-[600px]">
-        <p className="text-xl lg:text-2xl font-bold">
-          Refer friends to Tramona and get 30% of what we make for up to a year of their bookings!
+        <p className="text-xl font-bold lg:text-2xl">
+          Refer friends to Tramona and get 30% of what we make for up to a year
+          of their bookings!
         </p>
       </div>
       <div className="my-4 flex min-w-full flex-1 flex-col space-y-4 self-center rounded-3xl bg-primary p-4 md:min-w-[400px] lg:min-w-[500px] xl:min-w-[600px]">

@@ -112,26 +112,27 @@ export default function OTPDialog({
         description: "Code is valid for 10 minutes.",
       });
     } catch (err) {
-      console.log('askdlfjaskdf');
+      console.log("askdlfjaskdf");
       setOpen(false);
       setVerified(false);
       errorToast();
     }
   };
 
-    const { mutate } = api.users.updatePhoneNumber.useMutation(
-      {onSuccess: (res) => {
+  const { mutate } = api.users.updatePhoneNumber.useMutation({
+    onSuccess: (res) => {
       toast({
-        title: "Phone number verified!"
+        title: "Phone number verified!",
       });
       void update((prev: typeof data) => ({ ...prev, user: res }));
       if (res[0]?.phoneNumber) {
         setPhoneNumber?.(res[0]?.phoneNumber);
       }
-    }, onError: () => {
+    },
+    onError: () => {
       errorToast("Error verifying phone number!");
-    }});
-
+    },
+  });
 
   useEffect(() => {
     const verify = async () => {
@@ -153,12 +154,12 @@ export default function OTPDialog({
           clear();
           return;
         } else {
-          console.log('yay');
-          mutate({phoneNumber: toPhoneNumber});
+          console.log("yay");
+          mutate({ phoneNumber: toPhoneNumber });
         }
 
         //add phoneNumber to database
-        console.log('?');
+        console.log("?");
         setVerified(true);
         setOpen(false);
       } catch (err) {
@@ -166,13 +167,13 @@ export default function OTPDialog({
         console.log(".");
         setOpen(false);
         if (err instanceof Error) {
-          errorToast(err.message);
+          errorToast();
         }
       }
     };
 
     if (otpSent && allFilled) {
-      console.log('voided');
+      console.log("voided");
       void verify();
     }
   }, [allFilled]);

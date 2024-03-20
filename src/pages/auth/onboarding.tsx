@@ -88,18 +88,6 @@ export default function Onboarding() {
     void verifyCode(); // Call the asynchronous function here
   }, [code]);
 
-  const handlePhoneInputKeyDown = (event: { key: string }) => {
-    if (event.key === "Enter" && !sent) {
-      setIsLoading(true);
-      void mutateSendOTP({ to: phone });
-    }
-  };
-
-  function handleOnSubmit() {
-    setIsLoading(true);
-    void mutateSendOTP({ to: phone });
-  }
-
   return (
     <MainLayout
       type="auth"
@@ -108,7 +96,7 @@ export default function Onboarding() {
       <h1 className="text-center text-4xl font-bold tracking-tight">
         Let&apos;s set up your account
       </h1>
-      <Card className=" min-w-[400px]">
+      <Card className="my-5 flex max-w-[400px] flex-col gap-5">
         <CardHeader>
           <CardTitle>Verify your phone number</CardTitle>
         </CardHeader>
@@ -133,7 +121,6 @@ export default function Onboarding() {
               autoFocus
               defaultCountry={"US"}
               onChange={(value) => setPhone(value)}
-              onKeyDown={handlePhoneInputKeyDown}
             />
           )}
         </CardContent>
@@ -151,8 +138,14 @@ export default function Onboarding() {
               </p>
             </>
           ) : (
-            <>
-              <Button onClick={() => handleOnSubmit()} disabled={isLoading}>
+            <div className="flex flex-col gap-5">
+              <Button
+                onClick={() => {
+                  setIsLoading(true);
+                  void mutateSendOTP({ to: phone });
+                }}
+                disabled={isLoading}
+              >
                 {isLoading && (
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 )}
@@ -163,7 +156,7 @@ export default function Onboarding() {
                 We verify your phone number on account creation to ensure
                 account security. SMS & data charges may apply.
               </p>
-            </>
+            </div>
           )}
         </CardFooter>
       </Card>
