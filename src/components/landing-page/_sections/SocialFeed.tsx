@@ -214,9 +214,9 @@ const InfiniteScroll: React.FC = () => {
   }, [surroundingBackup]);
 
   return (
-    <div className="relative overflow-hidden rounded-lg">
+    <div className="relative overflow-hidden rounded-lg ">
       <div className="pointer-events-none absolute left-0 top-0 z-10 h-10 w-full bg-opacity-50 bg-gradient-to-b from-[#B8B8B6] to-transparent"></div>
-      <div ref={scrollRef} className="h-full overflow-auto">
+      <div ref={scrollRef} className="h-full overflow-auto scrollbar-hide">
         {Array.from({ length: surroundingBackup }, (_, i) =>
           cardData.map((card, index) => (
             <SocialCard key={`pre-${i}-${index}`} {...card} />
@@ -253,7 +253,7 @@ const SocialFeed: React.FC = () => {
         </div>
         <div className="relative z-10 flex flex-col-reverse items-start justify-center rounded-3xl p-8 text-white md:flex-row">
           <div className="w-full md:max-w-md md:flex-1 2xl:max-w-xl">
-            <div className="shadow-inner-5xl z-10 shadow-black">
+            <div className="shadow-inner-5xl z-10 shadow-black ">
               <InfiniteScroll />
             </div>
           </div>
@@ -268,7 +268,7 @@ const SocialFeed: React.FC = () => {
                 <div className="text-left"></div>
                 <p className="text-xl font-extralight text-neutral-900">
                   See your friends, connect with amazing places and faces,
-                  creating stories worth sharing.
+                  create stories worth sharing.
                 </p>
                 <p className="mt-4 text-xl font-extralight text-neutral-900">
                   At Tramona, we are dedicated to making travel more accessible
