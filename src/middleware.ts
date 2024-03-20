@@ -56,6 +56,8 @@ export default withAuth(
         );
       }
       return NextResponse.redirect(new URL("/dashboard", req.url));
+    } else {
+      return NextResponse.redirect(new URL("/auth/onboarding", req.url));
     }
 
     // // If the user has not onboarded (phoneNumber is null) and they are not trying to access the onboarding page
