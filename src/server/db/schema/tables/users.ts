@@ -51,7 +51,7 @@ export const users = pgTable(
     lastTextAt: timestamp("last_text_at").defaultNow(),
   },
   (t) => ({
-    // uniquePhoneNumber: unique().on(t.phoneNumber),
+    uniquePhoneNumber: unique().on(t.phoneNumber),
   }),
 );
 
