@@ -23,8 +23,8 @@ const ReferAndEarn = () => {
               Refer and earn
             </h2>
             <p className="mb-6 lg:mb-4 break-normal text-lg text-white md:text-lg lg:text-xl">
-              At Tramona, we think we're only as good as our people. Because of
-              that, we've created one of the most generous partnership programs.
+              At Tramona, we think we&apos;re only as good as our people. Because of
+              that, we&apos;ve created one of the most generous partnership programs.
             </p>
             <Link href="/program">
               <button className="rounded-full bg-white px-6 py-3 text-black hover:bg-[#e5e5e5]">
