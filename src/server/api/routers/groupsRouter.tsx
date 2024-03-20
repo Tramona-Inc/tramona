@@ -182,4 +182,27 @@ export const groupsRouter = createTRPCRouter({
           .map((member) => member.user),
       );
   }),
+
+  getGroupOwner: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ input: groupId, ctx }) => {
+      const members =
+        (await ctx.db.query.groups
+          .findFirst({
+            where: eq(groups.id, groupId),
+            with: { members: true },
+          })
+          .then((res) => res?.members)) ?? [];
+
+      const groupOwner = members.find((member) => member.isOwner);
+
+      if (groupOwner?.userId) {
+        const user = await ctx.db.query.users.findFirst({
+          where: eq(users.id, groupOwner?.userId),
+          columns: { phoneNumber: true },
+        })
+        return user;
+      }
+
+    }),
 });

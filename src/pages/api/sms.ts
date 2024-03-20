@@ -3,7 +3,7 @@ import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
 
 import { db } from "@/server/db";
 import { groupMembers, groups, requests, users } from "@/server/db/schema";
-import { eq, desc, exists, and } from "drizzle-orm";
+import { eq, desc, exists, and, sql } from "drizzle-orm";
 
 type TwilioRequestBody = {
   ToCountry: string;
@@ -76,7 +76,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     userResponse.toLowerCase().trim() === "yes"
   ) {
     twiml.message(
-      `Thank you for confirming your request to ${mostRecentRequest.location}! It has been sent to our network of hosts, and we will text you when you receive any new offers.`,
+      `Thank you for confirming your request to ${mostRecentRequest.location}! It has been sent to our network of hosts. We will text you when you have receive a new offers.`,
     );
 
     await db

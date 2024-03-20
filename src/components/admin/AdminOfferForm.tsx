@@ -148,6 +148,7 @@ export default function AdminOfferForm({
   const createOffersMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
+  const getOwnerMutation = api.groups.getGroupOwner.useMutation();
 
   const utils = api.useUtils();
 
@@ -226,9 +227,11 @@ export default function AdminOfferForm({
       utils.requests.invalidate(),
     ]);
 
-    if (user?.phoneNumber) {
+    const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+
+    if (traveler?.phoneNumber) {
       await twilioMutation.mutateAsync({
-        to: user.phoneNumber, // TODO: text the traveller, not the admin
+        to: traveler.phoneNumber, // TODO: text the traveller, not the admin
         msg: "You have a new offer for a request in your Tramona account!",
       });
     }

@@ -272,6 +272,12 @@ export const requestsRouter = createTRPCRouter({
         });
       });
 
+      void sendText({
+        to: ctx.user.phoneNumber!,
+        content:
+          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      });
+
       if (env.NODE_ENV !== "production") return;
 
       const name = ctx.user.name ?? ctx.user.email ?? "Someone";
@@ -298,12 +304,6 @@ export const requestsRouter = createTRPCRouter({
         `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,
       );
-
-      void sendText({
-        to: ctx.user.phoneNumber!,
-        content:
-          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-      });
     }),
 
   // resolving a request with no offers = reject
