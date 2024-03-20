@@ -43,9 +43,12 @@ export default function SignIn({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
+    // Relies on middleware to redirect to dashbaord
+    // onboarding checks if user has a phone number else go to dashboard
     await signIn("credentials", {
       email: email,
       password: password,
+      callbackUrl: `${window.location.origin}/auth/onboarding`,
     });
   };
 

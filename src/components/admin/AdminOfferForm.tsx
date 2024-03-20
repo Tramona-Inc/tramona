@@ -172,13 +172,17 @@ export default function AdminOfferForm({
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
     // const totalPrice = offeredPriceUSD * 100;
-    const totalPrice = data.offeredNightlyPriceUSD * numberOfNights * 100;
+    const totalPrice = Math.round(
+      data.offeredNightlyPriceUSD * numberOfNights * 100,
+    );
 
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
       type: propertyData.propertyType,
-      originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
+      originalNightlyPrice: Math.round(
+        propertyData.originalNightlyPriceUSD * 100,
+      ),
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
       mapScreenshot: url,
