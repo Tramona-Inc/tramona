@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { api } from "@/utils/api";
 import {
   useConversation,
@@ -47,36 +48,45 @@ export function SidebarConversation({
   }
 
   return (
-    <div
+    <button
       className={cn(
-        "flex items-center justify-start border-b px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
-        isSelected && "bg-zinc-100",
+        "relative flex min-h-24 w-full items-center gap-4 border-b p-4 text-left",
+        isSelected ? "bg-zinc-100" : "hover:bg-zinc-100",
       )}
       onClick={() => handleSelected()}
     >
+      {isSelected && (
+        <motion.div
+          layoutId="messages-sidebar-indicator"
+          transition={{ duration: 0.1, ease: "circOut" }}
+          className="absolute inset-y-0 right-0 border-[3px] border-transparent border-r-black"
+        />
+      )}
       <UserAvatar
         email={participants[0]?.email ?? ""}
         image={participants[0]?.image ?? ""}
         name={participants[0]?.name ?? ""}
       />
 
-      <div className="ml-4 md:ml-2">
+      <div>
         <h1 className="font-bold">{displayParticipants}</h1>
-        <p className="line-clamp-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
+        <p className="line-clamp-2 text-xs text-muted-foreground">
           {messages.length > 0 &&
             !messages[0]?.read &&
             messages[0]?.userId !== session?.user.id && (
-              <span className="rounded-full bg-blue-500 p-1" />
+              <div className="mr-1 inline-block size-2 rounded-full bg-blue-500" />
             )}
-          {messages[0]?.userId === session?.user.id && "You: "}
+          <span className="font-semibold">
+            {messages[0]?.userId === session?.user.id ? "You: " : ""}
+          </span>
           {messages[0]?.message ?? ""}
         </p>
         {session?.user.role === "admin" && (
-          <p className="line-clamp-1 text-sm uppercase text-muted-foreground">
+          <p className="line-clamp-1 text-xs uppercase text-muted-foreground">
             Conversation Id: {id}
           </p>
         )}
       </div>
-    </div>
+    </button>
   );
 }

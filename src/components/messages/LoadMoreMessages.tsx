@@ -4,6 +4,7 @@ import { errorToast } from "@/utils/toasts";
 import { getFromAndTo } from "@/utils/utils";
 import { Button } from "../ui/button";
 import { LIMIT_MESSAGE } from "./ChatMessages";
+import { ChevronUpIcon } from "lucide-react";
 
 export default function LoadMoreMessages() {
   const currentConversationId = useMessage(
@@ -76,13 +77,9 @@ export default function LoadMoreMessages() {
   };
 
   return (
-    <div className="flex items-center justify-center py-5">
-      <Button
-        variant={"darkPrimary"}
-        className="mx-10 w-full transition-all"
-        onClick={() => fetchConversation()}
-      >
-        Load More
+    <div className="flex items-center justify-center">
+      <Button className="rounded-full pl-3" onClick={() => fetchConversation()}>
+        <ChevronUpIcon /> Load More
       </Button>
     </div>
   );

@@ -44,8 +44,6 @@ export default function ChatInput({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
-      const utcDate = new Date(Date.now());
-
       const newMessage: ChatMessageType = {
         id: nanoid(),
         createdAt: new Date().toISOString().slice(0, -1),
@@ -100,6 +98,7 @@ export default function ChatInput({
                 <Input
                   placeholder="Type a message"
                   className="rounded-full"
+                  autoFocus
                   {...field}
                 />
               </FormControl>

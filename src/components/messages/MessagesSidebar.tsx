@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import Spinner from "../_common/Spinner";
 import { SidebarConversation } from "./SidebarConversation";
+import { ScrollArea } from "../ui/scroll-area";
 
 export type SidebarProps = {
   selectedConversation: Conversation | null;
@@ -121,7 +122,7 @@ export default function MessagesSidebar({
   }, [optimisticIds, selectedConversation?.id, session, setConversationToTop]);
 
   return (
-    <div className="w-96 border-r">
+    <ScrollArea className="h-screen-minus-header w-96 border-r">
       {!isLoading ? (
         conversations && conversations.length > 0 ? (
           conversations.map((conversation) => (
@@ -140,6 +141,6 @@ export default function MessagesSidebar({
       ) : (
         <Spinner />
       )}
-    </div>
+    </ScrollArea>
   );
 }

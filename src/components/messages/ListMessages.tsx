@@ -188,7 +188,7 @@ export default function ListMessages() {
         className="relative flex flex-1 flex-col overflow-y-auto"
       >
         <div className="flex-1"></div>
-        <div className="absolute w-full space-y-4 p-4 pt-12">
+        <div className="absolute w-full space-y-8 p-4 pt-12">
           {hasMore && <LoadMoreMessages />}
           {messageGroups.map((messageGroup) => (
             <MessageGroup
