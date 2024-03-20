@@ -62,7 +62,7 @@ export default function MessagesSidebar({
           .eq("id", payload.new.user_id)
           .single();
         if (error) {
-          errorToast(error.message);
+          errorToast();
         } else {
           const newMessage: ChatMessageType = {
             id: payload.new.id,
@@ -87,7 +87,7 @@ export default function MessagesSidebar({
           .eq("user_id", session.user.id);
 
         if (error) {
-          errorToast(error.message);
+          errorToast();
         } else {
           const channels = conversationIds
             // When channel is selected turn of here so it can listen in the child

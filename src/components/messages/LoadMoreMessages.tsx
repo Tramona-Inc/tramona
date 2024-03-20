@@ -54,7 +54,7 @@ export default function LoadMoreMessages() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        errorToast(error.message);
+        errorToast();
       } else {
         const loadedMessages: ChatMessageType[] = data.map((message) => ({
           conversationId: message.conversation_id,
