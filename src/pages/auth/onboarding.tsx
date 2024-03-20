@@ -1,3 +1,10 @@
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Icons } from "@/components/_icons/icons";
 import { Button } from "@/components/ui/button";
@@ -17,20 +24,36 @@ import { PhoneInput } from "@/components/ui/input-phone";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { isValidPhoneNumber } from "react-phone-number-input";
+import { z } from "zod";
+import { zodString } from "@/utils/zod-utils";
 
 export default function Onboarding() {
-  const [phone, setPhone] = useState<string>("");
-  const [sent, setSent] = useState<boolean>(false);
-  const [code, setCode] = useState("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const formSchema = z.object({
+    phone: zodString().refine(isValidPhoneNumber, {
+      message: "Invalid phone number",
+    }),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { phone: "" },
+    reValidateMode: "onSubmit",
+  });
 
   const { data: session } = useSession();
-
+  const [sent, setSent] = useState<boolean>(false);
   const router = useRouter();
+  const [code, setCode] = useState("");
+  const { phone } = form.watch();
 
   const { mutateAsync: mutateSendOTP } = api.twilio.sendOTP.useMutation({
     onSuccess: () => {
@@ -47,6 +70,11 @@ export default function Onboarding() {
     api.users.insertPhoneWithUserId.useMutation();
 
   const { update } = useSession();
+
+  async function onPhoneSubmit({ phone }: FormValues) {
+    // form.setError("phone", { message: phone });
+    await mutateSendOTP({ to: phone });
+  }
 
   useEffect(() => {
     const verifyCode = async () => {
@@ -117,11 +145,36 @@ export default function Onboarding() {
               )}
             />
           ) : (
-            <PhoneInput
-              autoFocus
-              defaultCountry={"US"}
-              onChange={(value) => setPhone(value)}
-            />
+            <Form {...form}>
+              <form
+                className="flex flex-col gap-2"
+                onSubmit={form.handleSubmit(onPhoneSubmit)}
+              >
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <PhoneInput
+                          placeholder="Enter phone number"
+                          defaultCountry="US"
+                          autoFocus
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting && (
+                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Send Verification Code
+                </Button>
+              </form>
+            </Form>
           )}
         </CardContent>
         <CardFooter>
@@ -138,25 +191,10 @@ export default function Onboarding() {
               </p>
             </>
           ) : (
-            <div className="flex flex-col gap-5">
-              <Button
-                onClick={() => {
-                  setIsLoading(true);
-                  void mutateSendOTP({ to: phone });
-                }}
-                disabled={isLoading}
-              >
-                {isLoading && (
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Send Verification Code
-              </Button>
-
-              <p className="text-center text-xs text-muted-foreground">
-                We verify your phone number on account creation to ensure
-                account security. SMS & data charges may apply.
-              </p>
-            </div>
+            <p className="text-center text-xs text-muted-foreground">
+              We verify your phone number on account creation to ensure account
+              security. SMS & data charges may apply.
+            </p>
           )}
         </CardFooter>
       </Card>
