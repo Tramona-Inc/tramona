@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 
+import MainLayout from "@/components/_common/Layout/MainLayout";
+
 import { type Form1Values } from "@/components/HostSignUp/forms/form1";
 import { type Form2Values } from "@/components/HostSignUp/forms/form2";
 import Leftside from "@/components/HostSignUp/leftside";
@@ -67,6 +69,7 @@ export default function HostSignUp() {
 
   return (
     <>
+    <MainLayout>
       <Head>
         <title>Host Onboarding | Tramona</title>
       </Head>
@@ -79,6 +82,7 @@ export default function HostSignUp() {
           isSubmitting={isSubmitting}
         />
       </div>
+      </MainLayout>
     </>
   );
 }

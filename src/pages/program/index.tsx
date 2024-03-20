@@ -134,7 +134,7 @@ function ExploreEarningsCard() {
 function IntroSection() {
   return (
     <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <section className="relative rounded-3xl bg-white shadow">
+      <section className="relative bg-white">
         <div className="flex flex-col-reverse items-center lg:flex-row lg:space-x-10 xl:space-x-20">
           <div className="max-w-xl space-y-5 lg:space-y-10">
             <h1 className="font-semibold">TRAMONA PARTNERSHIP PROGRAM</h1>
@@ -158,7 +158,7 @@ function IntroSection() {
               src={"/assets/images/partners-landing.png"}
               width={500}
               height={500}
-              alt="Refer and Earn"
+              alt=""
               className="w-full rounded-lg"
             />
           </div>
@@ -176,7 +176,7 @@ function ProgramTiers() {
 
   return (
     <div className="[&>*]:flex [&>*]:min-h-[calc(50vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <section className="w-full rounded-3xl bg-white shadow">
+      <section className="w-full bg-white">
         <h2 className="text-center text-4xl font-bold sm:text-5xl">
           Introducing the Tramona way
         </h2>
@@ -270,54 +270,107 @@ function ProgramTiers() {
   );
 }
 
-function HowItWorks() {
+// function HowItWorks() {
+//   return (
+//     <div className="[&>*]:flex [&>*]:min-h-[calc(50vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
+//       <section className="bg-neutral-900">
+//         <h2 className="text-center text-4xl font-bold text-white sm:text-6xl">
+//           How it works
+//         </h2>
+//         <div className="grid gap-4 lg:grid-cols-3">
+//           <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
+//             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
+//               1
+//             </div>
+//             <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+//               Sign Up
+//             </h2>
+//             <p className="text-lg font-medium tracking-tight sm:text-xl">
+//               Sign up, access our partner portal, and get your{" "}
+//               <mark>custom affiliate link</mark>.
+//             </p>
+//           </div>
+//           <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
+//             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
+//               2
+//             </div>
+//             <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+//               Share
+//             </h2>
+//             <p className="text-lg font-medium tracking-tight sm:text-xl">
+//               <mark>Share your link</mark> with your contacts and social media
+//               followers.
+//             </p>
+//           </div>
+//           <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
+//             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
+//               3
+//             </div>
+//             <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+//               Earn
+//             </h2>
+//             <p className="text-lg font-medium tracking-tight sm:text-xl">
+//               <mark>Earn</mark> based on every persons travel you refer
+//             </p>
+//           </div>
+//         </div>
+//       </section>
+//     </div>
+//   );
+// }
+
+interface FeatureProps {
+  number: string;
+  title: string;
+  description: string;
+}
+
+const Feature: React.FC<FeatureProps> = ({ number, title, description }) => {
   return (
-    <div className="[&>*]:flex [&>*]:min-h-[calc(50vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <section className="rounded-3xl bg-neutral-900 shadow">
-        <h2 className="text-center text-4xl font-bold text-white sm:text-6xl">
-          How it works
-        </h2>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
-            <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
-              1
-            </div>
-            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
-              Sign Up
-            </h2>
-            <p className="text-lg font-medium tracking-tight sm:text-xl">
-              Sign up, access our partner portal, and get your{" "}
-              <mark>custom affiliate link</mark>.
-            </p>
-          </div>
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
-            <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
-              2
-            </div>
-            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
-              Share
-            </h2>
-            <p className="text-lg font-medium tracking-tight sm:text-xl">
-              <mark>Share your link</mark> with your contacts and social media
-              followers.
-            </p>
-          </div>
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
-            <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
-              3
-            </div>
-            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
-              Earn
-            </h2>
-            <p className="text-lg font-medium tracking-tight sm:text-xl">
-              <mark>Earn</mark> based on every persons travel you refer
-            </p>
-          </div>
-        </div>
-      </section>
+    <div className="flex flex-col items-center space-y-4 text-center md:items-start md:text-left">
+      <div
+        className={`flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900 text-2xl text-white`}
+      >
+        {number}
+      </div>
+      <h3 className="text-2xl font-semibold">{title}</h3>
+      <p className="text-gray-600">{description}</p>
     </div>
   );
-}
+};
+
+const HowItWorks: React.FC = () => {
+  return (
+    <div className="bg-white px-6 py-16 lg:px-0">
+      <hr className="mx-24 mb-24 h-px border-0 bg-neutral-300"></hr>
+      <div className="mx-auto max-w-6xl">
+        <div className="space-y-6 text-center">
+          <h2 className="text-4xl font-bold">How Tramona Partnership Works?</h2>
+        </div>
+        <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
+          <Feature
+            number="1"
+            title="Sign Up"
+            description="Sign up, access our partner portal, and get your
+            custom affiliate link."
+          />
+          <Feature
+            number="2"
+            title="Share"
+            description="Share your link with your contacts and social media
+            followers."
+          />
+          <Feature
+            number="3"
+            title="Earn"
+            description="Earn based on every persons travel you refer."
+          />
+        </div>
+      </div>
+      <hr className="mx-24 mt-24 h-px border-0 bg-neutral-300"></hr>
+    </div>
+  );
+};
 
 function ExploreEarnings() {
   return (
@@ -357,7 +410,7 @@ function ExploreEarnings() {
 function FAQ() {
   return (
     <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <section className="rounded-3xl bg-white shadow">
+      <section className="bg-white">
         <h2 className="text-center text-4xl font-bold sm:text-6xl">
           Questions?
         </h2>
@@ -430,22 +483,22 @@ function FAQ() {
 export default function Page() {
   return (
     <MainLayout>
-      <div className="relative bg-gray-100">
+      <div className="relative bg-white">
         <Head>
           <title>Partners | Tramona</title>
         </Head>
-        <div className="p-2 md:px-2 md:pt-4">
+        <div className="">
           <IntroSection />
         </div>
-
-        <div className="p-2 md:px-2">
+        <hr className="mx-24 mb-24 h-px border-0 bg-neutral-300"></hr>
+        <div className="">
           <ProgramTiers />
         </div>
 
-        <div className="p-2 md:px-2">
+        <div className="">
           <HowItWorks />
         </div>
-        <div className="p-2 md:px-2 md:pb-4">
+        <div className="">
           <FAQ />
         </div>
       </div>

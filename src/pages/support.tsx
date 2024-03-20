@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { zodEmail, zodString } from "@/utils/zod-utils";
 import Icons from "@/components/ui/icons";
+import MainLayout from "@/components/_common/Layout/MainLayout";
 
 const formSchema = z.object({
   name: zodString(),
@@ -100,6 +101,7 @@ function ContactForm() {
 
 export default function Page() {
   return (
+    <MainLayout>
     <div className="mx-auto max-w-3xl space-y-8 p-4 pb-32">
       <h1 className="pt-20 text-3xl font-bold">Get support</h1>
       <section className="space-y-4 rounded-xl border p-4 shadow-md">
@@ -135,5 +137,6 @@ export default function Page() {
         <ContactForm />
       </section>
     </div>
+    </MainLayout>
   );
 }
