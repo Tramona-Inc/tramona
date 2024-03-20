@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   varchar,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
@@ -26,25 +27,33 @@ export const earningStatusEnum = pgEnum("earning_status", [
   "cancelled",
 ]);
 
-export const users = pgTable("user", {
-  // nextauth fields
-  id: text("id").notNull().primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
-  image: text("image"),
+export const users = pgTable(
+  "user",
+  {
+    // nextauth fields
+    id: text("id").notNull().primaryKey(),
+    name: text("name"),
+    email: text("email").notNull(),
+    emailVerified: timestamp("emailVerified", { mode: "date" }),
+    image: text("image"),
 
-  // custom fields
-  password: varchar("password", { length: 510 }),
-  username: varchar("username", { length: 60 }),
-  referralCodeUsed: varchar("referral_code_used", {
-    length: REFERRAL_CODE_LENGTH,
+    // custom fields
+    password: varchar("password", { length: 510 }),
+    username: varchar("username", { length: 60 }),
+    referralCodeUsed: varchar("referral_code_used", {
+      length: REFERRAL_CODE_LENGTH,
+    }),
+    role: roleEnum("role").notNull().default("guest"),
+    referralTier: referralTierEnum("referral_tier")
+      .notNull()
+      .default("Partner"),
+    phoneNumber: varchar("phone_number", { length: 20 }),
+    lastTextAt: timestamp("last_text_at").defaultNow(),
+  },
+  (t) => ({
+    // uniquePhoneNumber: unique().on(t.phoneNumber),
   }),
-  role: roleEnum("role").notNull().default("guest"),
-  referralTier: referralTierEnum("referral_tier").notNull().default("Partner"),
-  phoneNumber: varchar("phone_number", { length: 20 }),
-  lastTextAt: timestamp("last_text_at").defaultNow(),
-});
+);
 
 export type User = typeof users.$inferSelect;
 

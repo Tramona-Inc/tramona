@@ -36,7 +36,7 @@ import { zodString } from "@/utils/zod-utils";
 
 export default function Onboarding() {
   const formSchema = z.object({
-    phone: zodString().refine(isValidPhoneNumber, {
+    phoneNumber: zodString().refine(isValidPhoneNumber, {
       message: "Invalid phone number",
     }),
   });
@@ -45,7 +45,7 @@ export default function Onboarding() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { phone: "" },
+    defaultValues: { phoneNumber: "" },
     reValidateMode: "onSubmit",
   });
 
@@ -53,7 +53,7 @@ export default function Onboarding() {
   const [sent, setSent] = useState<boolean>(false);
   const router = useRouter();
   const [code, setCode] = useState("");
-  const { phone } = form.watch();
+  const { phoneNumber } = form.watch();
 
   const { mutateAsync: mutateSendOTP } = api.twilio.sendOTP.useMutation({
     onSuccess: () => {
@@ -66,36 +66,43 @@ export default function Onboarding() {
   });
 
   const { mutateAsync: mutateVerifyOTP } = api.twilio.verifyOTP.useMutation();
+  const { mutateAsync: phoneNumberIsTaken } =
+    api.users.phoneNumberIsTaken.useMutation();
   const { mutateAsync: mutateInsertPhone } =
     api.users.insertPhoneWithUserId.useMutation();
 
   const { update } = useSession();
 
-  async function onPhoneSubmit({ phone }: FormValues) {
-    // form.setError("phone", { message: phone });
-    await mutateSendOTP({ to: phone });
+  async function onPhoneSubmit({ phoneNumber }: FormValues) {
+    if (await phoneNumberIsTaken({ phoneNumber })) {
+      form.setError("phoneNumber", {
+        message: "Phone number already in use, please try again",
+      });
+      return;
+    }
+    await mutateSendOTP({ to: phoneNumber });
   }
 
   useEffect(() => {
     const verifyCode = async () => {
-      if (code.length === 6 && phone) {
+      if (code.length === 6 && phoneNumber) {
         // Verify Code
         const verifyOTPResponse = await mutateVerifyOTP({
-          to: phone,
+          to: phoneNumber,
           code: code,
         });
 
         const { status } = verifyOTPResponse; // pending | approved | canceled
 
         if (status !== "approved") {
-          errorToast("Incorrect code!");
+          errorToast("Incorrect code, please try again");
           return;
         } else {
           // insert phone with email
           if (session?.user.id) {
             void mutateInsertPhone({
               userId: session.user.id,
-              phone: phone,
+              phone: phoneNumber,
             });
 
             toast({
@@ -140,7 +147,7 @@ export default function Onboarding() {
                 <InputOTPGroup>
                   {slots.map((slot, index) => (
                     <InputOTPSlot key={index} {...slot} />
-                  ))}{" "}
+                  ))}
                 </InputOTPGroup>
               )}
             />
@@ -152,7 +159,7 @@ export default function Onboarding() {
               >
                 <FormField
                   control={form.control}
-                  name="phone"
+                  name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -184,7 +191,7 @@ export default function Onboarding() {
                 Not seeing the code?{" "}
                 <span
                   className="cursor-pointer underline hover:text-black"
-                  onClick={() => mutateSendOTP({ to: phone })}
+                  onClick={() => mutateSendOTP({ to: phoneNumber })}
                 >
                   Try again
                 </span>
