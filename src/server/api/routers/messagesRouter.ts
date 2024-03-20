@@ -3,12 +3,10 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
 import { zodNumber, zodString } from "@/utils/zod-utils";
-import { eq, and, ne, inArray} from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
-import { sub } from "date-fns";
-import { uniqueKeyName } from "drizzle-orm/mysql-core";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
 
@@ -230,21 +228,22 @@ export const messagesRouter = createTRPCRouter({
     }),
 
   getParticipantsPhoneNumbers: protectedProcedure
-    .input(z.object({conversationId: zodNumber()}))
-    .query(async({ctx, input}) => {
+    .input(z.object({ conversationId: zodNumber() }))
+    .query(async ({ ctx, input }) => {
       const participants = await db
-        .select({ id: users.id, phoneNumber: users.phoneNumber, lastTextAt: users.lastTextAt })
+        .select({
+          id: users.id,
+          phoneNumber: users.phoneNumber,
+          lastTextAt: users.lastTextAt,
+        })
         .from(conversationParticipants)
         .innerJoin(users, eq(conversationParticipants.userId, users.id))
         .where(
           and(
-            eq(
-              conversationParticipants.conversationId,
-              input.conversationId,
-            ),
+            eq(conversationParticipants.conversationId, input.conversationId),
             ne(conversationParticipants.userId, ctx.user.id),
           ),
         );
       return participants;
-    })
+    }),
 });
