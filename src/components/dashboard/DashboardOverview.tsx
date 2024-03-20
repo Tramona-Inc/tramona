@@ -60,7 +60,7 @@ export default function DashboardOverview() {
 
       <div className="grid grid-cols-1 gap-5 px-10 py-10 lg:grid-cols-10 xl:px-20 2xl:px-32">
         <div className="col-span-1 lg:col-span-6 xl:col-span-7">
-          <h2 className="text-3xl">Requests/offers</h2>
+          <h2 className="text-3xl">Requests & offers</h2>
           <div className="py-5">
             <ActiveRequestGroups />
           </div>
