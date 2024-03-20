@@ -7,11 +7,12 @@ import {
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
+import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import Spinner from "../_common/Spinner";
-import { SidebarConversation } from "./SidebarConversation";
 import { ScrollArea } from "../ui/scroll-area";
+import { SidebarConversation } from "./SidebarConversation";
 
 export type SidebarProps = {
   selectedConversation: Conversation | null;
@@ -122,27 +123,38 @@ export default function MessagesSidebar({
   }, [optimisticIds, selectedConversation?.id, session, setConversationToTop]);
 
   return (
-    <ScrollArea className="h-screen-minus-header w-96 border-r">
-      {!isLoading ? (
-        conversations && conversations.length > 0 ? (
-          conversations.map((conversation) => (
-            <SidebarConversation
-              key={conversation.id}
-              conversation={conversation}
-              isSelected={selectedConversation?.id === conversation.id}
-              setSelected={setSelected}
-            />
-          ))
+    <div
+      className={cn(
+        "col-span-1 block h-screen-minus-header md:col-span-4 md:border-r lg:col-span-3 2xl:col-span-2",
+        selectedConversation && "hidden md:block",
+      )}
+    >
+      <h1 className="flex h-[73px] w-full items-center border-b p-4 text-4xl font-bold md:text-2xl md:font-semibold lg:p-8">
+        Messages
+      </h1>
+
+      <ScrollArea className="">
+        {!isLoading ? (
+          conversations && conversations.length > 0 ? (
+            conversations.map((conversation) => (
+              <SidebarConversation
+                key={conversation.id}
+                conversation={conversation}
+                isSelected={selectedConversation?.id === conversation.id}
+                setSelected={setSelected}
+              />
+            ))
+          ) : (
+            <div className="grid h-screen-minus-header place-items-center text-muted-foreground">
+              <p>No conversations yet</p>
+            </div>
+          )
         ) : (
           <div className="grid h-screen-minus-header place-items-center text-muted-foreground">
-            <p>No conversations yet</p>
+            <Spinner />
           </div>
-        )
-      ) : (
-        <div className="grid h-screen-minus-header place-items-center text-muted-foreground">
-          <Spinner />
-        </div>
-      )}
-    </ScrollArea>
+        )}
+      </ScrollArea>
+    </div>
   );
 }
