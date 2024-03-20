@@ -4,7 +4,7 @@ import { create } from "zustand";
 import supabase from "../supabase-client";
 import { errorToast } from "../toasts";
 
-export type ChatMessageType = MessageType;
+export type ChatMessageType = MessageType & { userId: string }; // make userId non-null
 
 type ConversationsState = Record<
   string,
@@ -184,7 +184,7 @@ export const useMessage = create<MessageState>((set, get) => ({
         }));
       }
     } catch (error) {
-      errorToast(error as string);
+      errorToast();
     }
   },
   removeMessageFromConversation: (
