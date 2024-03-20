@@ -134,12 +134,14 @@ export default function MessagesSidebar({
             />
           ))
         ) : (
-          <div className="grid h-full place-items-center text-muted-foreground">
+          <div className="grid h-screen-minus-header place-items-center text-muted-foreground">
             <p>No conversations yet</p>
           </div>
         )
       ) : (
-        <Spinner />
+        <div className="grid h-screen-minus-header place-items-center text-muted-foreground">
+          <Spinner />
+        </div>
       )}
     </ScrollArea>
   );
