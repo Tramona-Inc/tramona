@@ -165,18 +165,20 @@ export default function ListMessages() {
     .map((message) => {
       // Display message with user
       if (!participants || !session) return null;
-      const participantUser = participants.find(
-        (participant) => participant.id === message.userId,
-      );
+      if (message.userId === session.user.id) {
+        return { message, user: session.user };
+      }
 
-      const user = participantUser ?? session.user;
+      const user =
+        participants.find(
+          (participant) => participant?.id === message.userId,
+        ) ?? null; // null means its a deleted user
+
       return { message, user };
     })
     .filter(Boolean);
 
   const messageGroups = groupMessages(messagesWithUser);
-
-  console.log(messages);
 
   return (
     <>

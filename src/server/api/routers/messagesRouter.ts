@@ -76,7 +76,7 @@ export async function fetchConversationWithAdmin(userId: string) {
     (conv) =>
       conv.conversation?.participants?.length === 2 &&
       conv.conversation.participants.some(
-        (participant) => participant.user.id === ADMIN_ID,
+        (participant) => participant.user?.id === ADMIN_ID,
       ),
   );
 
@@ -142,8 +142,9 @@ export const messagesRouter = createTRPCRouter({
         ({ conversation }) => ({
           ...conversation,
           participants: conversation.participants
-            .filter((p) => p.user.id !== ctx.user.id)
-            .map((p) => p.user),
+            .filter((p) => p.user?.id !== ctx.user.id)
+            .map((p) => p.user)
+            .filter(Boolean),
         }),
       );
 

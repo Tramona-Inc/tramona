@@ -2,7 +2,7 @@ import { type MessageType, type User } from "@/server/db/schema";
 import { type ChatMessageType } from "@/utils/store/messages";
 
 export type MessageGroup = {
-  user: Pick<User, "name" | "email" | "image" | "id">;
+  user: Pick<User, "name" | "email" | "image" | "id"> | null;
   messages: MessageType[];
 };
 
@@ -11,7 +11,7 @@ export type MessageGroup = {
 export function groupMessages(
   messages: {
     message: ChatMessageType;
-    user: MessageGroup["user"];
+    user: MessageGroup["user"] | null;
   }[],
 ) {
   const groups: MessageGroup[] = [];
@@ -19,14 +19,14 @@ export function groupMessages(
   messages.forEach(({ message, user }) => {
     const lastGroup = groups[groups.length - 1];
 
-    if (lastGroup && user.id !== lastGroup.user.id) {
+    if (!user || (lastGroup && user.id !== lastGroup?.user?.id)) {
       groups.push({
-        user: user,
+        user,
         messages: [message],
       });
     } else {
       const lastMessage = lastGroup?.messages[lastGroup.messages.length - 1];
-      
+
       if (
         lastMessage &&
         new Date(message.createdAt).getTime() -

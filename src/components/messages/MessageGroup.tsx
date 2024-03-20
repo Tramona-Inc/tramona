@@ -3,6 +3,7 @@ import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 import { type MessageGroup } from "./groupMessages";
+import { AnonymousAvatar } from "../ui/avatar";
 
 export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   const { data: session } = useSession();
@@ -17,10 +18,14 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
 
   return (
     <div className="flex items-start gap-2">
-      <UserAvatar {...user} />
+      {user ? <UserAvatar {...user} /> : <AnonymousAvatar />}
       <div>
         <div className="flex items-baseline gap-2">
-          <p className="font-semibold leading-none">{user.name}</p>
+          {user ? (
+            <p className="font-semibold leading-none">{user.name}</p>
+          ) : (
+            <p className="leading-none text-muted-foreground">[deleted user]</p>
+          )}
           <p className="text-xs text-muted-foreground">
             {formatRelative(localTime, new Date())}
             {session.user.id === firstMessage.userId && firstMessage.read && (
