@@ -4,12 +4,10 @@ import { create } from "zustand";
 import supabase from "../supabase-client";
 import { errorToast } from "../toasts";
 
-export type ChatMessageType = MessageType & {
-  user: { name: string | null; email: string; image: string | null };
-};
+export type ChatMessageType = MessageType;
 
 type ConversationsState = Record<
-  number,
+  string,
   {
     messages: ChatMessageType[];
     page: number;
@@ -20,35 +18,39 @@ type ConversationsState = Record<
 
 type MessageState = {
   conversations: ConversationsState;
-  currentConversationId: number | null;
-  setCurrentConversationId: (id: number) => void;
-  switchConversation: (conversationId: number) => void;
+  currentConversationId: string | null;
+  setCurrentConversationId: (id: string) => void;
+  switchConversation: (conversationId: string) => void;
   addMessageToConversation: (
-    conversationId: number,
+    conversationId: string,
     messages: ChatMessageType,
   ) => void;
-  optimisticIds: number[];
-  setOptimisticIds: (id: number) => void;
+  optimisticIds: string[];
+  setOptimisticIds: (id: string) => void;
   setMoreMessagesToConversation: (
-    conversationId: number,
+    conversationId: string,
     moreMessages: ChatMessageType[],
   ) => void;
-  fetchInitialMessages: (conversationId: number) => Promise<void>;
+  fetchInitialMessages: (conversationId: string) => Promise<void>;
+  removeMessageFromConversation: (
+    conversationId: string,
+    messageId: string,
+  ) => void;
 };
 
 export const useMessage = create<MessageState>((set, get) => ({
   conversations: {},
   currentConversationId: null,
-  setCurrentConversationId: (id: number) => {
+  setCurrentConversationId: (id: string) => {
     set(() => ({
       currentConversationId: id,
     }));
   },
-  switchConversation: (conversationId: number) => {
+  switchConversation: (conversationId: string) => {
     set({ currentConversationId: conversationId });
   },
   addMessageToConversation: (
-    conversationId: number,
+    conversationId: string,
     newMessage: ChatMessageType,
   ) => {
     set((state) => {
@@ -69,16 +71,7 @@ export const useMessage = create<MessageState>((set, get) => ({
           alreadyFetched:
             updatedConversations[conversationId]?.alreadyFetched ?? true,
         };
-      } else {
-        // If the conversation doesn't exist, create a new conversation with the new message
-        updatedConversations[conversationId] = {
-          messages: [newMessage],
-          page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
-          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
-          alreadyFetched: updatedConversations[conversationId]?.hasMore ?? true,
-        };
       }
-
       // Ensure TypeScript understands that this is a ChatMessageType[]
       const updatedState: MessageState = {
         ...state,
@@ -90,12 +83,12 @@ export const useMessage = create<MessageState>((set, get) => ({
     });
   },
   optimisticIds: [],
-  setOptimisticIds: (id: number) =>
+  setOptimisticIds: (id: string) =>
     set((state) => ({
       optimisticIds: [...state.optimisticIds, id],
     })),
   setMoreMessagesToConversation: (
-    conversationId: number,
+    conversationId: string,
     moreMessages: ChatMessageType[],
   ) => {
     set((state) => {
@@ -134,7 +127,7 @@ export const useMessage = create<MessageState>((set, get) => ({
       return updatedState;
     });
   },
-  fetchInitialMessages: async (conversationId: number): Promise<void> => {
+  fetchInitialMessages: async (conversationId: string): Promise<void> => {
     const state = get();
 
     // Check if messages for this conversation have already been fetched
@@ -162,12 +155,12 @@ export const useMessage = create<MessageState>((set, get) => ({
       if (data) {
         const chatMessages: ChatMessageType[] = data.map((message) => ({
           id: message.id,
-          createdAt: new Date(message.created_at),
+          createdAt: message.created_at,
           conversationId: message.conversation_id,
           userId: message.user_id,
           message: message.message,
-          read: message.read ?? null, // Provide a default value if needed
-          isEdit: message.is_edit ?? null, // Provide a default value if needed
+          read: message.read ?? false, // since fetched means it's read
+          isEdit: message.is_edit ?? false, // Provide a default value if needed
           user: {
             name: message.user?.name ?? "",
             image: message.user?.image ?? "",
@@ -193,5 +186,38 @@ export const useMessage = create<MessageState>((set, get) => ({
     } catch (error) {
       errorToast(error as string);
     }
+  },
+  removeMessageFromConversation: (
+    conversationId: string,
+    messageId: string,
+  ) => {
+    set((state) => {
+      const updatedConversations: ConversationsState = {
+        ...state.conversations,
+      };
+
+      // Check if the conversation exists in the state
+      if (updatedConversations[conversationId]) {
+        // Remove the message from the existing conversation
+        updatedConversations[conversationId] = {
+          messages:
+            updatedConversations[conversationId]?.messages.filter(
+              (message) => message.id !== messageId,
+            ) ?? [],
+          page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
+          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
+          alreadyFetched:
+            updatedConversations[conversationId]?.alreadyFetched ?? true,
+        };
+      }
+
+      const updatedState: MessageState = {
+        ...state,
+        conversations: updatedConversations,
+        optimisticIds: state.optimisticIds.filter((id) => id !== messageId),
+      };
+
+      return updatedState;
+    });
   },
 }));
