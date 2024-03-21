@@ -92,6 +92,29 @@ export default function ChatInput({
         removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
       }
+
+
+        if (participantPhoneNumbers) {
+          void Promise.all(
+            participantPhoneNumbers.map(
+              async ({ id, lastTextAt, phoneNumber }) => {
+                if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1 })) {
+                  if (phoneNumber) {
+                    await sendSMS({
+                      to: phoneNumber,
+                      msg: "You have a new unread message in Tramona!",
+                    });
+                    await updateProfile({
+                      id: id,
+                      lastTextAt: new Date(),
+                    });
+                    await utils.messages.invalidate();
+                  }
+                }
+              },
+            ),
+          );
+      }
     }
   };
 
