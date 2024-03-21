@@ -1,8 +1,9 @@
-import { z } from "zod";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -11,16 +12,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
-import { zodEmail, zodString } from "@/utils/zod-utils";
 import { api } from "@/utils/api";
+import { zodEmail, zodString } from "@/utils/zod-utils";
 import { useState } from "react";
 
-import OTPDialog from "../otp-dialog/OTPDialog";
 import { formatPhoneNumber } from "@/utils/formatters";
+import OTPDialog from "./OTPDialog";
 
 const formSchema = z.object({
   name: zodString(),
