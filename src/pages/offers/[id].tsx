@@ -6,6 +6,7 @@
 // import StarIcon from "@/common/components/icons/star";
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
 import { api } from "@/utils/api";
@@ -27,7 +28,7 @@ export default function Listings() {
   );
 
   return (
-    <>
+    <DashboardLayout type='guest'>
       <Head>
         <title>Listings Property Preview | Tramona</title>
       </Head>
@@ -36,6 +37,6 @@ export default function Listings() {
           {offer ? <OfferPage offer={offer} /> : <Spinner />}
         </div>
       </div>
-    </>
+    </DashboardLayout>
   );
 }
