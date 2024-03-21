@@ -19,6 +19,7 @@ import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import MainLayout from "@/components/_common/Layout/MainLayout";
 
 const formSchema = z.object({
   name: zodString(),
