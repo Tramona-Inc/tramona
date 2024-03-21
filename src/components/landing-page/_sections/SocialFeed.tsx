@@ -24,7 +24,7 @@ const SocialCard: React.FC<SocialCardProps> = ({
   tramonaPrice,
 }) => {
   return (
-    <div className="mb-1 flex flex-col items-start overflow-hidden rounded-2xl border border-[#BFBFBF] bg-gray-400 bg-opacity-10 bg-clip-padding shadow-lg backdrop-blur-xl backdrop-filter">
+    <div className="mb-1 flex flex-col items-start overflow-hidden rounded-2xl border border-[#BFBFBF] bg-gray-400 bg-opacity-10 bg-clip-padding backdrop-blur-xl backdrop-filter lg:max-w-4xl">
       <div className="flex w-full">
         <div className="flex flex-grow flex-col justify-start p-4">
           <div className="mb-2 flex items-center">
@@ -167,8 +167,10 @@ const InfiniteScroll: React.FC = () => {
         setCardHeightPx(150);
       } else if (screenWidth < 768) {
         setCardHeightPx(175);
-      } else {
+      } else if (screenWidth < 1920) {
         setCardHeightPx(200);
+      } else {
+        setCardHeightPx(255);
       }
     };
 
@@ -212,56 +214,77 @@ const InfiniteScroll: React.FC = () => {
   }, [surroundingBackup]);
 
   return (
-    <div
-      ref={scrollRef}
-      className="h-[calc(100vh-2rem)] overflow-auto scrollbar-hide"
-      onScroll={handleScroll}
-    >
-      {Array.from({ length: surroundingBackup }, (_, i) =>
-        cardData.map((card, index) => (
-          <SocialCard key={`pre-${i}-${index}`} {...card} />
-        )),
-      )}
-      <div ref={contentRef}>
-        {cardData.map((card, index) => (
-          <SocialCard key={`original-${index}`} {...card} />
-        ))}
+    <div className="relative overflow-hidden rounded-lg ">
+      <div className="pointer-events-none absolute left-0 top-0 z-10 h-10 w-full bg-opacity-50 bg-gradient-to-b from-[#B8B8B6] to-transparent"></div>
+      <div ref={scrollRef} className="h-full overflow-auto scrollbar-hide">
+        {Array.from({ length: surroundingBackup }, (_, i) =>
+          cardData.map((card, index) => (
+            <SocialCard key={`pre-${i}-${index}`} {...card} />
+          )),
+        )}
+        <div ref={contentRef}>
+          {cardData.map((card, index) => (
+            <SocialCard key={`original-${index}`} {...card} />
+          ))}
+        </div>
+        {Array.from({ length: surroundingBackup }, (_, i) =>
+          cardData.map((card, index) => (
+            <SocialCard key={`post-${i}-${index}`} {...card} />
+          )),
+        )}
       </div>
-      {Array.from({ length: surroundingBackup }, (_, i) =>
-        cardData.map((card, index) => (
-          <SocialCard key={`post-${i}-${index}`} {...card} />
-        )),
-      )}
+      <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-10 w-full bg-opacity-50 bg-gradient-to-t from-[#61605E] to-transparent"></div>
     </div>
   );
 };
 
 const SocialFeed: React.FC = () => {
   return (
-    <section className="relative bg-gray-100 p-2 md:px-2">
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/assets/images/landing-page/bg3.jpg"
-          alt=""
-          fill
-          style={{ objectFit: "cover", objectPosition: "center" }}
-          className="rounded-3xl p-2 md:px-2"
-        />
-      </div>
-      <div className="relative z-10 flex flex-col-reverse items-start justify-center rounded-3xl p-8 text-white md:flex-row">
-        <div className="w-full md:max-w-md md:flex-1">
-          <InfiniteScroll />
+    <>
+      <section className="relative bg-white p-2 md:px-2">
+        <div className="absolute inset-0 z-0 ">
+          <Image
+            src="/assets/images/landing-page/bg3.jpg"
+            alt=""
+            fill
+            style={{ objectFit: "cover", objectPosition: "center" }}
+            className="rounded-3xl p-2 md:px-2"
+          />
         </div>
-        <div className="mb-4 w-full md:mb-0 md:max-w-lg md:flex-1 md:pl-16 lg:pl-28">
-          <h2 className="mb-4 text-4xl font-semibold text-neutral-900 md:text-5xl">
-            Make more memories
-          </h2>
-          <p className="md:mt-18 text-xl font-extralight text-neutral-900">
-            Our only goal is to enable you to travel more often.
-          </p>
+        <div className="relative z-10 flex flex-col-reverse items-start justify-center rounded-3xl p-8 text-white md:flex-row">
+          <div className="w-full md:max-w-md md:flex-1 2xl:max-w-xl">
+            <div className="shadow-inner-5xl z-10 shadow-black ">
+              <InfiniteScroll />
+            </div>
+          </div>
+          <div className="mb-4 w-full md:mb-0 md:max-w-lg md:flex-1 md:pl-16 lg:pl-28 2xl:max-w-2xl">
+            <div className="rounded-3xl p-5">
+              <h2 className="mb-4 text-5xl font-semibold text-neutral-900">
+                Make. <span className="font-bold italic">More.</span> Memories.
+              </h2>
+            </div>
+            <div className="relative mx-auto flex items-center justify-center p-5 sm:p-0 md:mt-2 lg:mt-2 2xl:mt-48">
+              <div className="relative max-w-xl rounded-2xl bg-white px-4 py-2 text-neutral-900 shadow">
+                <div className="text-left"></div>
+                <p className="text-xl font-extralight text-neutral-900">
+                  See your friends, connect with amazing places and faces,
+                  create stories worth sharing.
+                </p>
+                <p className="mt-4 text-xl font-extralight text-neutral-900">
+                  At Tramona, we are dedicated to making travel more accessible
+                  and enjoyable, ensuring that every journey is memorable and
+                  every stay is a perfect match.
+                </p>
+                <div className="absolute bottom-0 right-0 z-0 h-12 w-6 rotate-45 transform bg-white"></div>
+                <p className="relative z-10 mt-4 text-right text-xl font-bold">
+                  - Tramona Team
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

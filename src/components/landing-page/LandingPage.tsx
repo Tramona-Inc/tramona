@@ -23,6 +23,7 @@ export default function LandingPage() {
         <Head>
           <title>Tramona</title>
         </Head>
+        <div className="bg-white">
         {isBannerVisible && (
           <div className="mb-0 mt-0 w-full place-items-center rounded-lg px-2 pt-2 lg:overflow-visible">
             <div
@@ -31,7 +32,7 @@ export default function LandingPage() {
               onClick={handleBannerClick}
             >
               <div className="flex-grow px-4 text-left md:px-6 md:text-center">
-                <p className="text-xs text-white md:text-base md:font-semibold">
+                <p className="text-xs text-white md:text-lg lg:text-xl lg:font-semibold md:font-semibold">
                   A platform designed solely so you can experience more of the
                   world.
                 </p>
@@ -56,6 +57,7 @@ export default function LandingPage() {
         <ReferAndEarn />
         <ForHosts />
         <HelpEndThis />
+        </div>
       </div>
     </>
   );
