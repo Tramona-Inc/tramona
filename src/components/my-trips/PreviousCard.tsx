@@ -11,7 +11,7 @@ type PreviousCardProps = {
 export default function PreviousCard(props: PreviousCardProps) {
   return (
     <Link
-      href={`/listings/${props.offerId}`}
+      href={`/offers/${props.offerId}`}
       className="border-2xl rounded-lg border shadow-xl"
     >
       <div className="relative h-[250px]">

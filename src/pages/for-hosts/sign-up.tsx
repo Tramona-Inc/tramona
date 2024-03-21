@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
 import Head from "next/head";
+import { useEffect, useState } from "react";
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
-
 import { type Form1Values } from "@/components/HostSignUp/forms/form1";
 import { type Form2Values } from "@/components/HostSignUp/forms/form2";
 import Leftside from "@/components/HostSignUp/leftside";
 import Rightside from "@/components/HostSignUp/rightside";
-import { useSession } from "next-auth/react";
 import { toast } from "@/components/ui/use-toast";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 export default function HostSignUp() {
@@ -68,8 +67,7 @@ export default function HostSignUp() {
   };
 
   return (
-    <>
-    <MainLayout>
+    <MainLayout type="auth">
       <Head>
         <title>Host Onboarding | Tramona</title>
       </Head>
@@ -82,7 +80,6 @@ export default function HostSignUp() {
           isSubmitting={isSubmitting}
         />
       </div>
-      </MainLayout>
-    </>
+    </MainLayout>
   );
 }

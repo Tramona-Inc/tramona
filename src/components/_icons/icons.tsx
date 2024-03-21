@@ -30,6 +30,7 @@ import {
   Settings,
   Tags,
   Twitter,
+  X,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -37,6 +38,7 @@ export type Icon = LucideIcon;
 // type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
+  close: X,
   spinner: Loader2,
   dotHorizontal: MoreHorizontal,
   eyeOff: EyeOff,
