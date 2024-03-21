@@ -89,7 +89,7 @@ export default function Page() {
                     className="rounded-full"
                     asChild
                   >
-                    <Link href={`/listings/${offer.id}`}>More details</Link>
+                    <Link href={`/offers/${offer.id}`}>More details</Link>
                   </Button>
                   {false /* offer.isPremium */ ? (
                     <PaywallDialog>

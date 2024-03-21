@@ -116,7 +116,7 @@ export default function UpcomingCard(props: UpcomingCardProps) {
       </div>
 
       <Link
-        href={`/listings/${props.offerId}`}
+        href={`/offers/${props.offerId}`}
         className="relative w-full max-md:h-[300px] md:w-1/2"
       >
         <Image

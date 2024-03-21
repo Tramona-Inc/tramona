@@ -17,7 +17,7 @@ function UpcomingTrips({ trips }: { trips: UpcomingTrip[] }) {
   return (
     <div className="grid grid-cols-1 gap-4">
       {trips.map((trip) => (
-        <Link key={trip.id} href={`/listings/${trip.id}`}>
+        <Link key={trip.id} href={`/offers/${trip.id}`}>
           <Card>
             <CardContent className="flex flex-col">
               <p>{trip.property.address}</p>
