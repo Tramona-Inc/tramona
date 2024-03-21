@@ -10,6 +10,7 @@ export default function Document() {
         <NextScript />
         <Script
           defer
+          async
           id="googlemaps"
           type="text/javascript"
           strategy="afterInteractive"
