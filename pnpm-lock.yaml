@@ -148,7 +148,7 @@ dependencies:
     version: 2.4.1(react-dom@18.2.0)(react@18.2.0)
   aws-sdk:
     specifier: ^2.1569.0
-    version: 2.1580.0
+    version: 2.1583.0
   axios:
     specifier: ^1.6.7
     version: 1.6.8
@@ -9676,8 +9676,8 @@ packages:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  /aws-sdk@2.1580.0:
-    resolution: {integrity: sha512-jR9EWyo1UY6QrYs+jhXCpqxBYXU6QYmqNejpsPgU5OzAWxUgalbXfQPAaw0A/DBxXU99qHO+j6RUYof82veiKw==}
+  /aws-sdk@2.1583.0:
+    resolution: {integrity: sha512-gpJFO1kWC4qHPFMRgtjp15X48W8UrU1BvhYNUE7vv4O2YFHWbfulDp1hAdv6NN1sFkq/gvK2gdo5+qjj+4wdOQ==}
     engines: {node: '>= 10.0.0'}
     requiresBuild: true
     dependencies:
