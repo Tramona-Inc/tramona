@@ -50,7 +50,7 @@ export default function IncomingRequests() {
             <h1 className="py-4 text-3xl font-bold text-black">
               Incoming requests
             </h1>
-            <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600 group-data-[state=active]:bg-primary/20 group-data-[state=active]:text-primary">
+            <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-sm font-semibold text-zinc-600 empty:hidden group-data-[state=active]:bg-primary/20 group-data-[state=active]:text-primary">
               {requests?.incomingRequests.length}
             </span>
           </div>
