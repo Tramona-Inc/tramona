@@ -28,7 +28,7 @@ export default function Listings() {
   );
 
   return (
-    <DashboardLayout type='guest'>
+    <DashboardLayout type="guest">
       <Head>
         <title>Listings Property Preview | Tramona</title>
       </Head>

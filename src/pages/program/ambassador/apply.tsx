@@ -5,8 +5,8 @@ import { ProgramFrom } from "@/components/ambassador/ProgramForm";
 export default function Page() {
   return (
     <MainLayout>
-      <div className="bg-[#3843D0] py-20">
-        <div className="container flex max-w-[1000px] flex-col items-center justify-between gap-10 text-[#FFFFFF] lg:flex-row">
+      <div className="bg-[#F2EBDC] py-20">
+        <div className="container flex max-w-[1000px] flex-col items-center justify-between gap-10 text-neutral-900 lg:flex-row">
           {/* Partner Program */}
           <div className="flex flex-col gap-4">
             <p className="font-bold">LET&apos;S EARN TOGETHER</p>
@@ -19,9 +19,9 @@ export default function Page() {
             </p>
           </div>
 
-          <div>
+          {/* <div>
             <StartIcon2 />
-          </div>
+          </div> */}
         </div>
       </div>
 

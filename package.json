@@ -15,7 +15,7 @@
     "db:generate": "drizzle-kit generate:pg",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe-webhook",
     "stripe:trigger": "stripe trigger payment_intent.succeeded",
-    "email": "email dev --dir src/emails",
+    "email": "email dev --dir src/components/email-templates",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "chromatic": "npx chromatic --project-token=chpt_e09628bd7bc2d55"
@@ -84,7 +84,7 @@
     "fs": "0.0.1-security",
     "input-otp": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.359.0",
+    "lucide-react": "^0.363.0",
     "micro": "^10.0.1",
     "multer": "1.4.5-lts.1",
     "nanoid": "^5.0.6",

@@ -8,7 +8,7 @@ import {
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Icons } from "@/components/_icons/icons";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   InputOTP,
   InputOTPGroup,
@@ -138,58 +138,59 @@ export default function Onboarding() {
       <h1 className="text-center text-4xl font-bold tracking-tight">
         Verify your phone number
       </h1>
-      <Card className="mx-auto max-w-md">
-        <CardContent>
-          {sent ? (
-            <InputOTP
-              maxLength={6}
-              pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
-              value={code}
-              autoFocus
-              onChange={(value) => setCode(value)}
-              render={({ slots }) => (
-                <InputOTPGroup>
-                  {slots.map((slot, index) => (
-                    <InputOTPSlot key={index} {...slot} />
-                  ))}
-                </InputOTPGroup>
-              )}
-            />
-          ) : (
-            <Form {...form}>
-              <form
-                className="flex flex-col gap-2"
-                onSubmit={form.handleSubmit(onPhoneSubmit)}
-              >
-                <FormField
-                  control={form.control}
-                  name="phoneNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <PhoneInput
-                          placeholder="Enter phone number"
-                          defaultCountry="US"
-                          onCountryChange={setCountry}
-                          autoFocus
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting && (
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Send Verification Code
-                </Button>
-              </form>
-            </Form>
-          )}
-        </CardContent>
-        <CardFooter>
+      <div>
+        <Card className="mx-auto max-w-md">
+          <CardContent>
+            {sent ? (
+              <InputOTP
+                maxLength={6}
+                pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+                value={code}
+                autoFocus
+                onChange={(value) => setCode(value)}
+                className="mx-auto w-max"
+                render={({ slots }) => (
+                  <InputOTPGroup>
+                    {slots.map((slot, index) => (
+                      <InputOTPSlot key={index} {...slot} />
+                    ))}
+                  </InputOTPGroup>
+                )}
+              />
+            ) : (
+              <Form {...form}>
+                <form
+                  className="flex flex-col gap-2"
+                  onSubmit={form.handleSubmit(onPhoneSubmit)}
+                >
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <PhoneInput
+                            placeholder="Enter phone number"
+                            defaultCountry="US"
+                            onCountryChange={setCountry}
+                            autoFocus
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting && (
+                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Send Verification Code
+                  </Button>
+                </form>
+              </Form>
+            )}
+          </CardContent>
           {sent ? (
             <>
               <p className="text-center text-xs text-muted-foreground">
@@ -208,8 +209,8 @@ export default function Onboarding() {
               security. SMS & data charges may apply.
             </p>
           )}
-        </CardFooter>
-      </Card>
+        </Card>
+      </div>
     </MainLayout>
   );
 }

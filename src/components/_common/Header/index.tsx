@@ -2,10 +2,11 @@ import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 import HeaderTopRight from "./HeaderTopRight";
 
+import Sidebar from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsLg } from "@/utils/utils";
-import Sidebar from "@/components/dashboard/Sidebar";
+import { useSession } from "next-auth/react";
 import { TramonaLogo } from "./TramonaLogo";
 
 type HeaderProps =
@@ -29,6 +30,8 @@ export default function Header(props: HeaderProps) {
 }
 
 function LargeHeader(props: HeaderProps) {
+  const { status } = useSession();
+
   return (
     <header className="sticky top-0 z-50 bg-white p-4 shadow-md">
       <div className="flex items-center">
@@ -48,14 +51,19 @@ function LargeHeader(props: HeaderProps) {
           )}
         </div>
 
-        <div className="flex flex-1 justify-end">
+        <div className="flex flex-1 justify-end gap-5">
           {props.type === "dashboard" ? (
-            <HeaderTopRight />
-          ) : (
             <Button asChild variant="darkOutline">
-              <Link href="/auth/signin">Log in</Link>
+              <Link href="/">Switch to Home page</Link>
+            </Button>
+          ) : (
+            <Button variant="darkOutline">
+              <Link href="/auth/signin">
+                {status === "authenticated" ? "Switch to Dashboard" : "Log in"}
+              </Link>
             </Button>
           )}
+          <HeaderTopRight />
         </div>
       </div>
     </header>
@@ -85,22 +93,28 @@ function SmallSidebar(props: HeaderProps) {
 }
 
 function SmallHeader(props: HeaderProps) {
+  const { status } = useSession();
+
   return (
     <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
-      <div className="flex-1">
-        <SmallSidebar {...props} />
-      </div>
+      {props.type === "dashboard" && (
+        <div className="flex-1">
+          <SmallSidebar {...props} />
+        </div>
+      )}
 
       <TramonaLogo />
 
       <div className="flex flex-1 justify-end gap-2">
         {props.type === "marketing" && (
-          <Button asChild variant="darkOutline">
-            <Link href="/auth/signin">Log in</Link>
+          <Button variant="darkOutline">
+            <Link href="/auth/signin">
+              {status === "authenticated" ? "Dashboard" : "Log in"}
+            </Link>
           </Button>
         )}
 
-        {props.type === "dashboard" && <HeaderTopRight />}
+        <HeaderTopRight />
       </div>
     </header>
   );
