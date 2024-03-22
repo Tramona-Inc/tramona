@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 
 function SidebarLink({
   href,
@@ -66,7 +67,7 @@ const adminNavLinks = [
   { href: "/admin/past-requests", name: "Past Requests", icon: HistoryIcon },
   { href: "/admin/utility", name: "Utility", icon: WrenchIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/dashboard", name:"Switch To User", icon: ArrowLeftRight }
+  { href: "/dashboard", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
 const hostNavLinks = [
@@ -79,7 +80,6 @@ const guestNavLinks = [
   { href: "/requests", name: "My Requests", icon: TagIcon },
   { href: "/my-trips", name: "My Trips", icon: BriefcaseIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/admin", name:"Switch To Admin", icon: ArrowLeftRight }
 ];
 
 export default function Sidebar({
@@ -89,12 +89,20 @@ export default function Sidebar({
   type: "admin" | "guest" | "host";
   withLogo?: boolean;
 }) {
+
+  //using session to check user's role if the role is == admin "Switch to Admin link will appear"
+  const { data: session, status } = useSession();
+
+  const isAdmin = session && session.user.role === "admin";
+
   const navLinks =
     type === "admin"
       ? adminNavLinks
       : type === "host"
-        ? hostNavLinks
-        : guestNavLinks;
+      ? hostNavLinks
+      : isAdmin
+      ? [...guestNavLinks, { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight }]
+      : guestNavLinks;
 
   return (
     <div className="sticky top-0 flex h-full w-64 flex-col border-r lg:w-24">
