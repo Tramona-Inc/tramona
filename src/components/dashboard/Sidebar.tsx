@@ -2,6 +2,7 @@ import NavLink from "../_utils/NavLink";
 
 import { cn } from "@/utils/utils";
 import {
+  ArrowLeftRight,
   BriefcaseIcon,
   HistoryIcon,
   HomeIcon,
@@ -65,6 +66,7 @@ const adminNavLinks = [
   { href: "/admin/past-requests", name: "Past Requests", icon: HistoryIcon },
   { href: "/admin/utility", name: "Utility", icon: WrenchIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/dashboard", name:"Switch To User", icon: ArrowLeftRight }
 ];
 
 const hostNavLinks = [
@@ -77,6 +79,7 @@ const guestNavLinks = [
   { href: "/requests", name: "My Requests", icon: TagIcon },
   { href: "/my-trips", name: "My Trips", icon: BriefcaseIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/admin", name:"Switch To Admin", icon: ArrowLeftRight }
 ];
 
 export default function Sidebar({
