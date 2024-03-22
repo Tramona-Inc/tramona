@@ -52,14 +52,13 @@ function LargeHeader(props: HeaderProps) {
         </div>
 
         <div className="flex flex-1 justify-end gap-5">
-          {props.type === "dashboard" ? (
+          {props.type ===
+          "dashboard" ? //   <Link href="/">Switch to Home page</Link> // <Button asChild variant="darkOutline">
+          // </Button>
+          null : (
             <Button asChild variant="darkOutline">
-              <Link href="/">Switch to Home page</Link>
-            </Button>
-          ) : (
-            <Button variant="darkOutline">
               <Link href="/auth/signin">
-                {status === "authenticated" ? "Switch to Dashboard" : "Log in"}
+                {status === "authenticated" ? "Go to Dashboard" : "Log in"}
               </Link>
             </Button>
           )}
