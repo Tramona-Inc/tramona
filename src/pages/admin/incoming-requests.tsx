@@ -8,6 +8,7 @@ import RequestCard, {
 } from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
+import Head from "next/head";
 
 function IncomingRequestCards({
   requests,
@@ -39,11 +40,14 @@ function IncomingRequestCards({
   );
 }
 
-export default function IncomingRequests() {
+export default function Page() {
   const { data: requests } = api.requests.getAll.useQuery();
 
   return (
     <DashboardLayout type="admin">
+      <Head>
+        <title>Incoming Requests | Tramona</title>
+      </Head>
       <div className="px-4 pb-64 pt-16">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-row items-center gap-5">
