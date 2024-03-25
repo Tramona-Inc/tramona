@@ -25,7 +25,7 @@ export default function MastHead() {
 
               <p className="border-l-4 border-neutral-700 pl-4 text-left text-lg font-normal text-neutral-700 md:text-xl lg:text-2xl">
                 Tramona is the first perfectly efficient vacation rental
-                platform. We take vacancies in hosts' calendars and match them
+                platform. We take vacancies in hosts&apos; calendars and match them
                 with what you are willing to pay, all while cutting out the fees
                 other bigger platforms charge.
               </p>
