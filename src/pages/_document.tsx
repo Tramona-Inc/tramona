@@ -2,12 +2,14 @@
 import Document, { Html, Head, Main, NextScript } from "next/document";
 import Script from "next/script";
 import GoogleTagManager from "../components/analytics/GoogleTagManager";
+import MicrosoftClarityTag from "@/components/analytics/MicrosoftClarityTag";
 
 class MyDocument extends Document {
   render() {
     return (
       <Html lang="en">
         <Head>
+          <MicrosoftClarityTag/>
           <GoogleTagManager />
         </Head>
         <body>
