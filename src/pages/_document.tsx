@@ -29,13 +29,6 @@ class MyDocument extends Document {
               gtag('config', 'G-WBTN40GDLM');
             `}
           </Script>
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-              `,
-            }}
-          />
         </Head>
         <body>
           <Main />
