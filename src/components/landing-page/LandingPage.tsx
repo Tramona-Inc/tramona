@@ -24,7 +24,7 @@ export default function LandingPage() {
           <title>Tramona</title>
         </Head>
         <div className="bg-white">
-          <div className="lg:mx-12">
+          <div className="2xl:mx-12">
             {isBannerVisible && (
               <div className="mb-0 mt-0 w-full place-items-center rounded-lg px-2 pt-2 lg:overflow-visible">
                 <div
