@@ -69,7 +69,7 @@ const formSchema = z.object({
   airbnbMessageUrl: optional(zodUrl()),
   checkInInfo: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
-  mapScreenshot: optional(zodString()),
+  // mapScreenshot: optional(zodString()),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -584,7 +584,7 @@ export default function AdminOfferForm({
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="mapScreenshot"
           render={({ field }) => (
@@ -605,7 +605,7 @@ export default function AdminOfferForm({
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <FormField
           control={form.control}
