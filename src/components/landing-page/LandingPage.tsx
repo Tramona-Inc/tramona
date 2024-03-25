@@ -24,39 +24,40 @@ export default function LandingPage() {
           <title>Tramona</title>
         </Head>
         <div className="bg-white">
-        {isBannerVisible && (
-          <div className="mb-0 mt-0 w-full place-items-center rounded-lg px-2 pt-2 lg:overflow-visible">
-            <div
-              role="alert"
-              className="relative flex w-full items-center justify-center rounded-lg bg-neutral-900 px-4 py-4 text-base text-white"
-              onClick={handleBannerClick}
-            >
-              <div className="flex-grow px-4 text-left md:px-6 md:text-center">
-                <p className="text-xs text-white md:text-lg lg:text-xl lg:font-semibold md:font-semibold">
-                  A platform designed solely so you can experience more of the
-                  world.
-                </p>
+          <div className="lg:mx-12">
+            {isBannerVisible && (
+              <div className="mb-0 mt-0 w-full place-items-center rounded-lg px-2 pt-2 lg:overflow-visible">
+                <div
+                  role="alert"
+                  className="relative flex w-full items-center justify-center rounded-lg bg-neutral-900 px-4 py-4 text-base text-white"
+                  onClick={handleBannerClick}
+                >
+                  <div className="flex-grow px-4 text-left md:px-6 md:text-center">
+                    <p className="text-xs text-white md:text-lg md:font-semibold lg:text-xl lg:font-semibold">
+                      A platform designed solely so you can experience more of
+                      the world.
+                    </p>
+                  </div>
+                  <button
+                    className="rounded-lg border-2"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBannerClick();
+                    }}
+                  >
+                    <Icons.close />
+                  </button>
+                </div>
               </div>
-              <button
-                className="rounded-lg border-2"
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleBannerClick();
-                }}
-              >
-                <Icons.close />
-              </button>
-            </div>
+            )}
+            <MastHead />
+            <HowItWorks />
+            <SocialFeed />
+            <ReferAndEarn />
+            <ForHosts />
+            <HelpEndThis />
           </div>
-        )}
-
-        <MastHead />
-        <HowItWorks />
-        <SocialFeed />
-        <ReferAndEarn />
-        <ForHosts />
-        <HelpEndThis />
         </div>
       </div>
     </>

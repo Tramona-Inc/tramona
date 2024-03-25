@@ -18,15 +18,19 @@ export default function MastHead() {
           </div>
           {/* <LandingVideo /> */}
           <div className="z-10 flex flex-col justify-center gap-4 p-4">
-            <div className="mx-auto mb-8 max-w-3xl space-y-4">
-              <h1 className="text-center text-3xl font-bold text-black md:text-6xl">
-                Tramona is a name your own price tool
+            <div className="mx-auto mb-8 max-w-5xl space-y-4 p-4">
+              <h1 className="animate-text rounded-xl bg-gradient-to-r from-black via-neutral-500 to-black bg-clip-text text-left text-5xl font-bold text-transparent md:text-center md:text-6xl lg:text-8xl">
+                Name your own price.
               </h1>
-              <p className=" text-center text-xl text-black md:text-3xl">
-                We match you with vacant dates from top performing Airbnb hosts,
-                so you get better travel deals
+
+              <p className="border-l-4 border-neutral-700 pl-4 text-left text-lg font-normal text-neutral-700 md:text-xl lg:text-2xl">
+                Tramona is the first perfectly efficient vacation rental
+                platform. We take vacancies in hosts' calendars and match them
+                with what you are willing to pay, all while cutting out the fees
+                other bigger platforms charge.
               </p>
             </div>
+
             <div className="mx-auto w-full max-w-5xl">
               <DesktopSearchBar />
             </div>
