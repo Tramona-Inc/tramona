@@ -33,38 +33,32 @@ function LargeHeader(props: HeaderProps) {
   const { status } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 bg-white p-4 shadow-md">
-      <div className="flex items-center">
-        <div className="flex flex-1 gap-4">
-          <TramonaLogo />
-        </div>
+    <header className="sticky top-0 z-50 flex h-header-height items-center bg-white p-4 shadow-md">
+      <div className="flex flex-1 gap-4">
+        <TramonaLogo />
+      </div>
 
-        <div className="flex items-center justify-center gap-2">
-          {props.type === "marketing" && (
-            <>
-              {/* {headerLinks.map(({ href, label }, i) => (
+      <div className="flex items-center justify-center gap-2">
+        {props.type === "marketing" && (
+          <>
+            {/* {headerLinks.map(({ href, label }, i) => (
                 <HeaderLink key={i} href={href}>
                   {label}
                 </HeaderLink>
               ))} */}
-            </>
-          )}
-        </div>
+          </>
+        )}
+      </div>
 
-        <div className="flex flex-1 justify-end gap-5">
-          {props.type === "dashboard" ? (
-            <Button asChild variant="darkOutline">
-              <Link href="/">Switch to Home page</Link>
-            </Button>
-          ) : (
-            <Button variant="darkOutline">
-              <Link href="/auth/signin">
-                {status === "authenticated" ? "Switch to Dashboard" : "Log in"}
-              </Link>
-            </Button>
-          )}
-          <HeaderTopRight />
-        </div>
+      <div className="flex flex-1 justify-end gap-5">
+        {props.type === "dashboard" ? null : ( // </Button> //   <Link href="/">Switch to Home page</Link> // <Button asChild variant="darkOutline">
+          <Button asChild variant="darkOutline">
+            <Link href="/auth/signin">
+              {status === "authenticated" ? "Go to Dashboard" : "Log in"}
+            </Link>
+          </Button>
+        )}
+        <HeaderTopRight />
       </div>
     </header>
   );
@@ -96,7 +90,7 @@ function SmallHeader(props: HeaderProps) {
   const { status } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 flex items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
+    <header className="sticky top-0 z-50 flex h-header-height items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
       {props.type === "dashboard" && (
         <div className="flex-1">
           <SmallSidebar {...props} />

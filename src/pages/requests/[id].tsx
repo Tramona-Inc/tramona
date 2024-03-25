@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
 import OfferCard from "@/components/requests/[id]/OfferCard";
@@ -41,7 +41,7 @@ export default function Page() {
   }
 
   return (
-    <DashboardLayout type="guest">
+    <DashboadLayout type="guest">
       <Head>
         <title>Offers for you | Tramona</title>
       </Head>
@@ -129,6 +129,6 @@ export default function Page() {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </DashboadLayout>
   );
 }

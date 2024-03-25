@@ -84,7 +84,7 @@
     "fs": "0.0.1-security",
     "input-otp": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.359.0",
+    "lucide-react": "^0.363.0",
     "micro": "^10.0.1",
     "multer": "1.4.5-lts.1",
     "nanoid": "^5.0.6",
