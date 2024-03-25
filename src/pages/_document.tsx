@@ -1,16 +1,41 @@
-
 import Document, { Html, Head, Main, NextScript } from "next/document";
 import Script from "next/script";
-import GoogleTagManager from "../components/analytics/GoogleTagManager";
-import MicrosoftClarityTag from "@/components/analytics/MicrosoftClarityTag";
 
 class MyDocument extends Document {
   render() {
     return (
       <Html lang="en">
         <Head>
-          <MicrosoftClarityTag/>
-          <GoogleTagManager />
+          <Script id="clarity-tag" strategy="afterInteractive">
+            {`
+            (function(c,l,a,r,i,t,y){
+              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "lmawv9751s");
+          `}
+          </Script>
+
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-WBTN40GDLM"
+            strategy="beforeInteractive"
+            async
+          />
+          <Script id="google-tag-config" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-WBTN40GDLM');
+            `}
+          </Script>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+              `,
+            }}
+          />
         </Head>
         <body>
           <Main />
