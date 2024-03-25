@@ -26,7 +26,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { sendText } from "@/server/server-utils";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 
 async function createGroup({
   ownerId,
@@ -272,11 +272,18 @@ export const requestsRouter = createTRPCRouter({
         });
       });
 
-      void sendText({
-        to: ctx.user.phoneNumber!,
-        content:
-          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-      });
+      if (!ctx.user.isWhatsApp) {
+        void sendWhatsApp({
+          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+          to: ctx.user.phoneNumber!,
+        });
+      } else {
+        void sendText({
+          to: ctx.user.phoneNumber!,
+          content:
+            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+        });
+      }
 
       if (env.NODE_ENV !== "production") return;
 
@@ -323,11 +330,18 @@ export const requestsRouter = createTRPCRouter({
         .set({ confirmationSentAt: new Date() })
         .where(eq(requests.id, input.requestId));
 
-      await sendText({
-        to: ctx.user.phoneNumber!,
-        content:
-          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-      });
+      if (!ctx.user.isWhatsApp) {
+        await sendWhatsApp({
+          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+          to: ctx.user.phoneNumber!,
+        });
+      } else {
+        await sendText({
+          to: ctx.user.phoneNumber!,
+          content:
+            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+        });
+      }
     }),
 
   resolve: roleRestrictedProcedure(["admin"])
@@ -358,18 +372,25 @@ export const requestsRouter = createTRPCRouter({
         (member) => member.isOwner,
       )!.userId;
 
-      const ownerPhoneNumber = await ctx.db.query.users
+      const owner = await ctx.db.query.users
         .findFirst({
           where: eq(users.id, ownerId),
-          columns: { phoneNumber: true },
-        })
-        .then((res) => res?.phoneNumber);
-
-      if (ownerPhoneNumber) {
-        void sendText({
-          to: ownerPhoneNumber,
-          content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
+          columns: { phoneNumber: true, isWhatsApp: true },
         });
+
+      if (owner) {
+        if (!owner.isWhatsApp) {
+          void sendWhatsApp({
+            templateId: 'HX08c870ee406c7ef4ff763917f0b3c411',
+            to: owner.phoneNumber!,
+            propertyAddress: request.location,
+          })
+        } else {
+          void sendText({
+            to: owner.phoneNumber!,
+            content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
+          });
+        }
       }
     }),
 

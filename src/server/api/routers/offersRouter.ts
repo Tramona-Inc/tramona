@@ -16,7 +16,7 @@ import {
   requestSelectSchema,
   requests,
 } from "@/server/db/schema";
-import { sendText } from "@/server/server-utils";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
@@ -354,14 +354,14 @@ export const offersRouter = createTRPCRouter({
         where: eq(offers.id, input.id),
         columns: {},
         with: {
-          property: { columns: { hostId: true, name: true, address: true } },
+          property: { columns: { hostId: true, name: true } },
           request: {
-            columns: { checkIn: true, checkOut: true, id: true },
+            columns: { checkIn: true, checkOut: true, id: true, location: true },
             with: {
               madeByGroup: {
                 with: {
                   members: {
-                    with: { user: { columns: { phoneNumber: true } } },
+                    with: { user: { columns: { phoneNumber: true, isWhatsApp: true } } },
                   },
                 },
               },
@@ -410,13 +410,34 @@ export const offersRouter = createTRPCRouter({
         );
 
       const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-      const url = `${env.NEXTAUTH_URL}/requests/${request.id}`;
+      const url = `${env.NEXTAUTH_URL}/requests`;
 
       if (groupOwner.user.phoneNumber) {
-        void sendText({
-          to: groupOwner.user.phoneNumber,
-          content: `Tramona: Hello, your ${property.name} in ${property.address} offer from ${fmtdDateRange} has expired.${groupOwnerHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
-        });
+        if (!groupOwner.user.isWhatsApp) {
+          groupOwnerHasOtherOffers ?
+          void sendWhatsApp({
+            templateId: 'HXd5256ff10d6debdf70a13d70504d39d5',
+            to: groupOwner.user.phoneNumber,
+            propertyName: property.name,
+            propertyAddress: request.location,  //??can this be null
+            checkIn: request.checkIn,
+            checkOut: request.checkOut,
+            url: url,
+          }) :
+          void sendWhatsApp({
+            templateId: 'HXb293923af34665e7eefc81be0579e5db',
+            to: groupOwner.user.phoneNumber,
+            propertyName: property.name,
+            propertyAddress: request.location,
+            checkIn: request.checkIn,
+            checkOut: request.checkOut,
+          })
+        } else {
+          void sendText({
+            to: groupOwner.user.phoneNumber,
+            content: `Tramona: Hello, your ${property.name} in ${request.location} offer from ${fmtdDateRange} has expired.${groupOwnerHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
+          });
+        }
       }
     }),
 });

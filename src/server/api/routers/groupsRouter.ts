@@ -196,7 +196,7 @@ export const groupsRouter = createTRPCRouter({
       if (groupOwner?.userId) {
         const user = await ctx.db.query.users.findFirst({
           where: eq(users.id, groupOwner?.userId),
-          columns: { phoneNumber: true },
+          columns: { phoneNumber: true, isWhatsApp: true },
         })
         return user;
       }

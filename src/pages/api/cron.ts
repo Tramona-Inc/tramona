@@ -4,7 +4,7 @@ import { db } from "@/server/db";
 import { groupMembers, groups, requests, users } from "@/server/db/schema";
 import { eq, and, isNotNull, count, lt } from "drizzle-orm";
 
-import { sendText } from "@/server/server-utils";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { plural } from "@/utils/utils";
 import { sub } from "date-fns";
 
@@ -12,6 +12,7 @@ export default async function cron(req: NextApiRequest, res: NextApiResponse) {
   const result = await db
     .select({
       phoneNumber: users.phoneNumber,
+      isWhatsApp: users.isWhatsApp,
       numUnconfirmedRequests: count(requests.id),
     })
     .from(groups)
@@ -29,11 +30,22 @@ export default async function cron(req: NextApiRequest, res: NextApiResponse) {
     .groupBy(groupMembers.userId);
 
   try {
-    for (const { phoneNumber, numUnconfirmedRequests } of result) {
-      await sendText({
-        to: phoneNumber!,
-        content: `Tramona: You have ${plural(numUnconfirmedRequests, "unconfirmed request")}! Please tap below to confirm your ${plural(numUnconfirmedRequests, "request")} so we can get you the best travel deals.`,
-      });
+    for (const { phoneNumber, numUnconfirmedRequests, isWhatsApp } of result) {
+      const url = `${process.env.NEXTAUTH_URL}/requests`;
+      if (isWhatsApp) {
+        await sendWhatsApp({
+          templateId: 'HX82b075be3d74f02e45957a453fd48cef',
+          to: phoneNumber!,
+          numRequests: numUnconfirmedRequests,
+          url: url,
+        })
+      } else {
+        //const url = `${process.env.NEXTAUTH_URL}/requests/${request.id}`;
+        await sendText({
+          to: phoneNumber!,
+          content: `Tramona: You have ${plural(numUnconfirmedRequests, "unconfirmed request")}! Please tap below to confirm your ${plural(numUnconfirmedRequests, "request")} so we can get you the best travel deals. ${url}`,
+        });
+      }
     }
 
     await db

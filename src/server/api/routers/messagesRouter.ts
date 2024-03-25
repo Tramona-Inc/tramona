@@ -236,6 +236,7 @@ export const messagesRouter = createTRPCRouter({
           id: users.id,
           phoneNumber: users.phoneNumber,
           lastTextAt: users.lastTextAt,
+          isWhatsApp: users.isWhatsApp,
         })
         .from(conversationParticipants)
         .innerJoin(users, eq(conversationParticipants.userId, users.id))

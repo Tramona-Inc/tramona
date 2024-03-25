@@ -7,6 +7,7 @@ import {
   timestamp,
   varchar,
   index,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
@@ -49,6 +50,7 @@ export const users = pgTable(
       .default("Partner"),
     phoneNumber: varchar("phone_number", { length: 20 }),
     lastTextAt: timestamp("last_text_at").defaultNow(),
+    isWhatsApp: boolean("is_whats_app").default(false).notNull(),
   },
   (t) => ({
     phoneNumberIdx: index("phone_number_idx").on(t.phoneNumber),

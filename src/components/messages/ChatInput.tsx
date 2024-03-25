@@ -53,6 +53,8 @@ export default function ChatInput({
   const { data: participantPhoneNumbers } =
     api.messages.getParticipantsPhoneNumbers.useQuery({ conversationId });
 
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
       const newMessage: ChatMessageType = {
@@ -93,27 +95,33 @@ export default function ChatInput({
         errorToast();
       }
 
-
-        if (participantPhoneNumbers) {
-          void Promise.all(
-            participantPhoneNumbers.map(
-              async ({ id, lastTextAt, phoneNumber }) => {
-                if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1 })) {
-                  if (phoneNumber) {
+      if (participantPhoneNumbers) {
+        void Promise.all(
+          participantPhoneNumbers.map(
+            async ({ id, lastTextAt, phoneNumber, isWhatsApp }) => {
+              if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1 })) {
+                if (phoneNumber) {
+                  if (!isWhatsApp) {
+                    await twilioWhatsAppMutation.mutateAsync({
+                      templateId: "HXae95c5b28aa2f5448a5d63ee454ccb74",
+                      to: phoneNumber,
+                    });
+                  } else {
                     await sendSMS({
                       to: phoneNumber,
                       msg: "You have a new unread message in Tramona!",
                     });
-                    await updateProfile({
-                      id: id,
-                      lastTextAt: new Date(),
-                    });
-                    await utils.messages.invalidate();
                   }
+                  await updateProfile({
+                    id: id,
+                    lastTextAt: new Date(),
+                  });
+                  await utils.messages.invalidate();
                 }
-              },
-            ),
-          );
+              }
+            },
+          ),
+        );
       }
     }
   };
