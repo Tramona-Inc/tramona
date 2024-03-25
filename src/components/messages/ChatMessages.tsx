@@ -2,7 +2,7 @@ import { useMessage } from "@/utils/store/messages";
 import { useEffect } from "react";
 import ListMessages from "./ListMessages";
 
-export const LIMIT_MESSAGE = 9;
+export const LIMIT_MESSAGE = 20;
 
 export default function ChatMessages({
   conversationId,
