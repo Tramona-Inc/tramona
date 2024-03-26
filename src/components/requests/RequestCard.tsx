@@ -114,8 +114,7 @@ function ActionDialog() {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <Icons.refresh className="mr-2 h-4 w-4" />
-            Refresh
+            <Icons.refresh className="mr-2 h-4 w-4" />I don't like my offers
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Icons.trash className="mr-2 h-4 w-4" />
