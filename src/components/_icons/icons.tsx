@@ -32,6 +32,9 @@ import {
   Tags,
   Twitter,
   X,
+  Trash2,
+  Pencil,
+  RefreshCw,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -39,6 +42,9 @@ export type Icon = LucideIcon;
 // type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
+  refresh: RefreshCw,
+  edit: Pencil,
+  trash: Trash2,
   ellipsis: EllipsisVertical,
   close: X,
   spinner: Loader2,

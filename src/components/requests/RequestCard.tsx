@@ -113,10 +113,14 @@ function ActionDialog() {
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Team</DropdownMenuItem>
-          <DropdownMenuItem>Subscription</DropdownMenuItem>
+          <DropdownMenuItem>
+            <Icons.refresh className="mr-2 h-4 w-4" />
+            Refresh
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Icons.trash className="mr-2 h-4 w-4" />
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>
