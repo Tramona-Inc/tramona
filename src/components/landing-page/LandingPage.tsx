@@ -29,7 +29,7 @@ export default function LandingPage() {
               <div className="mb-0 mt-0 w-full place-items-center rounded-lg px-2 pt-2 lg:overflow-visible">
                 <div
                   role="alert"
-                  className="relative flex w-full items-center justify-center rounded-lg bg-neutral-900 px-4 py-4 text-base text-white"
+                  className="relative flex hidden w-full items-center justify-center rounded-lg bg-neutral-900 px-4 py-4 text-base text-white md:flex"
                   onClick={handleBannerClick}
                 >
                   <div className="flex-grow px-4 text-left md:px-6 md:text-center">
