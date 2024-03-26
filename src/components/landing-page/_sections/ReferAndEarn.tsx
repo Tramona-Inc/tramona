@@ -12,6 +12,7 @@ const ReferAndEarn = () => {
               src="/assets/images/landing-page/referandearn.jpeg"
               width={384}
               height={300}
+              unoptimized
               alt=""
               className="h-full w-full rounded-lg object-cover object-center"
             />
