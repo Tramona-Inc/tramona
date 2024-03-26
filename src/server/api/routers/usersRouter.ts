@@ -31,19 +31,18 @@ export const usersRouter = createTRPCRouter({
   }),
 
   myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
-    const phone = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.user.id),
-      columns: {
-        phoneNumber: true,
-      },
-    })
-    .then((res) => {
-      return res?.phoneNumber ?? null
-    });
-
+    const phone = await ctx.db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {
+          phoneNumber: true,
+        },
+      })
+      .then((res) => {
+        return res?.phoneNumber ?? null;
+      });
 
     return phone;
-
   }),
 
   myReferralCode: protectedProcedure.query(async ({ ctx }) => {
@@ -175,21 +174,36 @@ export const usersRouter = createTRPCRouter({
     }));
   }),
 
-    updatePhoneNumber: protectedProcedure
-      .input(
-        z.object({
-          phoneNumber: zodString({ maxLen: 20 }),
-        }),
-      )
-      .mutation(async ({ ctx, input }) => {
-        const updatedUser = await ctx.db
-          .update(users)
-          .set({
-            phoneNumber: input.phoneNumber,
-          })
-          .where(eq(users.id, ctx.user.id))
-          .returning();
+  updatePhoneNumber: protectedProcedure
+    .input(
+      z.object({
+        phoneNumber: zodString({ maxLen: 20 }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatedUser = await ctx.db
+        .update(users)
+        .set({
+          phoneNumber: input.phoneNumber,
+        })
+        .where(eq(users.id, ctx.user.id))
+        .returning();
 
-        return updatedUser;
-      })
+      return updatedUser;
+    }),
+
+  phoneNumberIsTaken: protectedProcedure
+    .input(
+      z.object({
+        phoneNumber: zodString({ maxLen: 20 }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.query.users
+        .findFirst({
+          columns: { id: true },
+          where: eq(users.phoneNumber, input.phoneNumber),
+        })
+        .then((res) => !!res);
+    }),
 });

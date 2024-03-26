@@ -1,8 +1,6 @@
 // import ContactIcon from '@/components/icons/contact';
 // import EditIcon from '@/components/icons/large-edit-icon';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -11,17 +9,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { zodEmail, zodString } from "@/utils/zod-utils";
-import Icons from "@/components/ui/icons";
+import { api } from "@/utils/api";
+import { errorToast } from "@/utils/toasts";
+import { zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import MainLayout from "@/components/_common/Layout/MainLayout";
 
 const formSchema = z.object({
   name: zodString(),
-  email: zodEmail(),
-  message: zodString(),
+  email: zodString().email(),
+  message: zodString().max(300, {
+    message: "Response must be less than 300 Characters",
+  }),
 });
 
 function ContactForm() {
@@ -31,12 +36,29 @@ function ContactForm() {
 
   const { toast } = useToast();
 
-  const handleSubmit = async ({}: z.infer<typeof formSchema>) => {
-    toast({
-      title: "Message sent successfully",
-      description: "We will be in touch shortly",
-    });
+  const { mutateAsync } = api.emails.sendSupportEmail.useMutation({
+    onSuccess: () => {
+      form.resetField("message", { defaultValue: "" });
 
+      toast({
+        title: "Message sent successfully",
+        description: "We will be in touch shortly",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+      });
+      errorToast("Couldn't send support email! Please try again.");
+    },
+  });
+
+  const handleSubmit = async (formData: z.infer<typeof formSchema>) => {
+    void mutateAsync(formData);
+
+    // Reset the message field after successful submission
     form.resetField("message", { defaultValue: "" });
   };
 
@@ -100,6 +122,7 @@ function ContactForm() {
 
 export default function Page() {
   return (
+    <MainLayout>
     <div className="mx-auto max-w-3xl space-y-8 p-4 pb-32">
       <h1 className="pt-20 text-3xl font-bold">Get support</h1>
       <section className="space-y-4 rounded-xl border p-4 shadow-md">
@@ -135,5 +158,6 @@ export default function Page() {
         <ContactForm />
       </section>
     </div>
+    </MainLayout>
   );
 }

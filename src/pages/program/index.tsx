@@ -20,6 +20,7 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
+import HowItWorks from "@/components/_common/HowItWorks";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -134,7 +135,7 @@ function ExploreEarningsCard() {
 function IntroSection() {
   return (
     <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <section className="relative rounded-3xl bg-white shadow">
+      <section className="relative bg-white">
         <div className="flex flex-col-reverse items-center lg:flex-row lg:space-x-10 xl:space-x-20">
           <div className="max-w-xl space-y-5 lg:space-y-10">
             <h1 className="font-semibold">TRAMONA PARTNERSHIP PROGRAM</h1>
@@ -158,7 +159,7 @@ function IntroSection() {
               src={"/assets/images/partners-landing.png"}
               width={500}
               height={500}
-              alt="Refer and Earn"
+              alt=""
               className="w-full rounded-lg"
             />
           </div>
@@ -170,11 +171,13 @@ function IntroSection() {
 
 function ProgramTiers() {
   const { status } = useSession();
-  const { data } = api.users.myReferralCode.useQuery();
+  const { data } = api.users.myReferralCode.useQuery(undefined, {
+    enabled: status === "authenticated",
+  });
 
   return (
     <div className="[&>*]:flex [&>*]:min-h-[calc(50vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <section className="w-full rounded-3xl bg-white shadow">
+      <section className="w-full bg-white">
         <h2 className="text-center text-4xl font-bold sm:text-5xl">
           Introducing the Tramona way
         </h2>
@@ -268,54 +271,54 @@ function ProgramTiers() {
   );
 }
 
-function HowItWorks() {
-  return (
-    <div className="[&>*]:flex [&>*]:min-h-[calc(50vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <section className="rounded-3xl bg-neutral-900 shadow">
-        <h2 className="text-center text-4xl font-bold text-white sm:text-6xl">
-          How it works
-        </h2>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
-            <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
-              1
-            </div>
-            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
-              Sign Up
-            </h2>
-            <p className="text-lg font-medium tracking-tight sm:text-xl">
-              Sign up, access our partner portal, and get your{" "}
-              <mark>custom affiliate link</mark>.
-            </p>
-          </div>
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
-            <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
-              2
-            </div>
-            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
-              Share
-            </h2>
-            <p className="text-lg font-medium tracking-tight sm:text-xl">
-              <mark>Share your link</mark> with your contacts and social media
-              followers.
-            </p>
-          </div>
-          <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
-            <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
-              3
-            </div>
-            <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
-              Earn
-            </h2>
-            <p className="text-lg font-medium tracking-tight sm:text-xl">
-              <mark>Earn</mark> based on every persons travel you refer
-            </p>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
+// function HowItWorks() {
+//   return (
+//     <div className="[&>*]:flex [&>*]:min-h-[calc(50vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
+//       <section className="bg-neutral-900">
+//         <h2 className="text-center text-4xl font-bold text-white sm:text-6xl">
+//           How it works
+//         </h2>
+//         <div className="grid gap-4 lg:grid-cols-3">
+//           <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
+//             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
+//               1
+//             </div>
+//             <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+//               Sign Up
+//             </h2>
+//             <p className="text-lg font-medium tracking-tight sm:text-xl">
+//               Sign up, access our partner portal, and get your{" "}
+//               <mark>custom affiliate link</mark>.
+//             </p>
+//           </div>
+//           <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
+//             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
+//               2
+//             </div>
+//             <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+//               Share
+//             </h2>
+//             <p className="text-lg font-medium tracking-tight sm:text-xl">
+//               <mark>Share your link</mark> with your contacts and social media
+//               followers.
+//             </p>
+//           </div>
+//           <div className="relative space-y-6 rounded-3xl border-2 border-black bg-white p-6 lg:max-w-md">
+//             <div className="absolute right-4 top-0 text-9xl font-extrabold text-black/10">
+//               3
+//             </div>
+//             <h2 className="pt-6 text-2xl font-bold tracking-tight sm:text-3xl">
+//               Earn
+//             </h2>
+//             <p className="text-lg font-medium tracking-tight sm:text-xl">
+//               <mark>Earn</mark> based on every persons travel you refer
+//             </p>
+//           </div>
+//         </div>
+//       </section>
+//     </div>
+//   );
+// }
 
 function ExploreEarnings() {
   return (
@@ -355,7 +358,7 @@ function ExploreEarnings() {
 function FAQ() {
   return (
     <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
-      <section className="rounded-3xl bg-white shadow">
+      <section className="bg-white">
         <h2 className="text-center text-4xl font-bold sm:text-6xl">
           Questions?
         </h2>
@@ -426,24 +429,46 @@ function FAQ() {
 }
 
 export default function Page() {
+  const partnershipSteps = [
+    {
+      number: "1",
+      title: "Sign Up",
+      description:
+        "Sign up, access our partner portal, and get your custom affiliate link.",
+    },
+    {
+      number: "2",
+      title: "Share",
+      description:
+        "Share your link with your contacts and social media followers.",
+    },
+    {
+      number: "3",
+      title: "Earn",
+      description: "Earn based on every person's travel you refer.",
+    },
+  ];
   return (
     <MainLayout>
-      <div className="relative bg-gray-100">
+      <div className="relative bg-white">
         <Head>
           <title>Partners | Tramona</title>
         </Head>
-        <div className="p-2 md:px-2 md:pt-4">
+        <div className="">
           <IntroSection />
         </div>
-
-        <div className="p-2 md:px-2">
+        <hr className="mx-24 mb-24 h-px border-0 bg-neutral-300"></hr>
+        <div className="">
           <ProgramTiers />
         </div>
 
-        <div className="p-2 md:px-2">
-          <HowItWorks />
+        <div className="">
+          <HowItWorks
+            title="How Tramona Partnership Works?"
+            steps={partnershipSteps}
+          />
         </div>
-        <div className="p-2 md:px-2 md:pb-4">
+        <div className="">
           <FAQ />
         </div>
       </div>

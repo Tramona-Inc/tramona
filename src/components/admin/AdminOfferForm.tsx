@@ -69,7 +69,7 @@ const formSchema = z.object({
   airbnbMessageUrl: optional(zodUrl()),
   checkInInfo: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
-  mapScreenshot: zodString(),
+  // mapScreenshot: optional(zodString()),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -171,13 +171,17 @@ export default function AdminOfferForm({
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
     // const totalPrice = offeredPriceUSD * 100;
-    const totalPrice = data.offeredNightlyPriceUSD * numberOfNights * 100;
+    const totalPrice = Math.round(
+      data.offeredNightlyPriceUSD * numberOfNights * 100,
+    );
 
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
       type: propertyData.propertyType,
-      originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
+      originalNightlyPrice: Math.round(
+        propertyData.originalNightlyPriceUSD * 100,
+      ),
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
       mapScreenshot: url,
@@ -580,12 +584,12 @@ export default function AdminOfferForm({
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="mapScreenshot"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Screenshot of Map</FormLabel>
+              <FormLabel>Screenshot of Map (optional)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -601,7 +605,7 @@ export default function AdminOfferForm({
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <FormField
           control={form.control}

@@ -3,6 +3,7 @@ import StarIcon from "@/components/_icons/StarIcon";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 
 const steps = [
   {
@@ -38,11 +39,11 @@ function Card({
       </div>
       <p className="text-xl font-bold">{info}</p>
 
-      {displayStar && (
+      {/* {displayStar && (
         <div className="absolute -right-[56px] -top-[80px] z-20">
           <StarIcon />
         </div>
-      )}
+      )} */}
     </div>
   );
 }
@@ -53,7 +54,7 @@ export default function Page() {
       <Head>
         <title>Partners | Tramona</title>
       </Head>
-      <div className="bg-blue-300 py-20">
+      <div className="bg-[#F2EBDC] py-20">
         <div className="container flex max-w-[1000px] flex-col items-center justify-between gap-10 lg:flex-row">
           {/* Partner Program */}
           <div className="flex flex-col gap-4">
@@ -68,12 +69,12 @@ export default function Page() {
           </div>
 
           {/* Image */}
-          <Image
+          {/* <Image
             src={"/assets/images/partner-program.png"}
             height={301}
             width={325}
             alt="partner program"
-          />
+          /> */}
         </div>
       </div>
 
@@ -92,9 +93,11 @@ export default function Page() {
           page
         </p>
 
-        <Button className="rounded-xl px-10 py-6 text-lg font-bold">
-          Start referring
-        </Button>
+        <Link href="/auth/signup">
+          <Button className="rounded-xl px-10 py-6 text-lg font-bold">
+            Start referring
+          </Button>
+        </Link>
       </div>
     </MainLayout>
   );

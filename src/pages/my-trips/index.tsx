@@ -8,18 +8,16 @@ import UpcomingCard from "@/components/my-trips/UpcomingCard";
 import { Button } from "@/components/ui/button";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import { type AppRouter } from "@/server/api/root";
-import { api } from "@/utils/api";
+import { type RouterOutputs, api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
-import { type inferRouterOutputs } from "@trpc/server";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
 export type UpcomingTrip = MyTripsType<
-  inferRouterOutputs<AppRouter>["myTrips"]["getUpcomingTrips"]
+  RouterOutputs["myTrips"]["getUpcomingTrips"]
 >;
 export type PreviousTrip = MyTripsType<
-  inferRouterOutputs<AppRouter>["myTrips"]["getPreviousTrips"]
+  RouterOutputs["myTrips"]["getPreviousTrips"]
 >;
 
 export default function MyTrips() {

@@ -7,12 +7,10 @@ import { ReferralTable } from "@/components/account/cashback/ReferralTable";
 import { referralColumns } from "@/components/account/cashback/ReferralColumns";
 import Spinner from "@/components/_common/Spinner";
 
-import { api } from "@/utils/api";
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "@/server/api/root";
+import { type RouterOutputs, api } from "@/utils/api";
 
 export type ReferralTableData =
-  inferRouterOutputs<AppRouter>["referralCodes"]["getReferralEarnings"];
+  RouterOutputs["referralCodes"]["getReferralEarnings"];
 
 export default function CashbackBalance() {
   useSession({ required: true });
@@ -33,7 +31,7 @@ export default function CashbackBalance() {
       <Head>
         <title>Cashback Balance | Tramona</title>
       </Head>
-      <div className="min-h-[calc(100vh-5rem)] gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
+      <div className="min-h-screen-minus-header gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
         <AccountSidebar />
         <div className="w-full space-y-5">
           {isLoading ? (

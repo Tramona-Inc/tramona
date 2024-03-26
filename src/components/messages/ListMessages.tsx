@@ -3,10 +3,13 @@ import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
-// import LoadMoreMessages from "./LoadMoreMessages";
+import { api } from "@/utils/api";
+import { useConversation } from "@/utils/store/conversations";
 import { errorToast } from "@/utils/toasts";
+import { useSession } from "next-auth/react";
 import LoadMoreMessages from "./LoadMoreMessages";
-import { Message } from "./Message";
+import { groupMessages } from "./groupMessages";
+import { MessageGroup } from "./MessageGroup";
 
 function NoMessages() {
   return (
@@ -37,19 +40,38 @@ export default function ListMessages() {
     ? conversations[currentConversationId]?.messages ?? []
     : [];
 
+  const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
+
+  const { data: session } = useSession();
+
+  // Set all the messages to read when loaded
+  useEffect(() => {
+    const unreadMessageIds = messages
+      .filter(
+        (message) =>
+          message.read === false && message.userId !== session?.user.id,
+      )
+      .map((message) => message.id);
+
+    if (unreadMessageIds.length > 0) {
+      void mutateAsync({ unreadMessageIds });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
+
   const hasMore = currentConversationId
     ? conversations[currentConversationId]?.hasMore ?? false
     : false;
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     if (!optimisticIds.includes(payload.new.id)) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("user")
         .select("name, email, image")
         .eq("id", payload.new.user_id)
         .single();
       if (error) {
-        errorToast(error.message);
+        errorToast();
       } else {
         const newMessage: ChatMessageType = {
           id: payload.new.id,
@@ -57,9 +79,8 @@ export default function ListMessages() {
           userId: payload.new.user_id,
           message: payload.new.message,
           isEdit: payload.new.is_edit,
-          createdAt: new Date(payload.new.created_at),
+          createdAt: payload.new.created_at,
           read: payload.new.read,
-          user: data,
         };
         addMessageToConversation(payload.new.conversation_id, newMessage);
       }
@@ -91,7 +112,7 @@ export default function ListMessages() {
     return () => {
       void channel.unsubscribe();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConversationId, messages]);
 
   useEffect(() => {
@@ -100,7 +121,7 @@ export default function ListMessages() {
     if (scrollContainer && !userScrolled) {
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   const handleOnScroll = () => {
@@ -130,21 +151,52 @@ export default function ListMessages() {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   };
 
+  // Get all participants
+  const { conversationList } = useConversation();
+
+  const conversationIndex = conversationList.findIndex(
+    (conversation) => conversation.id === currentConversationId,
+  );
+
+  const participants = conversationList[conversationIndex]?.participants;
+
+  const messagesWithUser = messages
+    .slice()
+    .reverse()
+    .map((message) => {
+      // Display message with user
+      if (!participants || !session) return null;
+      if (message.userId === session.user.id) {
+        return { message, user: session.user };
+      }
+
+      const user =
+        participants.find(
+          (participant) => participant?.id === message.userId,
+        ) ?? null; // null means its a deleted user
+
+      return { message, user };
+    })
+    .filter(Boolean);
+
+  const messageGroups = groupMessages(messagesWithUser);
+
   return (
     <>
       <div
         ref={scrollRef}
         onScroll={handleOnScroll}
-        className="relative flex flex-1 flex-col overflow-y-auto scroll-smooth"
+        className="relative flex flex-1 flex-col overflow-y-auto"
       >
         <div className="flex-1"></div>
-        <div className="absolute w-full">
+        <div className="absolute w-full space-y-8 p-4 pt-12">
           {hasMore && <LoadMoreMessages />}
-          {messages.length > 0 &&
-            messages
-              .slice()
-              .reverse()
-              .map((message) => <Message key={message.id} message={message} />)}
+          {messageGroups.map((messageGroup) => (
+            <MessageGroup
+              key={messageGroup.messages[0]?.id}
+              messageGroup={messageGroup}
+            />
+          ))}
         </div>
         {messages.length === 0 && (
           <div className="flex h-full w-full items-center justify-center">
@@ -152,6 +204,8 @@ export default function ListMessages() {
           </div>
         )}
       </div>
+      {/* {JSON.stringify(messagesWithUser, null, 2)}
+      {JSON.stringify(messageGroups, null, 2)} */}
       {userScrolled && (
         <div
           className="absolute bottom-16 flex w-full items-center justify-center"

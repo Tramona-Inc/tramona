@@ -1,15 +1,17 @@
 import { createTRPCRouter } from "@/server/api/trpc";
 import { authRouter } from "./routers/authRouter";
+import { filesRouter } from "./routers/filesRouter";
+import { groupsRouter } from "./routers/groupsRouter";
+import { messagesRouter } from "./routers/messagesRouter";
+import { myTripsRouter } from "./routers/myTripsRouter";
 import { offersRouter } from "./routers/offersRouter";
 import { propertiesRouter } from "./routers/propertiesRouter";
+import { referralCodesRouter } from "./routers/referralCodesRouter";
 import { requestsRouter } from "./routers/requestsRouter";
 import { stripeRouter } from "./routers/stripeRouter";
-import { usersRouter } from "./routers/usersRouter";
-import { myTripsRouter } from "./routers/myTripsRouter";
-import { referralCodesRouter } from "./routers/referralCodesRouter";
-import { messagesRouter } from "./routers/messagesRouter";
 import { twilioRouter } from "./routers/twilioRouter";
-import { filesRouter } from "./routers/filesRouter";
+import { usersRouter } from "./routers/usersRouter";
+import { emailRouter } from "./routers/emailRouter";
 
 /**
  * This is the primary router for your server.
@@ -28,6 +30,8 @@ export const appRouter = createTRPCRouter({
   twilio: twilioRouter,
   messages: messagesRouter,
   files: filesRouter,
+  groups: groupsRouter,
+  emails: emailRouter,
 });
 
 // export type definition of API

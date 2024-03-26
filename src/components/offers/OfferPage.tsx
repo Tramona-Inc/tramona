@@ -9,9 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type AppRouter } from "@/server/api/root";
 import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
-import { api } from "@/utils/api";
+import { type RouterOutputs, api } from "@/utils/api";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import {
   cn,
@@ -23,15 +22,13 @@ import {
   plural,
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
-import { type inferRouterOutputs } from "@trpc/server";
 import { CheckIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 
-export type OfferWithDetails =
-  inferRouterOutputs<AppRouter>["offers"]["getByIdWithDetails"];
+export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export default function OfferPage({
   offer: { property, request, ...offer },
@@ -75,7 +72,9 @@ export default function OfferPage({
     originalTotal - offer.totalPrice,
   );
 
-  const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
+  // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
+
+  const tax = 0;
 
   return (
     <div className="space-y-4">

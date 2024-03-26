@@ -10,7 +10,7 @@ import {
   users,
   type User,
 } from "@/server/db/schema";
-import { sendEmail } from "@/server/server-utils";
+import { addUserToGroups, sendEmail } from "@/server/server-utils";
 import { generateReferralCode } from "@/utils/utils";
 import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
@@ -48,7 +48,7 @@ async function insertUserAuth(
   name: string,
   email: string,
   hashedPassword: string,
-  makeHost: boolean = false,
+  makeHost = false,
 ) {
   return await db
     .insert(users)
@@ -144,23 +144,27 @@ export const authRouter = createTRPCRouter({
           user = await insertUserAuth(input.name, input.email, hashedPassword);
 
           if (user) {
-            // Create referral code
-            await ctx.db.insert(referralCodes).values({
-              ownerId: user.id,
-              referralCode: generateReferralCode(),
-            });
+            await Promise.all([
+              // Create referral code
+              ctx.db.insert(referralCodes).values({
+                ownerId: user.id,
+                referralCode: generateReferralCode(),
+              }),
 
-            // Link user account
-            await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
-              provider: "credentials",
-              providerAccountId: user.id,
-              userId: user.id,
-              type: "email",
-            });
+              // Link user account
+              CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
+                provider: "credentials",
+                providerAccountId: user.id,
+                userId: user.id,
+                type: "email",
+              }),
+
+              // add user to groups they were invited to
+              addUserToGroups(user),
+            ]);
           }
         }
 
-        // Send email verification token
         if (user) {
           await sendVerificationEmail(user);
         }

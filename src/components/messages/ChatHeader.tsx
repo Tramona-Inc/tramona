@@ -14,7 +14,7 @@ export default function ChatHeader({
   setSelected,
 }: ContentProps) {
   return (
-    <div className="flex h-[100px] items-center justify-between border-b px-4 lg:px-8">
+    <div className="flex items-center justify-between border-b px-4 py-2 lg:px-8 lg:py-4">
       <div className="flex items-center gap-2 lg:gap-3">
         <div className="block md:hidden">
           <Button variant="ghost" size="icon" onClick={() => setSelected(null)}>

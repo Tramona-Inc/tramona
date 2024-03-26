@@ -1,4 +1,3 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,16 +13,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import { api } from "@/utils/api";
+import { getFmtdFilters } from "@/utils/formatters";
+import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FilterIcon } from "lucide-react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { ALL_PROPERTY_TYPES, requests } from "@/server/db/schema";
-import { api } from "@/utils/api";
-import { getFmtdFilters } from "@/utils/formatters";
-import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
   Select,
@@ -33,34 +33,31 @@ import {
   SelectValue,
 } from "../ui/select";
 
-import {
-  NestedDrawer,
-  DrawerContent,
-  DrawerTrigger,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "../ui/drawer";
-import { DialogClose } from "../ui/dialog";
+import { Input } from "@/components/ui/input";
+import { formatPhoneNumber } from "@/utils/formatters";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import PlacesInput from "../_common/PlacesInput";
+import OTPDialog from "../profile/OTPDialog";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "../ui/label";
-import { toast } from "../ui/use-toast";
-import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
-import OTPDialog from "../otp-dialog/OTPDialog";
-import { formatPhoneNumber } from "@/utils/formatters";
-import PlacesInput from "../_common/PlacesInput";
+import {
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  NestedDrawer,
+} from "../ui/drawer";
 import ErrorMsg from "../ui/ErrorMsg";
-import { db } from "@/server/db";
-import { eq } from "drizzle-orm";
+import { toast } from "../ui/use-toast";
 
 const formSchema = z
   .object({
@@ -88,7 +85,7 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
-  const { status, data, update } = useSession();
+  const { status } = useSession();
 
   const isDesktop = useIsDesktop();
 
@@ -99,10 +96,7 @@ export default function NewRequestForm({
     },
   });
 
-  const createRequestsMutation = api.requests.create.useMutation();
-
-  const smsMutation = api.twilio.sendSMS.useMutation();
-
+  const mutation = api.requests.createMultiple.useMutation();
   const utils = api.useUtils();
   const router = useRouter();
 
@@ -135,8 +129,6 @@ export default function NewRequestForm({
   const phoneRef = useRef(toPhoneNumber);
 
   const waitForVerification = async () => {
-    console.log(verifiedRef.current);
-    console.log(verified);
     return new Promise<void>((resolve) => {
       if (verifiedRef.current) {
         resolve();
@@ -179,7 +171,7 @@ export default function NewRequestForm({
     const newRequest = {
       checkIn: checkIn,
       checkOut: checkOut,
-      maxTotalPrice: numNights * maxNightlyPriceUSD * 100,
+      maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
       propertyType: propertyType === "any" ? undefined : propertyType,
       ...restData,
     };
@@ -193,7 +185,7 @@ export default function NewRequestForm({
       });
     } else {
       try {
-        await createRequestsMutation.mutateAsync(newRequest).catch(() => {
+        await mutation.mutateAsync([newRequest]).catch(() => {
           throw new Error();
         });
         await utils.requests.invalidate();
@@ -202,10 +194,6 @@ export default function NewRequestForm({
         while (!phoneRef.current) {
           await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
         }
-        await smsMutation.mutateAsync({
-          msg: "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-          to: phoneRef.current,
-        });
 
         successfulRequestToast(newRequest);
         form.reset();
@@ -315,37 +303,36 @@ export default function NewRequestForm({
           Request Deal
         </Button>
 
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Enter your phone number</DialogTitle>
-                  <DialogDescription>
-                    Please enter your phone number below and you will recieve a code via text.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 p-4 py-4">
-                  <div className="flex flex-row items-center gap-4">
-
-                    <Input
-                      id="phone-number"
-                      value={toPhoneNumber}
-                      placeholder="Phone Number"
-                      onChange={(e) => {
-                        setToPhoneNumber(e.target.value);
-                      }}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <OTPDialog
-                    toPhoneNumber={formatPhoneNumber(toPhoneNumber)}
-                    setVerified={setVerified}
-                    setPhoneNumber={setToPhoneNumber}
-                  />
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Enter your phone number</DialogTitle>
+              <DialogDescription>
+                Please enter your phone number below and you will recieve a code
+                via text.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 p-4 py-4">
+              <div className="flex flex-row items-center gap-4">
+                <Input
+                  id="phone-number"
+                  value={toPhoneNumber}
+                  placeholder="Phone Number"
+                  onChange={(e) => {
+                    setToPhoneNumber(e.target.value);
+                  }}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <OTPDialog
+                toPhoneNumber={formatPhoneNumber(toPhoneNumber)}
+                setVerified={setVerified}
+                setPhoneNumber={setToPhoneNumber}
+              />
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </form>
     </Form>
   );
