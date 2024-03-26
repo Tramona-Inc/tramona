@@ -39,7 +39,7 @@ export default function Page() {
       <Head>
         <title>Ambassador | Tramona</title>
       </Head>
-      <div className="bg-[#C4B5FD] py-20">
+      <div className="bg-[#F2EBDC] py-20">
         <div className="container flex max-w-[1000px] flex-col items-center justify-between gap-10 lg:flex-row">
           {/* Partner Program */}
           <div className="flex flex-col gap-4">
@@ -56,9 +56,9 @@ export default function Page() {
             </p>
           </div>
 
-          <div>
+          {/* <div>
             <StarIcon />
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export default function Page() {
         </p>
 
         <Link href={"ambassador/apply"}>
-          <Button className="rounded-xl bg-[#3843D0] px-10 py-6 text-lg font-bold">
+          <Button className="rounded-xl px-10 py-6 text-lg font-bold">
             Apply here
           </Button>
         </Link>

@@ -77,7 +77,10 @@ export function capitalize(str: string) {
  * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
-export function formatDateRange(from: Date, to?: Date) {
+export function formatDateRange(fromDate: Date, toDate?: Date) {
+  const from = removeTimezoneFromDate(fromDate) ?? "";
+  const to = toDate ? removeTimezoneFromDate(toDate) : "";
+
   const isCurYear = isSameYear(from, new Date());
 
   if (!to || isSameDay(from, to)) {
@@ -100,6 +103,11 @@ export function formatDateRange(from: Date, to?: Date) {
     )}`;
   }
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
+}
+
+function removeTimezoneFromDate(date: Date) {
+  // Convert to ISO string and split by 'T' to get date part
+  return date.toISOString().split("Z")[0];
 }
 
 export function formatDateMonthDay(date: Date) {
@@ -195,4 +203,18 @@ export function getFromAndTo(page: number, itemPerPage: number) {
   }
 
   return { from, to };
+}
+
+// hopefully we wont need this
+export function convertUTCDateToLocalDate(date: Date) {
+  const newDate = new Date(
+    date.getTime() + date.getTimezoneOffset() * 60 * 1000,
+  );
+
+  const offset = date.getTimezoneOffset() / 60;
+  const hours = date.getHours();
+
+  newDate.setHours(hours - offset);
+
+  return newDate;
 }

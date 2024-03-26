@@ -1,10 +1,11 @@
-import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { and, eq } from "drizzle-orm";
+import { GroupInviteEmail } from "@/components/email-templates/GroupInviteEmail";
 import { groupInvites, groupMembers, groups, users } from "@/server/db/schema";
+import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
-import { sendEmail } from "@/server/server-utils";
+import { and, eq } from "drizzle-orm";
+import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const groupsRouter = createTRPCRouter({
   inviteUserByEmail: protectedProcedure
@@ -46,14 +47,10 @@ export const groupsRouter = createTRPCRouter({
         await sendEmail({
           to: input.email,
           subject: "You've been invited to a request on Tramona",
-          content: (
-            <>
-              {ctx.user.name ?? ctx.user.email ?? "An anonymous user"} invited
-              you to their request on Tramona! Sign up at
-              https://tramona.com/auth/signup with this email to be added to the
-              group.
-            </>
-          ),
+          content: GroupInviteEmail({
+            email: ctx.user.email,
+            name: ctx.user.name,
+          }),
         });
 
         return { status: "sent invite" as const };
@@ -199,7 +196,7 @@ export const groupsRouter = createTRPCRouter({
       if (groupOwner?.userId) {
         const user = await ctx.db.query.users.findFirst({
           where: eq(users.id, groupOwner?.userId),
-          columns: { phoneNumber: true },
+          columns: { phoneNumber: true, isWhatsApp: true },
         })
         return user;
       }

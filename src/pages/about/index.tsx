@@ -1,8 +1,4 @@
-import { useSession } from "next-auth/react";
 import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useState } from "react";
 import MainLayout from "@/components/_common/Layout/MainLayout";
 
 export default function Page() {

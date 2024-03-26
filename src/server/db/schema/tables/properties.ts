@@ -7,7 +7,6 @@ import {
   smallint,
   text,
   timestamp,
-  unique,
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";

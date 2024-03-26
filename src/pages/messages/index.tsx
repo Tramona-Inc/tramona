@@ -9,12 +9,9 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { api } from "@/utils/api";
 
 function MessageDisplay() {
-  const [isViewed, setIsViewd] = useState(false);
-
-  const conversations = useConversation((state) => state.conversationList);
-
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
 
@@ -22,12 +19,14 @@ function MessageDisplay() {
     setSelectedConversation(conversation);
   };
 
+  // * Allows us to open message from url query
+  const [isViewed, setIsViewd] = useState(false);
+  const conversations = useConversation((state) => state.conversationList);
   const { query } = useRouter();
 
-  // Allows us to open message from url query
   useEffect(() => {
     if (query.conversationId && conversations.length > 0 && !isViewed) {
-      const conversationIdToSelect = parseInt(query.conversationId as string);
+      const conversationIdToSelect = query.conversationId as string;
       const conversationToSelect = conversations.find(
         (conversation) => conversation.id === conversationIdToSelect,
       );
@@ -44,28 +43,37 @@ function MessageDisplay() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <div className="flex min-h-screen-minus-header">
+    <div className="grid h-full min-h-screen-minus-header grid-cols-1 max-lg:border-x md:grid-cols-8">
       <MessagesSidebar
         selectedConversation={selectedConversation}
         setSelected={selectConversation}
       />
-      <div className="flex-1">
-        <MessagesContent
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-        />
-      </div>
+      <MessagesContent
+        selectedConversation={selectedConversation}
+        setSelected={selectConversation}
+      />
     </div>
   );
 }
 
 export default function MessagePage() {
   const { data: session } = useSession({ required: true });
+  const userId = session?.user.id;
+
+  const { data: totalUnreadMessages } =
+    api.messages.showUnreadMessages.useQuery({
+      userId: userId ?? "default-user-id",
+    });
 
   return (
     <>
       <Head>
-        <title>Messages | Tramona</title>
+        <title>
+          {totalUnreadMessages && totalUnreadMessages > 0
+            ? `(${totalUnreadMessages})`
+            : null}{" "}
+          Messages | Tramona
+        </title>
       </Head>
       <DashboardLayout type={session?.user.role ?? "guest"}>
         <MessageDisplay />

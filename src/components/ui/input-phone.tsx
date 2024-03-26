@@ -37,7 +37,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
       return (
         <RPNInput.default
           ref={ref}
-          className={cn("flex", className)}
+          className={cn("flex [&_:has(.rounded-l-none)]:flex-1", className)} // dont ask questions
           flagComponent={FlagComponent}
           countrySelectComponent={CountrySelect}
           inputComponent={InputComponent}
@@ -60,12 +60,7 @@ PhoneInput.displayName = "PhoneInput";
 
 const InputComponent = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, ...props }, ref) => (
-    <Input
-      placeholder="Enter a phone number"
-      className={cn("w-[300px]", className)}
-      {...props}
-      ref={ref}
-    />
+    <Input className={cn("rounded-l-none", className)} {...props} ref={ref} />
   ),
 );
 InputComponent.displayName = "InputComponent";
@@ -87,6 +82,7 @@ const CountrySelect = ({
 }: CountrySelectProps) => {
   const handleSelect = React.useCallback(
     (country: RPNInput.Country) => {
+      console.log(country);
       onChange(country);
     },
     [onChange],
@@ -97,8 +93,8 @@ const CountrySelect = ({
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant={"ghost"}
-          className={cn("flex gap-1  pl-3 pr-1")}
+          variant="ghost"
+          className="flex gap-1 rounded-r-none border border-r-0 border-input bg-primary-foreground pl-3 pr-1"
           disabled={disabled}
         >
           <FlagComponent country={value} countryName={value} />
@@ -110,7 +106,7 @@ const CountrySelect = ({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
+      <PopoverContent className="w-80 p-0">
         <Command>
           <CommandList>
             <CommandInput placeholder="Search country..." />

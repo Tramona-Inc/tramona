@@ -42,7 +42,7 @@ export default function UpcomingCard(props: UpcomingCardProps) {
   return (
     <div className="border-2xl flex flex-col-reverse rounded-lg border shadow-xl md:flex-row">
       <div className="flex flex-col gap-2 p-8 font-bold md:w-1/2">
-        <p className="text-lg">Tropical getaway in Mexico</p>
+        <p className="text-lg">{props.name}</p>
         <div className="flex flex-row items-center gap-2">
           <UserAvatar
             name={props.hostName}
@@ -116,7 +116,7 @@ export default function UpcomingCard(props: UpcomingCardProps) {
       </div>
 
       <Link
-        href={`/listings/${props.offerId}`}
+        href={`/offers/${props.offerId}`}
         className="relative w-full max-md:h-[300px] md:w-1/2"
       >
         <Image

@@ -1,4 +1,3 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,16 +13,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { optional, zodInteger, zodString } from "@/utils/zod-utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FilterIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
+import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
+import { optional, zodInteger, zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FilterIcon } from "lucide-react";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import DateRangePicker from "../_common/DateRangePicker";
 import {
   Select,
@@ -33,31 +33,31 @@ import {
   SelectValue,
 } from "../ui/select";
 
-import {
-  NestedDrawer,
-  DrawerContent,
-  DrawerTrigger,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "../ui/drawer";
-import { DialogClose } from "../ui/dialog";
+import { Input } from "@/components/ui/input";
+import { formatPhoneNumber } from "@/utils/formatters";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import PlacesInput from "../_common/PlacesInput";
+import OTPDialog from "../profile/OTPDialog";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Input } from "@/components/ui/input";
-import { toast } from "../ui/use-toast";
-import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
-import OTPDialog from "../otp-dialog/OTPDialog";
-import { formatPhoneNumber } from "@/utils/formatters";
-import PlacesInput from "../_common/PlacesInput";
+import {
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  NestedDrawer,
+} from "../ui/drawer";
 import ErrorMsg from "../ui/ErrorMsg";
+import { toast } from "../ui/use-toast";
 
 const formSchema = z
   .object({
@@ -85,7 +85,7 @@ export default function NewRequestForm({
 }: {
   afterSubmit?: () => void;
 }) {
-  const { status, data, update } = useSession();
+  const { status } = useSession();
 
   const isDesktop = useIsDesktop();
 

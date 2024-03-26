@@ -51,7 +51,7 @@ const formSchema = z.object({
   propertyName: zodString(),
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
-  address: optional(zodString({ maxLen: 1000 })),
+  address: zodString({ maxLen: 1000 }),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
@@ -69,7 +69,7 @@ const formSchema = z.object({
   airbnbMessageUrl: optional(zodUrl()),
   checkInInfo: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
-  mapScreenshot: zodString(),
+  // mapScreenshot: optional(zodString()),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -148,6 +148,7 @@ export default function AdminOfferForm({
   const createOffersMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
   const getOwnerMutation = api.groups.getGroupOwner.useMutation();
 
   const utils = api.useUtils();
@@ -234,10 +235,17 @@ export default function AdminOfferForm({
     const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
 
     if (traveler?.phoneNumber) {
-      await twilioMutation.mutateAsync({
-        to: traveler.phoneNumber, // TODO: text the traveller, not the admin
-        msg: "You have a new offer for a request in your Tramona account!",
-      });
+      if (traveler.isWhatsApp) {
+        await twilioWhatsAppMutation.mutateAsync({
+          templateId: "HXfeb90955f0801d551e95a6170a5cc015",
+          to: traveler.phoneNumber
+        })
+      } else {
+        await twilioMutation.mutateAsync({
+          to: traveler.phoneNumber,
+          msg: "You have a new offer for a request in your Tramona account!",
+        });
+      }
     }
 
     successfulAdminOfferToast({
@@ -564,7 +572,7 @@ export default function AdminOfferForm({
           name="address"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Address (optional)</FormLabel>
+              <FormLabel>Address</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
               </FormControl>
@@ -587,12 +595,12 @@ export default function AdminOfferForm({
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="mapScreenshot"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Screenshot of Map</FormLabel>
+              <FormLabel>Screenshot of Map (optional)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -608,7 +616,7 @@ export default function AdminOfferForm({
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <FormField
           control={form.control}

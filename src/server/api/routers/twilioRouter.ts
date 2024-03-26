@@ -82,10 +82,11 @@ export const twilioRouter = createTRPCRouter({
       url: z.string().optional(),
       checkIn: z.date().optional(),
       checkOut: z.date().optional(),
+      numRequests: z.number().optional(),
     }),
   )
   .mutation(async ({ input }) => {
-    const { templateId, to, propertyName, propertyAddress, url, checkIn, checkOut } = input;
+    const { templateId, to, propertyName, propertyAddress, url, checkIn, checkOut, numRequests } = input;
     let contentVariables: Record<number, string | undefined> = {};
 
     // Set content variables based on template ID
@@ -99,6 +100,14 @@ export const twilioRouter = createTRPCRouter({
 
       if (templateId === 'HXd5256ff10d6debdf70a13d70504d39d5') {
         contentVariables[5] = url;
+      }
+    } else if (templateId === "HX82b075be3d74f02e45957a453fd48cef") {
+      if (numRequests) {
+        contentVariables = {
+          1: numRequests > 1 ? `${numRequests} unconfrimed requests` : `${numRequests} unconfirmed request`,
+          2: numRequests > 1 ? `${numRequests} requests` : `${numRequests} request`,
+          3: url,
+        }
       }
     }
 
