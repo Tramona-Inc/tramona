@@ -148,7 +148,7 @@ dependencies:
     version: 2.4.1(react-dom@18.2.0)(react@18.2.0)
   aws-sdk:
     specifier: ^2.1569.0
-    version: 2.1584.0
+    version: 2.1585.0
   axios:
     specifier: ^1.6.7
     version: 1.6.8
@@ -229,7 +229,7 @@ dependencies:
     version: 3.4.4
   puppeteer:
     specifier: ^22.4.1
-    version: 22.6.0(typescript@5.4.3)
+    version: 22.6.1(typescript@5.4.3)
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -9677,8 +9677,8 @@ packages:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  /aws-sdk@2.1584.0:
-    resolution: {integrity: sha512-57Qizb+bLOhrBLWQSWw6WXTtbO/lFKzLouHxTfm/QeXm38gs0Q0knFxhdH+sWc/DPPJYSRGy7MNiuQcmsq5zxA==}
+  /aws-sdk@2.1585.0:
+    resolution: {integrity: sha512-zDJ76hivdnBLH2+hXTO0F5y3Sdx5RRSDCf4EqZILZCUkPLTwaVmKmaU6XO3pyhrMTcWk58m7UBgHFyARE5SCkQ==}
     engines: {node: '>= 10.0.0'}
     requiresBuild: true
     dependencies:
@@ -10349,8 +10349,8 @@ packages:
     resolution: {integrity: sha512-p3KULyQg4S7NIHixdwbGX+nFHkoBiA4YQmyWtjb8XngSKV124nJmRysgAeujbUVb15vh+RvFUfCPqU7rXk+hZg==}
     engines: {node: '>=6.0'}
 
-  /chromium-bidi@0.5.13(devtools-protocol@0.0.1262051):
-    resolution: {integrity: sha512-OHbYCetDxdW/xmlrafgOiLsIrw4Sp1BEeolbZ1UGJO5v/nekQOJBj/Kzyw6sqKcAVabUTo0GS3cTYgr6zIf00g==}
+  /chromium-bidi@0.5.14(devtools-protocol@0.0.1262051):
+    resolution: {integrity: sha512-zm4mX61/U4KXs+S/0WIBHpOWqtpW6FPv1i7n4UZqDDc5LOQ9/Y1MAnB95nO7i/lFFuijLjpe1XMdNcqDqwlH5w==}
     peerDependencies:
       devtools-protocol: '*'
     dependencies:
@@ -11820,8 +11820,8 @@ packages:
   /es-module-lexer@1.4.1:
     resolution: {integrity: sha512-cXLGjP0c4T3flZJKQSuziYoq7MlT+rnvfZjfp7h+I7K9BNX54kP9nyWvdbwjQ4u1iWbOL4u96fgeZLToQlZC7w==}
 
-  /es-module-lexer@1.4.2:
-    resolution: {integrity: sha512-7nOqkomXZEaxUDJw21XZNtRk739QvrPSoZoRtbsEfcii00vdzZUh6zh1CQwHhrib8MdEtJfv5rJiGeb4KuV/vw==}
+  /es-module-lexer@1.5.0:
+    resolution: {integrity: sha512-pqrTKmwEIgafsYZAGw9kszYzmagcE/n4dbgwGWLEXg7J4QFJVQRBld8j3Q3GNez79jzxZshq0bcT962QHOghjw==}
 
   /es-object-atoms@1.0.0:
     resolution: {integrity: sha512-MZ4iQ6JwHOBQjahnjwaC1ZtIBH+2ohjamzAO3oaHcXYup7qxjF2fixyH+Q71voWHeOkI2q/TnJao/KfXYIZWbw==}
@@ -16088,12 +16088,12 @@ packages:
       - utf-8-validate
     dev: true
 
-  /puppeteer-core@22.6.0:
-    resolution: {integrity: sha512-xclyGFhxHfZ9l62uXFm+JpgtJHLIZ1qHc7iR4eaIqBNKA5Dg2sDr8yvylfCx5bMN89QWIaxpV6IHsy0qUynK/g==}
+  /puppeteer-core@22.6.1:
+    resolution: {integrity: sha512-rShSd0xtyDSEJYys5nnzQnnwtrafQWg/lWCppyjZIIbYadWP8B1u0XJD/Oe+Xgw8v1hLHX0loNoA0ItRmNLnBg==}
     engines: {node: '>=18'}
     dependencies:
       '@puppeteer/browsers': 2.2.0
-      chromium-bidi: 0.5.13(devtools-protocol@0.0.1262051)
+      chromium-bidi: 0.5.14(devtools-protocol@0.0.1262051)
       debug: 4.3.4
       devtools-protocol: 0.0.1262051
       ws: 8.16.0
@@ -16103,8 +16103,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /puppeteer@22.6.0(typescript@5.4.3):
-    resolution: {integrity: sha512-TYeza4rl1YXfxqUVw/0hWUWYX5cicnf6qu5kkDV+t7QrESCjMoSNnva4ZA/MRGQ03HnB9BOFw9nxs/SKek5KDA==}
+  /puppeteer@22.6.1(typescript@5.4.3):
+    resolution: {integrity: sha512-736QHNKtPD4tPeFbIn73E4l0CWsLzvRFlm0JsLG/VsyM8Eh0FRFNmMp+M3+GSMwdmYxqOVpTgzB6VQDxWxu8xQ==}
     engines: {node: '>=18'}
     hasBin: true
     requiresBuild: true
@@ -16112,7 +16112,7 @@ packages:
       '@puppeteer/browsers': 2.2.0
       cosmiconfig: 9.0.0(typescript@5.4.3)
       devtools-protocol: 0.0.1262051
-      puppeteer-core: 22.6.0
+      puppeteer-core: 22.6.1
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -18598,7 +18598,7 @@ packages:
       browserslist: 4.23.0
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.16.0
-      es-module-lexer: 1.4.2
+      es-module-lexer: 1.5.0
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
