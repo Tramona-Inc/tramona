@@ -12,7 +12,7 @@ const HelpEndThis = () => {
           The number of empty units on Airbnb per night
         </p>
         <Link href="/auth/signup">
-          <button className="rounded-full bg-white px-6 py-2 font-semibold">
+          <button className="rounded-full bg-white px-6 py-2 font-semibold hover:bg-[#e5e5e5]">
             Help us end this
           </button>
         </Link>
