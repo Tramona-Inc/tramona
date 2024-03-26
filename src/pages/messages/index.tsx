@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { api } from "@/utils/api";
 
 function MessageDisplay() {
   const [isViewed, setIsViewd] = useState(false);
@@ -44,7 +45,7 @@ function MessageDisplay() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <div className="min-h-screen-minus-header flex">
+    <div className="flex min-h-screen-minus-header">
       <MessagesSidebar
         selectedConversation={selectedConversation}
         setSelected={selectConversation}
@@ -61,11 +62,22 @@ function MessageDisplay() {
 
 export default function MessagePage() {
   const { data: session } = useSession({ required: true });
+  const userId = session?.user.id;
+
+  const { data: totalUnreadMessages } =
+    api.messages.showUnreadMessages.useQuery({
+      userId: userId ?? "default-user-id",
+    });
 
   return (
     <>
       <Head>
-        <title>Messages | Tramona</title>
+        <title>
+          {totalUnreadMessages && totalUnreadMessages > 0
+            ? `(${totalUnreadMessages})`
+            : null}{" "}
+          Messages | Tramona
+        </title>
       </Head>
       <DashboardLayout type={session?.user.role ?? "guest"}>
         <MessageDisplay />

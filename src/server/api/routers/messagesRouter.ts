@@ -226,14 +226,14 @@ export const messagesRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       await addTwoUserToConversation(input.user1Id, input.user2Id);
     }),
-  
+
   showUnreadMessages: protectedProcedure
-    .input(
-      z.object({ userId: zodString() }))
-    .query(async ({ctx, input}) => {
+    .input(z.object({ userId: zodString() }))
+    .query(async ({ ctx, input }) => {
       const userMessages = await ctx.db.query.messages.findMany({
-        where: and(eq(messages.userId, input.userId), eq(messages.read, false))
-      })
-      return userMessages
-    })
+        where: and(eq(messages.userId, input.userId), eq(messages.read, false)),
+      });
+
+      return userMessages.length;
+    }),
 });

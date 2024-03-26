@@ -87,9 +87,10 @@ export default function Sidebar({
   const { data: session } = useSession();
   const userId = session?.user.id;
 
-  const response = api.messages.showUnreadMessages.useQuery({
-    userId: userId!,
-  });
+  const { data: totalUnreadMessages } =
+    api.messages.showUnreadMessages.useQuery({
+      userId: userId ?? "add-default-user-id",
+    });
 
   const notifyMe = useCallback(async () => {
     if (!("Notification" in window)) {
@@ -103,8 +104,10 @@ export default function Sidebar({
       const title = "Tramona Messages";
       const icon =
         "https://img.apmcdn.org/d7e015791079e6474a04b6cff4825a9c9e3a7a36/square/50a6ba-20231003-panda-diplomacy1-webp2000.webp";
-      const body = `You have ${response.data?.length} unread message${response.data?.length ?? 0 > 1 ? "s" : ""}.`;
+      const body = `You have ${totalUnreadMessages} unread message${totalUnreadMessages && totalUnreadMessages > 1 ? "s" : ""}.`;
       const notification = new Notification(title, { body, icon });
+      const notificationSound = new Audio("/assets/sounds/sound.mp3");
+      void notificationSound.play();
       console.log("userId:", userId);
       console.log("notification", notification);
     } else if (Notification.permission !== "denied") {
@@ -118,11 +121,16 @@ export default function Sidebar({
         }
       });
     }
-  }, [response]);
+  }, [totalUnreadMessages, userId]);
 
   useEffect(() => {
-    response.data?.length && notifyMe;
-  }, [response.data?.length, notifyMe]);
+    totalUnreadMessages && notifyMe;
+  }, [totalUnreadMessages, notifyMe]);
+
+  const play = () => {
+    const notificationSound = new Audio("/assets/sounds/sound.mp3");
+    void notificationSound.play();
+  };
 
   return (
     <div className="sticky top-0 flex h-full w-64 flex-col border-r">
@@ -132,14 +140,26 @@ export default function Sidebar({
         </div>
       )}
       <div className="flex flex-1 flex-col justify-center">
-        {navLinks.map((link, index) => (
-          <SidebarLink key={index} href={link.href} icon={link.icon}>
-            {link.name}
-          </SidebarLink>
-        ))}
+        {navLinks.map((link, index) =>
+          link.name === "Messages" ? (
+            <SidebarLink key={index} href={link.href} icon={link.icon}>
+              {link.name}{" "}
+              {totalUnreadMessages && totalUnreadMessages > 0 ? (
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border bg-red-600 text-white">
+                  {totalUnreadMessages}
+                </div>
+              ) : null}
+            </SidebarLink>
+          ) : (
+            <SidebarLink key={index} href={link.href} icon={link.icon}>
+              {link.name}
+            </SidebarLink>
+          ),
+        )}
       </div>
       <button onClick={notifyMe}>NOTIFICATION</button>
-      <p>{`You have ${response.data?.length ?? ""} unread message(s).`}</p>
+      <button onClick={play}>Sound</button>
+      <p>{`You have ${totalUnreadMessages ?? 0} unread message(s).`}</p>
     </div>
   );
 }
