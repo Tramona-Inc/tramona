@@ -72,7 +72,9 @@ export default function OfferPage({
     originalTotal - offer.totalPrice,
   );
 
-  const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
+  // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
+
+  const tax = 0;
 
   return (
     <div className="space-y-4">
