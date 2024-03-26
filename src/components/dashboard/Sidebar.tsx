@@ -1,6 +1,8 @@
 import NavLink from "../_utils/NavLink";
 
+import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
+import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
   BriefcaseIcon,
@@ -12,11 +14,9 @@ import {
   TagIcon,
   WrenchIcon,
 } from "lucide-react";
-import { TramonaLogo } from "../_common/Header/TramonaLogo";
-import { api } from "@/utils/api";
-import { useCallback, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
+import { useCallback, useEffect } from "react";
+import { TramonaLogo } from "../_common/Header/TramonaLogo";
 
 function SidebarLink({
   href,
@@ -180,9 +180,9 @@ export default function Sidebar({
           ),
         )}
       </div>
-      <button onClick={notifyMe}>NOTIFICATION</button>
+      {/* <button onClick={notifyMe}>NOTIFICATION</button>
       <button onClick={play}>Sound</button>
-      <p>{`You have ${totalUnreadMessages ?? 0} unread message(s).`}</p>
+      <p>{`You have ${totalUnreadMessages ?? 0} unread message(s).`}</p> */}
     </div>
   );
 }
