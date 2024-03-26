@@ -227,7 +227,6 @@ export const messagesRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       await addTwoUserToConversation(input.user1Id, input.user2Id);
     }),
-<<<<<<< HEAD
 
   showUnreadMessages: protectedProcedure
     .input(z.object({ userId: zodString() }))
@@ -237,7 +236,6 @@ export const messagesRouter = createTRPCRouter({
       });
 
       return userMessages.length;
-=======
   setMessagesToRead: protectedProcedure
     .input(
       z.object({
@@ -249,6 +247,5 @@ export const messagesRouter = createTRPCRouter({
         .update(messages)
         .set({ read: true })
         .where(inArray(messages.id, input.unreadMessageIds));
->>>>>>> dev
     }),
 });

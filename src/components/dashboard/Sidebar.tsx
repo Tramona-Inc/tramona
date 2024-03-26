@@ -91,9 +91,8 @@ export default function Sidebar({
   type: "admin" | "guest" | "host";
   withLogo?: boolean;
 }) {
-
   //using session to check user's role if the role is == admin "Switch to Admin link will appear"
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const isAdmin = session && session.user.role === "admin";
 
@@ -101,12 +100,14 @@ export default function Sidebar({
     type === "admin"
       ? adminNavLinks
       : type === "host"
-      ? hostNavLinks
-      : isAdmin
-      ? [...guestNavLinks, { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight }]
-      : guestNavLinks;
+        ? hostNavLinks
+        : isAdmin
+          ? [
+              ...guestNavLinks,
+              { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
+            ]
+          : guestNavLinks;
 
-  const { data: session } = useSession();
   const userId = session?.user.id;
 
   const { data: totalUnreadMessages } =
