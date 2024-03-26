@@ -3,7 +3,7 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
 import { zodString, zodNumber } from "@/utils/zod-utils";
-import { eq, and, ne, inArray } from "drizzle-orm";
+import { ne, and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
@@ -248,6 +248,15 @@ export const messagesRouter = createTRPCRouter({
         );
       return participants;
     }),
+
+  showUnreadMessages: protectedProcedure
+    .input(z.object({ userId: zodString() }))
+    .query(async ({ ctx, input }) => {
+      const userMessages = await ctx.db.query.messages.findMany({
+        where: and(eq(messages.userId, input.userId), eq(messages.read, false)),
+      });
+
+      return userMessages.length;}),
   setMessagesToRead: protectedProcedure
     .input(
       z.object({
