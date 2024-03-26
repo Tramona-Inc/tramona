@@ -116,8 +116,7 @@ export default function Sidebar({
     });
 
   const notifyMe = useCallback(async () => {
-    if (!("Notification" in window)) {
-      // Check if the browser supports notifications
+    if (!("Notification" in window)) {      // Check if the browser supports notifications
       alert("This browser does not support desktop notification");
       // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
     } else if (Notification.permission === "granted") {
