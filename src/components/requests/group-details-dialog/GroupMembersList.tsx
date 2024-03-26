@@ -25,6 +25,44 @@ export default function GroupMembersList({
     const isYou = userId === member.id;
     const isOwner = member.isGroupOwner;
 
+    const leaveGroupBtn = (
+      <LeaveGroupDialog groupId={groupId} userIsOwner={userIsOwner}>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="rounded-full"
+          tooltip="Leave group"
+        >
+          <LogOutIcon className="size-4" />
+        </Button>
+      </LeaveGroupDialog>
+    );
+    const removeFromGroupBtn = (
+      <RemoveFromGroupDialog
+        groupId={groupId}
+        memberId={member.id}
+        memberName={member.name}
+      >
+        <Button
+          size="icon"
+          variant="ghost"
+          className="rounded-full"
+          tooltip="Remove from group"
+        >
+          <LogOutIcon className="size-4" />
+        </Button>
+      </RemoveFromGroupDialog>
+    );
+
+    const groupMemberAction =
+      isAdminDashboard || isSingleUser
+        ? null
+        : isYou
+          ? leaveGroupBtn
+          : userIsOwner
+            ? removeFromGroupBtn
+            : null;
+
     return (
       <GroupMember
         key={member.id}
@@ -34,33 +72,7 @@ export default function GroupMembersList({
         isAdminDashboard={isAdminDashboard}
         isSingleUser={isSingleUser}
       >
-        {isAdminDashboard || isSingleUser ? null : isYou ? (
-          <LeaveGroupDialog groupId={groupId} userIsOwner={userIsOwner}>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="rounded-full"
-              tooltip="Leave group"
-            >
-              <LogOutIcon className="size-4" />
-            </Button>
-          </LeaveGroupDialog>
-        ) : userIsOwner ? (
-          <RemoveFromGroupDialog
-            groupId={groupId}
-            memberId={member.id}
-            memberName={member.name}
-          >
-            <Button
-              size="icon"
-              variant="ghost"
-              className="rounded-full"
-              tooltip="Remove from group"
-            >
-              <LogOutIcon className="size-4" />
-            </Button>
-          </RemoveFromGroupDialog>
-        ) : null}
+        {groupMemberAction}
       </GroupMember>
     );
   });
