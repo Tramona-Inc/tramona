@@ -9,8 +9,18 @@ import {
 } from "@/utils/utils";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import Image from "next/image";
+import { Icons } from "../_icons/icons";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter } from "../ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import RequestGroupAvatars from "./RequestCardGroupAvatars";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
@@ -46,13 +56,14 @@ export default function RequestCard({
     <Card key={request.id}>
       <CardContent className="space-y-2">
         <RequestCardBadge request={request} />
-        <div className="absolute right-4 top-2">
+        <div className="absolute right-4 top-2 flex flex-row items-center gap-2">
           {showAvatars && (
             <RequestGroupAvatars
               request={request}
               isAdminDashboard={isAdminDashboard}
             />
           )}
+          <ActionDialog />
         </div>
         <div className="flex items-start gap-1">
           <MapPinIcon className="shrink-0 text-zinc-300" />
@@ -87,6 +98,28 @@ export default function RequestCard({
       </CardContent>
       <CardFooter>{children}</CardFooter>
     </Card>
+  );
+}
+
+function ActionDialog() {
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <Button variant={"ghost"}>
+            <Icons.ellipsis />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem>Billing</DropdownMenuItem>
+          <DropdownMenuItem>Team</DropdownMenuItem>
+          <DropdownMenuItem>Subscription</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }
 

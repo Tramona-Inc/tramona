@@ -10,6 +10,7 @@ import {
   ChevronRightCircle,
   ChevronsUpDownIcon,
   Clipboard,
+  EllipsisVertical,
   EyeOff,
   FileSliders,
   Github,
@@ -38,6 +39,7 @@ export type Icon = LucideIcon;
 // type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
+  ellipsis: EllipsisVertical,
   close: X,
   spinner: Loader2,
   dotHorizontal: MoreHorizontal,
