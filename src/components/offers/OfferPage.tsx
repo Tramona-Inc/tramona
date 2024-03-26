@@ -48,7 +48,6 @@ const Circle = dynamic(
     ssr: false,
   },
 );
-// import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -101,11 +100,6 @@ export default function OfferPage({
   // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
   const tax = 0;
-
-  const containerStyle = {
-    width: "400px",
-    height: "400px",
-  };
 
   const renderSeeMoreButton = property.imageUrls.length > 5;
 

@@ -160,10 +160,10 @@ export const offersRouter = createTRPCRouter({
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.location)}&key=${env.GOOGLE_MAPS_KEY}`,
       );
-      console.log('hi', response.data.results[0].geometry.location);
 
       const result = {
-        coordinates: response.data.results[0].geometry.location,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        coordinates: response.data.results[0].geometry.location as { lat: number, lng: number },
       }
       return result;
     }),
