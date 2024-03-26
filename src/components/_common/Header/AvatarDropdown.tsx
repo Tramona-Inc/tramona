@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils/utils";
 import {
-  ExternalLinkIcon,
   LayoutDashboardIcon,
   LogOutIcon,
   UserCheck2Icon,
@@ -133,9 +132,9 @@ export default function AvatarDropdown({ session }: { session: Session }) {
         <DropdownLink href="/profile" Icon={UserCogIcon}>
           Profile Settings
         </DropdownLink>
-        <DropdownLink newTab href="/" Icon={ExternalLinkIcon}>
+        {/* <DropdownLink newTab href="/" Icon={ExternalLinkIcon}>
           Tramona Homepage
-        </DropdownLink>
+        </DropdownLink> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: `${window.location.origin}` })}
