@@ -21,6 +21,9 @@ import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import axios from "axios";
+import { z } from "zod";
+import { useJsApiLoader } from "@react-google-maps/api";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -149,6 +152,20 @@ export const offersRouter = createTRPCRouter({
           },
         },
       });
+    }),
+
+  getCoordinates: protectedProcedure
+    .input(z.object({ location: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.location)}&key=${env.GOOGLE_MAPS_KEY}`,
+      );
+      console.log('hi', response.data.results[0].geometry.location);
+
+      const result = {
+        coordinates: response.data.results[0].geometry.location,
+      }
+      return result;
     }),
 
   getByIdWithDetails: protectedProcedure
@@ -356,12 +373,21 @@ export const offersRouter = createTRPCRouter({
         with: {
           property: { columns: { hostId: true, name: true } },
           request: {
-            columns: { checkIn: true, checkOut: true, id: true, location: true },
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              id: true,
+              location: true,
+            },
             with: {
               madeByGroup: {
                 with: {
                   members: {
-                    with: { user: { columns: { phoneNumber: true, isWhatsApp: true } } },
+                    with: {
+                      user: {
+                        columns: { phoneNumber: true, isWhatsApp: true },
+                      },
+                    },
                   },
                 },
               },
@@ -414,24 +440,24 @@ export const offersRouter = createTRPCRouter({
 
       if (groupOwner.user.phoneNumber) {
         if (!groupOwner.user.isWhatsApp) {
-          groupOwnerHasOtherOffers ?
-          void sendWhatsApp({
-            templateId: 'HXd5256ff10d6debdf70a13d70504d39d5',
-            to: groupOwner.user.phoneNumber,
-            propertyName: property.name,
-            propertyAddress: request.location,  //??can this be null
-            checkIn: request.checkIn,
-            checkOut: request.checkOut,
-            url: url,
-          }) :
-          void sendWhatsApp({
-            templateId: 'HXb293923af34665e7eefc81be0579e5db',
-            to: groupOwner.user.phoneNumber,
-            propertyName: property.name,
-            propertyAddress: request.location,
-            checkIn: request.checkIn,
-            checkOut: request.checkOut,
-          })
+          groupOwnerHasOtherOffers
+            ? void sendWhatsApp({
+                templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
+                to: groupOwner.user.phoneNumber,
+                propertyName: property.name,
+                propertyAddress: request.location, //??can this be null
+                checkIn: request.checkIn,
+                checkOut: request.checkOut,
+                url: url,
+              })
+            : void sendWhatsApp({
+                templateId: "HXb293923af34665e7eefc81be0579e5db",
+                to: groupOwner.user.phoneNumber,
+                propertyName: property.name,
+                propertyAddress: request.location,
+                checkIn: request.checkIn,
+                checkOut: request.checkOut,
+              });
         } else {
           void sendText({
             to: groupOwner.user.phoneNumber,

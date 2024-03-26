@@ -2,6 +2,7 @@ import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+//import { GoogleMap, Circle } from "@react-google-maps/api";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,27 @@ import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
+import "leaflet/dist/leaflet.css";
+import dynamic from "next/dynamic";
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((module) => module.MapContainer),
+  {
+    ssr: false, // Disable server-side rendering for this component
+  },
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((module) => module.TileLayer),
+  {
+    ssr: false,
+  },
+);
+const Circle = dynamic(
+  () => import("react-leaflet").then((module) => module.Circle),
+  {
+    ssr: false,
+  },
+);
+// import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -45,6 +67,10 @@ export default function OfferPage({
   if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
     isBooked = true;
   }
+
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: property.address!,
+  });
 
   const isAirbnb =
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
@@ -74,6 +100,13 @@ export default function OfferPage({
 
   const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
+  const containerStyle = {
+    width: "400px",
+    height: "400px",
+  };
+
+  const renderSeeMoreButton = property.imageUrls.length > 5;
+
   return (
     <div className="space-y-4">
       <Link
@@ -82,29 +115,56 @@ export default function OfferPage({
       >
         &larr; Back to all offers
       </Link>
-      <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
-        <div className="relative col-span-2 row-span-2 bg-accent">
-          <Image
-            src={property.imageUrls[0]!}
-            alt=""
-            fill
-            objectFit="cover"
-            priority
-          />
+      <div className="relative">
+        <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
+          {/* Render the first 5 images */}
+          {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
+            <div
+              key={index}
+              className={`relative col-span-1 row-span-1 bg-accent ${index === 0 ? "col-span-2 row-span-2" : ""}`}
+            >
+              <Image src={imageUrl} alt="" fill objectFit="cover" />
+            </div>
+          ))}
         </div>
-        <div className="relative col-span-1 row-span-1 bg-accent">
-          <Image src={property.imageUrls[1]!} alt="" fill objectFit="cover" />
-        </div>
-        <div className="relative col-span-1 row-span-1 bg-accent">
-          <Image src={property.imageUrls[2]!} alt="" fill objectFit="cover" />
-        </div>
-        <div className="relative col-span-1 row-span-1 bg-accent">
-          <Image src={property.imageUrls[3]!} alt="" fill objectFit="cover" />
-        </div>
-        <div className="relative col-span-1 row-span-1 bg-accent">
-          <Image src={property.imageUrls[4]!} alt="" fill objectFit="cover" />
-        </div>
+        {/* If there are more than 5 images, render the "See more photos" button */}
+        {renderSeeMoreButton && (
+          <div className="absolute bottom-2 right-2">
+            <Dialog>
+              <DialogTrigger className="rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
+                See more photos
+              </DialogTrigger>
+
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>More Photos</DialogTitle>
+                </DialogHeader>
+                <div className="grid-rows-auto grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
+                  {property.imageUrls.map((imageUrl, index) => (
+                    <div
+                      key={index}
+                      className={`relative bg-accent ${
+                        index === 0 || index === 3
+                          ? "col-span-2 row-span-2"
+                          : "col-span-1 row-span-1"
+                      }`}
+                    >
+                      <Image
+                        src={imageUrl}
+                        alt=""
+                        fill
+                        objectFit="cover"
+                        className="h-full w-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
       </div>
+
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
           <h1 className="items-center text-lg font-semibold sm:text-3xl">
@@ -187,7 +247,52 @@ export default function OfferPage({
               </div>
             </div>
           </section>
-          {(property.mapScreenshot !== null ||
+          <section className="space-y-1">
+            {/* {coordinateData && (
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={coordinateData.coordinates}
+                zoom={13}
+              >
+                <Circle
+                  center={coordinateData.coordinates}
+                  radius={500} // Radius is in meters, so 5 meters radius equals 10 meters diameter
+                  options={{
+                    strokeColor: "#FF0000",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#FF0000",
+                    fillOpacity: 0.15,
+                  }}
+                />
+              </GoogleMap>
+            )} */}
+
+            {coordinateData && (
+              <MapContainer
+                center={[coordinateData.coordinates.lat, coordinateData.coordinates.lng]}
+                zoom={15}
+                scrollWheelZoom={false}
+                style={{ height: "400px" }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Circle
+                  center={[coordinateData.coordinates.lat, coordinateData.coordinates.lng]}
+                  radius={200} // Adjust radius as needed
+                  pathOptions={{ color: "red" }} // Customize circle color and other options
+                />
+                {/* <Marker position={[51.505, -0.09]}>
+                <Popup>
+                  A pretty CSS3 popup. <br /> Easily customizable.
+                </Popup>
+              </Marker> */}
+              </MapContainer>
+            )}
+
+            {/* {(property.mapScreenshot !== null ||
             property.areaDescription !== null) && (
             <section className="space-y-1">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -205,9 +310,9 @@ export default function OfferPage({
                 <p className="px-4 py-2 text-zinc-700">
                   {property.areaDescription}
                 </p>
-              </div>
-            </section>
-          )}
+              </div> */}
+          </section>
+          {/* )} */}
         </div>
         <div className="flex-1">
           <div className="rounded-t-lg bg-black py-2 text-center font-bold text-white">
