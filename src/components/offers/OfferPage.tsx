@@ -22,6 +22,7 @@ import {
   getTramonaFeeTotal,
   plural,
 } from "@/utils/utils";
+import { AspectRatio } from "../ui/aspect-ratio";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { CheckIcon, XIcon } from "lucide-react";
 import Image from "next/image";
