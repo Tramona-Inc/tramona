@@ -18,25 +18,25 @@ export default function GroupMembersList({
     userId === request.groupMembers.find((member) => member.isGroupOwner)!.id;
 
   const groupId = request.madeByGroupId;
-
   const isSingleUser = request.groupMembers.length === 1;
+
+  const leaveGroupBtn = (
+    <LeaveGroupDialog groupId={groupId} userIsOwner={userIsOwner}>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="rounded-full"
+        tooltip="Leave group"
+      >
+        <LogOutIcon className="size-4" />
+      </Button>
+    </LeaveGroupDialog>
+  );
 
   return request.groupMembers.map((member) => {
     const isYou = userId === member.id;
     const isOwner = member.isGroupOwner;
 
-    const leaveGroupBtn = (
-      <LeaveGroupDialog groupId={groupId} userIsOwner={userIsOwner}>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="rounded-full"
-          tooltip="Leave group"
-        >
-          <LogOutIcon className="size-4" />
-        </Button>
-      </LeaveGroupDialog>
-    );
     const removeFromGroupBtn = (
       <RemoveFromGroupDialog
         groupId={groupId}
@@ -58,7 +58,9 @@ export default function GroupMembersList({
       isAdminDashboard || isSingleUser
         ? null
         : isYou
-          ? leaveGroupBtn
+          ? request.hasApproved
+            ? leaveGroupBtn
+            : null
           : userIsOwner
             ? removeFromGroupBtn
             : null;
