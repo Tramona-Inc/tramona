@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogClose,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -31,7 +33,7 @@ import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
-import OfferPhoto from "./OfferPhotos"
+import OfferPhotos from "./OfferPhotos";
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
   {
@@ -113,18 +115,30 @@ export default function OfferPage({
       >
         &larr; Back to all offers
       </Link>
-      <div className="relative">
-        <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
-          {/* Render the first 5 images */}
+      <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
+        <Dialog>
           {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
             <div
-              key={index}
               className={`relative col-span-1 row-span-1 bg-accent ${index === 0 ? "col-span-2 row-span-2" : ""}`}
             >
-              <Image src={imageUrl} alt="" fill objectFit="cover" />
+              <DialogTrigger key={index}>
+                <Image
+                  src={imageUrl}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                  className=""
+                />
+              </DialogTrigger>
             </div>
           ))}
-        </div>
+          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+            <div className="  screen-full flex justify-center">
+              <OfferPhotos propertyImages={property.imageUrls} />
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* If there are more than 5 images, render the "See more photos" button */}
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 right-2">
@@ -137,17 +151,20 @@ export default function OfferPage({
                 <DialogHeader>
                   <DialogTitle>More Photos</DialogTitle>
                 </DialogHeader>
-                <div className="grid grid-row-4 min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
+                <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
                   {property.imageUrls.map((imageUrl, index) => (
                     <div
                       key={index}
                       className={` bg-accent ${
                         index === 0 || index % 3 === 0
                           ? "col-span-2 row-span-2"
-                          : property.imageUrls.length -1 == index && index % 4===0 ? "col-span-2 row-span-2":"col-span-1 row-span-1" 
+                          : property.imageUrls.length - 1 == index &&
+                              index % 4 === 0
+                            ? "col-span-2 row-span-2"
+                            : "col-span-1 row-span-1"
                       }`}
                     >
-                      <AspectRatio ratio={3/2}>
+                      <AspectRatio ratio={3 / 2}>
                         <Image
                           src={imageUrl}
                           alt=""
