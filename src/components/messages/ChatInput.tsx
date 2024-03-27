@@ -101,7 +101,7 @@ export default function ChatInput({
             async ({ id, lastTextAt, phoneNumber, isWhatsApp }) => {
               if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1 })) {
                 if (phoneNumber) {
-                  if (!isWhatsApp) {
+                  if (isWhatsApp) {
                     await twilioWhatsAppMutation.mutateAsync({
                       templateId: "HXae95c5b28aa2f5448a5d63ee454ccb74",
                       to: phoneNumber,

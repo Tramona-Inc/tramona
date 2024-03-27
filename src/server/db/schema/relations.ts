@@ -9,7 +9,7 @@ import {
 } from "./tables/messages";
 import { offers } from "./tables/offers";
 import { properties } from "./tables/properties";
-import { requests } from "./tables/requests";
+import { requestGroups, requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
 
@@ -65,6 +65,10 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   madeByGroup: one(groups, {
     fields: [requests.madeByGroupId],
     references: [groups.id],
+  }),
+  requestGroup: one(requestGroups, {
+    fields: [requests.requestGroupId],
+    references: [requestGroups.id],
   }),
   offers: many(offers),
 }));

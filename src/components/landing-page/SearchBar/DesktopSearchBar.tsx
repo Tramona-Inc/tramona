@@ -153,7 +153,8 @@ export default function DesktopSearchBar({
           successfulRequestToast(newRequests[0]!);
         } else {
           toast({
-            title: `Successfully submitted ${newRequests.length} requests`,
+            title: `Successfully submitted ${newRequests.length} requests!`,
+            description: "Please check your phone for a confirmation text",
           });
         }
       } catch (e) {

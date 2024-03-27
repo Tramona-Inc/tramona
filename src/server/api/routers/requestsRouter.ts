@@ -7,6 +7,7 @@ import {
 import { db } from "@/server/db";
 import {
   MAX_REQUEST_GROUP_SIZE,
+  type RequestGroup,
   groupMembers,
   groups,
   requestGroups,
@@ -60,6 +61,7 @@ export const requestsRouter = createTRPCRouter({
             with: {
               requests: {
                 with: {
+                  requestGroup: true,
                   offers: {
                     with: {
                       property: {
@@ -136,21 +138,21 @@ export const requestsRouter = createTRPCRouter({
 
         // 4. group
         const groupedRequests: {
-          groupId: number;
+          group: RequestGroup;
           requests: typeof ungroupedRequests;
         }[] = [];
 
         for (const request of ungroupedRequests) {
           const group = groupedRequests.find(
-            ({ groupId }) => groupId === request.requestGroupId,
+            ({ group }) => group.id === request.requestGroupId,
           );
 
           if (group) {
             group.requests.push(request);
           } else {
             groupedRequests.push({
-              groupId: request.requestGroupId,
               requests: [request],
+              group: request.requestGroup,
             });
           }
         }
@@ -199,6 +201,7 @@ export const requestsRouter = createTRPCRouter({
             },
           },
           offers: { columns: { id: true } },
+          requestGroup: true,
         },
       })
       // doing this until drizzle adds aggregations for
@@ -272,7 +275,7 @@ export const requestsRouter = createTRPCRouter({
         });
       });
 
-      if (!ctx.user.isWhatsApp) {
+      if (ctx.user.isWhatsApp) {
         void sendWhatsApp({
           templateId: "HXaf0ed60e004002469e866e535a2dcb45",
           to: ctx.user.phoneNumber!,
@@ -323,14 +326,14 @@ export const requestsRouter = createTRPCRouter({
   // in the future, well need to validate that a host actually received the request,
   // or else a malicious host could reject any request
   updateConfirmation: protectedProcedure
-    .input(z.object({ requestId: z.number() }))
+    .input(z.object({ requestGroupId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
-        .update(requests)
+        .update(requestGroups)
         .set({ confirmationSentAt: new Date() })
-        .where(eq(requests.id, input.requestId));
+        .where(eq(requestGroups.id, input.requestGroupId));
 
-      if (!ctx.user.isWhatsApp) {
+      if (ctx.user.isWhatsApp) {
         await sendWhatsApp({
           templateId: "HXaf0ed60e004002469e866e535a2dcb45",
           to: ctx.user.phoneNumber!,
@@ -372,19 +375,18 @@ export const requestsRouter = createTRPCRouter({
         (member) => member.isOwner,
       )!.userId;
 
-      const owner = await ctx.db.query.users
-        .findFirst({
-          where: eq(users.id, ownerId),
-          columns: { phoneNumber: true, isWhatsApp: true },
-        });
+      const owner = await ctx.db.query.users.findFirst({
+        where: eq(users.id, ownerId),
+        columns: { phoneNumber: true, isWhatsApp: true },
+      });
 
       if (owner) {
         if (!owner.isWhatsApp) {
           void sendWhatsApp({
-            templateId: 'HX08c870ee406c7ef4ff763917f0b3c411',
+            templateId: "HX08c870ee406c7ef4ff763917f0b3c411",
             to: owner.phoneNumber!,
             propertyAddress: request.location,
-          })
+          });
         } else {
           void sendText({
             to: owner.phoneNumber!,

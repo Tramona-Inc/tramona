@@ -42,16 +42,11 @@ export function getRequestStatus(request: {
   if (request.resolvedAt) {
     return request.numOffers === 0 ? "rejected" : "booked";
   }
-  if (request.hasApproved) {
-    return request.numOffers === 0 ? "pending" : "accepted";
-  } else {
-    return "unconfirmed";
-  }
+  return request.numOffers === 0 ? "pending" : "accepted";
 }
 
 export function isIncoming(request: Parameters<typeof getRequestStatus>[0]) {
-  const status = getRequestStatus(request);
-  return status === "unconfirmed" || status === "pending";
+  return getRequestStatus(request) === "pending";
 }
 
 export function formatPhoneNumber(phoneNumber: string) {

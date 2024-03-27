@@ -3,36 +3,34 @@ import { api } from "@/utils/api";
 import { useEffect, useMemo, useState } from "react";
 import { useInterval } from "@/utils/useInterval";
 import { usePrevious } from "@uidotdev/usehooks";
-import RequestGroup from "./RequestGroup";
+import RequestGroupCards from "./RequestGroup";
+import { type RequestGroup } from "@/server/db/schema";
 
 export function RequestCards({
   requestGroups,
 }: {
-  requestGroups: { groupId: number; requests: DetailedRequest[] }[];
+  requestGroups: { group: RequestGroup; requests: DetailedRequest[] }[];
 }) {
   const [isWaiting, setIsWaiting] = useState(false);
   const utils = api.useUtils();
 
-  const requests = useMemo(
-    () => requestGroups.map((group) => group.requests).flat(),
-    [requestGroups],
-  );
-
-  const previousRequests = usePrevious(requests);
-  const newlyApprovedRequests =
-    requests && previousRequests
-      ? requests.filter(
-          (req) =>
-            req.hasApproved &&
-            !previousRequests.find((req2) => req2.id === req.id)?.hasApproved,
+  const previousRequestGroups = usePrevious(requestGroups);
+  const newlyApprovedRequestGroups =
+    requestGroups && previousRequestGroups
+      ? requestGroups.filter(
+          ({ group }) =>
+            group.hasApproved &&
+            !previousRequestGroups.find(
+              ({ group: group2 }) => group2?.id === group.id,
+            )?.group.hasApproved,
         )
       : [];
 
   useEffect(() => {
-    if (newlyApprovedRequests.length > 0) {
+    if (newlyApprovedRequestGroups.length > 0) {
       setIsWaiting(false);
     }
-  }, [newlyApprovedRequests.length]);
+  }, [newlyApprovedRequestGroups.length]);
 
   // Start the interval to invalidate requests every 10 seconds
   useInterval(
@@ -47,10 +45,10 @@ export function RequestCards({
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      {requestGroups.map(({ groupId, requests }) => (
-        <RequestGroup
-          key={groupId}
-          groupId={groupId}
+      {requestGroups.map(({ group: requestGroup, requests }) => (
+        <RequestGroupCards
+          key={requestGroup.id}
+          requestGroup={requestGroup}
           requests={requests}
           isWaiting={isWaiting}
           startTimer={startTimer}
