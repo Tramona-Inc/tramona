@@ -19,6 +19,7 @@ import { users } from "./users";
 
 export const groups = pgTable("groups", {
   id: serial("id").primaryKey(),
+  ownerId: text("owner_id").references(() => users.id),
 });
 
 export const groupMembers = pgTable(
