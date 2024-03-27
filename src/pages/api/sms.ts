@@ -74,7 +74,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           ),
       ),
     )
-    .orderBy(desc(requestGroups.createdAt))
+    .orderBy(desc(requestGroups.confirmationSentAt))
     .limit(1)
     .then((res) => res[0]);
 

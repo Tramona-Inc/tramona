@@ -49,7 +49,6 @@ export const requestGroups = pgTable("request_groups", {
   hasApproved: boolean("has_approved").default(false).notNull(),
   confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
   haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type RequestGroup = typeof requestGroups.$inferSelect;
