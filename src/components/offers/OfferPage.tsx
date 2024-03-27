@@ -31,6 +31,7 @@ import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
+import OfferPhoto from "./OfferPhotos"
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
   {
@@ -140,13 +141,13 @@ export default function OfferPage({
                   {property.imageUrls.map((imageUrl, index) => (
                     <div
                       key={index}
-                      className={`relative bg-accent ${
+                      className={` bg-accent ${
                         index === 0 || index % 3 === 0
                           ? "col-span-2 row-span-2"
                           : property.imageUrls.length -1 == index && index % 4===0 ? "col-span-2 row-span-2":"col-span-1 row-span-1" 
                       }`}
                     >
-                      <AspectRatio ratio={4/3}>
+                      <AspectRatio ratio={3/2}>
                         <Image
                           src={imageUrl}
                           alt=""
