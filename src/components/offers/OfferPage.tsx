@@ -102,7 +102,7 @@ export default function OfferPage({
 
   const tax = 0;
 
-  const renderSeeMoreButton = property.imageUrls.length > 5;
+  const renderSeeMoreButton = property.imageUrls.length > 4;
 
   return (
     <div className="space-y-4">
@@ -136,23 +136,25 @@ export default function OfferPage({
                 <DialogHeader>
                   <DialogTitle>More Photos</DialogTitle>
                 </DialogHeader>
-                <div className="grid-rows-auto grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
+                <div className="grid grid-row-4 min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
                   {property.imageUrls.map((imageUrl, index) => (
                     <div
                       key={index}
                       className={`relative bg-accent ${
-                        index === 0 || index === 3
+                        index === 0 || index % 3 === 0
                           ? "col-span-2 row-span-2"
-                          : "col-span-1 row-span-1"
+                          : property.imageUrls.length -1 == index && index % 4===0 ? "col-span-2 row-span-2":"col-span-1 row-span-1" 
                       }`}
                     >
-                      <Image
-                        src={imageUrl}
-                        alt=""
-                        fill
-                        objectFit="cover"
-                        className="h-full w-full"
-                      />
+                      <AspectRatio ratio={4/3}>
+                        <Image
+                          src={imageUrl}
+                          alt=""
+                          fill
+                          objectFit="cover"
+                          className="h-full w-full"
+                        />
+                      </AspectRatio>
                     </div>
                   ))}
                 </div>
@@ -267,7 +269,10 @@ export default function OfferPage({
 
             {coordinateData && (
               <MapContainer
-                center={[coordinateData.coordinates.lat, coordinateData.coordinates.lng]}
+                center={[
+                  coordinateData.coordinates.lat,
+                  coordinateData.coordinates.lng,
+                ]}
                 zoom={15}
                 scrollWheelZoom={false}
                 style={{ height: "400px" }}
@@ -277,7 +282,10 @@ export default function OfferPage({
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <Circle
-                  center={[coordinateData.coordinates.lat, coordinateData.coordinates.lng]}
+                  center={[
+                    coordinateData.coordinates.lat,
+                    coordinateData.coordinates.lng,
+                  ]}
                   radius={200} // Adjust radius as needed
                   pathOptions={{ color: "red" }} // Customize circle color and other options
                 />
