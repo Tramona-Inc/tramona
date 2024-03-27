@@ -9,7 +9,10 @@ export function TramonaLogo() {
   const href = role ? getHomePageFromRole(role) : "/";
 
   return (
-    <Link href={href} className="flex items-center gap-2 text-2xl font-bold">
+    <Link
+      href={href}
+      className="flex items-center gap-2 text-2xl font-bold 2xl:text-3xl"
+    >
       <TramonaIcon />
       Tramona
     </Link>

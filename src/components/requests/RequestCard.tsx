@@ -90,7 +90,7 @@ export default function RequestCard({
   );
 }
 
-function RequestCardBadge({
+export function RequestCardBadge({
   request,
 }: {
   request: DetailedRequest | RequestWithUser;
