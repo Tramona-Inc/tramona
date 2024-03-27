@@ -54,11 +54,22 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       exists(
         db
           .select()
-          .from(groupMembers)
+          .from(requests)
           .where(
             and(
-              eq(groupMembers.userId, userId),
-              eq(groupMembers.isOwner, true),
+              eq(requests.requestGroupId, requestGroups.id),
+              exists(
+                db
+                  .select()
+                  .from(groupMembers)
+                  .where(
+                    and(
+                      eq(groupMembers.userId, userId),
+                      eq(groupMembers.isOwner, true),
+                      eq(groupMembers.groupId, requests.requestGroupId),
+                    ),
+                  ),
+              ),
             ),
           ),
       ),
