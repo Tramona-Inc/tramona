@@ -1,3 +1,4 @@
+import {useState} from 'react'
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -34,6 +35,7 @@ import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
 import OfferPhotos from "./OfferPhotos";
+
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
   {
@@ -107,6 +109,8 @@ export default function OfferPage({
 
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
+  const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0)
+
   return (
     <div className="space-y-4">
       <Link
@@ -121,7 +125,7 @@ export default function OfferPage({
             <div
               className={`relative col-span-1 row-span-1 bg-accent ${index === 0 ? "col-span-2 row-span-2" : ""}`}
             >
-              <DialogTrigger key={index}>
+              <DialogTrigger key={index} onClick={()=>setIndexOfSelectedImage(index)}>
                 <Image
                   src={imageUrl}
                   alt=""
@@ -132,9 +136,9 @@ export default function OfferPage({
               </DialogTrigger>
             </div>
           ))}
-          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
             <div className="  screen-full flex justify-center">
-              <OfferPhotos propertyImages={property.imageUrls} />
+              <OfferPhotos propertyImages={property.imageUrls} indexOfSelectedImage={indexOfSelectedImage}/>
             </div>
           </DialogContent>
         </Dialog>
@@ -151,6 +155,7 @@ export default function OfferPage({
                 <DialogHeader>
                   <DialogTitle>More Photos</DialogTitle>
                 </DialogHeader>
+                {/* //dialog within a dialog */}
                 <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
                   {property.imageUrls.map((imageUrl, index) => (
                     <div

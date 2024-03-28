@@ -10,27 +10,39 @@ import Image from "next/image";
 
 interface OfferPhotoProps {
   propertyImages?: string[];
+  indexOfSelectedImage?: number;
 }
-export default function OfferPhotos({ propertyImages = [] }: OfferPhotoProps) {
+export default function OfferPhotos({
+  propertyImages = [],
+  indexOfSelectedImage,
+}: OfferPhotoProps) {
+  //convertes the indexOf theSelectedImage to 0 and then the remaining will follow then all the index prior will be added after
+  console.log(indexOfSelectedImage);
   return (
-    <Carousel className="w-full lg:w-[900px] ">
+    <Carousel
+      opts={{
+        align: "start",
+        loop: true,
+        startIndex: indexOfSelectedImage,
+      }}
+      className="w-full md:w-[600px] md:h-[600px] lg:h-[750px] lg:w-[800px]"
+    >
       <CarouselContent className="">
-        {Array.from({ length: 5 }).map((_, index) => (
+        {propertyImages.map((image, index) => (
           <CarouselItem key={index}>
-            <div className="p-1">
-              <Card className="min-h-[800px] bg-transparent border-none shadow-none">
+            <div className="p-1" >
+              <Card className="min-h-[700px] border-none bg-transparent shadow-none flex items-center">
                 <CardContent className="">
-                  <div className="shadow-lg">
+                  <div className="flex items-center">
                     <Image
                       src={
-                        propertyImages && propertyImages.length > 0
-                          ? propertyImages[0]
-                          : ""
+                        propertyImages && propertyImages.length > 0 ? image : ""
                       }
                       alt=""
                       fill
                       layout="fill"
                       objectFit="contain"
+                      
                     />
                   </div>
                 </CardContent>
@@ -39,7 +51,7 @@ export default function OfferPhotos({ propertyImages = [] }: OfferPhotoProps) {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious />
+      <CarouselPrevious/>
       <CarouselNext />
     </Carousel>
   );
