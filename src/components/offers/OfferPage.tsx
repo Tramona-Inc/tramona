@@ -7,15 +7,12 @@ import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogClose,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
 import { type RouterOutputs, api } from "@/utils/api";
-import { TAX_PERCENTAGE } from "@/utils/constants";
 import {
   cn,
   formatCurrency,
@@ -123,6 +120,7 @@ export default function OfferPage({
         <Dialog>
           {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
             <div
+              key={imageUrl}
               className={`relative col-span-1 row-span-1 bg-accent ${index === 0 ? "col-span-2 row-span-2" : ""}`}
             >
               <DialogTrigger
@@ -165,18 +163,20 @@ export default function OfferPage({
                 <Dialog>
                   <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
                     {property.imageUrls.map((imageUrl, index) => (
-                      <DialogTrigger className={` bg-accent ${
-                        index === 0 || index % 3 === 0
-                          ? "col-span-2 row-span-2"
-                          : property.imageUrls.length - 1 == index &&
-                              index % 4 === 0
+                      <DialogTrigger
+                        key={imageUrl}
+                        className={` bg-accent ${
+                          index === 0 || index % 3 === 0
                             ? "col-span-2 row-span-2"
-                            : "col-span-1 row-span-1"
-                      }`}>
+                            : property.imageUrls.length - 1 == index &&
+                                index % 4 === 0
+                              ? "col-span-2 row-span-2"
+                              : "col-span-1 row-span-1"
+                        }`}
+                      >
                         <div
                           key={index}
                           onClick={() => setIndexOfSelectedImage(index)}
-                        
                         >
                           <AspectRatio ratio={3 / 2}>
                             <Image
