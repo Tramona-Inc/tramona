@@ -5,7 +5,7 @@ export default function TwilioDemo() {
   const sendWhatsApp = api.twilio.sendWhatsApp.useMutation();
   const sendEmail = api.twilio.sendEmail.useMutation();
   const sendSMS = api.twilio.sendSMS.useMutation();
-  
+
 
   const whatsApp = () => {
     const response = sendWhatsApp.mutateAsync({
@@ -13,7 +13,6 @@ export default function TwilioDemo() {
       to: "+12066186280",
     });
 
-    console.log("sendWhatsApp: ", response);
   };
 
   const sms = () => {
@@ -22,7 +21,6 @@ export default function TwilioDemo() {
       to: "+12066186280",
     });
 
-    console.log("sendSMS: ", response);
   };
 
   const email = () => {
@@ -33,7 +31,6 @@ export default function TwilioDemo() {
       html: "<strong>and easy to do anywhere, even with Node.js</strong>",
     });
 
-    console.log("sendEmail: ", response);
   };
 
   return (

@@ -23,7 +23,6 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import axios from "axios";
 import { z } from "zod";
-import { useJsApiLoader } from "@react-google-maps/api";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -156,7 +155,7 @@ export const offersRouter = createTRPCRouter({
 
   getCoordinates: protectedProcedure
     .input(z.object({ location: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.location)}&key=${env.GOOGLE_MAPS_KEY}`,
       );

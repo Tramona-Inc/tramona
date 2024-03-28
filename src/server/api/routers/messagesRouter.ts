@@ -2,7 +2,7 @@ import { env } from "@/env";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
-import { zodString, zodNumber } from "@/utils/zod-utils";
+import { zodString } from "@/utils/zod-utils";
 import { ne, and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
@@ -229,7 +229,7 @@ export const messagesRouter = createTRPCRouter({
     }),
 
   getParticipantsPhoneNumbers: protectedProcedure
-    .input(z.object({ conversationId: zodNumber() }))
+    .input(z.object({ conversationId: zodString() }))
     .query(async ({ ctx, input }) => {
       const participants = await db
         .select({
