@@ -7,15 +7,12 @@ import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogClose,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
-import { type RouterOutputs, api } from "@/utils/api";
-import { TAX_PERCENTAGE } from "@/utils/constants";
+import { api, type RouterOutputs } from "@/utils/api";
 import {
   cn,
   formatCurrency,
@@ -36,7 +33,6 @@ import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
 import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
-
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
@@ -59,8 +55,6 @@ const Circle = dynamic(
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
-const isMobile = useMediaQuery('(max-width: 640px)')
-
 export default function OfferPage({
   offer: { property, request, ...offer },
 }: {
@@ -80,6 +74,7 @@ export default function OfferPage({
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: property.address!,
   });
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const isAirbnb =
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
@@ -125,28 +120,28 @@ export default function OfferPage({
       </Link>
       <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
         <Dialog>
-        {isMobile
-          ? ( // Only render the first image on small screens
-              <div className="relative col-span-2 row-span-2">
-                <DialogTrigger
-                  key={0}
-                  onClick={() => setIndexOfSelectedImage(0)}
-                  className="hover:opacity-90"
-                >
-                  <Image
-                    src={firstImageUrl}
-                    alt=""
-                    fill
-                    objectFit="cover"
-                    className=""
-                  />
-                </DialogTrigger>
-              </div>
-            )
-          : property.imageUrls.slice(0, 5).map((imageUrl, index) => (
+          {isMobile ? (
+            // Only render the first image on small screens
+            <div className="">
+              <DialogTrigger
+                key={0}
+                onClick={() => setIndexOfSelectedImage(0)}
+                className="hover:opacity-90"
+              >
+                <Image
+                  src={firstImageUrl}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                  className=""
+                />
+              </DialogTrigger>
+            </div>
+          ) : (
+            property.imageUrls.slice(0, 5).map((imageUrl, index) => (
               <div
                 className={`relative col-span-1 row-span-1 ${
-                  index === 0 ? 'col-span-2 row-span-2' : ''
+                  index === 0 ? "col-span-2 row-span-2" : ""
                 }`}
               >
                 <DialogTrigger
@@ -163,7 +158,16 @@ export default function OfferPage({
                   />
                 </DialogTrigger>
               </div>
-            ))}
+            ))
+          )}
+          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
+            <div className="  screen-full flex justify-center">
+              <OfferPhotos
+                propertyImages={property.imageUrls}
+                indexOfSelectedImage={indexOfSelectedImage}
+              />
+            </div>
+          </DialogContent>
         </Dialog>
 
         {/* If there are more than 5 images, render the "See more photos" button */}
@@ -171,7 +175,7 @@ export default function OfferPage({
           <div className="absolute bottom-2 right-2">
             <Dialog>
               <DialogTrigger className="rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
-                See all({property.imageUrls.length} photos)
+                See ({property.imageUrls.length}) photos
               </DialogTrigger>
 
               <DialogContent className="max-w-4xl">
@@ -415,10 +419,10 @@ export default function OfferPage({
                   <p className="underline">Tramona service fee</p>
                   <p>{formatCurrency(tramonaServiceFee)}</p>
                 </div>
-                <div className="flex justify-between py-2">
+                {/* <div className="flex justify-between py-2">
                   <p className="underline">Taxes</p>
                   <p>{formatCurrency(tax)}</p>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="flex justify-between py-2">
