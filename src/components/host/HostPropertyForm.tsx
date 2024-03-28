@@ -113,7 +113,7 @@ export default function HostPropertyForm() {
                 <FormControl>
                   <Input
                     {...field}
-                    value={field.value ?? 0}
+                    value={field.value}
                     inputMode="numeric"
                     prefix="$"
                     suffix="/night"
