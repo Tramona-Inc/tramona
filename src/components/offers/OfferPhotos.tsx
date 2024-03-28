@@ -17,7 +17,6 @@ export default function OfferPhotos({
   indexOfSelectedImage,
 }: OfferPhotoProps) {
   //convertes the indexOf theSelectedImage to 0 and then the remaining will follow then all the index prior will be added after
-  console.log(indexOfSelectedImage);
   return (
     <Carousel
       opts={{
@@ -25,13 +24,13 @@ export default function OfferPhotos({
         loop: true,
         startIndex: indexOfSelectedImage,
       }}
-      className="w-full md:w-[600px] md:h-[600px] lg:h-[750px] lg:w-[800px]"
+      className="w-full md:w-[600px] md:h-[600px] lg:h-[750px] lg:w-[800px] "
     >
       <CarouselContent className="">
         {propertyImages.map((image, index) => (
           <CarouselItem key={index}>
             <div className="p-1" >
-              <Card className="min-h-[700px] border-none bg-transparent shadow-none flex items-center">
+              <Card className="min-h-[700px] border-none bg-transparent shadow-none flex items-center ">
                 <CardContent className="">
                   <div className="flex items-center">
                     <Image
@@ -51,8 +50,8 @@ export default function OfferPhotos({
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious/>
-      <CarouselNext />
+      <CarouselPrevious className="h-[50px] w-[50px]"/>
+      <CarouselNext className="h-[50px] w-[50px]" />
     </Carousel>
   );
 }

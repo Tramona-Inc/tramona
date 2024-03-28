@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -109,7 +109,7 @@ export default function OfferPage({
 
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
-  const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0)
+  const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
 
   return (
     <div className="space-y-4">
@@ -125,7 +125,10 @@ export default function OfferPage({
             <div
               className={`relative col-span-1 row-span-1 bg-accent ${index === 0 ? "col-span-2 row-span-2" : ""}`}
             >
-              <DialogTrigger key={index} onClick={()=>setIndexOfSelectedImage(index)}>
+              <DialogTrigger
+                key={index}
+                onClick={() => setIndexOfSelectedImage(index)}
+              >
                 <Image
                   src={imageUrl}
                   alt=""
@@ -138,7 +141,10 @@ export default function OfferPage({
           ))}
           <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
             <div className="  screen-full flex justify-center">
-              <OfferPhotos propertyImages={property.imageUrls} indexOfSelectedImage={indexOfSelectedImage}/>
+              <OfferPhotos
+                propertyImages={property.imageUrls}
+                indexOfSelectedImage={indexOfSelectedImage}
+              />
             </div>
           </DialogContent>
         </Dialog>
@@ -156,31 +162,44 @@ export default function OfferPage({
                   <DialogTitle>More Photos</DialogTitle>
                 </DialogHeader>
                 {/* //dialog within a dialog */}
-                <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
-                  {property.imageUrls.map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className={` bg-accent ${
+                <Dialog>
+                  <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
+                    {property.imageUrls.map((imageUrl, index) => (
+                      <DialogTrigger className={` bg-accent ${
                         index === 0 || index % 3 === 0
                           ? "col-span-2 row-span-2"
                           : property.imageUrls.length - 1 == index &&
                               index % 4 === 0
                             ? "col-span-2 row-span-2"
                             : "col-span-1 row-span-1"
-                      }`}
-                    >
-                      <AspectRatio ratio={3 / 2}>
-                        <Image
-                          src={imageUrl}
-                          alt=""
-                          fill
-                          objectFit="cover"
-                          className="h-full w-full"
-                        />
-                      </AspectRatio>
+                      }`}>
+                        <div
+                          key={index}
+                          onClick={() => setIndexOfSelectedImage(index)}
+                        
+                        >
+                          <AspectRatio ratio={3 / 2}>
+                            <Image
+                              src={imageUrl}
+                              alt=""
+                              fill
+                              objectFit="cover"
+                              className="h-full w-full"
+                            />
+                          </AspectRatio>
+                        </div>
+                      </DialogTrigger>
+                    ))}
+                  </div>
+                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
+                    <div className="  screen-full flex justify-center">
+                      <OfferPhotos
+                        propertyImages={property.imageUrls}
+                        indexOfSelectedImage={indexOfSelectedImage}
+                      />
                     </div>
-                  ))}
-                </div>
+                  </DialogContent>
+                </Dialog>
               </DialogContent>
             </Dialog>
           </div>
