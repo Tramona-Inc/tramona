@@ -1,5 +1,5 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
-import HostPropertyForm from '@/components/host/HostPropertyForm';
+import HostPropertyForm from "@/components/host/HostPropertyForm";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,7 +15,7 @@ export default function Properties() {
     <DashboadLayout type="host">
       <h1 className="text-h1">Properties</h1>
       <Dialog>
-        <DialogTrigger>
+        <DialogTrigger asChild>
           <Button>Add a Property</Button>
         </DialogTrigger>
         <DialogContent>

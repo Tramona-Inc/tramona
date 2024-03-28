@@ -24,7 +24,6 @@
     "@aws-sdk/client-s3": "^3.525.0",
     "@aws-sdk/s3-request-presigner": "^3.525.0",
     "@aws-sdk/types": "^3.523.0",
-    "@builder.io/react-hydration-overlay": "^0.0.8",
     "@hookform/resolvers": "^3.3.4",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
