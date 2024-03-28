@@ -2,13 +2,8 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
 
 import { db } from "@/server/db";
-import {
-  groupMembers,
-  requestGroups,
-  requests,
-  users,
-} from "@/server/db/schema";
-import { eq, desc, exists, and } from "drizzle-orm";
+import { requestGroups, requests, users } from "@/server/db/schema";
+import { eq, desc } from "drizzle-orm";
 
 type TwilioRequestBody = {
   ToCountry: string;
@@ -75,7 +70,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     await db
       .update(requestGroups)
       .set({ hasApproved: true })
-      .where(eq(requests.id, mostRecentRequestGroup.id));
+      .where(eq(requestGroups.id, mostRecentRequestGroup.id));
   }
 
   res.setHeader("Content-Type", "text/xml");
