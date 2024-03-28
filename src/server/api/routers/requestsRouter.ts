@@ -230,11 +230,16 @@ export const requestsRouter = createTRPCRouter({
 
         const results = await Promise.allSettled(
           input.map(async (req) => {
-            const madeByGroupId = await db
+            const madeByGroupId = await tx
               .insert(groups)
               .values({ ownerId: ctx.user.id })
               .returning()
               .then((res) => res[0]!.id);
+
+            await tx.insert(groupMembers).values({
+              userId: ctx.user.id,
+              groupId: madeByGroupId,
+            });
 
             await tx.insert(requests).values({
               ...req,
