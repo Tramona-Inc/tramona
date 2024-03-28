@@ -23,6 +23,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   conversations: many(conversationParticipants),
   hostProfile: one(hostProfiles),
   groups: many(groupMembers),
+  ownedGroups: many(groups),
+  requestGroupsCreated: many(requestGroups),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -72,6 +74,17 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   }),
   offers: many(offers),
 }));
+
+export const requestGroupsRelations = relations(
+  requestGroups,
+  ({ one, many }) => ({
+    requests: many(requests),
+    createdByUser: one(users, {
+      fields: [requestGroups.createdByUserId],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const offersRelations = relations(offers, ({ one }) => ({
   property: one(properties, {

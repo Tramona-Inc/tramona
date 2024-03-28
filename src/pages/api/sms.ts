@@ -50,30 +50,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const mostRecentRequestGroup = await db
     .select({ hasApproved: requestGroups.hasApproved, id: requestGroups.id })
     .from(requestGroups)
-    .where(
-      exists(
-        db
-          .select()
-          .from(requests)
-          .where(
-            and(
-              eq(requests.requestGroupId, requestGroups.id),
-              exists(
-                db
-                  .select()
-                  .from(groupMembers)
-                  .where(
-                    and(
-                      eq(groupMembers.userId, userId),
-                      eq(groupMembers.isOwner, true),
-                      eq(groupMembers.groupId, requests.requestGroupId),
-                    ),
-                  ),
-              ),
-            ),
-          ),
-      ),
-    )
+    .where(eq(requestGroups.createdByUserId, userId))
     .orderBy(desc(requestGroups.confirmationSentAt))
     .limit(1)
     .then((res) => res[0]);
@@ -96,7 +73,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     await db
-      .update(requests)
+      .update(requestGroups)
       .set({ hasApproved: true })
       .where(eq(requests.id, mostRecentRequestGroup.id));
   }

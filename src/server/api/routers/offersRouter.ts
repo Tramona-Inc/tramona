@@ -7,6 +7,7 @@ import {
 } from "@/server/api/trpc";
 import {
   groupMembers,
+  groups,
   offerInsertSchema,
   offerSelectSchema,
   offerUpdateSchema,
@@ -34,11 +35,7 @@ export const offersRouter = createTRPCRouter({
         with: {
           request: {
             columns: { id: true },
-            with: {
-              madeByGroup: {
-                with: { members: { where: eq(groupMembers.isOwner, true) } },
-              },
-            },
+            with: { madeByGroup: { columns: { ownerId: true } } },
           },
         },
       });
@@ -51,7 +48,7 @@ export const offersRouter = createTRPCRouter({
       }
 
       // only the owner of the group can accept offers
-      if (offerDetails.request.madeByGroup.members[0]?.userId !== ctx.user.id) {
+      if (offerDetails.request.madeByGroup.ownerId !== ctx.user.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
         });
@@ -162,8 +159,11 @@ export const offersRouter = createTRPCRouter({
 
       const result = {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        coordinates: response.data.results[0].geometry.location as { lat: number, lng: number },
-      }
+        coordinates: response.data.results[0].geometry.location as {
+          lat: number;
+          lng: number;
+        },
+      };
       return result;
     }),
 
@@ -408,14 +408,23 @@ export const offersRouter = createTRPCRouter({
       await ctx.db.delete(offers).where(eq(offers.id, input.id));
 
       const { request, property } = offer;
-      const groupOwner = request.madeByGroup.members.find(
-        (member) => member.isOwner,
-      );
+
+      const groupOwner = await ctx.db.query.groups
+        .findFirst({
+          where: eq(groups.id, request.madeByGroup.id),
+          with: {
+            owner: {
+              columns: { id: true, phoneNumber: true, isWhatsApp: true },
+            },
+          },
+        })
+        .then((res) => res?.owner);
+
       if (!groupOwner) return;
 
       const groupOwnerHasOtherOffers = await ctx.db.query.groupMembers
         .findFirst({
-          where: eq(groupMembers.userId, groupOwner.userId),
+          where: eq(groupMembers.userId, groupOwner.id),
           columns: {},
           with: {
             group: {
@@ -437,12 +446,12 @@ export const offersRouter = createTRPCRouter({
       const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
       const url = `${env.NEXTAUTH_URL}/requests`;
 
-      if (groupOwner.user.phoneNumber) {
-        if (!groupOwner.user.isWhatsApp) {
+      if (groupOwner.phoneNumber) {
+        if (!groupOwner.isWhatsApp) {
           groupOwnerHasOtherOffers
             ? void sendWhatsApp({
                 templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
-                to: groupOwner.user.phoneNumber,
+                to: groupOwner.phoneNumber,
                 propertyName: property.name,
                 propertyAddress: request.location, //??can this be null
                 checkIn: request.checkIn,
@@ -451,7 +460,7 @@ export const offersRouter = createTRPCRouter({
               })
             : void sendWhatsApp({
                 templateId: "HXb293923af34665e7eefc81be0579e5db",
-                to: groupOwner.user.phoneNumber,
+                to: groupOwner.phoneNumber,
                 propertyName: property.name,
                 propertyAddress: request.location,
                 checkIn: request.checkIn,
@@ -459,7 +468,7 @@ export const offersRouter = createTRPCRouter({
               });
         } else {
           void sendText({
-            to: groupOwner.user.phoneNumber,
+            to: groupOwner.phoneNumber,
             content: `Tramona: Hello, your ${property.name} in ${request.location} offer from ${fmtdDateRange} has expired.${groupOwnerHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
           });
         }

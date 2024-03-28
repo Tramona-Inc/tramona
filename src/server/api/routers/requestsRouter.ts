@@ -29,28 +29,6 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 
-async function createGroup({
-  ownerId,
-  _db = db,
-}: {
-  ownerId?: string;
-  _db?: typeof db;
-}) {
-  const groupId = await _db
-    .insert(groups)
-    .values({})
-    .returning()
-    .then((res) => res[0]!.id);
-
-  if (ownerId) {
-    await _db
-      .insert(groupMembers)
-      .values({ groupId, userId: ownerId, isOwner: true });
-  }
-
-  return groupId;
-}
-
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
     const groupedRequests = await ctx.db.query.groupMembers
@@ -105,7 +83,7 @@ export const requestsRouter = createTRPCRouter({
               ...request,
               groupMembers: members.map((member) => ({
                 ...member.user,
-                isGroupOwner: member.isOwner,
+                isGroupOwner: groupMember.group.ownerId === member.userId,
               })),
               groupInvites: invites,
             }));
@@ -215,7 +193,7 @@ export const requestsRouter = createTRPCRouter({
               numOffers: offers.length,
               groupMembers: madeByGroup.members.map((member) => ({
                 ...member.user,
-                isGroupOwner: member.isOwner,
+                isGroupOwner: madeByGroup.ownerId === member.userId,
               })),
               groupInvites: madeByGroup.invites,
             };
@@ -252,10 +230,11 @@ export const requestsRouter = createTRPCRouter({
 
         const results = await Promise.allSettled(
           input.map(async (req) => {
-            const madeByGroupId = await createGroup({
-              ownerId: ctx.user.id,
-              _db: tx,
-            });
+            const madeByGroupId = await db
+              .insert(groups)
+              .values({ ownerId: ctx.user.id })
+              .returning()
+              .then((res) => res[0]!.id);
 
             await tx.insert(requests).values({
               ...req,
@@ -358,7 +337,9 @@ export const requestsRouter = createTRPCRouter({
           checkOut: true,
         },
         with: {
-          madeByGroup: { with: { members: true } },
+          madeByGroup: {
+            with: { members: true, owner: { columns: { id: true } } },
+          },
         },
       });
 
@@ -371,12 +352,8 @@ export const requestsRouter = createTRPCRouter({
         .set({ resolvedAt: new Date() })
         .where(eq(requests.id, input.id));
 
-      const ownerId = request.madeByGroup.members.find(
-        (member) => member.isOwner,
-      )!.userId;
-
       const owner = await ctx.db.query.users.findFirst({
-        where: eq(users.id, ownerId),
+        where: eq(users.id, request.madeByGroup.owner!.id),
         columns: { phoneNumber: true, isWhatsApp: true },
       });
 
@@ -406,13 +383,12 @@ export const requestsRouter = createTRPCRouter({
         const groupOwnerId = await ctx.db.query.requests
           .findFirst({
             where: eq(requests.id, input.id),
+            columns: {},
             with: {
-              madeByGroup: {
-                with: { members: { where: eq(groupMembers.isOwner, true) } },
-              },
+              madeByGroup: { columns: { ownerId: true } },
             },
           })
-          .then((request) => request?.madeByGroup.members[0]?.userId);
+          .then((res) => res?.madeByGroup.ownerId);
 
         if (!groupOwnerId) {
           throw new TRPCError({ code: "BAD_REQUEST" });

@@ -37,7 +37,6 @@ export function getFmtdFilters(
 export function getRequestStatus(request: {
   resolvedAt: Date | null;
   numOffers: number;
-  hasApproved: boolean;
 }) {
   if (request.resolvedAt) {
     return request.numOffers === 0 ? "rejected" : "booked";
