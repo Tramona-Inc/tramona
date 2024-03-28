@@ -8,17 +8,7 @@ import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
 import { RequestUnconfirmedButton } from "./RequestUnconfirmedButton";
 
-type RequestCardActionProps = {
-  request: DetailedRequest;
-  isWaiting: boolean;
-  onClick: () => void;
-};
-
-export function RequestCardAction({
-  request,
-  isWaiting,
-  onClick,
-}: RequestCardActionProps) {
+export function RequestCardAction({ request }: { request: DetailedRequest }) {
   const { data: session } = useSession({ required: true });
   if (!session) return null;
 
@@ -56,16 +46,5 @@ export function RequestCardAction({
     case "booked":
       // return <Button className={primaryBtn}>Request again</Button>;
       return null;
-    case "unconfirmed":
-      return (
-        userIsOwner &&
-        session.user.phoneNumber && (
-          <RequestUnconfirmedButton
-            request={request}
-            isWaiting={isWaiting}
-            onClick={onClick}
-          />
-        )
-      );
   }
 }

@@ -45,7 +45,11 @@ export default function RequestCard({
   return (
     <Card key={request.id}>
       <CardContent className="space-y-2">
-        <RequestCardBadge request={request} />
+        {request.requestGroup.hasApproved ? (
+          <RequestCardBadge request={request} />
+        ) : (
+          <Badge variant="gray">Unconfirmed</Badge>
+        )}
         <div className="absolute right-4 top-2">
           {showAvatars && (
             <RequestGroupAvatars
@@ -125,7 +129,5 @@ export function RequestCardBadge({
       return <Badge variant="red">Rejected</Badge>;
     case "booked":
       return <Badge variant="blue">Booked</Badge>;
-    case "unconfirmed":
-      return <Badge variant="secondary">Unconfirmed</Badge>;
   }
 }

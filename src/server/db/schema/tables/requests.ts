@@ -5,12 +5,14 @@ import {
   pgTable,
   serial,
   smallint,
+  text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { propertyTypeEnum } from "./properties";
 import { groups } from "./groups";
+import { users } from "./users";
 
 export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
@@ -46,4 +48,14 @@ export const MAX_REQUEST_GROUP_SIZE = 10;
 
 export const requestGroups = pgTable("request_groups", {
   id: serial("id").primaryKey(),
+  createdByUserId: text("created_by_user_id").references(() => users.id),
+  hasApproved: boolean("has_approved").default(true).notNull(),
+  confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
+  haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),
+  createdAt: timestamp("created_at"),
 });
+
+export type RequestGroup = typeof requestGroups.$inferSelect;
+export type NewRequestGroup = typeof requestGroups.$inferInsert;
+export const requestGroupSelectSchema = createSelectSchema(requestGroups);
+export const requestGroupInsertSchema = createInsertSchema(requestGroups);

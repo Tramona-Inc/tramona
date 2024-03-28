@@ -3,13 +3,13 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { referralCodes, users } from "@/server/db/schema";
+import { referralCodes, userUpdateSchema, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
-import { zodEmail, zodString } from "@/utils/zod-utils";
+import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -33,14 +33,14 @@ export const usersRouter = createTRPCRouter({
   myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
     const phone = await ctx.db.query.users
       .findFirst({
-        where: eq(users.id, ctx.user.id),
-        columns: {
-          phoneNumber: true,
-        },
-      })
-      .then((res) => {
-        return res?.phoneNumber ?? null;
-      });
+          where: eq(users.id, ctx.user.id),
+          columns: {
+            phoneNumber: true,
+          },
+        })
+        .then((res) => {
+          return res?.phoneNumber ?? null;;
+        });
 
     return phone;
   }),
@@ -70,26 +70,17 @@ export const usersRouter = createTRPCRouter({
   }),
 
   updateProfile: protectedProcedure
-    .input(
-      z.object({
-        name: zodString(),
-        email: zodEmail(),
-        phoneNumber: zodString({ maxLen: 20 }),
-      }),
-    )
+    .input(userUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const updatedUser = await ctx.db
         .update(users)
-        .set({
-          name: input.name,
-          email: input.email,
-          phoneNumber: input.phoneNumber,
-        })
-        .where(eq(users.id, ctx.user.id))
+        .set(input)
+        .where(eq(users.id, input.id))
         .returning();
 
       return updatedUser;
     }),
+
   createUrlToBeHost: protectedProcedure
     .input(
       z.object({
