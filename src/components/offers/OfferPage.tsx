@@ -1,3 +1,4 @@
+import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogClose,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -22,6 +25,7 @@ import {
   getTramonaFeeTotal,
   plural,
 } from "@/utils/utils";
+import { AspectRatio } from "../ui/aspect-ratio";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { CheckIcon, XIcon } from "lucide-react";
 import Image from "next/image";
@@ -30,6 +34,8 @@ import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
+import OfferPhotos from "./OfferPhotos";
+
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
   {
@@ -101,7 +107,9 @@ export default function OfferPage({
 
   const tax = 0;
 
-  const renderSeeMoreButton = property.imageUrls.length > 5;
+  const renderSeeMoreButton = property.imageUrls.length > 4;
+
+  const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
 
   return (
     <div className="space-y-4">
@@ -111,18 +119,36 @@ export default function OfferPage({
       >
         &larr; Back to all offers
       </Link>
-      <div className="relative">
-        <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
-          {/* Render the first 5 images */}
+      <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
+        <Dialog>
           {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
             <div
-              key={index}
               className={`relative col-span-1 row-span-1 bg-accent ${index === 0 ? "col-span-2 row-span-2" : ""}`}
             >
-              <Image src={imageUrl} alt="" fill objectFit="cover" />
+              <DialogTrigger
+                key={index}
+                onClick={() => setIndexOfSelectedImage(index)}
+              >
+                <Image
+                  src={imageUrl}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                  className=""
+                />
+              </DialogTrigger>
             </div>
           ))}
-        </div>
+          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
+            <div className="  screen-full flex justify-center">
+              <OfferPhotos
+                propertyImages={property.imageUrls}
+                indexOfSelectedImage={indexOfSelectedImage}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* If there are more than 5 images, render the "See more photos" button */}
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 right-2">
@@ -135,26 +161,45 @@ export default function OfferPage({
                 <DialogHeader>
                   <DialogTitle>More Photos</DialogTitle>
                 </DialogHeader>
-                <div className="grid-rows-auto grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
-                  {property.imageUrls.map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className={`relative bg-accent ${
-                        index === 0 || index === 3
+                {/* //dialog within a dialog */}
+                <Dialog>
+                  <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
+                    {property.imageUrls.map((imageUrl, index) => (
+                      <DialogTrigger className={` bg-accent ${
+                        index === 0 || index % 3 === 0
                           ? "col-span-2 row-span-2"
-                          : "col-span-1 row-span-1"
-                      }`}
-                    >
-                      <Image
-                        src={imageUrl}
-                        alt=""
-                        fill
-                        objectFit="cover"
-                        className="h-full w-full"
+                          : property.imageUrls.length - 1 == index &&
+                              index % 4 === 0
+                            ? "col-span-2 row-span-2"
+                            : "col-span-1 row-span-1"
+                      }`}>
+                        <div
+                          key={index}
+                          onClick={() => setIndexOfSelectedImage(index)}
+                        
+                        >
+                          <AspectRatio ratio={3 / 2}>
+                            <Image
+                              src={imageUrl}
+                              alt=""
+                              fill
+                              objectFit="cover"
+                              className="h-full w-full"
+                            />
+                          </AspectRatio>
+                        </div>
+                      </DialogTrigger>
+                    ))}
+                  </div>
+                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
+                    <div className="  screen-full flex justify-center">
+                      <OfferPhotos
+                        propertyImages={property.imageUrls}
+                        indexOfSelectedImage={indexOfSelectedImage}
                       />
                     </div>
-                  ))}
-                </div>
+                  </DialogContent>
+                </Dialog>
               </DialogContent>
             </Dialog>
           </div>
@@ -266,7 +311,10 @@ export default function OfferPage({
 
             {coordinateData && (
               <MapContainer
-                center={[coordinateData.coordinates.lat, coordinateData.coordinates.lng]}
+                center={[
+                  coordinateData.coordinates.lat,
+                  coordinateData.coordinates.lng,
+                ]}
                 zoom={15}
                 scrollWheelZoom={false}
                 style={{ height: "400px" }}
@@ -276,7 +324,10 @@ export default function OfferPage({
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <Circle
-                  center={[coordinateData.coordinates.lat, coordinateData.coordinates.lng]}
+                  center={[
+                    coordinateData.coordinates.lat,
+                    coordinateData.coordinates.lng,
+                  ]}
                   radius={200} // Adjust radius as needed
                   pathOptions={{ color: "red" }} // Customize circle color and other options
                 />
