@@ -10,8 +10,16 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 
+import { api } from "@/utils/api";
 import { capitalize } from "@/utils/utils";
-import { optional, zodInteger, zodNumber, zodString } from "@/utils/zod-utils";
+import {
+  optional,
+  zodInteger,
+  zodNumber,
+  zodString,
+  zodUrl,
+} from "@/utils/zod-utils";
+import { useFieldArray } from "react-hook-form";
 import TagSelect from "../_common/TagSelect";
 import ErrorMsg from "../ui/ErrorMsg";
 import {
@@ -31,7 +39,7 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
-const formSchema = z.object({
+export const hostPropertyFormSchema = z.object({
   name: zodString(),
   originalNightlyPrice: zodNumber(),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
@@ -47,37 +55,46 @@ const formSchema = z.object({
   address: optional(zodString({ maxLen: 1000 })),
   checkInInfo: optional(zodString()),
   areaDescription: optional(zodString({ maxLen: Infinity })),
+  imageUrls: z.object({ value: zodUrl() }).array(),
 });
 
-type FormSchema = z.infer<typeof formSchema>;
+type FormSchema = z.infer<typeof hostPropertyFormSchema>;
 
 export default function HostPropertyForm() {
   const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(hostPropertyFormSchema),
     defaultValues: {
       name: "",
       address: "",
       areaDescription: "",
-      // imageUrls: [
-      //   { value: "" },
-      //   { value: "" },
-      //   { value: "" },
-      //   { value: "" },
-      //   { value: "" },
-      // ],
+      imageUrls: [
+        { value: "" },
+        { value: "" },
+        { value: "" },
+        { value: "" },
+        { value: "" },
+      ],
       amenities: [],
       standoutAmenities: [],
       safetyItems: [],
     },
   });
 
-  // const imageUrlInputs = useFieldArray({
-  //   name: "imageUrls",
-  //   control: form.control,
-  // });
+  const imageUrlInputs = useFieldArray({
+    name: "imageUrls",
+    control: form.control,
+  });
+
+  const { mutateAsync } = api.properties.hostInsertProperty.useMutation({
+    onSuccess: () => {
+      return null;
+    },
+  });
 
   function onSubmit(values: FormSchema) {
     console.log(values);
+
+    void mutateAsync(values);
 
     return null;
   }
@@ -336,6 +353,73 @@ export default function HostPropertyForm() {
               </FormItem>
             )}
           />
+
+          <FormItem className="col-span-full space-y-1">
+            <FormLabel>Image URLs</FormLabel>
+            <div className="space-y-2 rounded-md border bg-secondary p-2">
+              {imageUrlInputs.fields.map((field, i) => (
+                <FormField
+                  control={form.control}
+                  key={field.id}
+                  name={`imageUrls.${i}.value`} // Update this line
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          inputMode="url"
+                          placeholder={`Image URL ${i + 1} (${
+                            i === 0
+                              ? "primary image"
+                              : i < 5
+                                ? "required"
+                                : "optional"
+                          })`}
+                          onKeyDown={(e) => {
+                            const n = imageUrlInputs.fields.length;
+
+                            switch (e.key) {
+                              case "Enter":
+                                imageUrlInputs.insert(i + 1, {
+                                  value: "",
+                                });
+                                e.preventDefault();
+                                break;
+                              case "ArrowDown":
+                                form.setFocus(`imageUrls.${(i + 1) % n}.value`);
+                                break;
+                              case "ArrowUp":
+                                form.setFocus(
+                                  `imageUrls.${(i + n - 1) % n}.value`,
+                                );
+                                break;
+                              case "Backspace":
+                                if (n > 3 && e.currentTarget.value === "") {
+                                  imageUrlInputs.remove(i);
+                                  form.setFocus(
+                                    `imageUrls.${i === n - 1 ? i - 1 : i}.value`,
+                                  );
+                                }
+                                break;
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="emptyInput"
+                className="w-full"
+                onClick={() => imageUrlInputs.append({ value: "" })}
+              >
+                Add another image (optional)
+              </Button>
+            </div>
+          </FormItem>
 
           <Button
             disabled={form.formState.isSubmitting}
