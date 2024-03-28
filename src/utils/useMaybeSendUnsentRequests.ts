@@ -45,10 +45,7 @@ export function useMaybeSendUnsentRequests() {
 
         if (unsentRequests.length === 1) {
           const req = unsentRequests[0];
-          successfulRequestToast({
-            ...req,
-            numGuests: req.numGuests ?? 1,
-          });
+          successfulRequestToast(req);
         } else {
           toast({
             title: `Successfully submitted ${unsentRequests.length} requests`,
