@@ -3,7 +3,7 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
 import { zodString } from "@/utils/zod-utils";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
@@ -43,6 +43,31 @@ export async function fetchUsersConversations(userId: string) {
     },
   });
 }
+
+export async function fetchUsersUnreadConversationMessages(userId: string) {
+  return await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: {},
+    with: {
+      conversations: {
+        columns: {},
+        with: {
+          conversation: {
+            with: {
+              messages: {
+                orderBy: (messages, { desc }) => [desc(messages.createdAt)],
+                where: and(ne(messages.userId, userId), eq(messages.read, false)),
+                columns: {
+                  id: true
+                }
+              },
+            },
+          },
+        },
+      },
+    }, });
+}
+
 
 export async function fetchConversationWithAdmin(userId: string) {
   const result = await db.query.users.findFirst({
@@ -231,11 +256,13 @@ export const messagesRouter = createTRPCRouter({
   showUnreadMessages: protectedProcedure
     .input(z.object({ userId: zodString() }))
     .query(async ({ ctx, input }) => {
-      const userMessages = await ctx.db.query.messages.findMany({
-        where: and(eq(messages.userId, input.userId), eq(messages.read, false)),
-      });
+      // const userMessages = await ctx.db.query.messages.findMany({
+      //   where: and(eq(messages.userId, input.userId), eq(messages.read, false)),
+      // });
 
-      return userMessages.length;}),
+      const result = await fetchUsersUnreadConversationMessages(ctx.user.id);
+
+    }),
   setMessagesToRead: protectedProcedure
     .input(
       z.object({
