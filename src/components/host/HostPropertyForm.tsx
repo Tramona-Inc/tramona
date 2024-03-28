@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
 import {
   ALL_PROPERTY_AMENITIES,
   ALL_PROPERTY_SAFETY_ITEMS,
@@ -11,6 +12,7 @@ import { z } from "zod";
 import { Button } from "../ui/button";
 
 import { api } from "@/utils/api";
+import { errorToast } from "@/utils/toasts";
 import { capitalize } from "@/utils/utils";
 import {
   optional,
@@ -60,7 +62,7 @@ export const hostPropertyFormSchema = z.object({
 
 type FormSchema = z.infer<typeof hostPropertyFormSchema>;
 
-export default function HostPropertyForm() {
+export default function HostPropertyForm({setOpen}: {setOpen: (isOpen: boolean) => void }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(hostPropertyFormSchema),
     defaultValues: {
@@ -87,16 +89,21 @@ export default function HostPropertyForm() {
 
   const { mutateAsync } = api.properties.hostInsertProperty.useMutation({
     onSuccess: () => {
-      return null;
+      form.reset();
+      setOpen(false);
+
+      toast({
+        title: "Successfully added property",
+        description: "Your property will now get some listings",
+      });
+    },
+    onError: () => {
+      errorToast("Couldn't add your property");
     },
   });
 
   function onSubmit(values: FormSchema) {
-    console.log(values);
-
     void mutateAsync(values);
-
-    return null;
   }
 
   return (

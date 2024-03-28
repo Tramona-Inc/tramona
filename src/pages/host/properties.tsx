@@ -9,12 +9,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export default function Properties() {
+  const [open, setOpen] = useState(false);
+
   return (
     <DashboadLayout type="host">
       <h1 className="text-h1">Properties</h1>
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button>Add a Property</Button>
         </DialogTrigger>
@@ -26,7 +29,7 @@ export default function Properties() {
               booking with your property.
             </DialogDescription>
           </DialogHeader>
-          <HostPropertyForm />
+          <HostPropertyForm setOpen={setOpen}/>
         </DialogContent>
       </Dialog>
     </DashboadLayout>

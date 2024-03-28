@@ -1,3 +1,4 @@
+import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import {
   createTRPCRouter,
   publicProcedure,
@@ -70,6 +71,20 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
+      });
+    }),
+  hostInsertProperty: roleRestrictedProcedure(["host"])
+    .input(hostPropertyFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "host") {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      return await ctx.db.insert(properties).values({
+        ...input,
+        hostId: ctx.user.id,
+        hostName: ctx.user.name,
+        imageUrls: input.imageUrls.map((urlObject) => urlObject.value),
       });
     }),
 });
