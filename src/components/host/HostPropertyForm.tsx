@@ -1,17 +1,11 @@
 import { Input } from "@/components/ui/input";
-import {
-  ALL_PROPERTY_AMENITIES,
-  ALL_PROPERTY_SAFETY_ITEMS,
-  ALL_PROPERTY_STANDOUT_AMENITIES,
-  ALL_PROPERTY_TYPES,
-  propertyInsertSchema,
-} from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES, propertyInsertSchema } from "@/server/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 
+import { capitalize } from "@/utils/utils";
 import { type z } from "zod";
-import TagSelect from "../_common/TagSelect";
 import ErrorMsg from "../ui/ErrorMsg";
 import {
   Form,
@@ -29,7 +23,6 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import { capitalize } from '@/utils/utils';
 
 const formSchema = propertyInsertSchema;
 
@@ -38,7 +31,12 @@ type FormSchema = z.infer<typeof formSchema>;
 export default function HostPropertyForm() {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      name: "",
+      hostName: "",
+      address: "",
+      areaDescription: "",
+    },
   });
 
   function onSubmit() {
@@ -69,27 +67,14 @@ export default function HostPropertyForm() {
 
           <FormField
             control={form.control}
-            name="hostName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Host name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="originalNightlyPriceUSD"
+            name="originalNightlyPrice"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Property&apos;s original price (nightly)</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
+                    value={field.value ?? ""}
                     inputMode="decimal"
                     prefix="$"
                     suffix="/night"
@@ -205,11 +190,11 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Amenities</FormLabel>
                 <FormControl>
-                  <TagSelect
+                  {/* <TagSelect
                     options={ALL_PROPERTY_AMENITIES}
                     onChange={field.onChange}
                     value={field.value}
-                  />
+                  /> */}
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -223,11 +208,11 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Standout Amenities</FormLabel>
                 <FormControl>
-                  <TagSelect
+                  {/* <TagSelect
                     options={ALL_PROPERTY_STANDOUT_AMENITIES}
                     onChange={field.onChange}
                     value={field.value}
-                  />
+                  /> */}
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -241,11 +226,11 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Safety Items</FormLabel>
                 <FormControl>
-                  <TagSelect
+                  {/* <TagSelect
                     options={ALL_PROPERTY_SAFETY_ITEMS}
                     onChange={field.onChange}
                     value={field.value}
-                  />
+                  /> */}
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -273,7 +258,7 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Address (optional)</FormLabel>
                 <FormControl>
-                  <Input {...field} type="text" />
+                  <Input {...field} type="text" value={field.value ?? ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -287,7 +272,12 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Check In Info (optional)</FormLabel>
                 <FormControl>
-                  <Textarea {...field} className="resize-y" rows={2} />
+                  <Textarea
+                    {...field}
+                    value={field.value ?? ""}
+                    className="resize-y"
+                    rows={2}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -301,7 +291,7 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Area Description (optional)</FormLabel>
                 <FormControl>
-                  <Input {...field} type="text" />
+                  <Input {...field} type="text" value={field.value ?? ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
