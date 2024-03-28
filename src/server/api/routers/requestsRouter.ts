@@ -236,6 +236,11 @@ export const requestsRouter = createTRPCRouter({
               .returning()
               .then((res) => res[0]!.id);
 
+            await tx.insert(groupMembers).values({
+              userId: ctx.user.id,
+              groupId: madeByGroupId,
+            });
+
             await tx.insert(requests).values({
               ...req,
               madeByGroupId,
