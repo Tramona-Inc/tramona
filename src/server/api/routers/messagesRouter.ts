@@ -56,18 +56,21 @@ export async function fetchUsersUnreadConversationMessages(userId: string) {
             with: {
               messages: {
                 orderBy: (messages, { desc }) => [desc(messages.createdAt)],
-                where: and(ne(messages.userId, userId), eq(messages.read, false)),
+                where: and(
+                  ne(messages.userId, userId),
+                  eq(messages.read, false),
+                ),
                 columns: {
-                  id: true
-                }
+                  id: true,
+                },
               },
             },
           },
         },
       },
-    }, });
+    },
+  });
 }
-
 
 export async function fetchConversationWithAdmin(userId: string) {
   const result = await db.query.users.findFirst({
@@ -262,6 +265,20 @@ export const messagesRouter = createTRPCRouter({
 
       const result = await fetchUsersUnreadConversationMessages(ctx.user.id);
 
+      let totalUnreadMessages = 0;
+
+      if (result) {
+        result.conversations.forEach((conversation) => {
+          if (conversation.conversation.messages.length > 0) {
+            const conversationMessagesCount =
+              conversation.conversation.messages.length;
+
+            totalUnreadMessages += conversationMessagesCount;
+          }
+
+          return totalUnreadMessages;
+        });
+      }
     }),
   setMessagesToRead: protectedProcedure
     .input(
