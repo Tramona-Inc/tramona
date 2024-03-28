@@ -53,7 +53,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (!mostRecentRequestGroup) return res.status(500);
 
   const requestsInGroup = await db.query.requests.findMany({
-    where: eq(requests.id, mostRecentRequestGroup.id),
+    where: eq(requests.requestGroupId, mostRecentRequestGroup.id),
     columns: { location: true },
   });
 
