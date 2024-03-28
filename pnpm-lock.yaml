@@ -190,7 +190,7 @@ dependencies:
     version: 8.0.0(react@18.2.0)
   framer-motion:
     specifier: ^11.0.15
-    version: 11.0.22(react-dom@18.2.0)(react@18.2.0)
+    version: 11.0.23(react-dom@18.2.0)(react@18.2.0)
   fs:
     specifier: 0.0.1-security
     version: 0.0.1-security
@@ -12886,8 +12886,8 @@ packages:
       '@emotion/is-prop-valid': 0.8.8
     dev: false
 
-  /framer-motion@11.0.22(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-kWyldNJLyKDvLWjPYFmgngQYLiU8973BtAeVBc83r2cnil/NBUQJb1ff/6/EweNQYb5BW3PaXFjZa4D3pn/W2Q==}
+  /framer-motion@11.0.23(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-V2xdf9hYJKPml7412Ghmh3LZYjiCAEDIIxR9JOb/ni4GHLQFLE+51wG89/3NhheX1vfYBI1SnicXSyHtzfTPqg==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0
