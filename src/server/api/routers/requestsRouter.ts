@@ -224,7 +224,7 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.transaction(async (tx) => {
         const requestGroupId = await tx
           .insert(requestGroups)
-          .values({})
+          .values({ createdByUserId: ctx.user.id })
           .returning()
           .then((res) => res[0]!.id);
 
@@ -353,7 +353,7 @@ export const requestsRouter = createTRPCRouter({
         .where(eq(requests.id, input.id));
 
       const owner = await ctx.db.query.users.findFirst({
-        where: eq(users.id, request.madeByGroup.owner!.id),
+        where: eq(users.id, request.madeByGroup.owner.id),
         columns: { phoneNumber: true, isWhatsApp: true },
       });
 

@@ -1,13 +1,7 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 
 import { db } from "@/server/db";
-import {
-  groupMembers,
-  groups,
-  requestGroups,
-  requests,
-  users,
-} from "@/server/db/schema";
+import { requestGroups, requests, users } from "@/server/db/schema";
 import { eq, and, isNotNull, count, lt } from "drizzle-orm";
 
 import { sendText, sendWhatsApp } from "@/server/server-utils";
