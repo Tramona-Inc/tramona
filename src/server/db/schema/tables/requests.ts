@@ -34,9 +34,6 @@ export const requests = pgTable("requests", {
   note: varchar("note", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
-  hasApproved: boolean("has_approved").default(false).notNull(),
-  confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
-  haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),
 });
 
 export type Request = typeof requests.$inferSelect;
@@ -48,11 +45,12 @@ export const MAX_REQUEST_GROUP_SIZE = 10;
 
 export const requestGroups = pgTable("request_groups", {
   id: serial("id").primaryKey(),
-  createdByUserId: text("created_by_user_id").references(() => users.id),
-  hasApproved: boolean("has_approved").default(true).notNull(),
+  createdByUserId: text("created_by_user_id")
+    .notNull()
+    .references(() => users.id),
+  hasApproved: boolean("has_approved").default(false).notNull(),
   confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
   haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),
-  createdAt: timestamp("created_at"),
 });
 
 export type RequestGroup = typeof requestGroups.$inferSelect;

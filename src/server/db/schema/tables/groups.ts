@@ -1,5 +1,4 @@
 import {
-  boolean,
   integer,
   pgTable,
   primaryKey,
@@ -19,7 +18,9 @@ import { users } from "./users";
 
 export const groups = pgTable("groups", {
   id: serial("id").primaryKey(),
-  ownerId: text("owner_id").references(() => users.id),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id),
 });
 
 export const groupMembers = pgTable(
@@ -31,7 +32,6 @@ export const groupMembers = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    isOwner: boolean("is_owner").notNull().default(false),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.groupId, vt.userId] }),
