@@ -4,14 +4,14 @@ import {
   ALL_PROPERTY_SAFETY_ITEMS,
   ALL_PROPERTY_STANDOUT_AMENITIES,
   ALL_PROPERTY_TYPES,
-  propertyInsertSchema,
 } from "@/server/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "../ui/button";
 
 import { capitalize } from "@/utils/utils";
-import { type z } from "zod";
+import { optional, zodInteger, zodNumber, zodString } from "@/utils/zod-utils";
 import TagSelect from "../_common/TagSelect";
 import ErrorMsg from "../ui/ErrorMsg";
 import {
@@ -31,7 +31,23 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
-const formSchema = propertyInsertSchema;
+const formSchema = z.object({
+  name: zodString(),
+  originalNightlyPrice: zodNumber(),
+  propertyType: z.enum(ALL_PROPERTY_TYPES),
+  maxNumGuests: zodInteger({ min: 1 }),
+  numBeds: zodInteger({ min: 1 }),
+  numBedrooms: zodInteger({ min: 1 }),
+  avgRating: zodNumber({ min: 0, max: 5 }),
+  numRatings: zodInteger({ min: 1 }),
+  amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
+  standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
+  safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
+  about: zodString({ maxLen: Infinity }),
+  address: optional(zodString({ maxLen: 1000 })),
+  checkInInfo: optional(zodString()),
+  areaDescription: optional(zodString({ maxLen: Infinity })),
+});
 
 type FormSchema = z.infer<typeof formSchema>;
 
@@ -40,7 +56,6 @@ export default function HostPropertyForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      hostName: "",
       address: "",
       areaDescription: "",
       // imageUrls: [
@@ -61,7 +76,9 @@ export default function HostPropertyForm() {
   //   control: form.control,
   // });
 
-  function onSubmit() {
+  function onSubmit(values: FormSchema) {
+    console.log(values);
+
     return null;
   }
 
@@ -96,8 +113,8 @@ export default function HostPropertyForm() {
                 <FormControl>
                   <Input
                     {...field}
-                    value={field.value ?? ""}
-                    inputMode="decimal"
+                    value={field.value ?? 0}
+                    inputMode="numeric"
                     prefix="$"
                     suffix="/night"
                   />
