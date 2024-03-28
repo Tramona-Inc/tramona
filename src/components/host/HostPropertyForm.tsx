@@ -1,11 +1,18 @@
 import { Input } from "@/components/ui/input";
-import { ALL_PROPERTY_TYPES, propertyInsertSchema } from "@/server/db/schema";
+import {
+  ALL_PROPERTY_AMENITIES,
+  ALL_PROPERTY_SAFETY_ITEMS,
+  ALL_PROPERTY_STANDOUT_AMENITIES,
+  ALL_PROPERTY_TYPES,
+  propertyInsertSchema,
+} from "@/server/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 
 import { capitalize } from "@/utils/utils";
 import { type z } from "zod";
+import TagSelect from "../_common/TagSelect";
 import ErrorMsg from "../ui/ErrorMsg";
 import {
   Form,
@@ -36,8 +43,23 @@ export default function HostPropertyForm() {
       hostName: "",
       address: "",
       areaDescription: "",
+      // imageUrls: [
+      //   { value: "" },
+      //   { value: "" },
+      //   { value: "" },
+      //   { value: "" },
+      //   { value: "" },
+      // ],
+      amenities: [],
+      standoutAmenities: [],
+      safetyItems: [],
     },
   });
+
+  // const imageUrlInputs = useFieldArray({
+  //   name: "imageUrls",
+  //   control: form.control,
+  // });
 
   function onSubmit() {
     return null;
@@ -190,11 +212,11 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Amenities</FormLabel>
                 <FormControl>
-                  {/* <TagSelect
+                  <TagSelect
                     options={ALL_PROPERTY_AMENITIES}
                     onChange={field.onChange}
                     value={field.value}
-                  /> */}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -208,11 +230,11 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Standout Amenities</FormLabel>
                 <FormControl>
-                  {/* <TagSelect
+                  <TagSelect
                     options={ALL_PROPERTY_STANDOUT_AMENITIES}
                     onChange={field.onChange}
                     value={field.value}
-                  /> */}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -226,11 +248,11 @@ export default function HostPropertyForm() {
               <FormItem className="col-span-full">
                 <FormLabel>Safety Items</FormLabel>
                 <FormControl>
-                  {/* <TagSelect
+                  <TagSelect
                     options={ALL_PROPERTY_SAFETY_ITEMS}
                     onChange={field.onChange}
                     value={field.value}
-                  /> */}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
