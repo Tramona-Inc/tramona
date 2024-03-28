@@ -169,7 +169,7 @@ export default function Sidebar({
             <SidebarLink href={link.href} icon={link.icon}>
               {link.name}
             </SidebarLink>
-            {totalUnreadMessages &&
+            {totalUnreadMessages !== undefined &&
               totalUnreadMessages > 0 &&
               link.name === "Messages" && (
                 <div className="pointer-events-none absolute inset-y-3 right-3 flex flex-col justify-center lg:justify-start">
