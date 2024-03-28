@@ -17,6 +17,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
+import { Badge } from "../ui/badge";
 
 function SidebarLink({
   href,
@@ -116,7 +117,8 @@ export default function Sidebar({
     });
 
   const notifyMe = useCallback(async () => {
-    if (!("Notification" in window)) {      // Check if the browser supports notifications
+    if (!("Notification" in window)) {
+      // Check if the browser supports notifications
       alert("This browser does not support desktop notification");
       // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
     } else if (Notification.permission === "granted") {
@@ -162,22 +164,26 @@ export default function Sidebar({
         </div>
       )}
       <div className="flex flex-1 flex-col justify-center">
-        {navLinks.map((link, index) =>
-          link.name === "Messages" ? (
-            <SidebarLink key={index} href={link.href} icon={link.icon}>
-              {link.name}{" "}
-              {totalUnreadMessages && totalUnreadMessages > 0 ? (
-                <div className="flex h-6 w-6 items-center justify-center rounded-full border bg-red-600 text-white">
-                  {totalUnreadMessages}
-                </div>
-              ) : null}
-            </SidebarLink>
-          ) : (
-            <SidebarLink key={index} href={link.href} icon={link.icon}>
+        {navLinks.map((link, index) => (
+          <div key={index} className="relative">
+            <SidebarLink href={link.href} icon={link.icon}>
               {link.name}
             </SidebarLink>
-          ),
-        )}
+            {totalUnreadMessages &&
+              totalUnreadMessages > 0 &&
+              link.name === "Messages" && (
+                <div className="pointer-events-none absolute inset-y-3 right-3 flex flex-col justify-center lg:justify-start">
+                  <Badge
+                    className="min-w-5 text-center"
+                    variant="solidRed"
+                    size="sm"
+                  >
+                    {totalUnreadMessages}
+                  </Badge>
+                </div>
+              )}
+          </div>
+        ))}
       </div>
       {/* <button onClick={notifyMe}>NOTIFICATION</button>
       <button onClick={play}>Sound</button>

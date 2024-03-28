@@ -70,7 +70,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     await db
       .update(requestGroups)
       .set({ hasApproved: true })
-      .where(eq(requests.id, mostRecentRequestGroup.id));
+      .where(eq(requestGroups.id, mostRecentRequestGroup.id));
   }
 
   res.setHeader("Content-Type", "text/xml");
