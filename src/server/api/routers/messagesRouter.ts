@@ -256,32 +256,30 @@ export const messagesRouter = createTRPCRouter({
       await addTwoUserToConversation(input.user1Id, input.user2Id);
     }),
 
-  showUnreadMessages: protectedProcedure
-    .input(z.object({ userId: zodString() }))
-    .query(async ({ ctx, input }) => {
-      // const userMessages = await ctx.db.query.messages.findMany({
-      //   where: and(eq(messages.userId, input.userId), eq(messages.read, false)),
-      // });
+  getNumUnreadMessages: protectedProcedure.query(async ({ ctx }) => {
+    // const userMessages = await ctx.db.query.messages.findMany({
+    //   where: and(eq(messages.userId, input.userId), eq(messages.read, false)),
+    // });
 
-      const result = await fetchUsersUnreadConversationMessages(ctx.user.id);
+    const result = await fetchUsersUnreadConversationMessages(ctx.user.id);
 
-      let totalUnreadMessages = 0;
+    let totalUnreadMessages = 0;
 
-      if (result) {
-        result.conversations.forEach((conversation) => {
-          if (conversation.conversation.messages.length > 0) {
-            const conversationMessagesCount =
-              conversation.conversation.messages.length;
+    if (result) {
+      result.conversations.forEach((conversation) => {
+        if (conversation.conversation.messages.length > 0) {
+          const conversationMessagesCount =
+            conversation.conversation.messages.length;
 
-            totalUnreadMessages += conversationMessagesCount;
-          }
+          totalUnreadMessages += conversationMessagesCount;
+        }
 
-          return totalUnreadMessages;
-        });
-      }
+        return totalUnreadMessages;
+      });
+    }
 
-      return 0;
-    }),
+    return 0;
+  }),
   setMessagesToRead: protectedProcedure
     .input(
       z.object({

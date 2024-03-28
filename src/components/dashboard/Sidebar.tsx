@@ -1,7 +1,7 @@
 import NavLink from "../_utils/NavLink";
 
 import { api } from "@/utils/api";
-import { cn } from "@/utils/utils";
+import { cn, plural } from "@/utils/utils";
 import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
@@ -108,51 +108,31 @@ export default function Sidebar({
             ]
           : guestNavLinks;
 
-  const userId = session?.user.id;
-
   const { data: totalUnreadMessages } =
-    api.messages.showUnreadMessages.useQuery({
-      userId: userId ?? "add-default-user-id",
+    api.messages.getNumUnreadMessages.useQuery(undefined, {
+      refetchInterval: 10000,
     });
 
   const notifyMe = useCallback(async () => {
-    if (!("Notification" in window)) {      // Check if the browser supports notifications
-      alert("This browser does not support desktop notification");
-      // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
-    } else if (Notification.permission === "granted") {
+    // Check if the browser supports notifications
+    if (!("Notification" in window) || !totalUnreadMessages) return;
+
+    // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
+    if (Notification.permission === "granted") {
       // Check whether notification permissions have already been granted;
       // if so, create a notification
-      console.log("permission granted");
       const title = "Tramona Messages";
-      const icon =
-        "https://img.apmcdn.org/d7e015791079e6474a04b6cff4825a9c9e3a7a36/square/50a6ba-20231003-panda-diplomacy1-webp2000.webp";
-      const body = `You have ${totalUnreadMessages} unread message${totalUnreadMessages && totalUnreadMessages > 1 ? "s" : ""}.`;
-      const notification = new Notification(title, { body, icon });
+      const icon = "/assets/images/tramona-logo.jpeg";
+      const body = `You have ${plural(totalUnreadMessages, "unread message")}!`;
+      new Notification(title, { body, icon });
       const notificationSound = new Audio("/assets/sounds/sound.mp3");
       void notificationSound.play();
-      console.log("userId:", userId);
-      console.log("notification", notification);
-    } else if (Notification.permission !== "denied") {
-      // We need to ask the user for permission
-      console.log("permission denied");
-      await Notification.requestPermission().then((permission) => {
-        // If the user accepts, let's create a notification
-        if (permission === "granted") {
-          const notification = new Notification("Hi there!");
-          // …
-        }
-      });
     }
-  }, [totalUnreadMessages, userId]);
+  }, [totalUnreadMessages]);
 
   useEffect(() => {
     totalUnreadMessages && notifyMe;
   }, [totalUnreadMessages, notifyMe]);
-
-  const play = () => {
-    const notificationSound = new Audio("/assets/sounds/sound.mp3");
-    void notificationSound.play();
-  };
 
   return (
     <div className="sticky top-0 flex h-full w-64 flex-col border-r lg:w-24">
