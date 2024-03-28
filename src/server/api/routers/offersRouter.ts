@@ -137,6 +137,7 @@ export const offersRouter = createTRPCRouter({
           createdAt: true,
           totalPrice: true,
           id: true,
+          acceptedAt: true,
         },
         with: {
           property: {
