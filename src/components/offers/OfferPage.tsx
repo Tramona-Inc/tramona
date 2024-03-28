@@ -140,6 +140,7 @@ export default function OfferPage({
           ) : (
             property.imageUrls.slice(0, 5).map((imageUrl, index) => (
               <div
+                key={index}
                 className={`relative col-span-1 row-span-1 ${
                   index === 0 ? "col-span-2 row-span-2" : ""
                 }`}
@@ -187,6 +188,7 @@ export default function OfferPage({
                   <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
                     {property.imageUrls.map((imageUrl, index) => (
                       <DialogTrigger
+                        key={index}
                         className={` hover:opacity-90 ${
                           index === 0 || index % 3 === 0
                             ? "col-span-2 row-span-2"
