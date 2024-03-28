@@ -62,6 +62,12 @@ export default function MessagePage() {
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery();
 
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      void Notification.requestPermission();
+    }
+  }, []);
+
   return (
     <>
       <Head>
