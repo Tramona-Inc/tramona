@@ -6,6 +6,7 @@ import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 
 export default function DashboardPage() {
   useMaybeSendUnsentRequests();
+
   return (
     <DashboardLayout type="guest">
       <Head>

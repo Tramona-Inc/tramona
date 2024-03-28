@@ -21,22 +21,11 @@ export default function ProfileSidebar() {
           <div>
             <div className="my-4">
               <p className="text-3xl font-bold">{session.user.name}</p>
-              <p className="text-base">Member since 10/22/2023</p>
+              <p className="text-base">
+                Member since{" "}
+                {new Date(session.user.createdAt).toLocaleDateString()}
+              </p>
             </div>
-            {/* <div className="my-8 space-y-4">
-            <div>
-              <p className="text-sm text-zinc-500">Average review given</p>
-              <p className="text-xl font-bold">3.17</p>
-            </div>
-            <div>
-              <p className="text-sm text-zinc-500">Average review received</p>
-              <p className="text-xl font-bold">4.86</p>
-            </div>
-            <div>
-              <p className="text-sm text-zinc-500">Total experiences made</p>
-              <p className="text-xl font-bold">3</p>
-            </div>
-          </div> */}
           </div>
           <div>
             <Button

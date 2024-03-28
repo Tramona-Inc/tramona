@@ -256,6 +256,27 @@ export const messagesRouter = createTRPCRouter({
       await addTwoUserToConversation(input.user1Id, input.user2Id);
     }),
 
+  getParticipantsPhoneNumbers: protectedProcedure
+    .input(z.object({ conversationId: zodString() }))
+    .query(async ({ ctx, input }) => {
+      const participants = await db
+        .select({
+          id: users.id,
+          phoneNumber: users.phoneNumber,
+          lastTextAt: users.lastTextAt,
+          isWhatsApp: users.isWhatsApp,
+        })
+        .from(conversationParticipants)
+        .innerJoin(users, eq(conversationParticipants.userId, users.id))
+        .where(
+          and(
+            eq(conversationParticipants.conversationId, input.conversationId),
+            ne(conversationParticipants.userId, ctx.user.id),
+          ),
+        );
+      return participants;
+    }),
+
   getNumUnreadMessages: protectedProcedure.query(async ({ ctx }) => {
     // const userMessages = await ctx.db.query.messages.findMany({
     //   where: and(eq(messages.userId, input.userId), eq(messages.read, false)),

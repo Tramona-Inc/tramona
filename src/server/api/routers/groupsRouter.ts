@@ -1,6 +1,6 @@
 import { GroupInviteEmail } from "@/components/email-templates/GroupInviteEmail";
 import { groupInvites, groupMembers, groups, users } from "@/server/db/schema";
-import { sendEmail } from "@/server/server-utils";
+import { getGroupOwnerId, sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
 import { and, eq } from "drizzle-orm";
@@ -11,12 +11,7 @@ export const groupsRouter = createTRPCRouter({
   inviteUserByEmail: protectedProcedure
     .input(z.object({ email: z.string(), groupId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const groupOwnerId = await ctx.db.query.groups
-        .findFirst({
-          where: eq(groups.id, input.groupId),
-          with: { members: { where: eq(groupMembers.isOwner, true) } },
-        })
-        .then((res) => res?.members[0]?.userId);
+      const groupOwnerId = await getGroupOwnerId(input.groupId);
 
       if (ctx.user.id !== groupOwnerId) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -79,12 +74,7 @@ export const groupsRouter = createTRPCRouter({
   inviteUserById: protectedProcedure
     .input(z.object({ userId: z.string(), groupId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const groupOwnerId = await ctx.db.query.groups
-        .findFirst({
-          where: eq(groups.id, input.groupId),
-          with: { members: { where: eq(groupMembers.isOwner, true) } },
-        })
-        .then((res) => res?.members[0]?.userId);
+      const groupOwnerId = await getGroupOwnerId(input.groupId);
 
       if (ctx.user.id !== groupOwnerId) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -96,16 +86,11 @@ export const groupsRouter = createTRPCRouter({
   leaveGroup: protectedProcedure
     .input(z.number())
     .mutation(async ({ input: groupId, ctx }) => {
-      const members =
-        (await ctx.db.query.groups
-          .findFirst({
-            where: eq(groups.id, groupId),
-            with: { members: true },
-          })
-          .then((res) => res?.members)) ?? [];
-
-      const userWasOwner =
-        ctx.user.id === members.find((member) => member.isOwner)?.userId;
+      const group = await ctx.db.query.groups.findFirst({
+        where: eq(groups.id, groupId),
+        columns: { ownerId: true },
+        with: { members: true },
+      });
 
       await ctx.db
         .delete(groupMembers)
@@ -116,18 +101,19 @@ export const groupsRouter = createTRPCRouter({
           ),
         );
 
+      const userWasOwner = group?.ownerId === ctx.user.id;
       if (userWasOwner) {
-        const randomMember = members.find((member) => !member.isOwner);
+        const randomMember = group.members.find(
+          (member) => member.userId !== ctx.user.id,
+        );
         if (randomMember) {
           await ctx.db
-            .update(groupMembers)
-            .set({ isOwner: true })
-            .where(
-              and(
-                eq(groupMembers.groupId, groupId),
-                eq(groupMembers.userId, randomMember?.userId),
-              ),
-            );
+            .update(groups)
+            .set({ ownerId: randomMember.userId })
+            .where(eq(groups.id, groupId));
+        } else {
+          // group must be empty, so delete it
+          await ctx.db.delete(groups).where(eq(groups.id, groupId));
         }
       }
     }),
@@ -135,12 +121,7 @@ export const groupsRouter = createTRPCRouter({
   removeGroupMember: protectedProcedure
     .input(z.object({ memberId: z.string(), groupId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const groupOwnerId = await ctx.db.query.groups
-        .findFirst({
-          where: eq(groups.id, input.groupId),
-          with: { members: { where: eq(groupMembers.isOwner, true) } },
-        })
-        .then((res) => res?.members[0]?.userId);
+      const groupOwnerId = await getGroupOwnerId(input.groupId);
 
       if (ctx.user.id !== groupOwnerId) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -179,4 +160,16 @@ export const groupsRouter = createTRPCRouter({
           .map((member) => member.user),
       );
   }),
+
+  getGroupOwner: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ input: groupId, ctx }) => {
+      return await ctx.db.query.groups
+        .findFirst({
+          columns: {},
+          with: { owner: { columns: { phoneNumber: true, isWhatsApp: true } } },
+          where: eq(groups.id, groupId),
+        })
+        .then((res) => res?.owner);
+    }),
 });

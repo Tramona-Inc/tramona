@@ -2,29 +2,39 @@ import RequestCard, {
   type DetailedRequest,
 } from "@/components/requests/RequestCard";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
+import { type RequestGroup } from "@/server/db/schema";
+import { RequestUnconfirmedButton } from "./RequestUnconfirmedButton";
 
-export default function RequestGroup({
-  groupId: _, // well use it soon
+export default function RequestGroupCards({
+  requestGroup,
   requests,
   isWaiting,
   startTimer,
 }: {
-  groupId: number;
+  requestGroup: RequestGroup;
   requests: DetailedRequest[];
   isWaiting: boolean;
   startTimer: () => void;
 }) {
   if (requests.length === 0) return null;
 
+  const requestUnconfirmedBtn = (
+    <RequestUnconfirmedButton
+      requestGroupId={requestGroup.id}
+      isWaiting={isWaiting}
+      onClick={startTimer}
+    />
+  );
+
   if (requests.length === 1) {
     const request = requests[0]!;
     return (
       <RequestCard request={request}>
-        <RequestCardAction
-          request={request}
-          isWaiting={isWaiting}
-          onClick={startTimer}
-        />
+        {requestGroup.hasApproved ? (
+          <RequestCardAction request={request} />
+        ) : (
+          requestUnconfirmedBtn
+        )}
       </RequestCard>
     );
   }
@@ -40,14 +50,13 @@ export default function RequestGroup({
         {requests.map((request) => (
           <div key={request.id} className="min-w-96 *:h-full">
             <RequestCard request={request}>
-              <RequestCardAction
-                request={request}
-                isWaiting={isWaiting}
-                onClick={startTimer}
-              />
+              <RequestCardAction request={request} />
             </RequestCard>
           </div>
         ))}
+      </div>
+      <div className="flex justify-end gap-2 px-4 pb-2">
+        {!requestGroup.hasApproved && requestUnconfirmedBtn}
       </div>
     </div>
   );

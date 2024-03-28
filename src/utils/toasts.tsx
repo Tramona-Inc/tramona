@@ -19,21 +19,10 @@ export function errorToast(error = "Something went wrong, please try again") {
   });
 }
 
-export function successfulRequestToast(
-  request: Pick<
-    Request,
-    "checkIn" | "checkOut" | "maxTotalPrice" | "numGuests" | "location"
-  >,
-) {
-  const pricePerNight =
-    request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
-  const fmtdPrice = `${formatCurrency(pricePerNight)}/night`;
-  const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-  const fmtdNumGuests = plural(request.numGuests, "guest");
-
+export function successfulRequestToast(request: Pick<Request, "location">) {
   toast({
     title: `Request sent: ${request.location}`,
-    description: `${fmtdPrice} • ${fmtdDateRange} • ${fmtdNumGuests}`,
+    description: `Please check your phone for a confirmation text`,
   });
 }
 
