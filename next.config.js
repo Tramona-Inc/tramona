@@ -79,6 +79,10 @@ const config = {
         protocol: "https",
         hostname: "www.airbnb.com",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
     ],
   },
   experimental: {

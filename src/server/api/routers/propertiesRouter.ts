@@ -72,4 +72,12 @@ export const propertiesRouter = createTRPCRouter({
         where: eq(properties.id, input.id),
       });
     }),
+
+  getManyByHostId: publicProcedure
+    .input(propertySelectSchema.pick({ hostId: true }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.properties.findMany({
+        where: eq(properties.hostId, input.hostId),
+      });
+    }),
 });
