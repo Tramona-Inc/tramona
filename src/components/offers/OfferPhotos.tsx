@@ -24,7 +24,7 @@ export default function OfferPhotos({
         loop: true,
         startIndex: indexOfSelectedImage,
       }}
-      className="w-full md:w-[600px] md:h-[600px] lg:h-[750px] lg:w-[800px] "
+      className="w-full md:w-[600px] md:h-[700px] lg:h-[750px] lg:w-[800px] "
     >
       <CarouselContent className="">
         {propertyImages.map((image, index) => (
@@ -37,7 +37,7 @@ export default function OfferPhotos({
                       src={
                         propertyImages && propertyImages.length > 0 ? image : ""
                       }
-                      alt=""
+                      alt="Property Image"
                       fill
                       layout="fill"
                       objectFit="contain"
@@ -50,8 +50,8 @@ export default function OfferPhotos({
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="h-[50px] w-[50px]"/>
-      <CarouselNext className="h-[50px] w-[50px]" />
+      <CarouselPrevious className="h-[50px] w-[50px] -ml-6"/>
+      <CarouselNext className="h-[50px] w-[50px] -mr-6" />
     </Carousel>
   );
 }
