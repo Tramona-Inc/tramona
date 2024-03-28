@@ -279,6 +279,8 @@ export const messagesRouter = createTRPCRouter({
           return totalUnreadMessages;
         });
       }
+
+      return 0;
     }),
   setMessagesToRead: protectedProcedure
     .input(
