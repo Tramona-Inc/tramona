@@ -2,13 +2,8 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
 
 import { db } from "@/server/db";
-import {
-  groupMembers,
-  requestGroups,
-  requests,
-  users,
-} from "@/server/db/schema";
-import { eq, desc, exists, and } from "drizzle-orm";
+import { requestGroups, requests, users } from "@/server/db/schema";
+import { eq, desc } from "drizzle-orm";
 
 type TwilioRequestBody = {
   ToCountry: string;
