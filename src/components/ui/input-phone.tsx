@@ -82,6 +82,7 @@ const CountrySelect = ({
 }: CountrySelectProps) => {
   const handleSelect = React.useCallback(
     (country: RPNInput.Country) => {
+      console.log(country);
       onChange(country);
     },
     [onChange],

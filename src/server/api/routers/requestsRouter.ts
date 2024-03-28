@@ -7,6 +7,7 @@ import {
 import { db } from "@/server/db";
 import {
   MAX_REQUEST_GROUP_SIZE,
+  type RequestGroup,
   groupMembers,
   groups,
   requestGroups,
@@ -26,29 +27,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { sendText } from "@/server/server-utils";
-
-async function createGroup({
-  ownerId,
-  _db = db,
-}: {
-  ownerId?: string;
-  _db?: typeof db;
-}) {
-  const groupId = await _db
-    .insert(groups)
-    .values({})
-    .returning()
-    .then((res) => res[0]!.id);
-
-  if (ownerId) {
-    await _db
-      .insert(groupMembers)
-      .values({ groupId, userId: ownerId, isOwner: true });
-  }
-
-  return groupId;
-}
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -60,6 +39,7 @@ export const requestsRouter = createTRPCRouter({
             with: {
               requests: {
                 with: {
+                  requestGroup: true,
                   offers: {
                     with: {
                       property: {
@@ -103,7 +83,7 @@ export const requestsRouter = createTRPCRouter({
               ...request,
               groupMembers: members.map((member) => ({
                 ...member.user,
-                isGroupOwner: member.isOwner,
+                isGroupOwner: groupMember.group.ownerId === member.userId,
               })),
               groupInvites: invites,
             }));
@@ -136,21 +116,21 @@ export const requestsRouter = createTRPCRouter({
 
         // 4. group
         const groupedRequests: {
-          groupId: number;
+          group: RequestGroup;
           requests: typeof ungroupedRequests;
         }[] = [];
 
         for (const request of ungroupedRequests) {
           const group = groupedRequests.find(
-            ({ groupId }) => groupId === request.requestGroupId,
+            ({ group }) => group.id === request.requestGroupId,
           );
 
           if (group) {
             group.requests.push(request);
           } else {
             groupedRequests.push({
-              groupId: request.requestGroupId,
               requests: [request],
+              group: request.requestGroup,
             });
           }
         }
@@ -199,6 +179,7 @@ export const requestsRouter = createTRPCRouter({
             },
           },
           offers: { columns: { id: true } },
+          requestGroup: true,
         },
       })
       // doing this until drizzle adds aggregations for
@@ -212,7 +193,7 @@ export const requestsRouter = createTRPCRouter({
               numOffers: offers.length,
               groupMembers: madeByGroup.members.map((member) => ({
                 ...member.user,
-                isGroupOwner: member.isOwner,
+                isGroupOwner: madeByGroup.ownerId === member.userId,
               })),
               groupInvites: madeByGroup.invites,
             };
@@ -243,16 +224,17 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.transaction(async (tx) => {
         const requestGroupId = await tx
           .insert(requestGroups)
-          .values({})
+          .values({ createdByUserId: ctx.user.id })
           .returning()
           .then((res) => res[0]!.id);
 
         const results = await Promise.allSettled(
           input.map(async (req) => {
-            const madeByGroupId = await createGroup({
-              ownerId: ctx.user.id,
-              _db: tx,
-            });
+            const madeByGroupId = await db
+              .insert(groups)
+              .values({ ownerId: ctx.user.id })
+              .returning()
+              .then((res) => res[0]!.id);
 
             await tx.insert(requests).values({
               ...req,
@@ -271,6 +253,19 @@ export const requestsRouter = createTRPCRouter({
           }
         });
       });
+
+      if (ctx.user.isWhatsApp) {
+        void sendWhatsApp({
+          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+          to: ctx.user.phoneNumber!,
+        });
+      } else {
+        void sendText({
+          to: ctx.user.phoneNumber!,
+          content:
+            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+        });
+      }
 
       if (env.NODE_ENV !== "production") return;
 
@@ -298,12 +293,6 @@ export const requestsRouter = createTRPCRouter({
         `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,
       );
-
-      void sendText({
-        to: ctx.user.phoneNumber!,
-        content:
-          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-      });
     }),
 
   // resolving a request with no offers = reject
@@ -316,18 +305,25 @@ export const requestsRouter = createTRPCRouter({
   // in the future, well need to validate that a host actually received the request,
   // or else a malicious host could reject any request
   updateConfirmation: protectedProcedure
-    .input(z.object({ requestId: z.number() }))
+    .input(z.object({ requestGroupId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
-        .update(requests)
+        .update(requestGroups)
         .set({ confirmationSentAt: new Date() })
-        .where(eq(requests.id, input.requestId));
+        .where(eq(requestGroups.id, input.requestGroupId));
 
-      await sendText({
-        to: ctx.user.phoneNumber!,
-        content:
-          "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-      });
+      if (ctx.user.isWhatsApp) {
+        await sendWhatsApp({
+          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+          to: ctx.user.phoneNumber!,
+        });
+      } else {
+        await sendText({
+          to: ctx.user.phoneNumber!,
+          content:
+            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+        });
+      }
     }),
 
   resolve: roleRestrictedProcedure(["admin"])
@@ -341,7 +337,9 @@ export const requestsRouter = createTRPCRouter({
           checkOut: true,
         },
         with: {
-          madeByGroup: { with: { members: true } },
+          madeByGroup: {
+            with: { members: true, owner: { columns: { id: true } } },
+          },
         },
       });
 
@@ -354,22 +352,24 @@ export const requestsRouter = createTRPCRouter({
         .set({ resolvedAt: new Date() })
         .where(eq(requests.id, input.id));
 
-      const ownerId = request.madeByGroup.members.find(
-        (member) => member.isOwner,
-      )!.userId;
+      const owner = await ctx.db.query.users.findFirst({
+        where: eq(users.id, request.madeByGroup.owner.id),
+        columns: { phoneNumber: true, isWhatsApp: true },
+      });
 
-      const ownerPhoneNumber = await ctx.db.query.users
-        .findFirst({
-          where: eq(users.id, ownerId),
-          columns: { phoneNumber: true },
-        })
-        .then((res) => res?.phoneNumber);
-
-      if (ownerPhoneNumber) {
-        void sendText({
-          to: ownerPhoneNumber,
-          content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
-        });
+      if (owner) {
+        if (!owner.isWhatsApp) {
+          void sendWhatsApp({
+            templateId: "HX08c870ee406c7ef4ff763917f0b3c411",
+            to: owner.phoneNumber!,
+            propertyAddress: request.location,
+          });
+        } else {
+          void sendText({
+            to: owner.phoneNumber!,
+            content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
+          });
+        }
       }
     }),
 
@@ -383,13 +383,12 @@ export const requestsRouter = createTRPCRouter({
         const groupOwnerId = await ctx.db.query.requests
           .findFirst({
             where: eq(requests.id, input.id),
+            columns: {},
             with: {
-              madeByGroup: {
-                with: { members: { where: eq(groupMembers.isOwner, true) } },
-              },
+              madeByGroup: { columns: { ownerId: true } },
             },
           })
-          .then((request) => request?.madeByGroup.members[0]?.userId);
+          .then((res) => res?.madeByGroup.ownerId);
 
         if (!groupOwnerId) {
           throw new TRPCError({ code: "BAD_REQUEST" });

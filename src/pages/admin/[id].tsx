@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { api } from "@/utils/api";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { RequestCardBadge } from "@/components/requests/RequestCard";
 
 export default function Page() {
   const router = useRouter();
@@ -63,6 +64,7 @@ export default function Page() {
                   checkIn={request.checkIn}
                   checkOut={request.checkOut}
                 >
+                  {offer.acceptedAt && <RequestCardBadge request={request} />}
                   <RevokeOfferDialog
                     requestId={request.id}
                     requestCheckIn={request.checkIn}

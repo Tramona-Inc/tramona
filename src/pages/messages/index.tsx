@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { api } from "@/utils/api";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -57,11 +58,22 @@ function MessageDisplay() {
 
 export default function MessagePage() {
   const { data: session } = useSession({ required: true });
+  const userId = session?.user.id;
+
+  const { data: totalUnreadMessages } =
+    api.messages.showUnreadMessages.useQuery({
+      userId: userId ?? "default-user-id",
+    });
 
   return (
     <>
       <Head>
-        <title>Messages | Tramona</title>
+        <title>
+          {totalUnreadMessages && totalUnreadMessages > 0
+            ? `(${totalUnreadMessages})`
+            : null}{" "}
+          Messages | Tramona
+        </title>
       </Head>
       <DashboardLayout type={session?.user.role ?? "guest"}>
         <MessageDisplay />

@@ -30,6 +30,7 @@ const ForHosts = () => {
               alt=""
               width={384}
               height={300}
+              unoptimized
               className="h-full w-full rounded-lg object-cover object-center"
             />
           </div>
