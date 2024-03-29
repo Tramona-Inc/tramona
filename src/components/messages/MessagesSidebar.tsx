@@ -163,40 +163,31 @@ export default function MessagesSidebar({
 
     const fetchConversationIds = async () => {
       if (session) {
-        const { data: conversationIds, error } = await supabase
-          .from("conversation_participants")
-          .select("conversation_id")
-          .eq("user_id", session.user.id);
+        const channels = conversations.map((conversation) => conversation.id)
+          // When channel is selected turn of here so it can listen in the child
+          .filter(
+            (conversationId) =>
+              conversationId !== selectedConversation?.id,
+          )
+          .map((conversationId) =>
+            supabase
+              .channel(conversationId)
+              .on(
+                "postgres_changes",
+                {
+                  event: "INSERT",
+                  schema: "public",
+                  table: "messages",
+                },
+                (payload: { new: MessageDbType }) =>
+                  void handlePostgresChange(payload),
+              )
+              .subscribe(),
+          );
 
-        if (error) {
-          errorToast();
-        } else {
-          const channels = conversationIds
-            // When channel is selected turn of here so it can listen in the child
-            .filter(
-              (conversationId) =>
-                conversationId.conversation_id !== selectedConversation?.id,
-            )
-            .map((conversationId) =>
-              supabase
-                .channel(conversationId.conversation_id)
-                .on(
-                  "postgres_changes",
-                  {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "messages",
-                  },
-                  (payload: { new: MessageDbType }) =>
-                    void handlePostgresChange(payload),
-                )
-                .subscribe(),
-            );
-
-          return () => {
-            channels.forEach((channel) => void channel.unsubscribe());
-          };
-        }
+        return () => {
+          channels.forEach((channel) => void channel.unsubscribe());
+        };
       }
     };
 
