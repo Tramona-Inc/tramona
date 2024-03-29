@@ -1,3 +1,4 @@
+import { sum } from "lodash";
 import { env } from "@/env";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
@@ -34,34 +35,6 @@ export async function fetchUsersConversations(userId: string) {
                       image: true,
                     },
                   },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-}
-
-export async function fetchUsersUnreadConversationMessages(userId: string) {
-  return await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: {},
-    with: {
-      conversations: {
-        columns: {},
-        with: {
-          conversation: {
-            with: {
-              messages: {
-                orderBy: (messages, { desc }) => [desc(messages.createdAt)],
-                where: and(
-                  ne(messages.userId, userId),
-                  eq(messages.read, false),
-                ),
-                columns: {
-                  id: true,
                 },
               },
             },
@@ -278,28 +251,33 @@ export const messagesRouter = createTRPCRouter({
     }),
 
   getNumUnreadMessages: protectedProcedure.query(async ({ ctx }) => {
-    // const userMessages = await ctx.db.query.messages.findMany({
-    //   where: and(eq(messages.userId, input.userId), eq(messages.read, false)),
-    // });
-
-    const result = await fetchUsersUnreadConversationMessages(ctx.user.id);
-
-    let totalUnreadMessages = 0;
-
-    if (result) {
-      result.conversations.forEach((conversation) => {
-        if (conversation.conversation.messages.length > 0) {
-          const conversationMessagesCount =
-            conversation.conversation.messages.length;
-
-          totalUnreadMessages += conversationMessagesCount;
-        }
-
-        return totalUnreadMessages;
-      });
-    }
-
-    return 0;
+    return await db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {},
+        with: {
+          conversations: {
+            columns: {},
+            with: {
+              conversation: {
+                columns: {},
+                with: {
+                  messages: {
+                    columns: { id: true },
+                    where: and(
+                      eq(messages.read, false),
+                      ne(messages.userId, ctx.user.id),
+                    ),
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((res) =>
+        sum(res?.conversations.map((c) => c.conversation.messages.length)),
+      );
   }),
   setMessagesToRead: protectedProcedure
     .input(
