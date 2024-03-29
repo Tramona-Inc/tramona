@@ -336,15 +336,9 @@ export const requestsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.id),
-        columns: {
-          location: true,
-          checkIn: true,
-          checkOut: true,
-        },
+        columns: { location: true, checkIn: true, checkOut: true },
         with: {
-          madeByGroup: {
-            with: { members: true, owner: { columns: { id: true } } },
-          },
+          madeByGroup: { columns: { ownerId: true } },
         },
       });
 
@@ -358,12 +352,12 @@ export const requestsRouter = createTRPCRouter({
         .where(eq(requests.id, input.id));
 
       const owner = await ctx.db.query.users.findFirst({
-        where: eq(users.id, request.madeByGroup.owner.id),
+        where: eq(users.id, request.madeByGroup.ownerId),
         columns: { phoneNumber: true, isWhatsApp: true },
       });
 
       if (owner) {
-        if (!owner.isWhatsApp) {
+        if (owner.isWhatsApp) {
           void sendWhatsApp({
             templateId: "HX08c870ee406c7ef4ff763917f0b3c411",
             to: owner.phoneNumber!,

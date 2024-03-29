@@ -1,9 +1,10 @@
+import { sum } from "lodash";
 import { env } from "@/env";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
 import { zodString } from "@/utils/zod-utils";
-import { ne, and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
@@ -249,14 +250,35 @@ export const messagesRouter = createTRPCRouter({
       return participants;
     }),
 
-  showUnreadMessages: protectedProcedure
-    .input(z.object({ userId: zodString() }))
-    .query(async ({ ctx, input }) => {
-      const userMessages = await ctx.db.query.messages.findMany({
-        where: and(eq(messages.userId, input.userId), eq(messages.read, false)),
-      });
-
-      return userMessages.length;}),
+  getNumUnreadMessages: protectedProcedure.query(async ({ ctx }) => {
+    return await db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {},
+        with: {
+          conversations: {
+            columns: {},
+            with: {
+              conversation: {
+                columns: {},
+                with: {
+                  messages: {
+                    columns: { id: true },
+                    where: and(
+                      eq(messages.read, false),
+                      ne(messages.userId, ctx.user.id),
+                    ),
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((res) =>
+        sum(res?.conversations.map((c) => c.conversation.messages.length)),
+      );
+  }),
   setMessagesToRead: protectedProcedure
     .input(
       z.object({
