@@ -449,7 +449,7 @@ export const offersRouter = createTRPCRouter({
       const url = `${env.NEXTAUTH_URL}/requests`;
 
       if (groupOwner.phoneNumber) {
-        if (!groupOwner.isWhatsApp) {
+        if (groupOwner.isWhatsApp) {
           groupOwnerHasOtherOffers
             ? void sendWhatsApp({
                 templateId: "HXd5256ff10d6debdf70a13d70504d39d5",

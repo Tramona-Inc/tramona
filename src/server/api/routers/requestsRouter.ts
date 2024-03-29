@@ -363,7 +363,7 @@ export const requestsRouter = createTRPCRouter({
       });
 
       if (owner) {
-        if (!owner.isWhatsApp) {
+        if (owner.isWhatsApp) {
           void sendWhatsApp({
             templateId: "HX08c870ee406c7ef4ff763917f0b3c411",
             to: owner.phoneNumber!,
