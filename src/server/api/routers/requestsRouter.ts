@@ -25,7 +25,7 @@ import {
   plural,
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { z } from "zod";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 
@@ -399,5 +399,17 @@ export const requestsRouter = createTRPCRouter({
       }
 
       await ctx.db.delete(requests).where(eq(requests.id, input.id));
+
+      const remainingRequests = await ctx.db
+        .select({ count: count() })
+        .from(requests)
+        .where(eq(requests.requestGroupId, input.id))
+        .then((res) => res[0]?.count ?? 0);
+
+      if (remainingRequests === 0) {
+        await ctx.db
+          .delete(requestGroups)
+          .where(eq(requestGroups.id, input.id));
+      }
     }),
 });
