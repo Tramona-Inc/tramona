@@ -57,7 +57,7 @@ function LargeHeader(props: HeaderProps) {
         ) : (
           <Button asChild variant="darkOutline">
             <Link href="/auth/signin">
-              {status === "authenticated" ? "Go to Dashboard" : "Log in"}
+              {status === "authenticated" ? "Switch to Dashboard" : "Log in"}
             </Link>
           </Button>
         )}
