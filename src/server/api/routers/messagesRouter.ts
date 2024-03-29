@@ -1,4 +1,3 @@
-import { sum } from "lodash";
 import { env } from "@/env";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
@@ -275,9 +274,16 @@ export const messagesRouter = createTRPCRouter({
           },
         },
       })
-      .then((res) =>
-        sum(res?.conversations.map((c) => c.conversation.messages.length)),
-      );
+      .then((res) => {
+        if (!res) return 0; // No result found, so return 0 unread messages
+
+        // Iterate over conversations and calculate sum of message lengths
+        let totalLength = 0;
+        res.conversations.forEach((conv) => {
+          totalLength += conv.conversation.messages.length;
+        });
+        return totalLength;
+      });
   }),
   setMessagesToRead: protectedProcedure
     .input(
