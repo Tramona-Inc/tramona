@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { PhoneInput } from "@/components/ui/input-phone";
+import { type Country, isValidPhoneNumber } from "react-phone-number-input";
 
 import { api } from "@/utils/api";
 import { zodEmail, zodString } from "@/utils/zod-utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { formatPhoneNumber } from "@/utils/formatters";
 import OTPDialog from "./OTPDialog";
@@ -25,7 +27,9 @@ import OTPDialog from "./OTPDialog";
 const formSchema = z.object({
   name: zodString(),
   email: zodEmail(),
-  phoneNumber: zodString({ maxLen: 20 }),
+  phoneNumber: zodString().refine(isValidPhoneNumber, {
+    message: "Invalid phone number",
+  }),
 });
 
 export default function ProfileForm() {
@@ -35,6 +39,7 @@ export default function ProfileForm() {
   const { toast } = useToast();
 
   const [verified, setVerified] = useState<boolean>(false);
+  const [country, setCountry] = useState<Country | undefined>("US");
 
   const { mutate, isLoading } = api.users.updateProfile.useMutation({
     onSuccess: (res) => {
@@ -54,6 +59,14 @@ export default function ProfileForm() {
       });
     },
   });
+  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { mutateAsync: phoneNumberIsTaken } =
+    api.users.phoneNumberIsTaken.useMutation();
+  const { data: phoneNumber } = api.users.myPhoneNumber.useQuery();
+
+  useEffect(() => {
+    user?.phoneNumber === phoneNumber && setVerified(true);
+  }, [user?.phoneNumber, phoneNumber]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,6 +92,29 @@ export default function ProfileForm() {
         phoneNumber: values.phoneNumber,
         name: values.name,
       });
+    }
+
+    if (!country) {
+      form.setError("phoneNumber", { message: "Invalid phone number" });
+      return;
+    }
+    if (country !== "US") {
+      if (session?.user.id) {
+        await updateProfile({
+          id: session?.user.id,
+          isWhatsApp: true,
+        });
+      }
+    }
+
+    if (
+      (await phoneNumberIsTaken({ phoneNumber: values.phoneNumber })) &&
+      values.phoneNumber !== phoneNumber
+    ) {
+      form.setError("phoneNumber", {
+        message: "Phone number already in use, please try again",
+      });
+      return;
     }
   };
 
@@ -121,12 +157,22 @@ export default function ProfileForm() {
             <FormItem className="lg:col-span-2">
               <FormLabel>Phone</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <PhoneInput
+                  placeholder="Enter phone number"
+                  defaultCountry="US"
+                  onCountryChange={setCountry}
+                  autoFocus
+                  {...field}
+                />
               </FormControl>
-              <OTPDialog
-                toPhoneNumber={formatPhoneNumber(form.getValues("phoneNumber"))}
-                setVerified={setVerified}
-              />
+              {!verified && (
+                <OTPDialog
+                  toPhoneNumber={formatPhoneNumber(
+                    form.getValues("phoneNumber"),
+                  )}
+                  setVerified={setVerified}
+                />
+              )}
               <FormMessage />
             </FormItem>
           )}
