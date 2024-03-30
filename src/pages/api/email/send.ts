@@ -1,28 +1,22 @@
-import { type EmailTemplateProps, EmailTemplate } from "@/components/ambassador/EmailTemplate";
+import {
+  type EmailTemplateProps,
+  EmailTemplate,
+} from "@/components/ambassador/EmailTemplate";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Resend } from "resend";
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmail } from "@/server/server-utils";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const bodyData = req.body as EmailTemplateProps;
 
-    const { data, error } = await resend.emails.send({
-      from: `${
-        bodyData.values.firstName + " " + bodyData.values.lastName
-      } - Ambassador Application <onboarding@resend.dev>`,
-      to: ["info@tramona.com"],
-      subject: "New Ambassador Program Application",
-      text: "Applications",
-      react: EmailTemplate(bodyData)
-    })
+    const to = "info@tramona.com";
+    const subject = "New Ambassador Program Application";
+    const content = EmailTemplate(bodyData);
 
-    if (error) {
-      return res.status(400).json(error);
-    }
+    const response = await sendEmail({ to, subject, content });
 
-    res.status(200).json(data);
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
