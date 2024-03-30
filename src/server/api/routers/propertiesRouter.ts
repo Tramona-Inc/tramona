@@ -73,11 +73,11 @@ export const propertiesRouter = createTRPCRouter({
       });
     }),
 
-  getManyByHostId: publicProcedure
-    .input(propertySelectSchema.pick({ hostId: true }))
-    .query(async ({ ctx, input }) => {
+  getManyByHostId: roleRestrictedProcedure(["host", "admin"]).query(
+    async ({ ctx }) => {
       return await ctx.db.query.properties.findMany({
-        where: eq(properties.hostId, input.hostId),
+        where: eq(properties.hostId, ctx.user.id),
       });
-    }),
+    },
+  ),
 });
