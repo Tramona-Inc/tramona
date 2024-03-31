@@ -1,3 +1,4 @@
+import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -11,8 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ALL_PROPERTY_SAFETY_ITEMS } from "@/server/db/schema";
-import { type RouterOutputs, api } from "@/utils/api";
-import { TAX_PERCENTAGE } from "@/utils/constants";
+import { api, type RouterOutputs } from "@/utils/api";
 import {
   cn,
   formatCurrency,
@@ -22,6 +22,7 @@ import {
   getTramonaFeeTotal,
   plural,
 } from "@/utils/utils";
+import { AspectRatio } from "../ui/aspect-ratio";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { CheckIcon, XIcon } from "lucide-react";
 import Image from "next/image";
@@ -30,8 +31,8 @@ import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
-// import { DivIcon } from "leaflet";
-// const Map = dynamic(() => import("./Map"), {ssr: false});
+import OfferPhotos from "./OfferPhotos";
+
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
   {
@@ -110,11 +111,9 @@ export default function OfferPage({
 
   const tax = 0;
 
-  const renderSeeMoreButton = property.imageUrls.length > 5;
-  // const customIcon = new DivIcon({
-  //   iconUrl: "https://cdn-icons-png.flaticon.com/128/15527/15527315.png",
-  //   iconSize: [38,38],
-  // })
+  const renderSeeMoreButton = property.imageUrls.length > 4;
+
+  const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
 
   return (
     <div className="space-y-4">
@@ -124,18 +123,37 @@ export default function OfferPage({
       >
         &larr; Back to all offers
       </Link>
-      <div className="relative">
-        <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
-          {/* Render the first 5 images */}
+      <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
+        <Dialog>
           {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
             <div
-              key={index}
+              key={imageUrl}
               className={`relative col-span-1 row-span-1 bg-accent ${index === 0 ? "col-span-2 row-span-2" : ""}`}
             >
-              <Image src={imageUrl} alt="" fill objectFit="cover" />
+              <DialogTrigger
+                key={index}
+                onClick={() => setIndexOfSelectedImage(index)}
+              >
+                <Image
+                  src={imageUrl}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                  className=""
+                />
+              </DialogTrigger>
             </div>
           ))}
-        </div>
+          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
+            <div className="  screen-full flex justify-center">
+              <OfferPhotos
+                propertyImages={property.imageUrls}
+                indexOfSelectedImage={indexOfSelectedImage}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* If there are more than 5 images, render the "See more photos" button */}
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 right-2">
@@ -148,26 +166,47 @@ export default function OfferPage({
                 <DialogHeader>
                   <DialogTitle>More Photos</DialogTitle>
                 </DialogHeader>
-                <div className="grid-rows-auto grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
-                  {property.imageUrls.map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className={`relative bg-accent ${
-                        index === 0 || index === 3
-                          ? "col-span-2 row-span-2"
-                          : "col-span-1 row-span-1"
-                      }`}
-                    >
-                      <Image
-                        src={imageUrl}
-                        alt=""
-                        fill
-                        objectFit="cover"
-                        className="h-full w-full"
+                {/* //dialog within a dialog */}
+                <Dialog>
+                  <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
+                    {property.imageUrls.map((imageUrl, index) => (
+                      <DialogTrigger
+                        key={imageUrl}
+                        className={` bg-accent ${
+                          index === 0 || index % 3 === 0
+                            ? "col-span-2 row-span-2"
+                            : property.imageUrls.length - 1 == index &&
+                                index % 4 === 0
+                              ? "col-span-2 row-span-2"
+                              : "col-span-1 row-span-1"
+                        }`}
+                      >
+                        <div
+                          key={index}
+                          onClick={() => setIndexOfSelectedImage(index)}
+                        >
+                          <AspectRatio ratio={3 / 2}>
+                            <Image
+                              src={imageUrl}
+                              alt=""
+                              fill
+                              objectFit="cover"
+                              className="h-full w-full"
+                            />
+                          </AspectRatio>
+                        </div>
+                      </DialogTrigger>
+                    ))}
+                  </div>
+                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
+                    <div className="  screen-full flex justify-center">
+                      <OfferPhotos
+                        propertyImages={property.imageUrls}
+                        indexOfSelectedImage={indexOfSelectedImage}
                       />
                     </div>
-                  ))}
-                </div>
+                  </DialogContent>
+                </Dialog>
               </DialogContent>
             </Dialog>
           </div>
@@ -371,10 +410,10 @@ export default function OfferPage({
                   <p className="underline">Tramona service fee</p>
                   <p>{formatCurrency(tramonaServiceFee)}</p>
                 </div>
-                <div className="flex justify-between py-2">
+                {/* <div className="flex justify-between py-2">
                   <p className="underline">Taxes</p>
                   <p>{formatCurrency(tax)}</p>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="flex justify-between py-2">

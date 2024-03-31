@@ -34,10 +34,8 @@ export function MessageConversation({
   const { mutateAsync: setMessageToReadMutate } =
     api.messages.setMessageToRead.useMutation();
 
-    const { mutate, isLoading } = api.users.updateProfile.useMutation({});
-    const utils = api.useUtils();
-
-
+  const { mutate, isLoading } = api.users.updateProfile.useMutation({});
+  const utils = api.useUtils();
 
   const setConversationReadState = useConversation(
     (state) => state.setConversationReadState,
@@ -49,8 +47,8 @@ export function MessageConversation({
       if (session) {
         mutate({
           id: session.user.id,
-          lastTextAt: sub(new Date(), {hours: 2})
-        })
+          lastTextAt: sub(new Date(), { hours: 2 }),
+        });
         await utils.messages.invalidate();
       }
     }
