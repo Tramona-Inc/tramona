@@ -30,6 +30,8 @@ import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
+// import { DivIcon } from "leaflet";
+// const Map = dynamic(() => import("./Map"), {ssr: false});
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
   {
@@ -48,6 +50,13 @@ const Circle = dynamic(
     ssr: false,
   },
 );
+const Marker = dynamic(
+  () => import("react-leaflet").then((module) => module.Marker),
+  {
+    ssr: false,
+  },
+);
+
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -102,6 +111,10 @@ export default function OfferPage({
   const tax = 0;
 
   const renderSeeMoreButton = property.imageUrls.length > 5;
+  // const customIcon = new DivIcon({
+  //   iconUrl: "https://cdn-icons-png.flaticon.com/128/15527/15527315.png",
+  //   iconSize: [38,38],
+  // })
 
   return (
     <div className="space-y-4">
@@ -264,9 +277,16 @@ export default function OfferPage({
               </GoogleMap>
             )} */}
 
+            {/* {coordinateData && (
+              <Map coordinates={coordinateData.coordinates}></Map>
+            )} */}
+
             {coordinateData && (
               <MapContainer
-                center={[coordinateData.coordinates.lat, coordinateData.coordinates.lng]}
+                center={[
+                  coordinateData.coordinates.lat,
+                  coordinateData.coordinates.lng,
+                ]}
                 zoom={15}
                 scrollWheelZoom={false}
                 style={{ height: "400px" }}
@@ -276,15 +296,20 @@ export default function OfferPage({
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <Circle
-                  center={[coordinateData.coordinates.lat, coordinateData.coordinates.lng]}
+                  center={[
+                    coordinateData.coordinates.lat,
+                    coordinateData.coordinates.lng,
+                  ]}
                   radius={200} // Adjust radius as needed
                   pathOptions={{ color: "red" }} // Customize circle color and other options
                 />
-                {/* <Marker position={[51.505, -0.09]}>
-                <Popup>
-                  A pretty CSS3 popup. <br /> Easily customizable.
-                </Popup>
-              </Marker> */}
+                {/* <Marker
+                  position={[
+                    coordinateData.coordinates.lat,
+                    coordinateData.coordinates.lng,
+                  ]}
+                  icon={customIcon}
+                ></Marker> */}
               </MapContainer>
             )}
 
