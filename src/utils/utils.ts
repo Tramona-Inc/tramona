@@ -77,7 +77,10 @@ export function capitalize(str: string) {
  * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
-export function formatDateRange(from: Date, to?: Date) {
+export function formatDateRange(fromDate: Date, toDate?: Date) {
+  const from = removeTimezoneFromDate(fromDate) ?? "";
+  const to = toDate ? removeTimezoneFromDate(toDate) : "";
+
   const isCurYear = isSameYear(from, new Date());
 
   if (!to || isSameDay(from, to)) {
@@ -100,6 +103,11 @@ export function formatDateRange(from: Date, to?: Date) {
     )}`;
   }
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
+}
+
+function removeTimezoneFromDate(date: Date) {
+  // Convert to ISO string and split by 'T' to get date part
+  return date.toISOString().split("Z")[0];
 }
 
 export function formatDateMonthDay(date: Date) {
@@ -168,9 +176,16 @@ export function getDiscountPercentage(
   return Math.round((1 - discountPrice / originalPrice) * 100);
 }
 
-export function useIsDesktop() {
-  return (useWindowSize()?.width ?? 0) >= 640;
-}
+// functions for when css doesnt cut it for showing/hiding stuff on screens
+// use these as a last resort cuz it can cause jank with ssr (unless the element isnt
+// visible on the first render in which case it doesnt matter for ssr)
+
+// https://tailwindcss.com/docs/screens + tailwind.config.ts
+
+export const useScreenWidth = () => useWindowSize()?.width ?? 0;
+export const useIsDesktop = () => useScreenWidth() >= 640;
+export const useIsMd = () => useScreenWidth() >= 768;
+export const useIsLg = () => useScreenWidth() >= 1024;
 
 export function getTramonaFeeTotal(totalSavings: number) {
   const fee = 0.2 * totalSavings;
@@ -188,4 +203,18 @@ export function getFromAndTo(page: number, itemPerPage: number) {
   }
 
   return { from, to };
+}
+
+// hopefully we wont need this
+export function convertUTCDateToLocalDate(date: Date) {
+  const newDate = new Date(
+    date.getTime() + date.getTimezoneOffset() * 60 * 1000,
+  );
+
+  const offset = date.getTimezoneOffset() / 60;
+  const hours = date.getHours();
+
+  newDate.setHours(hours - offset);
+
+  return newDate;
 }

@@ -9,19 +9,22 @@ import {
 } from "./tables/messages";
 import { offers } from "./tables/offers";
 import { properties } from "./tables/properties";
-import { requests } from "./tables/requests";
+import { requestGroups, requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
+import { groupInvites, groupMembers, groups } from "./tables/groups";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
   referralCode: one(referralCodes), // the one they own, not the one used at signup
   propertiesOwned: many(properties),
-  requestsMade: many(requests),
   referralEarnings: many(referralEarnings),
   messages: many(messages),
   conversations: many(conversationParticipants),
   hostProfile: one(hostProfiles),
+  groups: many(groupMembers),
+  ownedGroups: many(groups),
+  requestGroupsCreated: many(requestGroups),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -61,12 +64,27 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
-  madeByUser: one(users, {
-    fields: [requests.userId],
-    references: [users.id],
+  madeByGroup: one(groups, {
+    fields: [requests.madeByGroupId],
+    references: [groups.id],
+  }),
+  requestGroup: one(requestGroups, {
+    fields: [requests.requestGroupId],
+    references: [requestGroups.id],
   }),
   offers: many(offers),
 }));
+
+export const requestGroupsRelations = relations(
+  requestGroups,
+  ({ one, many }) => ({
+    requests: many(requests),
+    createdByUser: one(users, {
+      fields: [requestGroups.createdByUserId],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const offersRelations = relations(offers, ({ one }) => ({
   property: one(properties, {
@@ -120,4 +138,30 @@ export const conversationParticipantsRelations = relations(
   }),
 );
 
+export const groupsRelations = relations(groups, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [groups.ownerId],
+    references: [users.id],
+  }),
+  members: many(groupMembers),
+  invites: many(groupInvites),
+  requests: many(requests),
+}));
 
+export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupMembers.groupId],
+    references: [groups.id],
+  }),
+  user: one(users, {
+    fields: [groupMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupInvites.groupId],
+    references: [groups.id],
+  }),
+}));

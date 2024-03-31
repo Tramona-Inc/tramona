@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
-import { TAX_PERCENTAGE } from "@/utils/constants";
 import {
   formatCurrency,
   formatDateMonthDay,
@@ -65,14 +64,16 @@ export default function DirectBookDialog(
   const tramonaServiceFee = getTramonaFeeTotal(
     originalTotal - offer.totalPrice,
   );
-  const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
+  // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
+
+  const tax = 0;
 
   const totalPriceWithFees = offer.totalPrice + tramonaServiceFee + tax;
 
   async function checkout() {
     const user = session.data?.user;
     if (!user) return;
-    
+
     const response = await createCheckout.mutateAsync({
       listingId: offer.id,
       propertyId: offer.property.id,
@@ -149,10 +150,10 @@ export default function DirectBookDialog(
               <p className="underline">Tramona service fee</p>
               <p>{formatCurrency(tramonaServiceFee)}</p>
             </div>
-            <div className="flex justify-between py-2">
+            {/* <div className="flex justify-between py-2">
               <p className="underline">Taxes</p>
               <p>{formatCurrency(tax)}</p>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="flex justify-between py-2">

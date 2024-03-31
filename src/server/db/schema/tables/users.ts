@@ -6,6 +6,8 @@ import {
   text,
   timestamp,
   varchar,
+  index,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
@@ -26,24 +28,40 @@ export const earningStatusEnum = pgEnum("earning_status", [
   "cancelled",
 ]);
 
-export const users = pgTable("user", {
-  // nextauth fields
-  id: text("id").notNull().primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
-  image: text("image"),
+export const users = pgTable(
+  "user",
+  {
+    // nextauth fields
+    id: text("id").notNull().primaryKey(),
+    name: text("name"),
+    email: text("email").notNull(),
+    emailVerified: timestamp("emailVerified", { mode: "date" }),
+    image: text("image"),
 
-  // custom fields
-  password: varchar("password", { length: 510 }),
-  username: varchar("username", { length: 60 }),
-  referralCodeUsed: varchar("referral_code_used", {
-    length: REFERRAL_CODE_LENGTH,
+    // custom fields
+    password: varchar("password", { length: 510 }),
+    username: varchar("username", { length: 60 }),
+    referralCodeUsed: varchar("referral_code_used", {
+      length: REFERRAL_CODE_LENGTH,
+    }),
+    role: roleEnum("role").notNull().default("guest"),
+    referralTier: referralTierEnum("referral_tier")
+      .notNull()
+      .default("Partner"),
+    phoneNumber: varchar("phone_number", { length: 20 }),
+    lastTextAt: timestamp("last_text_at").defaultNow(),
+    isWhatsApp: boolean("is_whats_app").default(false).notNull(),
+
+    // mode: "string" cuz nextauth doesnt serialize/deserialize dates
+    createdAt: timestamp("created_at", { mode: "string" })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    phoneNumberIdx: index("phone_number_idx").on(t.phoneNumber),
+    emailIdx: index("email_idx").on(t.email),
   }),
-  role: roleEnum("role").notNull().default("guest"),
-  referralTier: referralTierEnum("referral_tier").notNull().default("Partner"),
-  phoneNumber: varchar("phone_number", { length: 20 }),
-});
+);
 
 export type User = typeof users.$inferSelect;
 
@@ -59,8 +77,6 @@ export const referralCodes = pgTable("referral_codes", {
   numBookingsUsingCode: integer("num_bookings_using_code").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
-
-export const userSelectSchema = createSelectSchema(users);
 
 export const referralEarnings = pgTable("referral_earnings", {
   id: serial("id").primaryKey(),
@@ -89,3 +105,9 @@ export const referralEarningsInsertSchema =
 export type ReferralCode = typeof referralCodes.$inferSelect;
 export const referralCodeSelectSchema = createSelectSchema(referralCodes);
 export const referralCodeInsertSchema = createInsertSchema(referralCodes);
+
+export const userInsertSchema = createInsertSchema(users);
+export const userSelectSchema = createSelectSchema(users);
+export const userUpdateSchema = userInsertSchema
+  .partial()
+  .required({ id: true });

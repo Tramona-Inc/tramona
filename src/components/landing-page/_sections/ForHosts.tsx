@@ -4,27 +4,36 @@ import Link from "next/link";
 
 const ForHosts = () => {
   return (
-    <section className="bg-gray-100 p-2 md:px-2">
-      <div className="flex flex-col-reverse justify-between rounded-3xl bg-white p-6 shadow md:flex-row md:p-14">
-        <div className="mt-4 md:mt-0">
-          <h2 className="mb-4 mt-4 text-3xl font-bold md:mt-0">For hosts</h2>
-          <p className="mb-4 text-lg">
-            We turn your vacant calendar dates into bookings!
-          </p>
-          <Link href="/for-hosts">
-            <button className="rounded-full bg-black px-4 py-2 text-white">
-              Learn more
-            </button>
-          </Link>
+    <section className="bg-white p-2 md:px-2">
+      <div className="flex flex-col-reverse rounded-3xl bg-neutral-900 p-6 shadow md:flex-row">
+        <div className="flex flex-1 flex-col justify-center md:mr-8">
+          <div className="mt-4">
+            <h2 className="mb-4 ml-2 text-3xl font-bold text-white md:text-left md:text-4xl lg:text-5xl">
+              For hosts
+            </h2>
+            <p className="mb-6 ml-2 text-lg text-white md:text-left md:text-lg lg:text-xl">
+              We turn your vacant calendar dates into bookings!
+            </p>
+            <div className="ml-2 flex md:justify-start">
+              <Link href="/for-hosts">
+                <button className="rounded-full bg-white px-6 py-3 hover:bg-[#e5e5e5]">
+                  Learn more
+                </button>
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="h-48 w-full overflow-hidden rounded-lg md:h-64 md:w-96">
-          <Image
-            src="/assets/images/landing-page/forhosts.jpeg"
-            alt=""
-            width={384}
-            height={192}
-            className="rounded-lg object-cover object-center"
-          />
+        <div className="w-full md:w-1/2">
+          <div className="h-64 w-full overflow-hidden rounded-lg md:h-auto">
+            <Image
+              src="/assets/images/landing-page/forhosts.jpg"
+              alt=""
+              width={384}
+              height={300}
+              unoptimized
+              className="h-full w-full rounded-lg object-cover object-center"
+            />
+          </div>
         </div>
       </div>
     </section>

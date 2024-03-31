@@ -37,17 +37,15 @@ export function getFmtdFilters(
 export function getRequestStatus(request: {
   resolvedAt: Date | null;
   numOffers: number;
-  hasApproved: boolean;
 }) {
-
   if (request.resolvedAt) {
     return request.numOffers === 0 ? "rejected" : "booked";
   }
-  if (request.hasApproved) {
-    return request.numOffers === 0 ? "pending" : "accepted";
-  } else {
-    return "unconfirmed";
-  }
+  return request.numOffers === 0 ? "pending" : "accepted";
+}
+
+export function isIncoming(request: Parameters<typeof getRequestStatus>[0]) {
+  return getRequestStatus(request) === "pending";
 }
 
 export function formatPhoneNumber(phoneNumber: string) {

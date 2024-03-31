@@ -2,7 +2,7 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
 
 import { db } from "@/server/db";
-import { requests, users } from "@/server/db/schema";
+import { requestGroups, requests, users } from "@/server/db/schema";
 import { eq, desc } from "drizzle-orm";
 
 type TwilioRequestBody = {
@@ -42,30 +42,35 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (!userId) return res.status(500);
 
-  const mostRecentRequest = await db.query.requests.findFirst({
-    where: eq(requests.userId, userId),
-    orderBy: desc(requests.confirmationSentAt),
-    columns: { hasApproved: true, id: true, location: true },
-  });
+  const mostRecentRequestGroup = await db
+    .select({ hasApproved: requestGroups.hasApproved, id: requestGroups.id })
+    .from(requestGroups)
+    .where(eq(requestGroups.createdByUserId, userId))
+    .orderBy(desc(requestGroups.confirmationSentAt))
+    .limit(1)
+    .then((res) => res[0]);
 
-  if (!mostRecentRequest) return res.status(500);
+  if (!mostRecentRequestGroup) return res.status(500);
+
+  const requestsInGroup = await db.query.requests.findMany({
+    where: eq(requests.requestGroupId, mostRecentRequestGroup.id),
+    columns: { location: true },
+  });
 
   const twiml = new MessagingResponse();
 
   if (
-    !mostRecentRequest.hasApproved &&
+    !mostRecentRequestGroup.hasApproved &&
     userResponse.toLowerCase().trim() === "yes"
   ) {
     twiml.message(
-      `Thank you for confirming your request to ${mostRecentRequest.location}`,
+      `Thank you for confirming ${requestsInGroup.length === 1 ? `your request to ${requestsInGroup[0]!.location}` : `your trip with ${requestsInGroup.length} requests`}! ${requestsInGroup.length === 1 ? "It has" : "They have"} been sent to our network of hosts. We will text you when you receive offers.`,
     );
 
     await db
-      .update(requests)
-      .set({
-        hasApproved: true,
-      })
-      .where(eq(requests.id, mostRecentRequest.id));
+      .update(requestGroups)
+      .set({ hasApproved: true })
+      .where(eq(requestGroups.id, mostRecentRequestGroup.id));
   }
 
   res.setHeader("Content-Type", "text/xml");

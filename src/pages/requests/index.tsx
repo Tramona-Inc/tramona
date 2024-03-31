@@ -1,22 +1,16 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import Spinner from "@/components/_common/Spinner";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
-import RequestCard, {
-  type DetailedRequest,
-} from "@/components/requests/RequestCard";
-import { RequestCardAction } from "@/components/requests/RequestCardAction";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { useEffect, useState } from "react";
-import { useInterval } from "@/utils/useInterval";
-import { usePrevious } from "@uidotdev/usehooks";
 import { HistoryIcon, Plus, TagIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
+import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
+import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
 
-function NewRequestButton() {
+export function NewRequestButton() {
   return (
     <NewRequestDialog>
       <Button className="pl-2">
@@ -27,104 +21,30 @@ function NewRequestButton() {
   );
 }
 
-function RequestCards({
-  requests,
-}: {
-  requests: DetailedRequest[] | undefined;
-}) {
-  const [isWaiting, setIsWaiting] = useState(false);
-  const utils = api.useUtils();
-
-  const previousRequests = usePrevious(requests);
-
-  useEffect(() => {
-    if (!requests || !previousRequests) return;
-    const newlyApprovedRequests = requests.filter(
-      (req) =>
-        req.hasApproved &&
-        !previousRequests.find((req2) => req2.id === req.id)?.hasApproved,
-    );
-    if (newlyApprovedRequests.length > 0) {
-      setIsWaiting(false);
-    }
-  }, [requests]);
-
-  // Start the interval to invalidate requests every 10 seconds
-  useInterval(
-    () => void utils.requests.getMyRequests.invalidate(),
-    isWaiting ? 10 * 1000 : null,
-  ); // 10 seconds
-
-  const handleResendConfirmation = () => {
-    // Start the timer for 3 minutes
-    setIsWaiting(true);
-    setTimeout(
-      () => {
-        setIsWaiting(false);
-      },
-      3 * 60 * 1000,
-    ); // 3 minutes
-  };
-
-  return requests ? (
-    <div className="grid gap-4 lg:grid-cols-2">
-      {requests.map((request) => (
-        <RequestCard key={request.id} request={request}>
-          <RequestCardAction
-            key={request.id}
-            request={request}
-            onClick={handleResendConfirmation}
-            isWaiting={isWaiting}
-          />
-        </RequestCard>
-      ))}
-    </div>
-  ) : (
-    <Spinner />
-  );
-}
-
 function RequestsTabs() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
 
   return (
-    <Tabs defaultValue="activeRequests" className="space-y-4">
+    <Tabs defaultValue="activeRequestGroups" className="space-y-4">
       <TabsList>
         <TabsTrigger
-          value="activeRequests"
-          count={requests?.activeRequests.length ?? "blank"}
+          value="activeRequestGroups"
+          count={requests?.activeRequestGroups.length ?? "blank"}
         >
           <TagIcon /> Current Requests
         </TabsTrigger>
         <TabsTrigger
-          value="inactiveRequests"
-          count={requests?.inactiveRequests.length ?? "blank"}
+          value="inactiveRequestGroups"
+          count={requests?.inactiveRequestGroups.length ?? "blank"}
         >
           <HistoryIcon /> Past Requests
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="activeRequests">
-        {requests?.activeRequests.length !== 0 ? (
-          <RequestCards requests={requests?.activeRequests} />
-        ) : (
-          <div className="flex flex-col items-center gap-4 pt-32">
-            <p className="text-center text-muted-foreground">
-              No requests yet, make a request to get started
-            </p>
-            <NewRequestButton />
-          </div>
-        )}
+      <TabsContent value="activeRequestGroups">
+        <ActiveRequestGroups />
       </TabsContent>
-      <TabsContent value="inactiveRequests">
-        {requests?.inactiveRequests.length !== 0 ? (
-          <RequestCards requests={requests?.inactiveRequests} />
-        ) : (
-          <div className="flex flex-col items-center gap-4 pt-32">
-            <p className="text-center text-muted-foreground">
-              Your past requests will show up here
-            </p>
-          </div>
-        )}
+      <TabsContent value="inactiveRequestGroups">
+        <InactiveRequestGroups />
       </TabsContent>
     </Tabs>
   );
@@ -147,7 +67,7 @@ export default function Page() {
               <h1 className="flex-1 py-4 text-4xl font-bold text-black">
                 My Requests
               </h1>
-              <NewRequestButton />
+              {/* <NewRequestButton /> */}
             </div>
             <RequestsTabs />
           </div>

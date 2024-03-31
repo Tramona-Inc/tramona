@@ -1,9 +1,10 @@
+import { sum } from "lodash";
 import { env } from "@/env";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
-import { zodNumber, zodString } from "@/utils/zod-utils";
-import { eq } from "drizzle-orm";
+import { zodString } from "@/utils/zod-utils";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
@@ -76,7 +77,7 @@ export async function fetchConversationWithAdmin(userId: string) {
     (conv) =>
       conv.conversation?.participants?.length === 2 &&
       conv.conversation.participants.some(
-        (participant) => participant.user.id === ADMIN_ID,
+        (participant) => participant.user?.id === ADMIN_ID,
       ),
   );
 
@@ -109,7 +110,7 @@ export async function createConversationWithAdmin(userId: string) {
   }
 }
 
-async function addUserToConversation(userId: string, conversationId: number) {
+async function addUserToConversation(userId: string, conversationId: string) {
   await db
     .insert(conversationParticipants)
     .values({ conversationId: conversationId, userId: userId });
@@ -142,8 +143,9 @@ export const messagesRouter = createTRPCRouter({
         ({ conversation }) => ({
           ...conversation,
           participants: conversation.participants
-            .filter((p) => p.user.id !== ctx.user.id)
-            .map((p) => p.user),
+            .filter((p) => p.user?.id !== ctx.user.id)
+            .map((p) => p.user)
+            .filter(Boolean),
         }),
       );
 
@@ -200,13 +202,13 @@ export const messagesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await addUserToConversation(input.userId, parseInt(input.conversationId));
+      await addUserToConversation(input.userId, input.conversationId);
     }),
 
   setMessageToRead: protectedProcedure
     .input(
       z.object({
-        messageId: zodNumber(),
+        messageId: zodString(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -225,5 +227,68 @@ export const messagesRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       await addTwoUserToConversation(input.user1Id, input.user2Id);
+    }),
+
+  getParticipantsPhoneNumbers: protectedProcedure
+    .input(z.object({ conversationId: zodString() }))
+    .query(async ({ ctx, input }) => {
+      const participants = await db
+        .select({
+          id: users.id,
+          phoneNumber: users.phoneNumber,
+          lastTextAt: users.lastTextAt,
+          isWhatsApp: users.isWhatsApp,
+        })
+        .from(conversationParticipants)
+        .innerJoin(users, eq(conversationParticipants.userId, users.id))
+        .where(
+          and(
+            eq(conversationParticipants.conversationId, input.conversationId),
+            ne(conversationParticipants.userId, ctx.user.id),
+          ),
+        );
+      return participants;
+    }),
+
+  getNumUnreadMessages: protectedProcedure.query(async ({ ctx }) => {
+    return await db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {},
+        with: {
+          conversations: {
+            columns: {},
+            with: {
+              conversation: {
+                columns: {},
+                with: {
+                  messages: {
+                    columns: { id: true },
+                    where: and(
+                      eq(messages.read, false),
+                      ne(messages.userId, ctx.user.id),
+                    ),
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((res) =>
+        sum(res?.conversations.map((c) => c.conversation.messages.length)),
+      );
+  }),
+  setMessagesToRead: protectedProcedure
+    .input(
+      z.object({
+        unreadMessageIds: z.string().array(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(messages)
+        .set({ read: true })
+        .where(inArray(messages.id, input.unreadMessageIds));
     }),
 });

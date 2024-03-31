@@ -1,23 +1,21 @@
-import { type AppRouter } from "@/server/api/root";
 import { type MessageType } from "@/server/db/schema";
-import { type inferRouterOutputs } from "@trpc/server";
 
 import { create } from "zustand";
+import { type RouterOutputs } from "../api";
 
 export type Conversation =
-  inferRouterOutputs<AppRouter>["messages"]["getConversations"][number];
+  RouterOutputs["messages"]["getConversations"][number];
 
-export type Conversations =
-  inferRouterOutputs<AppRouter>["messages"]["getConversations"];
+export type Conversations = RouterOutputs["messages"]["getConversations"];
 
 type ConversationListState = {
   conversationList: Conversations | [];
   setConversationList: (conversationList: Conversations | []) => void;
   setConversationToTop: (
-    conversationId: number,
+    conversationId: string,
     newMessage: MessageType,
   ) => void;
-  setConversationReadState: (conversationId: number) => void;
+  setConversationReadState: (conversationId: string) => void;
 };
 
 export const useConversation = create<ConversationListState>((set) => ({
@@ -25,7 +23,7 @@ export const useConversation = create<ConversationListState>((set) => ({
   setConversationList: (conversationList: Conversations | []) => {
     set(() => ({ conversationList }));
   },
-  setConversationToTop: (conversationId: number, newMessage: MessageType) => {
+  setConversationToTop: (conversationId: string, newMessage: MessageType) => {
     set((state) => {
       const updatedConversations: Conversations | [] = state.conversationList
         ? [...state.conversationList]
@@ -64,7 +62,7 @@ export const useConversation = create<ConversationListState>((set) => ({
       return { conversationList: updatedConversations };
     });
   },
-  setConversationReadState: (conversationId: number) => {
+  setConversationReadState: (conversationId: string) => {
     set((state) => {
       const updatedConversations = state.conversationList.map(
         (conversation) => {

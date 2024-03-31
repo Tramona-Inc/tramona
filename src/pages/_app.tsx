@@ -17,7 +17,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     // <HydrationOverlay>
-    <TooltipProvider delayDuration={50}>
+    <TooltipProvider delayDuration={50} disableHoverableContent>
       <SessionProvider session={session}>
         <Head>
           <meta

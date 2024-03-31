@@ -1,86 +1,59 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { env } from "@/env";
 
 import { db } from "@/server/db";
-import { requests, users } from "@/server/db/schema";
-import { eq, and, isNotNull } from "drizzle-orm";
+import { requestGroups, requests, users } from "@/server/db/schema";
+import { eq, and, isNotNull, count, lt } from "drizzle-orm";
 
-import { sendText } from "@/server/server-utils";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
+import { plural } from "@/utils/utils";
+import { sub } from "date-fns";
 
-// eslint-disable-next-line import/no-anonymous-default-export
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+// "request" means request group in this code
+
+export default async function cron(req: NextApiRequest, res: NextApiResponse) {
   const usersWithUnconfirmedRequests = await db
-    .selectDistinctOn([users.id], {
-      id: users.id,
+    .select({
       phoneNumber: users.phoneNumber,
+      isWhatsApp: users.isWhatsApp,
+      numUnconfirmedRequests: count(requests.id),
     })
-    .from(users)
-    .leftJoin(requests, eq(users.id, requests.userId))
-    .where(and(eq(requests.hasApproved, false), isNotNull(users.phoneNumber)));
+    .from(requestGroups)
+    .innerJoin(users, eq(requestGroups.createdByUserId, users.id))
+    .where(
+      and(
+        eq(requestGroups.hasApproved, false),
+        isNotNull(users.phoneNumber),
+        lt(requests.createdAt, sub(new Date(), { days: 1 })),
+      ),
+    )
+    .groupBy(users.id);
 
   try {
-    // Get the current time
-    const currentTime = new Date();
-
-    // Iterate through each request
-    if (!requests) return;
     for (const user of usersWithUnconfirmedRequests) {
-      const unconfirmedRequests = await db
-        .select()
-        .from(requests)
-        .where(
-          and(eq(requests.userId, user.id), eq(requests.hasApproved, false)),
-        );
-
-      for (const request of unconfirmedRequests) {
-        if (
-          isOlderThan24Hours(request.createdAt, currentTime) &&
-          !request.haveSentFollowUp
-        ) {
-          const url = `${env.NEXTAUTH_URL}/requests/${request.id}`;
-          // Check if the request is older than 24 hours and has not been approved
-          const formattedCheckIn = new Date(request.checkIn).toLocaleDateString(
-            "en-US",
-            {
-              month: "short", // Short month name (e.g., "Feb")
-              day: "2-digit", // Two-digit day (e.g., "27")
-              year: "numeric", // Full year (e.g., "2024")
-            },
-          );
-
-          const formattedCheckOut = new Date(
-            request.checkOut,
-          ).toLocaleDateString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-          });
-
-          await sendText({
-            to: user.phoneNumber!,
-            content: `Tramona: You have an unconfirmed request to ${request.location} from ${formattedCheckIn} to ${formattedCheckOut}. Please [click here](${url}) to return to the site to confirm your request so we can get you the best travel deals.`,
-          });
-
-          await db
-            .update(requests)
-            .set({ haveSentFollowUp: true }) // Update the hasApproved field to true
-            .where(eq(requests.id, request.id));
-
-          return;
-        }
+      const url = `${process.env.NEXTAUTH_URL}/requests`;
+      if (user.isWhatsApp) {
+        await sendWhatsApp({
+          templateId: "HX82b075be3d74f02e45957a453fd48cef",
+          to: user.phoneNumber!,
+          numRequests: user.numUnconfirmedRequests,
+          url: url,
+        });
+      } else {
+        //const url = `${process.env.NEXTAUTH_URL}/requests/${request.id}`;
+        await sendText({
+          to: user.phoneNumber!,
+          content: `Tramona: You have ${plural(user.numUnconfirmedRequests, "unconfirmed request")}! Please tap below to confirm your ${plural(user.numUnconfirmedRequests, "request")} so we can get you the best travel deals. ${url}`,
+        });
       }
-      // Send Twilio message for this request
     }
+
+    await db
+      .update(requestGroups)
+      .set({ haveSentFollowUp: true })
+      .where(eq(requestGroups.haveSentFollowUp, false));
+
     res.status(200).send("Cron job executed successfully.");
   } catch (error) {
     res.status(500).send("An error occurred during cron job execution.");
   }
-};
-
-// Function to check if a date is older than 24 hours
-
-function isOlderThan24Hours(createdAt: Date, currentTime: Date) {
-  const timeDifference = currentTime.getTime() - new Date(createdAt).getTime();
-  const hoursDifference = timeDifference / (1000 * 3600); // Convert milliseconds to hours
-  return hoursDifference >= 24;
 }

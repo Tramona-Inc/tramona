@@ -1,15 +1,21 @@
 import Head from "next/head";
 
-import MastHead from "@/components/landing-page/_sections/MastHead";
-import HowItWorks from "@/components/landing-page/_sections/HowItWorks";
-import SocialFeed from "@/components/landing-page/_sections/SocialFeed";
 import ForHosts from "@/components/landing-page/_sections/ForHosts";
-import ReferAndEarn from "@/components/landing-page/_sections/ReferAndEarn";
 import HelpEndThis from "@/components/landing-page/_sections/HelpEndThis";
+import HowItWorks from "@/components/landing-page/_sections/HowItWorks";
+import MastHead from "@/components/landing-page/_sections/MastHead";
+import ReferAndEarn from "@/components/landing-page/_sections/ReferAndEarn";
+import SocialFeed from "@/components/landing-page/_sections/SocialFeed";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import { useState } from "react";
+import { Icons } from "../_icons/icons";
 
 export default function LandingPage() {
   useMaybeSendUnsentRequests();
+  const [isBannerVisible, setIsBannerVisible] = useState<boolean>(true);
+  const handleBannerClick = () => {
+    setIsBannerVisible(false);
+  };
 
   return (
     <>
@@ -17,41 +23,42 @@ export default function LandingPage() {
         <Head>
           <title>Tramona</title>
         </Head>
-        {/* Section 1: hero & form */}
-        <MastHead />
-
-        {/* Section 2: How it works  */}
-        {/* <How /> */}
-        <HowItWorks />
-
-        {/* Section 3: Message to Host*/}
-        {/* <Hosts /> */}
-        <SocialFeed />
-
-        {/* Section 4: Travel More Save More */}
-        {/* <Save /> */}
-        <ForHosts />
-        <ReferAndEarn />
-        <HelpEndThis />
-
-        {/* Hack to display coin image out of bounds */}
-        {/* without -> displays coin image below */}
-        <div className="relative overflow-x-hidden overflow-y-hidden">
-          {/* Section 5: Gift your friends */}
-          {/* <Gift /> */}
-
-          {/* Section 5: Current State of Travel */}
-          {/* <CurrentState /> */}
+        <div className="bg-white">
+          <div className="2xl:mx-12">
+            {isBannerVisible && (
+              <div className="mb-0 mt-0 w-full place-items-center rounded-lg px-2 pt-2 lg:overflow-visible">
+                <div
+                  role="alert"
+                  className="relative flex hidden w-full items-center justify-center rounded-lg bg-neutral-900 px-4 py-4 text-base text-white md:flex"
+                  onClick={handleBannerClick}
+                >
+                  <div className="flex-grow px-4 text-left md:px-6 md:text-center">
+                    <p className="text-xs text-white md:text-lg md:font-semibold lg:text-xl lg:font-semibold">
+                      A platform designed solely so you can experience more of
+                      the world.
+                    </p>
+                  </div>
+                  <button
+                    className="rounded-lg border-2"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBannerClick();
+                    }}
+                  >
+                    <Icons.close />
+                  </button>
+                </div>
+              </div>
+            )}
+            <MastHead />
+            <HowItWorks />
+            <SocialFeed />
+            <ReferAndEarn />
+            <ForHosts />
+            <HelpEndThis />
+          </div>
         </div>
-
-        {/* Section 5: Tramona Loop */}
-        {/* <TramonaLoop /> */}
-
-        {/* Section 6: Reviews */}
-        {/* <Reviews /> */}
-
-        {/* Jungle Image */}
-        {/* <Jungle /> */}
       </div>
     </>
   );

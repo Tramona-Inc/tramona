@@ -1,5 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { Instagram, Facebook, Linkedin } from "lucide-react";
 
 function FooterLink({
   children,
@@ -21,84 +22,45 @@ function FooterLink({
   );
 }
 
-export default function Footer() {
-  // const [submittedEmail, setSubmittedEmail] = useState(false);
+const Footer: React.FC = () => {
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="flex items-stretch bg-black">
-      <div className="flex-1">
-        <div className="mx-4 my-8 flex flex-col px-4 lg:mx-20">
-          {/* <div>
-            <p className="pb-2 text-lg font-medium text-zinc-300">Newsletter</p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                // const formData = new FormData(e.currentTarget);
-                // const email = formData.get('email');
-                setSubmittedEmail(true);
-
-                e.currentTarget.reset();
-              }}
-              className="relative max-w-lg"
-            >
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder={
-                  submittedEmail ? "Thanks, we'll be in touch!" : "Your Email"
-                }
-                className="w-full rounded-full bg-zinc-700 px-6 py-3 font-semibold text-white placeholder:text-zinc-400"
-              />
-              <button
-                type="submit"
-                className="absolute inset-y-1 right-1 grid h-10 w-10 place-items-center rounded-full bg-black text-xl text-white"
-              >
-                <ArrowRightIcon />
-              </button>
-            </form>
-          </div> */}
-          <div className="my-8 flex flex-col text-zinc-300 lg:flex-row">
-            <div className="flex-1">
-              <FooterLink href="/faq">FAQ</FooterLink>
-
-              <FooterLink href="/auth/signup">Sign up</FooterLink>
-              <FooterLink href="/auth/signin">Log in</FooterLink>
-            </div>
-            <div className="flex-1">
-              <FooterLink href="/support">Contact us</FooterLink>
-              <FooterLink href="/support">Request a Feature</FooterLink>
-              <FooterLink href="/support">Report a Bug</FooterLink>
-            </div>
-            <div className="flex-1">
-              <FooterLink
-                external
-                href="https://www.instagram.com/shoptramona/"
-              >
-                Instagram
-              </FooterLink>
-
-              <FooterLink
-                external
-                href="https://www.facebook.com/ShopTramona?mibextid=LQQJ4d"
-              >
-                Facebook
-              </FooterLink>
-
-              <FooterLink
-                external
-                href="https://www.linkedin.com/company/tramona/"
-              >
-                LinkedIn
-              </FooterLink>
-            </div>
+    <footer className="rounded-t-3xl bg-neutral-900 text-white">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center sm:items-start">
+          <div className="mt-6 flex w-full flex-col items-start gap-2 px-8 sm:flex-row sm:justify-center md:gap-8">
+            <FooterLink href="/auth/signup">Sign up</FooterLink>
+            <FooterLink href="/auth/signin">Sign in</FooterLink>
+            <FooterLink href="/faq">FAQ</FooterLink>
+            <FooterLink href="/support">Contact us</FooterLink>
+            <FooterLink href="/support">Request a feature</FooterLink>
+            <FooterLink href="/support">Report a bug</FooterLink>
           </div>
-          <div className="mx-auto text-zinc-500">
-            <FooterLink href="/">Tramona Inc.</FooterLink>
+        </div>
+        <hr className="my-6 h-px border-none bg-neutral-600" />
+        <div className="flex w-full flex-col items-center justify-between text-center sm:flex-row">
+          <div className="mb-4 text-sm text-gray-400 sm:mb-0">
+            © {currentYear} Tramona. All rights reserved.
+          </div>
+          <div className="flex gap-4">
+            <FooterLink external href="https://www.instagram.com/shoptramona/">
+              <Instagram size={20} />
+            </FooterLink>
+            <FooterLink external href="https://www.facebook.com/ShopTramona">
+              <Facebook size={20} />
+            </FooterLink>
+            <FooterLink
+              external
+              href="https://www.linkedin.com/company/tramona/"
+            >
+              <Linkedin size={20} />
+            </FooterLink>
           </div>
         </div>
       </div>
-      {/* <div className="hidden w-64 bg-[url(/assets/images/footer-img.png)] bg-cover bg-center sm:block" /> */}
     </footer>
   );
-}
+};
+
+export default Footer;
