@@ -206,7 +206,7 @@ export default function OfferPage({
         )}
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start relative">
         <div className="flex-[2] space-y-6">
           <h1 className="items-center text-lg font-semibold sm:text-3xl">
             {property.name}{" "}
@@ -267,10 +267,10 @@ export default function OfferPage({
               </div>
             </div>
           </section>
-          <section>
-            <div className="max-w-2xl rounded-lg bg-zinc-200 px-4 py-2 text-zinc-700">
+          <section className="z-20">
+            <div className="max-w-2xl rounded-lg bg-zinc-200 px-4 py-2 text-zinc-700 z-20">
               <div className="line-clamp-3 break-words">{property.about}</div>
-              <div className="flex justify-end">
+              <div className="flex justify-end z-20">
                 <Dialog>
                   <DialogTrigger className="text-foreground underline underline-offset-2">
                     Read more
@@ -310,33 +310,35 @@ export default function OfferPage({
             )} */}
 
             {coordinateData && (
-              <MapContainer
-                center={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
-                ]}
-                zoom={15}
-                scrollWheelZoom={false}
-                style={{ height: "400px" }}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Circle
+              <div className="relative z-10">
+                <MapContainer
                   center={[
                     coordinateData.coordinates.lat,
                     coordinateData.coordinates.lng,
                   ]}
-                  radius={200} // Adjust radius as needed
-                  pathOptions={{ color: "red" }} // Customize circle color and other options
-                />
-                {/* <Marker position={[51.505, -0.09]}>
+                  zoom={15}
+                  scrollWheelZoom={false}
+                  style={{ height: "400px" }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Circle
+                    center={[
+                      coordinateData.coordinates.lat,
+                      coordinateData.coordinates.lng,
+                    ]}
+                    radius={200} // Adjust radius as needed
+                    pathOptions={{ color: "red" }} // Customize circle color and other options
+                  />
+                  {/* <Marker position={[51.505, -0.09]}>
                 <Popup>
                   A pretty CSS3 popup. <br /> Easily customizable.
                 </Popup>
               </Marker> */}
-              </MapContainer>
+                </MapContainer>
+              </div>
             )}
 
             {/* {(property.mapScreenshot !== null ||
