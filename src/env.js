@@ -47,6 +47,8 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: z.string(),
     REGION: z.string(),
     MAP_SCREENSHOTS_BUCKET_NAME: z.string(),
+    RAPIDAPI_KEY: z.string(),
+    RAPIDAPI_HOST: z.string(),
     GOOGLE_MAPS_KEY: z.string(),
   },
 
@@ -100,6 +102,8 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     REGION: process.env.REGION,
     MAP_SCREENSHOTS_BUCKET_NAME: process.env.MAP_SCREENSHOTS_BUCKET_NAME,
+    RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
+    RAPIDAPI_HOST: process.env.RAPIDAPI_HOST,
     GOOGLE_MAPS_KEY: process.env.GOOGLE_MAPS_KEY,
   },
   /**
