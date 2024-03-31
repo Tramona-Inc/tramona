@@ -11,7 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { capitalize, cn, getNumNights } from "@/utils/utils";
+import { capitalize, cn, formatCurrency, getNumNights } from "@/utils/utils";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, XIcon } from "lucide-react";
@@ -28,8 +28,16 @@ import LPDateRangePicker, {
   LPLocationInput,
   classNames,
 } from "./components";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-const baseFormSchema = z.object({
+const formSchema = z.object({
   data: z
     .array(
       z
@@ -54,7 +62,7 @@ const baseFormSchema = z.object({
     .nonempty(),
 });
 
-type FormSchema = z.infer<typeof baseFormSchema>;
+type FormSchema = z.infer<typeof formSchema>;
 
 export default function DesktopSearchBar({
   afterSubmit,
@@ -62,29 +70,6 @@ export default function DesktopSearchBar({
   afterSubmit?: () => void;
 }) {
   const utils = api.useUtils();
-
-  const formSchema = baseFormSchema.superRefine(async ({ data }, ctx) => {
-    await Promise.all(
-      data.map(async (request, i) => {
-        const minAcceptablePrice = await utils.misc.getMinAcceptablePrice.fetch(
-          {
-            checkIn: request.date.from,
-            checkOut: request.date.to,
-            location: request.location,
-            numGuests: request.numGuests,
-          },
-        );
-
-        if (request.maxNightlyPriceUSD < minAcceptablePrice) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Too low, please try a higher price",
-            path: ["data", i, "maxNightlyPriceUSD"],
-          });
-        }
-      }),
-    );
-  });
 
   const defaultValues: Partial<FormSchema["data"][number]> = {
     propertyType: "any",
@@ -97,6 +82,9 @@ export default function DesktopSearchBar({
     },
     reValidateMode: "onBlur",
   });
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogDescription, setDialogDescription] = useState("");
 
   const [curTab, setCurTab] = useState(0);
 
@@ -113,6 +101,63 @@ export default function DesktopSearchBar({
     form.formState.errors.data
       ?.map?.((error, index) => (error ? index : null))
       .filter((i): i is number => i !== null) ?? [];
+
+  let shouldOpenDialog = false;
+
+  async function checkPriceEstimation(data: FormSchema["data"]) {
+    const newRequests = data.map((request) => {
+      const { date: _date, maxNightlyPriceUSD, location, numGuests } = request;
+      const checkIn = request.date.from;
+      const checkOut = request.date.to;
+
+      return {
+        checkIn,
+        checkOut,
+        location,
+        numGuests,
+        maxNightlyPriceUSD,
+      };
+    });
+
+    // Check for prices
+    await Promise.all(
+      newRequests.map(async (request) => {
+        const averageNightlyPrice =
+          await utils.misc.getAverageNightlyPrice.fetch({
+            checkIn: request.checkIn,
+            checkOut: request.checkOut,
+            location: request.location,
+            numGuests: request.numGuests,
+          });
+
+        const requestedPrice = request.maxNightlyPriceUSD;
+        const priceDifference = averageNightlyPrice - requestedPrice;
+        const priceDiffPercent = (priceDifference / averageNightlyPrice) * 100;
+
+        if (request.maxNightlyPriceUSD < averageNightlyPrice) {
+          if (priceDiffPercent > 30) {
+            // If the price difference is greater than 30%
+            setDialogDescription(
+              `The average nightly price is ${formatCurrency(averageNightlyPrice * 100)}. You are requesting ${formatCurrency(request.maxNightlyPriceUSD * 100)}, which is ${priceDiffPercent.toFixed(0)}% less than the average. There may be high chances of not getting an offer at all. Do you still want to submit your request?`,
+            );
+            shouldOpenDialog = true;
+          } else if (priceDiffPercent >= 24 && priceDiffPercent <= 30) {
+            // If the price difference is between 24% and 30%
+            setDialogDescription(
+              `The average nightly price is ${formatCurrency(averageNightlyPrice * 100)}. You are requesting ${formatCurrency(request.maxNightlyPriceUSD * 100)}, which is ${priceDiffPercent.toFixed(0)}% less than the average. There may be a small chance of getting offers. Do you still want to submit your request?`,
+            );
+            shouldOpenDialog = true;
+          }
+        }
+      }),
+    );
+
+    if (shouldOpenDialog) {
+      setDialogOpen(true);
+    } else {
+      onSubmit(data);
+    }
+  }
 
   async function onSubmit(data: FormSchema["data"]) {
     const newRequests = data.map((request) => {
@@ -174,6 +219,7 @@ export default function DesktopSearchBar({
       }
     }
 
+    setDialogOpen(false);
     afterSubmit?.();
   }
 
@@ -213,7 +259,7 @@ export default function DesktopSearchBar({
                 Trip {i + 1}
                 {hasErrors && (
                   <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
-                    errors
+                    Errors
                   </div>
                 )}
                 {showX && (
@@ -317,14 +363,44 @@ export default function DesktopSearchBar({
         <div className="flex justify-center">
           <Button
             disabled={form.formState.isSubmitting}
+            type="button"
+            onClick={form.handleSubmit((data) =>
+              checkPriceEstimation(data.data),
+            )}
             size="lg"
-            type="submit"
             variant="white"
             className="rounded-full"
           >
             Request Deal
           </Button>
         </div>
+
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>{dialogDescription}</DialogDescription>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full"
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+
+              <Button
+                type="submit"
+                onClick={form.handleSubmit((data) => onSubmit(data.data))}
+                className="rounded-full"
+              >
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </form>
     </Form>
   );
