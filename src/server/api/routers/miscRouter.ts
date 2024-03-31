@@ -1,19 +1,48 @@
 import { requestSelectSchema } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
-import { z } from "zod";
+import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
 
-const priceEstimateSchema = z.object({
-  price: z.object({
-    rate: z.number(),
-    currency: z.string(),
-    total: z.number(),
-  }),
-});
+type AirbnbListing = {
+  id: string;
+  url: string;
+  deeplink: string;
+  position: number;
+  name: string;
+  bathrooms: number;
+  bedrooms: number;
+  beds: number;
+  city: string;
+  images: any[];
+  hostThumbnail: string;
+  isSuperhost: boolean;
+  rareFind: boolean;
+  lat: number;
+  lng: number;
+  persons: number;
+  reviewsCount: number;
+  type: string;
+  userId: number;
+  address: string;
+  amenityIds: any[];
+  previewAmenities: any[];
+  cancelPolicy: string;
+  price: {
+    rate: number;
+    currency: string;
+    total: number;
+  };
+};
+
+type ApiResponse = {
+  error: boolean;
+  headers: any;
+  results: AirbnbListing[];
+};
 
 export const miscRouter = createTRPCRouter({
-  getMinAcceptablePrice: publicProcedure
+  getAverageNightlyPrice: publicProcedure
     .input(
       requestSelectSchema.pick({
         location: true,
@@ -23,14 +52,12 @@ export const miscRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      return 100;
-
-      const price = await fetch(
-        `https://${env.RAPIDAPI_HOST}/search-location` +
+      const price = (await fetch(
+        `https://${env.RAPIDAPI_HOST}/search-location?` +
           new URLSearchParams({
             location: input.location,
-            checkin: input.checkIn.toString(),
-            checkout: input.checkOut.toString(),
+            checkin: format(input.checkIn, "yyyy-MM-dd"),
+            checkout: format(input.checkOut, "yyyy-MM-dd"),
             adults: input.numGuests.toString(),
           }).toString(),
         {
@@ -40,16 +67,18 @@ export const miscRouter = createTRPCRouter({
             "X-RapidAPI-Host": env.RAPIDAPI_HOST,
           },
         },
-      )
-        .then((res) => res.json())
-        .then((res) => priceEstimateSchema.parse(res).price);
+      ).then((res) => res.json())) as ApiResponse;
 
-      if (price.currency !== "USD") {
+      if (price.error) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      // TODO: do some math to figure out the minimum acceptable price
+      // Calculate average nightly price
+      const averageNightlyPrice =
+        price.results.reduce((acc, listing) => {
+          return acc + listing.price.rate;
+        }, 0) / price.results.length;
 
-      return price.total;
+      return averageNightlyPrice;
     }),
 });
