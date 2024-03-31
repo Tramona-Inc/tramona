@@ -10,7 +10,6 @@ import { referralCodesRouter } from "./routers/referralCodesRouter";
 import { requestsRouter } from "./routers/requestsRouter";
 import { stripeRouter } from "./routers/stripeRouter";
 import { twilioRouter } from "./routers/twilioRouter";
-import { filesRouter } from "./routers/filesRouter";
 import { miscRouter } from "./routers/miscRouter";
 import { usersRouter } from "./routers/usersRouter";
 import { emailRouter } from "./routers/emailRouter";

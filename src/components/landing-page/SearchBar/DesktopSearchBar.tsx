@@ -153,7 +153,7 @@ export default function DesktopSearchBar({
     if (shouldOpenDialog) {
       setDialogOpen(true);
     } else {
-      onSubmit(data);
+      void onSubmit(data);
     }
   }
 
