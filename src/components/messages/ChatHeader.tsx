@@ -37,7 +37,7 @@ export default function ChatHeader({
       </div>
 
       <Link
-        href="/requests"
+        href={`/offers/${96}`}
         className={buttonVariants({ variant: "darkOutline" })}
       >
         View trip details
