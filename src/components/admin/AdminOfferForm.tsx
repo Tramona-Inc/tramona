@@ -51,7 +51,7 @@ const formSchema = z.object({
   propertyName: zodString(),
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
-  address: optional(zodString({ maxLen: 1000 })),
+  address: zodString({ maxLen: 1000 }),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
@@ -148,6 +148,8 @@ export default function AdminOfferForm({
   const createOffersMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+  const getOwnerMutation = api.groups.getGroupOwner.useMutation();
 
   const utils = api.useUtils();
 
@@ -230,11 +232,20 @@ export default function AdminOfferForm({
       utils.requests.invalidate(),
     ]);
 
-    if (user?.phoneNumber) {
-      await twilioMutation.mutateAsync({
-        to: user.phoneNumber, // TODO: text the traveller, not the admin
-        msg: "You have a new offer for a request in your Tramona account!",
-      });
+    const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+
+    if (traveler?.phoneNumber) {
+      if (traveler.isWhatsApp) {
+        await twilioWhatsAppMutation.mutateAsync({
+          templateId: "HXfeb90955f0801d551e95a6170a5cc015",
+          to: traveler.phoneNumber
+        })
+      } else {
+        await twilioMutation.mutateAsync({
+          to: traveler.phoneNumber,
+          msg: "You have a new offer for a request in your Tramona account!",
+        });
+      }
     }
 
     successfulAdminOfferToast({
@@ -561,7 +572,7 @@ export default function AdminOfferForm({
           name="address"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Address (optional)</FormLabel>
+              <FormLabel>Address</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
               </FormControl>

@@ -11,7 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 import { ALL_PROPERTY_TYPES, MAX_REQUEST_GROUP_SIZE } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { capitalize, cn, getNumNights } from "@/utils/utils";
+import { capitalize, cn, formatCurrency, getNumNights } from "@/utils/utils";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, XIcon } from "lucide-react";
@@ -28,6 +28,14 @@ import LPDateRangePicker, {
   LPLocationInput,
   classNames,
 } from "./components";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   data: z
@@ -55,32 +63,32 @@ const formSchema = z.object({
 });
 
 type FormSchema = z.infer<typeof formSchema>;
-type ErrorState = string | null;
-
-const defaultValues: Partial<FormSchema["data"][number]> = {
-  propertyType: "any",
-};
 
 export default function DesktopSearchBar({
   afterSubmit,
 }: {
   afterSubmit?: () => void;
 }) {
+  const utils = api.useUtils();
+
+  const defaultValues: Partial<FormSchema["data"][number]> = {
+    propertyType: "any",
+  };
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data: [defaultValues],
     },
+    reValidateMode: "onBlur",
   });
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogDescription, setDialogDescription] = useState("");
+
   const [curTab, setCurTab] = useState(0);
-  const [airbnbUrl, setAirbnbUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorState>(null);
-  // const [combinedScrapedData, setCombinedScrapedData] = useState<string[]>([]); // State variable for combined scraped data
 
   const mutation = api.requests.createMultiple.useMutation();
-  const utils = api.useUtils();
   const router = useRouter();
   const { status } = useSession();
 
@@ -92,13 +100,62 @@ export default function DesktopSearchBar({
       ?.map?.((error, index) => (error ? index : null))
       .filter((i): i is number => i !== null) ?? [];
 
-  // const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
-  // const fmtdFilters = getFmtdFilters({
-  //   minNumBedrooms,
-  //   minNumBeds,
-  //   propertyType: propertyType === "any" ? undefined : propertyType,
-  //   note,
-  // });
+  let shouldOpenDialog = false;
+
+  async function checkPriceEstimation(data: FormSchema["data"]) {
+    const newRequests = data.map((request) => {
+      const { date: _date, maxNightlyPriceUSD, location, numGuests } = request;
+      const checkIn = request.date.from;
+      const checkOut = request.date.to;
+
+      return {
+        checkIn,
+        checkOut,
+        location,
+        numGuests,
+        maxNightlyPriceUSD,
+      };
+    });
+
+    // Check for prices
+    await Promise.all(
+      newRequests.map(async (request) => {
+        const averageNightlyPrice =
+          await utils.misc.getAverageNightlyPrice.fetch({
+            checkIn: request.checkIn,
+            checkOut: request.checkOut,
+            location: request.location,
+            numGuests: request.numGuests,
+          });
+
+        const requestedPrice = request.maxNightlyPriceUSD;
+        const priceDifference = averageNightlyPrice - requestedPrice;
+        const priceDiffPercent = (priceDifference / averageNightlyPrice) * 100;
+
+        if (request.maxNightlyPriceUSD < averageNightlyPrice) {
+          if (priceDiffPercent > 30) {
+            // If the price difference is greater than 30%
+            setDialogDescription(
+              `The average nightly price is ${formatCurrency(averageNightlyPrice * 100)}. You are requesting ${formatCurrency(request.maxNightlyPriceUSD * 100)}, which is ${priceDiffPercent.toFixed(0)}% less than the average. There may be high chances of not getting an offer at all. Do you still want to submit your request?`,
+            );
+            shouldOpenDialog = true;
+          } else if (priceDiffPercent >= 24 && priceDiffPercent <= 30) {
+            // If the price difference is between 24% and 30%
+            setDialogDescription(
+              `The average nightly price is ${formatCurrency(averageNightlyPrice * 100)}. You are requesting ${formatCurrency(request.maxNightlyPriceUSD * 100)}, which is ${priceDiffPercent.toFixed(0)}% less than the average. There may be a small chance of getting offers. Do you still want to submit your request?`,
+            );
+            shouldOpenDialog = true;
+          }
+        }
+      }),
+    );
+
+    if (shouldOpenDialog) {
+      setDialogOpen(true);
+    } else {
+      void onSubmit(data);
+    }
+  }
 
   async function onSubmit(data: FormSchema["data"]) {
     const newRequests = data.map((request) => {
@@ -153,7 +210,8 @@ export default function DesktopSearchBar({
           successfulRequestToast(newRequests[0]!);
         } else {
           toast({
-            title: `Successfully submitted ${newRequests.length} requests`,
+            title: `Successfully submitted ${newRequests.length} requests!`,
+            description: "Please check your phone for a confirmation text",
           });
         }
       } catch (e) {
@@ -161,49 +219,9 @@ export default function DesktopSearchBar({
       }
     }
 
+    setDialogOpen(false);
     afterSubmit?.();
   }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/scrape", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: airbnbUrl }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to scrape data");
-      }
-
-      // Reset input field after successful scraping
-      setAirbnbUrl("");
-      setError(null);
-      const scrapedData = await response.json();
-      // grab this data, put it in local storage or in the db ---- scrapedData.combinedData
-    } catch (error) {
-      console.error("Error scraping data:", error);
-      setError("Failed to scrape data");
-    } finally {
-      setLoading(false);
-    }
-
-    // Add your Puppeteer scraping logic here
-    // For example:
-    // const browser = await puppeteer.launch();
-    //const page = await browser.newPage();
-    // await page.goto(airbnbUrl, { waitUntil: 'domcontentloaded' });
-    // await page.waitForTimeout(30000);
-
-    // // Other scraping operations...
-    // await browser.close();
-  };
 
   return (
     // <>
@@ -241,7 +259,7 @@ export default function DesktopSearchBar({
                 Trip {i + 1}
                 {hasErrors && (
                   <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
-                    errors
+                    Errors
                   </div>
                 )}
                 {showX && (
@@ -291,6 +309,13 @@ export default function DesktopSearchBar({
             className="col-span-full lg:col-span-4"
           />
 
+          <LPDateRangePicker
+            control={form.control}
+            name={`data.${curTab}.date`}
+            formLabel="Check in/Check out"
+            className="col-span-full lg:col-span-3"
+          />
+
           <FormField
             control={form.control}
             name={`data.${curTab}.numGuests`}
@@ -324,13 +349,6 @@ export default function DesktopSearchBar({
             )}
           />
 
-          <LPDateRangePicker
-            control={form.control}
-            name={`data.${curTab}.date`}
-            formLabel="Check in/Check out"
-            className="col-span-full lg:col-span-3"
-          />
-
           <div className="col-span-full">
             <FiltersSection form={form} curTab={curTab} />
           </div>
@@ -339,14 +357,44 @@ export default function DesktopSearchBar({
         <div className="flex justify-center">
           <Button
             disabled={form.formState.isSubmitting}
+            type="button"
+            onClick={form.handleSubmit((data) =>
+              checkPriceEstimation(data.data),
+            )}
             size="lg"
-            type="submit"
             variant="white"
             className="rounded-full"
           >
             Request Deal
           </Button>
         </div>
+
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>{dialogDescription}</DialogDescription>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full"
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+
+              <Button
+                type="submit"
+                onClick={form.handleSubmit((data) => onSubmit(data.data))}
+                className="rounded-full"
+              >
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </form>
     </Form>
   );

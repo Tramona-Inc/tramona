@@ -67,6 +67,7 @@ export default function Onboarding() {
     api.users.phoneNumberIsTaken.useMutation();
   const { mutateAsync: mutateInsertPhone } =
     api.users.insertPhoneWithUserId.useMutation();
+  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
 
   const { update } = useSession();
 
@@ -84,6 +85,15 @@ export default function Onboarding() {
     //   });
     //   return;
     // }
+    if (country !== "US") {
+      if (session?.user.id) {
+        await updateProfile({
+          id: session?.user.id,
+          isWhatsApp: true,
+        });
+      };
+    };
+    
     if (await phoneNumberIsTaken({ phoneNumber })) {
       form.setError("phoneNumber", {
         message: "Phone number already in use, please try again",
