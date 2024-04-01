@@ -168,7 +168,7 @@
   "ct3aMetadata": {
     "initVersion": "7.25.1"
   },
-  "packageManager": "pnpm@8.15.5",
+  "packageManager": "pnpm@8.15.6",
   "readme": "ERROR: No README data found!",
   "_id": "tramona-trpc@0.1.0"
 }
