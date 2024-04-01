@@ -83,10 +83,52 @@ export async function fetchConversationWithAdmin(userId: string) {
   return conversationWithAdmin?.conversation?.id ?? null;
 }
 
-async function generateConversation() {
+export async function fetchConversationWithOffer(
+  userId: string,
+  offerId: string,
+) {
+  const result = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    with: {
+      conversations: {
+        with: {
+          conversation: {
+            columns: {
+              offerId: true,
+            },
+            with: {
+              participants: {
+                with: {
+                  user: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const offerExists = result?.conversations.some(
+    (convo) => convo.conversation.offerId === offerId,
+  );
+
+  return offerExists;
+}
+
+async function generateConversation(
+  conversationName?: string,
+  offerId?: string,
+) {
   const [createdConversation] = await db
     .insert(conversations)
-    .values({})
+    .values({ name: conversationName ? conversationName : null, offerId })
     .returning({ id: conversations.id });
 
   return createdConversation?.id;
@@ -101,6 +143,31 @@ export async function createConversationWithAdmin(userId: string) {
     const participantValues = [
       { conversationId: createdConversationId, userId: userId },
       { conversationId: createdConversationId, userId: ADMIN_ID },
+    ];
+
+    await db.insert(conversationParticipants).values(participantValues);
+
+    return createdConversationId;
+  }
+}
+
+export async function createConversationWithOffer(
+  userId: string,
+  offerUserId: string,
+  propertyName: string,
+  offerId: string,
+) {
+  // Generate conversation and get id
+  const createdConversationId = await generateConversation(
+    propertyName,
+    offerId,
+  );
+
+  if (createdConversationId !== undefined) {
+    // Insert participants for the user and admin
+    const participantValues = [
+      { conversationId: createdConversationId, userId: userId },
+      { conversationId: createdConversationId, userId: offerUserId },
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
@@ -192,6 +259,33 @@ export const messagesRouter = createTRPCRouter({
 
     return conversationId;
   }),
+
+  createConversationWithOffer: protectedProcedure
+    .input(
+      z.object({
+        offerId: z.string(),
+        offerUserId: z.string(),
+        offerPropertyName: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const conversationExist = await fetchConversationWithOffer(
+        ctx.user.id,
+        input.offerId,
+      );
+
+      // Create conversation with host if it doesn't exist
+      if (!conversationExist) {
+        return await createConversationWithOffer(
+          ctx.user.id,
+          input.offerUserId === ""
+            ? env.TRAMONA_ADMIN_USER_ID
+            : input.offerUserId,
+          input.offerPropertyName,
+          input.offerId,
+        );
+      }
+    }),
 
   addUserToConversation: publicProcedure
     .input(

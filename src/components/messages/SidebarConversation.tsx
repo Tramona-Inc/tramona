@@ -1,10 +1,10 @@
-import { motion } from "framer-motion";
 import { api } from "@/utils/api";
 import {
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
+import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 
@@ -17,7 +17,7 @@ export function SidebarConversation({
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {
-  const { participants, messages, id } = conversation;
+  const { participants, messages, id, name } = conversation;
 
   const displayParticipants = participants
     .map((participant) => participant?.name)
@@ -69,6 +69,7 @@ export function SidebarConversation({
       />
 
       <div>
+        <h1 className="font-bold">Property: {name}</h1>
         <h1 className="font-bold">{displayParticipants}</h1>
         <p className="line-clamp-2 text-xs text-muted-foreground">
           {messages.length > 0 &&
