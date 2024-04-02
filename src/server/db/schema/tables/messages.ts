@@ -14,6 +14,7 @@ export const conversations = pgTable("conversations", {
   id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
   name: varchar("name", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  offerId: varchar("offer_id"),
 });
 
 export const messages = pgTable(

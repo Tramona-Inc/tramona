@@ -8,11 +8,13 @@ import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { cn } from "@/utils/utils";
+import { sub } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import Spinner from "../_common/Spinner";
 import UserAvatar from "../_common/UserAvatar";
-import { sub } from "date-fns";
+import { ScrollArea } from "../ui/scroll-area";
+import { SidebarConversation } from "./SidebarConversation";
 
 export function MessageConversation({
   conversation,
@@ -23,7 +25,7 @@ export function MessageConversation({
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {
-  const { participants, messages, id } = conversation;
+  const { participants, messages, id, name } = conversation;
 
   const displayParticipants = participants
     .map((participant) => participant.name)
@@ -74,15 +76,16 @@ export function MessageConversation({
 
       <div className="ml-4 md:ml-2">
         <h1 className="font-bold">{displayParticipants}</h1>
-        <p className="line-clamp-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
+        <p>{name}</p>
+        <div className="line-clamp-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
           {messages.length > 0 &&
             !messages[0]?.read &&
             messages[0]?.userId !== session?.user.id && (
-              <div className="rounded-full bg-blue-500 p-1" />
+              <p className="rounded-full bg-blue-500 p-1" />
             )}
           {messages[0]?.userId === session?.user.id && "You: "}
           {messages[0]?.message ?? ""}
-        </p>
+        </div>
         {session?.user.role === "admin" && (
           <p className="line-clamp-1 text-sm uppercase text-muted-foreground">
             Conversation Id: {id}
@@ -92,8 +95,6 @@ export function MessageConversation({
     </div>
   );
 }
-import { ScrollArea } from "../ui/scroll-area";
-import { SidebarConversation } from "./SidebarConversation";
 
 export type SidebarProps = {
   selectedConversation: Conversation | null;
@@ -108,7 +109,7 @@ export default function MessagesSidebar({
   const { data: fetchedConversations, isLoading } =
     api.messages.getConversations.useQuery(undefined, {
       refetchOnWindowFocus: false,
-      refetchOnMount: false,
+      // refetchOnMount: false,
     });
 
   const conversations = useConversation((state) => state.conversationList);
@@ -163,40 +164,31 @@ export default function MessagesSidebar({
 
     const fetchConversationIds = async () => {
       if (session) {
-        const { data: conversationIds, error } = await supabase
-          .from("conversation_participants")
-          .select("conversation_id")
-          .eq("user_id", session.user.id);
+        const channels = conversations
+          .map((conversation) => conversation.id)
+          // When channel is selected turn of here so it can listen in the child
+          .filter(
+            (conversationId) => conversationId !== selectedConversation?.id,
+          )
+          .map((conversationId) =>
+            supabase
+              .channel(conversationId)
+              .on(
+                "postgres_changes",
+                {
+                  event: "INSERT",
+                  schema: "public",
+                  table: "messages",
+                },
+                (payload: { new: MessageDbType }) =>
+                  void handlePostgresChange(payload),
+              )
+              .subscribe(),
+          );
 
-        if (error) {
-          errorToast();
-        } else {
-          const channels = conversationIds
-            // When channel is selected turn of here so it can listen in the child
-            .filter(
-              (conversationId) =>
-                conversationId.conversation_id !== selectedConversation?.id,
-            )
-            .map((conversationId) =>
-              supabase
-                .channel(conversationId.conversation_id)
-                .on(
-                  "postgres_changes",
-                  {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "messages",
-                  },
-                  (payload: { new: MessageDbType }) =>
-                    void handlePostgresChange(payload),
-                )
-                .subscribe(),
-            );
-
-          return () => {
-            channels.forEach((channel) => void channel.unsubscribe());
-          };
-        }
+        return () => {
+          channels.forEach((channel) => void channel.unsubscribe());
+        };
       }
     };
 
