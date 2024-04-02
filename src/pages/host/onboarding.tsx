@@ -1,8 +1,11 @@
 import Header from "@/components/_common/Header";
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { Button } from "@/components/ui/button";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 
 export default function Onboarding() {
+  const progress = useHostOnboarding((state) => state.progress);
+
   return (
     <>
       <Header type="dashboard" sidebarType={"host"} />

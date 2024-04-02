@@ -68,6 +68,31 @@ export const ALL_PROPERTY_SAFETY_ITEMS = [
   "Carbon monoxide alarm",
 ] as const;
 
+// TODO: add a new column to properties
+export const ALL_PROPERTY_AMENITIES_ONBOARDING = [
+  "Stove",
+  "Refrigerator",
+  "Microwave",
+  "Oven",
+  "Freezer",
+  "Dishwashwer",
+  "Dishes & silverware",
+  "Dining table & chairs",
+  "Coffee maker",
+  "TV",
+  "Couch",
+  "Heating",
+  "Air conditioning",
+  "Washer",
+  "Dryzer",
+  "Workspace",
+  "Wifi",
+  "Street parking",
+  "Garage parking",
+  "EV charging",
+  "Driveway parking",
+] as const;
+
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
