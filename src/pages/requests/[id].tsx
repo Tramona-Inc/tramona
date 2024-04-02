@@ -30,14 +30,22 @@ export default function Page() {
     .flat(1)
     .find(({ id }) => id === requestId);
 
-  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
+  const { mutate } = api.messages.createConversationWithOffer.useMutation({
     onSuccess: (conversationId) => {
       void router.push(`/messages?conversationId=${conversationId}`);
     },
   });
 
-  function handleConversation() {
-    mutate();
+  function handleConversation({
+    offerId,
+    offerUserId,
+    offerPropertyName,
+  }: {
+    offerId: string;
+    offerUserId: string;
+    offerPropertyName: string;
+  }) {
+    mutate({ offerId, offerUserId, offerPropertyName });
   }
 
   return (
@@ -77,7 +85,13 @@ export default function Page() {
                   checkOut={request.checkOut}
                 >
                   <Button
-                    onClick={() => handleConversation()}
+                    onClick={() =>
+                      handleConversation({
+                        offerId: String(offer.id),
+                        offerUserId: offer.property.hostId ?? "",
+                        offerPropertyName: offer.property.name,
+                      })
+                    }
                     size="lg"
                     variant="outline"
                     className="rounded-full"

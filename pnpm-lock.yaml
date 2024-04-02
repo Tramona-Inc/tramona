@@ -100,7 +100,7 @@ dependencies:
     version: 2.19.3(react-dom@18.2.0)(react@18.2.0)
   '@sendgrid/mail':
     specifier: ^8.1.0
-    version: 8.1.1
+    version: 8.1.2
   '@slack/web-api':
     specifier: ^7.0.2
     version: 7.0.2
@@ -199,7 +199,7 @@ dependencies:
     version: 0.0.1-security
   input-otp:
     specifier: ^1.2.0
-    version: 1.2.3(react-dom@18.2.0)(react@18.2.0)
+    version: 1.2.4(react-dom@18.2.0)(react@18.2.0)
   jsonwebtoken:
     specifier: ^9.0.2
     version: 9.0.2
@@ -6570,8 +6570,8 @@ packages:
       selderee: 0.11.0
     dev: false
 
-  /@sendgrid/client@8.1.1:
-    resolution: {integrity: sha512-pg0gYhAdyQil3Aga7/xHVcZFpvDAjAQMNBgMy5njTSkjACoWHmpSi1nWBZM7nIH/ptcRNMpnBbm9B5EvQ8fX2w==}
+  /@sendgrid/client@8.1.2:
+    resolution: {integrity: sha512-/0+FMZhCqIX76GWAwoJ0ToZAHd2RIrkm0f5m0rPFC77zYFQBgh+IgfPSd77lYxpx5WU2VtmEDIC0VFi78d428g==}
     engines: {node: '>=12.*'}
     dependencies:
       '@sendgrid/helpers': 8.0.0
@@ -6587,11 +6587,11 @@ packages:
       deepmerge: 4.3.1
     dev: false
 
-  /@sendgrid/mail@8.1.1:
-    resolution: {integrity: sha512-tNtmgWLtBA7ZxKtPuEGOaIdEZP1vZSXsj5zg9iuoDBPVj/fNz+7LWzndvTcKumHk5eaDrS0UPXJqBm61m3+H1A==}
+  /@sendgrid/mail@8.1.2:
+    resolution: {integrity: sha512-DKx8WtePcFEP2jG6kstjZpIjXBT2peS7do/I+hYi5i1DKk8uh5GoB6RdIZXtkqxgvuLcFn0+xGjsBse9iu8oGA==}
     engines: {node: '>=12.*'}
     dependencies:
-      '@sendgrid/client': 8.1.1
+      '@sendgrid/client': 8.1.2
       '@sendgrid/helpers': 8.0.0
     transitivePeerDependencies:
       - debug
@@ -13417,8 +13417,8 @@ packages:
       prop-types: 15.8.1
     dev: false
 
-  /input-otp@1.2.3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-pxYvgnihL9KAdpcShX2+iKctdMRbDs36bIqd8uIsN3e5vv9VjMv2bhO3S5Bl1PjcDPsA/OXZe5R71n8oVtucfQ==}
+  /input-otp@1.2.4(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-md6rhmD+zmMnUh5crQNSQxq3keBRYvE3odbr4Qb9g2NWzQv9azi+t1a3X4TBTbh98fsGHgEEJlzbe1q860uGCA==}
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
