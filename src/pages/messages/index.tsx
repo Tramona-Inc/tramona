@@ -58,12 +58,15 @@ function MessageDisplay() {
 
 export default function MessagePage() {
   const { data: session } = useSession({ required: true });
-  const userId = session?.user.id;
 
   const { data: totalUnreadMessages } =
-    api.messages.showUnreadMessages.useQuery({
-      userId: userId ?? "default-user-id",
-    });
+    api.messages.getNumUnreadMessages.useQuery();
+
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      void Notification.requestPermission();
+    }
+  }, []);
 
   return (
     <>

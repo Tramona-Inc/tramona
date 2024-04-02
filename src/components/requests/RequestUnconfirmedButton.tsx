@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { api } from "@/utils/api";
-import { type DetailedRequest } from "./RequestCard";
 import { toast } from "../ui/use-toast";
 
 export function RequestUnconfirmedButton({
-  request,
+  requestGroupId,
   isWaiting,
   onClick,
 }: {
-  request: DetailedRequest;
+  requestGroupId: number;
   isWaiting: boolean;
   onClick: () => void;
 }) {
@@ -26,7 +25,7 @@ export function RequestUnconfirmedButton({
 
   const handleClick = async () => {
     setIsSending(true);
-    await resendConfirmation({ requestId: request.id });
+    await resendConfirmation({ requestGroupId });
     toast({
       title: "Successfully resent confirmation text",
       description: "Please check your messages",

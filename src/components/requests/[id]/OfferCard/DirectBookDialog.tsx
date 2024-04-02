@@ -150,10 +150,10 @@ export default function DirectBookDialog(
               <p className="underline">Tramona service fee</p>
               <p>{formatCurrency(tramonaServiceFee)}</p>
             </div>
-            <div className="flex justify-between py-2">
+            {/* <div className="flex justify-between py-2">
               <p className="underline">Taxes</p>
               <p>{formatCurrency(tax)}</p>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="flex justify-between py-2">

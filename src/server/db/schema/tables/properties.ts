@@ -80,9 +80,9 @@ export const properties = pgTable("properties", {
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
+  address: varchar("address", { length: 1000 }),
 
   // how many guests does this property accomodate at most?
-  address: varchar("address", { length: 1000 }),
   maxNumGuests: smallint("max_num_guests").notNull(),
   numBeds: smallint("num_beds").notNull(),
   numBedrooms: smallint("num_bedrooms").notNull(),
