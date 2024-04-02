@@ -3,9 +3,6 @@ import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { Button } from "@/components/ui/button";
 
 export default function Onboarding() {
-  
-
-
   return (
     <>
       <Header type="dashboard" sidebarType={"host"} />
@@ -13,7 +10,7 @@ export default function Onboarding() {
         <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-2">
           <Onboarding1 />
         </div>
-        <div className="flex justify-end border-t-[5px] p-10">
+        <div className="flex justify-end border-t-[5px] p-5">
           <Button>Get Started</Button>
         </div>
       </div>
