@@ -1,12 +1,14 @@
 import Header from "@/components/_common/Header";
 import AssistedListing from "@/components/_icons/AssistedListing";
 import ManuallyAdd from "@/components/_icons/ManuallyAdd";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 const items = [
   {
     icon: <ManuallyAdd />,
     title: "Manually Add",
+
     text: "Complete a simple step-by-step process to add your property information",
   },
   {
@@ -38,34 +40,43 @@ function CardSelect({
 
 export default function Onboarding() {
   return (
-    <div>
+    <>
       <Header type="dashboard" sidebarType={"host"} />
-      <div className="min-h-screen-minus-header w-full max-sm:container lg:grid lg:grid-cols-2">
-        <div className="hidden bg-muted lg:block">
-          <Image
-            src="/assets/images/host-onboarding.png"
-            alt="Image"
-            width="1920"
-            height="1080"
-            className="h-full w-full object-cover"
-          />
-        </div>
+      <div className="flex min-h-screen-minus-header flex-col">
+        <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-2">
+          <div className="hidden flex-grow bg-muted lg:block">
+            <Image
+              src="/assets/images/host-onboarding.png"
+              alt="Image"
+              width="1920"
+              height="1080"
+              className="h-full w-full object-cover"
+            />
+          </div>
 
-        <div className="mt-32 flex flex-col sm:mx-20">
-          <h1 className="mb-16 flex flex-col text-4xl font-semibold">
-            It&apos;s easy to list your
-            <span>property on Tramona</span>
-          </h1>
+          <div className="mt-32 flex flex-col sm:mx-20">
+            <h1 className="mb-16 flex flex-col text-4xl font-semibold">
+              It&apos;s easy to list your
+              <span>property on Tramona</span>
+            </h1>
 
-          <div className="flex flex-col gap-10">
-            {items.map((item) => (
-              <CardSelect key={item.title} title={item.title} text={item.text}>
-                {item.icon}
-              </CardSelect>
-            ))}
+            <div className="flex flex-col gap-10">
+              {items.map((item) => (
+                <CardSelect
+                  key={item.title}
+                  title={item.title}
+                  text={item.text}
+                >
+                  {item.icon}
+                </CardSelect>
+              ))}
+            </div>
           </div>
         </div>
+        <div className="border-t-[5px] flex justify-end p-10">
+          <Button>Get Started</Button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
