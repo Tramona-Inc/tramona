@@ -6,6 +6,9 @@ import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
   BriefcaseIcon,
+  DollarSign,
+  Fence,
+  Handshake,
   HistoryIcon,
   HomeIcon,
   InboxIcon,
@@ -47,12 +50,14 @@ function SidebarLink({
               className="absolute inset-y-0 right-0 border-[3px] border-transparent border-r-black"
             />
           )}
+
           <Icon
             className={cn(
               "size-6 lg:size-8",
               selected ? "text-black" : "text-zinc-700",
             )}
           />
+
           {children}
         </div>
       )}
@@ -75,6 +80,13 @@ const adminNavLinks = [
 
 const hostNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
+  {
+    href: "/host/incoming-request",
+    name: "Incoming Requests",
+    icon: Handshake,
+  },
+  { href: "/host/properties", name: "Properties", icon: Fence },
+  { href: "/host/payout", name: "Payout", icon: DollarSign },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
