@@ -18,7 +18,10 @@ export default function OnboardingLayout({
       <Header type="dashboard" sidebarType={"host"} />
       <div className="flex min-h-screen-minus-header flex-col">
         <div className="flex flex-grow">{children}</div>
-        <Progress value={progress * 10} className="h-2 w-full rounded-none" />
+        <Progress
+          value={(progress * 100) / max_pages}
+          className="h-2 w-full rounded-none"
+        />
         <div className="flex justify-between p-5">
           <Button
             variant={"ghost"}
