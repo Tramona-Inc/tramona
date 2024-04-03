@@ -1,16 +1,17 @@
-import CardSelect from '@/components/_common/CardSelect';
-import AssistedListing from '@/components/_icons/AssistedListing';
-import ManuallyAdd from '@/components/_icons/ManuallyAdd';
-import Image from 'next/image';
+import CardSelect from "@/components/_common/CardSelect";
+import AssistedListing from "@/components/_icons/AssistedListing";
+import ManuallyAdd from "@/components/_icons/ManuallyAdd";
+import Image from "next/image";
 
 const items = [
   {
+    id: "1",
     icon: <ManuallyAdd />,
     title: "Manually Add",
-
     text: "Complete a simple step-by-step process to add your property information",
   },
   {
+    id: "2",
     icon: <AssistedListing />,
     title: "Assisted Listing",
     text: "Have the Tramona onboarding team set up my account.",
@@ -19,7 +20,7 @@ const items = [
 
 export default function Onboarding1() {
   return (
-    <>
+    <div className="w-full max-sm:container lg:grid lg:grid-cols-2">
       <div className="hidden flex-grow bg-muted lg:block">
         <Image
           src="/assets/images/host-onboarding.png"
@@ -38,16 +39,12 @@ export default function Onboarding1() {
 
         <div className="flex flex-col gap-10">
           {items.map((item) => (
-            <CardSelect
-              key={item.title}
-              title={item.title}
-              text={item.text}
-            >
+            <CardSelect key={item.title} title={item.title} text={item.text}>
               {item.icon}
             </CardSelect>
           ))}
         </div>
       </div>
-    </>
-  )
+    </div>
+  );
 }
