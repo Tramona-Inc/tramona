@@ -33,11 +33,11 @@ const options = [
 
 export default function Onboarding2() {
   return (
-    <div className="flex w-full flex-col items-center justify-center">
+    <div className="flex w-full flex-col items-center justify-center gap-5 max-lg:container">
       <h1 className="text-4xl font-bold">
         Which of these describes your property?
       </h1>
-      <div className="flex flex-col gap-10">
+      <div className="mb-5 flex flex-col gap-5">
         {options.map((item) => (
           <CardSelect key={item.title} title={item.title} text={item.text}>
             {item.icon}

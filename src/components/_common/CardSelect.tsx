@@ -8,7 +8,7 @@ export default function CardSelect({
   text: string;
 }) {
   return (
-    <div className="flex flex-row items-center gap-5 rounded-[12px] border-[2px] p-5 sm:p-8 lg:p-10">
+    <div className="flex flex-row items-center gap-5 rounded-[12px] border-[2px] p-5 sm:p-7 lg:p-10">
       <div className="flex w-16 justify-center">{children}</div>
       <div>
         <h1 className="font-semibold md:text-2xl">{title}</h1>
