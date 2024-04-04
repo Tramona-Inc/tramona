@@ -16,7 +16,7 @@ export default function Onboarding4() {
         </h1>
 
         <Select>
-          <SelectTrigger className="">
+          <SelectTrigger>
             <SelectValue placeholder="Country /region" />
           </SelectTrigger>
           <SelectContent>
@@ -25,17 +25,20 @@ export default function Onboarding4() {
         </Select>
 
         <div className="rounded-lg border">
-          <InputTogether 
+          <InputTogether
             className="rounded-t-lg border-none"
             placeholder="Steet address"
           />
-          <InputTogether 
+          <InputTogether
             className="border-none"
             placeholder="Apt, suite, unit (if applicable)"
           />
-          < InputTogether className="border-none" placeholder="City / town" />
-          < InputTogether className="border-none" placeholder="State / territory" />
-          <InputTogether 
+          <InputTogether className="border-none" placeholder="City / town" />
+          <InputTogether
+            className="border-none"
+            placeholder="State / territory"
+          />
+          <InputTogether
             className="rounded-b-lg border-none"
             placeholder="ZIP code"
           />
