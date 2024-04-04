@@ -83,7 +83,7 @@ export default function Onboarding3() {
 
   return (
     <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
-      <div className="flex flex-col gap-5">
+      <div className="mt-10 flex flex-col gap-5">
         <h1 className="text-4xl font-bold">What is the living situation?</h1>
 
         <div>
