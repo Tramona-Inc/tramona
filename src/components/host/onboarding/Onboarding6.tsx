@@ -101,7 +101,7 @@ function CheckboxSelect({ item }: { item: CheckboxSelectProps }) {
   return (
     <div className="flex flex-row items-center gap-2 rounded-lg border p-3">
       <Checkbox id={item.id} />
-      <p className="text-xl font-bold">{item.content}</p>
+      <p className="text-sm font-bold sm:text-base">{item.content}</p>
     </div>
   );
 }
@@ -114,7 +114,7 @@ export default function Onboarding6() {
 
         <div>
           <h3 className="mb-5 text-2xl font-semibold">Kitchen</h3>
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {kitchenItems.map((item) => (
               <CheckboxSelect key={item.id} item={item} />
             ))}
@@ -123,7 +123,7 @@ export default function Onboarding6() {
 
         <div>
           <h3 className="mb-5 text-2xl font-semibold">Living room</h3>
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {livingRoomItems.map((item) => (
               <CheckboxSelect key={item.id} item={item} />
             ))}
@@ -132,7 +132,7 @@ export default function Onboarding6() {
 
         <div>
           <h3 className="mb-5 text-2xl font-semibold"> Heating & cooling</h3>
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {heatingAndCoolingItems.map((item) => (
               <CheckboxSelect key={item.id} item={item} />
             ))}
@@ -141,7 +141,7 @@ export default function Onboarding6() {
 
         <div>
           <h3 className="mb-5 text-2xl font-semibold">Laundry</h3>
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {laundryItems.map((item) => (
               <CheckboxSelect key={item.id} item={item} />
             ))}
@@ -150,7 +150,7 @@ export default function Onboarding6() {
 
         <div>
           <h3 className="mb-5 text-2xl font-semibold">Internet & office</h3>
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {laundryItems.map((item) => (
               <CheckboxSelect key={item.id} item={item} />
             ))}
@@ -159,7 +159,7 @@ export default function Onboarding6() {
 
         <div>
           <h3 className="mb-5 text-2xl font-semibold">Parking</h3>
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {parkingItems.map((item) => (
               <CheckboxSelect key={item.id} item={item} />
             ))}
