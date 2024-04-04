@@ -14,7 +14,7 @@ export const RequestRefreshButton = forwardRef<HTMLButtonElement, RequestRefresh
       onClick={onClick}
     >
       <ReloadIcon className="icon-size" aria-hidden /> 
-      I don't like my offers
+      I don&apos;t like my offers
     </Button>
   );
 });

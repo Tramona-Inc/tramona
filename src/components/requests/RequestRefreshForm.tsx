@@ -344,7 +344,7 @@ export default function RequestRefreshForm({
         <div className="my-10">
           <div className="p-18">
             <p>
-              You've already updated your request. We'll get back to you
+              You&apos;ve already updated your request. We&apos;ll get back to you
               shortly.
             </p>
           </div>
