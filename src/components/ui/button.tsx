@@ -36,6 +36,8 @@ const buttonVariants = cva(
         white: "bg-white text-black hover:bg-zinc-200",
         wrapper:
           "hover:bg-accent hover:text-accent-foreground gap-0 -m-1 h-auto rounded-full p-1",
+        increment:
+          "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
       },
     },
     defaultVariants: {

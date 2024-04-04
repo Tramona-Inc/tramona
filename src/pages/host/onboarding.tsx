@@ -1,5 +1,6 @@
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import Onboarding2 from "@/components/host/onboarding/Onboarding2";
+import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import OnboardingLayout from "../../components/host/onboarding/layout";
 
@@ -10,6 +11,7 @@ export default function Onboarding() {
     <OnboardingLayout>
       {progress === 0 && <Onboarding1 />}
       {progress === 1 && <Onboarding2 />}
+      {progress === 2 && <Onboarding3 />}
     </OnboardingLayout>
   );
 }
