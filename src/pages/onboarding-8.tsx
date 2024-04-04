@@ -1,5 +1,6 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import { Form,
+import {
+  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -9,13 +10,7 @@ import { Form,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Container } from "@react-email/components";
-import {
-  optional,
-  zodInteger,
-  zodNumber,
-  zodString,
-  zodUrl,
-} from "@/utils/zod-utils";
+import { zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -32,15 +27,15 @@ export default function Onboarding8() {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      propertyName: '',
-      about: '',
+      propertyName: "",
+      about: "",
     },
   });
 
   return (
     <MainLayout>
       <Container className="my-10">
-        <h1 className="font-bold text-3xl mb-8" >Describe your listing</h1>
+        <h1 className="mb-8 text-3xl font-bold">Describe your listing</h1>
         <Form {...form}>
           <div className="space-y-4">
             <FormField
@@ -48,10 +43,14 @@ export default function Onboarding8() {
               name="propertyName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-primary font-bold text-lg">Create a title</FormLabel>
-                  <FormDescription>Keep it short and descriptive.</FormDescription>
+                  <FormLabel className="text-lg font-bold text-primary">
+                    Create a title
+                  </FormLabel>
+                  <FormDescription>
+                    Keep it short and descriptive.
+                  </FormDescription>
                   <FormControl>
-                    <Input {...field}/>
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -62,8 +61,12 @@ export default function Onboarding8() {
               name="about"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-primary font-bold text-lg">Create your description</FormLabel>
-                  <FormDescription>Share what makes your place unique.</FormDescription>
+                  <FormLabel className="text-lg font-bold text-primary">
+                    Create your description
+                  </FormLabel>
+                  <FormDescription>
+                    Share what makes your place unique.
+                  </FormDescription>
                   <FormControl>
                     <Textarea {...field} className="resize-y" rows={10} />
                   </FormControl>
@@ -75,5 +78,5 @@ export default function Onboarding8() {
         </Form>
       </Container>
     </MainLayout>
-  )
+  );
 }
