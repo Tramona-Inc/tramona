@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 export default function Onboarding4() {
   return (
     <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
@@ -44,9 +43,9 @@ export default function Onboarding4() {
 
         <div className="mt-5 w-full">
           <h1 className="text-xl font-bold">Hours</h1>
-          <div className="flex w-full flex-row">
-            <Input type="text" placeholder="Check in time" />
-            <Input type="text" placeholder="Check out time" />
+          <div className="grid grid-cols-2 gap-5">
+            <Input type="clock" placeholder="Check in time" />
+            <Input type="clock" placeholder="Check out time" />
           </div>
         </div>
       </div>
