@@ -33,7 +33,9 @@ export default function OnboardingLayout({
           >
             Back
           </Button>
-          <Button onClick={() => setProgress(progress + 1)}>Get Started</Button>
+          <Button onClick={() => setProgress(progress + 1)}>
+            {progress > 0 ? "Next" : "Get Started"}
+          </Button>
         </div>
       </div>
     </>
