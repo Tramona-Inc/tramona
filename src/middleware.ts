@@ -80,7 +80,7 @@ export default withAuth(
         }
 
         if (path.startsWith("/host")) {
-          return token?.role === "host";
+          return token?.role === "host" || token?.role === "admin";
         }
 
         // By default return true only if the token is not null

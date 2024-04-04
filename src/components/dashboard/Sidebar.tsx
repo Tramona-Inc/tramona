@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
   BriefcaseIcon,
+  EditIcon,
   HistoryIcon,
   HomeIcon,
   InboxIcon,
@@ -74,7 +75,14 @@ const adminNavLinks = [
 ];
 
 const hostNavLinks = [
-  { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
+  { href: "/host", name: "Overview", icon: HomeIcon },
+  {
+    href: "/host/incoming-requests",
+    name: "Incoming Requests",
+    icon: BriefcaseIcon,
+  },
+  { href: "/host/properties", name: "Properties", icon: EditIcon },
+  { href: "/host/finances", name: "Finances", icon: TagIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
