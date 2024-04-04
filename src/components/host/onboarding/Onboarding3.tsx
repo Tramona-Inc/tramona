@@ -3,6 +3,7 @@ import Home from "@/components/_icons/Home";
 import Room from "@/components/_icons/Room";
 import SharedRoom from "@/components/_icons/SharedRoom";
 import { Button } from "@/components/ui/button";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { Minus, Plus } from "lucide-react";
 
 const options = [
@@ -26,9 +27,62 @@ const options = [
   },
 ];
 
-export default function Onboarding3() {
+function Total({
+  name,
+  total,
+  setTotal,
+}: {
+  name: string;
+  total: number;
+  setTotal: (total: number) => void;
+}) {
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-5 max-lg:container">
+    <div className="flex flex-row items-center justify-between border-b-2 p-5">
+      <h2 className="text-xl font-semibold">{name}</h2>
+      <div className="grid max-w-[150px] grid-cols-3 place-items-center">
+        <Button
+          variant="increment"
+          className="text-4xl"
+          size={"icon"}
+          onClick={() => {
+            if (total - 1 > -1) {
+              setTotal(total - 1);
+            }
+          }}
+        >
+          <Minus color="gray" />
+        </Button>
+        <div className="text-xl font-semibold">{total}</div>
+        <Button
+          variant="increment"
+          className="text-4xl"
+          size={"icon"}
+          onClick={() => {
+            setTotal(total + 1);
+          }}
+        >
+          <Plus color="gray" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export default function Onboarding3() {
+  const maxGuests = useHostOnboarding((state) => state.listing.maxGuests);
+  const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
+
+  const bedrooms = useHostOnboarding((state) => state.listing.bedrooms);
+  const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
+
+  const beds = useHostOnboarding((state) => state.listing.beds);
+  const setBeds = useHostOnboarding((state) => state.setBeds);
+
+  const bathrooms = useHostOnboarding((state) => state.listing.bathrooms);
+  const setBathrooms = useHostOnboarding((state) => state.setBathrooms);
+
+  return (
+    <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
       <div className="flex flex-col gap-5">
         <h1 className="text-4xl font-bold">What is the living situation?</h1>
 
@@ -46,12 +100,21 @@ export default function Onboarding3() {
         <div>
           <h3 className="mb-5 text-2xl font-semibold">Rooms and spaces</h3>
           <div className="mb-5 flex flex-col gap-5">
-            <Button variant="increment" className="text-4xl" size={"icon"}>
-              <Minus color="gray" />
-            </Button>
-            <Button variant="increment" className="text-4xl" size={"icon"}>
-              <Plus color="gray" />
-            </Button>
+            <Total
+              name={"Maximum guests"}
+              total={maxGuests}
+              setTotal={setMaxGuests}
+            />
+
+            <Total name={"Bedrooms"} total={bedrooms} setTotal={setBedrooms} />
+
+            <Total name={"Beds"} total={beds} setTotal={setBeds} />
+
+            <Total
+              name={"Bathrooms"}
+              total={bathrooms}
+              setTotal={setBathrooms}
+            />
           </div>
         </div>
       </div>

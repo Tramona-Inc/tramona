@@ -6,10 +6,10 @@ type HostOnboardingState = {
   listing: {
     propertyType: "apartment" | "home" | "hotels" | "other";
     spaceType: "entire" | "single" | "shared";
-    maxGuest: number;
-    bedroom: number;
-    bed: number;
-    bathroom: number;
+    maxGuests: number;
+    bedrooms: number;
+    beds: number;
+    bathrooms: number;
     location: string;
     checkInType: string;
     checkIn: Date;
@@ -22,6 +22,10 @@ type HostOnboardingState = {
     smokingAllowed: boolean;
     otherHouseRules: string;
   };
+  setMaxGuests: (maxGuests: number) => void;
+  setBedrooms: (bedrooms: number) => void;
+  setBeds: (beds: number) => void;
+  setBathrooms: (bathrooms: number) => void;
 };
 
 export const useHostOnboarding = create<HostOnboardingState>((set) => ({
@@ -29,10 +33,10 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
   listing: {
     propertyType: "apartment",
     spaceType: "entire",
-    maxGuest: 0,
-    bedroom: 0,
-    bed: 0,
-    bathroom: 0,
+    maxGuests: 1,
+    bedrooms: 1,
+    beds: 1,
+    bathrooms: 1,
     location: "",
     checkInType: "",
     checkIn: new Date(),
@@ -43,9 +47,45 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
     description: "",
     petsAllowed: false,
     smokingAllowed: false,
-    otherHouseRules: ""
+    otherHouseRules: "",
   },
   setProgress: (progress: number) => {
     set((state) => ({ ...state, progress }));
+  },
+  setMaxGuests: (maxGuests: number) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        maxGuests,
+      },
+    }));
+  },
+  setBedrooms: (bedrooms: number) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        bedrooms,
+      },
+    }));
+  },
+  setBeds: (beds: number) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        beds,
+      },
+    }));
+  },
+  setBathrooms: (bathrooms: number) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        bathrooms,
+      },
+    }));
   },
 }));
