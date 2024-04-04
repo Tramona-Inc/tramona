@@ -43,6 +43,16 @@ export const requestInsertSchema = createInsertSchema(requests);
 
 export const MAX_REQUEST_GROUP_SIZE = 10;
 
+// TO-DO: maybe add relation 
+export const requestUpdatedInfo = pgTable("request_updated_info", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id")
+      .references(() => requests.id, { onDelete: "cascade" }),
+  preferences: varchar("preferences", { length: 255 }),
+  updatedPriceNightlyUSD: integer("updated_price_usd_nightly"),
+  propertyLinks: text("property_links"), 
+});
+
 export const requestGroups = pgTable("request_groups", {
   id: serial("id").primaryKey(),
   createdByUserId: text("created_by_user_id")
