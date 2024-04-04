@@ -9,30 +9,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
-import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
-import { capitalize, getNumNights, plural } from "@/utils/utils";
+import { getNumNights } from "@/utils/utils";
 import { Textarea } from "../ui/textarea";
 import {
   optional,
-  zodInteger,
   zodNumber,
   zodString,
   zodUrl,
 } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import TagSelect from "../_common/TagSelect";
-import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 import { useSession } from "next-auth/react";
-import ErrorMsg from "../ui/ErrorMsg";
-import axios from "axios";
 import {
-  ALL_PROPERTY_AMENITIES,
-  ALL_PROPERTY_SAFETY_ITEMS,
-  ALL_PROPERTY_STANDOUT_AMENITIES,
-  ALL_PROPERTY_TYPES,
   type Request,
 } from "@/server/db/schema";
 
