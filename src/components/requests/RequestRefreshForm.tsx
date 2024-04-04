@@ -145,11 +145,11 @@ export default function RequestRefreshForm({
         return (
           <>
             <h3 className="text-lg font-semibold">Refreshing your request</h3>
-            <div className="flex items-center m-2">
-              <div className="flex md:h-4 md:w-5 h-6 w-12 items-center text-xs justify-center rounded-full bg-black text-white mb-4">
+            <div className="m-2 flex items-center">
+              <div className="mb-4 flex h-6 w-12 items-center justify-center rounded-full bg-black text-xs text-white md:h-4 md:w-5">
                 1
               </div>
-              <span className="ml-4 leading-5 text-base">
+              <span className="ml-4 text-base leading-5">
                 In order to get more offers for your request, you need to update
                 your request price.
               </span>
@@ -206,14 +206,14 @@ export default function RequestRefreshForm({
         return (
           <>
             <h3 className="text-lg font-semibold">Additional Information</h3>
-            <div className="flex items-center m-2">
-              <div className="flex md:h-4 md:w-8 h-6 w-20 items-center text-xs justify-center rounded-full bg-black text-white md:mb-4 mb-10">
+            <div className="m-2 flex items-center">
+              <div className="mb-10 flex h-6 w-20 items-center justify-center rounded-full bg-black text-xs text-white md:mb-4 md:h-4 md:w-8">
                 2
               </div>
-              <span className="ml-4 leading-5 text-base">
-              Please enter your preferences on what you are looking for in your
-              new offers or tell us what you didn&apos;t like about your other
-              offers.
+              <span className="ml-4 text-base leading-5">
+                Please enter your preferences on what you are looking for in
+                your new offers or tell us what you didn&apos;t like about your
+                other offers.
               </span>
             </div>
             <FormField
@@ -233,14 +233,14 @@ export default function RequestRefreshForm({
       case 2:
         return (
           <FormItem className="col-span-full space-y-1">
-            <div className="flex items-center m-2">
-              <div className="flex md:h-4 md:w-8 h-6 w-20 items-center text-xs justify-center rounded-full bg-black text-white md:mb-4 mb-8">
+            <div className="m-2 flex items-center">
+              <div className="mb-8 flex h-6 w-20 items-center justify-center rounded-full bg-black text-xs text-white md:mb-4 md:h-4 md:w-8">
                 3
               </div>
-              <span className="ml-4 leading-5 text-base">
-              Are you currently eyeing any properties on Airbnb/Vrbo? Enter the
-              link below and we will try to get you that exact stay at a
-              discount!
+              <span className="ml-4 text-base leading-5">
+                Are you currently eyeing any properties on Airbnb/Vrbo? Enter
+                the link below and we will try to get you that exact stay at a
+                discount!
               </span>
             </div>
 
@@ -293,27 +293,36 @@ export default function RequestRefreshForm({
 
       case 3:
         return (
-          <div className="max-w-xl mx-auto p-4 bg-white rounded-lg border border-grey-500">
-            <h3 className="text-center text-xl font-semibold mb-4">
+          <div className="border-grey-500 mx-auto max-w-xl rounded-lg border bg-white px-4 py-2 sm:p-4">
+            <h3 className="mb-2 text-center text-lg font-semibold sm:mb-4 sm:text-xl">
               Review Your Details
             </h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
+            <div className="space-y-2 sm:space-y-4">
+              <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
                 <strong>Price Preference Updated To:</strong>
-                <span className="text-gray-600">${watch("price") + old_price} per night</span>
+                <span className="mt-1 text-gray-600 sm:mt-0">
+                  ${watch("price") + old_price} per night
+                </span>
               </div>
               {watch("preferences") && (
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
                   <strong>Your Additional Preferences:</strong>
-                  <p className="text-gray-600 truncate" title={watch("preferences")}>
-                    {watch("preferences").length > 50 ? watch("preferences").substring(0, 47) + '...' : watch("preferences")}
+                  <p
+                    className="mt-1 truncate text-gray-600 sm:mt-0 sm:max-w-xs"
+                    title={watch("preferences")}
+                  >
+                    {watch("preferences").length > 50
+                      ? watch("preferences").substring(0, 47) + "..."
+                      : watch("preferences")}
                   </p>
                 </div>
               )}
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
                 <strong>Links:</strong>
-                <span className="text-gray-600">
-                  {watch("propertyLinks").some((url) => url.value?.trim() !== "")
+                <span className="mt-1 text-gray-600 sm:mt-0">
+                  {watch("propertyLinks").some(
+                    (url) => url.value?.trim() !== "",
+                  )
                     ? "Provided"
                     : "None Provided"}
                 </span>
@@ -321,8 +330,6 @@ export default function RequestRefreshForm({
             </div>
           </div>
         );
-        
-        
 
       default:
         return null;
