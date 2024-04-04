@@ -26,23 +26,23 @@ export default function Onboarding4() {
 
         <div className="rounded-lg border">
           <InputTogether
-            className="border-b-1 rounded-t-lg border-x-0 border-t-0"
+            className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6"
             placeholder="Steet address"
           />
           <InputTogether
-            className="border-b-1 rounded-t-lg border-x-0 border-t-0 focus:rounded-none"
+            className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
             placeholder="Apt, suite, unit (if applicable)"
           />
           <InputTogether
-            className="border-b-1 rounded-t-lg border-x-0 border-t-0 focus:rounded-none"
+            className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
             placeholder="City / town"
           />
           <InputTogether
-            className="border-b-1 rounded-t-lg border-x-0 border-t-0 focus:rounded-none"
+            className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
             placeholder="State / territory"
           />
           <InputTogether
-            className="rounded-t-lg border-x-0 border-b-0 border-t-0 focus:rounded-b-lg focus:rounded-t-none"
+            className="rounded-t-lg border-x-0 border-b-0 border-t-0 p-6 focus:rounded-b-lg focus:rounded-t-none"
             placeholder="ZIP code"
           />
         </div>

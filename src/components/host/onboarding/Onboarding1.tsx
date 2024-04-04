@@ -31,7 +31,7 @@ export default function Onboarding1() {
         />
       </div>
 
-      <div className="mt-32 flex flex-col sm:mx-20">
+      <div className="flex flex-col items-center justify-center sm:mx-20">
         <h1 className="mb-16 flex flex-col text-4xl font-semibold">
           It&apos;s easy to list your
           <span>property on Tramona</span>
