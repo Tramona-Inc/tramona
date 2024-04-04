@@ -8,23 +8,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { type Request } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getNumNights } from "@/utils/utils";
-import { Textarea } from "../ui/textarea";
-import {
-  optional,
-  zodNumber,
-  zodString,
-  zodUrl,
-} from "@/utils/zod-utils";
+import { optional, zodNumber, zodString, zodUrl } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {  useState } from "react";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useSession } from "next-auth/react";
-import {
-  type Request,
-} from "@/server/db/schema";
+import { Textarea } from "../ui/textarea";
 
 const calculatePriceOptions = (oldPrice: number): number[] => {
   if (oldPrice >= 0 && oldPrice < 400) {
@@ -42,7 +35,7 @@ const calculatePriceOptions = (oldPrice: number): number[] => {
 const formSchema = z.object({
   preferences: zodString({ maxLen: Infinity }),
   price: zodNumber(),
-  propertyLinks: z.object({ value: optional(zodUrl()) }).array(),
+  imageUrls: z.object({ value: optional(zodUrl()) }).array(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -79,13 +72,13 @@ export default function RequestRefreshForm({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      propertyLinks: [{ value: "" }],
+      imageUrls: [{ value: "" }],
       price: 0,
     },
   });
 
   const imageUrlInputs = useFieldArray({
-    name: "propertyLinks",
+    name: "imageUrls",
     control: form.control,
   });
 
@@ -95,7 +88,7 @@ export default function RequestRefreshForm({
     let submissionData = {
       preferences: data.preferences,
       updatedPriceNightlyUSD: data.price * 100,
-      propertyLinks: data.propertyLinks
+      imageUrls: data.imageUrls
         .map((urlObj) => urlObj.value)
         .filter((url): url is string => !!url),
     };
@@ -240,7 +233,7 @@ export default function RequestRefreshForm({
                 <div key={field.id} className="relative">
                   <FormField
                     control={form.control}
-                    name={`propertyLinks.${index}.value`}
+                    name={`imageUrls.${index}.value`}
                     render={({ field }) => (
                       <FormItem className="mb-2">
                         <FormControl>
@@ -310,7 +303,7 @@ export default function RequestRefreshForm({
               <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
                 <strong>Links:</strong>
                 <span className="mt-1 text-gray-600 sm:mt-0">
-                  {watch("propertyLinks").some(
+                  {watch("imageUrls").some(
                     (url) => url.value?.trim() !== "",
                   )
                     ? "Provided"
@@ -334,8 +327,8 @@ export default function RequestRefreshForm({
         <div className="my-10">
           <div className="p-18">
             <p>
-              You&apos;ve already updated your request. We&apos;ll get back to you
-              shortly.
+              You&apos;ve already updated your request. We&apos;ll get back to
+              you shortly.
             </p>
           </div>
         </div>

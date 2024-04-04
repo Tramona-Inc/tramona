@@ -35,7 +35,7 @@ const updateRequestInputSchema = z.object({
   updatedRequestInfo: z.object({
     preferences: z.string().optional(),
     updatedPriceNightlyUSD: z.number().optional(),
-    propertyLinks: z.array(z.string().url()).optional(),
+    imageUrls: z.array(z.string().url()).optional(),
   }),
 });
 
@@ -428,12 +428,12 @@ export const requestsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
         const { requestId, updatedRequestInfo } = input;
         
-        // serialize propertyLinks to a JSON string
-        const serializedpropertyLinks = JSON.stringify(updatedRequestInfo.propertyLinks);
+        // serialize image urls to a JSON string
+        const serializedImageUrls = JSON.stringify(updatedRequestInfo.imageUrls);
 
         const infoToUpdate = {
             ...updatedRequestInfo,
-            propertyLinks: serializedpropertyLinks, // use the serialized string for DB storage
+            imageUrls: serializedImageUrls, // use the serialized string for DB storage
         };
 
         const existingUpdatedInfo = await ctx.db.query.requestUpdatedInfo.findFirst({
