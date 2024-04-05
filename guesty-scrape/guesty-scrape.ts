@@ -1,11 +1,11 @@
-git import { db } from "@/server/db";
+import { db } from "@/server/db";
 import { all } from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import puppeteer, { Page } from "puppeteer";
+import fs from "fs/promises"
 
 //eslint-disable-next-line import/no-anonymous-default-export
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const url = req.query.url as string;
+async function scrape(url: string) {
   process.on("unhandledRejection", (reason, promise) => {
     console.error("Unhandled Rejection at:", promise, "reason:", reason);
     // You can add additional debugging information here if needed
@@ -377,7 +377,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       })();
     });
 
-    try {
+
       const propertiesData = await page.evaluate(async () => {
         const element = document.querySelector(".overflow-y-scroll");
         const data = {};
@@ -506,11 +506,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       console.log("err after the page.eval", err);
     }
 
-    await browser.close();
-    res.status(200).json({ success: true, data: propertyData });
-  } catch (error) {
-    res.status(500).json({ success: false, error: "Scraping failed" });
-  }
+    return propertyData;
 };
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
