@@ -23,8 +23,8 @@ type HostOnboardingState = {
     bathrooms: number;
     location: LocationType;
     checkInType: string;
-    checkIn: Date;
-    checkOut: Date;
+    checkIn: string;
+    checkOut: string;
     amenities: string[];
     imageUrls: string[];
     title: string;
@@ -40,7 +40,8 @@ type HostOnboardingState = {
   setPropertyType: (property: PropertyType) => void;
   setSpaceType: (property: SpaceType) => void;
   setLocation: (location: LocationType) => void;
-  setCheckInType: (checkInType: string) => void; // Add this line
+  setCheckIn: (checkIn: string) => void; // Add this line
+  setCheckOut: (checkOut: string) => void; // Add this line
 };
 
 export const useHostOnboarding = create<HostOnboardingState>((set) => ({
@@ -61,8 +62,8 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
       zipcode: "",
     },
     checkInType: "self",
-    checkIn: new Date(),
-    checkOut: new Date(),
+    checkIn: "",
+    checkOut: "",
     amenities: [],
     imageUrls: [],
     title: "",
@@ -147,4 +148,20 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
       },
     }));
   },
+  setCheckIn: (checkIn: string) => {
+    set((state) => ({
+      listing: {
+        ...state.listing,
+        checkIn,
+      },
+    }));
+  },
+  setCheckOut: (checkOut: string) => {
+    set((state) => ({
+      listing: {
+        ...state.listing,
+        checkOut,
+      },
+    }));
+  }
 }));

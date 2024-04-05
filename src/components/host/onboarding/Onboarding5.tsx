@@ -27,6 +27,11 @@ export default function Onboarding4() {
     setCheckInType(e.target.value);
   };
 
+  const checkIn = useHostOnboarding((state) => state.listing.checkIn);
+  const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
+  const checkOut = useHostOnboarding((state) => state.listing.checkOut);
+  const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
+
   return (
     <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
       <div className="mt-10 flex flex-col gap-10">
