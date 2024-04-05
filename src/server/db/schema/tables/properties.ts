@@ -15,6 +15,22 @@ import { users } from "./users";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 
 export const ALL_PROPERTY_TYPES = [
+  "Condominium",
+  "Apartment",
+  "House",
+  "Loft",
+  "Boat",
+  "Camper/RV",
+  "Chalet",
+  "Bed & Breakfast",
+  "Villa",
+  "Tent",
+  "Cabin",
+  "Townhouse",
+  "Bungalow",
+  "Hut",
+  "Other",
+
   "house",
   "guesthouse",
   "apartment",
@@ -31,7 +47,7 @@ export const newPropertyAmenitiesEnum = pgEnum(
 
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
-  hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
+  hostId: text("host_id").references(() => users.id, { onDelete: "cascade"}),
   name: varchar("name", { length: 255 }).notNull(),
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
