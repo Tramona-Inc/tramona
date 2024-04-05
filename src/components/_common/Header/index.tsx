@@ -104,7 +104,7 @@ function SmallHeader(props: HeaderProps) {
 
       <div className="flex flex-1 justify-end gap-2">
         {props.type === "marketing" && (
-          <Button variant="darkOutline">
+          <Button asChild variant="darkOutline">
             <Link href="/auth/signin">
               {status === "authenticated" ? "Dashboard" : "Log in"}
             </Link>
