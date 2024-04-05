@@ -3,25 +3,25 @@ import Home from "@/components/_icons/Home";
 import Room from "@/components/_icons/Room";
 import SharedRoom from "@/components/_icons/SharedRoom";
 import { Button } from "@/components/ui/button";
-import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { SpaceType, useHostOnboarding } from "@/utils/store/host-onboarding";
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 
 const options = [
   {
-    id: "entire",
+    id: "entire" as SpaceType,
     icon: <Home />,
     title: "Apartment",
     text: "Guests have the whole place to themselves.",
   },
   {
-    id: "single room",
+    id: "single room" as SpaceType,
     icon: <Room />,
     title: "Home",
     text: "Guests have their own room in a home and access to shared spaces.",
   },
   {
-    id: "shared room",
+    id: "shared room" as SpaceType,
     icon: <SharedRoom />,
     title: "Hotels, B&Bs, & More",
     text: "Guests sleep in a room or common area that may be shared with you or others.",
@@ -46,7 +46,7 @@ function Total({
           className="text-4xl"
           size={"icon"}
           onClick={() => {
-            if (total - 1 > -1) {
+            if (total - 1 > 0) {
               setTotal(total - 1);
             }
           }}
@@ -82,11 +82,8 @@ export default function Onboarding3() {
   const bathrooms = useHostOnboarding((state) => state.listing.bathrooms);
   const setBathrooms = useHostOnboarding((state) => state.setBathrooms);
 
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-
-  const handleSelectOption = (optionId: string) => {
-    setSelectedOption(optionId);
-  };
+  const spaceType = useHostOnboarding((state) => state.listing.spaceType);
+  const setSpaceType = useHostOnboarding((state) => state.setSpaceType);
 
   return (
     <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
@@ -102,8 +99,8 @@ export default function Onboarding3() {
                 title={item.title}
                 text={item.text}
                 hover={true}
-                onClick={() => handleSelectOption(item.id)}
-                isSelected={selectedOption === item.id}
+                onClick={() => setSpaceType(item.id)}
+                isSelected={spaceType === item.id}
               >
                 {item.icon}
               </CardSelect>

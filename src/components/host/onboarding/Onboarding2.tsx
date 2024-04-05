@@ -3,29 +3,32 @@ import Alternative from "@/components/_icons/Alternative";
 import ApartmentIcon from "@/components/_icons/Apartment";
 import Home from "@/components/_icons/Home";
 import Hotels from "@/components/_icons/Hotels";
-import { useState } from "react";
+import {
+  type PropertyType,
+  useHostOnboarding,
+} from "@/utils/store/host-onboarding";
 
 const options = [
   {
-    id: "apartment",
+    id: "apartment" as PropertyType,
     icon: <ApartmentIcon />,
     title: "Apartment",
     text: "Furnished and self-catering accommodations where guests rent the entire place",
   },
   {
-    id: "home",
+    id: "home" as PropertyType,
     icon: <Home />,
     title: "Home",
     text: "Furnished and self-catering accommodations where guests rent the entire place",
   },
   {
-    id: "hotels",
+    id: "hotels" as PropertyType,
     icon: <Hotels />,
     title: "Hotels, B&Bs, & More",
     text: "Furnished and self-catering accommodations where guests rent the entire place",
   },
   {
-    id: "alternative places",
+    id: "alternative" as PropertyType,
     icon: <Alternative />,
     title: "Alternative Places",
     text: "Furnished and self-catering accommodations where guests rent the entire place",
@@ -33,11 +36,8 @@ const options = [
 ];
 
 export default function Onboarding2() {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-
-  const handleSelectOption = (optionId: string) => {
-    setSelectedOption(optionId);
-  };
+  const propertyType = useHostOnboarding((state) => state.listing.propertyType);
+  const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-5 max-lg:container">
@@ -50,8 +50,8 @@ export default function Onboarding2() {
             key={item.title}
             title={item.title}
             text={item.text}
-            onClick={() => handleSelectOption(item.id)}
-            isSelected={selectedOption === item.id}
+            onClick={() => setPropertyType(item.id)}
+            isSelected={propertyType === item.id}
             hover={true}
           >
             {item.icon}

@@ -1,11 +1,14 @@
 import { create } from "zustand";
 
+export type PropertyType = "apartment" | "home" | "hotels" | "alternative";
+export type SpaceType = "entire" | "single" | "shared" | "alternative";
+
 type HostOnboardingState = {
   progress: number;
   setProgress: (progress: number) => void;
   listing: {
-    propertyType: "apartment" | "home" | "hotels" | "other";
-    spaceType: "entire" | "single" | "shared";
+    propertyType: PropertyType;
+    spaceType: SpaceType;
     maxGuests: number;
     bedrooms: number;
     beds: number;
@@ -26,6 +29,8 @@ type HostOnboardingState = {
   setBedrooms: (bedrooms: number) => void;
   setBeds: (beds: number) => void;
   setBathrooms: (bathrooms: number) => void;
+  setPropertyType: (property: PropertyType) => void;
+  setSpaceType: (property: SpaceType) => void;
 };
 
 export const useHostOnboarding = create<HostOnboardingState>((set) => ({
@@ -85,6 +90,24 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
       listing: {
         ...state.listing,
         bathrooms,
+      },
+    }));
+  },
+  setPropertyType: (propertyType: PropertyType) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        propertyType,
+      },
+    }));
+  },
+  setSpaceType: (spaceType: SpaceType) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        spaceType,
       },
     }));
   },
