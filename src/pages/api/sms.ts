@@ -36,6 +36,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     phoneNumber = phoneNumber.replace('whatsapp:', '');
   }
 
+  console.log("getting user...");
+
   const userId = await db.query.users
     .findFirst({
       where: eq(users.phoneNumber, phoneNumber),
@@ -43,7 +45,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     })
     .then((res) => res?.id);
 
-  if (!userId) return res.status(500);
+  if (!userId)
+    return res
+      .status(500)
+      .send(`User for phone number ${phoneNumber} not found`);
+
+  console.log("getting most recent request group...");
 
   const mostRecentRequestGroup = await db
     .select({ hasApproved: requestGroups.hasApproved, id: requestGroups.id })
@@ -53,12 +60,19 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     .limit(1)
     .then((res) => res[0]);
 
-  if (!mostRecentRequestGroup) return res.status(500);
+  if (!mostRecentRequestGroup)
+    return res.status(500).send("request group not found for request");
+
+  console.log("getting requests in group...");
 
   const requestsInGroup = await db.query.requests.findMany({
     where: eq(requests.requestGroupId, mostRecentRequestGroup.id),
     columns: { location: true },
   });
+
+  console.log(
+    `found ${requestsInGroup.length} requests in group #${mostRecentRequestGroup.id}`,
+  );
 
   const twiml = new MessagingResponse();
 

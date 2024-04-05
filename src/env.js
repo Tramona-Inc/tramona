@@ -31,7 +31,6 @@ export const env = createEnv({
     EMAIL_FROM: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
-    RESEND_API_KEY: z.string(),
     STRIPE_SECRET_KEY: z.string(),
     STRIPE_WEBHOOK_SECRET: z.string(),
     FACEBOOK_CLIENT_ID: z.string(),
@@ -47,6 +46,8 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: z.string(),
     REGION: z.string(),
     MAP_SCREENSHOTS_BUCKET_NAME: z.string(),
+    RAPIDAPI_KEY: z.string(),
+    RAPIDAPI_HOST: z.string(),
     GOOGLE_MAPS_KEY: z.string(),
   },
 
@@ -79,7 +80,6 @@ export const env = createEnv({
     EMAIL_FROM: process.env.EMAIL_FROM,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_GOOGLE_PLACES_KEY: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY,
@@ -100,6 +100,8 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     REGION: process.env.REGION,
     MAP_SCREENSHOTS_BUCKET_NAME: process.env.MAP_SCREENSHOTS_BUCKET_NAME,
+    RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
+    RAPIDAPI_HOST: process.env.RAPIDAPI_HOST,
     GOOGLE_MAPS_KEY: process.env.GOOGLE_MAPS_KEY,
   },
   /**
