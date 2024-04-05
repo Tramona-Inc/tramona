@@ -9,8 +9,7 @@ export type LocationType = {
   city: string;
   state: string;
   zipcode: string;
-}
-
+};
 
 type HostOnboardingState = {
   progress: number;
@@ -40,7 +39,8 @@ type HostOnboardingState = {
   setBathrooms: (bathrooms: number) => void;
   setPropertyType: (property: PropertyType) => void;
   setSpaceType: (property: SpaceType) => void;
-  setLocation: (location: LocationType) => void; // Define the setLocation setter
+  setLocation: (location: LocationType) => void;
+  setCheckInType: (checkInType: string) => void; // Add this line
 };
 
 export const useHostOnboarding = create<HostOnboardingState>((set) => ({
@@ -60,7 +60,7 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
       state: "",
       zipcode: "",
     },
-    checkInType: "",
+    checkInType: "self",
     checkIn: new Date(),
     checkOut: new Date(),
     amenities: [],
@@ -128,12 +128,22 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
       },
     }));
   },
-  setLocation: (location: LocationType) => { // Define the setLocation setter
+  setLocation: (location: LocationType) => {
+    // Define the setLocation setter
     set((state) => ({
       ...state,
       listing: {
         ...state.listing,
         location,
+      },
+    }));
+  },
+  setCheckInType: (checkInType: string) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        checkInType,
       },
     }));
   },
