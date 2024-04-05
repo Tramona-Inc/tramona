@@ -2,7 +2,6 @@ import { db } from "@/server/db";
 import { all } from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import puppeteer, { Page } from "puppeteer";
-import fs from "fs/promises"
 
 //eslint-disable-next-line import/no-anonymous-default-export
 async function scrape(url: string) {
