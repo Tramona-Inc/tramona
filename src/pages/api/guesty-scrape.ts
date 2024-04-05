@@ -1,4 +1,4 @@
-git import { db } from "@/server/db";
+import { db } from "@/server/db";
 import { all } from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import puppeteer, { Page } from "puppeteer";
