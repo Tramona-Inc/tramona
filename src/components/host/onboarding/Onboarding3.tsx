@@ -5,6 +5,7 @@ import SharedRoom from "@/components/_icons/SharedRoom";
 import { Button } from "@/components/ui/button";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { Minus, Plus } from "lucide-react";
+import { useState } from "react";
 
 const options = [
   {
@@ -81,6 +82,12 @@ export default function Onboarding3() {
   const bathrooms = useHostOnboarding((state) => state.listing.bathrooms);
   const setBathrooms = useHostOnboarding((state) => state.setBathrooms);
 
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+  const handleSelectOption = (optionId: string) => {
+    setSelectedOption(optionId);
+  };
+
   return (
     <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
       <div className="mt-10 flex flex-col gap-5">
@@ -90,7 +97,14 @@ export default function Onboarding3() {
           <h3 className="mb-5 text-2xl font-semibold">Type of Space</h3>
           <div className="mb-5 flex flex-col gap-5">
             {options.map((item) => (
-              <CardSelect key={item.title} title={item.title} text={item.text}>
+              <CardSelect
+                key={item.title}
+                title={item.title}
+                text={item.text}
+                hover={true}
+                onClick={() => handleSelectOption(item.id)}
+                isSelected={selectedOption === item.id}
+              >
                 {item.icon}
               </CardSelect>
             ))}

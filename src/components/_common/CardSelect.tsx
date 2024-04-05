@@ -1,3 +1,4 @@
+import { cn } from "@/utils/utils";
 import React from "react";
 
 export default function CardSelect({
@@ -6,18 +7,23 @@ export default function CardSelect({
   text,
   onClick,
   isSelected,
+  hover,
 }: {
   children: React.ReactNode;
   title: string;
   text: string;
-  onClick: () => void;
-  isSelected: boolean;
+  onClick?: () => void;
+  isSelected?: boolean;
+  hover?: boolean;
 }) {
   return (
     <div
-      className={`flex flex-row items-center gap-5 rounded-[12px] border-[2px] p-5 transition-all hover:border-black sm:p-6 lg:p-7 ${
-        isSelected ? "border-black" : ""
-      }`}
+      className={cn(
+        hover && "hover:border-black",
+        `flex flex-row items-center gap-5 rounded-[12px] border-[2px] p-5 transition-all sm:p-6 lg:p-7 ${
+          isSelected ? "border-black" : ""
+        }`,
+      )}
       onClick={onClick}
     >
       <div className="flex w-16 justify-center">{children}</div>

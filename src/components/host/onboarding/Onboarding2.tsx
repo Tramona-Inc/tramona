@@ -52,6 +52,7 @@ export default function Onboarding2() {
             text={item.text}
             onClick={() => handleSelectOption(item.id)}
             isSelected={selectedOption === item.id}
+            hover={true}
           >
             {item.icon}
           </CardSelect>
