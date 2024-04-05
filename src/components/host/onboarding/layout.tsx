@@ -26,7 +26,7 @@ export default function OnboardingLayout({
           <Button
             variant={"ghost"}
             onClick={() => {
-              if (progress - 1 > -1) {
+              if (progress - 1 > 0) {
                 setProgress(progress - 1);
               }
             }}
