@@ -9,9 +9,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  ALL_PROPERTY_AMENITIES,
-  ALL_PROPERTY_SAFETY_ITEMS,
-  ALL_PROPERTY_STANDOUT_AMENITIES,
   ALL_PROPERTY_TYPES,
   type Request,
 } from "@/server/db/schema";
@@ -46,6 +43,7 @@ import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
 import axios from "axios";
 import { getS3ImgUrl } from "@/utils/formatters";
+import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -62,8 +60,6 @@ const formSchema = z.object({
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
   amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
-  standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
-  safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
@@ -121,8 +117,6 @@ export default function AdminOfferForm({
             avgRating: offer.property.avgRating,
             numRatings: offer.property.numRatings,
             amenities: offer.property.amenities,
-            standoutAmenities: offer.property.standoutAmenities,
-            safetyItems: offer.property.safetyItems,
             about: offer.property.about,
             airbnbUrl: offer.property.airbnbUrl ?? undefined,
             airbnbMessageUrl: offer.property.airbnbMessageUrl ?? undefined,
@@ -465,42 +459,6 @@ export default function AdminOfferForm({
               <FormControl>
                 <TagSelect
                   options={ALL_PROPERTY_AMENITIES}
-                  onChange={field.onChange}
-                  value={field.value}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="standoutAmenities"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Standout Amenities</FormLabel>
-              <FormControl>
-                <TagSelect
-                  options={ALL_PROPERTY_STANDOUT_AMENITIES}
-                  onChange={field.onChange}
-                  value={field.value}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="safetyItems"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Safety Items</FormLabel>
-              <FormControl>
-                <TagSelect
-                  options={ALL_PROPERTY_SAFETY_ITEMS}
                   onChange={field.onChange}
                   value={field.value}
                 />
