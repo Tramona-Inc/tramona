@@ -28,8 +28,8 @@ export default function Onboarding4() {
   };
 
   const checkIn = useHostOnboarding((state) => state.listing.checkIn);
-  const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
   const checkOut = useHostOnboarding((state) => state.listing.checkOut);
+  const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
   const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
 
   return (
@@ -92,8 +92,20 @@ export default function Onboarding4() {
         <div className="mt-5 w-full">
           <h1 className="mb-2 text-xl font-bold">Hours</h1>
           <div className="grid grid-cols-2 gap-5">
-            <Input type="clock" placeholder="Check in time" className="p-5" />
-            <Input type="clock" placeholder="Check out time" className="p-5" />
+            <Input
+              type="clock"
+              value={checkIn}
+              placeholder="Check in time"
+              className="p-5"
+              onChange={(e) => setCheckIn(e.target.value)}
+            />
+            <Input
+              type="clock"
+              value={checkOut}
+              placeholder="Check out time"
+              className="p-5"
+              onChange={(e) => setCheckOut(e.target.value)}
+            />
           </div>
         </div>
       </div>
