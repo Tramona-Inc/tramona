@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { FileCheck2Icon } from "lucide-react";
+import { api } from "@/utils/api";
+import { getS3ImgUrl } from "@/utils/formatters";
+import axios from "axios";
 
 export default function Onboarding7() {
   const defaultValues: { file: null | File } = {
@@ -59,6 +62,27 @@ export default function Onboarding7() {
     }
   }
 
+  const uploadFileMutation = api.files.upload.useMutation();
+
+  async function handleFormSubmit(data: { file: File | null }) {
+    let url: string | null = null;
+
+    const file = data.file;
+
+    if (file) {
+      const fileName = file.name;
+
+      try {
+        const uploadUrlResponse = await uploadFileMutation.mutateAsync({
+          fileName,
+        });
+        await axios.put(uploadUrlResponse, file);
+        url = getS3ImgUrl(fileName);
+      } catch (error) {
+        throw new Error("error uploading file");
+      }
+    }
+  }
   return (
     <MainLayout>
       <Container className="my-10">
@@ -69,7 +93,7 @@ export default function Onboarding7() {
         <Form {...methods}>
           <form
             className="w-100 flex flex-col items-center justify-center gap-2"
-            // onSubmit={methods.handleSubmit(handleFormSubmit)}
+            onSubmit={methods.handleSubmit(handleFormSubmit)}
             noValidate
             autoComplete="off"
           >

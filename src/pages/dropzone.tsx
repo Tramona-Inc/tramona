@@ -70,6 +70,7 @@ const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
               value={undefined}
               ref={inputRef}
               type="file"
+              multiple
               className={cn("hidden", className)}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 handleOnDrop(e.target.files)
