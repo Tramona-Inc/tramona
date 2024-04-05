@@ -8,10 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  ALL_PROPERTY_TYPES,
-  type Request,
-} from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES, type Request } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
 import { capitalize, plural } from "@/utils/utils";
@@ -100,8 +97,6 @@ export default function AdminOfferForm({
         { value: "" },
       ],
       amenities: [],
-      standoutAmenities: [],
-      safetyItems: [],
       ...(offer
         ? {
             // im sorry
@@ -232,8 +227,8 @@ export default function AdminOfferForm({
       if (!traveler.isWhatsApp) {
         await twilioWhatsAppMutation.mutateAsync({
           templateId: "HXfeb90955f0801d551e95a6170a5cc015",
-          to: traveler.phoneNumber
-        })
+          to: traveler.phoneNumber,
+        });
       } else {
         await twilioMutation.mutateAsync({
           to: traveler.phoneNumber,
