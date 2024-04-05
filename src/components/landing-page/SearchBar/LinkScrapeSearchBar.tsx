@@ -17,7 +17,7 @@ const formSchema = z.object({
   data: z
     .array(
       z.object({
-        airbnbLink: zodString(),
+        airbnbLink: zodString({ maxLen: 500 }),
       }),
     )
     .min(1),
@@ -56,7 +56,21 @@ export default function LinkScrapeSearchBar({
       .filter((i): i is number => i !== null) ?? [];
 
   async function onSubmit(data: FormSchema["data"]) {
-    console.log(data);
+    console.log({ url: data[0]?.airbnbLink });
+    // fetch("/api/scrape", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ url: data[0]?.airbnbLink }),
+    // })
+    //   .then((res) => res.json())
+    //   .then((res) => {
+    //     console.log(res);
+    //   });
+    const response = await utils.misc.scrapeUsingLink.fetch({
+      url: data[0]?.airbnbLink!,
+    });
+
+    console.log(response);
   }
 
   return (
