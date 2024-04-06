@@ -3,29 +3,33 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { cn } from "@/utils/utils";
-import { useState } from "react";
 
 export default function Onboarding4() {
-  const [isOther, setIsOther] = useState(false);
-  const [otherValue, setOtherValue] = useState("");
+  const otherCheckInType = useHostOnboarding(
+    (state) => state.listing.otherCheckInType,
+  );
+
+  const setOtherCheckInType = useHostOnboarding(
+    (state) => state.setOtherCheckInType,
+  );
 
   const checkInType = useHostOnboarding((state) => state.listing.checkInType);
   const setCheckInType = useHostOnboarding((state) => state.setCheckInType);
 
   const handleRadioChange = (value: string) => {
     if (value === "self" || value === "host") {
-      setIsOther(false);
+      setOtherCheckInType(false);
       setCheckInType(value); // Set check-in type for other options
     } else {
-      setIsOther(true);
+      setOtherCheckInType(true);
       setCheckInType(""); // Clear check-in type when "Other" is selected
     }
   };
 
-  const handleOtherInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOtherValue(e.target.value);
-    setCheckInType(e.target.value);
-  };
+  // const handleOtherInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setOtherValue(e.target.value);
+  //   setCheckInType(e.target.value);
+  // };
 
   const checkIn = useHostOnboarding((state) => state.listing.checkIn);
   const checkOut = useHostOnboarding((state) => state.listing.checkOut);
@@ -73,7 +77,7 @@ export default function Onboarding4() {
           <div>
             <p
               className={cn(
-                !isOther && "text-muted-foreground",
+                !otherCheckInType && "text-muted-foreground",
                 "mb-2 text-sm font-semibold",
               )}
             >
@@ -81,9 +85,9 @@ export default function Onboarding4() {
             </p>
             <Input
               type="text"
-              disabled={!isOther}
-              value={otherValue}
-              onChange={handleOtherInputChange}
+              disabled={!otherCheckInType}
+              value={otherCheckInType ? checkInType : ""}
+              onChange={(e) => setCheckInType(e.target.value)}
             />
             {/* //TODO display the character count */}
           </div>
