@@ -10,7 +10,7 @@ interface DropzoneProps
   > {
   classNameWrapper?: string;
   className?: string;
-  dropMessage: string;
+  dropMessage: React.ReactNode;
   handleOnDrop: (acceptedFiles: FileList | null) => void;
 }
 
@@ -30,17 +30,13 @@ const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      handleOnDrop(null);
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
       const { files } = e.dataTransfer;
-      if (inputRef.current) {
-        inputRef.current.files = files;
-        handleOnDrop(files);
-      }
+      handleOnDrop(files);
     };
 
     const handleButtonClick = () => {
@@ -49,34 +45,38 @@ const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
         inputRef.current.click();
       }
     };
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+      const { files } = e.target;
+      handleOnDrop(files);
+    };
+
     return (
       <Card
         ref={ref}
         className={cn(
-          `border-2 border-dashed bg-muted hover:cursor-pointer hover:border-muted-foreground/50`,
+          `h-96 items-center justify-center border-2 border-dashed bg-muted hover:cursor-pointer hover:border-muted-foreground/50`,
           classNameWrapper,
         )}
       >
         <CardContent
-          className="flex flex-col items-center justify-center space-y-2 px-2 py-4 text-xs"
+          className="relative py-8"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={handleButtonClick}
         >
-          <div className="flex items-center justify-center text-muted-foreground">
-            <span className="font-medium">{dropMessage}</span>
-            <Input
-              {...props}
-              value={undefined}
-              ref={inputRef}
-              type="file"
-              multiple
-              className={cn("hidden", className)}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                handleOnDrop(e.target.files)
-              }
-            />
-          </div>
+          <p className="text-center text-xs font-medium text-muted-foreground">
+            {dropMessage}
+          </p>
+          <Input
+            {...props}
+            value={undefined}
+            ref={inputRef}
+            type="file"
+            multiple
+            className={cn("absolute inset-0 hidden", className)}
+            onChange={handleChange}
+          />
         </CardContent>
       </Card>
     );

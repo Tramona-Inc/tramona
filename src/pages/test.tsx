@@ -34,11 +34,26 @@ export default function Onboarding7() {
           Add some photos of your property
         </h1>
         <p className="mb-5 text-muted-foreground">Choose at least 5 photos</p>
-        <PhotosDropzone
-          control={form.control}
-          name="imageURLs"
-          minPhotosRequired={5}
-        />
+        <Form {...form}>
+          <form
+            className="w-100 flex flex-col items-center justify-center gap-2"
+            onSubmit={form.handleSubmit(handleFormSubmit)}
+            noValidate
+            autoComplete="off"
+          >
+            <PhotosDropzone
+              control={form.control}
+              name="imageURLs"
+              minPhotosRequired={5}
+            />
+            <PhotosDropzone
+              control={form.control}
+              name="moreImageURLs"
+              minPhotosRequired={5}
+            />
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
       </Container>
     </MainLayout>
   );
