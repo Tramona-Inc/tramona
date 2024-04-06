@@ -6,6 +6,7 @@ import CashbackAccount from "@/components/account/CashbackAccount";
 import ReferFolks from "@/components/account/ReferFolks";
 
 import { api } from "@/utils/api";
+import MainLayout from "@/components/_common/Layout/MainLayout";
 
 export default function MyAccount() {
   useSession({ required: true });
@@ -28,17 +29,19 @@ export default function MyAccount() {
       <Head>
         <title>My Account | Tramona</title>
       </Head>
-      <div className="min-h-screen-minus-header gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
-        <AccountSidebar />
-        <div className="w-full space-y-5">
-          <CashbackAccount
-            isLoading={isLoading}
-            cashbackBalance={cashbackBalance}
-            recentEarnings={recentEarnings}
-          />
-          <ReferFolks />
+      <MainLayout>
+        <div className="min-h-screen-minus-header gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
+          <AccountSidebar />
+          <div className="w-full space-y-5">
+            <CashbackAccount
+              isLoading={isLoading}
+              cashbackBalance={cashbackBalance}
+              recentEarnings={recentEarnings}
+            />
+            <ReferFolks />
+          </div>
         </div>
-      </div>
+      </MainLayout>
     </>
   );
 }

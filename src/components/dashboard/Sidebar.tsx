@@ -5,7 +5,9 @@ import { cn, plural } from "@/utils/utils";
 import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
-  BriefcaseIcon,
+  DollarSign,
+  Fence,
+  Handshake,
   HistoryIcon,
   HomeIcon,
   InboxIcon,
@@ -18,6 +20,7 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
+import SuitcaseIcon from "../_icons/SuitcaseIcon";
 
 function SidebarLink({
   href,
@@ -47,12 +50,14 @@ function SidebarLink({
               className="absolute inset-y-0 right-0 border-[3px] border-transparent border-r-black"
             />
           )}
+
           <Icon
             className={cn(
               "size-6 lg:size-8",
               selected ? "text-black" : "text-zinc-700",
             )}
           />
+
           {children}
         </div>
       )}
@@ -75,13 +80,20 @@ const adminNavLinks = [
 
 const hostNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
+  {
+    href: "/host/incoming-request",
+    name: "Incoming Requests",
+    icon: Handshake,
+  },
+  { href: "/host/properties", name: "Properties", icon: Fence },
+  { href: "/host/payout", name: "Payout", icon: DollarSign },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
 const guestNavLinks = [
   { href: "/dashboard", name: "Home", icon: HomeIcon },
-  { href: "/requests", name: "My Requests", icon: TagIcon },
-  { href: "/my-trips", name: "My Trips", icon: BriefcaseIcon },
+  { href: "/requests", name: "Requests & Offers", icon: TagIcon },
+  { href: "/my-trips", name: "My Trips", icon: SuitcaseIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 

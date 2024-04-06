@@ -8,6 +8,7 @@ import { referralColumns } from "@/components/account/cashback/ReferralColumns";
 import Spinner from "@/components/_common/Spinner";
 
 import { type RouterOutputs, api } from "@/utils/api";
+import MainLayout from "@/components/_common/Layout/MainLayout";
 
 export type ReferralTableData =
   RouterOutputs["referralCodes"]["getReferralEarnings"];
@@ -31,22 +32,24 @@ export default function CashbackBalance() {
       <Head>
         <title>Cashback Balance | Tramona</title>
       </Head>
-      <div className="min-h-screen-minus-header gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
-        <AccountSidebar />
-        <div className="w-full space-y-5">
-          {isLoading ? (
-            <Spinner />
-          ) : (
-            <>
-              <CashbackBalanceDetails balance={cashbackBalance} />
+      <MainLayout>
+        <div className="min-h-screen-minus-header gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
+          <AccountSidebar />
+          <div className="w-full space-y-5">
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              <>
+                <CashbackBalanceDetails balance={cashbackBalance} />
 
-              <div className="rounded-xl bg-zinc-50 shadow-md">
-                <ReferralTable data={data ?? []} columns={referralColumns} />
-              </div>
-            </>
-          )}
+                <div className="rounded-xl bg-zinc-50 shadow-md">
+                  <ReferralTable data={data ?? []} columns={referralColumns} />
+                </div>
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      </MainLayout>
     </>
   );
 }
