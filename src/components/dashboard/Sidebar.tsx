@@ -5,7 +5,6 @@ import { cn, plural } from "@/utils/utils";
 import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
-  BriefcaseIcon,
   DollarSign,
   Fence,
   Handshake,
@@ -21,6 +20,7 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
+import SuitcaseIcon from "../_icons/SuitcaseIcon";
 
 function SidebarLink({
   href,
@@ -92,8 +92,8 @@ const hostNavLinks = [
 
 const guestNavLinks = [
   { href: "/dashboard", name: "Home", icon: HomeIcon },
-  { href: "/requests", name: "Requests & Offers", icon: TagIcon },
-  { href: "/my-trips", name: "My Trips", icon: BriefcaseIcon },
+  { href: "/requests", name: "Requests & Offers", icon: TagIcon },
+  { href: "/my-trips", name: "My Trips", icon: SuitcaseIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
