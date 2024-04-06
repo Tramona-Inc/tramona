@@ -92,7 +92,7 @@ const hostNavLinks = [
 
 const guestNavLinks = [
   { href: "/dashboard", name: "Home", icon: HomeIcon },
-  { href: "/requests", name: "My Requests", icon: TagIcon },
+  { href: "/requests", name: "Requests & Offers", icon: TagIcon },
   { href: "/my-trips", name: "My Trips", icon: BriefcaseIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];

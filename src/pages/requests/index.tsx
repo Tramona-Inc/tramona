@@ -57,7 +57,7 @@ export default function Page() {
   return (
     <>
       <Head>
-        <title>My Requests | Tramona</title>
+        <title>Requests & Offers | Tramona</title>
       </Head>
 
       <DashboardLayout type="guest">
@@ -65,7 +65,7 @@ export default function Page() {
           <div className="mx-auto">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-4xl font-bold text-black">
-                My Requests
+                Requests & Offers
               </h1>
               {/* <NewRequestButton /> */}
             </div>
