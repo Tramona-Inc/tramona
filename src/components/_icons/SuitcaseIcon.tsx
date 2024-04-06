@@ -1,4 +1,5 @@
 export default function SuitcaseIcon({ className }: { className?: string }) {
+  //
   return (
     <svg
       width="25"
