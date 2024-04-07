@@ -40,14 +40,14 @@ export const ALL_PROPERTY_TYPES = [
 
 export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
 
-export const newPropertyAmenitiesEnum = pgEnum(
-  "new_property_amenities",
+export const propertyAmenitiesEnum = pgEnum(
+  "property_amenities",
   ALL_PROPERTY_AMENITIES,
 );
 
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
-  hostId: text("host_id").references(() => users.id, { onDelete: "cascade"}),
+  hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
@@ -65,7 +65,7 @@ export const properties = pgTable("properties", {
   imageUrls: varchar("image_url").array().notNull(),
   originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
   propertyType: propertyTypeEnum("property_type").notNull(),
-  amenities: newPropertyAmenitiesEnum("property_amenities").array().notNull(),
+  amenities: propertyAmenitiesEnum("property_amenities").array().notNull(),
   checkInInfo: varchar("check_in_info"),
   about: text("about").notNull(),
   areaDescription: text("area_description"),
