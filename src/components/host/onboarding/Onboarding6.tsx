@@ -110,8 +110,12 @@ function OtherBox({ item }: { item: string }) {
   return (
     <div className="flex flex-row items-center justify-between gap-2 rounded-lg border p-3">
       <p className="text-sm font-bold capitalize sm:text-base">{item}</p>
-      <Button variant={"ghost"} onClick={() => removeOtherAmenity(item)}>
-        <Trash color={"red"} />
+      <Button
+        variant={"ghost"}
+        size={"icon"}
+        onClick={() => removeOtherAmenity(item)}
+      >
+        <Trash color={"red"} size={20} />
       </Button>
     </div>
   );
