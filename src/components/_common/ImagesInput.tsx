@@ -4,12 +4,10 @@ import axios from "axios";
 import { nanoid } from "nanoid";
 import Dropzone from "../ui/dropzone";
 import { ScrollBar, ScrollArea } from "../ui/scroll-area";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils/utils";
-import { Badge } from "../ui/badge";
-import { Loader2Icon } from "lucide-react";
-import { Button } from "../ui/button";
+import { ImagePlusIcon, Loader2Icon, XIcon } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
 
 type SelectedImage = { id: string; url: string } & (
   | { status: "uploading" }
@@ -71,60 +69,69 @@ export default function ImagesInput({
   }
 
   function removeFromImages(id: string) {
-    images.forEach((image, index) => {
-      image.id === id && images.splice(index, 1);
-    });
+    setImages((prev) => prev.filter((img) => img.id !== id));
   }
 
   return (
     <div className="space-y-2">
       <Dropzone accept="image/*" handleOnDrop={handleOnDrop}>
         <div className="flex flex-col items-center space-y-2 text-center">
-          <p className="h-16 w-16 border-2 border-primary"></p>
-          <h1 className="text-lg font-bold">Drag your photos here</h1>
+          <div className="rounded-full bg-zinc-200 p-3">
+            <ImagePlusIcon className="h-8 w-8" />
+          </div>
+          <p className="text-lg font-bold">Drag your photos here</p>
           <p className="text-sm text-muted-foreground">or</p>
           <p className="text-sm underline">Upload from device</p>
         </div>
       </Dropzone>
-      <div className="flex justify-center">
-        <ScrollArea className="w-96 whitespace-nowrap rounded-md border">
-          <div className="flex w-max items-center gap-2">
+      <ScrollArea className="rounded-md border p-2">
+        {images.length === 0 ? (
+          <div className="flex h-40 items-center justify-center">
+            <p className="text-sm text-muted-foreground">
+              Your photos will show up here
+            </p>
+          </div>
+        ) : (
+          <div className="flex h-40 w-max gap-2">
             {images.map((image, index) => (
-              <div key={image.id} className="relative overflow-hidden">
-                <Image
+              <div key={image.id} className="group relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={image.url}
                   className={cn(
+                    "h-full w-auto",
                     image.status === "uploaded" ? "opacity-100" : "opacity-50",
-                    "aspect-square object-cover",
                   )}
-                  width={200}
-                  height={200}
                   alt=""
                 />
-                <div className="absolute right-2 top-2">
+                <div className="absolute inset-0 grid place-items-center">
                   {image.status === "uploading" && (
                     <Loader2Icon className="animate-spin" />
                   )}
-                  {image.status === "error" && (
-                    <Badge variant="solidRed" size="sm">
-                      Error
-                    </Badge>
-                  )}
-                  <Button onClick={() => removeFromImages(image.id)}>X</Button>
                 </div>
                 <div className="absolute left-2 top-2">
                   {index === 0 && (
-                    <p className="border-1 rounded-sm bg-zinc-400/50 p-1 text-sm font-bold text-secondary">
+                    <p className="border-1 rounded-full bg-white p-1 px-2 text-xs font-semibold text-black">
                       Cover Photo
                     </p>
                   )}
                 </div>
+                <Tooltip>
+                  <TooltipTrigger
+                    type="button" // to prevent form submit
+                    className="absolute right-1 top-1 z-10 -translate-y-1/2 translate-x-1/2 rounded-full bg-black p-1 text-white"
+                    onClick={() => removeFromImages(image.id)}
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>Remove image</TooltipContent>
+                </Tooltip>
               </div>
             ))}
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
+        )}
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 }

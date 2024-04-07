@@ -30,43 +30,45 @@ export default function Onboarding7() {
     },
   });
 
-  async function handleFormSubmit(values: FormValues) {
-    console.log(values);
+  async function handleFormSubmit({ imageURLs }: FormValues) {
+    console.log(imageURLs);
   }
 
   return (
     <MainLayout>
-      <Container className="my-10">
-        <h1 className="my-3 text-3xl font-bold">
-          Add some photos of your property
-        </h1>
-        <p className="mb-5 text-muted-foreground">
-          Choose at least 5 photos (first photo will be the cover photo)
-        </p>
-        <Form {...form}>
-          <form
-            className="w-100 flex flex-col gap-2"
-            onSubmit={form.handleSubmit(handleFormSubmit)}
-            noValidate
-            autoComplete="off"
-          >
-            <FormField
-              control={form.control}
-              name="imageURLs"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <ImagesInput {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <div className="px-4 pb-32 pt-16">
+        <div className="mx-auto max-w-3xl">
+          <h1 className="my-3 text-3xl font-bold">
+            Add some photos of your property
+          </h1>
+          <p className="mb-5 text-muted-foreground">
+            Choose at least 5 photos (put your best photos first)
+          </p>
+          <Form {...form}>
+            <form
+              className="flex flex-col gap-2"
+              onSubmit={form.handleSubmit(handleFormSubmit)}
+              noValidate
+              autoComplete="off"
+            >
+              <FormField
+                control={form.control}
+                name="imageURLs"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <ImagesInput {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Button type="submit">Submit</Button>
-          </form>
-        </Form>
-      </Container>
+              <Button type="submit">Submit</Button>
+            </form>
+          </Form>
+        </div>
+      </div>
     </MainLayout>
   );
 }
