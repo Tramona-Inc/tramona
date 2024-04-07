@@ -1,5 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 
 const kitchenItems = [
   {
@@ -97,16 +98,35 @@ type CheckboxSelectProps = {
   content: string;
 };
 
-function CheckboxSelect({ item }: { item: CheckboxSelectProps }) {
+function CheckboxSelect({
+  item,
+  isSelected,
+}: {
+  item: CheckboxSelectProps;
+  isSelected: boolean;
+}) {
+  const setAmenity = useHostOnboarding((state) => state.setAmenity);
+  const removeAmenity = useHostOnboarding((state) => state.removeAmenity);
+
   return (
     <div className="flex flex-row items-center gap-2 rounded-lg border p-3">
-      <Checkbox id={item.id} />
+      <Checkbox
+        id={item.id}
+        defaultChecked={isSelected}
+        onCheckedChange={(checked) => {
+          return checked ? setAmenity(item.id) : removeAmenity(item.id);
+        }}
+      />
       <p className="text-sm font-bold sm:text-base">{item.content}</p>
     </div>
   );
 }
 
 export default function Onboarding6() {
+  const amenities: string[] = useHostOnboarding(
+    (state) => state.listing.amenities,
+  );
+
   return (
     <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
       <div className="my-20 flex flex-col gap-10">
@@ -116,7 +136,11 @@ export default function Onboarding6() {
           <h3 className="mb-5 text-2xl font-semibold">Kitchen</h3>
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {kitchenItems.map((item) => (
-              <CheckboxSelect key={item.id} item={item} />
+              <CheckboxSelect
+                key={item.id}
+                item={item}
+                isSelected={amenities.includes(item.id)}
+              />
             ))}
           </div>
         </div>
@@ -125,7 +149,11 @@ export default function Onboarding6() {
           <h3 className="mb-5 text-2xl font-semibold">Living room</h3>
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {livingRoomItems.map((item) => (
-              <CheckboxSelect key={item.id} item={item} />
+              <CheckboxSelect
+                key={item.id}
+                item={item}
+                isSelected={amenities.includes(item.id)}
+              />
             ))}
           </div>
         </div>
@@ -134,7 +162,11 @@ export default function Onboarding6() {
           <h3 className="mb-5 text-2xl font-semibold"> Heating & cooling</h3>
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {heatingAndCoolingItems.map((item) => (
-              <CheckboxSelect key={item.id} item={item} />
+              <CheckboxSelect
+                key={item.id}
+                item={item}
+                isSelected={amenities.includes(item.id)}
+              />
             ))}
           </div>
         </div>
@@ -143,7 +175,11 @@ export default function Onboarding6() {
           <h3 className="mb-5 text-2xl font-semibold">Laundry</h3>
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {laundryItems.map((item) => (
-              <CheckboxSelect key={item.id} item={item} />
+              <CheckboxSelect
+                key={item.id}
+                item={item}
+                isSelected={amenities.includes(item.id)}
+              />
             ))}
           </div>
         </div>
@@ -152,7 +188,11 @@ export default function Onboarding6() {
           <h3 className="mb-5 text-2xl font-semibold">Internet & office</h3>
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {laundryItems.map((item) => (
-              <CheckboxSelect key={item.id} item={item} />
+              <CheckboxSelect
+                key={item.id}
+                item={item}
+                isSelected={amenities.includes(item.id)}
+              />
             ))}
           </div>
         </div>
@@ -161,7 +201,11 @@ export default function Onboarding6() {
           <h3 className="mb-5 text-2xl font-semibold">Parking</h3>
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
             {parkingItems.map((item) => (
-              <CheckboxSelect key={item.id} item={item} />
+              <CheckboxSelect
+                key={item.id}
+                item={item}
+                isSelected={amenities.includes(item.id)}
+              />
             ))}
           </div>
         </div>
@@ -172,7 +216,7 @@ export default function Onboarding6() {
             Specify additional amenities you want to highlight.
           </p>
 
-          <Textarea />
+          <Textarea disabled={true} />
         </div>
       </div>
     </div>
