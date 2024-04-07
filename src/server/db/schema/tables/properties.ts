@@ -17,6 +17,7 @@ import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
   "Apartment",
+  "Guesthouse",
   "House",
   "Loft",
   "Boat",
@@ -30,15 +31,20 @@ export const ALL_PROPERTY_TYPES = [
   "Bungalow",
   "Hut",
   "Other",
+] as const;
 
-  "house",
-  "guesthouse",
-  "apartment",
-  "room",
-  "townhouse",
+export const ALL_PROPERTY_ROOM_TYPES = [
+  "Entire place",
+  "Shared room",
+  "Private room",
 ] as const;
 
 export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
+
+export const propertyRoomTypeEnum = pgEnum(
+  "property_room_type",
+  ALL_PROPERTY_ROOM_TYPES,
+);
 
 export const propertyAmenitiesEnum = pgEnum(
   "property_amenities",
@@ -65,7 +71,8 @@ export const properties = pgTable("properties", {
   imageUrls: varchar("image_url").array().notNull(),
   originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
   propertyType: propertyTypeEnum("property_type").notNull(),
-  amenities: propertyAmenitiesEnum("property_amenities").array().notNull(),
+  roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
+  amenities: propertyAmenitiesEnum("amenities").array().notNull(),
   checkInInfo: varchar("check_in_info"),
   about: text("about").notNull(),
   areaDescription: text("area_description"),
