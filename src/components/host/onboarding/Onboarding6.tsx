@@ -1,6 +1,10 @@
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { errorToast } from "@/utils/toasts";
+import { Plus, Trash } from "lucide-react";
+import { useState } from "react";
 
 const kitchenItems = [
   {
@@ -98,6 +102,21 @@ type CheckboxSelectProps = {
   content: string;
 };
 
+function OtherBox({ item }: { item: string }) {
+  const removeOtherAmenity = useHostOnboarding(
+    (state) => state.removeOtherAmenity,
+  );
+
+  return (
+    <div className="flex flex-row items-center justify-between gap-2 rounded-lg border p-3">
+      <p className="text-sm font-bold capitalize sm:text-base">{item}</p>
+      <Button variant={"ghost"} onClick={() => removeOtherAmenity(item)}>
+        <Trash color={"red"} />
+      </Button>
+    </div>
+  );
+}
+
 function CheckboxSelect({
   item,
   isSelected,
@@ -126,6 +145,24 @@ export default function Onboarding6() {
   const amenities: string[] = useHostOnboarding(
     (state) => state.listing.amenities,
   );
+
+  const otherAmenities: string[] = useHostOnboarding(
+    (state) => state.listing.otherAmenities,
+  );
+
+  const setOtherAmenity = useHostOnboarding((state) => state.setOtherAmenity);
+
+  const [otherValue, setOtherValue] = useState("");
+
+  function handleAddOther() {
+    if (!otherAmenities.includes(otherValue.toLocaleLowerCase())) {
+      setOtherAmenity(otherValue.toLocaleLowerCase());
+      setOtherValue("");
+    } else {
+      errorToast("Duplicate amenities");
+      setOtherValue("");
+    }
+  }
 
   return (
     <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
@@ -215,8 +252,34 @@ export default function Onboarding6() {
           <p className="text-muted-foreground">
             Specify additional amenities you want to highlight.
           </p>
+          <div className="grid grid-cols-4 gap-5">
+            <div className="col-span-3">
+              <Input
+                placeholder="Other amenity"
+                value={otherValue}
+                onChange={(e) => setOtherValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAddOther();
+                  }
+                }}
+              />
+            </div>
 
-          <Textarea disabled={true} />
+            <Button
+              onClick={() => {
+                handleAddOther();
+              }}
+            >
+              <Plus />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+            {otherAmenities.map((item, index) => (
+              <OtherBox key={index} item={item} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

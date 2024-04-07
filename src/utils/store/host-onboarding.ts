@@ -27,6 +27,7 @@ type HostOnboardingState = {
     checkIn: string;
     checkOut: string;
     amenities: string[];
+    otherAmenities: string[];
     imageUrls: string[];
     title: string;
     description: string;
@@ -47,6 +48,8 @@ type HostOnboardingState = {
   setCheckOut: (checkOut: string) => void; // Add this line
   setAmenity: (amenity: string) => void;
   removeAmenity: (amenity: string) => void;
+  setOtherAmenity: (amenity: string) => void;
+  removeOtherAmenity: (amenity: string) => void;
 };
 
 export const useHostOnboarding = create<HostOnboardingState>((set) => ({
@@ -71,6 +74,7 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
     checkIn: "",
     checkOut: "",
     amenities: [],
+    otherAmenities: [],
     imageUrls: [],
     title: "",
     description: "",
@@ -196,6 +200,26 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
       listing: {
         ...state.listing,
         amenities: state.listing.amenities.filter((item) => item !== amenity),
+      },
+    }));
+  },
+  setOtherAmenity: (amenity: string) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        otherAmenities: [...state.listing.otherAmenities, amenity],
+      },
+    }));
+  },
+  removeOtherAmenity: (amenity: string) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        otherAmenities: state.listing.otherAmenities.filter(
+          (item) => item !== amenity,
+        ),
       },
     }));
   },
