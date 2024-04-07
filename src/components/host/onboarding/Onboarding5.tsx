@@ -35,8 +35,7 @@ export default function Onboarding4() {
   const checkOut = useHostOnboarding((state) => state.listing.checkOut);
   const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
   const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
-
-  return (
+return (
     <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
       <div className="mt-10 flex flex-col gap-10">
         <h1 className="text-4xl font-bold">
@@ -45,7 +44,7 @@ export default function Onboarding4() {
 
         <div className="flex flex-col gap-5">
           <RadioGroup
-            defaultValue={checkInType}
+            defaultValue={otherCheckInType ? "other" : checkInType}
             onValueChange={handleRadioChange}
           >
             <div className="flex items-center space-x-2 rounded-lg border p-5">
