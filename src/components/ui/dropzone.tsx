@@ -10,7 +10,7 @@ interface DropzoneProps
   > {
   classNameWrapper?: string;
   className?: string;
-  dropMessage: React.ReactNode;
+  children: React.ReactNode;
   handleOnDrop: (acceptedFiles: FileList | null) => void;
 }
 
@@ -19,7 +19,7 @@ const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
     {
       className,
       classNameWrapper,
-      dropMessage,
+      children,
       handleOnDrop,
       ...props
     }: DropzoneProps,
@@ -41,7 +41,6 @@ const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
 
     const handleButtonClick = () => {
       if (inputRef.current) {
-        console.log("Button clicked");
         inputRef.current.click();
       }
     };
@@ -55,26 +54,24 @@ const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
       <Card
         ref={ref}
         className={cn(
-          `h-96 items-center justify-center border-2 border-dashed bg-muted hover:cursor-pointer hover:border-muted-foreground/50`,
+          `h-80 items-center justify-center border-2 border-dashed bg-muted hover:cursor-pointer hover:border-muted-foreground/50`,
           classNameWrapper,
         )}
       >
         <CardContent
-          className="relative py-8"
+          className="flex w-full items-center justify-center"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={handleButtonClick}
         >
-          <p className="text-center text-xs font-medium text-muted-foreground">
-            {dropMessage}
-          </p>
+          {children}
           <Input
             {...props}
             value={undefined}
             ref={inputRef}
             type="file"
             multiple
-            className={cn("absolute inset-0 hidden", className)}
+            className={cn("inset-0 hidden", className)}
             onChange={handleChange}
           />
         </CardContent>

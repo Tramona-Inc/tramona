@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/utils/utils";
 import { Badge } from "../ui/badge";
 import { Loader2Icon } from "lucide-react";
+import { Button } from "../ui/button";
 
 type SelectedImage = { id: string; url: string } & (
   | { status: "uploading" }
@@ -69,46 +70,61 @@ export default function ImagesInput({
     );
   }
 
+  function removeFromImages(id: string) {
+    images.forEach((image, index) => {
+      image.id === id && images.splice(index, 1);
+    });
+  }
+
   return (
     <div className="space-y-2">
-      <Dropzone
-        accept="image/*"
-        dropMessage={
-          <>
-            Drag your photos here or{" "}
-            <span className="underline">upload from device</span>
-          </>
-        }
-        handleOnDrop={handleOnDrop}
-      />
-      <ScrollArea>
-        <div className="flex gap-2">
-          {images.map((image) => (
-            <div key={image.id} className="relative">
-              <Image
-                src={image.url}
-                className={cn(
-                  image.status === "uploaded" ? "opacity-100" : "opacity-50",
-                )}
-                width={200}
-                height={200}
-                alt=""
-              />
-              <div className="absolute right-2 top-2">
-                {image.status === "uploading" && (
-                  <Loader2Icon className="animate-spin" />
-                )}
-                {image.status === "error" && (
-                  <Badge variant="solidRed" size="sm">
-                    Error
-                  </Badge>
-                )}
-              </div>
-            </div>
-          ))}
+      <Dropzone accept="image/*" handleOnDrop={handleOnDrop}>
+        <div className="flex flex-col items-center space-y-2 text-center">
+          <p className="h-16 w-16 border-2 border-primary"></p>
+          <h1 className="text-lg font-bold">Drag your photos here</h1>
+          <p className="text-sm text-muted-foreground">or</p>
+          <p className="text-sm underline">Upload from device</p>
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </Dropzone>
+      <div className="flex justify-center">
+        <ScrollArea className="w-96 whitespace-nowrap rounded-md border">
+          <div className="flex w-max items-center gap-2">
+            {images.map((image, index) => (
+              <div key={image.id} className="relative overflow-hidden">
+                <Image
+                  src={image.url}
+                  className={cn(
+                    image.status === "uploaded" ? "opacity-100" : "opacity-50",
+                    "aspect-square object-cover",
+                  )}
+                  width={200}
+                  height={200}
+                  alt=""
+                />
+                <div className="absolute right-2 top-2">
+                  {image.status === "uploading" && (
+                    <Loader2Icon className="animate-spin" />
+                  )}
+                  {image.status === "error" && (
+                    <Badge variant="solidRed" size="sm">
+                      Error
+                    </Badge>
+                  )}
+                  <Button onClick={() => removeFromImages(image.id)}>X</Button>
+                </div>
+                <div className="absolute left-2 top-2">
+                  {index === 0 && (
+                    <p className="border-1 rounded-sm bg-zinc-400/50 p-1 text-sm font-bold text-secondary">
+                      Cover Photo
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
     </div>
   );
 }

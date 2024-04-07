@@ -41,11 +41,11 @@ export default function Onboarding7() {
           Add some photos of your property
         </h1>
         <p className="mb-5 text-muted-foreground">
-          Choose at least 5 photos, and put your best one first
+          Choose at least 5 photos (first photo will be the cover photo)
         </p>
         <Form {...form}>
           <form
-            className="w-100 flex flex-col items-center justify-center gap-2"
+            className="w-100 flex flex-col gap-2"
             onSubmit={form.handleSubmit(handleFormSubmit)}
             noValidate
             autoComplete="off"
