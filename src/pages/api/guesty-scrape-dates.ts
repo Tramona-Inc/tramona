@@ -1,8 +1,7 @@
 import fs from "fs/promises"
-import { db } from "@/server/db";
+
 import { type NextApiRequest, type NextApiResponse } from "next";
 import puppeteer, { Page } from "puppeteer";
-import { propertyInsertSchema } from "@/server/db/schema";
 
 //eslint-disable-next-line import/no-anonymous-default-export
 export default async (req: NextApiRequest, res: NextApiResponse) => {
@@ -58,22 +57,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     await scrollDownUntilNoChange(page);
 
 
-
     await delay(2000);
     let propertyNumber = 0;
 
-    // const propertyData: {
-    //   images: (string | null)[];
-    //   text: (string | undefined)[];
-    //   dates: string[][];
-    // }[] = [];
+
     let propertyData: {};
 
-    let test = false;
 
-
-
-    const handleNewPage = async (newPage: Page, propertyNumber: number) => {
+    const handleNewPage = async (newPage: Page) => {
       await delay(3000);
       try {
         newPage.on("console", (msg) => {
@@ -82,43 +73,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           }
         });
         const returnedData = await newPage.evaluate(async (propertyNumber) => {
-          const slides = Array.from(
-            document.querySelectorAll(
-              'div[class*="mainSlider"] .slick-slide:not(.slick-cloned)',
-            ),
-          );
-          const numClicks = slides.length - 1;
-          console.log(numClicks);
 
-          const arrow = document.getElementsByClassName("slick-next")[0];
-
-          for (let i = 0; i < numClicks; i++) {
-            arrow.click();
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-
-          const slickSlideDivs = document.querySelectorAll(
-            'div[class*="mainSlider"] .slick-slide:not(.slick-cloned) img',
-          );
-
-          const imageSources = Array.from(slickSlideDivs).map((img) =>
-            img.getAttribute("src"),
-          );
-
-          // expand amenities
-          const divWithShowAll = document.querySelector(
-            'div[class*="showAll"]',
-          );
-
-          // Check if the div element is found
-          if (divWithShowAll) {
-            // Trigger a click event on the div element
-            divWithShowAll.click();
-          } else {
-            console.log("Element with text 'Show all' not found.");
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, 1000));
 
           //grab all text
           const propertyDescriptions = document.querySelectorAll(
@@ -132,67 +87,68 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           const titleEndIndex = propertyTexts.indexOf("Description");
           const title = propertyTexts.substring(0, titleEndIndex);
 
-          // Extracting description
-          const descriptionStartIndex = titleEndIndex + "Description".length;
-          const descriptionEndIndex = propertyTexts.indexOf("Check in");
-          const description = propertyTexts.substring(
-            descriptionStartIndex,
-            descriptionEndIndex,
+
+          //grab all dates
+          const allDates = [];
+          let expandCalendarButton = document.querySelectorAll(
+            '[class*="Button-content"]',
           );
+          expandCalendarButton[0].click();
 
-          // Extracting check-in and check-out
-          const checkInIndex = propertyTexts.indexOf("Check in:");
-          const checkOutIndex = propertyTexts.indexOf("Check out:");
-          const checkIn = propertyTexts
-            .substring(checkInIndex + "Check in:".length, checkOutIndex)
-            .trim();
-          const checkOut = propertyTexts
-            .substring(
-              checkOutIndex + "Check out:".length,
-              propertyTexts.indexOf("Property features"),
-            )
-            .trim();
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
-          // Extracting property features
-          const propertyFeaturesStartIndex =
-            propertyTexts.indexOf("Property features");
-          const propertyFeaturesEndIndex = propertyTexts.indexOf("Amenities");
-          let propertyFeatures = propertyTexts
-            .substring(
-              propertyFeaturesStartIndex + "Property features".length,
-              propertyFeaturesEndIndex,
-            )
-            .trim();
-
-            propertyFeatures = propertyFeatures.replace(
-              /([a-zA-Z])(\d+(\.\d+)?)/g,
-              "$1, $2"
+          for (let i = 0; i < 5; i++) {
+            let expandCalendarButton = document.querySelector(
+              '[class*="nextButton"]',
             );
 
-          // Extracting amenities
-          const showAllDiv = document.querySelector('div[class*="showAll"]');
-          const brotherWithChildren = showAllDiv?.previousElementSibling;
-          const amenities = [];
-          if (brotherWithChildren) {
-            for (const childDiv of brotherWithChildren.children) {
-              // Push the text content of each child div into the array
-              amenities.push(childDiv.textContent?.trim());
+            try {
+              expandCalendarButton.click();
+            } catch (err) {
+              console.log("error while clicking dates", err);
             }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
+            const calendarCaptionText = document.querySelectorAll(
+              "div.CalendarMonth_caption",
+            )[1]?.textContent;
+            const month = calendarCaptionText.substring(
+              0,
+              calendarCaptionText.length - 5,
+            );
+
+            const tdElements = document.querySelectorAll(
+              "div.CalendarMonth td.CalendarDay",
+            );
+            const filteredAriaLabels = Array.from(tdElements).filter((td) => {
+              const ariaLabel = td.getAttribute("aria-label");
+              return ariaLabel?.includes(month) && !ariaLabel?.includes("Not");
+            });
+
+            const dates = filteredAriaLabels.map((td) => {
+              const ariaLabel = td.getAttribute("aria-label");
+              const dateStartIndex = ariaLabel?.indexOf(",") + 2;
+              const dateEndIndex = ariaLabel?.indexOf(",", dateStartIndex + 1); // Find the index of the next comma after the month
+
+              // Extract the full date string
+              const dateString = ariaLabel?.substring(
+                dateStartIndex,
+                dateEndIndex,
+              );
+
+              // Format the date as desired (e.g., March 31, 2024)
+              return `${dateString?.trim()}, ${new Date().getFullYear()}`;
+            });
+            allDates.push(dates);
           }
 
+
           return {
-            propertyNumber,
-            imageSources,
-            propertyTexts,
-            // allDates,
+            allDates,
             title,
-            description,
-            checkIn,
-            checkOut,
-            propertyFeatures,
-            amenities,
           }; // Return property number and image sources
-        }, propertyNumber);
+        });
 
         await newPage.close(); // Close the new page after evaluating its content
         openedPages.splice(openedPages.indexOf(newPage), 1);
@@ -208,32 +164,19 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           const newPage = await target.page();
           openedPages.push(newPage);
           try {
-            const returnedData = await handleNewPage(newPage, propertyNumber);
+            const returnedData = await handleNewPage(newPage);
 
-            const [bedrooms, beds, bathroom] =
-              returnedData.propertyFeatures.split(", ");
+
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (returnedData?.title) {
               propertyData[returnedData.title] = {
                 ...(propertyData[returnedData.title] || {}),
-                title: returnedData.title,
-                images: returnedData.imageSources,
-                description: returnedData.description,
-                checkIn: returnedData.checkIn,
-                checkOut: returnedData.checkOut,
-                amenities: returnedData.amenities,
-                numBedrooms: bedrooms ? parseInt(bedrooms) : null, // Convert to integer if present
-                numBeds: beds ? parseInt(beds) : null, // Convert to integer if present
-                numBathroom: bathroom ? parseInt(bathroom) : null,
+                dates: returnedData.allDates,
               };
             }
 
-            await fs.writeFile("./scrape-data.json", JSON.stringify(propertyData));
-            //const parsedProperty = propertyInsertSchema.parse(propertyData);
-
-
-
+            await fs.writeFile("./scrape-data-date.json", JSON.stringify(propertyData));
             console.log(propertyNumber);
             propertyNumber++;
           } catch (err) {
@@ -288,47 +231,32 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       console.log("error in original page ", err);
     }
 
-    // try {
       await page.evaluate(async () => {
         const element = document.querySelector(".overflow-y-scroll");
-        //await new Promise((resolve) => setTimeout(resolve, 2000));
         if (element) {
           const divs = Array.from(element.children) as HTMLElement[];
+          console.log("count", divs.length);
 
-          const batchSize = 10;
-          const totalBatches = Math.ceil(divs.length / batchSize);
-
-          for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-            const startIndex = batchIndex * batchSize;
-            const endIndex = Math.min(startIndex + batchSize, divs.length);
-
-            for (let i = startIndex; i < endIndex; i++) {
-              const bookNowButton = divs[i]?.querySelector(
-                '[data-qa="book-now"]',
+          // eslint-disable-next-line @typescript-eslint/prefer-for-of
+          for (let i = 0; i < divs.length; i++) {
+            const bookNowButton = divs[i]?.querySelector(
+              '[data-qa="book-now"]',
+            );
+            if (bookNowButton) {
+              bookNowButton.dispatchEvent(
+                new MouseEvent("click", { bubbles: true, button: 1 }),
               );
-              if (bookNowButton) {
-                bookNowButton.dispatchEvent(
-                  new MouseEvent("click", { bubbles: true, button: 1 }),
-                );
 
-                console.log("testlklk");
-                await new Promise((resolve) => setTimeout(resolve, 2000));
+              console.log("testlklk");
+              await new Promise((resolve) => setTimeout(resolve, 15000));
 
-                console.log("laksdfkl");
-              }
-            }
-
-            // If it's not the last batch, add a 30-second delay
-            if (batchIndex < totalBatches - 1) {
-              console.log("Waiting for 60 seconds before the next batch...");
-              await new Promise((resolve) => setTimeout(resolve, 50000));
+              console.log("laksdfkl");
             }
           }
+
         }
 
       });
-
-
     console.log("here");
     try {
       const waitForPagesToClose = async () => {
@@ -337,8 +265,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
         console.log("All opened pages closed");
       };
-
-      // Your existing code here...
 
       await waitForPagesToClose();
     } catch (err) {
