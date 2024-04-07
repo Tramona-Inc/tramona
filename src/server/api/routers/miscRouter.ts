@@ -14,7 +14,7 @@ type AirbnbListing = {
   bedrooms: number;
   beds: number;
   city: string;
-  images: any[];
+  images: unknown[];
   hostThumbnail: string;
   isSuperhost: boolean;
   rareFind: boolean;
@@ -25,8 +25,8 @@ type AirbnbListing = {
   type: string;
   userId: number;
   address: string;
-  amenityIds: any[];
-  previewAmenities: any[];
+  amenityIds: unknown[];
+  previewAmenities: unknown[];
   cancelPolicy: string;
   price: {
     rate: number;
@@ -37,7 +37,7 @@ type AirbnbListing = {
 
 type ApiResponse = {
   error: boolean;
-  headers: any;
+  headers: unknown;
   results: AirbnbListing[];
 };
 
