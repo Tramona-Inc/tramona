@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/utils/utils";
 import { ImagePlusIcon, Loader2Icon, XIcon } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
+import { motion } from "framer-motion";
 
 type SelectedImage = { id: string; url: string } & (
   | { status: "uploading" }
@@ -94,7 +95,7 @@ export default function ImagesInput({
         ) : (
           <div className="flex h-40 w-max gap-2">
             {images.map((image, index) => (
-              <div key={image.id} className="group relative">
+              <motion.div layout key={image.id} className="group relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={image.url}
@@ -126,7 +127,7 @@ export default function ImagesInput({
                   </TooltipTrigger>
                   <TooltipContent>Remove image</TooltipContent>
                 </Tooltip>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
