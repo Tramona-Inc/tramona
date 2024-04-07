@@ -24,7 +24,10 @@ export default function AccountSidebar() {
           <div className="w-1/2 space-y-3 px-14 py-6 text-center sm:w-full">
             <p className="text-muted-foreground">Welcome,</p>
             <p className="text-3xl font-bold">{session.user.name}</p>
-            <p className="text-muted-foreground">Member since 2/5/23</p>
+            <p className="text-muted-foreground">
+              Member since{" "}
+              {new Date(session.user.createdAt).toLocaleDateString()}
+            </p>
           </div>
         )}
 
