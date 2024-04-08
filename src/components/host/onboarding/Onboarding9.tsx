@@ -19,7 +19,7 @@ import OnboardingFooter from "./OnboardingFooter";
 const formSchema = z.object({
   pets: z.string(),
   smoking: z.string(),
-  additionalComments: zodString(),
+  additionalComments: zodString().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
