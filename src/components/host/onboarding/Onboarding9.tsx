@@ -54,7 +54,7 @@ export default function Onboarding9() {
     console.log(values);
     setPetsAllowed(values.pets === "true" ? true : false);
     setSmokingAllowed(values.smoking === "true" ? true : false);
-    setOtherHouseRules(values.additionalComments);
+    setOtherHouseRules(values.additionalComments ?? "");
   }
 
   return (
