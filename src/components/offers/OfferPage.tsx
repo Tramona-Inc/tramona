@@ -111,16 +111,25 @@ export default function OfferPage({
           </h1>
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-1">
-              <Badge variant="secondary" icon={<StarFilledIcon />}>
-                {property.avgRating} ({property.numRatings})
-              </Badge>
+              {property.numRatings > 0 && (
+                <Badge variant="secondary" icon={<StarFilledIcon />}>
+                  {property.avgRating} ({property.numRatings})
+                </Badge>
+              )}
               <Badge variant="secondary">
                 {plural(property.numBedrooms, "bedroom")}
               </Badge>
               <Badge variant="secondary">
                 {plural(property.numBeds, "bed")}
               </Badge>
-              <Badge variant="secondary">{property.propertyType}</Badge>
+              {property.numBathrooms && (
+                <Badge variant="secondary">
+                  {plural(property.numBathrooms, "bathroom")}
+                </Badge>
+              )}
+              <Badge variant="secondary">{property.roomType}</Badge>
+            </div>
+            <div className="flex flex-wrap items-center gap-1">
               {property.amenities.map((amenity) => (
                 <Badge variant="secondary" key={amenity}>
                   {amenity}
