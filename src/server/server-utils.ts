@@ -5,7 +5,15 @@ import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
 import { and, eq, inArray } from "drizzle-orm";
-import { type User, groupInvites, groupMembers, groups } from "./db/schema";
+import {
+  type User,
+  groupInvites,
+  groupMembers,
+  groups,
+  hostTeamInvites,
+  hostTeamMembers,
+  users,
+} from "./db/schema";
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -71,6 +79,39 @@ export async function addUserToGroups(user: Pick<User, "email" | "id">) {
         and(
           inArray(groupInvites.groupId, groupIds),
           eq(groupInvites.inviteeEmail, user.email),
+        ),
+      );
+  });
+}
+
+export async function addUserToHostTeams(user: Pick<User, "email" | "id">) {
+  const hostTeamIds = await db.query.hostTeamInvites
+    .findMany({
+      where: eq(hostTeamInvites.inviteeEmail, user.email),
+      columns: { hostTeamId: true },
+    })
+    .then((res) => res.map((invite) => invite.hostTeamId));
+
+  if (hostTeamIds.length === 0) return;
+
+  // make the user a host
+  await db.update(users).set({ role: "host" }).where(eq(users.id, user.id));
+
+  await db.transaction(async (tx) => {
+    // add user to teams
+    await tx
+      .insert(hostTeamMembers)
+      .values(
+        hostTeamIds.map((hostTeamId) => ({ hostTeamId, userId: user.id })),
+      );
+
+    // delete invites
+    await tx
+      .delete(hostTeamInvites)
+      .where(
+        and(
+          inArray(hostTeamInvites.hostTeamId, hostTeamIds),
+          eq(hostTeamInvites.inviteeEmail, user.email),
         ),
       );
   });
