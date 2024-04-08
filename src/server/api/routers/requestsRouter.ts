@@ -35,7 +35,7 @@ const updateRequestInputSchema = z.object({
   updatedRequestInfo: z.object({
     preferences: z.string().optional(),
     updatedPriceNightlyUSD: z.number().optional(),
-    imageUrls: z.array(z.string().url()).optional(),
+    propertyLinks: z.array(z.string().url()).optional(),
   }),
 });
 
@@ -428,12 +428,12 @@ export const requestsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
         const { requestId, updatedRequestInfo } = input;
         
-        // serialize image urls to a JSON string
-        const serializedImageUrls = JSON.stringify(updatedRequestInfo.imageUrls);
+        // serialize proprty urls to a JSON string
+        const serializedPropertyLinks = JSON.stringify(updatedRequestInfo.propertyLinks);
 
         const infoToUpdate = {
             ...updatedRequestInfo,
-            imageUrls: serializedImageUrls, // use the serialized string for DB storage
+            propertyLinks: serializedPropertyLinks, // use the serialized string for DB storage
         };
 
         const existingUpdatedInfo = await ctx.db.query.requestUpdatedInfo.findFirst({
@@ -467,5 +467,41 @@ export const requestsRouter = createTRPCRouter({
       return { alreadyUpdated: false };
     }
   }),
+  
+  getUpdatedRequestInfo: protectedProcedure
+    .input(z.object({
+      requestId: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const { requestId } = input;
+      const updateInfo = await ctx.db.query.requestUpdatedInfo.findFirst({
+        where: eq(requestUpdatedInfo.requestId, requestId),
+      });
+
+      if (!updateInfo) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `No updated info found for request with ID ${requestId}`,
+        });
+      }
+
+      let deserializedPropertyLinks: any[] = [];
+      if (updateInfo.propertyLinks !== null) {
+        try {
+          deserializedPropertyLinks = JSON.parse(updateInfo.propertyLinks) as any[];
+        } catch (e) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to parse propertyLinks',
+          });
+        }
+      }
+
+      return {
+        ...updateInfo,
+        propertyLinks: deserializedPropertyLinks,
+      };
+    }),
+
 
 });

@@ -35,7 +35,7 @@ const calculatePriceOptions = (oldPrice: number): number[] => {
 const formSchema = z.object({
   preferences: zodString({ maxLen: Infinity }),
   price: zodNumber(),
-  imageUrls: z.object({ value: optional(zodUrl()) }).array(),
+  propertyLinks: z.object({ value: optional(zodUrl()) }).array(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -72,13 +72,13 @@ export default function RequestRefreshForm({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      imageUrls: [{ value: "" }],
+      propertyLinks: [{ value: "" }],
       price: 0,
     },
   });
 
   const imageUrlInputs = useFieldArray({
-    name: "imageUrls",
+    name: "propertyLinks",
     control: form.control,
   });
 
@@ -88,7 +88,7 @@ export default function RequestRefreshForm({
     let submissionData = {
       preferences: data.preferences,
       updatedPriceNightlyUSD: data.price * 100,
-      imageUrls: data.imageUrls
+      propertyLinks: data.propertyLinks
         .map((urlObj) => urlObj.value)
         .filter((url): url is string => !!url),
     };
@@ -233,7 +233,7 @@ export default function RequestRefreshForm({
                 <div key={field.id} className="relative">
                   <FormField
                     control={form.control}
-                    name={`imageUrls.${index}.value`}
+                    name={`propertyLinks.${index}.value`}
                     render={({ field }) => (
                       <FormItem className="mb-2">
                         <FormControl>
@@ -303,7 +303,7 @@ export default function RequestRefreshForm({
               <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
                 <strong>Links:</strong>
                 <span className="mt-1 text-gray-600 sm:mt-0">
-                  {watch("imageUrls").some(
+                  {watch("propertyLinks").some(
                     (url) => url.value?.trim() !== "",
                   )
                     ? "Provided"

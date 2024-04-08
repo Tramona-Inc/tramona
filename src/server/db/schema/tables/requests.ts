@@ -51,7 +51,7 @@ export const requestUpdatedInfo = pgTable("request_updated_info", {
   }),
   preferences: varchar("preferences", { length: 255 }),
   updatedPriceNightlyUSD: integer("updated_price_usd_nightly"),
-  imageUrls: text("image_urls"),
+  propertyLinks: text("property_links"),
 });
 
 export const requestGroups = pgTable("request_groups", {
