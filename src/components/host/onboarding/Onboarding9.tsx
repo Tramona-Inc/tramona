@@ -1,4 +1,3 @@
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -7,7 +6,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -15,22 +17,45 @@ import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 
 const formSchema = z.object({
-  pets: z.boolean(),
-  smoking: z.boolean(),
+  pets: z.string(),
+  smoking: z.string(),
   additionalComments: zodString(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function Onboarding9() {
+  const petsAllowed = useHostOnboarding((state) => state.listing.petsAllowed);
+  const smokingAllowed = useHostOnboarding(
+    (state) => state.listing.smokingAllowed,
+  );
+  const otherHouseRules = useHostOnboarding(
+    (state) => state.listing.otherHouseRules,
+  );
+
+  const setPetsAllowed = useHostOnboarding((state) => state.setPetsAllowed);
+  const setSmokingAllowed = useHostOnboarding(
+    (state) => state.setSmokingAllowed,
+  );
+  const setOtherHouseRules = useHostOnboarding(
+    (state) => state.setOtherHouseRules,
+  );
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      pets: false,
-      smoking: false,
-      additionalComments: "",
+      pets: petsAllowed ? "true" : "false",
+      smoking: smokingAllowed ? "true" : "false",
+      additionalComments: otherHouseRules,
     },
   });
+
+  async function handleFormSubmit(values: FormSchema) {
+    console.log(values);
+    setPetsAllowed(values.pets === "true" ? true : false);
+    setSmokingAllowed(values.smoking === "true" ? true : false);
+    setOtherHouseRules(values.additionalComments);
+  }
 
   return (
     <>
@@ -48,19 +73,21 @@ export default function Onboarding9() {
                     Are pets allowed?
                   </FormLabel>
                   <FormControl>
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2/5 rounded-sm border-2 p-2">
-                        <Checkbox id="pets" />
-                        <label htmlFor="pets" className="ps-2">
-                          Yes
-                        </label>
-                      </div>
-                      <div className="w-2/5 rounded-sm border-2 p-2">
-                        <Checkbox id="pets" />
-                        <label htmlFor="pets" className="ps-2">
-                          No
-                        </label>
-                      </div>
+                    <div className="flex flex-row items-center space-x-4">
+                      <RadioGroup
+                        className="flex flex-row gap-10"
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="true" id="true" />
+                          <Label htmlFor="allowed">Yes</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="false" id="false" />
+                          <Label htmlFor="allowed">No</Label>
+                        </div>
+                      </RadioGroup>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -76,19 +103,21 @@ export default function Onboarding9() {
                     Is smoking allowed?
                   </FormLabel>
                   <FormControl>
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2/5 rounded-sm border-2 p-2">
-                        <Checkbox id="pets" />
-                        <label htmlFor="pets" className="ps-2">
-                          Yes
-                        </label>
-                      </div>
-                      <div className="w-2/5 rounded-sm border-2 p-2">
-                        <Checkbox id="pets" />
-                        <label htmlFor="pets" className="ps-2">
-                          No
-                        </label>
-                      </div>
+                    <div className="flex flex-row items-center space-x-4">
+                      <RadioGroup
+                        className="flex flex-row gap-10"
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="true" id="true" />
+                          <Label htmlFor="allowed">Yes</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="false" id="false" />
+                          <Label htmlFor="allowed">No</Label>
+                        </div>
+                      </RadioGroup>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -118,7 +147,11 @@ export default function Onboarding9() {
           </div>
         </Form>
       </div>
-      <OnboardingFooter isForm={false} />
+      <OnboardingFooter
+        isForm={true}
+        handleNext={form.handleSubmit(handleFormSubmit)}
+        isFormValid={form.formState.isValid}
+      />
     </>
   );
 }

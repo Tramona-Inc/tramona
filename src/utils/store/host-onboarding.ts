@@ -53,6 +53,9 @@ type HostOnboardingState = {
   setImageUrls: (imageUrls: string[]) => void;
   setTitle: (title: string) => void;
   setDescription: (description: string) => void;
+  setPetsAllowed: (petsAllowed: boolean) => void;
+  setSmokingAllowed: (smokingAllowed: boolean) => void;
+  setOtherHouseRules: (otherHouseRules: string) => void;
 };
 
 export const useHostOnboarding = create<HostOnboardingState>((set) => ({
@@ -250,6 +253,33 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
       listing: {
         ...state.listing,
         description,
+      },
+    }));
+  },
+  setPetsAllowed: (petsAllowed: boolean) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        petsAllowed,
+      },
+    }));
+  },
+  setSmokingAllowed: (smokingAllowed: boolean) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        smokingAllowed,
+      },
+    }));
+  },
+  setOtherHouseRules: (otherHouseRules: string) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        otherHouseRules,
       },
     }));
   },
