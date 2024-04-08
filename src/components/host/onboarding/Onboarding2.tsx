@@ -7,6 +7,7 @@ import {
   type PropertyType,
   useHostOnboarding,
 } from "@/utils/store/host-onboarding";
+import OnboardingFooter from "./OnboardingFooter";
 
 const options = [
   {
@@ -40,24 +41,27 @@ export default function Onboarding2() {
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
 
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-5 max-lg:container">
-      <h1 className="text-4xl font-bold">
-        Which of these describes your property?
-      </h1>
-      <div className="mb-5 flex flex-col gap-5">
-        {options.map((item) => (
-          <CardSelect
-            key={item.title}
-            title={item.title}
-            text={item.text}
-            onClick={() => setPropertyType(item.id)}
-            isSelected={propertyType === item.id}
-            hover={true}
-          >
-            {item.icon}
-          </CardSelect>
-        ))}
+    <>
+      <div className="flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
+        <h1 className="text-4xl font-bold">
+          Which of these describes your property?
+        </h1>
+        <div className="mb-5 flex flex-col gap-5">
+          {options.map((item) => (
+            <CardSelect
+              key={item.title}
+              title={item.title}
+              text={item.text}
+              onClick={() => setPropertyType(item.id)}
+              isSelected={propertyType === item.id}
+              hover={true}
+            >
+              {item.icon}
+            </CardSelect>
+          ))}
+        </div>
       </div>
-    </div>
+      <OnboardingFooter isForm={false} />
+    </>
   );
 }

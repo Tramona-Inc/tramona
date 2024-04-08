@@ -1,4 +1,4 @@
-import MainLayout from "@/components/_common/Layout/MainLayout";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -7,13 +7,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Container } from "@react-email/components";
+import { Textarea } from "@/components/ui/textarea";
 import { zodString } from "@/utils/zod-utils";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Textarea } from "@/components/ui/textarea";
+import { z } from "zod";
+import OnboardingFooter from "./OnboardingFooter";
 
 const formSchema = z.object({
   pets: z.boolean(),
@@ -34,8 +33,8 @@ export default function Onboarding9() {
   });
 
   return (
-    <MainLayout>
-      <Container className="my-10">
+    <>
+      <div className="container my-10 flex flex-grow flex-col justify-center">
         <h1 className="mb-8 text-3xl font-bold">Any house rules?</h1>
         <Form {...form}>
           <div className="space-y-4">
@@ -118,7 +117,8 @@ export default function Onboarding9() {
             />
           </div>
         </Form>
-      </Container>
-    </MainLayout>
+      </div>
+      <OnboardingFooter isForm={false} />
+    </>
   );
 }

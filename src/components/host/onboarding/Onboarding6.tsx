@@ -5,6 +5,7 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { errorToast } from "@/utils/toasts";
 import { Plus, Trash } from "lucide-react";
 import { useState } from "react";
+import OnboardingFooter from "./OnboardingFooter";
 
 const kitchenItems = [
   {
@@ -169,123 +170,126 @@ export default function Onboarding6() {
   }
 
   return (
-    <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
-      <div className="my-20 flex flex-col gap-10">
-        <h1 className="text-4xl font-bold">What amenities do you offer?</h1>
+    <>
+      <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
+        <div className="my-20 flex flex-col gap-10">
+          <h1 className="text-4xl font-bold">What amenities do you offer?</h1>
 
-        <div>
-          <h3 className="mb-5 text-2xl font-semibold">Kitchen</h3>
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
-            {kitchenItems.map((item) => (
-              <CheckboxSelect
-                key={item.id}
-                item={item}
-                isSelected={amenities.includes(item.id)}
-              />
-            ))}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Kitchen</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {kitchenItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="mb-5 text-2xl font-semibold">Living room</h3>
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
-            {livingRoomItems.map((item) => (
-              <CheckboxSelect
-                key={item.id}
-                item={item}
-                isSelected={amenities.includes(item.id)}
-              />
-            ))}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Living room</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {livingRoomItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="mb-5 text-2xl font-semibold"> Heating & cooling</h3>
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
-            {heatingAndCoolingItems.map((item) => (
-              <CheckboxSelect
-                key={item.id}
-                item={item}
-                isSelected={amenities.includes(item.id)}
-              />
-            ))}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold"> Heating & cooling</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {heatingAndCoolingItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="mb-5 text-2xl font-semibold">Laundry</h3>
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
-            {laundryItems.map((item) => (
-              <CheckboxSelect
-                key={item.id}
-                item={item}
-                isSelected={amenities.includes(item.id)}
-              />
-            ))}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Laundry</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {laundryItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="mb-5 text-2xl font-semibold">Internet & office</h3>
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
-            {laundryItems.map((item) => (
-              <CheckboxSelect
-                key={item.id}
-                item={item}
-                isSelected={amenities.includes(item.id)}
-              />
-            ))}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Internet & office</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {laundryItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="mb-5 text-2xl font-semibold">Parking</h3>
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
-            {parkingItems.map((item) => (
-              <CheckboxSelect
-                key={item.id}
-                item={item}
-                isSelected={amenities.includes(item.id)}
-              />
-            ))}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Parking</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {parkingItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-col gap-4">
-          <h3 className="text-2xl font-semibold">Other</h3>
-          <p className="text-muted-foreground">
-            Specify additional amenities you want to highlight.
-          </p>
-          <div className="grid grid-cols-4 gap-5">
-            <div className="col-span-3">
-              <Input
-                placeholder="Other amenity"
-                value={otherValue}
-                onChange={(e) => setOtherValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddOther();
-                  }
+          <div className="flex flex-col gap-4">
+            <h3 className="text-2xl font-semibold">Other</h3>
+            <p className="text-muted-foreground">
+              Specify additional amenities you want to highlight.
+            </p>
+            <div className="grid grid-cols-4 gap-5">
+              <div className="col-span-3">
+                <Input
+                  placeholder="Other amenity"
+                  value={otherValue}
+                  onChange={(e) => setOtherValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddOther();
+                    }
+                  }}
+                />
+              </div>
+
+              <Button
+                onClick={() => {
+                  handleAddOther();
                 }}
-              />
+              >
+                <Plus />
+              </Button>
             </div>
 
-            <Button
-              onClick={() => {
-                handleAddOther();
-              }}
-            >
-              <Plus />
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
-            {otherAmenities.map((item, index) => (
-              <OtherBox key={index} item={item} />
-            ))}
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {otherAmenities.map((item, index) => (
+                <OtherBox key={index} item={item} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <OnboardingFooter isForm={false} />
+    </>
   );
 }

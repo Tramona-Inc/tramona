@@ -9,8 +9,7 @@ export default function OnboardingLayout({
     <>
       <Header type="dashboard" sidebarType={"host"} />
       <div className="flex min-h-screen-minus-header flex-col">
-        <div className="flex flex-grow flex-col">{children}</div>
-        {/* <OnboardingFooter /> */}
+        {children}
       </div>
     </>
   );

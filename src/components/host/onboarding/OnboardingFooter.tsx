@@ -5,11 +5,13 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 type OnboardingFooterProps = {
   handleNext?: () => void;
   isFormValid?: boolean; // New prop to indicate whether the form is valid
+  isForm: boolean;
 };
 
 export default function OnboardingFooter({
   handleNext,
   isFormValid = false, // Default value is false
+  isForm,
 }: OnboardingFooterProps) {
   const max_pages = 10;
 
@@ -19,6 +21,9 @@ export default function OnboardingFooter({
   function onPressNext() {
     if (isFormValid) {
       handleNext && handleNext(); // Call handleNext only if it exists
+      setProgress(progress + 1);
+    }
+    if (!isForm) {
       setProgress(progress + 1);
     }
   }

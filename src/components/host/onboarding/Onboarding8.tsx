@@ -24,23 +24,24 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function Onboarding8() {
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      propertyName: "",
-      about: "",
-    },
-  });
-
   const title = useHostOnboarding((state) => state.listing.title);
   const setTitle = useHostOnboarding((state) => state.setTitle);
 
   const description = useHostOnboarding((state) => state.listing.description);
   const setDescription = useHostOnboarding((state) => state.setDescription);
 
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      propertyName: title,
+      about: description,
+    },
+  });
+
   async function handleFormSubmit(values: FormSchema) {
     console.log(values);
-    // setImageUrls(imageURLs);
+    setTitle(values.propertyName);
+    setDescription(values.about);
   }
 
   return (
@@ -92,6 +93,7 @@ export default function Onboarding8() {
       <OnboardingFooter
         handleNext={form.handleSubmit(handleFormSubmit)}
         isFormValid={form.formState.isValid}
+        isForm={true}
       />
     </>
   );

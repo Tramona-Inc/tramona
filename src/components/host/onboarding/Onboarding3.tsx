@@ -5,7 +5,7 @@ import SharedRoom from "@/components/_icons/SharedRoom";
 import { Button } from "@/components/ui/button";
 import { SpaceType, useHostOnboarding } from "@/utils/store/host-onboarding";
 import { Minus, Plus } from "lucide-react";
-import { useState } from "react";
+import OnboardingFooter from "./OnboardingFooter";
 
 const options = [
   {
@@ -86,49 +86,56 @@ export default function Onboarding3() {
   const setSpaceType = useHostOnboarding((state) => state.setSpaceType);
 
   return (
-    <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
-      <div className="mt-10 flex flex-col gap-5">
-        <h1 className="text-4xl font-bold">What is the living situation?</h1>
+    <>
+      <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
+        <div className="mt-10 flex flex-col gap-5">
+          <h1 className="text-4xl font-bold">What is the living situation?</h1>
 
-        <div>
-          <h3 className="mb-5 text-2xl font-semibold">Type of Space</h3>
-          <div className="mb-5 flex flex-col gap-5">
-            {options.map((item) => (
-              <CardSelect
-                key={item.title}
-                title={item.title}
-                text={item.text}
-                hover={true}
-                onClick={() => setSpaceType(item.id)}
-                isSelected={spaceType === item.id}
-              >
-                {item.icon}
-              </CardSelect>
-            ))}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Type of Space</h3>
+            <div className="mb-5 flex flex-col gap-5">
+              {options.map((item) => (
+                <CardSelect
+                  key={item.title}
+                  title={item.title}
+                  text={item.text}
+                  hover={true}
+                  onClick={() => setSpaceType(item.id)}
+                  isSelected={spaceType === item.id}
+                >
+                  {item.icon}
+                </CardSelect>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="mb-5 text-2xl font-semibold">Rooms and spaces</h3>
-          <div className="mb-5 flex flex-col gap-5">
-            <Total
-              name={"Maximum guests"}
-              total={maxGuests}
-              setTotal={setMaxGuests}
-            />
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Rooms and spaces</h3>
+            <div className="mb-5 flex flex-col gap-5">
+              <Total
+                name={"Maximum guests"}
+                total={maxGuests}
+                setTotal={setMaxGuests}
+              />
 
-            <Total name={"Bedrooms"} total={bedrooms} setTotal={setBedrooms} />
+              <Total
+                name={"Bedrooms"}
+                total={bedrooms}
+                setTotal={setBedrooms}
+              />
 
-            <Total name={"Beds"} total={beds} setTotal={setBeds} />
+              <Total name={"Beds"} total={beds} setTotal={setBeds} />
 
-            <Total
-              name={"Bathrooms"}
-              total={bathrooms}
-              setTotal={setBathrooms}
-            />
+              <Total
+                name={"Bathrooms"}
+                total={bathrooms}
+                setTotal={setBathrooms}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <OnboardingFooter isForm={false} />
+    </>
   );
 }

@@ -6,6 +6,7 @@ import Onboarding5 from "@/components/host/onboarding/Onboarding5";
 import Onboarding6 from "@/components/host/onboarding/Onboarding6";
 import Onboarding7 from "@/components/host/onboarding/Onboarding7";
 import Onboarding8 from "@/components/host/onboarding/Onboarding8";
+import Onboarding9 from "@/components/host/onboarding/Onboarding9";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import OnboardingLayout from "../../components/host/onboarding/layout";
 
@@ -22,6 +23,7 @@ export default function Onboarding() {
       {progress === 5 && <Onboarding6 />}
       {progress === 6 && <Onboarding7 />}
       {progress === 7 && <Onboarding8 />}
+      {progress === 8 && <Onboarding9 />}
     </OnboardingLayout>
   );
 }
