@@ -6,6 +6,7 @@ import {
   serial,
   smallint,
   text,
+  time,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -15,17 +16,39 @@ import { users } from "./users";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 
 export const ALL_PROPERTY_TYPES = [
-  "house",
-  "guesthouse",
-  "apartment",
-  "room",
-  "townhouse",
+  "Condominium",
+  "Apartment",
+  "Guesthouse",
+  "House",
+  "Loft",
+  "Boat",
+  "Camper/RV",
+  "Chalet",
+  "Bed & Breakfast",
+  "Villa",
+  "Tent",
+  "Cabin",
+  "Townhouse",
+  "Bungalow",
+  "Hut",
+  "Other",
+] as const;
+
+export const ALL_PROPERTY_ROOM_TYPES = [
+  "Entire place",
+  "Shared room",
+  "Private room",
 ] as const;
 
 export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
 
-export const newPropertyAmenitiesEnum = pgEnum(
-  "new_property_amenities",
+export const propertyRoomTypeEnum = pgEnum(
+  "property_room_type",
+  ALL_PROPERTY_ROOM_TYPES,
+);
+
+export const propertyAmenitiesEnum = pgEnum(
+  "property_amenities",
   ALL_PROPERTY_AMENITIES,
 );
 
@@ -101,15 +124,19 @@ export const properties = pgTable("properties", {
   maxNumGuests: smallint("max_num_guests").notNull(),
   numBeds: smallint("num_beds").notNull(),
   numBedrooms: smallint("num_bedrooms").notNull(),
-  avgRating: doublePrecision("avg_rating").notNull(),
-  numRatings: integer("num_ratings").notNull(),
+  numBathrooms: smallint("num_bathrooms"),
+  avgRating: doublePrecision("avg_rating").notNull().default(0),
+  numRatings: integer("num_ratings").notNull().default(0),
   airbnbUrl: varchar("airbnb_url"),
   airbnbMessageUrl: varchar("airbnb_message_url"),
   imageUrls: varchar("image_url").array().notNull(),
   originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
   propertyType: propertyTypeEnum("property_type").notNull(),
-  amenities: newPropertyAmenitiesEnum("property_amenities").array().notNull(),
+  roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
+  amenities: propertyAmenitiesEnum("amenities").array().notNull(),
   checkInInfo: varchar("check_in_info"),
+  checkInTime: time("check_in_time"),
+  checkOutTime: time("check_out_time"),
   about: text("about").notNull(),
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),

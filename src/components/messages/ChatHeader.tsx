@@ -35,13 +35,14 @@ export default function ChatHeader({
           {/* <p className="text-muted-foreground">Active 19m ago</p> */}
         </div>
       </div>
-
-      <Link
-        href={`/offers/${selectedConversation.offerId}`}
-        className={buttonVariants({ variant: "darkOutline" })}
-      >
-        View trip details
-      </Link>
+      {selectedConversation.offerId && (
+        <Link
+          href={`/offers/${selectedConversation.offerId}`}
+          className={buttonVariants({ variant: "darkOutline" })}
+        >
+          View trip details
+        </Link>
+      )}
     </div>
   );
 }
