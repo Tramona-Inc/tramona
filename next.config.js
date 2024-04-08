@@ -42,12 +42,6 @@ const config = {
         // pathname: "/im/pictures/**",
       },
       {
-        hostname: "trpc-test.s3.amazonaws.com",
-
-        // port: "",
-        // pathname: "/im/pictures/**",
-      },
-      {
         protocol: "https",
         hostname: "trpc-test.s3.amazonaws.com",
       },
@@ -78,6 +72,10 @@ const config = {
       {
         protocol: "https",
         hostname: "www.airbnb.com",
+      },
+      {
+        protocol: "https",
+        hostname: "guesty-listing-images.s3.amazonaws.com",
       },
     ],
   },
