@@ -1,3 +1,5 @@
+import ImagesInput from "@/components/_common/ImagesInput";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -5,13 +7,10 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import MainLayout from "@/components/_common/Layout/MainLayout";
-import { Container } from "@react-email/components";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import ImagesInput from "@/components/_common/ImagesInput";
 
 const formSchema = z.object({
   imageURLs: z
@@ -30,15 +29,18 @@ export default function Onboarding7() {
     },
   });
 
+  const setImageUrls = useHostOnboarding((state) => state.setImageUrls);
+
   async function handleFormSubmit({ imageURLs }: FormValues) {
     console.log(imageURLs);
+    setImageUrls(imageURLs);
   }
 
   return (
-    <MainLayout>
+    <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
       <div className="px-4 pb-32 pt-16">
         <div className="mx-auto max-w-3xl">
-          <h1 className="my-3 text-3xl font-bold">
+          <h1 className="font-old my-3 text-3xl">
             Add some photos of your property
           </h1>
           <p className="mb-5 text-muted-foreground">
@@ -69,6 +71,6 @@ export default function Onboarding7() {
           </Form>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }

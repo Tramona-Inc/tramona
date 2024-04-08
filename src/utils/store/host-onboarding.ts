@@ -50,6 +50,7 @@ type HostOnboardingState = {
   removeAmenity: (amenity: string) => void;
   setOtherAmenity: (amenity: string) => void;
   removeOtherAmenity: (amenity: string) => void;
+  setImageUrls: (imageUrls: string[]) => void;
 };
 
 export const useHostOnboarding = create<HostOnboardingState>((set) => ({
@@ -220,6 +221,15 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
         otherAmenities: state.listing.otherAmenities.filter(
           (item) => item !== amenity,
         ),
+      },
+    }));
+  },
+  setImageUrls: (imageUrls: string[]) => {
+    set((state) => ({
+      ...state,
+      listing: {
+        ...state.listing,
+        imageUrls: imageUrls,
       },
     }));
   },
