@@ -123,7 +123,7 @@ export const properties = pgTable("properties", {
   maxNumGuests: smallint("max_num_guests").notNull(),
   numBeds: smallint("num_beds").notNull(),
   numBedrooms: smallint("num_bedrooms").notNull(),
-  numBathrooms: smallint("num_bathrooms"),
+  numBathrooms: smallint("num_bathrooms").notNull(),
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
@@ -165,7 +165,7 @@ export const propertySelectSchema = createSelectSchema(properties);
 export const propertyInsertSchema = createInsertSchema(properties, {
   imageUrls: z.array(z.string().url()),
   amenities: z.array(z.enum(ALL_PROPERTY_AMENITIES)),
-  otherAmenities: z.array(z.string())
+  otherAmenities: z.array(z.string()),
 });
 
 // make everything except id optional

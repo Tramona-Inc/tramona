@@ -86,16 +86,33 @@ export const propertiesRouter = createTRPCRouter({
         hostId: ctx.user.id,
         hostName: ctx.user.name,
         imageUrls: input.imageUrls.map((urlObject) => urlObject.value),
+        numBathrooms: 0, //TODO add it into form
       });
     }),
-  getHostProperties: roleRestrictedProcedure(["host"])
-    .query(async ({ ctx }) => {
+  getHostProperties: roleRestrictedProcedure(["host"]).query(
+    async ({ ctx }) => {
       if (ctx.user.role !== "host") {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
       return ctx.db.query.properties.findMany({
         where: eq(properties.hostId, ctx.user.id),
+      });
+    },
+  ),
+  hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
+    .input(hostPropertyFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "host") {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      return await ctx.db.insert(properties).values({
+        ...input,
+        hostId: ctx.user.id,
+        hostName: ctx.user.name,
+        imageUrls: input.imageUrls.map((urlObject) => urlObject.value),
+        numBathrooms: 0, //TODO add it into form
       });
     }),
 });
