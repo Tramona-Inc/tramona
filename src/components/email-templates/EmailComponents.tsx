@@ -534,7 +534,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
                       >
                         <img
                           src={
-                            hostImageUrl || "https://via.placeholder.com/150"
+                            hostImageUrl ?? "https://via.placeholder.com/150"
                           }
                           alt="Host"
                           style={{

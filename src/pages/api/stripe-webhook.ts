@@ -118,23 +118,23 @@ export default async function webhook(
         const savings =
           (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
         const tramonaServiceFee = getTramonaFeeTotal(savings);
-
+        const offerIdString = 
         await sendEmail({
-          to: user?.email as string,
+          to: user!.email,
           subject: `Tramona Booking Confirmation ${property?.name}`,
           content: BookingConfirmationEmail({
             userName: user?.name ?? "",
             placeName: property?.name ?? "",
             hostName: property?.hostName ?? "",
             hostImageUrl: "https://via.placeholder.com/150",
-            startDate: formatDate(request?.checkIn!, "MM/dd/yyyy") ?? "",
-            endDate: formatDate(request?.checkOut!, "MM/dd/yyyy") ?? "",
-            address: property?.address ?? "",
-            propertyImageLink: property?.imageUrls?.[0] ?? "",
-            tripDetailLink: `https://www.tramona.com/offers/${offers?.id ?? ""}`,
+            startDate: formatDate(request!.checkIn, "MM/dd/yyyy") ?? "",
+            endDate: formatDate(request!.checkOut, "MM/dd/yyyy") ?? "",
+            address: property!.address ?? "",
+            propertyImageLink: property!.imageUrls?.[0] ?? "",
+            tripDetailLink: `https://www.tramona.com/offers/${offers.id.name}`,
             originalPrice: originalPrice,
             tramonaPrice: offer?.totalPrice ?? 0,
-            offerLink: `https://www.tramona.com/offers/${offer?.id ?? ""}`,
+            offerLink: `https://www.tramona.com/offers/${offer?.id.toString()}`,
             numOfNights: numOfNights,
             tramonaServiceFee: tramonaServiceFee ?? 0,
           }),

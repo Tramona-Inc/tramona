@@ -89,7 +89,7 @@ export function BookingConfirmationEmail({
         </Row>
         <Row className="">
           <Column>
-            <Text className="text-xs whitespace-no-wrap">Tramona's Price</Text>
+            <Text className="text-xs whitespace-no-wrap">Tramona&apos;s Price</Text>
           </Column>
           <Column
             className="text-xs text-[#606060] whitespace-no-wrap"
