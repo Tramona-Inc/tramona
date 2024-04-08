@@ -3,10 +3,14 @@ import Alternative from "@/components/_icons/Alternative";
 import ApartmentIcon from "@/components/_icons/Apartment";
 import Home from "@/components/_icons/Home";
 import Hotels from "@/components/_icons/Hotels";
+import { Form, FormField, FormItem } from "@/components/ui/form";
 import {
   type PropertyType,
   useHostOnboarding,
 } from "@/utils/store/host-onboarding";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 
 const options = [
@@ -36,9 +40,29 @@ const options = [
   },
 ];
 
+// ! Honeslty didn't need to do a form
+
+const formSchema = z.object({
+  propertyType: z.enum(["apartment", "home", "hotels", "alternative"]),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
 export default function Onboarding2() {
   const propertyType = useHostOnboarding((state) => state.listing.propertyType);
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      propertyType: "apartment",
+    },
+  });
+
+  async function handleFormSubmit() {
+    console.log(propertyType);
+    setPropertyType(propertyType);
+  }
 
   return (
     <>
@@ -46,22 +70,37 @@ export default function Onboarding2() {
         <h1 className="text-4xl font-bold">
           Which of these describes your property?
         </h1>
-        <div className="mb-5 flex flex-col gap-5">
-          {options.map((item) => (
-            <CardSelect
-              key={item.title}
-              title={item.title}
-              text={item.text}
-              onClick={() => setPropertyType(item.id)}
-              isSelected={propertyType === item.id}
-              hover={true}
-            >
-              {item.icon}
-            </CardSelect>
-          ))}
-        </div>
+
+        <Form {...form}>
+          <FormField
+            control={form.control}
+            name="propertyType"
+            render={({ field }) => (
+              <FormItem>
+                <div className="mb-5 flex flex-col gap-5">
+                  {options.map((item) => (
+                    <CardSelect
+                      key={item.title}
+                      title={item.title}
+                      text={item.text}
+                      onClick={() => setPropertyType(item.id)}
+                      isSelected={propertyType === item.id}
+                      hover={true}
+                    >
+                      {item.icon}
+                    </CardSelect>
+                  ))}
+                </div>
+              </FormItem>
+            )}
+          />
+        </Form>
       </div>
-      <OnboardingFooter isForm={false} />
+      <OnboardingFooter
+        handleNext={form.handleSubmit(handleFormSubmit)}
+        isFormValid={form.formState.isValid}
+        isForm={true}
+      />
     </>
   );
 }
