@@ -38,7 +38,7 @@ export default function Onboarding7() {
     <MainLayout>
       <div className="px-4 pb-32 pt-16">
         <div className="mx-auto max-w-3xl">
-          <h1 className="my-3 text-3xl font-bold">
+          <h1 className="my-3 text-3xl font-semibold">
             Add some photos of your property
           </h1>
           <p className="mb-5 text-muted-foreground">

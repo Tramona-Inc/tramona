@@ -36,7 +36,7 @@ export default function Onboarding9() {
   return (
     <MainLayout>
       <Container className="my-10">
-        <h1 className="mb-8 text-3xl font-bold">Any house rules?</h1>
+        <h1 className="mb-8 text-3xl font-semibold">Any house rules?</h1>
         <Form {...form}>
           <div className="space-y-4">
             {/* TO DO: FIX */}

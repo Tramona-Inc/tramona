@@ -35,7 +35,7 @@ export default function Onboarding8() {
   return (
     <MainLayout>
       <Container className="my-10">
-        <h1 className="mb-8 text-3xl font-bold">Describe your listing</h1>
+        <h1 className="mb-8 text-3xl font-semibold">Describe your listing</h1>
         <Form {...form}>
           <div className="space-y-4">
             <FormField
