@@ -210,7 +210,7 @@ export const offersRouter = createTRPCRouter({
         (member) => member.userId,
       );
 
-      if (!memberIds.includes(ctx.user.id)) {
+      if (!memberIds.includes(ctx.user.id) && ctx.user.role !== "admin") {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 

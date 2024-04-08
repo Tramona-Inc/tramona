@@ -35,8 +35,7 @@ export default function OfferCard({
   const numNights = getNumNights(checkIn, checkOut);
   const offerNightlyPrice = offer.totalPrice / numNights;
 
-  const numAmenities =
-    property.amenities.length + property.standoutAmenities.length;
+  const numAmenities = property.amenities.length;
 
   const discountPercentage = getDiscountPercentage(
     property.originalNightlyPrice,

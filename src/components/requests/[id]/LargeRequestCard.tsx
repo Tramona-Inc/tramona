@@ -11,6 +11,7 @@ import {
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import Image from "next/image";
 import { type DetailedRequest } from "../RequestCard";
+import RequestRefreshDialog from "../RequestRefreshDialog";
 
 export default function LargeRequestCard({
   request,
@@ -67,6 +68,7 @@ export default function LargeRequestCard({
       <div className="flex justify-end">
         <LargeRequestCardBadge request={request} />
       </div>
+      {request.numOffers > 0 && <RequestRefreshDialog request={request} />}
     </Card>
   );
 }

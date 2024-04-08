@@ -11,6 +11,7 @@ import { api } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
 import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 import Spinner from "../_common/Spinner";
+import { ChevronRight } from "lucide-react";
 
 const defaultMessage = `Hey! Join this new travel platform. They let people travel at any price they want. You name the price and they'll find a bnb out of your budget and make it work with your price. Here's the link, check it out:`;
 
@@ -50,17 +51,32 @@ export default function ReferralDashboard() {
     <div className="space-y-8">
       <section className="rounded-xl bg-zinc-100 p-4">
         <p className="text-base text-muted-foreground">Referral Status</p>
-        <p className="text-3xl font-bold">
-          {user?.referralTier}
-          <Link
-            href="/program"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-2 text-sm font-medium text-muted-foreground underline underline-offset-2"
-          >
-            Learn more
-          </Link>
-        </p>
+        <div className="flex items-end justify-between">
+          <p className="text-3xl font-bold">
+            {user?.referralTier}
+            <Link
+              href="/program"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 text-sm font-medium text-muted-foreground underline underline-offset-2"
+            >
+              Learn more
+            </Link>
+          </p>
+
+          <div className="flex items-center gap-1">
+            <Link
+              href="/account"
+              className={
+                "text-sm font-medium hover:underline hover:underline-offset-2"
+              }
+            >
+              See your earnings
+            </Link>
+            <ChevronRight size={16} />
+          </div>
+        </div>
+
         <div className="my-2 h-px bg-zinc-300"></div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
