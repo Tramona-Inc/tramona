@@ -30,8 +30,11 @@ type TwilioRequestBody = {
 // eslint-disable-next-line import/no-anonymous-default-export
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const body = req.body as TwilioRequestBody;
-  const phoneNumber = body.From;
+  let phoneNumber = body.From;
   const userResponse = body.Body;
+  if (phoneNumber.startsWith('whatsapp:')) {
+    phoneNumber = phoneNumber.replace('whatsapp:', '');
+  }
 
   console.log("getting user...");
 
