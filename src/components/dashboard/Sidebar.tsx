@@ -74,17 +74,17 @@ const adminNavLinks = [
   { href: "/dashboard", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
-const hostNavLinks = [
-  { href: "/host", name: "Overview", icon: HomeIcon },
-  {
-    href: "/host/incoming-requests",
-    name: "Incoming Requests",
-    icon: BriefcaseIcon,
-  },
-  { href: "/host/properties", name: "Properties", icon: EditIcon },
-  { href: "/host/finances", name: "Finances", icon: TagIcon },
-  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-];
+// const hostNavLinks = [
+//   { href: "/host", name: "Overview", icon: HomeIcon },
+//   {
+//     href: "/host/incoming-requests",
+//     name: "Incoming Requests",
+//     icon: BriefcaseIcon,
+//   },
+//   { href: "/host/properties", name: "Properties", icon: EditIcon },
+//   { href: "/host/finances", name: "Finances", icon: TagIcon },
+//   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+// ];
 
 const guestNavLinks = [
   { href: "/dashboard", name: "Home", icon: HomeIcon },
