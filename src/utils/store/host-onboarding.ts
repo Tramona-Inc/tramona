@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export type PropertyType = "apartment" | "home" | "hotels" | "alternative" | "";
-export type SpaceType = "entire" | "single" | "shared" | "alternative" | "";
+export type SpaceType = "entire" | "single" | "shared" | "";
 export type LocationType = {
   country: string;
   street: string;
