@@ -39,7 +39,6 @@ const updateRequestInputSchema = z.object({
   }),
 });
 
-
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
     const groupedRequests = await ctx.db.query.groupMembers
@@ -422,50 +421,55 @@ export const requestsRouter = createTRPCRouter({
       }
     }),
 
-    // update request 
-    updateRequest: protectedProcedure
+  // update request
+  updateRequest: protectedProcedure
     .input(updateRequestInputSchema)
     .mutation(async ({ ctx, input }) => {
-        const { requestId, updatedRequestInfo } = input;
-        
-        // serialize propertyLinks to a JSON string
-        const serializedpropertyLinks = JSON.stringify(updatedRequestInfo.propertyLinks);
+      const { requestId, updatedRequestInfo } = input;
 
-        const infoToUpdate = {
-            ...updatedRequestInfo,
-            propertyLinks: serializedpropertyLinks, // use the serialized string for DB storage
-        };
+      // serialize propertyLinks to a JSON string
+      const serializedpropertyLinks = JSON.stringify(
+        updatedRequestInfo.propertyLinks,
+      );
 
-        const existingUpdatedInfo = await ctx.db.query.requestUpdatedInfo.findFirst({
-            where: eq(requestUpdatedInfo.requestId, requestId),
+      const infoToUpdate = {
+        ...updatedRequestInfo,
+        propertyLinks: serializedpropertyLinks, // use the serialized string for DB storage
+      };
+
+      const existingUpdatedInfo =
+        await ctx.db.query.requestUpdatedInfo.findFirst({
+          where: eq(requestUpdatedInfo.requestId, requestId),
         });
 
-        if (existingUpdatedInfo) {
-            await ctx.db.update(requestUpdatedInfo)
-                .set(infoToUpdate)
-                .where(eq(requestUpdatedInfo.id, existingUpdatedInfo.id));
-        } else {
-            await ctx.db.insert(requestUpdatedInfo).values({
-                requestId,
-                ...infoToUpdate,
-            });
-        }
+      if (existingUpdatedInfo) {
+        await ctx.db
+          .update(requestUpdatedInfo)
+          .set(infoToUpdate)
+          .where(eq(requestUpdatedInfo.id, existingUpdatedInfo.id));
+      } else {
+        await ctx.db.insert(requestUpdatedInfo).values({
+          requestId,
+          ...infoToUpdate,
+        });
+      }
     }),
-    checkRequestUpdate: protectedProcedure
-  .input(z.object({
-    requestId: z.number(),
-  }))
-  .query(async ({ ctx, input }) => {
-    const { requestId } = input;
-    const existingUpdate = await ctx.db.query.requestUpdatedInfo.findFirst({
-      where: eq(requestUpdatedInfo.requestId, requestId),
-    });
+  checkRequestUpdate: protectedProcedure
+    .input(
+      z.object({
+        requestId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { requestId } = input;
+      const existingUpdate = await ctx.db.query.requestUpdatedInfo.findFirst({
+        where: eq(requestUpdatedInfo.requestId, requestId),
+      });
 
-    if (existingUpdate) {
-      return { alreadyUpdated: true };
-    } else {
-      return { alreadyUpdated: false };
-    }
-  }),
-
+      if (existingUpdate) {
+        return { alreadyUpdated: true };
+      } else {
+        return { alreadyUpdated: false };
+      }
+    }),
 });

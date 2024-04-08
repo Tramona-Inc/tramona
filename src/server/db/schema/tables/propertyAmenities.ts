@@ -124,4 +124,6 @@ export const ALL_PROPERTY_AMENITIES = [
   "Exercise equipment",
   "Fire pit",
   "Outdoor shower",
+  "Private entrance",
+  "Pets Allowed",
 ] as const;

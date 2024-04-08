@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 
 import { useToast } from "@/components/ui/use-toast";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
