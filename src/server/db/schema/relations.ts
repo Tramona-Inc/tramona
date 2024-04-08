@@ -12,6 +12,11 @@ import { properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
+import {
+  hostTeamInvites,
+  hostTeamMembers,
+  hostTeams,
+} from "./tables/hostTeams";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -25,6 +30,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   groups: many(groupMembers),
   ownedGroups: many(groups),
   requestGroupsCreated: many(requestGroups),
+  hostTeams: many(hostTeams),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -165,3 +171,37 @@ export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
     references: [groups.id],
   }),
 }));
+
+export const hostTeamsRelations = relations(hostTeams, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [hostTeams.ownerId],
+    references: [users.id],
+  }),
+  members: many(hostTeamMembers),
+  invites: many(hostTeamInvites),
+  properties: many(properties),
+}));
+
+export const hostTeamMembersRelations = relations(
+  hostTeamMembers,
+  ({ one }) => ({
+    hostTeam: one(hostTeams, {
+      fields: [hostTeamMembers.hostTeamId],
+      references: [hostTeams.id],
+    }),
+    user: one(users, {
+      fields: [hostTeamMembers.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const hostTeamInviteRelations = relations(
+  hostTeamInvites,
+  ({ one }) => ({
+    hostTeam: one(hostTeams, {
+      fields: [hostTeamInvites.hostTeamId],
+      references: [hostTeams.id],
+    }),
+  }),
+);
