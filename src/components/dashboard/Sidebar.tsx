@@ -9,12 +9,12 @@ import {
   Handshake,
   FenceIcon,
   HistoryIcon,
-  HomeIcon,
   InboxIcon,
   LayoutDashboardIcon,
   MessageCircleIcon,
   TagIcon,
   WrenchIcon,
+  HomeIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
