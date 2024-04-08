@@ -1,4 +1,5 @@
 import {
+  boolean,
   doublePrecision,
   integer,
   pgEnum,
@@ -12,8 +13,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { users } from "./users";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
+import { users } from "./users";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -114,32 +115,46 @@ export const propertySafetyItemsEnum = pgEnum(
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-  name: varchar("name", { length: 255 }).notNull(),
 
-  // for when blake/preju manually upload, otherwise get the host's name via hostId
-  hostName: varchar("host_name", { length: 255 }),
-  address: varchar("address", { length: 1000 }),
+  propertyType: propertyTypeEnum("property_type").notNull(),
+  roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
 
   // how many guests does this property accomodate at most?
   maxNumGuests: smallint("max_num_guests").notNull(),
   numBeds: smallint("num_beds").notNull(),
   numBedrooms: smallint("num_bedrooms").notNull(),
   numBathrooms: smallint("num_bathrooms"),
+
+  // for when blake/preju manually upload, otherwise get the host's name via hostId
+  hostName: varchar("host_name", { length: 255 }),
+  address: varchar("address", { length: 1000 }),
+
+  checkInInfo: varchar("check_in_info"),
+  checkInTime: time("check_in_time"),
+  checkOutTime: time("check_out_time"),
+
+  amenities: propertyAmenitiesEnum("amenities").array().notNull(),
+
+  otherAmenities: varchar("other_amenities").array(),
+
+  imageUrls: varchar("image_url").array().notNull(),
+
+  name: varchar("name", { length: 255 }).notNull(),
+  about: text("about").notNull(),
+
+  petsAllowed: boolean("pets_allowed"),
+  smokingAllowed: boolean("smoking_allowed"),
+
+  otherHouseRules: varchar("other_house_rules", { length: 1000 }),
+
   avgRating: doublePrecision("avg_rating").notNull().default(0),
   numRatings: integer("num_ratings").notNull().default(0),
   airbnbUrl: varchar("airbnb_url"),
   airbnbMessageUrl: varchar("airbnb_message_url"),
-  imageUrls: varchar("image_url").array().notNull(),
-  originalNightlyPrice: integer("original_nightly_price").notNull(), // in cents
-  propertyType: propertyTypeEnum("property_type").notNull(),
-  roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
-  amenities: propertyAmenitiesEnum("amenities").array().notNull(),
-  checkInInfo: varchar("check_in_info"),
-  checkInTime: time("check_in_time"),
-  checkOutTime: time("check_out_time"),
-  about: text("about").notNull(),
+  originalNightlyPrice: integer("original_nightly_price"), // in cents
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -150,6 +165,7 @@ export const propertySelectSchema = createSelectSchema(properties);
 export const propertyInsertSchema = createInsertSchema(properties, {
   imageUrls: z.array(z.string().url()),
   amenities: z.array(z.enum(ALL_PROPERTY_AMENITIES)),
+  otherAmenities: z.array(z.string())
 });
 
 // make everything except id optional

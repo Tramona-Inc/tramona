@@ -26,6 +26,7 @@ export const propertiesRouter = createTRPCRouter({
         .values({
           ...input,
           hostId: ctx.user.role === "admin" ? null : ctx.user.id,
+          otherAmenities: input.otherAmenities ?? [], // Ensure otherAmenities is an array
         })
         .returning({ id: properties.id })
         .then((res) => res[0]?.id);
