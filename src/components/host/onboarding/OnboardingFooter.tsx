@@ -2,11 +2,26 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 
-export default function OnboardingFooter() {
+type OnboardingFooterProps = {
+  handleNext?: () => void;
+  isFormValid?: boolean; // New prop to indicate whether the form is valid
+};
+
+export default function OnboardingFooter({
+  handleNext,
+  isFormValid = false, // Default value is false
+}: OnboardingFooterProps) {
   const max_pages = 10;
 
   const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
+
+  function onPressNext() {
+    if (isFormValid) {
+      handleNext && handleNext(); // Call handleNext only if it exists
+      setProgress(progress + 1);
+    }
+  }
 
   return (
     <>
@@ -25,7 +40,7 @@ export default function OnboardingFooter() {
         >
           Back
         </Button>
-        <Button onClick={() => setProgress(progress + 1)}>
+        <Button onClick={onPressNext}>
           {progress > 0 ? "Next" : "Get Started"}
         </Button>
       </div>

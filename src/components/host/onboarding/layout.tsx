@@ -1,5 +1,4 @@
 import Header from "@/components/_common/Header";
-import OnboardingFooter from "./OnboardingFooter";
 
 export default function OnboardingLayout({
   children,
@@ -10,8 +9,8 @@ export default function OnboardingLayout({
     <>
       <Header type="dashboard" sidebarType={"host"} />
       <div className="flex min-h-screen-minus-header flex-col">
-        <div className="flex flex-grow">{children}</div>
-        <OnboardingFooter />
+        <div className="flex flex-grow flex-col">{children}</div>
+        {/* <OnboardingFooter /> */}
       </div>
     </>
   );

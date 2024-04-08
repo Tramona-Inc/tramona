@@ -1,4 +1,3 @@
-import MainLayout from "@/components/_common/Layout/MainLayout";
 import {
   Form,
   FormControl,
@@ -9,12 +8,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Container } from "@react-email/components";
+import { Textarea } from "@/components/ui/textarea";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { zodString } from "@/utils/zod-utils";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Textarea } from "@/components/ui/textarea";
+import { z } from "zod";
+import OnboardingFooter from "./OnboardingFooter";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -32,9 +32,20 @@ export default function Onboarding8() {
     },
   });
 
+  const title = useHostOnboarding((state) => state.listing.title);
+  const setTitle = useHostOnboarding((state) => state.setTitle);
+
+  const description = useHostOnboarding((state) => state.listing.description);
+  const setDescription = useHostOnboarding((state) => state.setDescription);
+
+  async function handleFormSubmit(values: FormSchema) {
+    console.log(values);
+    // setImageUrls(imageURLs);
+  }
+
   return (
-    <MainLayout>
-      <Container className="my-10">
+    <>
+      <div className="container my-10 flex flex-grow flex-col justify-center">
         <h1 className="mb-8 text-3xl font-bold">Describe your listing</h1>
         <Form {...form}>
           <div className="space-y-4">
@@ -76,7 +87,12 @@ export default function Onboarding8() {
             />
           </div>
         </Form>
-      </Container>
-    </MainLayout>
+      </div>
+
+      <OnboardingFooter
+        handleNext={form.handleSubmit(handleFormSubmit)}
+        isFormValid={form.formState.isValid}
+      />
+    </>
   );
 }
