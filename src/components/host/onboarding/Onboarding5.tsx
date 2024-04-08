@@ -1,9 +1,21 @@
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { cn } from "@/utils/utils";
+import { zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
+
+const formSchema = z.object({
+  checkIn: zodString({ maxLen: 100 }),
+  checkOut: zodString({ maxLen: 100 }),
+});
+
+type FormSchema = z.infer<typeof formSchema>;
 
 export default function Onboarding4() {
   const otherCheckInType = useHostOnboarding(
@@ -27,15 +39,24 @@ export default function Onboarding4() {
     }
   };
 
-  // const handleOtherInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setOtherValue(e.target.value);
-  //   setCheckInType(e.target.value);
-  // };
-
   const checkIn = useHostOnboarding((state) => state.listing.checkIn);
   const checkOut = useHostOnboarding((state) => state.listing.checkOut);
   const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
   const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      checkIn: checkIn,
+      checkOut: checkOut,
+    },
+  });
+
+  async function handleFormSubmit(values: FormSchema) {
+    console.log(values);
+    setCheckIn(values.checkIn);
+    setCheckOut(values.checkOut);
+  }
 
   return (
     <>
@@ -98,28 +119,55 @@ export default function Onboarding4() {
             </div>
           </div>
 
-          <div className="mt-5 w-full">
-            <h1 className="mb-2 text-xl font-bold">Hours</h1>
-            <div className="grid grid-cols-2 gap-5">
-              <Input
-                type="clock"
-                value={checkIn}
-                placeholder="Check in time"
-                className="p-5"
-                onChange={(e) => setCheckIn(e.target.value)}
-              />
-              <Input
-                type="clock"
-                value={checkOut}
-                placeholder="Check out time"
-                className="p-5"
-                onChange={(e) => setCheckOut(e.target.value)}
-              />
-            </div>
-          </div>
+<Form {...form}>
+  <div className="mt-5 w-full">
+    <h1 className="mb-2 text-xl font-bold">Hours</h1>
+    <div className="grid grid-cols-2 gap-5">
+      <FormField
+        control={form.control}
+        name="checkIn"
+        render={({ field }) => (
+          <FormItem>
+            <Input
+              {...field}
+              type="clock"
+              placeholder="Check in time"
+              className="p-5"
+            />
+            <FormMessage>
+              {form.formState.errors.checkIn?.message}
+            </FormMessage>
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="checkOut"
+        render={({ field }) => (
+          <FormItem>
+            <Input
+              {...field}
+              type="clock"
+              placeholder="Check out time"
+              className="p-5"
+            />
+            <FormMessage>
+              {form.formState.errors.checkOut?.message}
+            </FormMessage>
+          </FormItem>
+        )}
+      />
+    </div>
+  </div>
+</Form>
+
         </div>
       </div>
-      <OnboardingFooter isForm={false} />
+      <OnboardingFooter
+        handleNext={form.handleSubmit(handleFormSubmit)}
+        isFormValid={form.formState.isValid}
+        isForm={true}
+      />
     </>
   );
 }
