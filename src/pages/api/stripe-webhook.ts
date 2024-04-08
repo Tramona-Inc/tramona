@@ -22,7 +22,6 @@ import { BookingConfirmationEmail } from "@/components/email-templates/BookingCo
 import { User } from "lucide-react";
 import { Payer } from "@aws-sdk/client-s3";
 import {
-  formatDateMonthDay,
   getNumNights,
   getTramonaFeeTotal,
 } from "@/utils/utils";
@@ -112,32 +111,34 @@ export default async function webhook(
         //send BookingConfirmationEmail
         //Send user confirmation email
         //getting num of nights
-        const numOfNights = getNumNights(request?.checkIn!, request?.checkOut!);
-        const originalPrice = property?.originalNightlyPrice! * numOfNights;
-        const savings = property?.originalNightlyPrice! - offer?.totalPrice!;
+        const checkInDate = request?.checkIn ?? new Date(); // Use current date as default
+        const checkOutDate = request?.checkOut ?? new Date(); // Use current date as default
+        const numOfNights = getNumNights(checkInDate, checkOutDate);
+        const originalPrice = property?.originalNightlyPrice ?? 0 * numOfNights;
+        const savings =
+          (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
         const tramonaServiceFee = getTramonaFeeTotal(savings);
 
         await sendEmail({
           to: user?.email as string,
           subject: `Tramona Booking Confirmation ${property?.name}`,
           content: BookingConfirmationEmail({
-            userName: user?.name!,
-            placeName: property?.name,
-            hostName: property?.hostName!,
+            userName: user?.name ?? "",
+            placeName: property?.name ?? "",
+            hostName: property?.hostName ?? "",
             hostImageUrl: "https://via.placeholder.com/150",
-            startDate: formatDate(request?.checkIn!, "MM/dd/yyyy"),
-            endDate: formatDate(request?.checkOut!, "MM/dd/yyyy"),
-            address: property?.address!,
-            propertyImageLink: property?.imageUrls[0],
-            tripDetailLink: `https://www.tramona.com/offers/${offers?.id}`,
+            startDate: formatDate(request?.checkIn!, "MM/dd/yyyy") ?? "",
+            endDate: formatDate(request?.checkOut!, "MM/dd/yyyy") ?? "",
+            address: property?.address ?? "",
+            propertyImageLink: property?.imageUrls?.[0] ?? "",
+            tripDetailLink: `https://www.tramona.com/offers/${offers?.id ?? ""}`,
             originalPrice: originalPrice,
-            tramonaPrice: offer?.totalPrice!,
-            offerLink: `https://www.tramona.com/offers/${offer?.id}`,
+            tramonaPrice: offer?.totalPrice ?? 0,
+            offerLink: `https://www.tramona.com/offers/${offer?.id ?? ""}`,
             numOfNights: numOfNights,
-            tramonaServiceFee: tramonaServiceFee,
+            tramonaServiceFee: tramonaServiceFee ?? 0,
           }),
         });
-
         const twilioMutation = api.twilio.sendSMS.useMutation();
         const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 

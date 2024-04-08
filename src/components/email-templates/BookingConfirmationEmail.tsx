@@ -1,7 +1,5 @@
 import React from "react";
-
 import { formatCurrency } from "@/utils/utils";
-
 import {
   Layout,
   Header,
@@ -10,9 +8,8 @@ import {
   Info,
   BottomHr,
   CustomButton,
-  CustomButtonOutline,
   EmailConfirmationCard,
-} from "./EmailComponents";
+} from "./EmailComponentsWithoutHost";
 import {
   Text,
   Section,
@@ -23,31 +20,25 @@ import {
 } from "@react-email/components";
 
 interface BookingConfirmationEmailProps {
-  userName?: string;
-  placeName?: string;
-  hostName?: string;
-  hostImageUrl?: string;
-  startDate?: string;
-  endDate?: string;
-  address?: string;
-  propertyImageLink?: string;
-  tripDetailLink?: string;
-  originalPrice?: number;
-  tramonaPrice?: number;
-  tramonaDiscount?: number;
-  offerDescription?: string;
-  offerLink?: string;
-  numOfNights?: number;
-  paymentConfirmationDate?: string;
+  userName: string;
+  placeName: string;
+  hostName: string;
+  hostImageUrl: string;
+  startDate: string;
+  endDate: string;
+  address: string;
+  propertyImageLink: string;
+  tripDetailLink: string;
+  originalPrice: number;
+  tramonaPrice: number;
+  offerLink: string;
+  numOfNights: number;
   tramonaServiceFee: number
-
 }
 
 export function BookingConfirmationEmail({
   userName = "User",
   placeName = "Tropical getaway in Mexico",
-  hostName = "Host Name",
-  hostImageUrl = "https://via.placeholder.com/150",
   startDate = "Nov 6",
   endDate = "Nov 11, 2024",
   address = "101 Street Planet Earth",
@@ -57,7 +48,7 @@ export function BookingConfirmationEmail({
   tramonaPrice = 500,
   offerLink = "http://tramona/offers{offer.id}",
   numOfNights = 3,
-  tramonaServiceFee = 0,
+  tramonaServiceFee,
 }: BookingConfirmationEmailProps) {
   return (
     <Layout title_preview="Booking confirmation/Payment received">
@@ -71,8 +62,6 @@ export function BookingConfirmationEmail({
         style={{ width: "100%" }}
       >
         <EmailConfirmationCard
-          hostName={hostName}
-          hostImageUrl={hostImageUrl}
           startDate={startDate}
           endDate={endDate}
           address={address}
@@ -87,26 +76,23 @@ export function BookingConfirmationEmail({
         style={{ width: "100%" }}
       >
         <Row className="">
-          <Column> 
-          <Text className="text-xs">Original Price</Text>
+          <Column>
+            <Text className="text-xs whitespace-no-wrap">Original Price</Text>
           </Column>
           <Column
-            className="text-xs text-[#606060]"
+            className="text-xs text-[#606060] whitespace-no-wrap"
             style={{ paddingLeft: "5px" }}
           >
             x{numOfNights} nights
           </Column>
-          <Column style={{ width: "100%" }}></Column>
-          <Column
-            style={{ paddingLeft: "150px", textAlign: "right" }}
-          >{formatCurrency(originalPrice)}</Column>
+          <Column className="text-right" style={{ paddingLeft: "150px" }}>{formatCurrency(originalPrice)}</Column>
         </Row>
         <Row className="">
-          <Column >
-          <Text className="text-xs">Tramona's Price</Text>
+          <Column>
+            <Text className="text-xs whitespace-no-wrap">Tramona's Price</Text>
           </Column>
           <Column
-            className="text-xs text-[#606060]"
+            className="text-xs text-[#606060] whitespace-no-wrap"
             style={{ paddingLeft: "5px" }}
           >
             x{numOfNights} nights
@@ -114,23 +100,20 @@ export function BookingConfirmationEmail({
           <Column style={{ paddingLeft: "150px" }}>{formatCurrency(tramonaPrice)}</Column>
         </Row>
         <Row className="">
-          <Column >
-          <Text className="text-xs">Service Fee</Text>
+          <Column>
+            <Text className="text-xs">Service Fee</Text>
           </Column>
-          <Column
-            className="text-xs text-white"
-            style={{ paddingLeft: "5px" }}
-          >
+          <Column className="text-xs text-white" style={{ paddingLeft: "5px" }}>
             x{numOfNights} nights
           </Column>
-          <Column style={{ paddingLeft: "150px" }}>{formatCurrency(tramonaServiceFee)}</Column>
+          <Column className="text-end" style={{ paddingLeft: "150px" }}>{formatCurrency(tramonaServiceFee)}</Column>
         </Row>
         <Hr className="pt-5" />
         <Row className="font-bold">
           <Column>Total (USD)</Column>
-          <Column className="text-right">{formatCurrency(tramonaPrice + tramonaServiceFee)}</Column>
+          <Column className="text-right">{formatCurrency(tramonaPrice+tramonaServiceFee)}</Column>
         </Row>
-        </Section> 
+      </Section>
       <Text className="text-left text-base px-6 text-brand">
         If there are any questions, send us an email at info@tramona.com or send
         the host a message directly.
@@ -142,6 +125,5 @@ export function BookingConfirmationEmail({
     </Layout>
   );
 }
-
 
 export default BookingConfirmationEmail;
