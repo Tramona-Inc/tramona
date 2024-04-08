@@ -1,4 +1,7 @@
 import React from "react";
+
+import { formatCurrency } from "@/utils/utils";
+
 import {
   Layout,
   Header,
@@ -37,6 +40,7 @@ interface BookingConfirmationEmailProps {
   numOfNights?: number;
   paymentConfirmationDate?: string;
   tramonaServiceFee: number
+
 }
 
 export function BookingConfirmationEmail({
@@ -95,7 +99,7 @@ export function BookingConfirmationEmail({
           <Column style={{ width: "100%" }}></Column>
           <Column
             style={{ paddingLeft: "150px", textAlign: "right" }}
-          >{`$${originalPrice}`}</Column>
+          >{formatCurrency(originalPrice)}</Column>
         </Row>
         <Row className="">
           <Column >
@@ -107,7 +111,7 @@ export function BookingConfirmationEmail({
           >
             x{numOfNights} nights
           </Column>
-          <Column style={{ paddingLeft: "150px" }}>{`$${tramonaPrice}`}</Column>
+          <Column style={{ paddingLeft: "150px" }}>{formatCurrency(tramonaPrice)}</Column>
         </Row>
         <Row className="">
           <Column >
@@ -119,12 +123,12 @@ export function BookingConfirmationEmail({
           >
             x{numOfNights} nights
           </Column>
-          <Column style={{ paddingLeft: "150px" }}>{`$${tramonaServiceFee}`}</Column>
+          <Column style={{ paddingLeft: "150px" }}>{formatCurrency(tramonaServiceFee)}</Column>
         </Row>
         <Hr className="pt-5" />
         <Row className="font-bold">
           <Column>Total (USD)</Column>
-          <Column className="text-right">{`$${tramonaPrice + tramonaServiceFee}`}</Column>
+          <Column className="text-right">{formatCurrency(tramonaPrice + tramonaServiceFee)}</Column>
         </Row>
         </Section> 
       <Text className="text-left text-base px-6 text-brand">

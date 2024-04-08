@@ -189,7 +189,9 @@ export const useIsLg = () => useScreenWidth() >= 1024;
 
 export function getTramonaFeeTotal(totalSavings: number) {
   const fee = 0.2 * totalSavings;
-
+  console.log("next two lines are the fee")
+  console.log(fee)
+  console.log(typeof fee)
   return fee;
 }
 

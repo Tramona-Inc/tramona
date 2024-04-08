@@ -6,7 +6,6 @@ import {
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
-  Property,
   offers,
   properties,
   referralCodes,
@@ -22,7 +21,11 @@ import { sendEmail } from "@/server/server-utils";
 import { BookingConfirmationEmail } from "@/components/email-templates/BookingConfirmationEmail";
 import { User } from "lucide-react";
 import { Payer } from "@aws-sdk/client-s3";
-import { formatDateMonthDay, getNumNights, getTramonaFeeTotal } from "@/utils/utils";
+import {
+  formatDateMonthDay,
+  getNumNights,
+  getTramonaFeeTotal,
+} from "@/utils/utils";
 import { formatDate } from "date-fns";
 
 // ! Necessary for stripe
@@ -90,22 +93,29 @@ export default async function webhook(
         const user = await db.query.users.findFirst({
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
-        
 
-        const propertyID = parseInt(paymentIntentSucceeded.metadata.property_id!, 10)
+        const propertyID = parseInt(
+          paymentIntentSucceeded.metadata.property_id!,
+          10,
+        );
         const property = await db.query.properties.findFirst({
           where: eq(properties.id, propertyID),
-        })
-        const requestID = parseInt(paymentIntentSucceeded.metadata.request_id!)
+        });
+        const requestID = parseInt(paymentIntentSucceeded.metadata.request_id!);
         const request = await db.query.requests.findFirst({
-          where: eq(requests.id, requestID)
-        })
+          where: eq(requests.id, requestID),
+        });
         const offer = await db.query.offers.findFirst({
-          where: eq(offers.requestId, requestID)
-        })
+          where: eq(offers.requestId, requestID),
+        });
 
         //send BookingConfirmationEmail
         //Send user confirmation email
+        //getting num of nights
+        const numOfNights = getNumNights(request?.checkIn!, request?.checkOut!);
+        const originalPrice = property?.originalNightlyPrice! * numOfNights;
+        const savings = property?.originalNightlyPrice! - offer?.totalPrice!;
+        const tramonaServiceFee = getTramonaFeeTotal(savings);
 
         await sendEmail({
           to: user?.email as string,
@@ -115,19 +125,18 @@ export default async function webhook(
             placeName: property?.name,
             hostName: property?.hostName!,
             hostImageUrl: "https://via.placeholder.com/150",
-            startDate: formatDateMonthDay(request?.checkIn!),
+            startDate: formatDate(request?.checkIn!, "MM/dd/yyyy"),
             endDate: formatDate(request?.checkOut!, "MM/dd/yyyy"),
             address: property?.address!,
             propertyImageLink: property?.imageUrls[0],
-            tripDetailLink: `http://localhost:3000/offers/${offers?.id}`,
-            originalPrice: property?.originalNightlyPrice,
+            tripDetailLink: `https://www.tramona.com/offers/${offers?.id}`,
+            originalPrice: originalPrice,
             tramonaPrice: offer?.totalPrice!,
             offerLink: `https://www.tramona.com/offers/${offer?.id}`,
-            numOfNights: getNumNights(request?.checkIn!, request?.checkOut!),
-            tramonaServiceFee: getTramonaFeeTotal(Number(properties?.originalNightlyPrice!) - Number(offer?.totalPrice!))
+            numOfNights: numOfNights,
+            tramonaServiceFee: tramonaServiceFee,
           }),
         });
-
 
         const twilioMutation = api.twilio.sendSMS.useMutation();
         const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
