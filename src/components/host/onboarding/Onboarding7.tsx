@@ -22,10 +22,14 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Onboarding7() {
+  const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
+
+  console.log(imageURLs);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      imageURLs: [],
+      imageURLs: imageURLs,
     },
   });
 
@@ -69,6 +73,12 @@ export default function Onboarding7() {
               <Button type="submit">Submit</Button>
             </form>
           </Form>
+          <div className="my-5 text-center">
+            <p className="font-bold">
+              Total Uploaded Images:{" "}
+              <span className="font-normal">{imageURLs.length}</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

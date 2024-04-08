@@ -229,7 +229,7 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
       ...state,
       listing: {
         ...state.listing,
-        imageUrls: imageUrls,
+        imageUrls,
       },
     }));
   },
