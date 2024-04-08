@@ -27,7 +27,7 @@ export function BookingExpiredEmail({
   tripDetailLink = "https://www.tramona.com/",
 }: BookingExpiredEmailProps) {
   return (
-    <Layout title="Booking Expired">
+    <Layout title_preview="Booking Expired">
       <Text className="text-brand px-6 text-left text-base">
         Hello, {userName}. Your offer for ${offerPrice} on {checkIn} -{" "}
         {checkOut} at {location} has been removed.

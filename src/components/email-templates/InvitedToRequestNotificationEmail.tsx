@@ -11,7 +11,7 @@ export function InvitedToRequestNotificationEmail({
   signUpLink,
 }: InvitedToRequestNotificationEmailProps) {
   return (
-    <Layout title="You have been invited to a request on Tramona">
+    <Layout title_preview="You have been invited to a request on Tramona">
       <div className="pt-2" style={{ textAlign: "center" }}>
         <div className="text-brand px-6 text-left text-base">
           <Text className="text-brand text-left">

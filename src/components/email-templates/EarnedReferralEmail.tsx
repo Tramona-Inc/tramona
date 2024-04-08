@@ -17,7 +17,7 @@ export function EarnedReferralEmail({
   dealLink = "https://www.tramona.com/",
 }: EarnedReferralEmailProps) {
   return (
-    <Layout title="Money earned from a referral">
+    <Layout title_preview="Money earned from a referral">
       <Text className="text-brand px-6 text-left text-base">
         Hello, {userName}. Your referral network is paying off. You just earned
         ${earnedAmount} from a referral. Your total is now ${totalEarnedAmount}.
