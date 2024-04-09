@@ -2,6 +2,7 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Container } from "@react-email/components";
 import { Home } from "lucide-react";
+import Image from "next/image";
 
 const amenities = [
   "amenity",
@@ -120,8 +121,8 @@ export default function onboarding10() {
             </div>
             <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
               <div className="relative col-span-2 row-span-2 bg-accent">
-                <img
-                  src="https://t4.ftcdn.net/jpg/05/54/52/13/360_F_554521329_ngmDQSjSrUSRnbK2xK0bkcprsinG9Xdv.jpg"
+                <Image
+                  src="https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200"
                   alt=""
                   fill
                   objectFit="cover"
@@ -129,32 +130,32 @@ export default function onboarding10() {
                 />
               </div>
               <div className="relative col-span-1 row-span-1 bg-accent">
-                <img
-                  src="https://t4.ftcdn.net/jpg/05/54/52/13/360_F_554521329_ngmDQSjSrUSRnbK2xK0bkcprsinG9Xdv.jpg"
+                <Image
+                  src="https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200"
                   alt=""
                   fill
                   objectFit="cover"
                 />
               </div>
               <div className="relative col-span-1 row-span-1 bg-accent">
-                <img
-                  src="https://t4.ftcdn.net/jpg/05/54/52/13/360_F_554521329_ngmDQSjSrUSRnbK2xK0bkcprsinG9Xdv.jpg"
+                <Image
+                  src="https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200"
                   alt=""
                   fill
                   objectFit="cover"
                 />
               </div>
               <div className="relative col-span-1 row-span-1 bg-accent">
-                <img
-                  src="https://t4.ftcdn.net/jpg/05/54/52/13/360_F_554521329_ngmDQSjSrUSRnbK2xK0bkcprsinG9Xdv.jpg"
+                <Image
+                  src="https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200"
                   alt=""
                   fill
                   objectFit="cover"
                 />
               </div>
               <div className="relative col-span-1 row-span-1 bg-accent">
-                <img
-                  src="https://t4.ftcdn.net/jpg/05/54/52/13/360_F_554521329_ngmDQSjSrUSRnbK2xK0bkcprsinG9Xdv.jpg"
+                <Image
+                  src="https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200"
                   alt=""
                   fill
                   objectFit="cover"
