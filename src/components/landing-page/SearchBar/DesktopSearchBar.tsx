@@ -391,6 +391,7 @@ export default function DesktopSearchBar({
               <Button
                 type="submit"
                 onClick={form.handleSubmit((data) => onSubmit(data.data))}
+                disabled={form.formState.isSubmitting}
                 className="rounded-full"
               >
                 Confirm

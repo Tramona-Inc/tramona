@@ -92,12 +92,13 @@ function LargeRequestCardBadge({ request }: { request: DetailedRequest }) {
           <div className="flex items-center -space-x-2">
             {request.hostImages.map((imageUrl) => (
               <Image
+                unoptimized
                 key={imageUrl}
                 src={imageUrl}
                 alt=""
                 width={22}
                 height={22}
-                className="inline-block"
+                className="inline-block rounded-full"
               />
             ))}
           </div>
