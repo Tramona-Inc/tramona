@@ -33,6 +33,10 @@ export const ALL_PROPERTY_TYPES = [
   "Bungalow",
   "Hut",
   "Other",
+  "Home",
+  "Hotels",
+  "Alternative",
+  "",
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES = [

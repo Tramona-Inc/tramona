@@ -3,15 +3,6 @@ import { Dot, MapPin } from "lucide-react";
 import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
 
-const amenities = [
-  "amenity",
-  "amenity",
-  "amenity",
-  "amenity",
-  "amenity",
-  "amenity",
-];
-
 function Heading({
   title,
   editPage,

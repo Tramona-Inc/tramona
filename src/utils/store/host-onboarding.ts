@@ -1,7 +1,13 @@
+import {
+  type ALL_PROPERTY_ROOM_TYPES,
+  type ALL_PROPERTY_TYPES,
+} from "@/server/db/schema/tables/properties";
+
 import { create } from "zustand";
 
-export type PropertyType = "apartment" | "home" | "hotels" | "alternative" | "";
-export type SpaceType = "entire" | "single" | "shared" | "";
+export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
+export type SpaceType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
+
 export type LocationType = {
   country: string;
   street: string;
@@ -61,8 +67,8 @@ type HostOnboardingState = {
 export const useHostOnboarding = create<HostOnboardingState>((set) => ({
   progress: 0,
   listing: {
-    propertyType: "",
-    spaceType: "",
+    propertyType: "Other",
+    spaceType: "Entire place",
     maxGuests: 1,
     bedrooms: 1,
     beds: 1,

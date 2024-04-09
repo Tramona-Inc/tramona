@@ -41,7 +41,7 @@ type OfferPreview = Omit<
   | "area"
 >;
 
-export type Amenity =
+export type OldAmenity =
   | {
       type: "Baths" | "Beds";
       count: number | null;
@@ -60,7 +60,7 @@ export type OfferDetailType = OfferPreview & {
   checkIn: string | null;
   checkOut: string | null;
   guests: number | null;
-  amenites: Amenity[] | null;
+  amenites: OldAmenity[] | null;
 };
 
 export type LiveDeals = {

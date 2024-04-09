@@ -15,25 +15,25 @@ import OnboardingFooter from "./OnboardingFooter";
 
 const options = [
   {
-    id: "apartment" as PropertyType,
+    id: "Apartment" as PropertyType,
     icon: <ApartmentIcon />,
     title: "Apartment",
     text: "Furnished and self-catering accommodations where guests rent the entire place",
   },
   {
-    id: "home" as PropertyType,
+    id: "Home" as PropertyType,
     icon: <Home />,
     title: "Home",
     text: "Furnished and self-catering accommodations where guests rent the entire place",
   },
   {
-    id: "hotels" as PropertyType,
+    id: "Hotels" as PropertyType,
     icon: <Hotels />,
     title: "Hotels, B&Bs, & More",
     text: "Furnished and self-catering accommodations where guests rent the entire place",
   },
   {
-    id: "alternative" as PropertyType,
+    id: "Alternative" as PropertyType,
     icon: <Alternative />,
     title: "Alternative Places",
     text: "Furnished and self-catering accommodations where guests rent the entire place",

@@ -9,91 +9,91 @@ import OnboardingFooter from "./OnboardingFooter";
 
 const kitchenItems = [
   {
-    id: "stove",
+    id: "Stove",
     content: "Stove",
   },
   {
-    id: "refrigerator",
+    id: "Refrigerator",
     content: "Refrigerator",
   },
   {
-    id: "microwave",
+    id: "Microwave",
     content: "Microwave",
   },
   {
-    id: "oven",
+    id: "Oven",
     content: "Oven",
   },
   {
-    id: "freezer",
+    id: "Freezer",
     content: "Freezer",
   },
   {
-    id: "dishwasher",
+    id: "Dishwasher",
     content: "Dishwasher",
   },
   {
-    id: "dishes & silverwarr",
+    id: "Dishes and silverware",
     content: "Dishes & silverware",
   },
   {
-    id: "dining table & chairs",
+    id: "Dining table and chairs",
     content: "Dining Table & Chairs",
   },
   {
-    id: "coffee maker",
+    id: "Coffee maker",
     content: "Coffee Maker",
   },
 ];
 
 const livingRoomItems = [
   {
-    id: "tv",
+    id: "TV",
     content: "TV",
   },
   {
-    id: "couch",
+    id: "Couch",
     content: "Couch",
   },
 ];
 
 const heatingAndCoolingItems = [
   {
-    id: "heating",
+    id: "Heating",
     content: "Heating",
   },
   {
-    id: "air conditioning",
+    id: "Air conditioning",
     content: "Air Conditioning",
   },
 ];
 
 const laundryItems = [
   {
-    id: "washer",
-    content: "Washher",
+    id: "Washer",
+    content: "Washer",
   },
   {
-    id: "dryer",
+    id: "Dryer",
     content: "Dryer",
   },
 ];
 
 const parkingItems = [
   {
-    id: "street parking",
-    content: "Washher",
+    id: "Street Parking",
+    content: "Street Parking",
   },
   {
-    id: "garage parking",
+    id: "Garage Parking",
     content: "Garage Parking",
   },
   {
-    id: "ev charging",
+    id: "Ev charging",
     content: "EV charging",
   },
   {
-    id: "driveway parking",
+    id: "Driveway parking",
     content: "Driveway parking",
   },
 ];

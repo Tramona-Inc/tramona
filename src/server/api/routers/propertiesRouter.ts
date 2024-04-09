@@ -1,4 +1,5 @@
 import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
+import { hostPropertyOnboardingSchema } from '@/components/host/onboarding/OnboardingFooter';
 import {
   createTRPCRouter,
   publicProcedure,
@@ -101,7 +102,7 @@ export const propertiesRouter = createTRPCRouter({
     },
   ),
   hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
-    .input(hostPropertyFormSchema)
+    .input(hostPropertyOnboardingSchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "host") {
         throw new TRPCError({ code: "BAD_REQUEST" });
@@ -111,8 +112,7 @@ export const propertiesRouter = createTRPCRouter({
         ...input,
         hostId: ctx.user.id,
         hostName: ctx.user.name,
-        imageUrls: input.imageUrls.map((urlObject) => urlObject.value),
-        numBathrooms: 0, //TODO add it into form
+        imageUrls: input.imageUrls,
       });
     }),
 });
