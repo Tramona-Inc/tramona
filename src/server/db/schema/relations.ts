@@ -12,6 +12,7 @@ import { properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
+import { requestsToProperties } from "./tables/requestsToProperties";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -61,6 +62,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     references: [users.id],
   }),
   offers: many(offers),
+  requestsToProperties: many(requestsToProperties),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
@@ -73,6 +75,7 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
     references: [requestGroups.id],
   }),
   offers: many(offers),
+  requestsToProperties: many(requestsToProperties),
 }));
 
 export const requestGroupsRelations = relations(
@@ -82,6 +85,20 @@ export const requestGroupsRelations = relations(
     createdByUser: one(users, {
       fields: [requestGroups.createdByUserId],
       references: [users.id],
+    }),
+  }),
+);
+
+export const requestsToPropertiesRelations = relations(
+  requestsToProperties,
+  ({ one }) => ({
+    request: one(requests, {
+      fields: [requestsToProperties.requestId],
+      references: [requests.id],
+    }),
+    property: one(properties, {
+      fields: [requestsToProperties.propertyId],
+      references: [properties.id],
     }),
   }),
 );
