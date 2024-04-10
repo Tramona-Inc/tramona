@@ -66,7 +66,7 @@ export default function OnboardingFooter({
         title: "First property listed!",
         description: "Your first property successfully listed",
       });
-      void router.push("/host");
+      void router.push("/host/properties");
     },
   });
 
