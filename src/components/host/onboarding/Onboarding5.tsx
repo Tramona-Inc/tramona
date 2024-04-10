@@ -53,7 +53,6 @@ export default function Onboarding4() {
   });
 
   async function handleFormSubmit(values: FormSchema) {
-    console.log(values);
     setCheckIn(values.checkIn);
     setCheckOut(values.checkOut);
   }
