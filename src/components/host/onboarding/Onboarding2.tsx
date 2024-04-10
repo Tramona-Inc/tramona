@@ -3,6 +3,7 @@ import Alternative from "@/components/_icons/Alternative";
 import ApartmentIcon from "@/components/_icons/Apartment";
 import Home from "@/components/_icons/Home";
 import Hotels from "@/components/_icons/Hotels";
+import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem } from "@/components/ui/form";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import {
@@ -10,6 +11,7 @@ import {
   useHostOnboarding,
 } from "@/utils/store/host-onboarding";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
@@ -66,8 +68,20 @@ export default function Onboarding2() {
     }
   }
 
+  const router = useRouter();
+
   return (
     <>
+      <div className="container mt-5 flex w-full justify-end">
+        <Button
+          onClick={() => {
+            void router.push("/host");
+          }}
+          variant={"outlineLight"}
+        >
+          Save & Exit
+        </Button>
+      </div>
       <div className="flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <h1 className="text-4xl font-bold">
           Which of these describes your property?
