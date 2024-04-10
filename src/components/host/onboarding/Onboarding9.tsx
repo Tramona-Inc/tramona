@@ -19,7 +19,7 @@ import OnboardingFooter from "./OnboardingFooter";
 const formSchema = z.object({
   pets: z.string(),
   smoking: z.string(),
-  additionalComments: zodString().optional(),
+  additionalComments: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -46,12 +46,11 @@ export default function Onboarding9() {
     defaultValues: {
       pets: petsAllowed ? "true" : "false",
       smoking: smokingAllowed ? "true" : "false",
-      additionalComments: otherHouseRules,
+      additionalComments: otherHouseRules ?? undefined,
     },
   });
 
   async function handleFormSubmit(values: FormSchema) {
-    console.log(values);
     setPetsAllowed(values.pets === "true" ? true : false);
     setSmokingAllowed(values.smoking === "true" ? true : false);
     setOtherHouseRules(values.additionalComments ?? "");

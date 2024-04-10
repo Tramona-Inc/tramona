@@ -39,7 +39,7 @@ type HostOnboardingState = {
     description: string;
     petsAllowed: boolean;
     smokingAllowed: boolean;
-    otherHouseRules: string;
+    otherHouseRules: string | null | undefined;
   };
   setMaxGuests: (maxGuests: number) => void;
   setBedrooms: (bedrooms: number) => void;
