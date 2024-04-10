@@ -1,3 +1,4 @@
+import { Form, FormField, FormItem } from "@/components/ui/form";
 import { InputTogether } from "@/components/ui/input-together";
 import {
   Select,
@@ -10,33 +11,51 @@ import {
   type LocationType,
   useHostOnboarding,
 } from "@/utils/store/host-onboarding";
-import { useState } from "react";
+import { zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 
+const formSchema = z.object({
+  country: zodString(),
+  street: zodString(),
+  apt: z.string().optional(),
+  city: zodString(),
+  state: zodString(),
+  zipcode: zodString(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
 export default function Onboarding4() {
-  const [location, setLocation] = useState({
-    country: "",
-    street: "",
-    apt: "",
-    city: "",
-    state: "",
-    zipcode: "",
-  });
-
-  const updateLocation = (
-    field: string,
-    value: string,
-    setLocationInStore: (location: LocationType) => void,
-  ) => {
-    setLocation((prevLocation) => ({
-      ...prevLocation,
-      [field]: value,
-    }));
-    setLocationInStore({ ...location, [field]: value });
-  };
-
   const propertyLocation = useHostOnboarding((state) => state.listing.location);
   const setLocationInStore = useHostOnboarding((state) => state.setLocation);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      country: propertyLocation.country,
+      street: propertyLocation.street,
+      apt: propertyLocation.apt ?? undefined,
+      city: propertyLocation.city,
+      state: propertyLocation.state,
+      zipcode: propertyLocation.zipcode,
+    },
+  });
+
+  async function handleFormSubmit(values: FormValues) {
+    const location: LocationType = {
+      country: values.country,
+      street: values.street,
+      apt: values.apt ?? undefined,
+      city: values.city,
+      zipcode: values.zipcode,
+      state: values.state,
+    };
+
+    setLocationInStore(location);
+  }
 
   return (
     <>
@@ -46,65 +65,103 @@ export default function Onboarding4() {
             Where&apos;s your property located?
           </h1>
 
-          <Select
-            value={propertyLocation.country}
-            onValueChange={(value) => {
-              updateLocation("country", value, setLocationInStore);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Country /region" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="United States">United States</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="rounded-lg border">
-            <InputTogether
-              className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6"
-              placeholder="Street address"
-              value={propertyLocation.street}
-              onChange={(e) =>
-                updateLocation("street", e.target.value, setLocationInStore)
-              }
+          <Form {...form}>
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => (
+                <FormItem>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Country /region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="United States">
+                        United States
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
             />
-            <InputTogether
-              className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
-              placeholder="Apt, suite, unit (if applicable)"
-              value={propertyLocation.apt ?? ""}
-              onChange={(e) =>
-                updateLocation("apt", e.target.value, setLocationInStore)
-              }
-            />
-            <InputTogether
-              className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
-              placeholder="City / town"
-              value={propertyLocation.city}
-              onChange={(e) =>
-                updateLocation("city", e.target.value, setLocationInStore)
-              }
-            />
-            <InputTogether
-              className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
-              placeholder="State / territory"
-              value={propertyLocation.state}
-              onChange={(e) =>
-                updateLocation("state", e.target.value, setLocationInStore)
-              }
-            />
-            <InputTogether
-              className="rounded-t-lg border-x-0 border-b-0 border-t-0 p-6 focus:rounded-b-lg focus:rounded-t-none"
-              placeholder="ZIP code"
-              value={propertyLocation.zipcode}
-              onChange={(e) =>
-                updateLocation("zipcode", e.target.value, setLocationInStore)
-              }
-            />
-          </div>
+            <div className="rounded-lg border">
+              <FormField
+                control={form.control}
+                name="street"
+                render={({ field }) => (
+                  <FormItem>
+                    <InputTogether
+                      className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6"
+                      placeholder="Street address"
+                      {...field}
+                    />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="apt"
+                render={({ field }) => (
+                  <FormItem>
+                    <InputTogether
+                      className="border-b-1 border-x-0 border-t-0 p-6"
+                      placeholder="Apt, suite, unit (if applicable)"
+                      {...field}
+                    />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <InputTogether
+                      className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
+                      placeholder="City / town"
+                      {...field}
+                    />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <InputTogether
+                      className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
+                      placeholder="State / territory"
+                      {...field}
+                    />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="zipcode"
+                render={({ field }) => (
+                  <FormItem>
+                    <InputTogether
+                      className="rounded-t-lg border-x-0 border-b-0 border-t-0 p-6 focus:rounded-b-lg focus:rounded-t-none"
+                      placeholder="ZIP code"
+                      {...field}
+                    />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </Form>
         </div>
       </div>
-      <OnboardingFooter isForm={false} />
+      <OnboardingFooter
+        handleNext={form.handleSubmit(handleFormSubmit)}
+        isFormValid={form.formState.isValid}
+        isForm={true}
+      />
     </>
   );
 }

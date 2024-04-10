@@ -4,6 +4,7 @@ import ApartmentIcon from "@/components/_icons/Apartment";
 import Home from "@/components/_icons/Home";
 import Hotels from "@/components/_icons/Hotels";
 import { Form, FormField, FormItem } from "@/components/ui/form";
+import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import {
   type PropertyType,
   useHostOnboarding,
@@ -43,7 +44,7 @@ const options = [
 // ! Honeslty didn't need to do a form
 
 const formSchema = z.object({
-  propertyType: z.enum(["apartment", "home", "hotels", "alternative"]),
+  propertyType: z.enum(ALL_PROPERTY_TYPES),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -55,13 +56,14 @@ export default function Onboarding2() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      propertyType: "apartment",
+      propertyType: "Other",
     },
   });
 
   async function handleFormSubmit() {
-    console.log(propertyType);
-    setPropertyType(propertyType);
+    if (form.getValues("propertyType") !== "Other") {
+      setPropertyType(propertyType);
+    }
   }
 
   return (
@@ -98,7 +100,7 @@ export default function Onboarding2() {
       </div>
       <OnboardingFooter
         handleNext={form.handleSubmit(handleFormSubmit)}
-        isFormValid={form.formState.isValid}
+        isFormValid={propertyType !== "Other"}
         isForm={true}
       />
     </>

@@ -11,7 +11,7 @@ export type SpaceType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
 export type LocationType = {
   country: string;
   street: string;
-  apt: string | null;
+  apt: string | null | undefined;
   city: string;
   state: string;
   zipcode: string;
@@ -68,7 +68,7 @@ export const useHostOnboarding = create<HostOnboardingState>((set) => ({
   progress: 0,
   listing: {
     propertyType: "Other",
-    spaceType: "Entire place",
+    spaceType: "Other",
     maxGuests: 1,
     bedrooms: 1,
     beds: 1,

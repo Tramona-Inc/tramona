@@ -138,7 +138,7 @@ export default function Onboarding3() {
           </div>
         </div>
       </div>
-      <OnboardingFooter isForm={false} />
+      <OnboardingFooter isFormValid={spaceType !== "Other"} isForm={true} />
     </>
   );
 }
