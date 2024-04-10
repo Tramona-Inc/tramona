@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
-import SaveAndExit from './SaveAndExit';
+import SaveAndExit from "./SaveAndExit";
 
 const formSchema = z.object({
   checkIn: zodString({ maxLen: 100 }),
@@ -129,6 +129,7 @@ export default function Onboarding4() {
                   name="checkIn"
                   render={({ field }) => (
                     <FormItem>
+                      <Label className="font-semibold ">Check in</Label>
                       <Input
                         {...field}
                         type="time"
@@ -146,6 +147,7 @@ export default function Onboarding4() {
                   name="checkOut"
                   render={({ field }) => (
                     <FormItem>
+                      <Label className="font-semibold">Check in</Label>
                       <Input
                         {...field}
                         type="time"
