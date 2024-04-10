@@ -95,6 +95,7 @@ export const old_ALL_PROPERTY_AMENITIES = [
   "Pets Allowed",
   "Dishes & silverware",
   "Dining table and chairs",
+  "TV"
 ] as const;
 
 export const amenityCategories = [
@@ -289,9 +290,11 @@ export const amenityCategories = [
   },
 ] as const;
 
-export const ALL_PROPERTY_AMENITIES = amenityCategories.flatMap(
-  (category) => category.amenities,
-);
+// export const ALL_PROPERTY_AMENITIES = amenityCategories.flatMap(
+//   (category) => category.amenities,
+// );
+
+export const ALL_PROPERTY_AMENITIES = old_ALL_PROPERTY_AMENITIES;
 
 export type AmenityCategory = (typeof amenityCategories)[number]["category"]
 export type Amenity = (typeof ALL_PROPERTY_AMENITIES)[number];

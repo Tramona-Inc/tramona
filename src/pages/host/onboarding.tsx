@@ -13,6 +13,7 @@ import OnboardingLayout from "../../components/host/onboarding/layout";
 import Submitted from '@/components/host/onboarding/Submitted';
 
 export default function Onboarding() {
+
   const progress = useHostOnboarding((state) => state.progress);
 
   return (

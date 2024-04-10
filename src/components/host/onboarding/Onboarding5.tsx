@@ -119,48 +119,47 @@ export default function Onboarding4() {
             </div>
           </div>
 
-<Form {...form}>
-  <div className="mt-5 w-full">
-    <h1 className="mb-2 text-xl font-bold">Hours</h1>
-    <div className="grid grid-cols-2 gap-5">
-      <FormField
-        control={form.control}
-        name="checkIn"
-        render={({ field }) => (
-          <FormItem>
-            <Input
-              {...field}
-              type="clock"
-              placeholder="Check in time"
-              className="p-5"
-            />
-            <FormMessage>
-              {form.formState.errors.checkIn?.message}
-            </FormMessage>
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="checkOut"
-        render={({ field }) => (
-          <FormItem>
-            <Input
-              {...field}
-              type="clock"
-              placeholder="Check out time"
-              className="p-5"
-            />
-            <FormMessage>
-              {form.formState.errors.checkOut?.message}
-            </FormMessage>
-          </FormItem>
-        )}
-      />
-    </div>
-  </div>
-</Form>
-
+          <Form {...form}>
+            <div className="mt-5 w-full">
+              <h1 className="mb-2 text-xl font-bold">Hours</h1>
+              <div className="grid grid-cols-2 gap-5">
+                <FormField
+                  control={form.control}
+                  name="checkIn"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Input
+                        {...field}
+                        type="time"
+                        placeholder="Check in time"
+                        className="p-5"
+                      />
+                      <FormMessage>
+                        {form.formState.errors.checkIn?.message}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="checkOut"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Input
+                        {...field}
+                        type="time"
+                        placeholder="Check out time"
+                        className="p-5"
+                      />
+                      <FormMessage>
+                        {form.formState.errors.checkOut?.message}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </Form>
         </div>
       </div>
       <OnboardingFooter

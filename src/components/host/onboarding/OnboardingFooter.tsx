@@ -4,7 +4,6 @@ import {
   ALL_PROPERTY_ROOM_TYPES,
   ALL_PROPERTY_TYPES,
 } from "@/server/db/schema";
-import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { api } from "@/utils/api";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { z } from "zod";
@@ -24,7 +23,7 @@ export const hostPropertyOnboardingSchema = z.object({
   checkInTime: z.string().optional(),
   checkOutTime: z.string().optional(),
 
-  amenities: z.array(z.enum(ALL_PROPERTY_AMENITIES)),
+  amenities: z.string().array(),
 
   otherAmenities: z.string().array(),
 
@@ -55,11 +54,12 @@ export default function OnboardingFooter({
   const setProgress = useHostOnboarding((state) => state.setProgress);
   const { listing } = useHostOnboarding((state) => state);
 
-  const { mutate } = api.properties.hostInsertOnboardingProperty.useMutation();
+  const { mutate } = api.properties.hostInsertOnboardingProperty.useMutation({
+    onSuccess: () => setProgress(progress + 1),
+  });
 
   function onPressNext() {
     if (progress === 9) {
-      console.log("HIT");
       mutate({
         propertyType: listing.propertyType,
         roomType: listing.spaceType,
