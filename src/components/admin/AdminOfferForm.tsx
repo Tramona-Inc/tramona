@@ -56,7 +56,7 @@ const formSchema = z.object({
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
-  amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
+  amenities: z.string().array(),
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
@@ -118,7 +118,7 @@ export default function AdminOfferForm({
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
-            originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100,
+            originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100 ?? ,
             checkInInfo: offer.property.checkInInfo ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
           }
