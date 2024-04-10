@@ -6,6 +6,7 @@ import {
 } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { useRouter } from "next/router";
 import { z } from "zod";
 
 export const hostPropertyOnboardingSchema = z.object({
@@ -51,8 +52,11 @@ export default function OnboardingFooter({
   const max_pages = 10;
 
   const progress = useHostOnboarding((state) => state.progress);
+  const resetSession = useHostOnboarding((state) => state.resetSession);
   const setProgress = useHostOnboarding((state) => state.setProgress);
   const { listing } = useHostOnboarding((state) => state);
+
+  const router = useRouter();
 
   const { mutate } = api.properties.hostInsertOnboardingProperty.useMutation({
     onSuccess: () => setProgress(progress + 1),
@@ -83,8 +87,11 @@ export default function OnboardingFooter({
         about: listing.description,
         petsAllowed: listing.petsAllowed,
         smokingAllowed: listing.smokingAllowed,
-        otherHouseRules: listing.otherHouseRules,
+        otherHouseRules: listing.otherHouseRules ?? undefined,
       });
+    } else if (progress === 10) {
+      resetSession();
+      void router.push("/host");
     } else {
       if (isFormValid) {
         handleNext && handleNext(); // Call handleNext only if it exists
