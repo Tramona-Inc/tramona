@@ -201,7 +201,6 @@ export default function DesktopSearchBar({
         await mutation.mutateAsync(newRequests).catch(() => {
           throw new Error();
         });
-        await utils.requests.invalidate();
 
         // we need to do this instead of form.reset() since i
         // worked around needing to give defaultValues to useForm

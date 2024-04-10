@@ -140,8 +140,6 @@ export default function AdminOfferForm({
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
   const getOwnerMutation = api.groups.getGroupOwner.useMutation();
 
-  const utils = api.useUtils();
-
   async function onSubmit(data: FormSchema) {
     let url: string | null = null;
 
@@ -214,12 +212,6 @@ export default function AdminOfferForm({
         .mutateAsync(newOffer)
         .catch(() => errorToast());
     }
-
-    await Promise.all([
-      utils.properties.invalidate(),
-      utils.offers.invalidate(),
-      utils.requests.invalidate(),
-    ]);
 
     const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
 
