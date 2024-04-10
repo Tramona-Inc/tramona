@@ -11,6 +11,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
+import DateRangePicker from "@/components/_common/DateRangePicker";
+import { Form } from "@/components/ui/form";
 
 const photos = [
   "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/3b0c4129-696a-4b08-8896-3c05d9c729b5.jpeg?im_w=1200",
@@ -26,7 +28,7 @@ export default function homeOfferCard() {
       <Container>
         <div>
           <div className="flex justify-center">
-            <Carousel className="w-full max-w-xs">
+            <Carousel className="relative w-full">
               <CarouselContent>
                 {photos.map((photo, index) => (
                   <CarouselItem key={index}>
@@ -46,8 +48,8 @@ export default function homeOfferCard() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              <CarouselPrevious className="absolute left-10 top-1/2" />
+              <CarouselNext className="absolute right-10 top-1/2" />
             </Carousel>
           </div>
           <div className="flex justify-between font-bold">
@@ -55,8 +57,10 @@ export default function homeOfferCard() {
             <p>Price on Airbnb: $$$</p>
           </div>
           <p>4 guests, 2 bedrooms, 2 beds, 2 baths</p>
-          <div>Check in / out input</div>
-          <Button className="w-full">Make offer</Button>
+          <div>insert date range picker</div>
+          <Button className="w-full" type="submit">
+            Make offer
+          </Button>
         </div>
       </Container>
     </MainLayout>
