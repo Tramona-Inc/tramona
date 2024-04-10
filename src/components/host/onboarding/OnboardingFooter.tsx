@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "@/components/ui/use-toast";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   ALL_PROPERTY_TYPES,
@@ -59,7 +60,14 @@ export default function OnboardingFooter({
   const router = useRouter();
 
   const { mutate } = api.properties.hostInsertOnboardingProperty.useMutation({
-    onSuccess: () => setProgress(progress + 1),
+    onSuccess: () => {
+      resetSession();
+      toast({
+        title: "First property listed!",
+        description: "Your first property successfully listed",
+      });
+      void router.push("/host");
+    },
   });
 
   function onPressNext() {
@@ -89,9 +97,6 @@ export default function OnboardingFooter({
         smokingAllowed: listing.smokingAllowed,
         otherHouseRules: listing.otherHouseRules ?? undefined,
       });
-    } else if (progress === 10) {
-      resetSession();
-      void router.push("/host");
     } else {
       if (isFormValid) {
         handleNext && handleNext(); // Call handleNext only if it exists
