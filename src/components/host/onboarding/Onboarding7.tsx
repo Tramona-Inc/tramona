@@ -1,5 +1,4 @@
 import ImagesInput from "@/components/_common/ImagesInput";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
-import SaveAndExit from './SaveAndExit';
+import SaveAndExit from "./SaveAndExit";
 
 const formSchema = z.object({
   imageURLs: z
@@ -74,7 +73,7 @@ export default function Onboarding7() {
                   )}
                 />
 
-                <Button type="submit">Submit</Button>
+                {/* <Button type="submit">Submit</Button> */}
               </form>
             </Form>
             <div className="my-5 text-center">
@@ -86,7 +85,11 @@ export default function Onboarding7() {
           </div>
         </div>
       </div>
-      <OnboardingFooter isForm={false} />
+      <OnboardingFooter
+        handleNext={form.handleSubmit(handleFormSubmit)}
+        isFormValid={form.formState.isValid || imageURLs.length >= 5}
+        isForm={true}
+      />
     </>
   );
 }
