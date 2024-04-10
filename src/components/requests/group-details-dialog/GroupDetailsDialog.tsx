@@ -9,31 +9,35 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "../../ui/button";
-import { type RequestWithUser, type DetailedRequest } from "../RequestCard";
 import { useSession } from "next-auth/react";
 import React from "react";
 import GroupMembersList from "./GroupMembersList";
 import { InviteByEmailForm } from "./InviteByEmailForm";
 import GroupInviteesList from "./GroupInviteesList";
+import {
+  getRequestWithGroupDetails,
+  type RequestWithGroup,
+} from "../RequestCardGroupAvatars";
 
 export default function GroupDetailsDialog({
   children,
   request,
   isAdminDashboard,
 }: React.PropsWithChildren<{
-  request: DetailedRequest | RequestWithUser;
+  request: RequestWithGroup;
   isAdminDashboard?: boolean;
 }>) {
   const { data: session } = useSession({ required: true });
   if (!session) return null;
 
-  const userIsOwner = request.groupMembers.some(
-    (member) => member.isGroupOwner && member.id === session.user.id,
-  );
-  const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
-  const isInviteDialog = !isAdminDashboard && userIsOwner && !isEveryoneInvited;
+  const { userIsOwner, isSingleUser, isInviteDialog } =
+    getRequestWithGroupDetails({
+      request,
+      isAdminDashboard: !!isAdminDashboard,
+      userId: session.user.id,
+    });
+
   const showInviteForm = !isAdminDashboard && userIsOwner; // still show it after everyone is invited, just disabled
-  const isSingleUser = request.groupMembers.length === 1;
 
   return (
     <Dialog>
@@ -61,7 +65,7 @@ export default function GroupDetailsDialog({
             <div className="space-y-1">
               {request.numGuests > 1 && (
                 <p className="text-sm font-semibold uppercase text-muted-foreground">
-                  Current group members ({request.groupMembers.length})
+                  Current group members ({request.madeByGroup.members.length})
                 </p>
               )}
               <GroupMembersList
@@ -70,10 +74,10 @@ export default function GroupDetailsDialog({
                 isAdminDashboard={isAdminDashboard}
               />
             </div>
-            {!isAdminDashboard && request.groupInvites.length > 0 && (
+            {!isAdminDashboard && request.madeByGroup.invites.length > 0 && (
               <div className="space-y-1">
                 <p className="text-sm font-semibold uppercase text-muted-foreground">
-                  Pending invites ({request.groupInvites.length})
+                  Pending invites ({request.madeByGroup.invites.length})
                 </p>
                 <GroupInviteesList
                   request={request}

@@ -2,27 +2,67 @@ import UserAvatar from "../_common/UserAvatar";
 import { PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
-import { type RequestWithUser, type DetailedRequest } from "./RequestCard";
 import { Button } from "../ui/button";
+import { type InferQueryModel } from "@/server/db";
+
+export type RequestWithGroup = InferQueryModel<
+  "requests",
+  { numGuests: true },
+  {
+    madeByGroup: {
+      with: {
+        invites: true;
+        members: {
+          with: {
+            user: {
+              columns: { name: true; email: true; image: true; id: true };
+            };
+          };
+        };
+      };
+    };
+  }
+> & { requestGroup?: { hasApproved: boolean } };
+
+export function getRequestWithGroupDetails({
+  request,
+  isAdminDashboard,
+  userId,
+}: {
+  request: RequestWithGroup;
+  isAdminDashboard?: boolean;
+  userId?: string;
+}) {
+  const userIsOwner = request.madeByGroup.ownerId === userId;
+  const isEveryoneInvited =
+    request.madeByGroup.members.length >= request.numGuests;
+
+  return {
+    isEveryoneInvited,
+    userIsOwner,
+    isSingleUser: request.madeByGroup.members.length === 1,
+    isInviteDialog: !isAdminDashboard && userIsOwner && !isEveryoneInvited,
+  };
+}
 
 export default function RequestGroupAvatars({
   request,
   isAdminDashboard = false,
 }: {
-  request: DetailedRequest | RequestWithUser;
+  request: RequestWithGroup;
   isAdminDashboard?: boolean;
 }) {
   const { data: session } = useSession({ required: true });
   if (!session) return null;
 
-  const userIsOwner = request.groupMembers.some(
-    (member) => member.id === session.user.id && member.isGroupOwner,
-  );
+  const { userIsOwner, isEveryoneInvited, isSingleUser, isInviteDialog } =
+    getRequestWithGroupDetails({
+      request,
+      isAdminDashboard,
+      userId: session.user.id,
+    });
 
-  const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
   const showPlus = userIsOwner && !isAdminDashboard && !isEveryoneInvited;
-  const isSingleUser = request.groupMembers.length === 1;
-  const isInviteDialog = !isAdminDashboard && userIsOwner && !isEveryoneInvited;
 
   return (
     <GroupDetailsDialog request={request} isAdminDashboard={isAdminDashboard}>
@@ -36,13 +76,13 @@ export default function RequestGroupAvatars({
         }
         tooltipOptions={{ side: "left" }}
       >
-        {request.groupMembers.map((member) => (
+        {request.madeByGroup.members.map(({ user }) => (
           <UserAvatar
-            key={member.id}
+            key={user.id}
             size="sm"
-            name={member.name}
-            email={member.email}
-            image={member.image}
+            name={user.name}
+            email={user.email}
+            image={user.image}
           />
         ))}
         {showPlus && (

@@ -34,7 +34,6 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
-import { useSession } from "next-auth/react";
 
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
@@ -78,9 +77,6 @@ export default function AdminOfferForm({
   request: Request;
   offer?: OfferWithProperty;
 }) {
-  const { data: session } = useSession();
-  const user = session?.user;
-
   const numberOfNights = getNumNights(request.checkIn, request.checkOut);
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
