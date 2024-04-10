@@ -22,7 +22,7 @@ export default function Header(props: HeaderProps) {
       <div className="contents lg:hidden">
         <SmallHeader {...props} />
       </div>
-      <div className="hidden lg:contents">
+      <div className="container hidden lg:contents ">
         <LargeHeader {...props} />
       </div>
     </>
@@ -32,7 +32,7 @@ export default function Header(props: HeaderProps) {
 function LargeHeader(props: HeaderProps) {
   const { status } = useSession();
   return (
-    <header className="sticky top-0 z-50 flex h-header-height items-center bg-white p-4 lg:px-16">
+    <header className="container sticky top-0 z-50 flex h-header-height items-center bg-white">
       <div className="flex flex-1 gap-4">
         <TramonaLogo />
       </div>

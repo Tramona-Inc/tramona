@@ -1,14 +1,11 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import LandingPage from "@/components/landing-page/LandingPage";
-
-import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import TravelerPage from "@/components/landing-page/TravelerPage";
 
 export default function Home() {
-  useMaybeSendUnsentRequests();
-
   return (
     <MainLayout>
-      <LandingPage />
+      {/* <LandingPage /> */}
+      <TravelerPage />
     </MainLayout>
   );
 }

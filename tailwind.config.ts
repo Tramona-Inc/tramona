@@ -13,13 +13,13 @@ module.exports = {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "1900x",
       },
     },
     extend: {
-      fontSize:{
-        '8xl': '4.6rem',
-      }, 
+      fontSize: {
+        "8xl": "4.6rem",
+      },
       spacing: {
         "screen-minus-header": "var(--screen-minus-header)",
         "header-height": "var(--header-height)",
@@ -75,20 +75,20 @@ module.exports = {
           to: { height: "0" },
         },
         text: {
-          '0%, 100%': {
-            'background-size': '200% 200%',
-            'background-position': 'left center',
+          "0%, 100%": {
+            "background-size": "200% 200%",
+            "background-position": "left center",
           },
-          '50%': {
-            'background-size': '200% 200%',
-            'background-position': 'right center',
+          "50%": {
+            "background-size": "200% 200%",
+            "background-position": "right center",
           },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        text: 'text 5s ease infinite',
+        text: "text 5s ease infinite",
       },
     },
   },
