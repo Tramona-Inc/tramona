@@ -10,7 +10,7 @@ import {
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import RequestGroupAvatars from "./RequestCardGroupAvatars";
+import RequestGroupAvatars from "./RequestGroupAvatars";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"

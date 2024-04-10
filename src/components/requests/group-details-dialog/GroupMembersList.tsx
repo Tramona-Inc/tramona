@@ -6,7 +6,7 @@ import { GroupMember } from "./GroupMember";
 import {
   getRequestWithGroupDetails,
   type RequestWithGroup,
-} from "../RequestCardGroupAvatars";
+} from "../RequestGroupAvatars";
 
 export default function GroupMembersList({
   request,

@@ -17,7 +17,7 @@ import GroupInviteesList from "./GroupInviteesList";
 import {
   getRequestWithGroupDetails,
   type RequestWithGroup,
-} from "../RequestCardGroupAvatars";
+} from "../RequestGroupAvatars";
 
 export default function GroupDetailsDialog({
   children,

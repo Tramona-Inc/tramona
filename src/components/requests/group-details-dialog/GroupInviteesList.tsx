@@ -6,7 +6,7 @@ import { errorToast } from "@/utils/toasts";
 import {
   getRequestWithGroupDetails,
   type RequestWithGroup,
-} from "../RequestCardGroupAvatars";
+} from "../RequestGroupAvatars";
 
 export default function GroupInviteesList({
   request,

@@ -17,7 +17,7 @@ import { toast } from "../../ui/use-toast";
 import {
   getRequestWithGroupDetails,
   type RequestWithGroup,
-} from "../RequestCardGroupAvatars";
+} from "../RequestGroupAvatars";
 
 const formSchema = z.object({ email: zodEmail() });
 type FormValues = z.infer<typeof formSchema>;

@@ -6,7 +6,7 @@ import { ArrowRightIcon, UserPlusIcon } from "lucide-react";
 import { type DetailedRequest } from "./RequestCard";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
-import { getRequestWithGroupDetails } from "./RequestCardGroupAvatars";
+import { getRequestWithGroupDetails } from "./RequestGroupAvatars";
 
 export function RequestCardAction({ request }: { request: DetailedRequest }) {
   const { data: session } = useSession({ required: true });
