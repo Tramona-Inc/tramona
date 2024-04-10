@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from './SaveAndExit';
 
 const formSchema = z.object({
   country: zodString(),
@@ -59,6 +60,7 @@ export default function Onboarding4() {
 
   return (
     <>
+      <SaveAndExit />
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-5">
           <h1 className="text-4xl font-bold">

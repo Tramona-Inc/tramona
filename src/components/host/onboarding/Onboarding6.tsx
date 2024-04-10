@@ -5,6 +5,7 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from './SaveAndExit';
 
 const kitchenItems = [
   {
@@ -174,6 +175,7 @@ export default function Onboarding6() {
 
   return (
     <>
+      <SaveAndExit />
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="my-20 flex flex-col gap-10">
           <h1 className="text-4xl font-bold">What amenities do you offer?</h1>

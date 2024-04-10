@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from './SaveAndExit';
 
 const formSchema = z.object({
   imageURLs: z
@@ -43,6 +44,7 @@ export default function Onboarding7() {
 
   return (
     <>
+      <SaveAndExit />
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="px-4 pb-32 pt-16">
           <div className="mx-auto max-w-3xl">
