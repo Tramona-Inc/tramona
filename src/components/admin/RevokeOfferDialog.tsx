@@ -26,16 +26,14 @@ export default function RevokeOfferDialog(
 ) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const utils = api.useUtils();
   const mutation = api.offers.delete.useMutation();
 
   async function deleteOffer() {
     await mutation
       .mutateAsync({ id: props.offerId })
-      .then(() => utils.offers.invalidate())
       .then(() => toast({ title: "Sucessfully revoked offer" }))
-      .catch(() => errorToast())
-      .finally(() => setIsOpen(false));
+      .catch(() => errorToast());
+    setIsOpen(false);
   }
 
   return (

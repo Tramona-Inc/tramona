@@ -1,24 +1,25 @@
 import { Button } from "../../ui/button";
-import { type RequestWithUser, type DetailedRequest } from "../RequestCard";
 import { LogOutIcon } from "lucide-react";
 import { RemoveFromGroupDialog } from "./RemoveFromGroupDialog";
 import { LeaveGroupDialog } from "./LeaveGroupDialog";
 import { GroupMember } from "./GroupMember";
+import {
+  getRequestWithGroupDetails,
+  type RequestWithGroup,
+} from "../RequestGroupAvatars";
 
 export default function GroupMembersList({
   request,
   userId,
   isAdminDashboard = false,
 }: {
-  request: DetailedRequest | RequestWithUser;
+  request: RequestWithGroup;
   userId?: string;
   isAdminDashboard?: boolean;
 }) {
-  const userIsOwner =
-    userId === request.groupMembers.find((member) => member.isGroupOwner)!.id;
-
-  const groupId = request.madeByGroupId;
-  const isSingleUser = request.groupMembers.length === 1;
+  const { userIsOwner } = getRequestWithGroupDetails({ request, userId });
+  const isSingleUser = request.madeByGroup.members.length === 1;
+  const groupId = request.madeByGroup.id;
 
   const leaveGroupBtn = (
     <LeaveGroupDialog groupId={groupId} userIsOwner={userIsOwner}>
@@ -33,15 +34,15 @@ export default function GroupMembersList({
     </LeaveGroupDialog>
   );
 
-  return request.groupMembers.map((member) => {
-    const isYou = userId === member.id;
-    const isOwner = member.isGroupOwner;
+  return request.madeByGroup.members.map((member) => {
+    const isYou = userId === member.userId;
+    const isOwner = member.userId === request.madeByGroup.ownerId;
 
     const removeFromGroupBtn = (
       <RemoveFromGroupDialog
         groupId={groupId}
-        memberId={member.id}
-        memberName={member.name}
+        memberId={member.user.id}
+        memberName={member.user.name}
       >
         <Button
           size="icon"
@@ -58,7 +59,7 @@ export default function GroupMembersList({
       isAdminDashboard || isSingleUser
         ? null
         : isYou
-          ? request.requestGroup.hasApproved
+          ? request?.requestGroup?.hasApproved !== false
             ? leaveGroupBtn
             : null
           : userIsOwner
@@ -67,8 +68,8 @@ export default function GroupMembersList({
 
     return (
       <GroupMember
-        key={member.id}
-        member={member}
+        key={member.user.id}
+        member={member.user}
         isOwner={isOwner}
         isYou={isYou}
         isAdminDashboard={isAdminDashboard}

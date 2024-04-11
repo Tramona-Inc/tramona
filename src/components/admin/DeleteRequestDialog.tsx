@@ -18,21 +18,14 @@ export default function DeleteRequestDialog({
   requestId,
 }: PropsWithChildren<{ requestId: number }>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const utils = api.useUtils();
   const mutation = api.requests.delete.useMutation();
 
   async function deleteRequest() {
-    setIsLoading(true);
-
     await mutation
       .mutateAsync({ id: requestId })
-      .then(() => utils.requests.invalidate())
       .then(() => toast({ title: "Sucessfully deleted request" }))
       .catch(() => errorToast());
-
-    setIsLoading(false);
     setIsOpen(false);
   }
 
@@ -58,7 +51,7 @@ export default function DeleteRequestDialog({
           </Button>
           <Button
             onClick={() => deleteRequest()}
-            disabled={isLoading}
+            disabled={mutation.isLoading}
             className="rounded-full"
           >
             Delete
