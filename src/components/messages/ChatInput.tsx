@@ -116,7 +116,6 @@ export default function ChatInput({
                     id: id,
                     lastTextAt: new Date(),
                   });
-                  await utils.messages.invalidate();
                 }
               }
             },
