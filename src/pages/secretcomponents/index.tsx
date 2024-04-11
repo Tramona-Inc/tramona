@@ -1,7 +1,7 @@
 import React from "react";
-import { RadioGroupDemo } from "@/components/_common/componentSample/RadioGroup";
-import { ScrollAreaDemo } from "@/components/_common/componentSample/ScrollAreaDemo";
-import { SliderDemo } from "@/components/_common/componentSample/SliderDemo";
+import { RadioGroupDemo } from "@/components/_common/ComponentDemos/RadioGroup";
+import { ScrollAreaDemo } from "@/components/_common/ComponentDemos/ScrollAreaDemo";
+import { SliderDemo } from "@/components/_common/ComponentDemos/SliderDemo";
 import {
   Accordion,
   AccordionContent,
@@ -9,7 +9,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
-import { SheetDemo } from "@/components/_common/componentSample/SheetDemo";
+import { SheetDemo } from "@/components/_common/ComponentDemos/SheetDemo";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,21 +64,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NotificationsCard } from "@/components/_common/componentSample/NotificationsCard";
-import { ComboBox } from "@/components/_common/componentSample/ComboBox";
-import { ComboboxDropdownMenu } from "@/components/_common/componentSample/ComboboxDropdownMenu";
-import { DatePickerDemo } from "@/components/_common/componentSample/DatePickerDemo";
-import { DialogDemo } from "@/components/_common/componentSample/DialogDemo";
-import { HoverCardDemo } from "@/components/_common/componentSample/HoverCardDemo";
-import { NavigationMenuDemo } from "@/components/_common/componentSample/NavigationMenuDemo";
-import { ProgressDemo } from "@/components/_common/componentSample/ProgressDemo";
+import { NotificationsCard } from "@/components/_common/ComponentDemos/NotificationsCard";
+import { ComboBox } from "@/components/_common/ComponentDemos/ComboBox";
+import { ComboboxDropdownMenu } from "@/components/_common/ComponentDemos/ComboboxDropdownMenu";
+import { DatePickerDemo } from "@/components/_common/ComponentDemos/DatePickerDemo";
+import { DialogDemo } from "@/components/_common/ComponentDemos/DialogDemo";
+import { HoverCardDemo } from "@/components/_common/ComponentDemos/HoverCardDemo";
+import { NavigationMenuDemo } from "@/components/_common/ComponentDemos/NavigationMenuDemo";
+import { ProgressDemo } from "@/components/_common/ComponentDemos/ProgressDemo";
 import { Slider } from "@radix-ui/react-slider";
-import { SwitchDemo } from "@/components/_common/componentSample/SwitchDemo";
-import { TableDemo } from "@/components/_common/componentSample/TableDemo";
-import { TabsDemo } from "@/components/_common/componentSample/TabsDemo";
-import { ToggleGroupDemo } from "@/components/_common/componentSample/ToggleGroupDemo";
+import { SwitchDemo } from "@/components/_common/ComponentDemos/SwitchDemo";
+import { TableDemo } from "@/components/_common/ComponentDemos/TableDemo";
+import { TabsDemo } from "@/components/_common/ComponentDemos/TabsDemo";
+import { ToggleGroupDemo } from "@/components/_common/ComponentDemos/ToggleGroupDemo";
 import { Tooltip } from "react-leaflet";
-import { TooltipDemo } from "@/components/_common/componentSample/TooltipDemo";
+import { TooltipDemo } from "@/components/_common/ComponentDemos/TooltipDemo";
 
 const FormSchema = z.object({
   dob: z.date({
