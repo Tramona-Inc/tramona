@@ -1,4 +1,4 @@
-import { Form, FormField, FormItem } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { InputTogether } from "@/components/ui/input-together";
 import {
   Select,
@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
-import SaveAndExit from './SaveAndExit';
+import SaveAndExit from "./SaveAndExit";
 
 const formSchema = z.object({
   country: zodString(),
@@ -147,6 +147,7 @@ export default function Onboarding4() {
                 name="zipcode"
                 render={({ field }) => (
                   <FormItem>
+                    <FormMessage />
                     <InputTogether
                       className="rounded-t-lg border-x-0 border-b-0 border-t-0 p-6 focus:rounded-b-lg focus:rounded-t-none"
                       placeholder="ZIP code"
