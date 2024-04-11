@@ -1,5 +1,6 @@
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import Head from "next/head";
+import Listings from "./_sections/Listings";
 import SimpleMastHead from "./_sections/SimpleMastHead";
 
 export default function TravelerPage() {
@@ -12,7 +13,7 @@ export default function TravelerPage() {
       </Head>
       <div className="bg-white">
         <SimpleMastHead />
-        
+        <Listings />
       </div>
     </div>
   );

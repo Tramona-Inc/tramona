@@ -1,7 +1,6 @@
-import MainLayout from "@/components/_common/Layout/MainLayout";
+import DateRangePicker from "@/components/_common/DateRangePicker";
 import { Button } from "@/components/ui/button";
-import { Container } from "@react-email/components";
-import Image from "next/image";
+import { CardContent } from "@/components/ui/card";
 import {
   Carousel,
   type CarouselApi,
@@ -10,13 +9,12 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
-import DateRangePicker from "@/components/_common/DateRangePicker";
 import { Form } from "@/components/ui/form";
-import { useEffect, useState } from "react";
 import { cn } from "@/utils/utils";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const photos = [
@@ -89,53 +87,52 @@ export default function HomeOfferCard() {
   });
 
   return (
-    <MainLayout>
-      <Container>
-        <div className="space-y-2">
-          <div className="flex justify-center">
-            <Carousel className="relative w-full" setApi={setApi}>
-              <CarouselContent>
-                {photos.map((photo, index) => (
-                  <CarouselItem key={index}>
-                    <div className="p-1">
-                      <Card>
-                        <CardContent className="flex aspect-square items-center justify-center p-6">
-                          <Image
-                            src={photo}
-                            fill
-                            alt=""
-                            objectFit="cover"
-                            className="rounded-lg border"
-                          />
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="absolute left-10 top-1/2" />
-              <CarouselNext className="absolute right-10 top-1/2" />
-              <CarouselDots count={count} current={current} />
-            </Carousel>
-          </div>
-          <div className="flex justify-between">
-            <p className="font-semibold">Milan, Italy</p>
-            <p>Price on Airbnb: $$$</p>
-          </div>
-          <p>4 guests, 2 bedrooms, 2 beds, 2 baths</p>
-          <Form {...form}>
-            <DateRangePicker
-              control={form.control}
-              name="date"
-              formLabel=""
-              className="col-span-full sm:col-span-1"
-            />
-            <Button className="w-full font-bold" type="submit">
-              Make offer
-            </Button>
-          </Form>
-        </div>
-      </Container>
-    </MainLayout>
+    <div className="space-y-2">
+      <div className="flex justify-center">
+        <Carousel className="relative w-full" setApi={setApi}>
+          <CarouselContent>
+            {photos.map((photo, index) => (
+              <CarouselItem key={index}>
+                <CardContent>
+                  <Image
+                    src={photo}
+                    height={300}
+                    width={300}
+                    alt=""
+                    objectFit="cover"
+                    className="aspect-square w-full rounded-md object-cover"
+                  />
+                </CardContent>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious
+            className="absolute left-10 top-1/2"
+            variant={"white"}
+          />
+          <CarouselNext
+            className="absolute right-10 top-1/2"
+            variant={"white"}
+          />
+          <CarouselDots count={count} current={current} />
+        </Carousel>
+      </div>
+      <div className="flex justify-between">
+        <p className="font-semibold">Milan, Italy</p>
+        <p>Price on Airbnb: $$$</p>
+      </div>
+      <p>4 guests, 2 bedrooms, 2 beds, 2 baths</p>
+      <Form {...form}>
+        <DateRangePicker
+          control={form.control}
+          name="date"
+          formLabel=""
+          className="col-span-full sm:col-span-1"
+        />
+        <Button className="w-full font-bold" type="submit">
+          Make offer
+        </Button>
+      </Form>
+    </div>
   );
 }
