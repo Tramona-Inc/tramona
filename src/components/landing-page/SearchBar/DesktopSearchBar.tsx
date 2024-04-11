@@ -123,7 +123,7 @@ export default function DesktopSearchBar({
     // Check for prices
     await Promise.all(
       newRequests.map(async (request) => {
-        const averageNightlyPrice: any =
+        const averageNightlyPrice =
           await utils.misc.getAverageNightlyPrice.fetch({
             checkIn: request.checkIn,
             checkOut: request.checkOut,
@@ -131,8 +131,8 @@ export default function DesktopSearchBar({
             numGuests: request.numGuests,
           });
 
-        const requestedPrice:number = request.maxNightlyPriceUSD;
-        const priceDifference:number = averageNightlyPrice - requestedPrice;
+        const requestedPrice: number = request.maxNightlyPriceUSD;
+        const priceDifference: number = averageNightlyPrice - requestedPrice;
         const priceDiffPercent = (priceDifference / averageNightlyPrice) * 100;
 
         if (request.maxNightlyPriceUSD < averageNightlyPrice) {

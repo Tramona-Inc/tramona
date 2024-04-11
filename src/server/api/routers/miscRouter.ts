@@ -75,10 +75,12 @@ export const miscRouter = createTRPCRouter({
 
       // Calculate average nightly price
       const averageNightlyPrice =
-  Array.isArray(price.results) && price.results.length > 0
-    ? price.results.reduce((acc, listing) => {
-        return acc + listing.price.rate;
-      }, 0) / price.results.length
-    : 0;
+        Array.isArray(price.results) && price.results.length > 0
+          ? price.results.reduce((acc, listing) => {
+              return acc + listing.price.rate;
+            }, 0) / price.results.length
+          : 0;
+
+      return averageNightlyPrice;
     }),
 });
