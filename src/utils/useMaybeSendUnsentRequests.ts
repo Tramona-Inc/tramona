@@ -14,7 +14,6 @@ export function useMaybeSendUnsentRequests() {
 
   const { mutateAsync: createRequests } =
     api.requests.createMultiple.useMutation();
-  const utils = api.useUtils();
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -41,7 +40,6 @@ export function useMaybeSendUnsentRequests() {
         createRequests(unsentRequests).catch(() => {
           throw new Error();
         });
-        await utils.requests.invalidate();
 
         if (unsentRequests.length === 1) {
           const req = unsentRequests[0];
@@ -56,5 +54,5 @@ export function useMaybeSendUnsentRequests() {
         localStorage.setItem("unsentRequests", unsentRequestsJSON);
       }
     })();
-  }, [createRequests, status, utils.requests]);
+  }, [createRequests, status]);
 }

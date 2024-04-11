@@ -8,10 +8,9 @@ import {
   plural,
 } from "@/utils/utils";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
-import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import RequestGroupAvatars from "./RequestCardGroupAvatars";
+import RequestGroupAvatars from "./RequestGroupAvatars";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -26,8 +25,14 @@ export default function RequestCard({
   isAdminDashboard,
   children,
 }: React.PropsWithChildren<
-  | { request: DetailedRequest; isAdminDashboard?: false | undefined }
-  | { request: RequestWithUser; isAdminDashboard: true }
+  | {
+      request: DetailedRequest;
+      isAdminDashboard?: false | undefined;
+    }
+  | {
+      request: RequestWithUser;
+      isAdminDashboard: true;
+    }
 >) {
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
@@ -97,7 +102,11 @@ export default function RequestCard({
 export function RequestCardBadge({
   request,
 }: {
-  request: DetailedRequest | RequestWithUser;
+  request: {
+    createdAt: Date;
+    resolvedAt: Date | null;
+    numOffers: number;
+  };
 }) {
   switch (getRequestStatus(request)) {
     case "pending":
@@ -107,24 +116,7 @@ export function RequestCardBadge({
       return <Badge variant="yellow">Pending {fmtdTimeAgo}</Badge>;
     case "accepted":
       return (
-        <Badge variant="green">
-          {plural(request.numOffers, "offer")}
-          {"hostImages" in request && request.hostImages.length > 0 && (
-            <div className="-mr-2 flex items-center -space-x-2">
-              {request.hostImages.map((imageUrl) => (
-                <Image
-                  unoptimized
-                  key={imageUrl}
-                  src={imageUrl}
-                  alt=""
-                  width={22}
-                  height={22}
-                  className="inline-block rounded-full"
-                />
-              ))}
-            </div>
-          )}
-        </Badge>
+        <Badge variant="green">{plural(request.numOffers, "offer")}</Badge>
       );
     case "rejected":
       return <Badge variant="red">Rejected</Badge>;

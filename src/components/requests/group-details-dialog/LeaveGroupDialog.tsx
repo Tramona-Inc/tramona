@@ -20,16 +20,12 @@ export function LeaveGroupDialog({
   userIsOwner,
 }: React.PropsWithChildren<{ groupId: number; userIsOwner: boolean }>) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const utils = api.useUtils();
-  const { mutateAsync } = api.groups.leaveGroup.useMutation();
+  const mutation = api.groups.leaveGroup.useMutation();
 
   async function leaveGroup() {
-    setLoading(true);
-
-    await mutateAsync(groupId)
-      .then(() => utils.invalidate())
+    await mutation
+      .mutateAsync(groupId)
       .then(() =>
         toast({
           title: "Left group successfully",
@@ -37,8 +33,6 @@ export function LeaveGroupDialog({
         }),
       )
       .catch(() => errorToast());
-
-    setLoading(false);
   }
 
   return (
@@ -57,7 +51,7 @@ export function LeaveGroupDialog({
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button onClick={() => leaveGroup()} disabled={loading}>
+          <Button onClick={() => leaveGroup()} disabled={mutation.isLoading}>
             Leave group
           </Button>
         </DialogFooter>
