@@ -88,35 +88,30 @@ export default function HomeOfferCard() {
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-center">
-        <Carousel className="relative w-full" setApi={setApi}>
-          <CarouselContent>
-            {photos.map((photo, index) => (
-              <CarouselItem key={index}>
-                <CardContent>
-                  <Image
-                    src={photo}
-                    height={300}
-                    width={300}
-                    alt=""
-                    objectFit="cover"
-                    className="aspect-square w-full rounded-md object-cover"
-                  />
-                </CardContent>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious
-            className="absolute left-10 top-1/2"
-            variant={"white"}
-          />
-          <CarouselNext
-            className="absolute right-10 top-1/2"
-            variant={"white"}
-          />
-          <CarouselDots count={count} current={current} />
-        </Carousel>
-      </div>
+      <Carousel setApi={setApi}>
+        <CarouselContent>
+          {photos.map((photo, index) => (
+            <CarouselItem key={index}>
+              <CardContent>
+                <Image
+                  src={photo}
+                  height={300}
+                  width={300}
+                  alt=""
+                  objectFit="cover"
+                  className="aspect-square w-full rounded-xl object-cover"
+                />
+              </CardContent>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious
+          className="absolute left-10 top-1/2"
+          variant={"white"}
+        />
+        <CarouselNext className="absolute right-10 top-1/2" variant={"white"} />
+        <CarouselDots count={count} current={current} />
+      </Carousel>
       <div className="flex justify-between">
         <p className="font-semibold">Milan, Italy</p>
         <p>Price on Airbnb: $$$</p>
