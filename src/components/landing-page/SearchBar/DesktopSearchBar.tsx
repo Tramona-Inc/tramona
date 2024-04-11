@@ -131,8 +131,8 @@ export default function DesktopSearchBar({
             numGuests: request.numGuests,
           });
 
-        const requestedPrice = request.maxNightlyPriceUSD;
-        const priceDifference = averageNightlyPrice - requestedPrice;
+        const requestedPrice: number = request.maxNightlyPriceUSD;
+        const priceDifference: number = averageNightlyPrice - requestedPrice;
         const priceDiffPercent = (priceDifference / averageNightlyPrice) * 100;
 
         if (request.maxNightlyPriceUSD < averageNightlyPrice) {
