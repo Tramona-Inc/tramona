@@ -12,11 +12,7 @@ export default function TravelerPage() {
       </Head>
       <div className="bg-white">
         <SimpleMastHead />
-        {/* <HowItWorks />
-          <SocialFeed />
-          <ReferAndEarn />
-          <ForHosts />
-          <HelpEndThis /> */}
+        
       </div>
     </div>
   );
