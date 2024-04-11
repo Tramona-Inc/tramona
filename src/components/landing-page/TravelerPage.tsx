@@ -7,11 +7,11 @@ export default function TravelerPage() {
   useMaybeSendUnsentRequests();
 
   return (
-    <div className="container relative overflow-x-hidden">
+    <div className="container relative mb-20 mt-10 overflow-x-hidden">
       <Head>
         <title>Tramona</title>
       </Head>
-      <div className="bg-white">
+      <div className="flex flex-col space-y-20 bg-white">
         <SimpleMastHead />
         <Listings />
       </div>

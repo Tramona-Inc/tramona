@@ -1,4 +1,12 @@
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormLabel } from "@/components/ui/form";
 import {
   Select,
@@ -31,14 +39,6 @@ import LPDateRangePicker, {
   LPLocationInput,
   classNames,
 } from "./components";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   data: z
@@ -365,8 +365,8 @@ export default function DesktopSearchBar({
               checkPriceEstimation(data.data),
             )}
             size="lg"
-            variant="white"
-            className="rounded-full"
+            variant="outlineLight"
+            className="rounded-full font-semibold mt-5"
           >
             Request Deal
           </Button>
