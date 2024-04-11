@@ -42,7 +42,7 @@ export const ALL_PROPERTY_ROOM_TYPES = [
   "Entire place",
   "Shared room",
   "Private room",
-  "Other"
+  "Other",
 ] as const;
 
 export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);

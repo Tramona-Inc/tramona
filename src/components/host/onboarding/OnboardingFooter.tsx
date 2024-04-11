@@ -21,9 +21,9 @@ export const hostPropertyOnboardingSchema = z.object({
 
   address: z.string().max(1000),
 
-  checkInInfo: z.string().optional(),
-  checkInTime: z.string().optional(),
-  checkOutTime: z.string().optional(),
+  checkInInfo: z.string(),
+  checkInTime: z.string(),
+  checkOutTime: z.string(),
 
   amenities: z.string().array(),
 
