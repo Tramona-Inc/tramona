@@ -212,7 +212,7 @@ export default function AdminOfferForm({
     const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
 
     if (traveler?.phoneNumber) {
-      if (!traveler.isWhatsApp) {
+      if (traveler.isWhatsApp) {
         await twilioWhatsAppMutation.mutateAsync({
           templateId: "HXfeb90955f0801d551e95a6170a5cc015",
           to: traveler.phoneNumber,
