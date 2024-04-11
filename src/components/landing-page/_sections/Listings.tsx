@@ -5,5 +5,5 @@ export default function Listings() {
     <HomeOfferCard key={index} />
   ));
 
-  return <div className="grid grid-cols-4 gap-5 gap-y-10">{cards}</div>;
+  return <div className="grid grid-cols-6 gap-10 gap-y-10">{cards}</div>;
 }
