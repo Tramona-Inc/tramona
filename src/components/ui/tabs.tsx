@@ -1,5 +1,5 @@
-import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * as React from "react";
 
 import { cn } from "@/utils/utils";
 
@@ -7,8 +7,10 @@ const Tabs = TabsPrimitive.Root;
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+    noBorder?: boolean; // New prop to remove the border
+  }
+>(({ className, children, noBorder, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn("flex overflow-x-auto", className)}
@@ -16,7 +18,7 @@ const TabsList = React.forwardRef<
   >
     <>
       {children}
-      <div className="flex-1 border-b-4" />
+      <div className={cn(!noBorder && "flex-1 border-b-4")} />
     </>
   </TabsPrimitive.List>
 ));
@@ -26,13 +28,18 @@ const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
     count?: number | "blank" | undefined;
+    noBorder?: boolean; // New prop to remove the border
   }
->(({ className, onClick, count, children, ...props }, ref) => {
+>(({ className, onClick, count, noBorder, children, ...props }, ref) => {
   return (
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        "group inline-flex items-center justify-center gap-2 whitespace-nowrap border-b-4 p-2 text-sm font-semibold text-muted-foreground hover:bg-muted focus-visible:bg-muted disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-primary data-[state=active]:text-primary sm:px-4 sm:py-3 sm:text-base",
+        "group inline-flex items-center justify-center gap-2 whitespace-nowrap p-2 text-sm font-semibold text-muted-foreground hover:bg-muted focus-visible:bg-muted disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-primary sm:px-4 sm:py-3 sm:text-base",
+        {
+          // Conditionally add or remove border
+          "border-b-4": !noBorder,
+        },
         className,
       )}
       onClick={(e) => {
@@ -70,4 +77,4 @@ const TabsContent = React.forwardRef<
 ));
 TabsContent.displayName = TabsPrimitive.Content.displayName;
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsContent, TabsList, TabsTrigger };
