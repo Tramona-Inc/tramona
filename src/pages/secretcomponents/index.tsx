@@ -178,13 +178,13 @@ function Page() {
                   control={form.control}
                   name="dob"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem>
                       <FormLabel>Date of birth</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant={"outline"}
+                              variant="emptyInput"
                               className={cn(
                                 "w-[240px] pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground",
@@ -426,20 +426,17 @@ function Page() {
             Click here for more details
           </a>
           <div className="w-20">
-            <Button variant="default">Button</Button>
-            <Button variant="secondary">Button</Button>
-            <Button variant="link">Button</Button>
-            <Button variant="destructive">Button</Button>
-            <Button variant="outline">Button</Button>
-            <Button variant="ghost">Button</Button>
-            <Button variant="emptyInput">Button</Button>
-            <Button variant="filledInput">Button</Button>
-            <Button variant="darkPrimary">Button</Button>
-            <Button variant="darkOutline">Button</Button>
-            <Button variant="darkOutlineWhite">Button</Button>
-            <Button variant="gold">Button</Button>
-            <Button variant="white">Button</Button>
-            <Button variant="wrapper">Button</Button>
+            <Button variant="default">Default</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="link">Link</Button>
+            <Button variant="destructive">Destructive</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="emptyInput">Empty Input</Button>
+            <Button variant="filledInput">Filled Input</Button>
+            <Button variant="darkOutlineWhite">Dark Outline White</Button>
+            <Button variant="gold">Gold</Button>
+            <Button variant="white">White</Button>
           </div>
         </div>
         <div className="flex w-full flex-col gap-y-2 ">
@@ -475,7 +472,7 @@ function Page() {
         </div>
       </div>
       <hr />
-      <div className="my-16 flex flex-row gap-x-10">
+      <div className="grid grid-cols-4 py-10">
         <div className="flex w-full flex-col gap-y-2 ">
           <h1 className="font-2xl font-black">Combobox</h1>
           <a
@@ -488,7 +485,7 @@ function Page() {
             <ComboBox />
           </div>
         </div>
-        <div className="flex w-full flex-col gap-y-2 ">
+        <div className="flex w-full flex-col gap-y-2">
           <h1 className="font-2xl font-black">Combobox DropDown</h1>
           <a
             href="https://ui.shadcn.com/docs/components/combobox"
