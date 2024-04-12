@@ -9,18 +9,17 @@ import {
   Fence,
   Handshake,
   HistoryIcon,
-  HomeIcon,
   InboxIcon,
   LayoutDashboardIcon,
   MessageCircleIcon,
-  TagIcon,
-  WrenchIcon,
+  WrenchIcon
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
-import { Badge } from "../ui/badge";
+import { Icons } from "../_icons/icons";
 import SuitcaseIcon from "../_icons/SuitcaseIcon";
+import { Badge } from "../ui/badge";
 
 function SidebarLink({
   href,
@@ -91,10 +90,10 @@ const hostNavLinks = [
 ];
 
 const guestNavLinks = [
-  { href: "/dashboard", name: "Home", icon: HomeIcon },
-  { href: "/requests", name: "Requests & Offers", icon: TagIcon },
-  { href: "/my-trips", name: "My Trips", icon: SuitcaseIcon },
+  { href: "/", name: "Explore", icon: <Icons.search /> },
+  { href: "/requests", name: "Requests", icon: <Icons.request /> },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/my-trips", name: "My Trips", icon: SuitcaseIcon },
 ];
 
 export default function Sidebar({
