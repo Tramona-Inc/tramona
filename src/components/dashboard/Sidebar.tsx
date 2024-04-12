@@ -5,6 +5,8 @@ import { cn, plural } from "@/utils/utils";
 import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
+  BadgePercent,
+  Briefcase,
   DollarSign,
   Fence,
   Handshake,
@@ -12,13 +14,13 @@ import {
   InboxIcon,
   LayoutDashboardIcon,
   MessageCircleIcon,
-  WrenchIcon
+  MessageSquareMore,
+  Search,
+  WrenchIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
-import { Icons } from "../_icons/icons";
-import SuitcaseIcon from "../_icons/SuitcaseIcon";
 import { Badge } from "../ui/badge";
 
 function SidebarLink({
@@ -90,10 +92,10 @@ const hostNavLinks = [
 ];
 
 const guestNavLinks = [
-  { href: "/", name: "Explore", icon: <Icons.search /> },
-  { href: "/requests", name: "Requests", icon: <Icons.request /> },
-  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/my-trips", name: "My Trips", icon: SuitcaseIcon },
+  { href: "/", name: "Explore", icon: Search },
+  { href: "/requests", name: "Requests", icon: BadgePercent },
+  { href: "/messages", name: "Messages", icon: MessageSquareMore },
+  { href: "/my-trips", name: "My Trips", icon: Briefcase },
 ];
 
 export default function Sidebar({
