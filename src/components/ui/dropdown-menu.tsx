@@ -87,7 +87,7 @@ const DropdownMenuItem = React.forwardRef<
     className={cn(itemClassNames({ red: !!red }), className)}
     {...props}
   >
-    <>{children}</>
+    {children}
   </DropdownMenuPrimitive.Item>
 ));
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
