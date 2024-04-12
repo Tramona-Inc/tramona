@@ -2,7 +2,7 @@ import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import Head from "next/head";
 import Listings from "./_sections/Listings";
 import SimpleMastHead from "./_sections/SimpleMastHead";
-import CitiesFilter from './CitiesFilter';
+import CitiesFilter from "./CitiesFilter";
 
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
@@ -12,7 +12,7 @@ export default function TravelerPage() {
       <Head>
         <title>Tramona</title>
       </Head>
-      <div className="flex flex-col space-y-20 bg-white">
+      <div className="flex flex-col space-y-5 bg-white">
         <SimpleMastHead />
         <CitiesFilter />
         <Listings />

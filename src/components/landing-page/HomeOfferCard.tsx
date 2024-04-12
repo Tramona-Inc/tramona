@@ -116,7 +116,7 @@ export default function HomeOfferCard() {
         <p className="font-semibold">Milan, Italy</p>
         <p>Price on Airbnb: $$$</p>
       </div>
-      <p>4 guests, 2 bedrooms, 2 beds, 2 baths</p>
+      <p className="text-xs">4 guests, 2 bedrooms, 2 beds, 2 baths</p>
       <Form {...form}>
         <DateRangePicker
           control={form.control}
