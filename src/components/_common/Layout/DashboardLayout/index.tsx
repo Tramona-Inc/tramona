@@ -1,7 +1,7 @@
+import MobileNav from "@/components/dashboard/MobileNav";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "../../Header";
 import Footer from "../Footer";
-import MobileNav from '@/components/dashboard/MobileNav';
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -21,7 +21,7 @@ export default function DashboadLayout({
         </aside>
         <main className="flex-1">{children}</main>
       </div>
-      <MobileNav />
+      <MobileNav type={type} />
       <Footer />
     </>
   );
