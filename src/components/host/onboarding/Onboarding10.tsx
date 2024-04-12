@@ -2,6 +2,8 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { Dot, MapPin } from "lucide-react";
 import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
+import {api} from '@/utils/api'
+import LeafletMap from "./LeafletMap";
 
 function Heading({
   title,
@@ -40,6 +42,14 @@ function Heading({
 
 export default function Onboarding10() {
   const { listing } = useHostOnboarding((state) => state);
+  const address = `${listing.location.street}${listing.location.apt ? `, ${listing.location.apt}` : ""}, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${listing.location.country}`;
+
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: address,
+  });
+  console.log(address)
+  console.log("this is ")
+ // console.log(coordinateData.coordinates.lat, coordinateData.coordinates.lng)
 
   return (
     <>
@@ -64,6 +74,7 @@ export default function Onboarding10() {
           <Heading title={"Location"} editPage={3}>
             <div className="flex flex-row gap-5">
               <MapPin />
+            
               <div>
                 <p> {listing.location.street}</p>
                 {listing.location.apt && <p>{listing.location.apt}</p>}
@@ -74,6 +85,9 @@ export default function Onboarding10() {
                 <p>{listing.location.country}</p>
               </div>
             </div>
+              {coordinateData &&
+              (<LeafletMap lat={coordinateData.coordinates.lat} lng={coordinateData.coordinates.lng}/>)
+              }
           </Heading>
           <Heading title={"Check-in"} editPage={4}>
             <p>{listing.checkInType}</p>

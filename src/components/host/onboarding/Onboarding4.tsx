@@ -12,6 +12,8 @@ import {
 } from "@/utils/store/host-onboarding";
 import { useState } from "react";
 import OnboardingFooter from "./OnboardingFooter";
+import { api } from "@/utils/api";
+import LeafletMap from "./LeafletMap";
 
 export default function Onboarding4() {
   const [location, setLocation] = useState({
@@ -22,6 +24,18 @@ export default function Onboarding4() {
     state: "",
     zipcode: "",
   });
+
+  const isLocationFilled = () => {
+    const { country, street, apt, city, state, zipcode } = location;
+    return (
+      country !== "" &&
+      street !== "" &&
+      city !== "" &&
+      state !== "" &&
+      zipcode !== "" &&
+      zipcode.length >= 4
+    );
+  };
 
   const updateLocation = (
     field: string,
@@ -37,6 +51,11 @@ export default function Onboarding4() {
 
   const propertyLocation = useHostOnboarding((state) => state.listing.location);
   const setLocationInStore = useHostOnboarding((state) => state.setLocation);
+  const address = `${location.street}${location.apt ? `, ${location.apt}` : ""}, ${location.city}, ${location.state} ${location.zipcode}, ${location.country}`;
+
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: address,
+  });
 
   return (
     <>
@@ -102,6 +121,12 @@ export default function Onboarding4() {
               }
             />
           </div>
+          {isLocationFilled() && coordinateData && (
+            <LeafletMap
+              lat={coordinateData.coordinates.lat}
+              lng={coordinateData.coordinates.lng}
+            />
+          )}
         </div>
       </div>
       <OnboardingFooter isForm={false} />
