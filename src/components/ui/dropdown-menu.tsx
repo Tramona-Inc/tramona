@@ -34,16 +34,13 @@ const contentClassNames = cn(
 
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
-    icon: React.ReactNode;
-  }
->(({ className, icon, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger>
+>(({ className, children, ...props }, ref) => (
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(subTriggerClassNames({ red: false }), className)}
     {...props}
   >
-    {icon}
     {children}
     <ChevronRight className="ml-auto h-4 w-4" />
   </DropdownMenuPrimitive.SubTrigger>
@@ -83,18 +80,14 @@ const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     red?: boolean;
-    icon: React.ReactNode;
   }
->(({ className, children, icon, red, ...props }, ref) => (
+>(({ className, children, red, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(itemClassNames({ red: !!red }), className)}
     {...props}
   >
-    <>
-      {icon}
-      {children}
-    </>
+    <>{children}</>
   </DropdownMenuPrimitive.Item>
 ));
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;

@@ -63,15 +63,18 @@ export function ComboboxDropdownMenu() {
         <DropdownMenuContent align="end" className="w-[200px]">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuItem icon={<UserIcon className="h-4 w-4" />}>
+            <DropdownMenuItem>
+              <UserIcon className="h-4 w-4" />
               Assign to...
             </DropdownMenuItem>
-            <DropdownMenuItem icon={<CalendarIcon className="h-4 w-4" />}>
+            <DropdownMenuItem>
+              <CalendarIcon className="h-4 w-4" />
               Set due date...
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger icon={<TagIcon className="h-4 w-4" />}>
+              <DropdownMenuSubTrigger>
+                <TagIcon className="h-4 w-4" />
                 Apply label
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="p-0">
@@ -101,7 +104,8 @@ export function ComboboxDropdownMenu() {
               </DropdownMenuSubContent>
             </DropdownMenuSub>
             <DropdownMenuSeparator />
-            <DropdownMenuItem red icon={<TrashIcon className="h-4 w-4" />}>
+            <DropdownMenuItem red>
+              <TrashIcon className="h-4 w-4" />
               Delete
               <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
             </DropdownMenuItem>
