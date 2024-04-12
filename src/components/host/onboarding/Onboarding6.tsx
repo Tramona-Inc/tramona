@@ -2,10 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { errorToast } from "@/utils/toasts";
 import { Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from './SaveAndExit';
 
 const kitchenItems = [
   {
@@ -158,19 +158,24 @@ export default function Onboarding6() {
   const setOtherAmenity = useHostOnboarding((state) => state.setOtherAmenity);
 
   const [otherValue, setOtherValue] = useState("");
+  const [error, setError] = useState(false);
 
   function handleAddOther() {
     if (!otherAmenities.includes(otherValue.toLocaleLowerCase())) {
-      setOtherAmenity(otherValue.toLocaleLowerCase());
-      setOtherValue("");
+      if (otherValue !== "") {
+        setOtherAmenity(otherValue.toLocaleLowerCase());
+        setOtherValue("");
+        setError(false);
+      }
     } else {
-      errorToast("Duplicate amenities");
+      setError(true);
       setOtherValue("");
     }
   }
 
   return (
     <>
+      <SaveAndExit />
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="my-20 flex flex-col gap-10">
           <h1 className="text-4xl font-bold">What amenities do you offer?</h1>
@@ -279,6 +284,9 @@ export default function Onboarding6() {
               >
                 <Plus />
               </Button>
+            </div>
+            <div>
+              {error && <p className="text-red-500">Please no duplicate values</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-5 md:grid-cols-3">

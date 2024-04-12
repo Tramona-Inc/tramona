@@ -9,6 +9,7 @@ import {
 } from "@/utils/store/host-onboarding";
 import { Minus, Plus } from "lucide-react";
 import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from "./SaveAndExit";
 
 const options = [
   {
@@ -90,6 +91,7 @@ export default function Onboarding3() {
 
   return (
     <>
+      <SaveAndExit />
       <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-5">
           <h1 className="text-4xl font-bold">What is the living situation?</h1>
@@ -138,7 +140,7 @@ export default function Onboarding3() {
           </div>
         </div>
       </div>
-      <OnboardingFooter isForm={false} />
+      <OnboardingFooter isFormValid={spaceType !== "Other"} isForm={true} />
     </>
   );
 }

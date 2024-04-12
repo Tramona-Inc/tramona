@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "@/components/ui/use-toast";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   ALL_PROPERTY_TYPES,
 } from "@/server/db/schema";
-import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { api } from "@/utils/api";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { useRouter } from "next/router";
 import { z } from "zod";
 
 export const hostPropertyOnboardingSchema = z.object({
@@ -20,11 +21,11 @@ export const hostPropertyOnboardingSchema = z.object({
 
   address: z.string().max(1000),
 
-  checkInInfo: z.string().optional(),
-  checkInTime: z.string().optional(),
-  checkOutTime: z.string().optional(),
+  checkInInfo: z.string(),
+  checkInTime: z.string(),
+  checkOutTime: z.string(),
 
-  amenities: z.array(z.enum(ALL_PROPERTY_AMENITIES)),
+  amenities: z.string().array(),
 
   otherAmenities: z.string().array(),
 
@@ -52,14 +53,25 @@ export default function OnboardingFooter({
   const max_pages = 10;
 
   const progress = useHostOnboarding((state) => state.progress);
+  const resetSession = useHostOnboarding((state) => state.resetSession);
   const setProgress = useHostOnboarding((state) => state.setProgress);
   const { listing } = useHostOnboarding((state) => state);
 
-  const { mutate } = api.properties.hostInsertOnboardingProperty.useMutation();
+  const router = useRouter();
+
+  const { mutate } = api.properties.hostInsertOnboardingProperty.useMutation({
+    onSuccess: () => {
+      resetSession();
+      toast({
+        title: "First property listed!",
+        description: "Your first property successfully listed",
+      });
+      void router.push("/host/properties");
+    },
+  });
 
   function onPressNext() {
     if (progress === 9) {
-      console.log("HIT");
       mutate({
         propertyType: listing.propertyType,
         roomType: listing.spaceType,
@@ -83,7 +95,7 @@ export default function OnboardingFooter({
         about: listing.description,
         petsAllowed: listing.petsAllowed,
         smokingAllowed: listing.smokingAllowed,
-        otherHouseRules: listing.otherHouseRules,
+        otherHouseRules: listing.otherHouseRules ?? undefined,
       });
     } else {
       if (isFormValid) {

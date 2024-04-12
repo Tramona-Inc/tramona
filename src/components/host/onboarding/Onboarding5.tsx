@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from "./SaveAndExit";
 
 const formSchema = z.object({
   checkIn: zodString({ maxLen: 100 }),
@@ -53,13 +54,13 @@ export default function Onboarding4() {
   });
 
   async function handleFormSubmit(values: FormSchema) {
-    console.log(values);
     setCheckIn(values.checkIn);
     setCheckOut(values.checkOut);
   }
 
   return (
     <>
+      <SaveAndExit />
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-10">
           <h1 className="text-4xl font-bold">
@@ -119,48 +120,49 @@ export default function Onboarding4() {
             </div>
           </div>
 
-<Form {...form}>
-  <div className="mt-5 w-full">
-    <h1 className="mb-2 text-xl font-bold">Hours</h1>
-    <div className="grid grid-cols-2 gap-5">
-      <FormField
-        control={form.control}
-        name="checkIn"
-        render={({ field }) => (
-          <FormItem>
-            <Input
-              {...field}
-              type="clock"
-              placeholder="Check in time"
-              className="p-5"
-            />
-            <FormMessage>
-              {form.formState.errors.checkIn?.message}
-            </FormMessage>
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="checkOut"
-        render={({ field }) => (
-          <FormItem>
-            <Input
-              {...field}
-              type="clock"
-              placeholder="Check out time"
-              className="p-5"
-            />
-            <FormMessage>
-              {form.formState.errors.checkOut?.message}
-            </FormMessage>
-          </FormItem>
-        )}
-      />
-    </div>
-  </div>
-</Form>
-
+          <Form {...form}>
+            <div className="mt-5 w-full">
+              <h1 className="mb-2 text-xl font-bold">Hours</h1>
+              <div className="grid grid-cols-2 gap-5">
+                <FormField
+                  control={form.control}
+                  name="checkIn"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label className="font-semibold ">Check in</Label>
+                      <Input
+                        {...field}
+                        type="time"
+                        placeholder="Check in time"
+                        className="p-5"
+                      />
+                      <FormMessage>
+                        {form.formState.errors.checkIn?.message}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="checkOut"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label className="font-semibold">Check in</Label>
+                      <Input
+                        {...field}
+                        type="time"
+                        placeholder="Check out time"
+                        className="p-5"
+                      />
+                      <FormMessage>
+                        {form.formState.errors.checkOut?.message}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </Form>
         </div>
       </div>
       <OnboardingFooter

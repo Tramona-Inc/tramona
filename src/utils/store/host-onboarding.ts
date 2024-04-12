@@ -4,6 +4,7 @@ import {
 } from "@/server/db/schema/tables/properties";
 
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
 export type SpaceType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
@@ -11,7 +12,7 @@ export type SpaceType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
 export type LocationType = {
   country: string;
   street: string;
-  apt: string | null;
+  apt: string | null | undefined;
   city: string;
   state: string;
   zipcode: string;
@@ -39,7 +40,7 @@ type HostOnboardingState = {
     description: string;
     petsAllowed: boolean;
     smokingAllowed: boolean;
-    otherHouseRules: string;
+    otherHouseRules: string | null | undefined;
   };
   setMaxGuests: (maxGuests: number) => void;
   setBedrooms: (bedrooms: number) => void;
@@ -62,231 +63,245 @@ type HostOnboardingState = {
   setPetsAllowed: (petsAllowed: boolean) => void;
   setSmokingAllowed: (smokingAllowed: boolean) => void;
   setOtherHouseRules: (otherHouseRules: string) => void;
+  resetSession: () => void;
 };
 
-export const useHostOnboarding = create<HostOnboardingState>((set) => ({
-  progress: 0,
-  listing: {
-    propertyType: "Other",
-    spaceType: "Entire place",
-    maxGuests: 1,
-    bedrooms: 1,
-    beds: 1,
-    bathrooms: 1,
-    location: {
-      country: "",
-      street: "",
-      apt: "",
-      city: "",
-      state: "",
-      zipcode: "",
+export const useHostOnboarding = create<HostOnboardingState>()(
+  persist(
+    (set) => ({
+      progress: 0,
+      listing: {
+        propertyType: "Other",
+        spaceType: "Other",
+        maxGuests: 1,
+        bedrooms: 1,
+        beds: 1,
+        bathrooms: 1,
+        location: {
+          country: "",
+          street: "",
+          apt: "",
+          city: "",
+          state: "",
+          zipcode: "",
+        },
+        checkInType: "self",
+        otherCheckInType: false,
+        checkIn: "",
+        checkOut: "",
+        amenities: [],
+        otherAmenities: [],
+        imageUrls: [],
+        title: "",
+        description: "",
+        petsAllowed: false,
+        smokingAllowed: false,
+        otherHouseRules: "",
+      },
+      setProgress: (progress: number) => {
+        set((state) => ({ ...state, progress }));
+      },
+      setMaxGuests: (maxGuests: number) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            maxGuests,
+          },
+        }));
+      },
+      setBedrooms: (bedrooms: number) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            bedrooms,
+          },
+        }));
+      },
+      setBeds: (beds: number) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            beds,
+          },
+        }));
+      },
+      setBathrooms: (bathrooms: number) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            bathrooms,
+          },
+        }));
+      },
+      setPropertyType: (propertyType: PropertyType) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            propertyType,
+          },
+        }));
+      },
+      setSpaceType: (spaceType: SpaceType) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            spaceType,
+          },
+        }));
+      },
+      setLocation: (location: LocationType) => {
+        // Define the setLocation setter
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            location,
+          },
+        }));
+      },
+      setCheckInType: (checkInType: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            checkInType,
+          },
+        }));
+      },
+      setOtherCheckInType: (otherCheckInType: boolean) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            otherCheckInType,
+          },
+        }));
+      },
+      setCheckIn: (checkIn: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            checkIn,
+          },
+        }));
+      },
+      setCheckOut: (checkOut: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            checkOut,
+          },
+        }));
+      },
+      setAmenity: (amenity: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            amenities: [...state.listing.amenities, amenity],
+          },
+        }));
+      },
+      removeAmenity: (amenity: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            amenities: state.listing.amenities.filter(
+              (item) => item !== amenity,
+            ),
+          },
+        }));
+      },
+      setOtherAmenity: (amenity: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            otherAmenities: [...state.listing.otherAmenities, amenity],
+          },
+        }));
+      },
+      removeOtherAmenity: (amenity: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            otherAmenities: state.listing.otherAmenities.filter(
+              (item) => item !== amenity,
+            ),
+          },
+        }));
+      },
+      setImageUrls: (imageUrls: string[]) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            imageUrls,
+          },
+        }));
+      },
+      setTitle: (title: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            title,
+          },
+        }));
+      },
+      setDescription: (description: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            description,
+          },
+        }));
+      },
+      setPetsAllowed: (petsAllowed: boolean) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            petsAllowed,
+          },
+        }));
+      },
+      setSmokingAllowed: (smokingAllowed: boolean) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            smokingAllowed,
+          },
+        }));
+      },
+      setOtherHouseRules: (otherHouseRules: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            otherHouseRules,
+          },
+        }));
+      },
+      resetSession: () => {
+        sessionStorage.removeItem("host-onboarding-state");
+      }
+    }),
+    {
+      name: "host-onboarding-state", // name of the item in the storage (must be unique)
+      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
     },
-    checkInType: "self",
-    otherCheckInType: false,
-    checkIn: "",
-    checkOut: "",
-    amenities: [],
-    otherAmenities: [],
-    imageUrls: [],
-    title: "",
-    description: "",
-    petsAllowed: false,
-    smokingAllowed: false,
-    otherHouseRules: "",
-  },
-  setProgress: (progress: number) => {
-    set((state) => ({ ...state, progress }));
-  },
-  setMaxGuests: (maxGuests: number) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        maxGuests,
-      },
-    }));
-  },
-  setBedrooms: (bedrooms: number) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        bedrooms,
-      },
-    }));
-  },
-  setBeds: (beds: number) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        beds,
-      },
-    }));
-  },
-  setBathrooms: (bathrooms: number) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        bathrooms,
-      },
-    }));
-  },
-  setPropertyType: (propertyType: PropertyType) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        propertyType,
-      },
-    }));
-  },
-  setSpaceType: (spaceType: SpaceType) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        spaceType,
-      },
-    }));
-  },
-  setLocation: (location: LocationType) => {
-    // Define the setLocation setter
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        location,
-      },
-    }));
-  },
-  setCheckInType: (checkInType: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        checkInType,
-      },
-    }));
-  },
-  setOtherCheckInType: (otherCheckInType: boolean) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        otherCheckInType,
-      },
-    }));
-  },
-  setCheckIn: (checkIn: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        checkIn,
-      },
-    }));
-  },
-  setCheckOut: (checkOut: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        checkOut,
-      },
-    }));
-  },
-  setAmenity: (amenity: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        amenities: [...state.listing.amenities, amenity],
-      },
-    }));
-  },
-  removeAmenity: (amenity: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        amenities: state.listing.amenities.filter((item) => item !== amenity),
-      },
-    }));
-  },
-  setOtherAmenity: (amenity: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        otherAmenities: [...state.listing.otherAmenities, amenity],
-      },
-    }));
-  },
-  removeOtherAmenity: (amenity: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        otherAmenities: state.listing.otherAmenities.filter(
-          (item) => item !== amenity,
-        ),
-      },
-    }));
-  },
-  setImageUrls: (imageUrls: string[]) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        imageUrls,
-      },
-    }));
-  },
-  setTitle: (title: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        title,
-      },
-    }));
-  },
-  setDescription: (description: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        description,
-      },
-    }));
-  },
-  setPetsAllowed: (petsAllowed: boolean) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        petsAllowed,
-      },
-    }));
-  },
-  setSmokingAllowed: (smokingAllowed: boolean) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        smokingAllowed,
-      },
-    }));
-  },
-  setOtherHouseRules: (otherHouseRules: string) => {
-    set((state) => ({
-      ...state,
-      listing: {
-        ...state.listing,
-        otherHouseRules,
-      },
-    }));
-  },
-}));
+  ),
+);

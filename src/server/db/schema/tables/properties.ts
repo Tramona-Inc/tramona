@@ -36,13 +36,13 @@ export const ALL_PROPERTY_TYPES = [
   "Home",
   "Hotels",
   "Alternative",
-  "",
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES = [
   "Entire place",
   "Shared room",
   "Private room",
+  "Other",
 ] as const;
 
 export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
@@ -137,7 +137,8 @@ export const properties = pgTable("properties", {
   checkInTime: time("check_in_time"),
   checkOutTime: time("check_out_time"),
 
-  amenities: propertyAmenitiesEnum("amenities").array().notNull(),
+  // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
+  amenities: varchar("amenities").array(),
 
   otherAmenities: varchar("other_amenities").array(),
 

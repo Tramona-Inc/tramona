@@ -48,6 +48,7 @@ export default function Onboarding1() {
           </div>
         </div>
       </div>
+
       <OnboardingFooter isForm={false} />
     </>
   );

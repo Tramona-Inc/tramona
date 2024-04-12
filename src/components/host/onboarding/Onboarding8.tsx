@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from './SaveAndExit';
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -46,6 +47,7 @@ export default function Onboarding8() {
 
   return (
     <>
+      <SaveAndExit />
       <div className="container my-10 flex flex-grow flex-col justify-center">
         <h1 className="mb-8 text-3xl font-bold">Describe your listing</h1>
         <Form {...form}>

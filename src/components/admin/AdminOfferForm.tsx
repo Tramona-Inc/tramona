@@ -20,6 +20,7 @@ import {
   zodUrl,
 } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,11 +36,11 @@ import {
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 
-import { getNumNights } from "@/utils/utils";
-import ErrorMsg from "../ui/ErrorMsg";
-import axios from "axios";
-import { getS3ImgUrl } from "@/utils/formatters";
 import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
+import { getS3ImgUrl } from "@/utils/formatters";
+import { getNumNights } from "@/utils/utils";
+import axios from "axios";
+import ErrorMsg from "../ui/ErrorMsg";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -55,7 +56,7 @@ const formSchema = z.object({
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
-  amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
+  amenities: z.string().array(),
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
@@ -163,10 +164,11 @@ export default function AdminOfferForm({
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
-      type: propertyData.propertyType,
+      propertyType: propertyData.propertyType,
       originalNightlyPrice: Math.round(
         propertyData.originalNightlyPriceUSD * 100,
       ),
+      numBathrooms: "1",
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
       mapScreenshot: url,
@@ -185,6 +187,7 @@ export default function AdminOfferForm({
       await Promise.all([
         updatePropertiesMutation.mutateAsync({
           ...newProperty,
+          propertyType: "Other",
           id: offer.property.id,
         }),
         updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),

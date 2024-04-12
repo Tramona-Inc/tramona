@@ -10,16 +10,16 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from './SaveAndExit';
 
 const formSchema = z.object({
   pets: z.string(),
   smoking: z.string(),
-  additionalComments: zodString().optional(),
+  additionalComments: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -46,12 +46,11 @@ export default function Onboarding9() {
     defaultValues: {
       pets: petsAllowed ? "true" : "false",
       smoking: smokingAllowed ? "true" : "false",
-      additionalComments: otherHouseRules,
+      additionalComments: otherHouseRules ?? undefined,
     },
   });
 
   async function handleFormSubmit(values: FormSchema) {
-    console.log(values);
     setPetsAllowed(values.pets === "true" ? true : false);
     setSmokingAllowed(values.smoking === "true" ? true : false);
     setOtherHouseRules(values.additionalComments ?? "");
@@ -59,6 +58,7 @@ export default function Onboarding9() {
 
   return (
     <>
+      <SaveAndExit />
       <div className="container my-10 flex flex-grow flex-col justify-center">
         <h1 className="mb-8 text-3xl font-bold">Any house rules?</h1>
         <Form {...form}>
