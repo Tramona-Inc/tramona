@@ -418,7 +418,7 @@ function Page() {
 
         <div className="flex w-full flex-col gap-y-2 ">
           <h1 className="font-2xl font-black">Button</h1>
-          <p>This one has variations!</p>
+          <p>This one has variations too!</p>
           <a
             href="https://ui.shadcn.com/docs/components/button"
             className="text-blue-700"
@@ -426,20 +426,20 @@ function Page() {
             Click here for more details
           </a>
           <div className="w-20">
-            <Button variant="default">Badge</Button>
-            <Button variant="secondary">Badge</Button>
-            <Button variant="link">Badge</Button>
-            <Button variant="destructive">Badge</Button>
-            <Button variant="outline">Badge</Button>
-            <Button variant="ghost">Badge</Button>
-            <Button variant="emptyInput">Badge</Button>
-            <Button variant="filledInput">Badge</Button>
-            <Button variant="darkPrimary">Badge</Button>
-            <Button variant="darkOutline">Badge</Button>
-            <Button variant="darkOutlineWhite">Badge</Button>
-            <Button variant="gold">Badge</Button>
-            <Button variant="white">Badge</Button>
-            <Button variant="wrapper">Badge</Button>
+            <Button variant="default">Button</Button>
+            <Button variant="secondary">Button</Button>
+            <Button variant="link">Button</Button>
+            <Button variant="destructive">Button</Button>
+            <Button variant="outline">Button</Button>
+            <Button variant="ghost">Button</Button>
+            <Button variant="emptyInput">Button</Button>
+            <Button variant="filledInput">Button</Button>
+            <Button variant="darkPrimary">Button</Button>
+            <Button variant="darkOutline">Button</Button>
+            <Button variant="darkOutlineWhite">Button</Button>
+            <Button variant="gold">Button</Button>
+            <Button variant="white">Button</Button>
+            <Button variant="wrapper">Button</Button>
           </div>
         </div>
         <div className="flex w-full flex-col gap-y-2 ">
