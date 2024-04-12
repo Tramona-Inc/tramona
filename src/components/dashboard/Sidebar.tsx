@@ -146,7 +146,7 @@ export default function Sidebar({
   }, [totalUnreadMessages, notifyMe]);
 
   return (
-    <div className="sticky top-0 flex h-full w-64 flex-col border-r lg:w-24">
+    <div className="sticky top-0 flex h-full w-64 flex-col lg:w-24">
       {withLogo && (
         <div className="p-3">
           <TramonaLogo />
