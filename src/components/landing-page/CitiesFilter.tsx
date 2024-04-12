@@ -1,7 +1,6 @@
 import { LucideChevronRightCircle, LucideListFilter } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "../ui/button";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 const cities: string[] = [
   "Los Angeles (LA)",
@@ -50,35 +49,33 @@ const cities: string[] = [
 ];
 
 export default function CitiesFilter() {
-  // TODO: get button to scroll
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollRight = () => {
     if (scrollContainerRef.current) {
-      // Scroll by a specific amount to the right
-      scrollContainerRef.current.scrollLeft += 2; // Adjust as needed
+      scrollContainerRef.current.scrollLeft += 100;
     }
   };
 
   return (
     <div className="flex flex-row items-center gap-5">
-      <ScrollArea
+      {/* <ScrollArea
         ref={scrollContainerRef}
-        className="w-full overflow-hidden whitespace-nowrap rounded-md"
+        className="whitespace-nowrap rounded-md px-10"
       >
-        <div className="flex w-max space-x-4 p-4">
+        <div className="flex space-x-4 p-4">
           {cities.map((city, index) => {
             return <div key={index}>{city}</div>;
           })}
         </div>
         <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </ScrollArea> */}
 
       <Button
         variant={"ghost"}
         size={"sm"}
+        onClick={scrollRight}
         className="text-muted-foreground transition-all duration-300 hover:text-primary"
-        onClick={scrollRight} // Call scrollRight function on button click
       >
         <LucideChevronRightCircle strokeWidth={1} size={30} />
       </Button>
