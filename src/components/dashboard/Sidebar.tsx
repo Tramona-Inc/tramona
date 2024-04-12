@@ -63,7 +63,7 @@ function SidebarLink({
   );
 }
 
-const adminNavLinks = [
+export const adminNavLinks = [
   { href: "/admin", name: "Dashboard", icon: LayoutDashboardIcon },
   {
     href: "/admin/incoming-requests",
@@ -76,7 +76,7 @@ const adminNavLinks = [
   { href: "/dashboard", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
-const hostNavLinks = [
+export const hostNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
   {
     href: "/host/incoming-request",
@@ -88,7 +88,7 @@ const hostNavLinks = [
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
-const guestNavLinks = [
+export const guestNavLinks = [
   { href: "/", name: "Explore", icon: Search },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/messages", name: "Messages", icon: MessageSquareMore },

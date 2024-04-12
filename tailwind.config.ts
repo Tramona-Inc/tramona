@@ -23,6 +23,7 @@ module.exports = {
       spacing: {
         "screen-minus-header": "var(--screen-minus-header)",
         "header-height": "var(--header-height)",
+        "mobile-header-height": "var(--mobile-header-height)",
       },
       colors: {
         gold: "#FACF26",
