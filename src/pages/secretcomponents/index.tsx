@@ -1,4 +1,3 @@
-import React from "react";
 import { RadioGroupDemo } from "@/components/_common/ComponentDemos/RadioGroup";
 import { ScrollAreaDemo } from "@/components/_common/ComponentDemos/ScrollAreaDemo";
 import { SliderDemo } from "@/components/_common/ComponentDemos/SliderDemo";
@@ -55,15 +54,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { NotificationsCard } from "@/components/_common/ComponentDemos/NotificationsCard";
 import { ComboBox } from "@/components/_common/ComponentDemos/ComboBox";
 import { ComboboxDropdownMenu } from "@/components/_common/ComponentDemos/ComboboxDropdownMenu";
@@ -72,12 +62,10 @@ import { DialogDemo } from "@/components/_common/ComponentDemos/DialogDemo";
 import { HoverCardDemo } from "@/components/_common/ComponentDemos/HoverCardDemo";
 import { NavigationMenuDemo } from "@/components/_common/ComponentDemos/NavigationMenuDemo";
 import { ProgressDemo } from "@/components/_common/ComponentDemos/ProgressDemo";
-import { Slider } from "@radix-ui/react-slider";
 import { SwitchDemo } from "@/components/_common/ComponentDemos/SwitchDemo";
 import { TableDemo } from "@/components/_common/ComponentDemos/TableDemo";
 import { TabsDemo } from "@/components/_common/ComponentDemos/TabsDemo";
 import { ToggleGroupDemo } from "@/components/_common/ComponentDemos/ToggleGroupDemo";
-import { Tooltip } from "react-leaflet";
 import { TooltipDemo } from "@/components/_common/ComponentDemos/TooltipDemo";
 
 const FormSchema = z.object({
@@ -259,7 +247,8 @@ function Page() {
               </p>
             </CardContent>
             <CardFooter>
-              <p>Card Footer</p>
+              <Button variant="outline">Cancel</Button>
+              <Button>Done</Button>
             </CardFooter>
           </Card>
         </div>
