@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Calendar, MoreHorizontal, Tags, Trash, User } from "lucide-react";
+import {
+  CalendarIcon,
+  MoreHorizontal,
+  TagIcon,
+  TrashIcon,
+  UserIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -57,18 +63,15 @@ export function ComboboxDropdownMenu() {
         <DropdownMenuContent align="end" className="w-[200px]">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
+            <DropdownMenuItem icon={<UserIcon className="h-4 w-4" />}>
               Assign to...
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Calendar className="mr-2 h-4 w-4" />
+            <DropdownMenuItem icon={<CalendarIcon className="h-4 w-4" />}>
               Set due date...
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Tags className="mr-2 h-4 w-4" />
+              <DropdownMenuSubTrigger icon={<TagIcon className="h-4 w-4" />}>
                 Apply label
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="p-0">
@@ -98,8 +101,7 @@ export function ComboboxDropdownMenu() {
               </DropdownMenuSubContent>
             </DropdownMenuSub>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600">
-              <Trash className="mr-2 h-4 w-4" />
+            <DropdownMenuItem red icon={<TrashIcon className="h-4 w-4" />}>
               Delete
               <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
             </DropdownMenuItem>
