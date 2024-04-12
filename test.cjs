@@ -1,8 +1,8 @@
-const scrapedData = require('./scrape-data.json');
+const scrapedData = require('./scraped-dates-minus.json');
 
 const keysArray = Object.keys(scrapedData);
-const start = keysArray.indexOf(`La Costa Beach House - Malibu Beachfront Villa`);
-const end = keysArray.indexOf(`Beverly Hills Canyon Villa`)
+const start = keysArray.indexOf(`Ozark Spring Cabin Rock Bluff 03 King Bed, Spa Tub`);
+const end = keysArray.indexOf(`New Remodel, Slps 2, Modern feel, Historic Town`)
 console.log(end - start);
 
 
