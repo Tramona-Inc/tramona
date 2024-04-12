@@ -19,9 +19,13 @@ import {
 export function TabsDemo() {
   return (
     <Tabs defaultValue="account" className="w-[400px]">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="account">Account</TabsTrigger>
-        <TabsTrigger value="password">Password</TabsTrigger>
+      <TabsList>
+        <TabsTrigger className="w-1/2" value="account">
+          Account
+        </TabsTrigger>
+        <TabsTrigger className="w-1/2" value="password">
+          Password
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="account">
         <Card>
