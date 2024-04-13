@@ -10,6 +10,7 @@ import {
 import { Minus, Plus } from "lucide-react";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
+import { useState } from "react";
 
 const options = [
   {
@@ -89,6 +90,12 @@ export default function Onboarding3() {
   const spaceType = useHostOnboarding((state) => state.listing.spaceType);
   const setSpaceType = useHostOnboarding((state) => state.setSpaceType);
 
+  const [error, setError] = useState(false);
+
+  function handleError() {
+    setError(true);
+  }
+
   return (
     <>
       <SaveAndExit />
@@ -98,6 +105,9 @@ export default function Onboarding3() {
 
           <div>
             <h3 className="mb-5 text-2xl font-semibold">Type of Space</h3>
+            {error && (
+              <p className="mb-2 text-red-500">Please select a type of space</p>
+            )}
             <div className="mb-5 flex flex-col gap-5">
               {options.map((item) => (
                 <CardSelect
@@ -140,7 +150,11 @@ export default function Onboarding3() {
           </div>
         </div>
       </div>
-      <OnboardingFooter isFormValid={spaceType !== "Other"} isForm={true} />
+      <OnboardingFooter
+        isFormValid={spaceType !== "Other"}
+        isForm={true}
+        handleError={handleError}
+      />
     </>
   );
 }

@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
+import { useState } from "react";
 
 const formSchema = z.object({
   country: zodString(),
@@ -32,6 +33,8 @@ type FormValues = z.infer<typeof formSchema>;
 export default function Onboarding4() {
   const propertyLocation = useHostOnboarding((state) => state.listing.location);
   const setLocationInStore = useHostOnboarding((state) => state.setLocation);
+
+  const [error, setError] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -58,6 +61,10 @@ export default function Onboarding4() {
     setLocationInStore(location);
   }
 
+  function handleError() {
+    setError(true);
+  }
+
   return (
     <>
       <SaveAndExit />
@@ -66,6 +73,9 @@ export default function Onboarding4() {
           <h1 className="text-4xl font-bold">
             Where&apos;s your property located?
           </h1>
+          {error && (
+            <p className="text-red-500">Please fill out all required fields</p>
+          )}
 
           <Form {...form}>
             <FormField
@@ -164,6 +174,7 @@ export default function Onboarding4() {
         handleNext={form.handleSubmit(handleFormSubmit)}
         isFormValid={form.formState.isValid}
         isForm={true}
+        handleError={handleError}
       />
     </>
   );

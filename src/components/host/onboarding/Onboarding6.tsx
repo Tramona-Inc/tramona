@@ -5,7 +5,7 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import OnboardingFooter from "./OnboardingFooter";
-import SaveAndExit from './SaveAndExit';
+import SaveAndExit from "./SaveAndExit";
 
 const kitchenItems = [
   {
@@ -286,7 +286,9 @@ export default function Onboarding6() {
               </Button>
             </div>
             <div>
-              {error && <p className="text-red-500">Please no duplicate values</p>}
+              {error && (
+                <p className="text-red-500">Please no duplicate values</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-5 md:grid-cols-3">

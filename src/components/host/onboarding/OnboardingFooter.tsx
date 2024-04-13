@@ -43,12 +43,14 @@ type OnboardingFooterProps = {
   handleNext?: () => void;
   isFormValid?: boolean; // New prop to indicate whether the form is valid
   isForm: boolean;
+  handleError?: () => void;
 };
 
 export default function OnboardingFooter({
   handleNext,
   isFormValid = false, // Default value is false
   isForm,
+  handleError,
 }: OnboardingFooterProps) {
   const max_pages = 10;
 
@@ -101,6 +103,8 @@ export default function OnboardingFooter({
       if (isFormValid) {
         handleNext && handleNext(); // Call handleNext only if it exists
         setProgress(progress + 1);
+      } else {
+        handleError && handleError();
       }
       if (!isForm) {
         setProgress(progress + 1);
@@ -109,7 +113,7 @@ export default function OnboardingFooter({
   }
 
   return (
-    <>
+    <div className="sticky bottom-0 bg-white">
       <Progress
         value={(progress * 100) / max_pages}
         className="h-2 w-full rounded-none"
@@ -126,9 +130,9 @@ export default function OnboardingFooter({
           Back
         </Button>
         <Button onClick={onPressNext}>
-          {progress > 0 ? "Next" : "Get Started"}
+          {progress === 0 ? "Get Started" : progress === 9 ? "Finish" : "Next"}
         </Button>
       </div>
-    </>
+    </div>
   );
 }

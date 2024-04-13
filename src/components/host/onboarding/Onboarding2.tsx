@@ -13,7 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
-import SaveAndExit from './SaveAndExit';
+import SaveAndExit from "./SaveAndExit";
+import { useState } from "react";
 
 const options = [
   {
@@ -53,6 +54,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function Onboarding2() {
   const propertyType = useHostOnboarding((state) => state.listing.propertyType);
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
+  const [error, setError] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -67,6 +69,10 @@ export default function Onboarding2() {
     }
   }
 
+  function handleError() {
+    setError(true);
+  }
+
   return (
     <>
       <SaveAndExit />
@@ -74,6 +80,7 @@ export default function Onboarding2() {
         <h1 className="text-4xl font-bold">
           Which of these describes your property?
         </h1>
+        {error && <p className="text-red-500">Please select a property type</p>}
 
         <Form {...form}>
           <FormField
@@ -104,6 +111,7 @@ export default function Onboarding2() {
         handleNext={form.handleSubmit(handleFormSubmit)}
         isFormValid={propertyType !== "Other"}
         isForm={true}
+        handleError={handleError}
       />
     </>
   );
