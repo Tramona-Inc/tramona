@@ -16,9 +16,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
+import { api } from "@/utils/api";
+import LeafletMap from "./LeafletMap";
 import SaveAndExit from "./SaveAndExit";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 const formSchema = z.object({
   country: zodString(),
   street: zodString(),
@@ -31,6 +32,39 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Onboarding4() {
+  const [location, setLocation] = useState({
+    country: "",
+    street: "",
+    apt: "",
+    city: "",
+    state: "",
+    zipcode: "",
+  });
+
+  const [address, setAddress] = useState<string>("");
+
+  const isLocationFilled = () => {
+    return (
+      form.getValues("country") !== "" &&
+      form.getValues("street") !== "" &&
+      form.getValues("city") !== "" &&
+      form.getValues("state") !== "" &&
+      form.getValues("zipcode").length > 4
+    );
+  };
+
+  const updateLocation = (
+    field: string,
+    value: string,
+    setLocationInStore: (location: LocationType) => void,
+  ) => {
+    setLocation((prevLocation) => ({
+      ...prevLocation,
+      [field]: value,
+    }));
+    setLocationInStore({ ...location, [field]: value });
+  };
+
   const propertyLocation = useHostOnboarding((state) => state.listing.location);
   const setLocationInStore = useHostOnboarding((state) => state.setLocation);
 
@@ -60,7 +94,28 @@ export default function Onboarding4() {
 
     setLocationInStore(location);
   }
-
+  useEffect(() => {
+    if (isLocationFilled()) {
+      const location: LocationType = {
+        country: form.getValues("country"),
+        street: form.getValues("street"),
+        apt: form.getValues("apt") ?? undefined,
+        city: form.getValues("city"),
+        state: form.getValues("state"),
+        zipcode: form.getValues("zipcode"),
+      };
+      const addressConversion = `${location.street}${
+        location.apt ? `, ${location.apt}` : ""
+      }, ${location.city}, ${location.state} ${location.zipcode}, ${
+        location.country
+      }`;
+      setAddress(addressConversion);
+    }
+  }, [form.formState]);
+  //I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: address,
+  });
   function handleError() {
     setError(true);
   }
@@ -168,6 +223,12 @@ export default function Onboarding4() {
               />
             </div>
           </Form>
+          {coordinateData && (
+            <LeafletMap
+              lat={coordinateData.coordinates.lat}
+              lng={coordinateData.coordinates.lng}
+            />
+          )}
         </div>
       </div>
       <OnboardingFooter

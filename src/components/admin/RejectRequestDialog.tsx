@@ -21,21 +21,13 @@ export default function RejectRequestDialog({
   request: Pick<Request, "checkIn" | "checkOut" | "location" | "id">;
 }>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const utils = api.useUtils();
   const mutation = api.requests.resolve.useMutation();
 
   async function rejectRequest() {
-    setIsLoading(true);
-
     await mutation
       .mutateAsync({ id: request.id })
-      .then(() => utils.requests.invalidate())
       .then(() => toast({ title: "Sucessfully rejected request" }))
       .catch(() => errorToast());
-
-    setIsLoading(false);
     setIsOpen(false);
   }
 
@@ -59,7 +51,7 @@ export default function RejectRequestDialog({
           </Button>
           <Button
             onClick={() => rejectRequest()}
-            disabled={isLoading}
+            disabled={mutation.isLoading}
             className="rounded-full"
           >
             Reject

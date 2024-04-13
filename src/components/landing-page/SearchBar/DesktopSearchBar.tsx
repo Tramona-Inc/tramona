@@ -131,8 +131,8 @@ export default function DesktopSearchBar({
             numGuests: request.numGuests,
           });
 
-        const requestedPrice = request.maxNightlyPriceUSD;
-        const priceDifference = averageNightlyPrice - requestedPrice;
+        const requestedPrice: number = request.maxNightlyPriceUSD;
+        const priceDifference: number = averageNightlyPrice - requestedPrice;
         const priceDiffPercent = (priceDifference / averageNightlyPrice) * 100;
 
         if (request.maxNightlyPriceUSD < averageNightlyPrice) {
@@ -201,7 +201,6 @@ export default function DesktopSearchBar({
         await mutation.mutateAsync(newRequests).catch(() => {
           throw new Error();
         });
-        await utils.requests.invalidate();
 
         // we need to do this instead of form.reset() since i
         // worked around needing to give defaultValues to useForm
@@ -214,7 +213,8 @@ export default function DesktopSearchBar({
         } else {
           toast({
             title: `Successfully submitted ${newRequests.length} requests!`,
-            description: "Please check your phone for a confirmation text",
+            description:
+              "They have been sent to our network of hosts! We will email you with any updates.",
           });
         }
       } catch (e) {
@@ -391,6 +391,7 @@ export default function DesktopSearchBar({
               <Button
                 type="submit"
                 onClick={form.handleSubmit((data) => onSubmit(data.data))}
+                disabled={form.formState.isSubmitting}
                 className="rounded-full"
               >
                 Confirm
