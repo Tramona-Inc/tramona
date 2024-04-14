@@ -25,24 +25,18 @@ export function RemoveFromGroupDialog({
   memberName: string | null;
 }>) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const utils = api.useUtils();
-  const { mutateAsync } = api.groups.removeGroupMember.useMutation();
+  const mutation = api.groups.removeGroupMember.useMutation();
 
   async function removeGroupMember() {
-    setLoading(true);
-
-    await mutateAsync({ groupId, memberId })
-      .then(() => utils.invalidate())
+    await mutation
+      .mutateAsync({ groupId, memberId })
       .then(() =>
         toast({
           title: `Successfully removed ${memberName ?? "member"} from the group`,
         }),
       )
       .catch(() => errorToast());
-
-    setLoading(false);
   }
 
   return (
@@ -60,7 +54,10 @@ export function RemoveFromGroupDialog({
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button onClick={() => removeGroupMember()} disabled={loading}>
+          <Button
+            onClick={() => removeGroupMember()}
+            disabled={mutation.isLoading}
+          >
             Remove
           </Button>
         </DialogFooter>

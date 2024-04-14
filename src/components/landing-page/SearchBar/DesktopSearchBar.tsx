@@ -69,8 +69,10 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function DesktopSearchBar({
   afterSubmit,
+  modeSwitch,
 }: {
   afterSubmit?: () => void;
+  modeSwitch: React.ReactNode;
 }) {
   const utils = api.useUtils();
 
@@ -131,8 +133,8 @@ export default function DesktopSearchBar({
             numGuests: request.numGuests,
           });
 
-        const requestedPrice = request.maxNightlyPriceUSD;
-        const priceDifference = averageNightlyPrice - requestedPrice;
+        const requestedPrice: number = request.maxNightlyPriceUSD;
+        const priceDifference: number = averageNightlyPrice - requestedPrice;
         const priceDiffPercent = (priceDifference / averageNightlyPrice) * 100;
 
         if (request.maxNightlyPriceUSD < averageNightlyPrice) {
@@ -201,7 +203,6 @@ export default function DesktopSearchBar({
         await mutation.mutateAsync(newRequests).catch(() => {
           throw new Error();
         });
-        await utils.requests.invalidate();
 
         // we need to do this instead of form.reset() since i
         // worked around needing to give defaultValues to useForm
@@ -214,7 +215,8 @@ export default function DesktopSearchBar({
         } else {
           toast({
             title: `Successfully submitted ${newRequests.length} requests!`,
-            description: "Please check your phone for a confirmation text",
+            description:
+              "They have been sent to our network of hosts! We will email you with any updates.",
           });
         }
       } catch (e) {
@@ -234,76 +236,80 @@ export default function DesktopSearchBar({
         className="space-y-2"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: numTabs }).map((_, i) => {
-            const isSelected = curTab === i;
-            const hasErrors = tabsWithErrors.includes(i);
-            const showX = isSelected && numTabs > 1;
+        <div className="flex justify-between">
+          <div className="flex flex-wrap gap-1">
+            {Array.from({ length: numTabs }).map((_, i) => {
+              const isSelected = curTab === i;
+              const hasErrors = tabsWithErrors.includes(i);
+              const showX = isSelected && numTabs > 1;
 
-            // buttons in buttons arent allowed, so we only show the x button
-            // on the tab when the tab is selected, and make the tab a div instead
-            // of a button when its selected
-            const Comp = showX ? "div" : "button";
+              // buttons in buttons arent allowed, so we only show the x button
+              // on the tab when the tab is selected, and make the tab a div instead
+              // of a button when its selected
+              const Comp = showX ? "div" : "button";
 
-            return (
-              <Comp
-                key={i}
+              return (
+                <Comp
+                  key={i}
+                  type="button"
+                  onClick={showX ? undefined : () => setCurTab(i)}
+                  className={cn(
+                    "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
+                    hasErrors && "pr-3",
+                    isSelected
+                      ? "bg-white text-black"
+                      : "bg-black/50 text-white hover:bg-neutral-600/60",
+                    showX && "pr-2",
+                  )}
+                >
+                  Trip {i + 1}
+                  {hasErrors && (
+                    <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
+                      Errors
+                    </div>
+                  )}
+                  {showX && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (curTab === numTabs - 1) {
+                          setCurTab(numTabs - 2);
+                        }
+                        form.setValue(
+                          "data",
+                          data.filter((_, j) => j !== i),
+                        );
+                      }}
+                      className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
+                    >
+                      <XIcon className="size-3" />
+                    </button>
+                  )}
+                </Comp>
+              );
+            })}
+            {numTabs < MAX_REQUEST_GROUP_SIZE && (
+              <button
+                key=""
                 type="button"
-                onClick={showX ? undefined : () => setCurTab(i)}
-                className={cn(
-                  "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
-                  hasErrors && "pr-3",
-                  isSelected
-                    ? "bg-white text-black"
-                    : "bg-black/50 text-white hover:bg-neutral-600/60",
-                  showX && "pr-2",
-                )}
+                onClick={() => {
+                  setCurTab(numTabs);
+                  form.setValue("data", [
+                    ...data,
+                    defaultValues as FormSchema["data"][number],
+                  ]);
+                  // form.setFocus(`data.${data.length - 1}.location`);
+                }}
+                className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
               >
-                Trip {i + 1}
-                {hasErrors && (
-                  <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
-                    Errors
-                  </div>
-                )}
-                {showX && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (curTab === numTabs - 1) {
-                        setCurTab(numTabs - 2);
-                      }
-                      form.setValue(
-                        "data",
-                        data.filter((_, j) => j !== i),
-                      );
-                    }}
-                    className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
-                  >
-                    <XIcon className="size-3" />
-                  </button>
-                )}
-              </Comp>
-            );
-          })}
-          {numTabs < MAX_REQUEST_GROUP_SIZE && (
-            <button
-              key=""
-              type="button"
-              onClick={() => {
-                setCurTab(numTabs);
-                form.setValue("data", [
-                  ...data,
-                  defaultValues as FormSchema["data"][number],
-                ]);
-                // form.setFocus(`data.${data.length - 1}.location`);
-              }}
-              className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
-            >
-              <PlusIcon className="size-4" />
-              Add another trip
-            </button>
-          )}
+                <PlusIcon className="size-4" />
+                Add another trip
+              </button>
+            )}
+          </div>
+          {modeSwitch}
         </div>
+
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
           <LPLocationInput
             control={form.control}
@@ -391,6 +397,7 @@ export default function DesktopSearchBar({
               <Button
                 type="submit"
                 onClick={form.handleSubmit((data) => onSubmit(data.data))}
+                disabled={form.formState.isSubmitting}
                 className="rounded-full"
               >
                 Confirm

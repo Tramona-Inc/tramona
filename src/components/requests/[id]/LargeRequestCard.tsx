@@ -9,7 +9,6 @@ import {
   plural,
 } from "@/utils/utils";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
-import Image from "next/image";
 import { type DetailedRequest } from "../RequestCard";
 import RequestRefreshDialog from "../RequestRefreshDialog";
 
@@ -34,7 +33,7 @@ export default function LargeRequestCard({
   });
 
   return (
-    <Card size="lg" className="h-64">
+    <Card size="lg" className="min-h-64">
       <CardContent className="space-y-2">
         <h2 className="flex items-center gap-1 text-lg font-semibold text-zinc-700">
           <MapPinIcon className="-translate-y-0.5 text-zinc-300" />
@@ -86,22 +85,8 @@ function LargeRequestCardBadge({ request }: { request: DetailedRequest }) {
       );
     case "accepted":
       return (
-        <Badge size="lg" variant="green" className="pr-1">
-          {request.numOffers > 0 ? request.numOffers : "No"}{" "}
-          {request.numOffers === 1 ? "offer" : "offers"}
-          <div className="flex items-center -space-x-2">
-            {request.hostImages.map((imageUrl) => (
-              <Image
-                unoptimized
-                key={imageUrl}
-                src={imageUrl}
-                alt=""
-                width={22}
-                height={22}
-                className="inline-block rounded-full"
-              />
-            ))}
-          </div>
+        <Badge size="lg" variant="green">
+          {plural(request.numOffers, "offer")}
         </Badge>
       );
     case "rejected":

@@ -7,7 +7,6 @@ import {
 import { db } from "@/server/db";
 import {
   MAX_REQUEST_GROUP_SIZE,
-  type RequestGroup,
   groupMembers,
   groups,
   requestGroups,
@@ -26,9 +25,10 @@ import {
   plural,
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq, exists } from "drizzle-orm";
 import { z } from "zod";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
+import { groupBy } from "lodash";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -41,33 +41,25 @@ const updateRequestInputSchema = z.object({
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
-    const groupedRequests = await ctx.db.query.groupMembers
+    const groupedRequests = await ctx.db.query.requests
       .findMany({
-        where: eq(groupMembers.userId, ctx.user.id),
+        where: exists(
+          db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.groupId, requests.madeByGroupId),
+                eq(groupMembers.userId, ctx.user.id),
+              ),
+            ),
+        ),
         with: {
-          group: {
+          offers: { columns: { id: true } },
+          requestGroup: true,
+          madeByGroup: {
             with: {
-              requests: {
-                with: {
-                  requestGroup: true,
-                  offers: {
-                    with: {
-                      property: {
-                        with: {
-                          host: {
-                            columns: {
-                              name: true,
-                              email: true,
-                              image: true,
-                              id: true,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
+              invites: true,
               members: {
                 with: {
                   user: {
@@ -75,81 +67,34 @@ export const requestsRouter = createTRPCRouter({
                   },
                 },
               },
-              invites: true,
             },
           },
         },
       })
-
-      // 1. turn the data into a nicer shape
-      .then((res) =>
-        res
-          .map((groupMember) => {
-            const {
-              group: { requests, members, invites },
-            } = groupMember;
-
-            return requests.map((request) => ({
-              ...request,
-              groupMembers: members.map((member) => ({
-                ...member.user,
-                isGroupOwner: groupMember.group.ownerId === member.userId,
-              })),
-              groupInvites: invites,
-            }));
-          })
-          .flat(1),
-      )
-
-      .then((res) => {
-        const ungroupedRequests = res
-
-          // 2. extract host images & offers count
-          .map((request) => {
-            const hostImages = request.offers
-              .map((offer) => offer.property.host?.image)
-              .filter(Boolean);
-
-            const numOffers = request.offers.length;
-
-            const { offers: _, ...requestExceptOffers } = request;
-
-            return { ...requestExceptOffers, hostImages, numOffers };
-          })
-
-          // 3. sort
+      // 1. extract offer count & sort
+      .then((requests) =>
+        requests
+          .map(({ offers, ...request }) => ({
+            ...request,
+            numOffers: offers.length,
+          }))
           .sort(
             (a, b) =>
               b.numOffers - a.numOffers ||
               b.createdAt.getTime() - a.createdAt.getTime(),
-          );
+          ),
+      )
 
-        // 4. group
-        const groupedRequests: {
-          group: RequestGroup;
-          requests: typeof ungroupedRequests;
-        }[] = [];
-
-        for (const request of ungroupedRequests) {
-          const group = groupedRequests.find(
-            ({ group }) => group.id === request.requestGroupId,
-          );
-
-          if (group) {
-            group.requests.push(request);
-          } else {
-            groupedRequests.push({
-              requests: [request],
-              group: request.requestGroup,
-            });
-          }
-        }
-
-        return groupedRequests;
+      // 2. group by requestGroupId
+      .then((requests) => {
+        const groups = groupBy(requests, (req) => req.requestGroupId);
+        return Object.entries(groups).map(([_, requests]) => ({
+          group: requests[0]!.requestGroup,
+          requests,
+        }));
       });
 
-    // 5. group by active/inactive (and put partially-active groups on active)
-
+    // 3. group by active/inactive (and put partially-active groups on active)
     const activeRequestGroups = groupedRequests.filter((group) =>
       group.requests.some((request) => request.resolvedAt === null),
     );
@@ -158,8 +103,6 @@ export const requestsRouter = createTRPCRouter({
       (group) => !activeRequestGroups.includes(group),
     );
 
-    // 5. all done
-
     return {
       activeRequestGroups,
       inactiveRequestGroups,
@@ -167,49 +110,37 @@ export const requestsRouter = createTRPCRouter({
   }),
 
   getAll: roleRestrictedProcedure(["admin"]).query(async () => {
+    console.log("getting all");
     return await db.query.requests
       .findMany({
         with: {
+          offers: { columns: { id: true } },
+          requestGroup: true,
           madeByGroup: {
             with: {
+              invites: true,
               members: {
                 with: {
                   user: {
-                    columns: {
-                      name: true,
-                      email: true,
-                      image: true,
-                      phoneNumber: true,
-                      id: true,
-                    },
+                    columns: { name: true, email: true, image: true, id: true },
                   },
                 },
               },
-              invites: true,
             },
           },
-          offers: { columns: { id: true } },
-          requestGroup: true,
         },
       })
-      .then((res) =>
-        res
-          .map((req) => {
-            const { offers, madeByGroup, ...reqWithoutOffers } = req;
-            return {
-              ...reqWithoutOffers,
-              numOffers: offers.length,
-              groupMembers: madeByGroup.members.map((member) => ({
-                ...member.user,
-                isGroupOwner: madeByGroup.ownerId === member.userId,
-              })),
-              groupInvites: madeByGroup.invites,
-            };
-          })
+      // 1. extract offer count & sort
+      .then((requests) =>
+        requests
+          .map(({ offers, ...request }) => ({
+            ...request,
+            numOffers: offers.length,
+          }))
           .sort(
             (a, b) =>
               b.numOffers - a.numOffers ||
-              a.createdAt.getTime() - b.createdAt.getTime(),
+              b.createdAt.getTime() - a.createdAt.getTime(),
           ),
       )
       .then((res) => {
@@ -232,7 +163,7 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.transaction(async (tx) => {
         const requestGroupId = await tx
           .insert(requestGroups)
-          .values({ createdByUserId: ctx.user.id })
+          .values({ createdByUserId: ctx.user.id, hasApproved: true })
           .returning()
           .then((res) => res[0]!.id);
 
@@ -267,18 +198,18 @@ export const requestsRouter = createTRPCRouter({
         });
       });
 
-      if (ctx.user.isWhatsApp) {
-        void sendWhatsApp({
-          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
-          to: ctx.user.phoneNumber!,
-        });
-      } else {
-        void sendText({
-          to: ctx.user.phoneNumber!,
-          content:
-            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-        });
-      }
+      // if (ctx.user.isWhatsApp) {
+      //   void sendWhatsApp({
+      //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+      //     to: ctx.user.phoneNumber!,
+      //   });
+      // } else {
+      //   void sendText({
+      //     to: ctx.user.phoneNumber!,
+      //     content:
+      //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      //   });
+      // }
 
       if (env.NODE_ENV !== "production") return;
 

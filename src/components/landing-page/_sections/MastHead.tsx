@@ -1,5 +1,5 @@
-import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
 import Image from "next/image";
+import SearchBar from "../SearchBar/SearchBar";
 
 export default function MastHead() {
   return (
@@ -20,10 +20,10 @@ export default function MastHead() {
           <div className="z-10 flex flex-col justify-center gap-4 p-4">
             <div className="mx-auto mb-8 max-w-5xl space-y-4 p-4">
               <h1 className="animate-text bg-gradient-to-r from-black via-neutral-500 to-black bg-clip-text pb-2 text-left text-5xl font-bold leading-tight tracking-tight text-transparent sm:text-5xl sm:leading-tight md:text-center lg:text-8xl lg:leading-relaxed">
-                  Name your own price.
-                </h1>
+                Name your own price.
+              </h1>
 
-              <p className="border-l-4 border-neutral-700 pl-4 text-left text-lg font-normal text-neutral-700 md:text-xl lg:text-2xl pb-4">
+              <p className="border-l-4 border-neutral-700 pb-4 pl-4 text-left text-lg font-normal text-neutral-700 md:text-xl lg:text-2xl">
                 Tramona is the first perfectly efficient vacation rental
                 platform. We take vacancies in hosts&apos; calendars and match
                 them with what you are willing to pay, all while cutting out the
@@ -32,7 +32,7 @@ export default function MastHead() {
             </div>
 
             <div className="mx-auto w-full max-w-5xl">
-              <DesktopSearchBar />
+              <SearchBar />
             </div>
           </div>
         </section>
