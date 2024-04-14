@@ -26,7 +26,7 @@ export default function DateRangePicker<
   React.ComponentProps<typeof FormField<TFieldValues, TName>>,
   "render"
 > & {
-  className?: string;
+  className: string;
   formLabel: string;
 }) {
   return (

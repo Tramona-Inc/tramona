@@ -3,7 +3,6 @@ import * as React from "react";
 import { cn } from "@/utils/utils";
 import { useMeasure } from "@uidotdev/usehooks";
 import { useState } from "react";
-import Clock from "../_icons/Clock";
 import HiddenIcon from "../_icons/HiddenIcon";
 import VisibleIcon from "../_icons/VisibleIcon";
 
@@ -92,12 +91,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           placeholder={placeholder ?? ""} // so i can use placeholder-shown
           {...props}
         />
-        {type === "clock" && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-end pr-2">
-            <Clock />
-          </div>
-        )}
-
         <div className="pointer-events-none absolute inset-0 hidden items-center justify-between px-3 py-2 peer-[&:focus]:flex peer-[&:not(:placeholder-shown)]:flex">
           {prefixEl}
           {suffixEl}
