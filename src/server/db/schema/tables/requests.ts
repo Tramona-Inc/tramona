@@ -32,24 +32,7 @@ export const requests = pgTable("requests", {
   minNumBedrooms: smallint("min_num_bedrooms").default(1),
   propertyType: propertyTypeEnum("property_type"),
   note: varchar("note", { length: 255 }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  resolvedAt: timestamp("resolved_at"),
-});
-
-export const linkRequests = pgTable("link_requests", {
-  id: serial("id").primaryKey(),
-  madeByGroupId: integer("made_by_group_id")
-    .notNull()
-    // for this onDelete cascade to do anything, well need to delete groups with no members
-    .references(() => groups.id, { onDelete: "cascade" }),
-  requestGroupId: integer("request_group_id")
-    .notNull()
-    .references(() => requestGroups.id, { onDelete: "cascade" }),
-  airbnbPrice: integer("airbnb_price").notNull(), // in cents
-  location: varchar("location", { length: 255 }).notNull(), // TODO: use postGIS
-  checkIn: date("check_in", { mode: "date" }).notNull(),
-  checkOut: date("check_out", { mode: "date" }).notNull(),
-  numGuests: smallint("num_guests").notNull().default(1),
+  // airbnbLink: varchar("airbnb_link", { length: 512 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
 });
@@ -58,11 +41,6 @@ export type Request = typeof requests.$inferSelect;
 export type NewRequest = typeof requests.$inferInsert;
 export const requestSelectSchema = createSelectSchema(requests);
 export const requestInsertSchema = createInsertSchema(requests);
-
-export type LinkRequest = typeof linkRequests.$inferSelect;
-export type NewLinkRequest = typeof linkRequests.$inferInsert;
-export const linkRequestSelectSchema = createSelectSchema(linkRequests);
-export const linkRequestInsertSchema = createInsertSchema(linkRequests);
 
 export const MAX_REQUEST_GROUP_SIZE = 10;
 

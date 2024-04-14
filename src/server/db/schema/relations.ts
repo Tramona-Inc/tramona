@@ -9,7 +9,7 @@ import {
 } from "./tables/messages";
 import { offers } from "./tables/offers";
 import { properties } from "./tables/properties";
-import { linkRequests, requestGroups, requests } from "./tables/requests";
+import { requestGroups, requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
 
@@ -75,26 +75,10 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   offers: many(offers),
 }));
 
-export const linkRequestsRelations = relations(
-  linkRequests,
-  ({ one, many }) => ({
-    madeByGroup: one(groups, {
-      fields: [linkRequests.madeByGroupId],
-      references: [groups.id],
-    }),
-    requestGroup: one(requestGroups, {
-      fields: [linkRequests.requestGroupId],
-      references: [requestGroups.id],
-    }),
-    offers: many(offers),
-  }),
-);
-
 export const requestGroupsRelations = relations(
   requestGroups,
   ({ one, many }) => ({
     requests: many(requests),
-    linkRequests: many(linkRequests),
     createdByUser: one(users, {
       fields: [requestGroups.createdByUserId],
       references: [users.id],
@@ -162,7 +146,6 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   members: many(groupMembers),
   invites: many(groupInvites),
   requests: many(requests),
-  linkRequests: many(linkRequests),
 }));
 
 export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
