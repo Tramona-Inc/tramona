@@ -9,6 +9,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Form } from "@/components/ui/form";
 import { cn } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +21,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import MakeBid from "./bidding/MakeBid";
 
 const photos = [
   "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/3b0c4129-696a-4b08-8896-3c05d9c729b5.jpeg?im_w=1200",
@@ -124,9 +130,12 @@ export default function HomeOfferCard() {
           formLabel=""
           className="col-span-full sm:col-span-1"
         />
-        <Button className="w-full font-bold" type="submit">
-          Make offer
-        </Button>
+       <Dialog>
+        <DialogTrigger className="bg-foreground text-primary-foreground w-full rounded-xl py-2">Make Offer</DialogTrigger>
+        <DialogContent>
+          <MakeBid/>
+        </DialogContent>
+       </Dialog>
       </Form>
     </div>
   );
