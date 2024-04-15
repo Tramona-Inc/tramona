@@ -12,10 +12,15 @@ export default function TravelerPage() {
       <Head>
         <title>Tramona</title>
       </Head>
-      <div className='container border-b'>
+      <div className="container">
         <SimpleMastHead />
       </div>
-      <div className="container flex flex-col space-y-5 bg-white pt-10">
+
+      <div className="py-5">
+        <div className="border-[1px]" />
+      </div>
+
+      <div className="container flex flex-col space-y-5 bg-white">
         <CitiesFilter />
         <Listings />
       </div>
