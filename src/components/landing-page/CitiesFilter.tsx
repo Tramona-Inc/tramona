@@ -55,7 +55,6 @@ export default function CitiesFilter() {
   const scrollRight = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollLeft += 100;
-      console.log(scrollContainerRef.current);
     }
   };
 
@@ -64,7 +63,7 @@ export default function CitiesFilter() {
       <div className="col-span-8">
         <ScrollArea
           ref={scrollContainerRef}
-          className="whitespace-nowrap rounded-md"
+          className="whitespace-nowrap overflow-x-auto rounded-md"
         >
           <div className="flex space-x-4 p-4">
             {cities.map((city, index) => {
