@@ -37,6 +37,7 @@ import LPDateRangePicker, {
   LPFormMessage,
   LPInput,
   LPLocationInput,
+  AirbnbLinkDialog,
   classNames,
 } from "./components";
 
@@ -69,8 +70,10 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function DesktopSearchBar({
   afterSubmit,
+  mode,
 }: {
   afterSubmit?: () => void;
+  mode: "search" | "request";
 }) {
   const utils = api.useUtils();
 
@@ -131,8 +134,8 @@ export default function DesktopSearchBar({
             numGuests: request.numGuests,
           });
 
-        const requestedPrice = request.maxNightlyPriceUSD;
-        const priceDifference = averageNightlyPrice - requestedPrice;
+        const requestedPrice: number = request.maxNightlyPriceUSD;
+        const priceDifference: number = averageNightlyPrice - requestedPrice;
         const priceDiffPercent = (priceDifference / averageNightlyPrice) * 100;
 
         if (request.maxNightlyPriceUSD < averageNightlyPrice) {
@@ -201,7 +204,6 @@ export default function DesktopSearchBar({
         await mutation.mutateAsync(newRequests).catch(() => {
           throw new Error();
         });
-        await utils.requests.invalidate();
 
         // we need to do this instead of form.reset() since i
         // worked around needing to give defaultValues to useForm
@@ -214,7 +216,8 @@ export default function DesktopSearchBar({
         } else {
           toast({
             title: `Successfully submitted ${newRequests.length} requests!`,
-            description: "Please check your phone for a confirmation text",
+            description:
+              "They have been sent to our network of hosts! We will email you with any updates.",
           });
         }
       } catch (e) {
@@ -254,7 +257,7 @@ export default function DesktopSearchBar({
                   "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
                   hasErrors && "pr-3",
                   isSelected
-                    ? "bg-white text-black"
+                    ? "border border-gray-200 bg-white text-black"
                     : "bg-black/50 text-white hover:bg-neutral-600/60",
                   showX && "pr-2",
                 )}
@@ -304,6 +307,7 @@ export default function DesktopSearchBar({
             </button>
           )}
         </div>
+
         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
           <LPLocationInput
             control={form.control}
@@ -357,6 +361,8 @@ export default function DesktopSearchBar({
           </div>
         </div>
 
+        {mode === "request" && <AirbnbLinkDialog />}
+
         <div className="flex justify-center">
           <Button
             disabled={form.formState.isSubmitting}
@@ -366,7 +372,7 @@ export default function DesktopSearchBar({
             )}
             size="lg"
             variant="outlineLight"
-            className="rounded-full font-semibold mt-5"
+            className="mt-5 rounded-full font-semibold"
           >
             Request Deal
           </Button>
@@ -391,6 +397,7 @@ export default function DesktopSearchBar({
               <Button
                 type="submit"
                 onClick={form.handleSubmit((data) => onSubmit(data.data))}
+                disabled={form.formState.isSubmitting}
                 className="rounded-full"
               >
                 Confirm

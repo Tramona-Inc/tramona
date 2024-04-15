@@ -34,7 +34,6 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
-import { useSession } from "next-auth/react";
 
 import { getNumNights } from "@/utils/utils";
 import ErrorMsg from "../ui/ErrorMsg";
@@ -78,9 +77,6 @@ export default function AdminOfferForm({
   request: Request;
   offer?: OfferWithProperty;
 }) {
-  const { data: session } = useSession();
-  const user = session?.user;
-
   const numberOfNights = getNumNights(request.checkIn, request.checkOut);
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
@@ -139,8 +135,6 @@ export default function AdminOfferForm({
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
   const getOwnerMutation = api.groups.getGroupOwner.useMutation();
-
-  const utils = api.useUtils();
 
   async function onSubmit(data: FormSchema) {
     let url: string | null = null;
@@ -215,16 +209,10 @@ export default function AdminOfferForm({
         .catch(() => errorToast());
     }
 
-    await Promise.all([
-      utils.properties.invalidate(),
-      utils.offers.invalidate(),
-      utils.requests.invalidate(),
-    ]);
-
     const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
 
     if (traveler?.phoneNumber) {
-      if (!traveler.isWhatsApp) {
+      if (traveler.isWhatsApp) {
         await twilioWhatsAppMutation.mutateAsync({
           templateId: "HXfeb90955f0801d551e95a6170a5cc015",
           to: traveler.phoneNumber,

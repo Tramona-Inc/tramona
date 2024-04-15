@@ -4,9 +4,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatDateRange } from "@/utils/utils";
-import { CalendarIcon, MapPinIcon } from "lucide-react";
-import { type FieldPath, type FieldValues } from "react-hook-form";
+import { CalendarIcon, MapPinIcon, PlusIcon } from "lucide-react";
+import { useForm, type FieldPath, type FieldValues } from "react-hook-form";
 import {
+  Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -16,6 +18,13 @@ import { useMeasure } from "@uidotdev/usehooks";
 import { useState, type ComponentProps, forwardRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import PlacesPopover from "@/components/_common/PlacesPopover";
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
+import { zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { api } from "@/utils/api";
 
 // LP is short for landing page
 
@@ -253,5 +262,78 @@ export default function LPDateRangePicker<
         </LPFormItem>
       )}
     />
+  );
+}
+
+export function AirbnbLinkDialog() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const utils = api.useUtils();
+
+  const formSchema = z.object({
+    airbnbLink: zodString({ maxLen: 512 }),
+  });
+
+  type FormSchema = z.infer<typeof formSchema>;
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = async (data: FormSchema) => {
+    const response = await utils.misc.scrapeUsingLink.fetch({
+      url: data.airbnbLink,
+    });
+    console.log(response);
+  };
+
+  return (
+    <div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="rounded-full"
+        onClick={() => setDialogOpen(true)}
+      >
+        <PlusIcon /> Add an Airbnb Link
+      </Button>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogTitle>Add an Airbnb link</DialogTitle>
+          <p className="my-2">
+            Are you currently eyeing any properties on Airbnb? Enter the link
+            below and we will try to get you that exact stay at a discount!
+          </p>
+
+          <Form {...form}>
+            <form className="flex flex-col gap-4">
+              <FormField
+                control={form.control}
+                name={"airbnbLink"}
+                render={({ field }) => (
+                  <LPFormItem className="">
+                    <FormLabel>Link</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="text" placeholder="Enter link" />
+                    </FormControl>
+                    <FormMessage />
+                  </LPFormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                onClick={form.handleSubmit((data) => onSubmit(data))}
+                disabled={form.formState.isSubmitting}
+                className="rounded-full"
+              >
+                Add
+              </Button>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

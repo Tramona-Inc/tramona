@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "../../ui/button";
-import { type RequestWithUser, type DetailedRequest } from "../RequestCard";
 import { api } from "@/utils/api";
 import { z } from "zod";
 import { zodEmail } from "@/utils/zod-utils";
@@ -15,16 +14,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMsg from "../../ui/ErrorMsg";
 import { toast } from "../../ui/use-toast";
-import React from "react";
+import {
+  getRequestWithGroupDetails,
+  type RequestWithGroup,
+} from "../RequestGroupAvatars";
 
 const formSchema = z.object({ email: zodEmail() });
 type FormValues = z.infer<typeof formSchema>;
 
-export function InviteByEmailForm({
-  request,
-}: {
-  request: DetailedRequest | RequestWithUser;
-}) {
+export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
   const mutation = api.groups.inviteUserByEmail.useMutation();
 
   const form = useForm<FormValues>({
@@ -32,7 +30,7 @@ export function InviteByEmailForm({
     reValidateMode: "onSubmit",
   });
 
-  const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
+  const { isEveryoneInvited } = getRequestWithGroupDetails({ request });
 
   async function inviteUserByEmail(
     input: Parameters<typeof mutation.mutate>[0],
@@ -50,7 +48,7 @@ export function InviteByEmailForm({
   async function onSubmit({ email }: FormValues) {
     await inviteUserByEmail({
       email,
-      groupId: request.madeByGroupId,
+      groupId: request.madeByGroup.id,
     })
       .then(({ status, inviteeName }) => {
         if (status === "sent invite") {

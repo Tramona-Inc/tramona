@@ -14,10 +14,10 @@ export default function SimpleMastHead() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value={"search"}>
-          <DesktopSearchBar />
+          <DesktopSearchBar mode="search" />
         </TabsContent>
         <TabsContent value={"request"}>
-          <DesktopSearchBar />
+          <DesktopSearchBar mode="request" />
         </TabsContent>
       </Tabs>
     </div>

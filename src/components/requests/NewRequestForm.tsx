@@ -97,7 +97,6 @@ export default function NewRequestForm({
   });
 
   const mutation = api.requests.createMultiple.useMutation();
-  const utils = api.useUtils();
   const router = useRouter();
 
   const { minNumBedrooms, minNumBeds, propertyType, note } = form.watch();
@@ -188,8 +187,6 @@ export default function NewRequestForm({
         await mutation.mutateAsync([newRequest]).catch(() => {
           throw new Error();
         });
-        await utils.requests.invalidate();
-        await utils.users.invalidate();
 
         while (!phoneRef.current) {
           await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second

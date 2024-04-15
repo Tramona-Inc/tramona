@@ -6,17 +6,16 @@ import { ArrowRightIcon, UserPlusIcon } from "lucide-react";
 import { type DetailedRequest } from "./RequestCard";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
-import { RequestUnconfirmedButton } from "./RequestUnconfirmedButton";
+import { getRequestWithGroupDetails } from "./RequestGroupAvatars";
 
 export function RequestCardAction({ request }: { request: DetailedRequest }) {
   const { data: session } = useSession({ required: true });
   if (!session) return null;
 
-  const isEveryoneInvited = request.groupMembers.length >= request.numGuests;
-  const groupOwner = request.groupMembers.find(
-    (member) => member.isGroupOwner,
-  )!;
-  const userIsOwner = groupOwner?.id === session.user.id;
+  const { isEveryoneInvited, userIsOwner } = getRequestWithGroupDetails({
+    request,
+    userId: session.user.id,
+  });
 
   switch (getRequestStatus(request)) {
     case "pending":

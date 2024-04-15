@@ -32,6 +32,7 @@ export const requests = pgTable("requests", {
   minNumBedrooms: smallint("min_num_bedrooms").default(1),
   propertyType: propertyTypeEnum("property_type"),
   note: varchar("note", { length: 255 }),
+  // airbnbLink: varchar("airbnb_link", { length: 512 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
 });
@@ -43,14 +44,15 @@ export const requestInsertSchema = createInsertSchema(requests);
 
 export const MAX_REQUEST_GROUP_SIZE = 10;
 
-// TO-DO: maybe add relation 
+// TO-DO: maybe add relation
 export const requestUpdatedInfo = pgTable("request_updated_info", {
   id: serial("id").primaryKey(),
-  requestId: integer("request_id")
-      .references(() => requests.id, { onDelete: "cascade" }),
+  requestId: integer("request_id").references(() => requests.id, {
+    onDelete: "cascade",
+  }),
   preferences: varchar("preferences", { length: 255 }),
   updatedPriceNightlyUSD: integer("updated_price_usd_nightly"),
-  propertyLinks: text("property_links"), 
+  propertyLinks: text("property_links"),
 });
 
 export const requestGroups = pgTable("request_groups", {

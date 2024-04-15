@@ -1,6 +1,6 @@
 import { type DetailedRequest } from "@/components/requests/RequestCard";
 import { api } from "@/utils/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useInterval } from "@/utils/useInterval";
 import { usePrevious } from "@uidotdev/usehooks";
 import RequestGroupCards from "./RequestGroup";
