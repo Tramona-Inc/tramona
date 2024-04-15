@@ -10,10 +10,10 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import {
-  Dialog,
-  DialogContent,
+  DialogLarge,
+  DialogContentLarge,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialogLarge"
 import { Form } from "@/components/ui/form";
 import { cn } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -130,12 +130,12 @@ export default function HomeOfferCard() {
           formLabel=""
           className="col-span-full sm:col-span-1"
         />
-       <Dialog>
+       <DialogLarge>
         <DialogTrigger className="bg-foreground text-primary-foreground w-full rounded-xl py-2">Make Offer</DialogTrigger>
-        <DialogContent>
+        <DialogContentLarge className=" sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
           <MakeBid/>
-        </DialogContent>
-       </Dialog>
+        </DialogContentLarge>
+       </DialogLarge>
       </Form>
     </div>
   );
