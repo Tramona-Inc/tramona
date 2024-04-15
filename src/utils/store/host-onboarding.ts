@@ -21,6 +21,7 @@ export type LocationType = {
 type HostOnboardingState = {
   progress: number;
   setProgress: (progress: number) => void;
+  isEdit: boolean;
   listing: {
     propertyType: PropertyType;
     spaceType: SpaceType;
@@ -42,6 +43,7 @@ type HostOnboardingState = {
     smokingAllowed: boolean;
     otherHouseRules: string | null | undefined;
   };
+  setIsEdit: (isEdit: boolean) => void;
   setMaxGuests: (maxGuests: number) => void;
   setBedrooms: (bedrooms: number) => void;
   setBeds: (beds: number) => void;
@@ -70,6 +72,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
   persist(
     (set) => ({
       progress: 0,
+      isEdit: false,
       listing: {
         propertyType: "Other",
         spaceType: "Other",
@@ -97,6 +100,9 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         petsAllowed: false,
         smokingAllowed: false,
         otherHouseRules: "",
+      },
+      setIsEdit: (isEdit: boolean) => {
+        set((state) => ({ ...state, isEdit }));
       },
       setProgress: (progress: number) => {
         set((state) => ({ ...state, progress }));
@@ -297,7 +303,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
       },
       resetSession: () => {
         sessionStorage.removeItem("host-onboarding-state");
-      }
+      },
     }),
     {
       name: "host-onboarding-state", // name of the item in the storage (must be unique)

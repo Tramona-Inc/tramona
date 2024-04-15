@@ -16,6 +16,7 @@ function Heading({
 }) {
   // const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
+  const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
 
   return (
     <div className="flex flex-col gap-3 py-5">
@@ -25,6 +26,7 @@ function Heading({
           className="text-sm underline transition duration-200 hover:cursor-pointer hover:text-muted-foreground"
           onClick={() => {
             if (editPage) {
+              setIsEdit(true);
               setProgress(editPage);
             }
           }}
