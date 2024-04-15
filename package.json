@@ -113,7 +113,7 @@
     "react-leaflet": "^4.2.1",
     "react-phone-number-input": "^3.3.9",
     "resend": "^3.1.0",
-    "stripe": "^14.14.0",
+    "stripe": "^14.23.0",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.2.1",
     "tailwind-scrollbar-hide": "^1.1.7",
