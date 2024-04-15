@@ -8,7 +8,7 @@ export default function TravelerPage() {
   useMaybeSendUnsentRequests();
 
   return (
-    <div className="relative mb-20 mt-10 overflow-x-hidden">
+    <div className="relative mb-20 overflow-x-hidden bg-white pt-10">
       <Head>
         <title>Tramona</title>
       </Head>

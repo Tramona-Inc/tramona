@@ -3,7 +3,7 @@ import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
 
 export default function SimpleMastHead() {
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center bg-white">
       <Tabs defaultValue={"search"}>
         <TabsList noBorder className="flex items-center justify-center">
           <TabsTrigger value="search" noBorder>
