@@ -1,6 +1,7 @@
 import { LucideChevronRightCircle, LucideListFilter } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "../ui/button";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 const cities: string[] = [
   "Los Angeles (LA)",
@@ -54,22 +55,25 @@ export default function CitiesFilter() {
   const scrollRight = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollLeft += 100;
+      console.log(scrollContainerRef.current);
     }
   };
 
   return (
-    <div className="flex flex-row items-center gap-5">
-      {/* <ScrollArea
-        ref={scrollContainerRef}
-        className="whitespace-nowrap rounded-md px-10"
-      >
-        <div className="flex space-x-4 p-4">
-          {cities.map((city, index) => {
-            return <div key={index}>{city}</div>;
-          })}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea> */}
+    <div className="grid grid-cols-10 items-center gap-5">
+      <div className="col-span-8">
+        <ScrollArea
+          ref={scrollContainerRef}
+          className="whitespace-nowrap rounded-md"
+        >
+          <div className="flex space-x-4 p-4">
+            {cities.map((city, index) => {
+              return <div key={index}>{city}</div>;
+            })}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
 
       <Button
         variant={"ghost"}
