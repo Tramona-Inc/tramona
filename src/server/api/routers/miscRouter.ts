@@ -97,6 +97,7 @@ export const miscRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       const { url } = input;
+      const searchParams = new URLSearchParams(url.split("?")[1]);
 
       try {
         const browser = await puppeteer.launch();
@@ -172,17 +173,27 @@ export const miscRouter = createTRPCRouter({
           }
           return textContents.filter(Boolean);
         });
-        const combinedData = [
-          ...priceItems,
-          ...listingCardTextContent,
-          imgSrcUrl,
-        ].filter((item) => item !== null && item !== undefined);
 
         await browser.close();
 
-        // requestsRouter.createMultiple({input})
+        const nightlyPrice = Number(
+          priceItems[0]?.split(" ")[0]?.replace("$", "").trim(),
+        );
+        const propertyName =
+          listingCardTextContent[0]?.substring(0, 255) ?? "Airbnb Property";
+        const checkIn = new Date(searchParams.get("check_in")!);
+        const checkOut = new Date(searchParams.get("check_out")!);
+        const numGuests = Number(searchParams.get("adults"));
 
-        return { combinedData };
+        const response = {
+          nightlyPrice,
+          propertyName,
+          checkIn,
+          checkOut,
+          numGuests,
+        };
+
+        return response;
       } catch (error) {
         console.log(error);
         return new TRPCError({
