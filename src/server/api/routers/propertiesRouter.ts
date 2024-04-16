@@ -12,6 +12,7 @@ import {
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { createGzip } from "zlib";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -72,6 +73,10 @@ export const propertiesRouter = createTRPCRouter({
       return await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
       });
+    }),
+    getAll: publicProcedure
+    .query(async({ctx})=>{
+      return await ctx.db.query.properties.findMany();
     }),
   hostInsertProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)

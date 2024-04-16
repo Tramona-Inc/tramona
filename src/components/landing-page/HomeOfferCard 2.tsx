@@ -1,4 +1,5 @@
 import DateRangePicker from "@/components/_common/DateRangePicker";
+import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -21,7 +22,6 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import MakeBid from "./bidding/MakeBid";
-import { Property } from "@/server/db/schema";
 
 const photos = [
   "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/3b0c4129-696a-4b08-8896-3c05d9c729b5.jpeg?im_w=1200",
@@ -56,7 +56,7 @@ function CarouselDots({ count, current }: { count: number; current: number }) {
   );
 }
 
-export default function HomeOfferCard( {property}:{property:Property}) {
+export default function HomeOfferCard() {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -96,7 +96,7 @@ export default function HomeOfferCard( {property}:{property:Property}) {
     <div className="space-y-2">
       <Carousel setApi={setApi}>
         <CarouselContent>
-          {property.imageUrls.map((photo, index) => (
+          {photos.map((photo, index) => (
             <CarouselItem key={index}>
               <CardContent>
                 <Image
@@ -119,10 +119,10 @@ export default function HomeOfferCard( {property}:{property:Property}) {
         <CarouselDots count={count} current={current} />
       </Carousel>
       <div className="flex justify-between">
-        <p className="font-semibold">{property.name}</p>
-        <p>Price on Airbnb: ${property.originalNightlyPrice}</p>
+        <p className="font-semibold">Milan, Italy</p>
+        <p>Price on Airbnb: $$$</p>
       </div>
-      <p className="text-xs">{property.maxNumGuests} guests, {property.numBedrooms} bedrooms, {property.numBeds} beds, {property.numBathrooms} baths</p>
+      <p className="text-xs">4 guests, 2 bedrooms, 2 beds, 2 baths</p>
       <Form {...form}>
         <DateRangePicker
           control={form.control}
@@ -133,7 +133,7 @@ export default function HomeOfferCard( {property}:{property:Property}) {
        <DialogLarge>
         <DialogTrigger className="bg-foreground text-primary-foreground w-full rounded-xl py-2">Make Offer</DialogTrigger>
         <DialogContentLarge className=" sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
-          <MakeBid property = {property}/>
+          <MakeBid/>
         </DialogContentLarge>
        </DialogLarge>
       </Form>

@@ -1,9 +1,22 @@
+import Home from "@/pages";
 import HomeOfferCard from "../HomeOfferCard";
-
+import { api } from "@/utils/api";
+import { Property } from "@/server/db/schema";
 export default function Listings() {
-  const cards = Array.from({ length: 10 }, (_, index) => (
-    <HomeOfferCard key={index} />
-  ));
+  const { data: propertiesArray } = api.properties.getAll.useQuery();
+  console.log(propertiesArray)
 
-  return <div className="grid grid-cols-6 gap-10 gap-y-10">{cards}</div>;
+  const propertyCards = propertiesArray?.map((property:Property)=>(
+   <HomeOfferCard property = {property} /> 
+  ))
+
+
+  return (
+    <div>
+      <div className="grid grid-cols-1 gap-10 gap-y-10 md:grid-cols-6">
+        {propertyCards}
+      </div>
+      
+    </div>
+  );
 }

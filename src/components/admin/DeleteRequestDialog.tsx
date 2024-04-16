@@ -19,7 +19,7 @@ export default function DeleteRequestDialog({
 }: PropsWithChildren<{ requestId: number }>) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const mutation = api.requests.delete.useMutation();
+  const mutation = requests.delete.useMutation();
 
   async function deleteRequest() {
     await mutation

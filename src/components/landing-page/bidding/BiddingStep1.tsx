@@ -1,4 +1,4 @@
-import BiddingFooter from "./BiddingFooter";
+
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -6,16 +6,12 @@ import Link from "next/link";
 import {ArrowRight} from 'lucide-react'
 import { Label } from "@/components/ui/label"
 import { useBidding } from "@/utils/store/listingBidding";
-type Step1Props = {
-  imageUrl: string;
-  propertyTitle: string;
-  airbnbPrice: number;
-};
+import { Button } from "@/components/ui/button";
+import { Property } from "@/server/db/schema";
+
 function BiddingStep1({
-  imageUrl = "https://a0.muscache.com/im/pictures/miso/Hosting-1039233709360808183/original/f6b8ac21-837e-465e-98d5-3755d14c33f1.jpeg?im_w=1200",
-  propertyTitle = "Property Title",
-  airbnbPrice = 100,
-}: Step1Props) {
+  property 
+}: {property:Property}) {
   const step = useBidding((state)=> state.step)
   const setStep = useBidding((state)=> state.setStep)
   function onPressNext(){
@@ -23,7 +19,7 @@ function BiddingStep1({
   }
   return (
     <div className="flex flex-col items-center justify-center relative w-full">
-      <h1 className="text-xl md:text-3xl font-semibold tracking-tight">
+      <h1 className="text-lg md:text-3xl font-semibold tracking-tight">
         Step 1 of 2: Make an offer
       </h1>
       <div className="mt-10 h-56 w-56">
@@ -32,7 +28,7 @@ function BiddingStep1({
           className="relative flex items-center justify-center"
         >
           <Image
-            src={imageUrl}
+            src={property.imageUrls[0]!}
             alt="Property Photo"
             fill
             className="object-fit rounded-xl"
@@ -40,10 +36,11 @@ function BiddingStep1({
         </AspectRatio>
       </div>
 
-      <h2 className="mt-2 text-lg font-semibold">{propertyTitle}</h2>
-      <p className="my-3 text-sm">Airbnb&apos;s Price: ${airbnbPrice}/night</p>
+      <h2 className="mt-2 text-lg font-semibold">{property.name}</h2>
+      <p className="my-3 text-sm">Airbnb&apos;s Price: ${property.originalNightlyPrice}/night</p>
       <div className="border-2 border-dashed border-accent px-24 py-2">
-        <p>$100</p>
+        {/* Change this to reccomended price */}
+        <p>$100 </p> 
       </div>
       <p className="my-2 text-sm">Recommended Price</p>
       <div className=" flex w-5/6 flex-row text-accent">
@@ -58,11 +55,12 @@ function BiddingStep1({
           <Input className="w-[350px]"/>
         </div>
       </div>
-
-      <BiddingFooter />
-      <Link href="/properties" className="font-light flex flex-row">
+      <Button onClick={()=>onPressNext()} className="px-32 mb-1">Review offer</Button>
+      <p className=" text-muted-foreground text-xs md:text-sm mb-5">Payment information will be taken in the next step</p>
+    {/* we need to create a new end point /properties/properties[id] */}
+      <Link href="/properties/[property.Id]" className="font-light flex flex-row text-sm md:text-base items-center">
         <a>View full propery details</a>
-        <ArrowRight/>
+        <ArrowRight size={18}/>
       </Link>
     </div>
   );
