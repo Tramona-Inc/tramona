@@ -60,8 +60,11 @@ export default function CitiesFilter() {
 
   return (
     <div className="grid grid-cols-7 items-center gap-5 md:grid-cols-10">
-      <div className="col-span-4 md:col-span-7">
-        <ScrollArea className="overflow-x-auto whitespace-nowrap rounded-md">
+      <div className="col-span-4 md:col-span-7 xl:col-span-8">
+        <ScrollArea
+          className="overflow-x-auto whitespace-nowrap rounded-md"
+          ref={scrollContainerRef}
+        >
           <div className="flex space-x-4 p-4">
             {cities.map((city, index) => {
               return <div key={index}>{city}</div>;
@@ -82,7 +85,7 @@ export default function CitiesFilter() {
 
       <Button
         variant={"outlineLight"}
-        className="col-span-2 border-[1px] p-3 py-6 font-bold"
+        className="col-span-2 border-[1px] p-3 py-6 font-bold xl:col-span-1"
       >
         <LucideListFilter />
         Filter
