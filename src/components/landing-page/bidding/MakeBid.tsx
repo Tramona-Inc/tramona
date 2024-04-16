@@ -5,6 +5,7 @@ import { useBidding } from "@/utils/store/listingBidding";
 
 function MakeBid() {
   const step = useBidding((state) => state.step);
+  
   return (
     <div>
       {step == 0 && (

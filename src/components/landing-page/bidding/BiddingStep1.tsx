@@ -16,7 +16,11 @@ function BiddingStep1({
   propertyTitle = "Property Title",
   airbnbPrice = 100,
 }: Step1Props) {
-  const step = useBidding(state=> state.step)
+  const step = useBidding((state)=> state.step)
+  const setStep = useBidding((state)=> state.setStep)
+  function onPressNext(){
+    setStep(step + 1)
+  }
   return (
     <div className="flex flex-col items-center justify-center relative w-full">
       <h1 className="text-xl md:text-3xl font-semibold tracking-tight">
