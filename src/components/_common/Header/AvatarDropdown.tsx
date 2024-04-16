@@ -105,11 +105,11 @@ export default function AvatarDropdown({ session }: { session: Session }) {
           </Link>
         </DropdownMenuItem>
         {/* <DropdownMenuItem asChild>
-          <Link href="/">
-            <ExternalLinkIcon />
-            Tramona Homepage
-          </Link>
-        </DropdownMenuItem> */}
+         <Link href="/">
+           <ExternalLinkIcon />
+           Tramona Homepage
+         </Link>
+       </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           red

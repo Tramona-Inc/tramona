@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";

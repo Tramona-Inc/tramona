@@ -87,14 +87,21 @@ export const propertiesRouter = createTRPCRouter({
         imageUrls: input.imageUrls.map((urlObject) => urlObject.value),
       });
     }),
-  getHostProperties: roleRestrictedProcedure(["host"])
-    .query(async ({ ctx }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-
-      return ctx.db.query.properties.findMany({
+  getHostProperties: roleRestrictedProcedure(["host"]).query(
+    async ({ ctx }) => {
+      return await ctx.db.query.properties.findMany({
         where: eq(properties.hostId, ctx.user.id),
       });
-    }),
+    },
+  ),
+
+  getHostRequestsSidebar: roleRestrictedProcedure(["host"]).query(
+    async ({ ctx }) => {
+      return await ctx.db.query.properties.findMany({
+        columns: { imageUrls: true, name: true, address: true },
+        where: eq(properties.hostId, ctx.user.id),
+        with: {},
+      });
+    },
+  ),
 });

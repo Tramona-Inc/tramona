@@ -81,7 +81,7 @@ const adminNavLinks = [
 const hostNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
   {
-    href: "/host/incoming-requests",
+    href: "/host/requests",
     name: "Incoming Requests",
     icon: Handshake,
   },

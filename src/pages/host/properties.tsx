@@ -97,12 +97,12 @@ function PropertyCard({ property }: { property: Property }) {
               <DotsVerticalIcon />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent side="right" align="start">
             <DropdownMenuItem>
               <EditIcon />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem red>
               <EyeOffIcon />
               Unlist
             </DropdownMenuItem>
