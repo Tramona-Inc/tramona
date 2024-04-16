@@ -55,6 +55,8 @@ export default function OnboardingFooter({
   const max_pages = 10;
 
   const progress = useHostOnboarding((state) => state.progress);
+  const isEdit = useHostOnboarding((state) => state.isEdit);
+  const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
   const resetSession = useHostOnboarding((state) => state.resetSession);
   const setProgress = useHostOnboarding((state) => state.setProgress);
   const { listing } = useHostOnboarding((state) => state);
@@ -100,12 +102,17 @@ export default function OnboardingFooter({
         otherHouseRules: listing.otherHouseRules ?? undefined,
       });
     } else {
-      if (isFormValid) {
+      if (isEdit && isFormValid) {
+        handleNext && handleNext(); // Call handleNext only if it exists
+        setIsEdit(false);
+        setProgress(9);
+      } else if (isFormValid) {
         handleNext && handleNext(); // Call handleNext only if it exists
         setProgress(progress + 1);
       } else {
         handleError && handleError();
       }
+
       if (!isForm) {
         setProgress(progress + 1);
       }
@@ -129,15 +136,17 @@ export default function OnboardingFooter({
         >
           Back
         </Button>
-        <Button onClick={onPressNext}>
-          {progress === 0
-            ? "Get Started"
-            : progress === 9
-              ? "Finish"
-              : progress === 8
-                ? "Review"
+        {isEdit ? (
+          <Button onClick={onPressNext}>Back to summary</Button>
+        ) : (
+          <Button onClick={onPressNext}>
+            {progress === 0
+              ? "Get Started"
+              : progress === 9
+                ? "Finish"
                 : "Next"}
-        </Button>
+          </Button>
+        )}
       </div>
     </div>
   );
