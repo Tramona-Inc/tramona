@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import {ArrowRight} from 'lucide-react'
 import { Label } from "@/components/ui/label"
+import { useBidding } from "@/utils/store/listingBidding";
 type Step1Props = {
   imageUrl: string;
   propertyTitle: string;
@@ -15,6 +16,7 @@ function BiddingStep1({
   propertyTitle = "Property Title",
   airbnbPrice = 100,
 }: Step1Props) {
+  const step = useBidding(state=> state.step)
   return (
     <div className="flex flex-col items-center justify-center relative w-full">
       <h1 className="text-xl md:text-3xl font-semibold tracking-tight">
