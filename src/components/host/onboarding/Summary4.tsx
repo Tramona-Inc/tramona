@@ -50,77 +50,89 @@ export default function Summary4() {
       </div>
 
       <div className="flex flex-col gap-2 capitalize text-muted-foreground">
-        <p>{listing.checkInType}</p>
-        <p className="flex flex-row">
-          Check in: {listing.checkIn} <Dot /> Check-out: {listing.checkOut}
-        </p>
-      </div>
-      {isEditing && (
-        <>
-          <RadioGroup
-            defaultValue={otherCheckInType ? "other" : checkInType}
-            onValueChange={handleRadioChange}
-          >
-            <div className="flex items-center space-x-2 rounded-lg border p-5">
-              <RadioGroupItem value="self" id="self" />
-              <Label htmlFor="self">
-                <h2 className="mb-2 text-lg font-bold">Self check-in / out</h2>
-                <p className="text-muted-foreground">
-                  Guests can check in and out by themselves
-                </p>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2 rounded-lg border p-5">
-              <RadioGroupItem value="host" id="host" />
-              <Label htmlFor="meet">
-                <h2 className="text-lg font-bold">Meet host at door</h2>
-                <p className="text-muted-foreground">
-                  Guests get the keys from you when they arrive at the property
-                </p>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2 rounded-lg border p-5">
-              <RadioGroupItem value="other" id="other" />
-              <Label htmlFor="option-two" className="text-lg font-bold">
-                Other
-              </Label>
-            </div>
-          </RadioGroup>
+        {isEditing ? (
           <div>
-            <p
-              className={cn(
-                !otherCheckInType && "text-muted-foreground",
-                "mb-2 text-sm font-semibold",
-              )}
+            <RadioGroup
+              defaultValue={otherCheckInType ? "other" : checkInType}
+              onValueChange={handleRadioChange}
             >
-              Other: please specify here
-            </p>
-            <Input
-              type="text"
-              disabled={!otherCheckInType}
-              value={otherCheckInType ? checkInType : ""}
-              onChange={(e) => setCheckInType(e.target.value)}
-            />
-            {/* //TODO display the character count */}
-            <p>Check-In</p>
-            <Input
-              type="time"
-              placeholder="Check in time"
-              className="p-5"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-            />
-            <p>Check-Out</p>
-            <Input
-              type="time"
-              placeholder="Check out time"
-              className="p-5"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-            />
+              <div className="flex items-center space-x-2 rounded-lg border p-3">
+                <RadioGroupItem value="self" id="self" />
+                <Label htmlFor="self">
+                  <h2 className="text-lg font-bold">Self check-in / out</h2>
+                  <p className="text-muted-foreground">
+                    Guests can check in and out by themselves
+                  </p>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 rounded-lg border p-3">
+                <RadioGroupItem value="host" id="host" />
+                <Label htmlFor="meet">
+                  <h2 className="text-lg font-bold">Meet host at door</h2>
+                  <p className="text-muted-foreground">
+                    Guests get the keys from you when they arrive at the
+                    property
+                  </p>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 rounded-lg border p-3">
+                <RadioGroupItem value="other" id="other" />
+                <Label htmlFor="option-two" className="text-lg font-bold">
+                  Other
+                </Label>
+              </div>
+            </RadioGroup>
+            <div>
+              <p
+                className={cn(
+                  !otherCheckInType && "text-muted-foreground",
+                  "mb-2 text-sm font-semibold",
+                )}
+              >
+                Other: please specify here
+              </p>
+
+              <Input
+                type="text"
+                disabled={!otherCheckInType}
+                value={otherCheckInType ? checkInType : ""}
+                onChange={(e) => setCheckInType(e.target.value)}
+              />
+              {/* //TODO display the character count */}
+            </div>
           </div>
-        </>
-      )}
+        ) : (
+          <p>{listing.checkInType}</p>
+        )}
+        {isEditing ? (
+          <div className="flex justify-evenly">
+            <div>
+              <p className="font-semibold">Check-In</p>
+              <Input
+                type="time"
+                placeholder="Check in time"
+                className="p-5"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+              />
+            </div>
+            <div>
+              <p className="font-semibold">Check-Out</p>
+              <Input
+                type="time"
+                placeholder="Check out time"
+                className="p-5"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+              />
+            </div>
+          </div>
+        ) : (
+          <p className="flex flex-row">
+            Check in: {listing.checkIn} <Dot /> Check-out: {listing.checkOut}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

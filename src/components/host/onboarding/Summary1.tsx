@@ -36,13 +36,14 @@ export default function Summary1() {
       {isEditing && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">Select your property type</Button>
+            <Button variant="outline">Edit your property type</Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
+          <DropdownMenuContent className="w-60">
             {propertyTypeOptions.map((item) => (
               <DropdownMenuItem
                 key={item.title}
                 onClick={() => setPropertyType(item.id)}
+                className="cursor-pointer p-1"
               >
                 {item.id}
               </DropdownMenuItem>

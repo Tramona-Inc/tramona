@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useState } from "react";
 
@@ -27,28 +28,32 @@ export default function Summary7() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-2 capitalize text-muted-foreground">
-        <h2 className="font-semibold text-primary">Title</h2>
-        <p>{listing.title}</p>
-        <h2 className="font-semibold text-primary">Description</h2>
-        <p>{listing.description}</p>
-      </div>
-      {isEditing && (
-        <>
-          <label htmlFor="title">Edit title</label>
+      <div className="flex flex-col gap-2 text-muted-foreground">
+        <h2 className="font-semibold text-primary">
+          {isEditing ? "Edit Title" : "Title"}
+        </h2>
+        {isEditing ? (
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <label htmlFor="description">Edit description</label>
+        ) : (
+          <p className="capitalize">{listing.title}</p>
+        )}
+        <h2 className="font-semibold text-primary">
+          {isEditing ? "Edit Description" : "Description"}
+        </h2>
+        {isEditing ? (
           <Input
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-        </>
-      )}
+        ) : (
+          <p>{listing.description}</p>
+        )}
+      </div>
     </div>
   );
 }

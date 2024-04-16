@@ -142,9 +142,11 @@ export default function OnboardingFooter({
           <Button onClick={onPressNext}>
             {progress === 0
               ? "Get Started"
-              : progress === 9
-                ? "Finish"
-                : "Next"}
+              : progress === 8
+                ? "Review"
+                : progress === 9
+                  ? "Finish"
+                  : "Next"}
           </Button>
         )}
       </div>

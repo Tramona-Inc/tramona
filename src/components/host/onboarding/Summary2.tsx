@@ -4,11 +4,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@radix-ui/react-dropdown-menu";
-import { Dot } from "lucide-react";
+} from "@/components/ui/dropdown-menu";
+import { Dot, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Total } from "./Onboarding3";
 import { options as spaceTypeOptions } from "./Onboarding3";
 
 export default function Summary2() {
@@ -29,6 +28,47 @@ export default function Summary2() {
 
   const bathrooms = useHostOnboarding((state) => state.listing.bathrooms);
   const setBathrooms = useHostOnboarding((state) => state.setBathrooms);
+
+  function Total({
+    name,
+    total,
+    setTotal,
+  }: {
+    name: string;
+    total: number;
+    setTotal: (total: number) => void;
+  }) {
+    return (
+      <div className="flex flex-row items-center justify-between border-b-2 p-1">
+        <h1 className="font-semibold">{name}</h1>
+        <div className="grid max-w-[150px] grid-cols-3 place-items-center">
+          <Button
+            variant="increment"
+            className="text-4xl"
+            size={"icon"}
+            onClick={() => {
+              if (total - 1 > 0) {
+                setTotal(total - 1);
+              }
+            }}
+          >
+            <Minus color="gray" />
+          </Button>
+          <div className="text-lg font-semibold">{total}</div>
+          <Button
+            variant="increment"
+            className="text-4xl"
+            size={"icon"}
+            onClick={() => {
+              setTotal(total + 1);
+            }}
+          >
+            <Plus color="gray" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -61,13 +101,14 @@ export default function Summary2() {
           <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">Select your living situation</Button>
+                <Button variant="outline">Edit your living situation</Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
+              <DropdownMenuContent className="w-60">
                 {spaceTypeOptions.map((item) => (
                   <DropdownMenuItem
                     key={item.title}
                     onClick={() => setSpaceType(item.id)}
+                    className="cursor-pointer p-1"
                   >
                     {item.id}
                   </DropdownMenuItem>
@@ -92,7 +133,6 @@ export default function Summary2() {
           </>
         )}
       </div>
-      {/* </Heading> */}
     </>
   );
 }
