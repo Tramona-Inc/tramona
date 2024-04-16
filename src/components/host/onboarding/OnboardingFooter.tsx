@@ -102,7 +102,7 @@ export default function OnboardingFooter({
         otherHouseRules: listing.otherHouseRules ?? undefined,
       });
     } else {
-      if (isEdit && isFormValid) {
+      if (isEdit || isFormValid) {
         handleNext && handleNext(); // Call handleNext only if it exists
         setIsEdit(false);
         setProgress(9);
@@ -113,7 +113,10 @@ export default function OnboardingFooter({
         handleError && handleError();
       }
 
-      if (!isForm) {
+      if (!isForm && isEdit) {
+        setIsEdit(false);
+        setProgress(9);
+      } else {
         setProgress(progress + 1);
       }
     }
