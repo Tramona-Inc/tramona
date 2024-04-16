@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatDateRange } from "@/utils/utils";
-import { CalendarIcon, MapPinIcon, PlusIcon } from "lucide-react";
+import { CalendarIcon, MapPinIcon, PlusIcon, X } from "lucide-react";
 import { useForm, type FieldPath, type FieldValues } from "react-hook-form";
 import {
   Form,
@@ -25,6 +25,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
+import { type FormSchema as ParentFormSchema } from "./DesktopSearchBar";
+import { TRPCError } from "@trpc/server";
+import { errorToast } from "@/utils/toasts";
 
 // LP is short for landing page
 
@@ -265,7 +268,13 @@ export default function LPDateRangePicker<
   );
 }
 
-export function AirbnbLinkDialog() {
+export function AirbnbLinkDialog({
+  parentForm,
+  curTab,
+}: {
+  parentForm: ReturnType<typeof useForm<ParentFormSchema>>;
+  curTab: number;
+}) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const utils = api.useUtils();
@@ -284,20 +293,51 @@ export function AirbnbLinkDialog() {
     const response = await utils.misc.scrapeUsingLink.fetch({
       url: data.airbnbLink,
     });
-    console.log(response);
+
+    if (response instanceof TRPCError) {
+      errorToast("Couldn't retrieve data from AirBnB, please try again.");
+    } else {
+      parentForm.setValue(`data.${curTab}.airbnbLink`, data.airbnbLink);
+      parentForm.setValue(
+        `data.${curTab}.maxNightlyPriceUSD`,
+        response.nightlyPrice,
+      );
+      parentForm.setValue(`data.${curTab}.location`, response.propertyName);
+      parentForm.setValue(`data.${curTab}.date.from`, response.checkIn);
+      parentForm.setValue(`data.${curTab}.date.to`, response.checkOut);
+      parentForm.setValue(`data.${curTab}.numGuests`, response.numGuests);
+
+      setDialogOpen(false);
+    }
   };
 
   return (
     <div>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="rounded-full"
-        onClick={() => setDialogOpen(true)}
-      >
-        <PlusIcon /> Add an Airbnb Link
-      </Button>
+      {parentForm.getValues(`data.${curTab}.airbnbLink`) === undefined ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="rounded-full"
+          onClick={() => setDialogOpen(true)}
+        >
+          <PlusIcon />
+          Add an Airbnb Link
+        </Button>
+      ) : (
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="rounded-full"
+          onClick={() => setDialogOpen(true)}
+        >
+          <X />
+          {parentForm.getValues(`data.${curTab}.airbnbLink`)!.substring(0, 50)}
+          ...
+        </Button>
+      )}
+
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogTitle>Add an Airbnb link</DialogTitle>
@@ -311,6 +351,7 @@ export function AirbnbLinkDialog() {
               <FormField
                 control={form.control}
                 name={"airbnbLink"}
+                defaultValue={parentForm.getValues(`data.${curTab}.airbnbLink`)}
                 render={({ field }) => (
                   <LPFormItem className="">
                     <FormLabel>Link</FormLabel>
@@ -325,6 +366,7 @@ export function AirbnbLinkDialog() {
               <Button
                 type="submit"
                 onClick={form.handleSubmit((data) => onSubmit(data))}
+                isLoading={form.formState.isSubmitting}
                 disabled={form.formState.isSubmitting}
                 className="rounded-full"
               >

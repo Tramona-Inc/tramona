@@ -53,6 +53,7 @@ const formSchema = z.object({
             to: z.date(),
           }),
           numGuests: zodInteger({ min: 1 }),
+          airbnbLink: optional(zodString({ maxLen: 500 })),
           roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES, "any"]),
           minNumBedrooms: optional(zodInteger()),
           minNumBeds: optional(zodInteger()),
@@ -66,7 +67,7 @@ const formSchema = z.object({
     .min(1),
 });
 
-type FormSchema = z.infer<typeof formSchema>;
+export type FormSchema = z.infer<typeof formSchema>;
 
 export default function DesktopSearchBar({
   afterSubmit,
@@ -361,7 +362,9 @@ export default function DesktopSearchBar({
           </div>
         </div>
 
-        {mode === "request" && <AirbnbLinkDialog />}
+        {mode === "request" && (
+          <AirbnbLinkDialog parentForm={form} curTab={curTab} />
+        )}
 
         <div className="flex justify-center">
           <Button
