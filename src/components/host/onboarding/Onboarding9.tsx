@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
-import SaveAndExit from './SaveAndExit';
+import SaveAndExit from "./SaveAndExit";
 
 const formSchema = z.object({
   pets: z.string(),
@@ -130,7 +130,7 @@ export default function Onboarding9() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-lg font-bold text-primary">
-                    Anything you&apos;d like to add?
+                    Anything you&apos;d like to add? (optional)
                   </FormLabel>
                   <FormControl>
                     <Textarea

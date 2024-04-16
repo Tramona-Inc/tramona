@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
+import { useState } from "react";
 
 const formSchema = z.object({
   imageURLs: z
@@ -24,6 +25,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function Onboarding7() {
   const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
+  const [error, setError] = useState(false);
 
   console.log(imageURLs);
 
@@ -41,6 +43,10 @@ export default function Onboarding7() {
     setImageUrls(imageURLs);
   }
 
+  function handleError() {
+    setError(true);
+  }
+
   return (
     <>
       <SaveAndExit />
@@ -50,6 +56,9 @@ export default function Onboarding7() {
             <h1 className="font-old my-3 text-3xl">
               Add some photos of your property
             </h1>
+            {error && (
+              <p className="text-red-500">Please upload at least 5 photos</p>
+            )}
             <p className="mb-5 text-muted-foreground">
               Choose at least 5 photos (put your best photos first)
             </p>
@@ -89,6 +98,7 @@ export default function Onboarding7() {
         handleNext={form.handleSubmit(handleFormSubmit)}
         isFormValid={form.formState.isValid || imageURLs.length >= 5}
         isForm={true}
+        handleError={handleError}
       />
     </>
   );

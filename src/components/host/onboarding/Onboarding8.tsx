@@ -15,7 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
-import SaveAndExit from './SaveAndExit';
+import SaveAndExit from "./SaveAndExit";
+import { useState } from "react";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -31,6 +32,8 @@ export default function Onboarding8() {
   const description = useHostOnboarding((state) => state.listing.description);
   const setDescription = useHostOnboarding((state) => state.setDescription);
 
+  const [error, setError] = useState(false);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,11 +48,18 @@ export default function Onboarding8() {
     setDescription(values.about);
   }
 
+  function handleError() {
+    setError(true);
+  }
+
   return (
     <>
       <SaveAndExit />
       <div className="container my-10 flex flex-grow flex-col justify-center">
         <h1 className="mb-8 text-3xl font-bold">Describe your listing</h1>
+        {error && (
+          <p className="text-red-500">Please fill out all required fields</p>
+        )}
         <Form {...form}>
           <div className="space-y-4">
             <FormField
@@ -96,6 +106,7 @@ export default function Onboarding8() {
         handleNext={form.handleSubmit(handleFormSubmit)}
         isFormValid={form.formState.isValid}
         isForm={true}
+        handleError={handleError}
       />
     </>
   );

@@ -68,6 +68,8 @@ export default function Onboarding4() {
   const propertyLocation = useHostOnboarding((state) => state.listing.location);
   const setLocationInStore = useHostOnboarding((state) => state.setLocation);
 
+  const [error, setError] = useState(false);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -92,28 +94,33 @@ export default function Onboarding4() {
 
     setLocationInStore(location);
   }
-  useEffect(() => {
-    if (isLocationFilled()) {
-      const location: LocationType = {
-        country: form.getValues("country"),
-        street: form.getValues("street"),
-        apt: form.getValues("apt") ?? undefined,
-        city: form.getValues("city"),
-        state: form.getValues("state"),
-        zipcode: form.getValues("zipcode"),
-      };
-      const addressConversion = `${location.street}${
-        location.apt ? `, ${location.apt}` : ""
-      }, ${location.city}, ${location.state} ${location.zipcode}, ${
-        location.country
-      }`;
-      setAddress(addressConversion);
-    }
-  }, [form.formState]);
+  // useEffect(() => {
+  //   if (isLocationFilled()) {
+  //     const location: LocationType = {
+  //       country: form.getValues("country"),
+  //       street: form.getValues("street"),
+  //       apt: form.getValues("apt") ?? undefined,
+  //       city: form.getValues("city"),
+  //       state: form.getValues("state"),
+  //       zipcode: form.getValues("zipcode"),
+  //     };
+  //     const addressConversion = `${location.street}${
+  //       location.apt ? `, ${location.apt}` : ""
+  //     }, ${location.city}, ${location.state} ${location.zipcode}, ${
+  //       location.country
+  //     }`;
+  //     setAddress(addressConversion);
+  //   }
+  // }, [form.formState]);
   //I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: address,
-  });
+  // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+  //   location: address,
+  // });
+
+  function handleError() {
+    setError(true);
+  }
+
   return (
     <>
       <SaveAndExit />
@@ -122,6 +129,9 @@ export default function Onboarding4() {
           <h1 className="text-4xl font-bold">
             Where&apos;s your property located?
           </h1>
+          {error && (
+            <p className="text-red-500">Please fill out all required fields</p>
+          )}
 
           <Form {...form}>
             <FormField
@@ -214,18 +224,19 @@ export default function Onboarding4() {
               />
             </div>
           </Form>
-          {coordinateData && (
+          {/* {coordinateData && (
             <LeafletMap
               lat={coordinateData.coordinates.lat}
               lng={coordinateData.coordinates.lng}
             />
-          )}
+          )} */}
         </div>
       </div>
       <OnboardingFooter
         handleNext={form.handleSubmit(handleFormSubmit)}
         isFormValid={form.formState.isValid}
         isForm={true}
+        handleError={handleError}
       />
     </>
   );

@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
+import { useState } from "react";
 
 const formSchema = z.object({
   checkIn: zodString({ maxLen: 100 }),
@@ -45,6 +46,8 @@ export default function Onboarding4() {
   const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
   const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
 
+  const [error, setError] = useState(false);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,6 +59,10 @@ export default function Onboarding4() {
   async function handleFormSubmit(values: FormSchema) {
     setCheckIn(values.checkIn);
     setCheckOut(values.checkOut);
+  }
+
+  function handleError() {
+    setError(true);
   }
 
   return (
@@ -123,6 +130,11 @@ export default function Onboarding4() {
           <Form {...form}>
             <div className="mt-5 w-full">
               <h1 className="mb-2 text-xl font-bold">Hours</h1>
+              {error && (
+                <p className="text-red-500">
+                  Please include both a check in and check out time
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-5">
                 <FormField
                   control={form.control}
@@ -147,7 +159,7 @@ export default function Onboarding4() {
                   name="checkOut"
                   render={({ field }) => (
                     <FormItem>
-                      <Label className="font-semibold">Check in</Label>
+                      <Label className="font-semibold">Check out</Label>
                       <Input
                         {...field}
                         type="time"
@@ -169,6 +181,7 @@ export default function Onboarding4() {
         handleNext={form.handleSubmit(handleFormSubmit)}
         isFormValid={form.formState.isValid}
         isForm={true}
+        handleError={handleError}
       />
     </>
   );

@@ -1,9 +1,15 @@
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { Dot, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
-import {api} from '@/utils/api'
+import { api } from "@/utils/api";
 import LeafletMap from "./LeafletMap";
+import React from "react";
+import Summary1 from "./Summary1";
+import Summary2 from "./Summary2";
+import Summary4 from "./Summary4";
+import Summary7 from "./Summary7";
+import Summary8 from "./Summary8";
 
 function Heading({
   title,
@@ -16,6 +22,7 @@ function Heading({
 }) {
   // const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
+  const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
 
   return (
     <div className="flex flex-col gap-3 py-5">
@@ -25,6 +32,7 @@ function Heading({
           className="text-sm underline transition duration-200 hover:cursor-pointer hover:text-muted-foreground"
           onClick={() => {
             if (editPage) {
+              setIsEdit(true);
               setProgress(editPage);
             }
           }}
@@ -33,7 +41,7 @@ function Heading({
         </p>
       </div>
 
-      <div className="flex flex-col gap-2 capitalize text-muted-foreground">
+      <div className="flex flex-col gap-2 text-muted-foreground">
         {children}
       </div>
     </div>
@@ -42,39 +50,28 @@ function Heading({
 
 export default function Onboarding10() {
   const { listing } = useHostOnboarding((state) => state);
+
   const address = `${listing.location.street}${listing.location.apt ? `, ${listing.location.apt}` : ""}, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${listing.location.country}`;
 
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: address,
-  });
-  console.log(address)
-  console.log("this is ")
- // console.log(coordinateData.coordinates.lat, coordinateData.coordinates.lng)
+  // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+  //   location: address,
+  // });
+  // console.log(address);
+  // console.log("this is ");
+  // console.log(coordinateData.coordinates.lat, coordinateData.coordinates.lng)
 
   return (
     <>
       <div className="container my-10 flex-grow sm:px-32">
         <h1 className="mb-8 text-3xl font-semibold">Review your listing</h1>
         <div className="grid grid-cols-1 space-y-3 divide-y">
-          <Heading title={"Type of Property"} editPage={1}>
-            <p>{listing.propertyType}</p>
-          </Heading>
-          <Heading title={"Living Situation"} editPage={2}>
-            <p className="capitalize ">{listing.spaceType}</p>
-            <div className="flex flex-row lowercase">
-              {listing.maxGuests} {listing.maxGuests > 1 ? " guests" : " guest"}{" "}
-              <Dot />
-              {listing.bedrooms}{" "}
-              {listing.bedrooms > 1 ? " bedrooms" : " bedroom"} <Dot />
-              {listing.beds} {listing.beds > 1 ? " beds" : " bed"} <Dot />
-              {listing.bathrooms}{" "}
-              {listing.bathrooms > 1 ? " bathrooms" : " bathroom"}
-            </div>
-          </Heading>
+          <Summary1 />
+          <Summary2 />
+
           <Heading title={"Location"} editPage={3}>
             <div className="flex flex-row gap-5">
               <MapPin />
-            
+
               <div>
                 <p> {listing.location.street}</p>
                 {listing.location.apt && <p>{listing.location.apt}</p>}
@@ -85,16 +82,11 @@ export default function Onboarding10() {
                 <p>{listing.location.country}</p>
               </div>
             </div>
-              {coordinateData &&
+            {/* {coordinateData &&
               (<LeafletMap lat={coordinateData.coordinates.lat} lng={coordinateData.coordinates.lng}/>)
-              }
+              } */}
           </Heading>
-          <Heading title={"Check-in"} editPage={4}>
-            <p>{listing.checkInType}</p>
-            <p className="flex flex-row">
-              Check in: {listing.checkIn} <Dot /> Check-out: {listing.checkOut}
-            </p>
-          </Heading>
+          <Summary4 />
           <Heading title={"Amenities"} editPage={5}>
             <div className="grid grid-cols-2 gap-5">
               {listing.amenities.map((amenity, index) => (
@@ -149,28 +141,8 @@ export default function Onboarding10() {
               </div>
             </div>
           </Heading>
-          <Heading title={"Photos"} editPage={7}>
-            <h2 className="font-semibold text-primary">Title</h2>
-            <p>{listing.title}</p>
-            <h2 className="font-semibold text-primary">Description</h2>
-            <p>{listing.description}</p>
-          </Heading>
-          <Heading title={"House Rules"} editPage={8}>
-            <p>
-              Pets{" "}
-              <span className="lowercase">
-                {listing.petsAllowed ? "allowed" : "not allowed"}
-              </span>
-            </p>
-            <p>
-              Smoking{" "}
-              <span className="lowercase">
-                {listing.smokingAllowed ? "allowed" : "not allowed"}
-              </span>
-            </p>
-            <h2 className="font-semibold text-primary">Other House Rules</h2>
-            <p>{listing.otherHouseRules}</p>
-          </Heading>
+          <Summary7 />
+          <Summary8 />
         </div>
       </div>
       <OnboardingFooter isForm={false} />

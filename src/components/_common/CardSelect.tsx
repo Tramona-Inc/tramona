@@ -20,7 +20,7 @@ export default function CardSelect({
     <div
       className={cn(
         hover && "hover:border-black",
-        `flex flex-row items-center gap-5 rounded-[12px] border-[2px] p-5 transition-all sm:p-6 lg:p-7 ${
+        `flex cursor-pointer flex-row items-center gap-5 rounded-[12px] border-[2px] p-5 transition-all sm:p-6 lg:p-7 ${
           isSelected ? "border-black" : ""
         }`,
       )}
