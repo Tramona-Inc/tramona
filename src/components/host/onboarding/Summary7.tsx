@@ -1,5 +1,4 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useState } from "react";
 
