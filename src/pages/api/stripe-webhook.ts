@@ -17,7 +17,6 @@ import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { api } from "@/utils/api";
 
-
 // ! Necessary for stripe
 export const config = {
   api: {
@@ -80,20 +79,19 @@ export default async function webhook(
             ),
           );
 
-          const user = await db.query.users.findFirst({
-            where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
-          });
+        const user = await db.query.users.findFirst({
+          where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
+        });
 
-
-        const twilioMutation = api.twilio.sendSMS.useMutation();
+        const twilioMutation = twilio.sendSMS.useMutation();
         const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
         if (user?.isWhatsApp) {
           await twilioWhatsAppMutation.mutateAsync({
             templateId: "HXb0989d91e9e67396e9a508519e19a46c",
-            to: paymentIntentSucceeded.metadata.phoneNumber!
-          })
-        } else{
+            to: paymentIntentSucceeded.metadata.phoneNumber!,
+          });
+        } else {
           await twilioMutation.mutateAsync({
             to: paymentIntentSucceeded.metadata.phoneNumber!,
             msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
