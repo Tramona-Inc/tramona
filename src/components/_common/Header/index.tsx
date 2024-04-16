@@ -59,9 +59,9 @@ function LargeHeader(props: HeaderProps) {
             {session?.user.role === "host" && isHostPath === "host" ? (
               <Link href="/">Switch to Traveller</Link>
             ) : session?.user.role !== "host" ? (
-              <Link href="/host">Become a host</Link>
+              <Link href="/for-hosts/sign-up">Become a host</Link>
             ) : (
-              <Link href="/">Switch to Traveller</Link>
+              <Link href="/host">Switch to Host</Link>
             )}
           </Button>
         ) : (

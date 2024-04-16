@@ -61,16 +61,13 @@ export default function CitiesFilter() {
   return (
     <div className="grid grid-cols-7 items-center gap-5 md:grid-cols-10">
       <div className="col-span-4 md:col-span-7 xl:col-span-8">
-        <ScrollArea
-          className="overflow-x-auto whitespace-nowrap rounded-md"
-          ref={scrollContainerRef}
-        >
-          <div className="flex space-x-4 p-4">
+        <ScrollArea className="overflow-x-auto whitespace-nowrap rounded-md">
+          <div className="flex space-x-4 p-4" ref={scrollContainerRef}>
             {cities.map((city, index) => {
               return <div key={index}>{city}</div>;
             })}
           </div>
-          <ScrollBar orientation="horizontal" ref={scrollContainerRef} />
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
 
