@@ -8,10 +8,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { ALL_PROPERTY_TYPES, MAX_REQUEST_GROUP_SIZE } from "@/server/db/schema";
+import {
+  ALL_PROPERTY_ROOM_TYPES,
+  MAX_REQUEST_GROUP_SIZE,
+} from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { capitalize, cn, formatCurrency, getNumNights } from "@/utils/utils";
+import { cn, formatCurrency, getNumNights } from "@/utils/utils";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, XIcon } from "lucide-react";
@@ -49,7 +52,7 @@ const formSchema = z.object({
             to: z.date(),
           }),
           numGuests: zodInteger({ min: 1 }),
-          propertyType: z.enum([...ALL_PROPERTY_TYPES, "any"]),
+          roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES, "any"]),
           minNumBedrooms: optional(zodInteger()),
           minNumBeds: optional(zodInteger()),
           note: optional(zodString()),
@@ -72,7 +75,7 @@ export default function DesktopSearchBar({
   const utils = api.useUtils();
 
   const defaultValues: Partial<FormSchema["data"][number]> = {
-    propertyType: "any",
+    roomType: "any",
   };
 
   const form = useForm<FormSchema>({
@@ -128,8 +131,8 @@ export default function DesktopSearchBar({
             numGuests: request.numGuests,
           });
 
-        const requestedPrice = request.maxNightlyPriceUSD;
-        const priceDifference = averageNightlyPrice - requestedPrice;
+        const requestedPrice: number = request.maxNightlyPriceUSD;
+        const priceDifference: number = averageNightlyPrice - requestedPrice;
         const priceDiffPercent = (priceDifference / averageNightlyPrice) * 100;
 
         if (request.maxNightlyPriceUSD < averageNightlyPrice) {
@@ -162,7 +165,7 @@ export default function DesktopSearchBar({
       const {
         date: _date,
         maxNightlyPriceUSD,
-        propertyType,
+        roomType,
         ...restData
       } = request;
       const checkIn = request.date.from;
@@ -173,7 +176,7 @@ export default function DesktopSearchBar({
         checkIn: checkIn,
         checkOut: checkOut,
         maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
-        propertyType: propertyType === "any" ? undefined : propertyType,
+        roomType: roomType === "any" ? undefined : roomType,
         ...restData,
       };
     });
@@ -198,7 +201,6 @@ export default function DesktopSearchBar({
         await mutation.mutateAsync(newRequests).catch(() => {
           throw new Error();
         });
-        await utils.requests.invalidate();
 
         // we need to do this instead of form.reset() since i
         // worked around needing to give defaultValues to useForm
@@ -388,6 +390,7 @@ export default function DesktopSearchBar({
               <Button
                 type="submit"
                 onClick={form.handleSubmit((data) => onSubmit(data.data))}
+                disabled={form.formState.isSubmitting}
                 className="rounded-full"
               >
                 Confirm
@@ -450,7 +453,7 @@ function FiltersSection({
   const [isExpanded, setIsExpanded] = useState(false);
 
   // DD is short for dropdown
-  const [propertyTypeDDIsOpen, setPropertyTypeDDIsOpen] = useState(false);
+  const [roomTypeDDIsOpen, setRoomTypeDDIsOpen] = useState(false);
 
   return (
     <div>
@@ -484,28 +487,28 @@ function FiltersSection({
           />
           <FormField
             control={form.control}
-            name={`data.${curTab}.propertyType`}
+            name={`data.${curTab}.roomType`}
             render={({ field }) => (
               <LPFormItem className="col-span-full lg:col-span-1">
                 <FormLabel
                   className={classNames.buttonLabel({
-                    isFocused: propertyTypeDDIsOpen,
+                    isFocused: roomTypeDDIsOpen,
                   })}
                 >
-                  Property Type
+                  Room Type
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  open={propertyTypeDDIsOpen}
-                  onOpenChange={setPropertyTypeDDIsOpen}
+                  open={roomTypeDDIsOpen}
+                  onOpenChange={setRoomTypeDDIsOpen}
                 >
                   <FormControl>
                     <SelectTrigger
                       className={cn(
                         classNames.button({
                           isPlaceholder: field.value === "any",
-                          isFocused: propertyTypeDDIsOpen,
+                          isFocused: roomTypeDDIsOpen,
                         }),
                         "text-base",
                       )}
@@ -515,9 +518,9 @@ function FiltersSection({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="any">Any</SelectItem>
-                    {ALL_PROPERTY_TYPES.map((propertyType) => (
-                      <SelectItem key={propertyType} value={propertyType}>
-                        {capitalize(propertyType)}
+                    {ALL_PROPERTY_ROOM_TYPES.map((roomType) => (
+                      <SelectItem key={roomType} value={roomType}>
+                        {roomType}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -14,7 +14,7 @@ type AirbnbListing = {
   bedrooms: number;
   beds: number;
   city: string;
-  images: any[];
+  images: unknown[];
   hostThumbnail: string;
   isSuperhost: boolean;
   rareFind: boolean;
@@ -25,8 +25,8 @@ type AirbnbListing = {
   type: string;
   userId: number;
   address: string;
-  amenityIds: any[];
-  previewAmenities: any[];
+  amenityIds: unknown[];
+  previewAmenities: unknown[];
   cancelPolicy: string;
   price: {
     rate: number;
@@ -37,7 +37,7 @@ type AirbnbListing = {
 
 type ApiResponse = {
   error: boolean;
-  headers: any;
+  headers: unknown;
   results: AirbnbListing[];
 };
 
@@ -75,9 +75,11 @@ export const miscRouter = createTRPCRouter({
 
       // Calculate average nightly price
       const averageNightlyPrice =
-        price.results.reduce((acc, listing) => {
-          return acc + listing.price.rate;
-        }, 0) / price.results.length;
+        Array.isArray(price.results) && price.results.length > 0
+          ? price.results.reduce((acc, listing) => {
+              return acc + listing.price.rate;
+            }, 0) / price.results.length
+          : 0;
 
       return averageNightlyPrice;
     }),

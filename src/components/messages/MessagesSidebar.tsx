@@ -36,8 +36,7 @@ export function MessageConversation({
   const { mutateAsync: setMessageToReadMutate } =
     api.messages.setMessageToRead.useMutation();
 
-  const { mutate, isLoading } = api.users.updateProfile.useMutation({});
-  const utils = api.useUtils();
+  const { mutate } = api.users.updateProfile.useMutation();
 
   const setConversationReadState = useConversation(
     (state) => state.setConversationReadState,
@@ -51,7 +50,6 @@ export function MessageConversation({
           id: session.user.id,
           lastTextAt: sub(new Date(), { hours: 2 }),
         });
-        await utils.messages.invalidate();
       }
     }
     // Update local state to true
