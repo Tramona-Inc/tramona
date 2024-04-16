@@ -12,7 +12,7 @@ import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
 import { useState } from "react";
 
-const options = [
+export const options = [
   {
     id: "Entire place" as SpaceType,
     icon: <Home />,
@@ -33,7 +33,7 @@ const options = [
   },
 ];
 
-function Total({
+export function Total({
   name,
   total,
   setTotal,

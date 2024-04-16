@@ -130,7 +130,13 @@ export default function OnboardingFooter({
           Back
         </Button>
         <Button onClick={onPressNext}>
-          {progress === 0 ? "Get Started" : progress === 9 ? "Finish" : "Next"}
+          {progress === 0
+            ? "Get Started"
+            : progress === 9
+              ? "Finish"
+              : progress === 8
+                ? "Review"
+                : "Next"}
         </Button>
       </div>
     </div>

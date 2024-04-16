@@ -94,28 +94,29 @@ export default function Onboarding4() {
 
     setLocationInStore(location);
   }
-  useEffect(() => {
-    if (isLocationFilled()) {
-      const location: LocationType = {
-        country: form.getValues("country"),
-        street: form.getValues("street"),
-        apt: form.getValues("apt") ?? undefined,
-        city: form.getValues("city"),
-        state: form.getValues("state"),
-        zipcode: form.getValues("zipcode"),
-      };
-      const addressConversion = `${location.street}${
-        location.apt ? `, ${location.apt}` : ""
-      }, ${location.city}, ${location.state} ${location.zipcode}, ${
-        location.country
-      }`;
-      setAddress(addressConversion);
-    }
-  }, [form.formState]);
+  // useEffect(() => {
+  //   if (isLocationFilled()) {
+  //     const location: LocationType = {
+  //       country: form.getValues("country"),
+  //       street: form.getValues("street"),
+  //       apt: form.getValues("apt") ?? undefined,
+  //       city: form.getValues("city"),
+  //       state: form.getValues("state"),
+  //       zipcode: form.getValues("zipcode"),
+  //     };
+  //     const addressConversion = `${location.street}${
+  //       location.apt ? `, ${location.apt}` : ""
+  //     }, ${location.city}, ${location.state} ${location.zipcode}, ${
+  //       location.country
+  //     }`;
+  //     setAddress(addressConversion);
+  //   }
+  // }, [form.formState]);
   //I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: address,
-  });
+  // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+  //   location: address,
+  // });
+
   function handleError() {
     setError(true);
   }
@@ -223,12 +224,12 @@ export default function Onboarding4() {
               />
             </div>
           </Form>
-          {coordinateData && (
+          {/* {coordinateData && (
             <LeafletMap
               lat={coordinateData.coordinates.lat}
               lng={coordinateData.coordinates.lng}
             />
-          )}
+          )} */}
         </div>
       </div>
       <OnboardingFooter

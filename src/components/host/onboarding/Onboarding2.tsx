@@ -16,7 +16,7 @@ import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
 import { useState } from "react";
 
-const options = [
+export const options = [
   {
     id: "Apartment" as PropertyType,
     icon: <ApartmentIcon />,
