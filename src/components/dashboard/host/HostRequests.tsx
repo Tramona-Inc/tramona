@@ -2,17 +2,21 @@ import Spinner from "@/components/_common/Spinner";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/utils/api";
-import { plural } from "@/utils/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
-export default function HostRequests() {
+export default function HostRequests({ children }: React.PropsWithChildren) {
+  const router = useRouter();
+  const propertyId = router.query.id as string;
+
+  // const  {data: requests} = api.requests.get
   const { data: properties } = api.properties.getHostProperties.useQuery();
 
   return (
-    <div className="flex min-h-screen-minus-header">
-      <ScrollArea className="sticky inset-y-0 w-80 px-2 py-8">
-        <h1 className="text-4xl font-bold">Offers & Requests</h1>
+    <div className="flex">
+      <ScrollArea className="sticky inset-y-0 h-screen-minus-header w-96 px-4 py-8">
+        <h1 className="text-2xl font-bold">Offers & Requests</h1>
         <div className="pt-4">
           {properties ? (
             properties.map((property) => (
@@ -43,6 +47,13 @@ export default function HostRequests() {
           )}
         </div>
       </ScrollArea>
+      {children ?? (
+        <div className="grid h-screen-minus-header flex-1 place-items-center">
+          <p className="font-medium text-muted-foreground">
+            Select a property to view its requests
+          </p>
+        </div>
+      )}
     </div>
   );
 }
