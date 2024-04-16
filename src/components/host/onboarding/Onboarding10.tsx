@@ -20,7 +20,7 @@ function Heading({
   editPage?: number;
   children: React.ReactNode;
 }) {
-  // const progress = useHostOnboarding((state) => state.progress);
+
   const setProgress = useHostOnboarding((state) => state.setProgress);
   const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
 
@@ -53,13 +53,9 @@ export default function Onboarding10() {
 
   const address = `${listing.location.street}${listing.location.apt ? `, ${listing.location.apt}` : ""}, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${listing.location.country}`;
 
-  // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-  //   location: address,
-  // });
-  // console.log(address);
-  // console.log("this is ");
-  // console.log(coordinateData.coordinates.lat, coordinateData.coordinates.lng)
-
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: address,
+  });
   return (
     <>
       <div className="container my-10 flex-grow sm:px-32">
@@ -82,9 +78,12 @@ export default function Onboarding10() {
                 <p>{listing.location.country}</p>
               </div>
             </div>
-            {/* {coordinateData &&
-              (<LeafletMap lat={coordinateData.coordinates.lat} lng={coordinateData.coordinates.lng}/>)
-              } */}
+            {coordinateData &&
+              (<div className="z-0">
+                
+                <LeafletMap lat={coordinateData.coordinates.lat} lng={coordinateData.coordinates.lng}/>
+                </div>)
+              }
           </Heading>
           <Summary4 />
           <Heading title={"Amenities"} editPage={5}>
