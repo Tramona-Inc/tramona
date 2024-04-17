@@ -216,9 +216,9 @@ function categorizeAmenities(amenities: string[]): Record<string, string[]> {
     categorizedAmenities[category] = [];
   });
 
-  categorizedAmenities["Other"] = [];
+  categorizedAmenities.Other = [];
   amenities.forEach((amenity) => {
-    const category = amenityLookup[amenity] || "Other";
+    const category = amenityLookup[amenity] ?? "Other";
     categorizedAmenities[category]!.push(amenity);
   });
 
@@ -235,14 +235,14 @@ const AmenitiesComponent: React.FC<{ propertyAmenities: string[] }> = ({
       {Object.entries(categorizedAmenities).map(([category, amenities]) => {
         const categoryDetails = categories[
           category as keyof typeof categories
-        ] || { icon: BookHeartIcon }; 
+        ] ?? { icon: BookHeartIcon }; 
 
         return (
           amenities.length > 0 && (
             <div key={category} className="category-section">
               <h3 className="inline-flex items-center justify-center py-2 text-black">
                 {React.createElement(categoryDetails.icon)}
-                <h3 className="text-md ml-2 font-semibold">{category}</h3>
+                <p className="text-md ml-2 font-semibold">{category}</p>
               </h3>
               <div className="flex flex-col gap-2">
                 {amenities.map((amenity) => (

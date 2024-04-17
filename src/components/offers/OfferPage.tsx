@@ -1,6 +1,5 @@
 import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
@@ -22,15 +21,11 @@ import {
   plural,
 } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
-import { StarFilledIcon } from "@radix-ui/react-icons";
 import {
   CheckIcon,
-  XIcon,
   ImagesIcon,
   ChevronRight,
   MapPin,
-  ZapIcon,
-  BaggageClaimIcon,
   TreePalmIcon,
   LandPlotIcon,
   FishIcon,
@@ -39,7 +34,6 @@ import {
   MountainSnowIcon,
   MountainIcon,
   CookingPotIcon,
-  ShieldCheckIcon,
   UsersRoundIcon,
   CalendarDays,
   EggFriedIcon,
@@ -77,9 +71,8 @@ import {
 import AmenitiesComponent from "./CategorizedAmenities";
 
 type LucideIcon = FunctionComponent<SVGProps<SVGSVGElement>>;
-type AmenityIcons = {
-  [amenityName: string]: LucideIcon;
-};
+
+type AmenityIcons = Record<string, LucideIcon>;
 
 // prettier-ignore
 const amenityIcons: AmenityIcons = {
@@ -220,7 +213,6 @@ export default function OfferPage({
   if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
     isBooked = true;
   }
-  console.log(request);
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: property.address!,
@@ -631,7 +623,7 @@ export default function OfferPage({
       {property.checkInTime && (
         <div>
           <hr className="h-px border-0 bg-gray-300" />
-          <section id="house-rules" className="scroll-mt-36">
+          <section id="house-rules" className="scroll-mt-36 mt-4">
             <h1 className="text-lg font-bold">House rules</h1>
             {property.checkInTime && property.checkOutTime && (
               <div className="my-2 flex items-center justify-start gap-16">
