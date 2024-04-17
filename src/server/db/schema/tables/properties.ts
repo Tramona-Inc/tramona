@@ -169,7 +169,7 @@ export const propertySelectSchema = createSelectSchema(properties);
 // https://github.com/drizzle-team/drizzle-orm/issues/1609
 export const propertyInsertSchema = createInsertSchema(properties, {
   imageUrls: z.array(z.string().url()),
-  amenities: z.array(z.enum(ALL_PROPERTY_AMENITIES)),
+  amenities: z.array(z.string()),
   otherAmenities: z.array(z.string()),
 });
 

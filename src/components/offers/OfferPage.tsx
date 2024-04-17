@@ -1,8 +1,8 @@
-import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useState } from "react";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
 import {
   Dialog,
@@ -21,17 +21,17 @@ import {
   getTramonaFeeTotal,
   plural,
 } from "@/utils/utils";
-import { AspectRatio } from "../ui/aspect-ratio";
 import { StarFilledIcon } from "@radix-ui/react-icons";
-import { CheckIcon, XIcon } from "lucide-react";
+import "leaflet/dist/leaflet.css";
+import { CheckIcon } from "lucide-react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
-import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
-import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
-import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
+import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
+import { AspectRatio } from "../ui/aspect-ratio";
+import OfferPhotos from "./OfferPhotos";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
@@ -84,7 +84,7 @@ export default function OfferPage({
     offer.totalPrice / getNumNights(request.checkIn, request.checkOut);
 
   const discountPercentage = getDiscountPercentage(
-    property.originalNightlyPrice,
+    property.originalNightlyPrice ?? 0,
     offerNightlyPrice,
   );
 
@@ -92,7 +92,9 @@ export default function OfferPage({
   const checkOutDate = formatDateMonthDay(request.checkOut);
   const numNights = getNumNights(request.checkIn, request.checkOut);
 
-  const originalTotal = property.originalNightlyPrice * numNights;
+  const originalTotal = property.originalNightlyPrice
+    ? property.originalNightlyPrice * numNights
+    : 0;
 
   const tramonaServiceFee = getTramonaFeeTotal(
     originalTotal - offer.totalPrice,
@@ -255,14 +257,13 @@ export default function OfferPage({
               <Badge variant="secondary">{property.roomType}</Badge>
             </div>
             <div className="flex flex-wrap items-center gap-1">
-              {property.amenities.map((amenity) => (
+              {property.amenities?.map((amenity) => (
                 <Badge variant="secondary" key={amenity}>
                   {amenity}
                 </Badge>
               ))}
             </div>
           </div>
-
 
           <section>
             <div className="flex items-center gap-2">
@@ -278,7 +279,7 @@ export default function OfferPage({
             </div>
           </section>
           <section>
-            <div className="max-w-2xl rounded-lg bg-zinc-200 px-4 py-2 text-zinc-700 z-20">
+            <div className="z-20 max-w-2xl rounded-lg bg-zinc-200 px-4 py-2 text-zinc-700">
               <div className="line-clamp-3 break-words">{property.about}</div>
               <div className="flex justify-end">
                 <Dialog>
@@ -299,32 +300,30 @@ export default function OfferPage({
             </div>
           </section>
           <section className="space-y-1">
-
             {coordinateData && (
               <div className="relative z-10">
-
-              <MapContainer
-                center={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
-                ]}
-                zoom={15}
-                scrollWheelZoom={false}
-                style={{ height: "400px" }}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Circle
+                <MapContainer
                   center={[
                     coordinateData.coordinates.lat,
                     coordinateData.coordinates.lng,
                   ]}
-                  radius={200} // Adjust radius as needed
-                  pathOptions={{ color: "red" }} // Customize circle color and other options
-                />
-              </MapContainer>
+                  zoom={15}
+                  scrollWheelZoom={false}
+                  style={{ height: "400px" }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Circle
+                    center={[
+                      coordinateData.coordinates.lat,
+                      coordinateData.coordinates.lng,
+                    ]}
+                    radius={200} // Adjust radius as needed
+                    pathOptions={{ color: "red" }} // Customize circle color and other options
+                  />
+                </MapContainer>
               </div>
             )}
           </section>
@@ -382,7 +381,7 @@ export default function OfferPage({
                 isBooked={isBooked}
                 listingId={offer.id}
                 propertyName={property.name}
-                originalNightlyPrice={property.originalNightlyPrice}
+                originalNightlyPrice={property.originalNightlyPrice ?? 0}
                 airbnbUrl={property.airbnbUrl ?? ""}
                 checkIn={request.checkIn}
                 checkOut={request.checkOut}
