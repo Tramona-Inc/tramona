@@ -87,6 +87,7 @@ export const propertiesRouter = createTRPCRouter({
         imageUrls: input.imageUrls.map((urlObject) => urlObject.value),
       });
     }),
+
   getHostProperties: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
       return await ctx.db.query.properties.findMany({
@@ -97,11 +98,21 @@ export const propertiesRouter = createTRPCRouter({
 
   getHostRequestsSidebar: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
-      return await ctx.db.query.properties.findMany({
-        columns: { imageUrls: true, name: true, address: true },
-        where: eq(properties.hostId, ctx.user.id),
-        with: {},
-      });
+      return await ctx.db.query.properties
+        .findMany({
+          columns: { id: true, imageUrls: true, name: true, address: true },
+          where: eq(properties.hostId, ctx.user.id),
+          with: { requestsToProperties: true },
+        })
+        .then((res) =>
+          res.map((p) => {
+            const { requestsToProperties, ...rest } = p;
+            return {
+              ...rest,
+              numRequests: requestsToProperties.length,
+            };
+          }),
+        );
     },
   ),
 });
