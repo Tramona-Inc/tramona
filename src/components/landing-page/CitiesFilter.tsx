@@ -50,42 +50,39 @@ const cities: string[] = [
 ];
 
 export default function CitiesFilter() {
-  // TODO: get button to scroll
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollRight = () => {
     if (scrollContainerRef.current) {
-      // Scroll by a specific amount to the right
-      scrollContainerRef.current.scrollLeft += 2; // Adjust as needed
+      scrollContainerRef.current.scrollLeft += 100;
     }
   };
 
   return (
-    <div className="flex flex-row items-center gap-5">
-      <ScrollArea
-        ref={scrollContainerRef}
-        className="w-full overflow-hidden whitespace-nowrap rounded-md"
-      >
-        <div className="flex w-max space-x-4 p-4">
-          {cities.map((city, index) => {
-            return <div key={index}>{city}</div>;
-          })}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+    <div className="grid grid-cols-7 items-center gap-5 md:grid-cols-10">
+      <div className="col-span-4 md:col-span-7 xl:col-span-8">
+        <ScrollArea className="overflow-x-auto whitespace-nowrap rounded-md">
+          <div className="flex space-x-4 p-4" ref={scrollContainerRef}>
+            {cities.map((city, index) => {
+              return <div key={index}>{city}</div>;
+            })}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
 
       <Button
         variant={"ghost"}
         size={"sm"}
+        onClick={scrollRight}
         className="text-muted-foreground transition-all duration-300 hover:text-primary"
-        onClick={scrollRight} // Call scrollRight function on button click
       >
         <LucideChevronRightCircle strokeWidth={1} size={30} />
       </Button>
 
       <Button
         variant={"outlineLight"}
-        className="border-[1px] p-3 py-6 font-bold"
+        className="col-span-2 border-[1px] p-3 py-6 font-bold xl:col-span-1"
       >
         <LucideListFilter />
         Filter

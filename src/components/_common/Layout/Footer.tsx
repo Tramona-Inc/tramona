@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
-import { Instagram, Facebook, Linkedin } from "lucide-react";
+import type { ReactNode } from "react";
 
 function FooterLink({
   children,
@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="rounded-t-3xl bg-neutral-900 text-white">
+    <footer className="hidden rounded-t-3xl bg-neutral-900 text-white md:block">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center sm:items-start">
           <div className="mt-6 flex w-full flex-col items-start gap-2 px-8 sm:flex-row sm:justify-center md:gap-8">

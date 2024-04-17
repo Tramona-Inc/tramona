@@ -61,7 +61,7 @@ export default function Page() {
       </Head>
 
       <DashboardLayout type="guest">
-        <div className="container col-span-10 px-4 pb-64 pt-5 2xl:col-span-11">
+        <div className="container col-span-10 min-h-screen-minus-header px-4 pb-64 pt-5 2xl:col-span-11">
           <div className="mx-auto">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-4xl font-bold text-black">

@@ -112,10 +112,13 @@ export default function HomeOfferCard({ property }: { property: Property }) {
           ))}
         </CarouselContent>
         <CarouselPrevious
-          className="absolute left-10 top-1/2"
+          className="absolute left-2 top-1/2 size-6"
           variant={"white"}
         />
-        <CarouselNext className="absolute right-10 top-1/2" variant={"white"} />
+        <CarouselNext
+          className="absolute right-2 top-1/2 size-6"
+          variant={"white"}
+        />
         <CarouselDots count={count} current={current} />
       </Carousel>
       <div className="flex flex-col">

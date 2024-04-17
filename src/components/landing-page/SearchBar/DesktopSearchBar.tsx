@@ -32,13 +32,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import LPDateRangePicker, {
+  AirbnbLinkDialog,
+  classNames,
   LPFormItem,
   LPFormLabel,
   LPFormMessage,
   LPInput,
   LPLocationInput,
-  AirbnbLinkDialog,
-  classNames,
 } from "./components";
 
 const formSchema = z.object({
@@ -309,12 +309,12 @@ export default function DesktopSearchBar({
           )}
         </div>
 
-        <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
+        <div className="grid grid-cols-2 rounded-3xl bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-12">
           <LPLocationInput
             control={form.control}
             name={`data.${curTab}.location`}
             formLabel="Location"
-            className="col-span-full lg:col-span-4"
+            className="col-span-full lg:col-span-3"
           />
 
           <LPDateRangePicker
@@ -328,10 +328,14 @@ export default function DesktopSearchBar({
             control={form.control}
             name={`data.${curTab}.numGuests`}
             render={({ field }) => (
-              <LPFormItem className="lg:col-span-2">
+              <LPFormItem className="lg:col-span-3">
                 <LPFormLabel>Number of guests</LPFormLabel>
                 <FormControl>
-                  <LPInput {...field} inputMode="numeric" />
+                  <LPInput
+                    {...field}
+                    inputMode="numeric"
+                    placeholder="Add total guests"
+                  />
                 </FormControl>
                 <LPFormMessage />
               </LPFormItem>
@@ -342,7 +346,7 @@ export default function DesktopSearchBar({
             control={form.control}
             name={`data.${curTab}.maxNightlyPriceUSD`}
             render={({ field }) => (
-              <LPFormItem className="lg:col-span-2">
+              <LPFormItem className="lg:col-span-3">
                 <LPFormLabel>Name your price</LPFormLabel>
                 <FormControl>
                   <LPInput
@@ -350,6 +354,7 @@ export default function DesktopSearchBar({
                     inputMode="decimal"
                     prefix="$"
                     suffix="/night"
+                    placeholder="Price/night"
                   />
                 </FormControl>
                 <LPFormMessage />

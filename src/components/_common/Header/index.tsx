@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsLg } from "@/utils/utils";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
 
 type HeaderProps =
@@ -30,7 +31,10 @@ export default function Header(props: HeaderProps) {
 }
 
 function LargeHeader(props: HeaderProps) {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
+
+  const isHostPath = usePathname().split("/")[1];
+
   return (
     <header className="container sticky top-0 z-50 flex h-header-height items-center bg-white">
       <div className="flex flex-1 gap-4">
@@ -52,7 +56,13 @@ function LargeHeader(props: HeaderProps) {
       <div className="flex flex-1 justify-end gap-5">
         {props.type === "dashboard" ? (
           <Button asChild variant="darkOutline">
-            <Link href="/">Switch to Homepage</Link>
+            {session?.user.role === "host" && isHostPath === "host" ? (
+              <Link href="/">Switch to Traveller</Link>
+            ) : session?.user.role !== "host" ? (
+              <Link href="/for-hosts/sign-up">Become a host</Link>
+            ) : (
+              <Link href="/host">Switch to Host</Link>
+            )}
           </Button>
         ) : (
           <Button asChild variant="darkOutline">
@@ -93,12 +103,12 @@ function SmallHeader(props: HeaderProps) {
   const { status } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 flex h-header-height items-center bg-white p-2 text-sm sm:p-4 sm:text-base">
-      {props.type === "dashboard" && (
+    <header className="container sticky top-0 z-50 flex h-header-height items-center bg-white text-sm sm:text-base">
+      {/* {props.type === "dashboard" && (
         <div className="flex-1">
           <SmallSidebar {...props} />
         </div>
-      )}
+      )} */}
 
       <TramonaLogo />
 
@@ -111,7 +121,7 @@ function SmallHeader(props: HeaderProps) {
           </Button>
         )}
 
-        <HeaderTopRight />
+        {/* <HeaderTopRight /> */}
       </div>
     </header>
   );
