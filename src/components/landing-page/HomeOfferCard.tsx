@@ -9,11 +9,12 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import {
-  DialogLarge,
   DialogContentLarge,
+  DialogLarge,
   DialogTrigger,
-} from "@/components/ui/dialogLarge"
+} from "@/components/ui/dialogLarge";
 import { Form } from "@/components/ui/form";
+import { Property } from "@/server/db/schema";
 import { cn } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
@@ -21,7 +22,6 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import MakeBid from "./bidding/MakeBid";
-import { Property } from "@/server/db/schema";
 
 const photos = [
   "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/3b0c4129-696a-4b08-8896-3c05d9c729b5.jpeg?im_w=1200",
@@ -56,7 +56,7 @@ function CarouselDots({ count, current }: { count: number; current: number }) {
   );
 }
 
-export default function HomeOfferCard( {property}:{property:Property}) {
+export default function HomeOfferCard({ property }: { property: Property }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -118,11 +118,19 @@ export default function HomeOfferCard( {property}:{property:Property}) {
         <CarouselNext className="absolute right-10 top-1/2" variant={"white"} />
         <CarouselDots count={count} current={current} />
       </Carousel>
-      <div className="flex justify-between">
-        <p className="font-semibold">{property.name}</p>
-        <p>Price on Airbnb: ${property.originalNightlyPrice}</p>
+      <div className="flex flex-col">
+        <p className="max-w-full overflow-hidden text-ellipsis text-nowrap font-semibold">
+          Los Angeles Property
+        </p>
+        <p>
+          <span className="text-xs">Airbnb Price: </span>$
+          {property.originalNightlyPrice}
+        </p>
       </div>
-      <p className="text-xs">{property.maxNumGuests} guests, {property.numBedrooms} bedrooms, {property.numBeds} beds, {property.numBathrooms} baths</p>
+      <p className="text-xs">
+        {property.maxNumGuests} guests, {property.numBedrooms} bedrooms,{" "}
+        {property.numBeds} beds, {property.numBathrooms} baths
+      </p>
       <Form {...form}>
         <DateRangePicker
           control={form.control}
@@ -130,12 +138,14 @@ export default function HomeOfferCard( {property}:{property:Property}) {
           formLabel=""
           className="col-span-full sm:col-span-1"
         />
-       <DialogLarge>
-        <DialogTrigger className="bg-foreground text-primary-foreground w-full rounded-xl py-2">Make Offer</DialogTrigger>
-        <DialogContentLarge className=" sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
-          <MakeBid property = {property}/>
-        </DialogContentLarge>
-       </DialogLarge>
+        <DialogLarge>
+          <DialogTrigger className="w-full rounded-xl bg-foreground py-2 text-primary-foreground">
+            Make Offer
+          </DialogTrigger>
+          <DialogContentLarge className=" sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
+            <MakeBid property={property} />
+          </DialogContentLarge>
+        </DialogLarge>
       </Form>
     </div>
   );
