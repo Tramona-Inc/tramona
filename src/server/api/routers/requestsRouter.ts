@@ -16,6 +16,7 @@ import {
   requests,
   users,
   requestUpdatedInfo,
+  properties,
 } from "@/server/db/schema";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -471,5 +472,46 @@ export const requestsRouter = createTRPCRouter({
       } else {
         return { alreadyUpdated: false };
       }
+    }),
+
+  getByPropertyId: protectedProcedure
+    .input(z.number())
+    .query(async ({ ctx, input: propertyId }) => {
+      const hostId = await db.query.properties
+        .findFirst({
+          columns: { hostId: true },
+          where: eq(properties.id, propertyId),
+        })
+        .then((res) => res?.hostId);
+
+      if (hostId != ctx.user.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return await db.query.requestsToProperties.findMany({
+        where: eq(properties.id, propertyId),
+        with: {
+          request: {
+            with: {
+              madeByGroup: {
+                with: {
+                  members: {
+                    with: {
+                      user: {
+                        columns: {
+                          name: true,
+                          email: true,
+                          image: true,
+                          id: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
     }),
 });
