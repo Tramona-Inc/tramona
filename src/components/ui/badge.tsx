@@ -8,7 +8,7 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary/20 text-primary",
+        primary: "bg-primary/20 text-primary",
         secondary: "bg-zinc-200 text-zinc-600 font-medium",
         red: "bg-red-200 text-red-800",
         green: "bg-green-200 text-green-800",
@@ -25,7 +25,7 @@ const badgeVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "secondary",
       size: "md",
     },
   },

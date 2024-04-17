@@ -14,6 +14,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { users } from "./users";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
+import { hostTeams } from "./hostTeams";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -55,6 +56,9 @@ export const propertyAmenitiesEnum = pgEnum(
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
+  hostTeamId: text("host_team_id").references(() => hostTeams.id, {
+    onDelete: "cascade",
+  }),
   name: varchar("name", { length: 255 }).notNull(),
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId

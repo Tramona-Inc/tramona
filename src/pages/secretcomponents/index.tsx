@@ -111,7 +111,7 @@ function Page() {
       <h1 className="my-8 mt-10 text-3xl font-bold">Larger Components </h1>
       <div className="flex flex-row gap-x-16">
         <div className="w-full">
-          <h1 className="font-2xl font-black">Accordian</h1>
+          <h1 className="font-2xl font-black">Accordion</h1>
           <a
             href="https://ui.shadcn.com/docs/components/accordion"
             className="text-blue-700"
@@ -393,15 +393,19 @@ function Page() {
           >
             Click here for more details
           </a>
-          <div className="w-20">
-            <Badge variant="default">Badge</Badge>
-            <Badge variant="secondary">Badge</Badge>
-            <Badge variant="solidRed">Badge</Badge>
-            <Badge variant="red">Badge</Badge>
-            <Badge variant="green">Badge</Badge>
-            <Badge variant="yellow">Badge</Badge>
-            <Badge variant="blue">Badge</Badge>
-            <Badge variant="gray">Badge</Badge>
+          <div className="w-20 space-y-1">
+            <Badge variant="primary">primary</Badge>
+            <Badge variant="secondary">secondary</Badge>
+            <Badge variant="solidRed">solidRed</Badge>
+            <Badge variant="red">red</Badge>
+            <Badge variant="green">green</Badge>
+            <Badge variant="yellow">yellow</Badge>
+            <Badge variant="blue">blue</Badge>
+            <Badge variant="gray">gray</Badge>
+            <Badge variant="skeleton">skeleton</Badge>
+            <Badge size="sm">small</Badge>
+            <Badge size="md">medium</Badge>
+            <Badge size="lg">large</Badge>
           </div>
         </div>
 
