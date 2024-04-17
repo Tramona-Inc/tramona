@@ -11,4 +11,5 @@ export * from "./tables/properties";
 export * from "./tables/requests";
 export * from "./tables/users";
 export * from "./tables/groups";
+export * from "./tables/requestsToProperties";
 export * from "./tables/hostTeams";
