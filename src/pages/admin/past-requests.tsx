@@ -9,6 +9,43 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import Head from "next/head";
 import Link from "next/link";
+import UpdatedRequestInfoDialog from "@/components/admin/UpdatedRequestInfoDialog";
+type RequestUpdateCheckerProps = {
+  request: RequestWithUser;
+};
+
+const RequestUpdateChecker: React.FC<RequestUpdateCheckerProps> = ({
+  request,
+}) => {
+  const {
+    data: checkResult,
+    isLoading,
+    isError,
+  } = api.requests.checkRequestUpdate.useQuery(
+    { requestId: request.id },
+    { enabled: !!request.id },
+  );
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  if (isError) {
+    return <div>Error checking for updates.</div>;
+  }
+
+  if (checkResult?.alreadyUpdated) {
+    return (
+      <UpdatedRequestInfoDialog request={request}>
+        <Button className="rounded-full bg-yellow-100 px-2" variant="outline">
+          View Update
+        </Button>
+      </UpdatedRequestInfoDialog>
+    );
+  }
+
+  return null;
+};
 
 function PastRequestCards({
   requests,
@@ -19,6 +56,7 @@ function PastRequestCards({
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
         <RequestCard isAdminDashboard key={request.id} request={request}>
+          <RequestUpdateChecker request={request} />
           <DeleteRequestDialog requestId={request.id}>
             <Button className="rounded-full" variant="outline">
               Delete

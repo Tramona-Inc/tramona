@@ -10,8 +10,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { propertyTypeEnum } from "./properties";
 import { groups } from "./groups";
+import { propertyTypeEnum } from "./properties";
 import { users } from "./users";
 
 export const requests = pgTable("requests", {
@@ -43,14 +43,15 @@ export const requestInsertSchema = createInsertSchema(requests);
 
 export const MAX_REQUEST_GROUP_SIZE = 10;
 
-// TO-DO: maybe add relation 
+// TO-DO: maybe add relation
 export const requestUpdatedInfo = pgTable("request_updated_info", {
   id: serial("id").primaryKey(),
-  requestId: integer("request_id")
-      .references(() => requests.id, { onDelete: "cascade" }),
+  requestId: integer("request_id").references(() => requests.id, {
+    onDelete: "cascade",
+  }),
   preferences: varchar("preferences", { length: 255 }),
   updatedPriceNightlyUSD: integer("updated_price_usd_nightly"),
-  propertyLinks: text("property_links"), 
+  propertyLinks: text("property_links"),
 });
 
 export const requestGroups = pgTable("request_groups", {

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
@@ -22,8 +21,23 @@ import {
   plural,
 } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
-import { StarFilledIcon } from "@radix-ui/react-icons";
-import { CheckIcon, XIcon } from "lucide-react";
+import {
+  CheckIcon,
+  ImagesIcon,
+  ChevronRight,
+  MapPin,
+  TreePalmIcon,
+  LandPlotIcon,
+  FishIcon,
+  FlameKindlingIcon,
+  TreeDeciduousIcon,
+  MountainSnowIcon,
+  MountainIcon,
+  CookingPotIcon,
+  UsersRoundIcon,
+  CalendarDays,
+  EggFriedIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
@@ -32,6 +46,136 @@ import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
 import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
+import { FunctionComponent, SVGProps } from "react";
+import {
+  WifiIcon,
+  UtensilsIcon,
+  Tv2Icon,
+  WashingMachineIcon,
+  ThermometerSnowflakeIcon,
+  ChefHatIcon,
+  MicrowaveIcon,
+  HeaterIcon,
+  DogIcon,
+  AccessibilityIcon,
+  BathIcon,
+  DumbbellIcon,
+  CircleParkingIcon,
+  CoffeeIcon,
+  WavesIcon,
+  CrossIcon,
+  AlarmSmokeIcon,
+  ArrowLeftToLineIcon,
+  ArrowRightToLineIcon,
+} from "lucide-react";
+import AmenitiesComponent from "./CategorizedAmenities";
+
+type LucideIcon = FunctionComponent<SVGProps<SVGSVGElement>>;
+
+type AmenityIcons = Record<string, LucideIcon>;
+
+// prettier-ignore
+const amenityIcons: AmenityIcons = {
+  "Wireless Internet": WifiIcon,
+  "TV": Tv2Icon,
+  "Washer": WashingMachineIcon,
+  "Cookware": ChefHatIcon,
+  "Air conditioning": ThermometerSnowflakeIcon,
+  "Dishes and silverware": UtensilsIcon,
+  "Microwave": MicrowaveIcon,
+  "Breakfast": EggFriedIcon,
+  "Kitchen": CookingPotIcon,
+  "Heating": HeaterIcon,
+  "Pets Allowed": DogIcon,
+  "Wheelchair accessible": AccessibilityIcon,
+  "Bathtub": BathIcon,
+  "Gym": DumbbellIcon,
+  "Free parking on street": CircleParkingIcon,
+  "Paid parking off premises": CircleParkingIcon,
+  "Paid parking on premises": CircleParkingIcon,
+  "Free parking on premises": CircleParkingIcon,
+  "Coffee maker": CoffeeIcon,
+  "Swimming pool": WavesIcon,
+  "Beach": TreePalmIcon,
+  "Golf course front": LandPlotIcon,
+  "Golf view": LandPlotIcon,
+  "Lake": WavesIcon,
+  "Mountain": MountainIcon,
+  "Near Ocean": FishIcon,
+  "Sea view": FishIcon,
+  "Resort": MountainSnowIcon,
+  "Garden or backyard": TreeDeciduousIcon,
+  "Indoor fireplace": FlameKindlingIcon,
+  "First aid kit": CrossIcon,
+  "Carbon monoxide detector": AlarmSmokeIcon,
+};
+
+type AmenityItemProps = {
+  name: keyof AmenityIcons;
+};
+
+const AmenityItem: React.FC<AmenityItemProps> = ({ name }) => {
+  const IconComponent = amenityIcons[name];
+  if (!IconComponent) return null;
+  return (
+    <div className="flex items-center space-x-2 py-2 md:py-6">
+      {IconComponent && <IconComponent className="h-5 w-5" />}
+      <span>{name}</span>
+    </div>
+  );
+};
+
+const amenityPriorityOrder = [
+  "Wireless Internet",
+  "Air conditioning",
+  "Heating",
+  "Kitchen",
+  "Washer",
+  "Dryer",
+  "Gym",
+  "Breakfast",
+  "Pets Allowed",
+  "Wheelchair accessible",
+  "Bathtub",
+];
+
+type PropertyAmenitiesProps = {
+  amenities: string[];
+};
+
+const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
+  amenities = [],
+}) => {
+  const isMobile = useMediaQuery("(max-width: 640px)");
+
+  if (!Array.isArray(amenities) || amenities.length === 0) {
+    return <p>No amenities to display.</p>;
+  }
+
+  const sortedAmenities = amenities.sort((a, b) => {
+    const indexA = amenityPriorityOrder.indexOf(a);
+    const indexB = amenityPriorityOrder.indexOf(b);
+    return (
+      (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB)
+    );
+  });
+
+  let toDisplay = 9;
+  if (isMobile) {
+    toDisplay = 5;
+  }
+  const topAmenities = sortedAmenities
+    .filter((amenity) => amenityIcons[amenity])
+    .slice(0, toDisplay);
+
+  return (
+    <div className="gap-4 py-6 md:grid md:grid-cols-3">
+      {topAmenities.map((amenity, index) => (
+        <AmenityItem key={index} name={amenity} />
+      ))}
+    </div>
+  );
+};
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
@@ -73,6 +217,7 @@ export default function OfferPage({
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: property.address!,
   });
+
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const isAirbnb =
@@ -112,8 +257,30 @@ export default function OfferPage({
         href={isBooked ? "/requests" : `/requests/${request.id}`}
         className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
       >
-        &larr; Back to all offers
+        &larr; Back to offers
       </Link>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+        <div className="flex-[2] space-y-2">
+          <h1 className="items-center text-lg font-semibold sm:text-3xl">
+            {property.name}
+          </h1>
+          <div className="text-sm font-medium">
+            <span>{plural(property.maxNumGuests, "Guest")}</span>
+            <span className="mx-2">·</span>
+            <span>{plural(property.numBedrooms, "bedroom")}</span>
+            <span className="mx-2">·</span>
+            <span>{property.propertyType}</span>
+            <span className="mx-2">·</span>
+            <span>{plural(property.numBeds, "bed")}</span>
+            {property.numBathrooms && (
+              <>
+                <span className="mx-2">·</span>
+                <span>{plural(property.numBathrooms, "bath")}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
       <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
         <Dialog>
           {isMobile ? (
@@ -169,10 +336,11 @@ export default function OfferPage({
 
         {/* If there are more than 5 images, render the "See more photos" button */}
         {renderSeeMoreButton && (
-          <div className="absolute bottom-2 right-2">
+          <div className="absolute bottom-2 left-2">
             <Dialog>
-              <DialogTrigger className="rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
-                See ({property.imageUrls.length}) photos
+              <DialogTrigger className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
+                <ImagesIcon className="mr-2" />
+                See all {property.imageUrls.length} photos
               </DialogTrigger>
 
               <DialogContent className="max-w-4xl">
@@ -225,45 +393,29 @@ export default function OfferPage({
           </div>
         )}
       </div>
+      <div className="flex justify-start space-x-4">
+        <a
+          href="#overview"
+          className="font-medium text-black hover:text-gray-800"
+        >
+          Overview
+        </a>
+        <a href="#amenities" className="text-gray-600 hover:text-gray-800">
+          Amenities
+        </a>
+        <a href="#location" className="text-gray-600 hover:text-gray-800">
+          Location
+        </a>
+        {property.checkInTime && (
+          <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
+            House rules
+          </a>
+        )}
+      </div>
 
+      <hr className="h-px border-0 bg-gray-300" />
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
-          <h1 className="items-center text-lg font-semibold sm:text-3xl">
-            {property.name}{" "}
-            <Badge className=" -translate-y-1 bg-primary text-white">
-              {discountPercentage}% off
-            </Badge>
-          </h1>
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-1">
-              {property.numRatings > 0 && (
-                <Badge variant="secondary" icon={<StarFilledIcon />}>
-                  {property.avgRating} ({property.numRatings})
-                </Badge>
-              )}
-              <Badge variant="secondary">
-                {plural(property.numBedrooms, "bedroom")}
-              </Badge>
-              <Badge variant="secondary">
-                {plural(property.numBeds, "bed")}
-              </Badge>
-              {property.numBathrooms && (
-                <Badge variant="secondary">
-                  {plural(property.numBathrooms, "bathroom")}
-                </Badge>
-              )}
-              <Badge variant="secondary">{property.roomType}</Badge>
-            </div>
-            <div className="flex flex-wrap items-center gap-1">
-              {property.amenities.map((amenity) => (
-                <Badge variant="secondary" key={amenity}>
-                  {amenity}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-
           <section>
             <div className="flex items-center gap-2">
               <UserAvatar
@@ -273,24 +425,29 @@ export default function OfferPage({
               />
               <div className="-space-y-1.5">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
-                <p className="text-lg font-semibold">{hostName}</p>
+                <p className="text-lg font-medium">{hostName}</p>
               </div>
             </div>
           </section>
-          <section>
-            <div className="max-w-2xl rounded-lg bg-zinc-200 px-4 py-2 text-zinc-700 z-20">
-              <div className="line-clamp-3 break-words">{property.about}</div>
-              <div className="flex justify-end">
+          <hr className="h-px border-0 bg-gray-300" />
+          <section id="overview" className="scroll-mt-36">
+            <h1 className="text-lg font-semibold md:text-xl">
+              About this property
+            </h1>
+            <div className="z-20 max-w-2xl py-2 text-zinc-700">
+              <div className="line-clamp-5 break-words">{property.about}</div>
+              <div className="flex justify-start py-2">
                 <Dialog>
-                  <DialogTrigger className="text-foreground underline underline-offset-2">
-                    Read more
+                  <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
+                    Show more
+                    <ChevronRight className="ml-2" />
                   </DialogTrigger>
 
-                  <DialogContent className="max-w-4xl">
+                  <DialogContent className="max-w-3xl p-8">
                     <DialogHeader>
                       <DialogTitle>About this property</DialogTitle>
                     </DialogHeader>
-                    <p className="whitespace-break-spaces break-words">
+                    <p className="whitespace-break-spaces break-words text-base">
                       {property.about}
                     </p>
                   </DialogContent>
@@ -298,81 +455,97 @@ export default function OfferPage({
               </div>
             </div>
           </section>
-          <section className="space-y-1">
+          <hr className="h-px border-0 bg-gray-300" />
+          <section id="amenities" className="scroll-mt-36">
+            <h1 className="text-lg font-semibold md:text-xl">Amenitites</h1>
+            <PropertyAmenities amenities={property.amenities} />
+            {property.amenities && (
+              <Dialog>
+                <DialogTrigger className="inline-flex w-full items-center justify-center rounded-lg border border-black px-2.5 py-2 text-foreground md:w-1/4">
+                  Show all amenities
+                </DialogTrigger>
 
-            {coordinateData && (
-              <div className="relative z-10">
-
-              <MapContainer
-                center={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
-                ]}
-                zoom={15}
-                scrollWheelZoom={false}
-                style={{ height: "400px" }}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Circle
-                  center={[
-                    coordinateData.coordinates.lat,
-                    coordinateData.coordinates.lng,
-                  ]}
-                  radius={200} // Adjust radius as needed
-                  pathOptions={{ color: "red" }} // Customize circle color and other options
-                />
-              </MapContainer>
-              </div>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle className="">Amenities</DialogTitle>
+                  </DialogHeader>
+                  <div className="max-h-96 overflow-y-scroll">
+                    <AmenitiesComponent
+                      propertyAmenities={property.amenities}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
             )}
           </section>
         </div>
         <div className="flex-1">
-          <div className="rounded-t-lg bg-black py-2 text-center font-bold text-white">
-            {discountPercentage}% OFF
-          </div>
-          <Card className="rounded-t-none">
-            <Card>
-              <div className="flex justify-around">
+          <Card className="">
+            <div>
+              <h2 className="flex items-center text-3xl font-semibold">
+                {formatCurrency(offerNightlyPrice)}
+                <span className="ml-2 py-0 text-sm font-normal text-gray-500">
+                  per night
+                </span>
+              </h2>
+              <p className="text-sm font-medium text-black">
+                Original price: {formatCurrency(originalTotal / numNights)}
+              </p>
+              <div className="my-6 grid grid-cols-2 gap-1">
                 <div>
-                  <p>Check-in</p>
-                  <p className="font-bold">{checkInDate}</p>
+                  <div className="inline-flex items-center justify-start rounded-full border border-gray-300 px-10 py-0 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
+                    <CalendarDays />
+                    <div className="ml-2">
+                      <p className="text-sm text-gray-600">Check in</p>
+                      <p className="text-base font-bold">{checkInDate}</p>
+                    </div>
+                  </div>
                 </div>
                 <div>
-                  <p>Check-out</p>
-                  <p className="font-bold">{checkOutDate}</p>
+                  <div className="inline-flex items-center justify-start rounded-full border border-gray-300 px-10 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
+                    <CalendarDays />
+                    <div className="ml-2">
+                      <p className="text-sm text-gray-600">Check out</p>
+                      <p className="font-bold">{checkOutDate}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </Card>
-            <div className="space-y-4 border-y py-4 text-muted-foreground">
-              <p className="text-xl font-bold text-black">Price Details</p>
+              <div className="inline-flex w-full items-center rounded-full border border-gray-300 px-8 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
+                <UsersRoundIcon />
+                <div className="ml-2">
+                  <p className="text-sm text-gray-600">Guests</p>
+                  <p className="font-bold">
+                    {plural(request.numGuests, "Guest")}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4 py-0 text-muted-foreground">
               <div className="-space-y-1 text-black">
                 <div className="flex justify-between py-2">
-                  <p className="underline">
+                  <p className="font-medium">
                     {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
                     nights
                   </p>
-                  <div className="flex">
-                    <p className="text-zinc-400 line-through">
-                      {formatCurrency(originalTotal)}
-                    </p>
-                    <p className="ms-1">{formatCurrency(offer.totalPrice)}</p>
-                  </div>
+                  <p className="ms-1 font-medium">
+                    {formatCurrency(offer.totalPrice)}
+                  </p>
                 </div>
                 <div className="flex justify-between py-2">
-                  <p className="underline">Tramona service fee</p>
-                  <p>{formatCurrency(tramonaServiceFee)}</p>
+                  <p className="font-medium">Service fee</p>
+                  <p className="font-medium">
+                    {formatCurrency(tramonaServiceFee)}
+                  </p>
                 </div>
-                {/* <div className="flex justify-between py-2">
-                  <p className="underline">Taxes</p>
-                  <p>{formatCurrency(tax)}</p>
-                </div> */}
+                <hr className="h-px bg-gray-300 py-0" />
               </div>
             </div>
-            <div className="flex justify-between py-2">
-              <p className="underline">Total (USD)</p>
+            <div className="flex justify-between">
+              <div>
+                <p className="font-semibold">Total</p>
+                <p className="text-xs text-gray-500">taxes not included.</p>
+              </div>
               <p className="font-bold">
                 {formatCurrency(offer.totalPrice + tramonaServiceFee + tax)}
               </p>
@@ -413,6 +586,72 @@ export default function OfferPage({
           </Card>
         </div>
       </div>
+      <hr className="h-px border-0 bg-gray-300" />
+      <section id="location" className="scroll-mt-36 space-y-1">
+        <h1 className="text-lg font-semibold md:text-xl">Location</h1>
+        <div className="inline-flex items-center justify-center py-2 text-base">
+          <MapPin className="mr-2" />
+          {request.location}
+        </div>
+        {coordinateData && (
+          <div className="relative z-10">
+            <MapContainer
+              center={[
+                coordinateData.coordinates.lat,
+                coordinateData.coordinates.lng,
+              ]}
+              zoom={15}
+              scrollWheelZoom={false}
+              style={{ height: "500px" }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Circle
+                center={[
+                  coordinateData.coordinates.lat,
+                  coordinateData.coordinates.lng,
+                ]}
+                radius={200} // Adjust radius as needed
+                pathOptions={{ color: "black" }} // Customize circle color and other options
+              />
+            </MapContainer>
+          </div>
+        )}
+      </section>
+      {property.checkInTime && (
+        <div>
+          <hr className="h-px border-0 bg-gray-300" />
+          <section id="house-rules" className="scroll-mt-36 mt-4">
+            <h1 className="text-lg font-bold">House rules</h1>
+            {property.checkInTime && property.checkOutTime && (
+              <div className="my-2 flex items-center justify-start gap-16">
+                <div className="flex items-center">
+                  <ArrowLeftToLineIcon className="mr-2" />{" "}
+                  <div>
+                    <div className="font-semibold">Check-in time</div>
+                    <div>After {property.checkInTime.substring(0, 5)}</div>
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <ArrowRightToLineIcon className="mr-2" />{" "}
+                  <div>
+                    <div className="font-semibold">Check-out time</div>
+                    <div>Before {property.checkOutTime.substring(0, 5)}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {property.checkInInfo && (
+              <div className="pt-6">
+                <h1 className="text-md font-bold">Additional information</h1>
+                <p>{property.checkInInfo}</p>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 }
