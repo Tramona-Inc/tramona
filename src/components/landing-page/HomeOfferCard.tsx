@@ -123,7 +123,7 @@ export default function HomeOfferCard({ property }: { property: Property }) {
       </Carousel>
       <div className="flex flex-col">
         <p className="max-w-full overflow-hidden text-ellipsis text-nowrap font-semibold">
-          Los Angeles Property
+          {property.name}
         </p>
         <p>
           <span className="text-xs">Airbnb Price: </span>$

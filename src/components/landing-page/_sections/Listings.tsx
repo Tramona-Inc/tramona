@@ -5,8 +5,6 @@ import HomeOfferCard from "../HomeOfferCard";
 export default function Listings() {
   const { data: propertiesArray } = api.properties.getAll.useQuery();
 
-  
-
   const propertyCards = propertiesArray?.map((property: Property) => (
     <HomeOfferCard key={property.id} property={property} />
   ));

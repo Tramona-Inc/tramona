@@ -83,7 +83,7 @@ export default async function webhook(
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
 
-        const twilioMutation = twilio.sendSMS.useMutation();
+        const twilioMutation = api.twilio.sendSMS.useMutation();
         const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
         if (user?.isWhatsApp) {
