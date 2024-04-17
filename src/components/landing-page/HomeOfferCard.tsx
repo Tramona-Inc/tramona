@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialogLarge";
 import { Form } from "@/components/ui/form";
-import { Property } from "@/server/db/schema";
+import { type Property } from "@/server/db/schema";
 import { cn } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";

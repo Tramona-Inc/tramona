@@ -4,14 +4,14 @@ import { z } from "zod";
 import { Form, FormControl, FormField } from "@/components/ui/form";
 import { LPFormItem, LPFormLabel, LPFormMessage, LPInput } from "./components";
 
-import { api } from "@/utils/api";
-import { zodString } from "@/utils/zod-utils";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/utils/utils";
-import { PlusIcon, XIcon } from "lucide-react";
-import { MAX_REQUEST_GROUP_SIZE } from "@/server/db/schema";
 import { Button } from "@/components/ui/button";
+import { MAX_REQUEST_GROUP_SIZE } from "@/server/db/schema";
+import { api } from "@/utils/api";
+import { cn } from "@/utils/utils";
+import { zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PlusIcon, XIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
 
 const formSchema = z.object({
   data: z
@@ -67,7 +67,7 @@ export default function LinkScrapeSearchBar({
     //     console.log(res);
     //   });
     const response = await utils.misc.scrapeUsingLink.fetch({
-      url: data[0]?.airbnbLink!,
+      url: data[0]?.airbnbLink ?? "",
     });
 
     console.log(response);
