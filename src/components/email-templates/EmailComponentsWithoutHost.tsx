@@ -70,7 +70,7 @@ export const TramonaLogo = () => {
   return (
     <div className="text-brand flex items-center gap-2 bg-white text-lg font-bold">
       <img
-        src="https://myspaceaccount.s3.us-east-2.amazonaws.com/tramona_wbg.png"
+        src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
         alt="Tramona Logo"
         style={{ width: "auto", height: "24px", marginRight: "5px" }}
       />
@@ -224,7 +224,7 @@ export const SocialLinks: React.FC = () => {
                 rel="noopener noreferrer"
               >
                 <img
-                  src="https://myspaceaccount.s3.us-east-2.amazonaws.com/tramona_wbg.png"
+                  src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
                   alt="Tramona Logo"
                   style={{ height: "16px" }}
                 />
@@ -238,7 +238,7 @@ export const SocialLinks: React.FC = () => {
                   rel="noopener noreferrer"
                 >
                   <img
-                    src="https://myspaceaccount.s3.us-east-2.amazonaws.com/facebook_wbg.png"
+                    src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
                     alt="Facebook"
                     style={{
                       width: "16px",
@@ -253,7 +253,7 @@ export const SocialLinks: React.FC = () => {
                   rel="noopener noreferrer"
                 >
                   <img
-                    src="https://myspaceaccount.s3.us-east-2.amazonaws.com/instagram_wbg.png"
+                    src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
                     alt="Instagram"
                     style={{ width: "16px", height: "16px" }}
                   />
