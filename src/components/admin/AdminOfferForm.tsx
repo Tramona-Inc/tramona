@@ -41,6 +41,11 @@ import axios from "axios";
 import { getS3ImgUrl } from "@/utils/formatters";
 import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 
+const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+
+// custom Zod validator for time
+const zodTime = z.string().regex(timeRegex, { message: "Invalid time format. Time must be in HH:MM format." });
+
 const formSchema = z.object({
   propertyName: zodString(),
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
@@ -60,6 +65,8 @@ const formSchema = z.object({
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
   checkInInfo: optional(zodString()),
+  checkInTime: optional(zodTime), 
+  checkOutTime: optional(zodTime), 
   imageUrls: z.object({ value: zodUrl() }).array(),
   // mapScreenshot: optional(zodString()),
 });
@@ -116,6 +123,8 @@ export default function AdminOfferForm({
             offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100,
             checkInInfo: offer.property.checkInInfo ?? undefined,
+            checkInTime: offer.property.checkInTime ?? undefined, 
+            checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
           }
         : {}),
@@ -530,6 +539,32 @@ export default function AdminOfferForm({
               <FormLabel>Check In Info (optional)</FormLabel>
               <FormControl>
                 <Textarea {...field} className="resize-y" rows={2} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="checkInTime"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Check In Time (optional)</FormLabel>
+              <FormControl>
+                <Input {...field}  />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="checkOutTime"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Check Out Time (optional)</FormLabel>
+              <FormControl>
+                <Input {...field}  />
               </FormControl>
               <FormMessage />
             </FormItem>

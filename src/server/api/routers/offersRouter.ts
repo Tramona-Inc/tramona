@@ -151,7 +151,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-  getCoordinates: protectedProcedure
+    getCoordinates: protectedProcedure
     .input(z.object({ location: z.string() }))
     .query(async ({ input }) => {
       const response = await axios.get(
@@ -188,6 +188,7 @@ export const offersRouter = createTRPCRouter({
               checkIn: true,
               checkOut: true,
               numGuests: true,
+              location: true, 
               id: true,
             },
             with: { madeByGroup: { with: { members: true } } },

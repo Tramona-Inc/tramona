@@ -8,23 +8,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { type Request } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getNumNights } from "@/utils/utils";
-import { Textarea } from "../ui/textarea";
-import {
-  optional,
-  zodNumber,
-  zodString,
-  zodUrl,
-} from "@/utils/zod-utils";
+import { optional, zodNumber, zodString, zodUrl } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {  useState } from "react";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useSession } from "next-auth/react";
-import {
-  type Request,
-} from "@/server/db/schema";
+import { Textarea } from "../ui/textarea";
 
 const calculatePriceOptions = (oldPrice: number): number[] => {
   if (oldPrice >= 0 && oldPrice < 400) {
@@ -334,8 +327,8 @@ export default function RequestRefreshForm({
         <div className="my-10">
           <div className="p-18">
             <p>
-              You&apos;ve already updated your request. We&apos;ll get back to you
-              shortly.
+              You&apos;ve already updated your request. We&apos;ll get back to
+              you shortly.
             </p>
           </div>
         </div>
