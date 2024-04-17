@@ -16,11 +16,12 @@ const badgeVariants = cva(
         blue: "bg-blue-200 text-blue-800",
         gray: "bg-zinc-200 text-zinc-700",
         solidRed: "bg-red-600 text-white",
+        skeleton: "bg-accent animate-pulse",
       },
       size: {
-        sm: "text-xs px-1.5 py-0.5 gap-0.5 font-medium",
-        md: "text-sm px-2.5 py-0.5 gap-1",
-        lg: "text-base px-3 py-1 gap-1.5",
+        sm: "text-xs px-1.5 h-5 gap-0.5 font-medium",
+        md: "text-sm px-2.5 h-6 gap-1",
+        lg: "text-base px-3 h-8 gap-1.5",
       },
     },
     defaultVariants: {
