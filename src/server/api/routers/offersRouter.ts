@@ -154,10 +154,17 @@ export const offersRouter = createTRPCRouter({
   getCoordinates: protectedProcedure
     .input(z.object({ location: z.string() }))
     .query(async ({ input }) => {
-      const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.location)}&key=${env.GOOGLE_MAPS_KEY}`,
-      );
-  
+      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.location)}&key=${env.GOOGLE_MAPS_KEY}`);
+    
+      if (response.data.results.length === 0) {
+        throw new Error(`No results found for the given location: ${input.location}`);
+      }
+    
+      const geometry = response.data.results[0].geometry;
+      if (!geometry) {
+        throw new Error("Geometry data is missing in the response.");
+      }
+    
       const result = {
         
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -188,6 +195,7 @@ export const offersRouter = createTRPCRouter({
               checkIn: true,
               checkOut: true,
               numGuests: true,
+              location: true, 
               id: true,
             },
             with: { madeByGroup: { with: { members: true } } },
