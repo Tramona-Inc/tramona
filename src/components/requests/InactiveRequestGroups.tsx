@@ -2,7 +2,6 @@ import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue"
 import Spinner from "@/components/_common/Spinner";
 import { RequestCards } from "@/components/requests/RequestCards";
 import { api } from "@/utils/api";
-import HistoryEmptySvg from "../_common/EmptyStateSvg/HistoryEmptySvg";
 
 export default function InactiveRequestGroups() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
@@ -16,12 +15,12 @@ export default function InactiveRequestGroups() {
       <p className="text-center">
         <EmptyStateValue
           title={"You have no history"}
-          description={"Completed requests will show up here. "}
+          description={
+            "You haven't made any request or offers. Completed requets will show up here."
+          }
           redirectTitle={"Request Deal"}
           href={"/"}
-        >
-          <HistoryEmptySvg />
-        </EmptyStateValue>
+        ></EmptyStateValue>
       </p>
     </div>
   );

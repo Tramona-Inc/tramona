@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { HistoryIcon, Plus, TagIcon } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
@@ -25,25 +25,36 @@ function RequestsTabs() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
 
   return (
-    <Tabs defaultValue="activeRequestGroups" className="space-y-4">
+    <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
         <TabsTrigger
-          value="activeRequestGroups"
-          count={requests?.activeRequestGroups.length ?? "blank"}
+          value="cityRequests"
+          // count={requests?.activeRequestGroups.length ?? "blank"}
         >
-          <TagIcon /> Current Requests
+          {/* <TagIcon /> Current Requests */}
+          City Requests
         </TabsTrigger>
         <TabsTrigger
-          value="inactiveRequestGroups"
-          count={requests?.inactiveRequestGroups.length ?? "blank"}
+          value="propertyOffers"
+          // count={requests?.inactiveRequestGroups.length ?? "blank"}
         >
-          <HistoryIcon /> Past Requests
+          {/* <HistoryIcon /> Past Requests */}
+          Property Offers
+        </TabsTrigger>
+        <TabsTrigger
+          value="history"
+          // count={requests?.inactiveRequestGroups.length ?? "blank"}
+        >
+          History
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="activeRequestGroups">
+      <TabsContent value="cityRequests">
         <ActiveRequestGroups />
       </TabsContent>
-      <TabsContent value="inactiveRequestGroups">
+      <TabsContent value="propertyOffers">
+        {/* <InactiveRequestGroups /> */}
+      </TabsContent>
+      <TabsContent value="history">
         <InactiveRequestGroups />
       </TabsContent>
     </Tabs>
