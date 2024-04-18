@@ -19,9 +19,10 @@ export default function PaymentTest() {
     requestId: 789,
     name: "string",
     price: 100,
+    description: "",
+    cancelUrl: "/payment-test", // Rename cancel_url to cancelUrl
     totalSavings: 20,
     phoneNumber: "123-456-7890",
-    cancelUrl: "/payment-test", // Rename cancel_url to cancelUrl
   };
 
   const session = useSession({ required: true });
