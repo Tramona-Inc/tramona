@@ -227,4 +227,6 @@ export const stripeRouter = createTRPCRouter({
         setupIntent: setupIntent,
       };
     }),
+
+  // TODO: create a PaymentIntent for admin/host to accept the bidding based of the user intent
 });
