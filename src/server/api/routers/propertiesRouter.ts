@@ -1,11 +1,12 @@
 import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
-import { hostPropertyOnboardingSchema } from '@/components/host/onboarding/OnboardingFooter';
+import { hostPropertyOnboardingSchema } from "@/components/host/onboarding/OnboardingFooter";
 import {
   createTRPCRouter,
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
+  adminPropertyInputSchema,
   properties,
   propertyInsertSchema,
   propertySelectSchema,
@@ -112,6 +113,20 @@ export const propertiesRouter = createTRPCRouter({
         ...input,
         hostId: ctx.user.id,
         hostName: ctx.user.name,
+        imageUrls: input.imageUrls,
+      });
+    }),
+  adminInsertProperty: roleRestrictedProcedure(["admin"])
+    .input(adminPropertyInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      return await ctx.db.insert(properties).values({
+        ...input,
+        hostId: input.hostId,
+        hostName: "Aaron",
         imageUrls: input.imageUrls,
       });
     }),

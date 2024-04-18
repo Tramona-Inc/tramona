@@ -1,7 +1,10 @@
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema/tables/properties";
-import { zodInteger, zodString, zodUrl } from "@/utils/zod-utils";
+import {
+  ALL_PROPERTY_ROOM_TYPES,
+  ALL_PROPERTY_TYPES,
+} from "@/server/db/schema/tables/properties";
+import { zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ErrorMsg from "../ui/ErrorMsg";
 import {
@@ -19,26 +22,40 @@ import { Button } from "../ui/button";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
+import ImagesInput from "../_common/ImagesInput";
+import { api } from "@/utils/api";
+import { toast } from "../ui/use-toast";
+import { useRouter } from "next/router";
 
 const formSchema = z.object({
   hostId: zodString(),
+
   propertyType: z.enum(ALL_PROPERTY_TYPES),
-  propertySpace: zodString(),
+  roomType: z.enum(ALL_PROPERTY_ROOM_TYPES),
+
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
   numBathrooms: zodInteger({ min: 1 }),
-  address: zodString({ maxLen: 1000 }),
-  checkInType: zodString(),
-  checkInTime: zodString(),
-  checkOutTime: zodString(),
-  amenities: z.string().array().nullable(),
-  imageUrls: z.object({ value: zodUrl() }).array(),
-  propertyName: zodString(),
-  about: zodString({ maxLen: Infinity }),
-  pets: zodString(),
-  smoking: zodString(),
-  otherHouseRules: zodString(),
+
+  address: z.string().max(1000),
+
+  checkInInfo: z.string(),
+  checkInTime: z.string(),
+  checkOutTime: z.string(),
+
+  amenities: z.string().array(),
+
+  otherAmenities: z.string().array(),
+
+  imageUrls: z.string().array(),
+  name: z.string().max(255),
+  about: z.string(),
+
+  petsAllowed: z.string(),
+  smokingAllowed: z.string(),
+
+  otherHouseRules: z.string().max(1000).optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -50,25 +67,48 @@ export default function AdminPropertyForm({
 }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      imageUrls: [
-        { value: "" },
-        { value: "" },
-        { value: "" },
-        { value: "" },
-        { value: "" },
-      ],
+  });
+
+  const router = useRouter();
+
+  const { mutate } = api.properties.adminInsertProperty.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Property successfully listed",
+      });
+      void router.push("/host/properties");
     },
   });
 
   function onSubmit(data: FormSchema) {
-    console.log("submitted");
+    mutate({
+      hostId: data.hostId,
+      propertyType: data.propertyType,
+      roomType: data.roomType,
+      maxNumGuests: data.maxNumGuests,
+      numBeds: data.numBeds,
+      numBedrooms: data.numBedrooms,
+      numBathrooms: data.numBathrooms,
+      address: data.address,
+      checkInInfo: data.checkInInfo,
+      checkInTime: data.checkInTime,
+      checkOutTime: data.checkOutTime,
+      amenities: data.amenities,
+      otherAmenities: data.otherAmenities,
+      imageUrls: data.imageUrls,
+      name: data.name,
+      about: data.about,
+      petsAllowed: data.petsAllowed === "true" ? true : false,
+      smokingAllowed: data.smokingAllowed === "true" ? true : false,
+      otherHouseRules: data.otherHouseRules ?? undefined,
+    });
   }
 
-  const imageUrlInputs = useFieldArray({
-    name: "imageUrls",
-    control: form.control,
-  });
+  // const imageUrlInputs = useFieldArray({
+  //   name: "imageUrls",
+  //   control: form.control,
+  // });
 
   return (
     <Form {...form}>
@@ -110,10 +150,10 @@ export default function AdminPropertyForm({
 
         <FormField
           control={form.control}
-          name="propertySpace"
+          name="roomType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Property Space</FormLabel>
+              <FormLabel>Room Type</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -129,7 +169,7 @@ export default function AdminPropertyForm({
             <FormItem>
               <FormLabel>Max Number of Guests</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} inputMode="numeric" type="number" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -143,7 +183,7 @@ export default function AdminPropertyForm({
             <FormItem>
               <FormLabel>Number of Beds</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} inputMode="numeric" type="number" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -157,7 +197,7 @@ export default function AdminPropertyForm({
             <FormItem>
               <FormLabel>Number of Bedrooms</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} inputMode="numeric" type="number" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -171,7 +211,7 @@ export default function AdminPropertyForm({
             <FormItem>
               <FormLabel>Number of Bathrooms</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} inputMode="numeric" type="number" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -194,10 +234,10 @@ export default function AdminPropertyForm({
 
         <FormField
           control={form.control}
-          name="checkInType"
+          name="checkInInfo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Check In Type</FormLabel>
+              <FormLabel>Check In Info</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -252,76 +292,22 @@ export default function AdminPropertyForm({
           )}
         />
 
-        <FormItem className="col-span-full space-y-1">
-          <FormLabel>Image URLs</FormLabel>
-          <div className="space-y-2 rounded-md border bg-secondary p-2">
-            {imageUrlInputs.fields.map((field, i) => (
-              <FormField
-                control={form.control}
-                key={field.id}
-                name={`imageUrls.${i}.value`} // Update this line
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        inputMode="url"
-                        placeholder={`Image URL ${i + 1} (${
-                          i === 0
-                            ? "primary image"
-                            : i < 5
-                              ? "required"
-                              : "optional"
-                        })`}
-                        onKeyDown={(e) => {
-                          const n = imageUrlInputs.fields.length;
-
-                          switch (e.key) {
-                            case "Enter":
-                              imageUrlInputs.insert(i + 1, {
-                                value: "",
-                              });
-                              e.preventDefault();
-                              break;
-                            case "ArrowDown":
-                              form.setFocus(`imageUrls.${(i + 1) % n}.value`);
-                              break;
-                            case "ArrowUp":
-                              form.setFocus(
-                                `imageUrls.${(i + n - 1) % n}.value`,
-                              );
-                              break;
-                            case "Backspace":
-                              if (n > 3 && e.currentTarget.value === "") {
-                                imageUrlInputs.remove(i);
-                                form.setFocus(
-                                  `imageUrls.${i === n - 1 ? i - 1 : i}.value`,
-                                );
-                              }
-                              break;
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-            <Button
-              type="button"
-              variant="emptyInput"
-              className="w-full"
-              onClick={() => imageUrlInputs.append({ value: "" })}
-            >
-              Add another image (optional)
-            </Button>
-          </div>
-        </FormItem>
+        <FormField
+          control={form.control}
+          name="imageUrls"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormControl>
+                <ImagesInput {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
-          name="propertyName"
+          name="name"
           render={({ field }) => (
             <FormItem className="col-span-full">
               <FormLabel>Property name</FormLabel>
@@ -349,7 +335,7 @@ export default function AdminPropertyForm({
 
         <FormField
           control={form.control}
-          name="pets"
+          name="petsAllowed"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Are pets allowed?</FormLabel>
@@ -358,7 +344,6 @@ export default function AdminPropertyForm({
                   <RadioGroup
                     className="flex flex-row gap-10"
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="true" id="true" />
@@ -378,7 +363,7 @@ export default function AdminPropertyForm({
 
         <FormField
           control={form.control}
-          name="smoking"
+          name="smokingAllowed"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Is smoking allowed?</FormLabel>
@@ -387,7 +372,6 @@ export default function AdminPropertyForm({
                   <RadioGroup
                     className="flex flex-row gap-10"
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="true" id="true" />
@@ -418,6 +402,9 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
+        <Button type="submit" className="col-span-full">
+          Upload Property
+        </Button>
       </form>
     </Form>
   );
