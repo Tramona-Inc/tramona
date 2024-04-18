@@ -75,14 +75,58 @@ export const stripeRouter = createTRPCRouter({
       });
     }),
 
+  authorizePayment: protectedProcedure
+    .input(
+      z.object({
+        listingId: z.number(),
+        propertyId: z.number(),
+        requestId: z.number(),
+        name: z.string(),
+        price: z.number(),
+        description: z.string(),
+        cancelUrl: z.string(),
+        images: z.array(z.string().url()),
+        userId: z.string(),
+        phoneNumber: z.string(),
+        totalSavings: z.number(),
+        // hostId: z.string(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      const currentDate = new Date(); // Get the current date and time
+
+      // Object that can be access through webhook and client
+      const metadata = {
+        user_id: ctx.user.id,
+        listing_id: input.listingId,
+        property_id: input.propertyId,
+        request_id: input.requestId,
+        price: input.price,
+        total_savings: input.totalSavings,
+        confirmed_at: currentDate.toISOString(),
+        phone_number: input.phoneNumber,
+        // host_id: input.hostId,
+      };
+
+      return stripe.paymentIntents.create({
+        payment_method_types: ["card"],
+        amount: input.price,
+        currency: 'usd',
+        capture_method: 'manual',
+        metadata: metadata, // metadata access for checkout session
+      });
+    }),
+
   getStripeSession: protectedProcedure
     .input(
       z.object({
         sessionId: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+
+      console.log("woah", session);
 
       return {
         metadata: {
@@ -98,7 +142,67 @@ export const stripeRouter = createTRPCRouter({
           confirmed_at: session.metadata?.confirmed_at,
           phoneNumber: session.metadata?.phone_number,
           // host_id: session.metadata?.host_id
+          setupIntent: session.setup_intent,
         },
       };
+    }),
+    getSetUpIntent: protectedProcedure
+    .input(
+      z.object({
+        setupIntent: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const setupIntent = await stripe.setupIntents.retrieve(input.setupIntent);
+
+      console.log(setupIntent);
+
+      return {
+       setupIntent: setupIntent,
+      };
+    }),
+
+    createSetupSession: protectedProcedure
+    .input(
+      z.object({
+        listingId: z.number(),
+        propertyId: z.number(),
+        requestId: z.number(),
+        name: z.string(),
+        price: z.number(),
+        description: z.string(),
+        cancelUrl: z.string(),
+        images: z.array(z.string().url()),
+        userId: z.string(),
+        phoneNumber: z.string(),
+        totalSavings: z.number(),
+        // hostId: z.string(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      const currentDate = new Date(); // Get the current date and time
+
+      // Object that can be access through webhook and client
+      const metadata = {
+        user_id: ctx.user.id,
+        listing_id: input.listingId,
+        property_id: input.propertyId,
+        request_id: input.requestId,
+        price: input.price,
+        total_savings: input.totalSavings,
+        confirmed_at: currentDate.toISOString(),
+        phone_number: input.phoneNumber,
+        // host_id: input.hostId,
+      };
+
+      return stripe.checkout.sessions.create({
+        mode: "setup",
+        payment_method_types: ["card"],
+        currency: 'usd',
+        // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`,
+        cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
+        metadata: metadata, // metadata access for checkout session
+      });
     }),
 });

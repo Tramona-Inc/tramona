@@ -1,4 +1,4 @@
-const scrapedData = require('./scrape-url.json');
+const scrapedData = require('./s3-images.json');
 
 const keysArray = Object.keys(scrapedData);
 
