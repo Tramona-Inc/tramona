@@ -1,3 +1,4 @@
+import { type RouterOutputs } from "@/utils/api";
 import {
   cn,
   formatCurrency,
@@ -7,12 +8,11 @@ import {
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
+import { type PropsWithChildren } from "react";
 import UserAvatar from "../../../_common/UserAvatar";
 import SaleTagIcon from "../../../_icons/SaleTagIcon";
 import { Badge } from "../../../ui/badge";
 import { Card, CardContent, CardFooter } from "../../../ui/card";
-import { type PropsWithChildren } from "react";
-import { type RouterOutputs } from "@/utils/api";
 
 export type OfferWithProperty =
   RouterOutputs["offers"]["getByRequestIdWithProperty"][number];
@@ -35,10 +35,8 @@ export default function OfferCard({
   const numNights = getNumNights(checkIn, checkOut);
   const offerNightlyPrice = offer.totalPrice / numNights;
 
-  const numAmenities = property.amenities.length;
-
   const discountPercentage = getDiscountPercentage(
-    property.originalNightlyPrice,
+    property.originalNightlyPrice ?? 0,
     offerNightlyPrice,
   );
 
@@ -70,7 +68,7 @@ export default function OfferCard({
                 </p>
                 <p>
                   <span className="text-3xl font-bold">
-                    {formatCurrency(property.originalNightlyPrice)}
+                    {formatCurrency(property.originalNightlyPrice ?? 0)}
                   </span>
                   <span className="text-sm">/night</span>
                 </p>
@@ -115,9 +113,9 @@ export default function OfferCard({
               </Badge>
             )}
             <Badge variant="secondary">{property.propertyType}</Badge>
-            {numAmenities > 0 && (
+            {property.amenities && property.amenities.length > 0 && (
               <Badge variant="secondary">
-                {plural(numAmenities, "amenity", "amenities")}
+                {plural(property.amenities.length, "amenity", "amenities")}
               </Badge>
             )}
           </div>
