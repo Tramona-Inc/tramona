@@ -42,8 +42,8 @@ function Calendar({
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
         ),
-        day_range_start: "day-range-start",
-        day_range_end: "day-range-end",
+        day_range_start: "day-range-start !text-primary-foreground",
+        day_range_end: "day-range-end !text-primary-foreground",
         day_selected:
           "bg-primary text-primary-foreground hover:bg-primary [&>*]:rounded-none hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: highlightToday ? "bg-accent text-accent-foreground" : "",

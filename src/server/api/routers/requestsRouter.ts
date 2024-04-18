@@ -163,7 +163,7 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.transaction(async (tx) => {
         const requestGroupId = await tx
           .insert(requestGroups)
-          .values({ createdByUserId: ctx.user.id, hasApproved: true })
+          .values({ createdByUserId: ctx.user.id })
           .returning()
           .then((res) => res[0]!.id);
 
@@ -198,18 +198,18 @@ export const requestsRouter = createTRPCRouter({
         });
       });
 
-      // if (ctx.user.isWhatsApp) {
-      //   void sendWhatsApp({
-      //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
-      //     to: ctx.user.phoneNumber!,
-      //   });
-      // } else {
-      //   void sendText({
-      //     to: ctx.user.phoneNumber!,
-      //     content:
-      //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-      //   });
-      // }
+      if (ctx.user.isWhatsApp) {
+        void sendWhatsApp({
+          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+          to: ctx.user.phoneNumber!,
+        });
+      } else {
+        void sendText({
+          to: ctx.user.phoneNumber!,
+          content:
+            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+        });
+      }
 
       if (env.NODE_ENV !== "production") return;
 
@@ -403,4 +403,41 @@ export const requestsRouter = createTRPCRouter({
         return { alreadyUpdated: false };
       }
     }),
+
+    // todo - change this when updaterequestinfo is not one to one anymore
+    getUpdatedRequestInfo: protectedProcedure
+     .input(z.object({
+       requestId: z.number(),
+     }))
+     .query(async ({ ctx, input }) => {
+       const { requestId } = input;
+       const updateInfo = await ctx.db.query.requestUpdatedInfo.findFirst({
+         where: eq(requestUpdatedInfo.requestId, requestId),
+       });
+
+       if (!updateInfo) {
+         throw new TRPCError({
+           code: 'NOT_FOUND',
+           message: `No updated info found for request with ID ${requestId}`,
+         });
+       }
+
+       let deserializedPropertyLinks: any[] = [];
+       if (updateInfo.propertyLinks !== null) {
+         try {
+           deserializedPropertyLinks = JSON.parse(updateInfo.propertyLinks) as any[];
+         } catch (e) {
+           throw new TRPCError({
+             code: 'INTERNAL_SERVER_ERROR',
+             message: 'Failed to parse propertyLinks',
+           });
+         }
+       }
+
+       return {
+         ...updateInfo,
+         propertyLinks: deserializedPropertyLinks,
+       };
+     }),
 });
+

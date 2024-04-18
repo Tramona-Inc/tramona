@@ -7,6 +7,7 @@ import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
   offers,
+  properties,
   referralCodes,
   referralEarnings,
   requests,
@@ -16,6 +17,15 @@ import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { api } from "@/utils/api";
+import { sendEmail } from "@/server/server-utils";
+import { BookingConfirmationEmail } from "@/components/email-templates/BookingConfirmationEmail";
+import { User } from "lucide-react";
+import { Payer } from "@aws-sdk/client-s3";
+import {
+  getNumNights,
+  getTramonaFeeTotal,
+} from "@/utils/utils";
+import { formatDate } from "date-fns";
 
 // ! Necessary for stripe
 export const config = {
@@ -52,8 +62,8 @@ export default async function webhook(
     // * You can add other event types to catch
     switch (event.type) {
       case "payment_intent.succeeded":
+        console.log("WOOOOO IT WORKED ");
         const paymentIntentSucceeded = event.data.object;
-
         await db
           .update(offers)
           .set({
@@ -83,6 +93,52 @@ export default async function webhook(
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
 
+        const propertyID = parseInt(
+          paymentIntentSucceeded.metadata.property_id!,
+          10,
+        );
+        const property = await db.query.properties.findFirst({
+          where: eq(properties.id, propertyID),
+        });
+        const requestID = parseInt(paymentIntentSucceeded.metadata.request_id!);
+        const request = await db.query.requests.findFirst({
+          where: eq(requests.id, requestID),
+        });
+        const offer = await db.query.offers.findFirst({
+          where: eq(offers.requestId, requestID),
+        });
+
+        //send BookingConfirmationEmail
+        //Send user confirmation email
+        //getting num of nights
+        const checkInDate = request?.checkIn ?? new Date(); // Use current date as default
+        const checkOutDate = request?.checkOut ?? new Date(); // Use current date as default
+        const numOfNights = getNumNights(checkInDate, checkOutDate);
+        const originalPrice = property?.originalNightlyPrice ?? 0 * numOfNights;
+        const savings =
+          (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
+        const tramonaServiceFee = getTramonaFeeTotal(savings);
+        const offerIdString = 
+        await sendEmail({
+          to: user!.email,
+          subject: `Tramona Booking Confirmation ${property?.name}`,
+          content: BookingConfirmationEmail({
+            userName: user?.name ?? "",
+            placeName: property?.name ?? "",
+            hostName: property?.hostName ?? "",
+            hostImageUrl: "https://via.placeholder.com/150",
+            startDate: formatDate(request!.checkIn, "MM/dd/yyyy") ?? "",
+            endDate: formatDate(request!.checkOut, "MM/dd/yyyy") ?? "",
+            address: property!.address ?? "",
+            propertyImageLink: property!.imageUrls?.[0] ?? "",
+            tripDetailLink: `https://www.tramona.com/offers/${offers.id.name}`,
+            originalPrice: originalPrice,
+            tramonaPrice: offer?.totalPrice ?? 0,
+            offerLink: `https://www.tramona.com/offers/${offer?.id.toString()}`,
+            numOfNights: numOfNights,
+            tramonaServiceFee: tramonaServiceFee ?? 0,
+          }),
+        });
         const twilioMutation = api.twilio.sendSMS.useMutation();
         const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 

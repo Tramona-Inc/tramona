@@ -1,4 +1,5 @@
 import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
+import { hostPropertyOnboardingSchema } from '@/components/host/onboarding/OnboardingFooter';
 import {
   createTRPCRouter,
   publicProcedure,
@@ -27,6 +28,7 @@ export const propertiesRouter = createTRPCRouter({
         .values({
           ...input,
           hostId: ctx.user.role === "admin" ? null : ctx.user.id,
+          otherAmenities: input.otherAmenities ?? [], // Ensure otherAmenities is an array
         })
         .returning({ id: properties.id })
         .then((res) => res[0]?.id);
@@ -90,16 +92,32 @@ export const propertiesRouter = createTRPCRouter({
         hostId: ctx.user.id,
         hostName: ctx.user.name,
         imageUrls: input.imageUrls.map((urlObject) => urlObject.value),
+        numBathrooms: 0, //TODO add it into form
       });
     }),
-  getHostProperties: roleRestrictedProcedure(["host"])
-    .query(async ({ ctx }) => {
+  getHostProperties: roleRestrictedProcedure(["host"]).query(
+    async ({ ctx }) => {
       if (ctx.user.role !== "host") {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
       return ctx.db.query.properties.findMany({
         where: eq(properties.hostId, ctx.user.id),
+      });
+    },
+  ),
+  hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
+    .input(hostPropertyOnboardingSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "host") {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      return await ctx.db.insert(properties).values({
+        ...input,
+        hostId: ctx.user.id,
+        hostName: ctx.user.name,
+        imageUrls: input.imageUrls,
       });
     }),
 });

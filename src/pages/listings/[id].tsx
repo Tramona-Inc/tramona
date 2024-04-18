@@ -29,7 +29,7 @@ export default function Listings() {
   return (
     <>
       <Head>
-        <title>Listings Property Preview | Tramona</title>
+        <title>Listing Property | Tramona</title>
       </Head>
       <div className="px-4 pb-64 pt-16">
         <div className="mx-auto max-w-5xl">

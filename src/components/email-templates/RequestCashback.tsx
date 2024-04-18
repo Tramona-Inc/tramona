@@ -17,7 +17,7 @@ export function RequestCashback({
   transactions: ReferralCashback[];
 }) {
   return (
-    <Layout title="New cashback request">
+    <Layout title_preview="New cashback request">
       <Section className="mt-[32px]">
         <TramonaIcon />
       </Section>

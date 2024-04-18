@@ -217,8 +217,7 @@ export default function DesktopSearchBar({
         } else {
           toast({
             title: `Successfully submitted ${newRequests.length} requests!`,
-            description:
-              "They have been sent to our network of hosts! We will email you with any updates.",
+            description: "Please check your phone for a confirmation text",
           });
         }
       } catch (e) {

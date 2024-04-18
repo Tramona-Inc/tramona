@@ -22,7 +22,7 @@ export function errorToast(error = "Something went wrong, please try again") {
 export function successfulRequestToast(request: Pick<Request, "location">) {
   toast({
     title: `Request sent: ${request.location}`,
-    description: `It has been sent to our network of hosts! We will email you with any updates.`,
+    description: `Please check your phone for a confirmation text`,
   });
 }
 
