@@ -11,13 +11,12 @@ import {
   getNumNights,
   getTramonaFeeTotal,
 } from "@/utils/utils";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
 import { useStripe } from "./HowToBookDialog";
-import { useSession } from "next-auth/react";
-
 
 export default function AirbnbBookDialog(
   props: React.PropsWithChildren<{
@@ -63,7 +62,7 @@ export default function AirbnbBookDialog(
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
   const getSession = api.stripe.getStripeSession.useMutation();
   const getSetupIntent = api.stripe.getSetUpIntent.useMutation();
-  const createSetupCheckout = api.stripe.createSetupSession.useMutation();
+  const createSetupCheckout = api.stripe.createSetupIntentSession.useMutation();
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
 
@@ -81,24 +80,22 @@ export default function AirbnbBookDialog(
       price: tramonafee, // Airbnb (tramona fee) Set's price for checkout
       description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
-      images: offer.property.imageUrls,
+      // images: offer.property.imageUrls,
       totalSavings,
       phoneNumber: user.phoneNumber ?? "",
-      userId: user.id,
+      // userId: user.id,
     });
-
-
 
     const stripe = await stripePromise;
 
-    if (stripe !== null) {
+    if (stripe !== null && response) {
       const sesh = await getSession.mutateAsync({
-        sessionId: response.id
-      })
+        sessionId: response.id,
+      });
 
       const intent = await getSetupIntent.mutateAsync({
-        setupIntent: sesh.metadata.setupIntent,
-      })
+        setupIntent: sesh.metadata.setupIntent as string,
+      });
       console.log(intent);
       await stripe.redirectToCheckout({
         sessionId: response.id,

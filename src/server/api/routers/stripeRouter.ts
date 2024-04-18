@@ -128,6 +128,8 @@ export const stripeRouter = createTRPCRouter({
         requestId: z.number(),
         price: z.number(),
         cancelUrl: z.string(),
+        name: z.string(),
+        description: z.string(),
         // images: z.array(z.string().url()),
         phoneNumber: z.string(),
         totalSavings: z.number(),

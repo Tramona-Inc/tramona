@@ -17,6 +17,7 @@ export default function PaymentTest() {
     listingId: 123,
     propertyId: 456,
     requestId: 789,
+    name: "string",
     price: 100,
     totalSavings: 20,
     phoneNumber: "123-456-7890",
