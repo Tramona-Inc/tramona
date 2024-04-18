@@ -363,7 +363,7 @@ devDependencies:
     version: 8.56.9
   '@types/google.maps':
     specifier: ^3.55.3
-    version: 3.55.5
+    version: 3.55.7
   '@types/leaflet':
     specifier: ^1.9.8
     version: 1.9.8
@@ -8679,8 +8679,8 @@ packages:
     resolution: {integrity: sha512-JcTwzkxskR8DN/nnX96Pie3gGN3WHiPpuxzuQ9z3516o1bB243d8w8DHUJ8BohuzoT1o3HUFta2ns/mkZC8KRw==}
     dev: false
 
-  /@types/google.maps@3.55.5:
-    resolution: {integrity: sha512-U1QwCo1GeeLm0YI/GoHvfd1VfwgnoUSBcKCMXXFAM+2izSSuqqwZUJ9XNO6NxZxmYKjBNI+NF5eGF6uUSb1aSg==}
+  /@types/google.maps@3.55.7:
+    resolution: {integrity: sha512-SlWFx0vo7RSAOC63+PTz8FeqLDaRYs7PrS/L0bZSKswxIN5TnCuckbeIwZpgD/S+DWalPteXfDbg5JsUER5Cyw==}
     dev: true
 
   /@types/graceful-fs@4.1.9:
