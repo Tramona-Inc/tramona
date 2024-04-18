@@ -35,11 +35,11 @@ import {
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 
-import { getNumNights } from "@/utils/utils";
-import ErrorMsg from "../ui/ErrorMsg";
-import axios from "axios";
-import { getS3ImgUrl } from "@/utils/formatters";
 import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
+import { getS3ImgUrl } from "@/utils/formatters";
+import { getNumNights } from "@/utils/utils";
+import axios from "axios";
+import ErrorMsg from "../ui/ErrorMsg";
 
 const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
@@ -60,7 +60,7 @@ const formSchema = z.object({
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
-  amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
+  amenities: z.string().array().nullable(),
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
@@ -121,7 +121,9 @@ export default function AdminOfferForm({
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
-            originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100,
+            originalNightlyPriceUSD: offer.property.originalNightlyPrice
+              ? offer.property.originalNightlyPrice / 100
+              : 0,
             checkInInfo: offer.property.checkInInfo ?? undefined,
             checkInTime: offer.property.checkInTime ?? undefined, 
             checkOutTime: offer.property.checkOutTime ?? undefined,
@@ -172,10 +174,11 @@ export default function AdminOfferForm({
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
-      type: propertyData.propertyType,
+      propertyType: propertyData.propertyType,
       originalNightlyPrice: Math.round(
         propertyData.originalNightlyPriceUSD * 100,
       ),
+      numBathrooms: 1,
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
       mapScreenshot: url,

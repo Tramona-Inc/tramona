@@ -122,7 +122,7 @@ export default function Page() {
                         getNumNights(request.checkIn, request.checkOut)
                       }
                       totalPrice={offer.totalPrice}
-                      originalNightlyPrice={offer.property.originalNightlyPrice}
+                      originalNightlyPrice={offer.property.originalNightlyPrice ?? 0}
                       airbnbUrl={offer.property.airbnbUrl ?? ""}
                       checkIn={request.checkIn}
                       checkOut={request.checkOut}

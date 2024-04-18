@@ -54,7 +54,7 @@ export default function Form2({
     <>
       <div className="pb-10">
         <h1 className="text-2xl font-bold md:text-4xl">
-          When we recieve offers for your property, where should we send them?
+          When we receive offers for your property, where should we send them?
         </h1>
         <h2 className="pt-10 text-lg font-semibold md:pt-20 md:text-2xl">
           We recommend both phone number and email as the requests are first

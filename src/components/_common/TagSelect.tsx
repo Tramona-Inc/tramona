@@ -2,13 +2,14 @@ import { cn } from "@/utils/utils";
 
 export default function TagSelect<TOption extends string>(props: {
   options: readonly TOption[];
-  value: TOption[];
+  value: TOption[] | null;
   onChange: (newValue: TOption[]) => void;
 }) {
   return (
     <div className="flex flex-wrap gap-1">
       {props.options.map((option) => {
-        const isSelected = props.value.includes(option);
+        const isSelected = props.value ? props.value.includes(option) : false;
+
         return (
           <button
             key={option}
@@ -16,8 +17,8 @@ export default function TagSelect<TOption extends string>(props: {
             onClick={() => {
               props.onChange(
                 isSelected
-                  ? props.value.filter((x) => x !== option)
-                  : [...props.value, option],
+                  ? props.value?.filter((x) => x !== option) ?? [] // Use optional chaining and nullish coalescing
+                  : [...(props.value ?? []), option], // Use nullish coalescing
               );
             }}
             className={cn(
