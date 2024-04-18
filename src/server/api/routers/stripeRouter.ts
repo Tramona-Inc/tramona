@@ -111,8 +111,8 @@ export const stripeRouter = createTRPCRouter({
       return stripe.paymentIntents.create({
         payment_method_types: ["card"],
         amount: input.price,
-        currency: 'usd',
-        capture_method: 'manual',
+        currency: "usd",
+        capture_method: "manual",
         metadata: metadata, // metadata access for checkout session
       });
     }),
@@ -146,7 +146,7 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
-    getSetUpIntent: protectedProcedure
+  getSetUpIntent: protectedProcedure
     .input(
       z.object({
         setupIntent: z.string(),
@@ -158,28 +158,25 @@ export const stripeRouter = createTRPCRouter({
       console.log(setupIntent);
 
       return {
-       setupIntent: setupIntent,
+        setupIntent: setupIntent,
       };
     }),
 
-    createSetupSession: protectedProcedure
+  createSetupSession: protectedProcedure
     .input(
       z.object({
         listingId: z.number(),
         propertyId: z.number(),
         requestId: z.number(),
-        name: z.string(),
         price: z.number(),
-        description: z.string(),
         cancelUrl: z.string(),
-        images: z.array(z.string().url()),
-        userId: z.string(),
+        // images: z.array(z.string().url()),
         phoneNumber: z.string(),
         totalSavings: z.number(),
         // hostId: z.string(),
       }),
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const currentDate = new Date(); // Get the current date and time
 
       // Object that can be access through webhook and client
@@ -195,14 +192,22 @@ export const stripeRouter = createTRPCRouter({
         // host_id: input.hostId,
       };
 
+      const stripeCustomerId = await stripe.customers
+        .create({
+          name: ctx.user.name ?? "",
+          email: ctx.user.email,
+        })
+        .then((res) => res.id);
+
       return stripe.checkout.sessions.create({
         mode: "setup",
         payment_method_types: ["card"],
-        currency: 'usd',
+        currency: "usd",
         // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
         success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`,
         cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
         metadata: metadata, // metadata access for checkout session
+        customer: stripeCustomerId,
       });
     }),
 });
