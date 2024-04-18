@@ -4,14 +4,14 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 
 export default function PaymentTest() {
-  const { mutateAsync: createSetupSessionMutation } =
-    api.stripe.createSetupSession.useMutation();
+  const { mutateAsync: createSetupIntentSessionMutation } =
+    api.stripe.createSetupIntentSession.useMutation();
 
   const { mutateAsync: getStripeSessionMutate } =
     api.stripe.getStripeSession.useMutation();
 
-  const { mutateAsync: getSetupIntentMutate } =
-    api.stripe.getSetUpIntent.useMutation();
+  // const { mutateAsync: getSetupIntentMutate } =
+  //   api.stripe.getSetUpIntent.useMutation();
 
   const data = {
     listingId: 123,
@@ -33,7 +33,7 @@ export default function PaymentTest() {
     if (!session.data?.user) return;
 
     // Creates Session for mode setup and creates customer
-    const response = await createSetupSessionMutation(data);
+    const response = await createSetupIntentSessionMutation(data);
 
     if (stripe !== null && response) {
       const sesh = await getStripeSessionMutate({
@@ -41,9 +41,10 @@ export default function PaymentTest() {
       });
 
       if (sesh.metadata.setupIntent) {
-        const intent = await getSetupIntentMutate({
-          setupIntent: sesh.metadata.setupIntent as string,
-        });
+        // ! Only get setup intent for host/admin to accept offer
+        // const intent = await getSetupIntentMutate({
+        //   setupIntent: sesh.metadata.setupIntent as string,
+        // });
 
         // console.log(intent);
         // Creates and redirects user to URL
