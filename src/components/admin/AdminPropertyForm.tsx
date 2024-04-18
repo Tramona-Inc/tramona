@@ -16,6 +16,9 @@ import { Input } from "../ui/input";
 import TagSelect from "../_common/TagSelect";
 import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { Button } from "../ui/button";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
   hostId: zodString(),
@@ -33,8 +36,8 @@ const formSchema = z.object({
   imageUrls: z.object({ value: zodUrl() }).array(),
   propertyName: zodString(),
   about: zodString({ maxLen: Infinity }),
-  petsAllowed: z.boolean(),
-  smokingAllowed: z.boolean(),
+  pets: zodString(),
+  smoking: zodString(),
   otherHouseRules: zodString(),
 });
 
@@ -320,7 +323,7 @@ export default function AdminPropertyForm({
           control={form.control}
           name="propertyName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-full">
               <FormLabel>Property name</FormLabel>
               <FormControl>
                 <Input {...field} />
@@ -334,10 +337,10 @@ export default function AdminPropertyForm({
           control={form.control}
           name="about"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-full">
               <FormLabel>About</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Textarea {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -346,12 +349,27 @@ export default function AdminPropertyForm({
 
         <FormField
           control={form.control}
-          name="petsAllowed"
+          name="pets"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Are Pets Allowed?</FormLabel>
+              <FormLabel>Are pets allowed?</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <div className="flex flex-row items-center space-x-4">
+                  <RadioGroup
+                    className="flex flex-row gap-10"
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="true" />
+                      <Label htmlFor="allowed">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="false" />
+                      <Label htmlFor="allowed">No</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -360,12 +378,27 @@ export default function AdminPropertyForm({
 
         <FormField
           control={form.control}
-          name="smokingAllowed"
+          name="smoking"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Is Smoking Allowed?</FormLabel>
+              <FormLabel>Is smoking allowed?</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <div className="flex flex-row items-center space-x-4">
+                  <RadioGroup
+                    className="flex flex-row gap-10"
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="true" />
+                      <Label htmlFor="allowed">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="false" />
+                      <Label htmlFor="allowed">No</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -376,10 +409,10 @@ export default function AdminPropertyForm({
           control={form.control}
           name="otherHouseRules"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-full">
               <FormLabel>Other House Rules</FormLabel>
               <FormControl>
-                <Input {...field} autoFocus />
+                <Textarea {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
