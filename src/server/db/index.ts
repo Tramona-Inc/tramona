@@ -12,10 +12,12 @@ import {
 const client = postgres(env.DATABASE_URL, { max: 1 });
 export const db = drizzle(client, { schema });
 
+///////// InferQueryModel type helper //////////////
+
 type Schema = typeof schema;
 type TablesWithRelations = ExtractTablesWithRelations<Schema>;
 
-export type IncludeRelation<TableName extends keyof TablesWithRelations> =
+type IncludeRelation<TableName extends keyof TablesWithRelations> =
   DBQueryConfig<
     "one" | "many",
     boolean,
@@ -23,7 +25,7 @@ export type IncludeRelation<TableName extends keyof TablesWithRelations> =
     TablesWithRelations[TableName]
   >["with"];
 
-export type IncludeColumns<TableName extends keyof TablesWithRelations> =
+type IncludeColumns<TableName extends keyof TablesWithRelations> =
   DBQueryConfig<
     "one" | "many",
     boolean,
