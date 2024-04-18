@@ -35,7 +35,7 @@ export default function PaymentTest() {
     // Creates Session for mode setup and creates customer
     const response = await createSetupSessionMutation(data);
 
-    if (stripe !== null) {
+    if (stripe !== null && response) {
       const sesh = await getStripeSessionMutate({
         sessionId: response.id,
       });
@@ -45,7 +45,7 @@ export default function PaymentTest() {
           setupIntent: sesh.metadata.setupIntent as string,
         });
 
-        console.log(intent);
+        // console.log(intent);
         // Creates and redirects user to URL
         await stripe.redirectToCheckout({
           sessionId: response.id,
