@@ -13,7 +13,7 @@ export default function InactiveRequestGroups() {
     <RequestCards requestGroups={requests.inactiveRequestGroups} />
   ) : (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-center text-muted-foreground">
+      <p className="text-center">
         <EmptyStateValue
           title={"You have no history"}
           description={"Completed requests will show up here. "}
@@ -22,7 +22,6 @@ export default function InactiveRequestGroups() {
         >
           <HistoryEmptySvg />
         </EmptyStateValue>
-        Your past requests will show up here
       </p>
     </div>
   );
