@@ -1,9 +1,17 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  EmptyState,
+  EmptyStateDescription,
+  EmptyStateFooter,
+  EmptyStateTitle,
+} from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TextSkeleton } from "@/components/ui/skeleton";
 import { api, type RouterOutputs } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
 import { range } from "lodash";
+import { HandshakeIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,11 +29,30 @@ export default function HostRequestsLayout({
       <ScrollArea className="sticky inset-y-0 h-screen-minus-header w-96 border-r px-4 py-8">
         <h1 className="text-2xl font-bold">Offers & Requests</h1>
         <div className="pt-4">
-          {properties
-            ? properties.map((property) => (
+          {properties ? (
+            properties.length > 0 ? (
+              properties.map((property) => (
                 <SidebarProperty key={property.id} property={property} />
               ))
-            : range(10).map((i) => <SidebarPropertySkeleton key={i} />)}
+            ) : (
+              <EmptyState
+                icon={HandshakeIcon}
+                className="h-[calc(100vh-280px)]"
+              >
+                <EmptyStateTitle>No requests yet</EmptyStateTitle>
+                <EmptyStateDescription>
+                  Properties with requests will show up here
+                </EmptyStateDescription>
+                <EmptyStateFooter>
+                  <Button asChild>
+                    <Link href="/host/properties">View all properties</Link>
+                  </Button>
+                </EmptyStateFooter>
+              </EmptyState>
+            )
+          ) : (
+            range(10).map((i) => <SidebarPropertySkeleton key={i} />)
+          )}
         </div>
       </ScrollArea>
       <div className="flex-1">

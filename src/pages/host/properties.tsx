@@ -39,8 +39,8 @@ export default function Page() {
     <DashboadLayout type="host">
       <div className="px-4 pb-32 pt-16">
         <div className="mx-auto max-w-7xl space-y-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-bold">Properties</h1>
+          <div className="flex justify-between">
+            <h1 className="text-3xl font-bold">Properties</h1>
             <NewPropertyBtn open={open} setOpen={setOpen} />
           </div>
           {properties ? (
