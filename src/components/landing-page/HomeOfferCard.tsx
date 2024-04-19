@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialogLarge";
 import { Form } from "@/components/ui/form";
 import { type Property } from "@/server/db/schema";
-import { cn } from "@/utils/utils";
+import { cn, formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -118,8 +118,9 @@ export default function HomeOfferCard({ property }: { property: Property }) {
           {property.name}
         </p>
         <p>
-          <span className="text-xs">Airbnb Price: </span>$
-          {property.originalNightlyPrice}
+          <span className="text-xs">Airbnb Price: </span>
+          {formatCurrency(property?.originalNightlyPrice ?? 0)}
+          <span className='text-xs'>/night</span>
         </p>
       </div>
       <p className="text-xs">
