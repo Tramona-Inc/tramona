@@ -32,7 +32,7 @@ export default function Header(props: HeaderProps) {
 function LargeHeader(props: HeaderProps) {
   const { status } = useSession();
   return (
-    <header className="sticky top-0 z-50 flex h-header-height items-center bg-white p-4 lg:px-16">
+    <header className="sticky top-0 z-50 flex h-header-height items-center bg-white p-4 shadow-md lg:px-16">
       <div className="flex flex-1 gap-4">
         <TramonaLogo />
       </div>
@@ -93,7 +93,7 @@ function SmallHeader(props: HeaderProps) {
   const { status } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 flex h-header-height items-center bg-white p-2 text-sm sm:p-4 sm:text-base">
+    <header className="sticky top-0 z-50 flex h-header-height items-center bg-white p-2 text-sm shadow-md sm:p-4 sm:text-base">
       {props.type === "dashboard" && (
         <div className="flex-1">
           <SmallSidebar {...props} />
