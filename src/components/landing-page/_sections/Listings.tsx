@@ -90,7 +90,7 @@ export default function Listings() {
 
             {!isFetchingNextPage &&
               properties?.pages.length &&
-              !properties.pages[properties.pages.length - 1].nextCursor && (
+              !properties.pages[properties.pages.length - 1]?.nextCursor && (
                 <div className="text-center opacity-60">
                   <p className="text-xs md:text-sm">No more posts to load</p>
                 </div>
