@@ -1,19 +1,20 @@
 import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
-import { hostPropertyOnboardingSchema } from '@/components/host/onboarding/OnboardingFooter';
+import { hostPropertyOnboardingSchema } from "@/components/host/onboarding/OnboardingFooter";
 import {
   createTRPCRouter,
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
-  properties,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { createGzip } from "zlib";
+import { withCursorPagination } from "drizzle-pagination";
+import { z } from "zod";
+import { properties } from "./../../db/schema/tables/properties";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -76,17 +77,40 @@ export const propertiesRouter = createTRPCRouter({
         where: eq(properties.id, input.id),
       });
     }),
-  getAll: publicProcedure
-  .query(async({ctx})=>{
+  getAll: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.properties.findMany();
   }),
-  getAllByFilter: publicProcedure
-  .query(async({ctx})=>{
+  getAllByFilter: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.properties.findMany({
-      limit: 10,
-      offset: 0 
+      limit: 100,
+      offset: 0,
     });
   }),
+  getAllInfiniteScroll: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).nullish(),
+        cursor: z.string().nullish(), // <-- "cursor" needs to exist, but can be any type
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 11;
+      const { cursor } = input;
+
+      const data = await ctx.db.query.properties.findMany(
+        withCursorPagination({
+          limit: limit + 1,
+          cursors: [[properties.name, "desc", cursor ? cursor : undefined]],
+        }),
+      );
+
+      return {
+        data,
+        nextCursor: data.length
+          ? data[data.length - 1]?.createdAt.toISOString()
+          : null,
+      };
+    }),
 
   hostInsertProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)

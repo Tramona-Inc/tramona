@@ -85,7 +85,10 @@ const config = {
         protocol: "https",
         hostname: "assets.guesty.com",
       },
-
+      {
+        protocol: "https",
+        hostname: "dx577khz83dc.cloudfront.net",
+      },
     ],
   },
   experimental: {
