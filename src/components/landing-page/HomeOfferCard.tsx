@@ -23,14 +23,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import MakeBid from "./bidding/MakeBid";
 
-const photos = [
-  "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/3b0c4129-696a-4b08-8896-3c05d9c729b5.jpeg?im_w=1200",
-  "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/1835c668-975c-498a-8773-e2ea4b13102f.jpeg?im_w=720",
-  "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/a356750d-26b8-4c5a-ac27-2bce4a145694.jpeg?im_w=720",
-  "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/6ad57d33-d0dd-492c-96e4-a1ad2f3184bc.jpeg?im_w=720",
-  "https://a0.muscache.com/im/pictures/miso/Hosting-710092666168276467/original/680b68ad-8ec1-4724-8c74-f588dc8286bc.jpeg?im_w=720",
-];
-
 function Dot({ isCurrent }: { isCurrent: boolean }) {
   return (
     <div
@@ -96,7 +88,7 @@ export default function HomeOfferCard({ property }: { property: Property }) {
     <div className="space-y-2">
       <Carousel setApi={setApi}>
         <CarouselContent>
-          {property.imageUrls.map((photo, index) => (
+          {property.imageUrls.slice(0, 5).map((photo, index) => (
             <CarouselItem key={index}>
               <CardContent>
                 <Image

@@ -3,7 +3,7 @@ import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import HomeOfferCard from "../HomeOfferCard";
 export default function Listings() {
-  const { data: propertiesArray } = api.properties.getAll.useQuery();
+  const { data: propertiesArray } = api.properties.getAllByFilter.useQuery();
 
   console.log(propertiesArray)
 

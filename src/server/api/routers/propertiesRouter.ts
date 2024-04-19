@@ -76,10 +76,18 @@ export const propertiesRouter = createTRPCRouter({
         where: eq(properties.id, input.id),
       });
     }),
-    getAll: publicProcedure
-    .query(async({ctx})=>{
-      return await ctx.db.query.properties.findMany();
-    }),
+  getAll: publicProcedure
+  .query(async({ctx})=>{
+    return await ctx.db.query.properties.findMany();
+  }),
+  getAllByFilter: publicProcedure
+  .query(async({ctx})=>{
+    return await ctx.db.query.properties.findMany({
+      limit: 10,
+      offset: 0 
+    });
+  }),
+
   hostInsertProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
     .mutation(async ({ ctx, input }) => {
