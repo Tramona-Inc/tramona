@@ -1,5 +1,5 @@
 import Image from "next/image";
-import SearchBar from "../SearchBar/SearcBar"
+import SearchBar from "../SearchBar/SearchBar";
 
 export default function MastHead() {
   return (
