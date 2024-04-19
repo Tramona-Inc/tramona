@@ -42,6 +42,7 @@ const buttonVariants = cva(
           "hover:border-black flex flex-row items-center gap-5 rounded-lg border-[2px] p-2 transition-all",
         increment:
           "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
+        underline: "hover:bg-accent text-zinc-800 underline",
       },
     },
     defaultVariants: {
