@@ -1,9 +1,19 @@
 import { useStripe } from "@/components/requests/[id]/OfferCard/HowToBookDialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
+import {
+  EmbeddedCheckout,
+  EmbeddedCheckoutProvider,
+} from "@stripe/react-stripe-js";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
+import type Stripe from "stripe";
 
 export default function PaymentTest() {
+  const [options, setOptions] =
+    useState<Stripe.Response<Stripe.Checkout.Session>>();
+
   const { mutateAsync: createSetupIntentSessionMutation } =
     api.stripe.createSetupIntentSession.useMutation();
 
@@ -37,6 +47,8 @@ export default function PaymentTest() {
     // Creates Session for mode setup and creates customer
     const response = await createSetupIntentSessionMutation(data);
 
+    console.log(response);
+
     if (stripe !== null && response) {
       const sesh = await getStripeSessionMutate({
         sessionId: response.id,
@@ -50,16 +62,29 @@ export default function PaymentTest() {
 
         // console.log(intent);
         // Creates and redirects user to URL
-        await stripe.redirectToCheckout({
-          sessionId: response.id,
-        });
+        // await stripe.redirectToCheckout({
+        //   sessionId: response.id,
+        // });
+
+        setOptions(response);
       }
     }
   }
 
   return (
     <div>
-      <Button onClick={checkout}>Set up</Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button onClick={checkout}>Set up</Button>
+        </DialogTrigger>
+        <DialogContent>
+          {options && (
+            <EmbeddedCheckoutProvider stripe={stripePromise} options={{clientSecret: options.client_secret ?? ''}}>
+              <EmbeddedCheckout />
+            </EmbeddedCheckoutProvider>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
