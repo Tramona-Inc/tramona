@@ -26,6 +26,13 @@ import ImagesInput from "../_common/ImagesInput";
 import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { options as propertyTypeOptions } from "../host/onboarding/Onboarding2";
 
 const formSchema = z.object({
   hostId: zodString(),
@@ -71,18 +78,20 @@ export default function AdminPropertyForm({
 
   const router = useRouter();
 
-  const { mutate } = api.properties.adminInsertProperty.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Success!",
-        description: "Property successfully listed",
-      });
-      void router.push("/host/properties");
-    },
-  });
+  const { mutateAsync: adminInsertProperty } =
+    api.properties.adminInsertProperty.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Success!",
+          description: "Property successfully listed",
+        });
+        void router.push("/host/properties");
+      },
+    });
 
-  function onSubmit(data: FormSchema) {
-    mutate({
+  async function onSubmit(data: FormSchema) {
+    console.log("form submitted");
+    await adminInsertProperty({
       hostId: data.hostId,
       propertyType: data.propertyType,
       roomType: data.roomType,
@@ -105,17 +114,13 @@ export default function AdminPropertyForm({
     });
   }
 
-  // const imageUrlInputs = useFieldArray({
-  //   name: "imageUrls",
-  //   control: form.control,
-  // });
-
   return (
     <Form {...form}>
       <h1 className="my-3 text-center text-xl font-bold">
         Admin Property Upload Form
       </h1>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
+      {JSON.stringify(form.formState.errors, null, 2)}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="container grid grid-cols-2 gap-4"
@@ -402,7 +407,11 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-        <Button type="submit" className="col-span-full">
+        <Button
+          type="submit"
+          className="col-span-full"
+          disabled={form.formState.isSubmitting}
+        >
           Upload Property
         </Button>
       </form>
