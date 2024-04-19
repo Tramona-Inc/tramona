@@ -135,7 +135,7 @@ export const propertySafetyItemsEnum = pgEnum(
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-  hostTeamId: text("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
+  hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
   propertyType: propertyTypeEnum("property_type").notNull(),
   roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
