@@ -114,7 +114,7 @@
     "react-phone-number-input": "^3.3.9",
     "recharts": "^2.12.3",
     "resend": "^3.1.0",
-    "stripe": "^14.14.0",
+    "stripe": "^14.23.0",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.2.1",
     "tailwind-scrollbar-hide": "^1.1.7",
@@ -172,7 +172,7 @@
   "ct3aMetadata": {
     "initVersion": "7.25.1"
   },
-  "packageManager": "pnpm@8.15.6",
+  "packageManager": "pnpm@8.15.7",
   "readme": "ERROR: No README data found!",
   "_id": "tramona-trpc@0.1.0"
 }

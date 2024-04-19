@@ -1,3 +1,4 @@
+import { BookingConfirmationEmail } from "@/components/email-templates/BookingConfirmationEmail";
 import { env } from "@/env";
 import {
   createConversationWithAdmin,
@@ -7,16 +8,19 @@ import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
   offers,
+  properties,
   referralCodes,
   referralEarnings,
   requests,
   users,
 } from "@/server/db/schema";
+import { sendEmail } from "@/server/server-utils";
+import { api } from "@/utils/api";
+import { getNumNights, getTramonaFeeTotal } from "@/utils/utils";
+import { formatDate } from "date-fns";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { api } from "@/utils/api";
-
 
 // ! Necessary for stripe
 export const config = {
@@ -53,8 +57,8 @@ export default async function webhook(
     // * You can add other event types to catch
     switch (event.type) {
       case "payment_intent.succeeded":
+        console.log("WOOOOO IT WORKED ");
         const paymentIntentSucceeded = event.data.object;
-
         await db
           .update(offers)
           .set({
@@ -80,20 +84,64 @@ export default async function webhook(
             ),
           );
 
-          const user = await db.query.users.findFirst({
-            where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
-          });
+        const user = await db.query.users.findFirst({
+          where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
+        });
 
+        const propertyID = parseInt(
+          paymentIntentSucceeded.metadata.property_id!,
+          10,
+        );
+        const property = await db.query.properties.findFirst({
+          where: eq(properties.id, propertyID),
+        });
+        const requestID = parseInt(paymentIntentSucceeded.metadata.request_id!);
+        const request = await db.query.requests.findFirst({
+          where: eq(requests.id, requestID),
+        });
+        const offer = await db.query.offers.findFirst({
+          where: eq(offers.requestId, requestID),
+        });
 
+        //send BookingConfirmationEmail
+        //Send user confirmation email
+        //getting num of nights
+        const checkInDate = request?.checkIn ?? new Date(); // Use current date as default
+        const checkOutDate = request?.checkOut ?? new Date(); // Use current date as default
+        const numOfNights = getNumNights(checkInDate, checkOutDate);
+        const originalPrice = property?.originalNightlyPrice ?? 0 * numOfNights;
+        const savings =
+          (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
+        const tramonaServiceFee = getTramonaFeeTotal(savings);
+        const offerIdString = await sendEmail({
+          to: user!.email,
+          subject: `Tramona Booking Confirmation ${property?.name}`,
+          content: BookingConfirmationEmail({
+            userName: user?.name ?? "",
+            placeName: property?.name ?? "",
+            hostName: property?.hostName ?? "",
+            hostImageUrl: "https://via.placeholder.com/150",
+            startDate: formatDate(request!.checkIn, "MM/dd/yyyy") ?? "",
+            endDate: formatDate(request!.checkOut, "MM/dd/yyyy") ?? "",
+            address: property!.address ?? "",
+            propertyImageLink: property!.imageUrls?.[0] ?? "",
+            tripDetailLink: `https://www.tramona.com/offers/${offers.id.name}`,
+            originalPrice: originalPrice,
+            tramonaPrice: offer?.totalPrice ?? 0,
+            offerLink: `https://www.tramona.com/offers/${offer?.id.toString()}`,
+            numOfNights: numOfNights,
+            tramonaServiceFee: tramonaServiceFee ?? 0,
+          }),
+        });
         const twilioMutation = api.twilio.sendSMS.useMutation();
         const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
         if (user?.isWhatsApp) {
           await twilioWhatsAppMutation.mutateAsync({
             templateId: "HXb0989d91e9e67396e9a508519e19a46c",
-            to: paymentIntentSucceeded.metadata.phoneNumber!
-          })
-        } else{
+            to: paymentIntentSucceeded.metadata.phoneNumber!,
+          });
+        } else {
           await twilioMutation.mutateAsync({
             to: paymentIntentSucceeded.metadata.phoneNumber!,
             msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
@@ -152,6 +200,27 @@ export default async function webhook(
 
       case "checkout.session.completed":
         const checkoutSessionCompleted = event.data.object;
+
+        if (checkoutSessionCompleted.metadata?.user_id) {
+          // * Insert Stripe Customer Id after session is completed
+          const stripeCustomerId = await db.query.users
+            .findFirst({
+              columns: {
+                stripeCustomerId: true,
+              },
+              where: eq(users.id, checkoutSessionCompleted.metadata.user_id),
+            })
+            .then((res) => res?.stripeCustomerId);
+
+          if (!stripeCustomerId) {
+            await db
+              .update(users)
+              .set({
+                stripeCustomerId: checkoutSessionCompleted.customer as string,
+              })
+              .where(eq(users.id, checkoutSessionCompleted.metadata.user_id));
+          }
+        }
 
         // * Make sure to check listing_id isnt' null
         if (

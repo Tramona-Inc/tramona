@@ -14,11 +14,11 @@ import {
 
 import { Tailwind } from "@react-email/tailwind";
 import * as React from "react";
-import { type ReactNode } from "react";
+import { ReactNode } from "react";
 
 interface LayoutProps {
   children: ReactNode;
-  title: string;
+  title_preview: string;
 }
 
 interface HeaderProps {
@@ -70,7 +70,7 @@ interface EmailConfirmationCardProps {
 
 export const TramonaLogo = () => {
   return (
-    <div className="text-brand flex items-center gap-2 bg-white text-lg font-bold">
+    <div className="flex items-center gap-2 text-lg font-bold text-brand bg-white">
       <img
         src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
         alt="Tramona Logo"
@@ -85,10 +85,10 @@ const main = {
   background: "#FFFFF",
 };
 
-export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
   return (
     <Html>
-      <Preview className="text-brand">{title}</Preview>
+      <Preview className="text-brand">{title_preview}</Preview>
       <Tailwind
         config={{
           theme: {
@@ -109,14 +109,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         }}
       >
         <Head />
-        <Body className="font-sans text-base" style={main}>
+        <Body
+          className="text-base font-sans flex justify-center items-center"
+          style={main}
+        >
           <Container className="bg-white" style={{ backgroundColor: "white" }}>
-            <Header title={title} />
             {children}
-            <BottomHr />
-            <SocialLinks />
-            <Footer />
-            <Info />
           </Container>
         </Body>
       </Tailwind>
@@ -127,13 +125,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
 export const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
     <>
-      <div className="ml-6 mt-4">
+      <div className="mt-4 ml-6">
         <TramonaLogo />
       </div>
-      <div className="inline-flex w-full items-center justify-center">
-        <Hr className="h-px w-11/12 border-0 bg-gray-400 " />
+      <div className="inline-flex items-center justify-center w-full">
+        <Hr className="w-11/12 h-px bg-gray-400 border-0 " />
       </div>
-      <Heading className="my-0 ml-6 mt-4 text-left text-lg leading-8">
+      <Heading className="text-left my-0 leading-8 text-lg ml-6 mt-4">
         <strong className="text-brand">{title}</strong>
       </Heading>
     </>
@@ -142,23 +140,23 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
 
 export const BottomHr = () => {
   return (
-    <div className="inline-flex w-full items-center justify-center">
-      <Hr className="mt-8 h-px w-11/12 border-0  bg-gray-400" />
+    <div className="inline-flex items-center justify-center w-full">
+      <Hr className="w-11/12 h-px bg-gray-400 border-0  mt-8" />
     </div>
   );
 };
 
-// commented out for now
 export const Info = () => {
   return (
     <div className="pb-6">
       <div className="text-left font-light">
-        {/* <Text className="text-xs text-brand font-light mx-6">
-                Update your email preferences to choose which emails you get or unsubscribe from this type of email.
-                </Text> */}
+        <Text className="text-xs text-brand font-light mx-6">
+          Update your email preferences to choose which emails you get or
+          unsubscribe from this type of email.
+        </Text>
       </div>
       <Row>
-        <Column className="px-20 text-center">
+        <Column className="text-center px-20">
           {/* <Link className="text-grey text-xs mr-2">Unsubscribe</Link> */}
           {/* <Link className="text-grey text-xs underline">View in the browser</Link> */}
         </Column>
@@ -174,7 +172,24 @@ export const CustomButton: React.FC<ButtonProps> = ({ title, link }) => {
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-brand mx-auto inline-block w-11/12 rounded-full py-3 text-base font-semibold text-white"
+        className="inline-block bg-brand text-white text-base font-semibold rounded-full px-3 py-3 w-11/12 mx-auto whitespace-nowrap"
+        style={{
+          textDecoration: "none",
+        }}
+      >
+        {title}
+      </a>
+    </Section>
+  );
+};
+export const CustomButtonOutline: React.FC<ButtonProps> = ({ title, link }) => {
+  return (
+    <Section className="text-center">
+      <a
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block bg-white border-brand text-brand text-base font-semibold rounded-full px-5 py-3 w-11/12 mx-auto whitespace-nowrap"
         style={{
           textDecoration: "none",
         }}
@@ -188,9 +203,9 @@ export const CustomButton: React.FC<ButtonProps> = ({ title, link }) => {
 export const Footer = () => {
   return (
     <Row>
-      <Column className="mb-0 mt-2 ">
-        <Text className="mb-0 ml-6 text-left text-xs text-black">Tramona</Text>
-        <Text className="ml-6 mt-0 text-left text-xs text-black">
+      <Column className="mt-2 mb-0 ">
+        <Text className="text-left text-xs text-black ml-6 mb-0">Tramona</Text>
+        <Text className="text-left text-xs text-black ml-6 mt-0">
           2314 236th AVE NE Sammamish WA 98074
         </Text>
       </Column>
@@ -198,7 +213,6 @@ export const Footer = () => {
   );
 };
 
-// Please, do NOT change img tag! React's Img doesnt work well with tables
 export const SocialLinks: React.FC = () => {
   return (
     <>
@@ -590,19 +604,19 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
 export const BookingCard: React.FC<BookingCardProps> = ({
   checkIn,
   checkOut,
-  // originalPrice,
-  // tramonaPrice,
+  originalPrice,
+  tramonaPrice,
   description,
   property_image_link,
   isExpired,
   booking_link,
 }) => {
-  // let discountPercentage = 0;
-  // if (tramonaPrice) {
-  //   discountPercentage = originalPrice
-  //     ? Math.round(((originalPrice - tramonaPrice) / originalPrice) * 100)
-  //     : 0;
-  // }
+  let discountPercentage = 0;
+  if (tramonaPrice) {
+    discountPercentage = originalPrice
+      ? Math.round(((originalPrice - tramonaPrice) / originalPrice) * 100)
+      : 0;
+  }
 
   return (
     <table
