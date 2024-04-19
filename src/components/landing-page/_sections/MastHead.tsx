@@ -1,5 +1,5 @@
 import Image from "next/image";
-import SearchBar from "../SearchBar/SearcBar"
+import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
 
 export default function MastHead() {
   return (
@@ -32,7 +32,7 @@ export default function MastHead() {
             </div>
 
             <div className="mx-auto w-full max-w-5xl">
-              <SearchBar />
+              <DesktopSearchBar mode={'search'} />
             </div>
           </div>
         </section>
