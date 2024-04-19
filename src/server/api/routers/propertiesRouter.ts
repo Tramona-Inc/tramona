@@ -122,7 +122,7 @@ export const propertiesRouter = createTRPCRouter({
       if (ctx.user.role !== "admin") {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
-      console.log("got here");
+
       return await ctx.db.insert(properties).values({
         ...input,
         hostId: input.hostId,

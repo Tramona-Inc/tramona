@@ -17,7 +17,10 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import TagSelect from "../_common/TagSelect";
-import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
+import {
+  ALL_PROPERTY_AMENITIES,
+  amenityCategories,
+} from "@/server/db/schema/tables/propertyAmenities";
 import { Button } from "../ui/button";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
@@ -27,12 +30,13 @@ import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next/router";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { options as propertyTypeOptions } from "../host/onboarding/Onboarding2";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { capitalize } from "@/utils/utils";
 
 const formSchema = z.object({
   hostId: zodString(),
@@ -55,7 +59,10 @@ const formSchema = z.object({
 
   otherAmenities: z.string().array(),
 
-  imageUrls: z.string().array(),
+  imageUrls: z
+    .string()
+    .array()
+    .min(5, { message: "Please submit at least 5 photos" }),
   name: z.string().max(255),
   about: z.string(),
 
@@ -74,6 +81,7 @@ export default function AdminPropertyForm({
 }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
+    defaultValues: { otherAmenities: [] },
   });
 
   const router = useRouter();
@@ -90,7 +98,6 @@ export default function AdminPropertyForm({
     });
 
   async function onSubmit(data: FormSchema) {
-    console.log("form submitted");
     await adminInsertProperty({
       hostId: data.hostId,
       propertyType: data.propertyType,
@@ -120,7 +127,7 @@ export default function AdminPropertyForm({
         Admin Property Upload Form
       </h1>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-      {JSON.stringify(form.formState.errors, null, 2)}
+      {/* {JSON.stringify(form.formState.errors, null, 2)} */}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="container grid grid-cols-2 gap-4"
@@ -145,9 +152,20 @@ export default function AdminPropertyForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Property Type</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a property type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {ALL_PROPERTY_TYPES.map((propertyType) => (
+                    <SelectItem key={propertyType} value={propertyType}>
+                      {capitalize(propertyType)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -159,9 +177,20 @@ export default function AdminPropertyForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Room Type</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a room type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {ALL_PROPERTY_ROOM_TYPES.map((roomType) => (
+                    <SelectItem key={roomType} value={roomType}>
+                      {capitalize(roomType)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -242,7 +271,9 @@ export default function AdminPropertyForm({
           name="checkInInfo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Check In Info</FormLabel>
+              <FormLabel>
+                Check In Info (How will the guests check in?)
+              </FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -257,10 +288,12 @@ export default function AdminPropertyForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Check In Time</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
+              <Input
+                {...field}
+                type="time"
+                placeholder="Check in time"
+                className="p-5"
+              />
             </FormItem>
           )}
         />
@@ -271,10 +304,12 @@ export default function AdminPropertyForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Check Out Time</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
+              <Input
+                {...field}
+                type="time"
+                placeholder="Check out time"
+                className="p-5"
+              />
             </FormItem>
           )}
         />
@@ -297,11 +332,30 @@ export default function AdminPropertyForm({
           )}
         />
 
+        {/* <FormField
+          control={form.control}
+          name="otherAmenities"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Other Amenities</FormLabel>
+              <FormControl>
+                {amenityCategories.map((category) =>
+                  category.amenities.map((amenity) => {
+                    amenity;
+                  }),
+                )}
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        /> */}
+
         <FormField
           control={form.control}
           name="imageUrls"
           render={({ field }) => (
             <FormItem className="col-span-full">
+              <FormLabel>Add some photos of the property</FormLabel>
               <FormControl>
                 <ImagesInput {...field} />
               </FormControl>
@@ -399,7 +453,7 @@ export default function AdminPropertyForm({
           name="otherHouseRules"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Other House Rules</FormLabel>
+              <FormLabel>Other House Rules (optional)</FormLabel>
               <FormControl>
                 <Textarea {...field} />
               </FormControl>
