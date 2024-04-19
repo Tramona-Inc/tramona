@@ -6,7 +6,7 @@ import HomeOfferCard from "../HomeOfferCard";
 
 export default function Listings() {
   const {
-    data: postsRaw,
+    data: properties,
     isLoading,
     fetchNextPage,
     isFetchingNextPage,
@@ -30,17 +30,18 @@ export default function Listings() {
     // if the user reaches the bottom of the page, and there are more posts to fetch, fetch them
     if (
       entry?.isIntersecting &&
-      postsRaw?.pages.length &&
-      postsRaw?.pages[postsRaw.pages.length - 1].nextCursor
-    )
+      properties?.pages.length &&
+      properties.pages[properties.pages.length - 1]?.nextCursor
+    ) {
       void fetchNextPage();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry]);
 
   // memoize the posts, so that they don't get re-rendered on every re-render
   const posts = useMemo(
-    () => postsRaw?.pages.flatMap((page) => page.data) ?? [],
-    [postsRaw],
+    () => properties?.pages.flatMap((page) => page.data) ?? [],
+    [properties],
   );
 
   // const propertyCards = propertiesArray?.map((property: Property) => (
@@ -88,8 +89,8 @@ export default function Listings() {
             )}
 
             {!isFetchingNextPage &&
-              postsRaw?.pages.length &&
-              !postsRaw.pages[postsRaw.pages.length - 1].nextCursor && (
+              properties?.pages.length &&
+              !properties.pages[properties.pages.length - 1].nextCursor && (
                 <div className="text-center opacity-60">
                   <p className="text-xs md:text-sm">No more posts to load</p>
                 </div>
