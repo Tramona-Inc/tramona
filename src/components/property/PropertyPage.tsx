@@ -1,4 +1,3 @@
-import UserAvatar from "@/components/_common/UserAvatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
@@ -10,15 +9,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Property } from '@/server/db/schema';
 import { api, type RouterOutputs } from "@/utils/api";
 import {
   cn,
   formatCurrency,
-  formatDateMonthDay,
-  getDiscountPercentage,
-  getNumNights,
-  getTramonaFeeTotal,
-  plural,
+  plural
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import "leaflet/dist/leaflet.css";
@@ -37,10 +33,10 @@ import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
 import { useMediaQuery } from "../_utils/useMediaQuery";
+import OfferPhotos from '../offers/OfferPhotos';
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Badge } from "../ui/badge";
-import OfferPhotos from "./OfferPhotos";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
@@ -70,15 +66,6 @@ export default function PropertyPage({
 }) {
   let isBooked = false;
 
-  const { data, isLoading } =
-    api.offers.getStripePaymentIntentAndCheckoutSessionId.useQuery({
-      id: offer.id,
-    });
-
-  if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
-    isBooked = true;
-  }
-
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: property.address!,
   });
@@ -89,30 +76,7 @@ export default function PropertyPage({
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
 
   // const lisa = false; // temporary until we add payments
-  const hostName = property.host?.name ?? property.hostName;
-  const offerNightlyPrice =
-    offer.totalPrice / getNumNights(request.checkIn, request.checkOut);
-
-  const discountPercentage = getDiscountPercentage(
-    property.originalNightlyPrice ?? 0,
-    offerNightlyPrice,
-  );
-
-  const checkInDate = formatDateMonthDay(request.checkIn);
-  const checkOutDate = formatDateMonthDay(request.checkOut);
-  const numNights = getNumNights(request.checkIn, request.checkOut);
-
-  const originalTotal = property.originalNightlyPrice
-    ? property.originalNightlyPrice * numNights
-    : 0;
-
-  const tramonaServiceFee = getTramonaFeeTotal(
-    originalTotal - offer.totalPrice,
-  );
-
-  // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
-
-  const tax = 0;
+  const hostName = property.hostName;
 
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
@@ -121,10 +85,10 @@ export default function PropertyPage({
   return (
     <div className="space-y-4">
       <Link
-        href={isBooked ? "/requests" : `/requests/${request.id}`}
+        href={isBooked ? "/requests" : `/`}
         className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
       >
-        &larr; Back to offers
+        &larr; Back to Home Page
       </Link>
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-2">
@@ -285,9 +249,6 @@ export default function PropertyPage({
         <div className="flex-[2] space-y-6">
           <h1 className="items-center text-lg font-semibold sm:text-3xl">
             {property.name}{" "}
-            <Badge className=" -translate-y-1 bg-primary text-white">
-              {discountPercentage}% off
-            </Badge>
           </h1>
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-1">
@@ -320,11 +281,11 @@ export default function PropertyPage({
 
           <section>
             <div className="flex items-center gap-2">
-              <UserAvatar
+              {/* <UserAvatar
                 name={hostName}
                 email={property.host?.email}
                 image={property.host?.image}
-              />
+              /> */}
               <div className="-space-y-1.5">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
                 <p className="text-lg font-medium">{hostName}</p>
@@ -386,13 +347,13 @@ export default function PropertyPage({
           <Card className="">
             <div>
               <h2 className="flex items-center text-3xl font-semibold">
-                {formatCurrency(offerNightlyPrice)}
+                {/* {formatCurrency(offerNightlyPrice)} */}
                 <span className="ml-2 py-0 text-sm font-normal text-gray-500">
                   per night
                 </span>
               </h2>
               <p className="text-sm font-medium text-black">
-                Original price: {formatCurrency(originalTotal / numNights)}
+                {/* Original price: {formatCurrency(originalTotal / numNights)} */}
               </p>
               <div className="my-6 grid grid-cols-2 gap-1">
                 <div>
@@ -400,7 +361,7 @@ export default function PropertyPage({
                     <CalendarDays />
                     <div className="ml-2">
                       <p className="text-sm text-gray-600">Check in</p>
-                      <p className="text-base font-bold">{checkInDate}</p>
+                      {/* <p className="text-base font-bold">{checkInDate}</p> */}
                     </div>
                   </div>
                 </div>
@@ -409,7 +370,7 @@ export default function PropertyPage({
                     <CalendarDays />
                     <div className="ml-2">
                       <p className="text-sm text-gray-600">Check out</p>
-                      <p className="font-bold">{checkOutDate}</p>
+                      {/* <p className="font-bold">{checkOutDate}</p> */}
                     </div>
                   </div>
                 </div>
@@ -419,7 +380,7 @@ export default function PropertyPage({
                 <div className="ml-2">
                   <p className="text-sm text-gray-600">Guests</p>
                   <p className="font-bold">
-                    {plural(request.numGuests, "Guest")}
+                    {/* {plural(request.numGuests, "Guest")} */}
                   </p>
                 </div>
               </div>
@@ -428,17 +389,17 @@ export default function PropertyPage({
               <div className="-space-y-1 text-black">
                 <div className="flex justify-between py-2">
                   <p className="font-medium">
-                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
+                    {/* {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "} */}
                     nights
                   </p>
                   <p className="ms-1 font-medium">
-                    {formatCurrency(offer.totalPrice)}
+                    {/* {formatCurrency(offer.totalPrice)} */}
                   </p>
                 </div>
                 <div className="flex justify-between py-2">
                   <p className="font-medium">Service fee</p>
                   <p className="font-medium">
-                    {formatCurrency(tramonaServiceFee)}
+                    {/* {formatCurrency(tramonaServiceFee)} */}
                   </p>
                 </div>
                 <hr className="h-px bg-gray-300 py-0" />
@@ -450,10 +411,10 @@ export default function PropertyPage({
                 <p className="text-xs text-gray-500">taxes not included.</p>
               </div>
               <p className="font-bold">
-                {formatCurrency(offer.totalPrice + tramonaServiceFee + tax)}
+                {/* {formatCurrency(offer.totalPrice + tramonaServiceFee + tax)} */}
               </p>
             </div>
-            {!isLoading ? (
+            {/* {!isLoading ? (
               <HowToBookDialog
                 isBooked={isBooked}
                 listingId={offer.id}
@@ -485,7 +446,7 @@ export default function PropertyPage({
               </HowToBookDialog>
             ) : (
               <Spinner />
-            )}
+            )} */}
           </Card>
         </div>
       </div>
@@ -494,7 +455,7 @@ export default function PropertyPage({
         <h1 className="text-lg font-semibold md:text-xl">Location</h1>
         <div className="inline-flex items-center justify-center py-2 text-base">
           <MapPin className="mr-2" />
-          {request.location}
+          {/* {request.location} */}
         </div>
         {coordinateData && (
           <div className="relative z-10">

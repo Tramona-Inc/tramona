@@ -1,4 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import Spinner from '@/components/_common/Spinner';
+import PropertyPage from '@/components/property/PropertyPage';
 import { api } from "@/utils/api";
 
 import { useSession } from "next-auth/react";
@@ -26,8 +28,7 @@ export default function Property() {
       </Head>
       <div className="px-4 pb-64 pt-16">
         <div className="mx-auto max-w-5xl">
-          {property?.id}
-          {/* {property ? <OfferPage offer={offer} /> : <Spinner />} */}
+          {property ? <PropertyPage property={property} /> : <Spinner />}
         </div>
       </div>
     </DashboardLayout>

@@ -202,7 +202,8 @@ async function scrapeUrl(
           console.log(`${i}: ${msg.args()[i]}`);
         }
       });
-      const returnedData = await newPage.evaluate(async (propertyNumber) => {
+      const returnedData = await newPage.evaluate(async (propertyNumber: number) => {
+
         const slides = Array.from(
           document.querySelectorAll(
             'div[class*="mainSlider"] .slick-slide:not(.slick-cloned)',
