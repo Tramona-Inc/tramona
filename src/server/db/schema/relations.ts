@@ -8,7 +8,7 @@ import {
   messages,
 } from "./tables/messages";
 import { offers } from "./tables/offers";
-import { properties } from "./tables/properties";
+import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
@@ -61,6 +61,14 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     references: [users.id],
   }),
   offers: many(offers),
+  bookedDates: many(bookedDates),
+}));
+
+export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
+  property: one(properties, {
+    fields: [bookedDates.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
