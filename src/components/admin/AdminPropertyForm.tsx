@@ -120,14 +120,14 @@ export default function AdminPropertyForm({
 
   return (
     <Form {...form}>
-      <h1 className="my-3 text-center text-xl font-bold">
+      <h1 className="my-5 text-center text-2xl font-bold">
         Admin Property Upload Form
       </h1>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
       {/* {JSON.stringify(form.formState.errors, null, 2)} to check for form state errors */}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="container grid grid-cols-2 gap-4"
+        className="container mb-5 grid grid-cols-2 gap-4"
       >
         <FormField
           control={form.control}
