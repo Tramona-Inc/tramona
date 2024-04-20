@@ -17,10 +17,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import TagSelect from "../_common/TagSelect";
-import {
-  ALL_PROPERTY_AMENITIES,
-  amenityCategories,
-} from "@/server/db/schema/tables/propertyAmenities";
+import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { Button } from "../ui/button";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
@@ -127,7 +124,7 @@ export default function AdminPropertyForm({
         Admin Property Upload Form
       </h1>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-      {/* {JSON.stringify(form.formState.errors, null, 2)} */}
+      {/* {JSON.stringify(form.formState.errors, null, 2)} to check for form state errors */}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="container grid grid-cols-2 gap-4"
@@ -170,7 +167,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="roomType"
@@ -195,7 +191,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="maxNumGuests"
@@ -209,7 +204,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="numBeds"
@@ -223,7 +217,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="numBedrooms"
@@ -237,7 +230,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="numBathrooms"
@@ -251,7 +243,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="address"
@@ -265,7 +256,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="checkInInfo"
@@ -281,7 +271,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="checkInTime"
@@ -297,7 +286,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="checkOutTime"
@@ -313,7 +301,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="amenities"
@@ -331,7 +318,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         {/* <FormField
           control={form.control}
           name="otherAmenities"
@@ -349,7 +335,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         /> */}
-
         <FormField
           control={form.control}
           name="imageUrls"
@@ -363,7 +348,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="name"
@@ -377,7 +361,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="about"
@@ -391,7 +374,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="petsAllowed"
@@ -419,7 +401,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="smokingAllowed"
@@ -447,7 +428,6 @@ export default function AdminPropertyForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="otherHouseRules"

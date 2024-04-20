@@ -11,6 +11,7 @@ import {
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
+  users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
@@ -123,10 +124,17 @@ export const propertiesRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, input.hostId),
+        columns: {
+          name: true,
+        },
+      });
+
       return await ctx.db.insert(properties).values({
         ...input,
         hostId: input.hostId,
-        hostName: "Aaron",
+        hostName: user?.name,
         imageUrls: input.imageUrls,
       });
     }),
