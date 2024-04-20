@@ -71,11 +71,7 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function AdminPropertyForm({
-  afterSubmit,
-}: {
-  afterSubmit?: () => void;
-}) {
+export default function AdminPropertyForm() {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: { otherAmenities: [] },
@@ -120,14 +116,11 @@ export default function AdminPropertyForm({
 
   return (
     <Form {...form}>
-      <h1 className="my-5 text-center text-2xl font-bold">
-        Admin Property Upload Form
-      </h1>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
       {/* {JSON.stringify(form.formState.errors, null, 2)} to check for form state errors */}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="container mb-5 grid grid-cols-2 gap-4"
+        className="grid grid-cols-2 gap-4 rounded-xl border bg-white p-4"
       >
         <FormField
           control={form.control}
