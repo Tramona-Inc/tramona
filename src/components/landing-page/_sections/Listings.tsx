@@ -13,7 +13,7 @@ export default function Listings() {
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {},
     {
-      // the cursor from where to start fetching thecurrentProperties 
+      // the cursor from where to start fetching thecurrentProperties
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
@@ -58,12 +58,11 @@ export default function Listings() {
     //     <Spinner />
     //   )}
     // </div>
-    <section className="grid gap-10 gap-y-10 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+    <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <div className="flex justify-center">
-          <Spinner />
-        </div>
+          <Spinner />        </div>
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
@@ -91,7 +90,9 @@ export default function Listings() {
             properties?.pages.length &&
             !properties.pages[properties.pages.length - 1]?.nextCursor && (
               <div className="text-center opacity-60">
-                <p className="text-xs md:text-sm">No more currentProperties to load</p>
+                <p className="text-xs md:text-sm">
+                  No more currentProperties to load
+                </p>
               </div>
             )}
         </>
