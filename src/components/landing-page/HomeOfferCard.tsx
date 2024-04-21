@@ -18,6 +18,7 @@ import { type Property } from "@/server/db/schema";
 import { cn, formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -91,14 +92,16 @@ export default function HomeOfferCard({ property }: { property: Property }) {
           {property.imageUrls.slice(0, 5).map((photo, index) => (
             <CarouselItem key={index}>
               <CardContent>
-                <Image
-                  src={photo}
-                  height={300}
-                  width={300}
-                  alt=""
-                  objectFit="cover"
-                  className="aspect-square w-full rounded-xl object-cover"
-                />
+                <Link href={`/property/${property.id}`}>
+                  <Image
+                    src={photo}
+                    height={300}
+                    width={300}
+                    alt=""
+                    objectFit="cover"
+                    className="aspect-square w-full rounded-xl object-cover"
+                  />
+                </Link>
               </CardContent>
             </CarouselItem>
           ))}
@@ -120,7 +123,7 @@ export default function HomeOfferCard({ property }: { property: Property }) {
         <p>
           <span className="text-xs">Airbnb Price: </span>
           {formatCurrency(property?.originalNightlyPrice ?? 0)}
-          <span className='text-xs'>/night</span>
+          <span className="text-xs">/night</span>
         </p>
       </div>
       <p className="text-xs">

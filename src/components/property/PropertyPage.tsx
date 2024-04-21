@@ -1,4 +1,4 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
@@ -9,20 +9,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Property } from '@/server/db/schema';
+import { Property } from "@/server/db/schema";
 import { api, type RouterOutputs } from "@/utils/api";
-import {
-  cn,
-  formatCurrency,
-  plural
-} from "@/utils/utils";
+import { cn, formatCurrency, plural } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import "leaflet/dist/leaflet.css";
 import {
   ArrowLeftToLineIcon,
   ArrowRightToLineIcon,
   CalendarDays,
-  CheckIcon,
   ChevronRight,
   ImagesIcon,
   MapPin,
@@ -31,10 +26,8 @@ import {
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import Spinner from "../_common/Spinner";
 import { useMediaQuery } from "../_utils/useMediaQuery";
-import OfferPhotos from '../offers/OfferPhotos';
-import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
+import OfferPhotos from "../offers/OfferPhotos";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Badge } from "../ui/badge";
 
@@ -59,11 +52,7 @@ const Circle = dynamic(
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
-export default function PropertyPage({
-  property,
-}: {
-  property: Property;
-}) {
+export default function PropertyPage({ property }: { property: Property }) {
   let isBooked = false;
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
@@ -347,7 +336,7 @@ export default function PropertyPage({
           <Card className="">
             <div>
               <h2 className="flex items-center text-3xl font-semibold">
-                {/* {formatCurrency(offerNightlyPrice)} */}
+                {formatCurrency(property.originalNightlyPrice ?? 0)}
                 <span className="ml-2 py-0 text-sm font-normal text-gray-500">
                   per night
                 </span>
