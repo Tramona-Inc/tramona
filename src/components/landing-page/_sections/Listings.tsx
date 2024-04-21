@@ -62,7 +62,8 @@ export default function Listings() {
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <div className="flex justify-center">
-          <Spinner />        </div>
+          <Spinner />{" "}
+        </div>
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
@@ -81,7 +82,7 @@ export default function Listings() {
           ))}
 
           {isFetchingNextPage && (
-            <div className="flex justify-center">
+            <div className="flex justify-center overflow-y-hidden">
               <Spinner />
             </div>
           )}
