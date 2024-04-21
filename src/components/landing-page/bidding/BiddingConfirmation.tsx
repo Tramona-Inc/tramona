@@ -3,9 +3,10 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import Image from "next/image";
 import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useBidding } from "@/utils/store/listingBidding";
 import Link from "next/link";
-import { Property } from "@/server/db/schema";
+import { type Property } from "@/server/db/schema";
+import { useBidding } from '@/utils/store/bidding';
+
 function BiddingConfirmation({ property }: { property: Property }) {
   const resetSession = useBidding((state) => state.resetSession);
   const step = useBidding((state) => state.step);

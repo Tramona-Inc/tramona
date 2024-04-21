@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialogLarge";
 import { Form } from "@/components/ui/form";
 import { type Property } from "@/server/db/schema";
+import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
@@ -22,6 +23,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Button } from "../ui/button";
 import MakeBid from "./bidding/MakeBid";
 
 function Dot({ isCurrent }: { isCurrent: boolean }) {
@@ -85,6 +87,18 @@ export default function HomeOfferCard({ property }: { property: Property }) {
     resolver: zodResolver(formSchema),
   });
 
+  const setDate = useBidding((state) => state.setDate);
+  const resetSession = useBidding((state) => state.resetSession);
+
+  const [open, setOpen] = useState(false);
+
+  async function onSubmit(values: FormSchema) {
+    // Reset session if on new date
+    resetSession();
+    setOpen(true);
+    setDate(values.date.from, values.date.to);
+  }
+
   return (
     <div className="space-y-2">
       <Carousel setApi={setApi}>
@@ -131,20 +145,31 @@ export default function HomeOfferCard({ property }: { property: Property }) {
         {property.numBeds} beds, {property.numBathrooms} baths
       </p>
       <Form {...form}>
-        <DateRangePicker
-          control={form.control}
-          name="date"
-          formLabel=""
-          className="col-span-full sm:col-span-1"
-        />
-        <DialogLarge>
-          <DialogTrigger className="w-full rounded-xl bg-foreground py-2 text-primary-foreground">
-            Make Offer
-          </DialogTrigger>
-          <DialogContentLarge className=" sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
-            <MakeBid property={property} />
-          </DialogContentLarge>
-        </DialogLarge>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-2"
+        >
+          <DateRangePicker
+            control={form.control}
+            name="date"
+            formLabel=""
+            className="col-span-full sm:col-span-1"
+          />
+          <DialogLarge open={open} onOpenChange={setOpen}>
+            <DialogTrigger className="">
+              <Button
+                type={"submit"}
+                className="w-full rounded-xl"
+                disabled={!form.formState.isValid}
+              >
+                Make Offer
+              </Button>
+            </DialogTrigger>
+            <DialogContentLarge className=" sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
+              <MakeBid property={property} />
+            </DialogContentLarge>
+          </DialogLarge>
+        </form>
       </Form>
     </div>
   );

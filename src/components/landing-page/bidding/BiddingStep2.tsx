@@ -1,4 +1,3 @@
-import { useBidding } from "@/utils/store/listingBidding";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -12,8 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SelectGroup, SelectTrigger } from "@radix-ui/react-select";
+import { type Property } from "@/server/db/schema";
 
-import { Property } from "@/server/db/schema";
+import { useBidding } from '@/utils/store/bidding';
 function BiddingStep2({ property }: {property: Property}) {
   const step = useBidding((state)=>state.step)
   const setStep = useBidding((state)=>state.setStep)
