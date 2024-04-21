@@ -18,6 +18,7 @@ import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -88,6 +89,8 @@ export default function HomeOfferCard({ property }: { property: Property }) {
   });
 
   const setDate = useBidding((state) => state.setDate);
+  const setStep = useBidding((state) => state.setStep);
+  const step = useBidding((state) => state.step);
   const resetSession = useBidding((state) => state.resetSession);
 
   const [open, setOpen] = useState(false);
@@ -165,7 +168,20 @@ export default function HomeOfferCard({ property }: { property: Property }) {
                 Make Offer
               </Button>
             </DialogTrigger>
-            <DialogContentLarge className=" sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
+            <DialogContentLarge className="relative sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
+              {step !== 0 && (
+                <Button
+                  variant={"ghost"}
+                  className={cn("absolute left-2 top-2 md:left-4 md:top-4")}
+                  onClick={() => {
+                    if (step - 1 > -1) {
+                      setStep(step - 1);
+                    }
+                  }}
+                >
+                  <ChevronLeft />
+                </Button>
+              )}
               <MakeBid property={property} />
             </DialogContentLarge>
           </DialogLarge>

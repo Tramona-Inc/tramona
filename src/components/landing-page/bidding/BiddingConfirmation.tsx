@@ -1,11 +1,10 @@
-import React from "react";
-import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import Image from "next/image";
-import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { type Property } from "@/server/db/schema";
-import { useBidding } from '@/utils/store/bidding';
+import { useBidding } from "@/utils/store/bidding";
+import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import { Lightbulb } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 function BiddingConfirmation({ property }: { property: Property }) {
   const resetSession = useBidding((state) => state.resetSession);
@@ -73,7 +72,7 @@ function BiddingConfirmation({ property }: { property: Property }) {
           </div>
         </div>
       </div>
-      <Link href="/requests">
+      <Link href={`/property/${property.id}`}>
         <Button
           variant="default"
           className="mt-40 md:px-10 md:text-xl"
