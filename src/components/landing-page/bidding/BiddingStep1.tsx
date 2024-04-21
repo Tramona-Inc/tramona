@@ -113,7 +113,7 @@ function BiddingStep1({ property }: { property: Property }) {
       </div>
       {/* we need to create a new end point /properties/properties[id] */}
       <Link
-        href="/properties/[property.Id]"
+        href={`/property/${property.id}`}
         className="flex flex-row items-center text-sm font-light md:text-base"
       >
         <a>View full propery details</a>

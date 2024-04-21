@@ -14,12 +14,22 @@ import Image from "next/image";
 import { FaApplePay } from "react-icons/fa";
 
 import { useBidding } from "@/utils/store/bidding";
+import { formatDateRange, getNumNights } from "@/utils/utils";
 function BiddingStep2({ property }: { property: Property }) {
+  const date = useBidding((state) => state.date);
+  const price = useBidding((state) => state.price);
+
   const step = useBidding((state) => state.step);
   const setStep = useBidding((state) => state.setStep);
   const handlePressNext = () => {
     setStep(step + 1);
   };
+
+  const totalNightlyPrice = price * getNumNights(date.from, date.to);
+
+  const tax = 1;
+
+  const totalPrice = totalNightlyPrice * tax;
 
   return (
     <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl">
@@ -48,7 +58,9 @@ function BiddingStep2({ property }: { property: Property }) {
                 Airbnb price: ${property.originalNightlyPrice}/night
               </p>
               <p className="mt-3">Check-in/Check-out:</p>
-              <p className="text-muted-foreground">Check in - check out</p>
+              <p className="text-muted-foreground">
+                {formatDateRange(date.from, date.to)}
+              </p>
               <ul className="my-4 flex flex-row text-nowrap text-xs tracking-tighter text-muted-foreground md:space-x-1 ">
                 <li className="">{property.maxNumGuests} Guests</li>
                 <li>&#8226;</li>
@@ -63,17 +75,20 @@ function BiddingStep2({ property }: { property: Property }) {
           {/* Price Breakdown */}
           <div className="text-base font-semibold">
             <div className="mt-8 flex flex-row justify-between">
-              <p>Offer Price: $Biddingamount x numOfNights nights</p>
-              <p>$Total </p>
+              <p>
+                Offer Price: ${price} x {getNumNights(date.from, date.to)}{" "}
+                nights
+              </p>
+              <p>${totalNightlyPrice} </p>
             </div>
-            <div className="my-4 flex flex-row justify-between">
+            {/* <div className="my-4 flex flex-row justify-between">
               <p>Taxes</p>
               <p>$20</p>
-            </div>
+            </div> */}
             <hr />
             <div className="my-2 flex flex-row justify-between">
               <p>Offer Total</p>
-              <p>$Total </p>
+              <p>${totalPrice} </p>
             </div>
           </div>
         </div>
