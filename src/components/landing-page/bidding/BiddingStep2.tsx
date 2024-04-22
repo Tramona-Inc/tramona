@@ -104,6 +104,8 @@ function BiddingStep2({ property }: { property: Property }) {
       propertyId: property.id,
       numGuests: guest,
       amount: price,
+      checkIn: date.from,
+      checkOut: date.to,
     });
   }
 

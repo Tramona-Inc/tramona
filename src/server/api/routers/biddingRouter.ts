@@ -6,12 +6,27 @@ import {
   groups,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq, exists } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const biddingRouter = createTRPCRouter({
   getMyBids: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.bids.findMany({});
+    return await ctx.db.query.bids.findMany({
+        where: exists(
+          ctx.db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.groupId, bids.madeByGroupId),
+                eq(groupMembers.userId, ctx.user.id),
+              ),
+            ),
+        ),
+        with: {
+          property: true
+        },
+      })
   }),
   create: protectedProcedure
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
@@ -33,8 +48,6 @@ export const biddingRouter = createTRPCRouter({
           userId: ctx.user.id,
           groupId: madeByGroupId,
         });
-
-        console.log("-------------------called");
 
         await ctx.db
           .insert(bids)

@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Property } from "@/server/db/schema";
+import { type Property } from "@/server/db/schema";
 import { api, type RouterOutputs } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
@@ -53,8 +53,13 @@ export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export default function PropertyPage({ property }: { property: Property }) {
   let isBooked = false;
 
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: property.address!,
+  // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+  //   location: property.address!,
+  // });
+
+  const { data: addressData } = api.offers.getCity.useQuery({
+    latitude: property.latitude!,
+    longitude: property.longitude!,
   });
 
   const isMobile = useMediaQuery("(max-width: 640px)");
@@ -301,34 +306,6 @@ export default function PropertyPage({ property }: { property: Property }) {
               </div>
             </div>
           </section>
-          <section className="space-y-1">
-            {coordinateData && (
-              <div className="relative z-10">
-                <MapContainer
-                  center={[
-                    coordinateData.coordinates.lat,
-                    coordinateData.coordinates.lng,
-                  ]}
-                  zoom={15}
-                  scrollWheelZoom={false}
-                  style={{ height: "400px" }}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <Circle
-                    center={[
-                      coordinateData.coordinates.lat,
-                      coordinateData.coordinates.lng,
-                    ]}
-                    radius={200} // Adjust radius as needed
-                    pathOptions={{ color: "red" }} // Customize circle color and other options
-                  />
-                </MapContainer>
-              </div>
-            )}
-          </section>
         </div>
         <div className="flex-1">
           <BiddingForm price={property.originalNightlyPrice ?? 0} />
@@ -339,15 +316,12 @@ export default function PropertyPage({ property }: { property: Property }) {
         <h1 className="text-lg font-semibold md:text-xl">Location</h1>
         <div className="inline-flex items-center justify-center py-2 text-base">
           <MapPin className="mr-2" />
-          {/* {request.location} */}
+          {addressData?.city}, {addressData?.state}
         </div>
-        {coordinateData && (
+        {property.latitude && property.latitude && (
           <div className="relative z-10">
             <MapContainer
-              center={[
-                coordinateData.coordinates.lat,
-                coordinateData.coordinates.lng,
-              ]}
+              center={[property.latitude, property.longitude ?? 0]}
               zoom={15}
               scrollWheelZoom={false}
               style={{ height: "500px" }}
@@ -357,10 +331,7 @@ export default function PropertyPage({ property }: { property: Property }) {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <Circle
-                center={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
-                ]}
+                center={[property.latitude, property.longitude ?? 0]}
                 radius={200} // Adjust radius as needed
                 pathOptions={{ color: "black" }} // Customize circle color and other options
               />
