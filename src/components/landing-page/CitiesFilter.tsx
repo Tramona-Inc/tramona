@@ -1,3 +1,5 @@
+import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { cn } from "@/utils/utils";
 import { LucideListFilter } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -9,6 +11,7 @@ import {
 } from "../ui/carousel";
 
 const cities: string[] = [
+  "All",
   "Los Angeles (LA)",
   "San Diego",
   "Orlando/Kissimmee",
@@ -55,6 +58,9 @@ const cities: string[] = [
 ];
 
 export default function CitiesFilter() {
+  const filter = useCitiesFilter((state) => state.filter);
+  const setFilter = useCitiesFilter((state) => state.setFilter);
+
   return (
     <div className="grid grid-cols-8">
       <div className="col-span-6 flex w-full items-center justify-center xl:col-span-7 ">
@@ -66,10 +72,16 @@ export default function CitiesFilter() {
         >
           <CarouselContent>
             {cities.map((city, index) => (
-              <CarouselItem key={index} className="basis-1/10">
-                <div className="p-1">
-                  <span className="">{city}</span>
-                </div>
+              <CarouselItem key={index} className={"basis-1/10"}>
+                <Button
+                  variant={"ghost"}
+                  onClick={() => {
+                    setFilter(city);
+                  }}
+                  className={cn(city === filter && "font-bold", "p-1")}
+                >
+                  {city}
+                </Button>
               </CarouselItem>
             ))}
           </CarouselContent>
