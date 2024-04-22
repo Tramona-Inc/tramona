@@ -163,7 +163,7 @@ export const properties = pgTable("properties", {
   otherAmenities: varchar("other_amenities")
     .array()
     .notNull()
-    .default(sql`'{}'`),
+    .default(sql`'{}'`), // .default([]) doesnt work, you gotta do this
 
   imageUrls: varchar("image_url").array().notNull(),
 
