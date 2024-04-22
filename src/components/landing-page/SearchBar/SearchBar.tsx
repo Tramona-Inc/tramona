@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
-import MobileSearchBar from "./MobileSearchBar";
+// import MobileSearchBar from "./MobileSearchBar";
 
 export default function SearchBar() {
   return (

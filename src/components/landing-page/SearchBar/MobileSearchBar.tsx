@@ -58,9 +58,9 @@ function SearchTab() {
     reValidateMode: "onBlur",
   });
 
-  const onSubmit = async (data: FormSchema) => {
-    console.log(data);
-  };
+  // const onSubmit = async (data: FormSchema) => {
+  //   console.log(data);
+  // };
 
   return (
     <Form {...form}>
@@ -96,7 +96,7 @@ function SearchTab() {
           <Button
             type="submit"
             variant="default"
-            onClick={form.handleSubmit((data) => onSubmit(data))}
+            // onClick={form.handleSubmit((data) => onSubmit(data))}
           >
             Search
           </Button>
@@ -159,12 +159,12 @@ function RequestDealTab() {
       ?.map?.((error, index) => (error ? index : null))
       .filter((i): i is number => i !== null) ?? [];
 
-  async function onSubmit(data: FormSchema["data"]) {}
+  // async function onSubmit(data: FormSchema["data"]) {}
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => onSubmit(data.data))}
+        // onSubmit={form.handleSubmit((data) => onSubmit(data.data))}
         className="space-y-2"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
