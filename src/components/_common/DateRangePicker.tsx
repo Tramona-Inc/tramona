@@ -36,10 +36,13 @@ export default function DateRangePicker<
 }) {
   let disabledDays: Date[] | undefined;
 
-  if (propertyId) {
-    const { data } = api.properties.getBlockedDates.useQuery({ propertyId });
-    disabledDays = data?.map((date: { date: string | number | Date; }) => new Date(date.date));
-  }
+  const { data, refetch } = api.properties.getBlockedDates.useQuery(
+    { propertyId: propertyId ?? 0 },
+    { enabled: false },
+  );
+  disabledDays = data?.map(
+    (date: { date: string | number | Date }) => new Date(date.date),
+  );
 
   return (
     <FormField
@@ -50,6 +53,7 @@ export default function DateRangePicker<
           <Popover>
             <PopoverTrigger asChild>
               <Button
+                onClick={() => propertyId && refetch()}
                 className={className}
                 variant={field.value ? "filledInput" : "emptyInput"}
               >

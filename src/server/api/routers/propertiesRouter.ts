@@ -87,6 +87,7 @@ export const propertiesRouter = createTRPCRouter({
       offset: 0,
     });
   }),
+
   getAllInfiniteScroll: publicProcedure
     .input(
       z.object({
@@ -159,7 +160,7 @@ export const propertiesRouter = createTRPCRouter({
       return await ctx.db.query.bookedDates.findMany({
         where: eq(bookedDates.propertyId, input.propertyId),
         columns: {
-          date: true
+          date: true,
         },
       });
     }),
