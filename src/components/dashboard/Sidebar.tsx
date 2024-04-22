@@ -90,7 +90,7 @@ const hostNavLinks = [
 ];
 
 const guestNavLinks = [
-  { href: "/dashboard", name: "Home", icon: HomeIcon },
+  { href: "/", name: "Home", icon: HomeIcon },
   { href: "/requests", name: "Requests & Offers", icon: TagIcon },
   { href: "/my-trips", name: "My Trips", icon: SuitcaseIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
