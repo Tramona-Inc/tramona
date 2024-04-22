@@ -52,7 +52,7 @@ function DropdownTop({ session }: { session: Session }) {
 
 export default function AvatarDropdown({ session }: { session: Session }) {
   const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
-  const { data: hostTeams } = api.hostTeams.getHostTeamsDropdown.useQuery();
+  const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
 
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 

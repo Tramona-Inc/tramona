@@ -18,7 +18,7 @@ export function HostTeamInviteEmail({
           <Text className="text-brand text-left">
             {name ?? email ?? "An anonymous user"} invited you to their host
             team on Tramona! Sign up at https://tramona.com/auth/signup with
-            this email to be added to the hostTeam.
+            this email to be added to the team.
           </Text>
         </div>
       </div>

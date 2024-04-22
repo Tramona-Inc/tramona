@@ -33,7 +33,9 @@ import { useState } from "react";
 export default function Page() {
   const [open, setOpen] = useState(false);
 
-  const { data: properties } = api.properties.getHostProperties.useQuery();
+  const { data: properties } = api.properties.getHostProperties.useQuery({
+    limit: 20,
+  });
 
   return (
     <DashboadLayout type="host">

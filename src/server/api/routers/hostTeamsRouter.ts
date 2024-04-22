@@ -29,7 +29,7 @@ export const hostTeamsRouter = createTRPCRouter({
 
       const invitee = await ctx.db.query.users.findFirst({
         where: eq(users.email, input.email),
-        columns: { id: true, name: true },
+        columns: { id: true, name: true, role: true },
       });
 
       if (!invitee) {
@@ -49,34 +49,42 @@ export const hostTeamsRouter = createTRPCRouter({
             },
           });
 
-        await sendEmail({
-          to: input.email,
-          subject: "You've been invited to a request on Tramona",
-          content: HostTeamInviteEmail({
-            email: ctx.user.email,
-            name: ctx.user.name,
-          }),
-        });
+        // await sendEmail({
+        //   to: input.email,
+        //   subject: "You've been invited to a request on Tramona",
+        //   content: HostTeamInviteEmail({
+        //     email: ctx.user.email,
+        //     name: ctx.user.name,
+        //   }),
+        // });
 
         return { status: "sent invite" as const };
       }
 
-      await ctx.db
-        .insert(hostTeamMembers)
-        .values({
-          hostTeamId: input.hostTeamId,
-          userId: invitee.id,
+      const userInTeam = await ctx.db.query.hostTeamMembers
+        .findFirst({
+          where: and(
+            eq(hostTeamMembers.hostTeamId, input.hostTeamId),
+            eq(hostTeamMembers.userId, invitee.id),
+          ),
         })
-        .catch((err) => {
-          const parsedErr = z.object({ code: z.string() }).safeParse(err);
-          if (!parsedErr.success) return;
-          if (parsedErr.data.code === "23505") {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "User is already in the hostTeam",
-            });
-          }
-        });
+        .then((res) => !!res);
+
+      if (userInTeam) {
+        return { status: "already in team" };
+      }
+
+      await ctx.db.insert(hostTeamMembers).values({
+        hostTeamId: input.hostTeamId,
+        userId: invitee.id,
+      });
+
+      if (invitee.role !== "host" && invitee.role !== "admin") {
+        await ctx.db
+          .update(users)
+          .set({ role: "host" })
+          .where(eq(users.id, invitee.id));
+      }
 
       return { status: "added user" as const, inviteeName: invitee.name };
     }),
@@ -172,18 +180,18 @@ export const hostTeamsRouter = createTRPCRouter({
   }),
 
   getHostTeamOwner: protectedProcedure
-    .input(z.number())
-    .mutation(async ({ input: hostTeamId, ctx }) => {
+    .input(z.object({ hostTeamId: z.number() }))
+    .query(async ({ input, ctx }) => {
       return await ctx.db.query.hostTeams
         .findFirst({
           columns: {},
           with: { owner: { columns: { phoneNumber: true, isWhatsApp: true } } },
-          where: eq(hostTeams.id, hostTeamId),
+          where: eq(hostTeams.id, input.hostTeamId),
         })
         .then((res) => res?.owner);
     }),
 
-  getHostTeamsDropdown: protectedProcedure.query(async ({ ctx }) => {
+  getMyHostTeams: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.users
       .findFirst({
         where: eq(users.id, ctx.user.id),
@@ -224,4 +232,84 @@ export const hostTeamsRouter = createTRPCRouter({
         .set({ curTeamId: hostTeamId })
         .where(eq(hostProfiles.userId, ctx.user.id));
     }),
+
+  getHostTeamDetails: protectedProcedure
+    .input(z.object({ hostTeamId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const hostTeam = await ctx.db.query.hostTeams.findFirst({
+        where: eq(hostTeams.id, input.hostTeamId),
+        with: {
+          invites: true,
+          members: {
+            with: { user: { columns: { name: true, email: true, id: true } } },
+          },
+          owner: { columns: { name: true, email: true, id: true } },
+        },
+      });
+
+      if (!hostTeam) {
+        return new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (!hostTeam.members.find((m) => m.userId === ctx.user.id)) {
+        return new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return hostTeam;
+    }),
+
+  getCurTeamOwnerId: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {},
+        with: {
+          hostProfile: {
+            columns: {},
+            with: { curTeam: { columns: { id: true } } },
+          },
+        },
+      })
+      .then((res) => res?.hostProfile?.curTeam.id);
+  }),
+
+  getCurTeamMembers: protectedProcedure.query(async ({ ctx }) => {
+    const members = await ctx.db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {},
+        with: {
+          hostProfile: {
+            columns: {},
+            with: {
+              curTeam: {
+                columns: {},
+                with: {
+                  members: {
+                    columns: {},
+                    with: {
+                      user: {
+                        columns: {
+                          name: true,
+                          email: true,
+                          image: true,
+                          id: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((res) => res?.hostProfile?.curTeam.members.map((m) => m.user));
+
+    if (!members) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    return members;
+  }),
 });

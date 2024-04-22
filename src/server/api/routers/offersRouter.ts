@@ -16,6 +16,7 @@ import {
   referralCodes,
   requestSelectSchema,
   requests,
+  requestsToProperties,
 } from "@/server/db/schema";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
@@ -315,6 +316,49 @@ export const offersRouter = createTRPCRouter({
         where: eq(offers.id, input.id),
         columns: { paymentIntentId: true, checkoutSessionId: true },
       });
+    }),
+
+  acceptCityRequest: protectedProcedure
+    .input(
+      offerInsertSchema.pick({
+        requestId: true,
+        propertyId: true,
+        totalPrice: true,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const propertyHostTeam = await ctx.db.query.properties
+        .findFirst({
+          where: eq(properties.id, input.propertyId),
+          columns: { id: true },
+          with: {
+            hostTeam: { with: { members: true } },
+          },
+        })
+        .then((res) => res?.hostTeam);
+
+      if (!propertyHostTeam) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      if (
+        !propertyHostTeam.members.find(
+          (member) => member.userId === ctx.user.id,
+        )
+      ) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      await ctx.db.insert(offers).values(input);
+
+      await ctx.db
+        .delete(requestsToProperties)
+        .where(
+          and(
+            eq(requestsToProperties.propertyId, input.propertyId),
+            eq(requestsToProperties.requestId, input.requestId),
+          ),
+        );
     }),
 
   create: roleRestrictedProcedure(["admin", "host"])

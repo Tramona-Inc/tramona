@@ -93,7 +93,7 @@ function SidebarProperty({
       <div className="relative h-16 w-16 overflow-clip rounded-md bg-accent">
         <Image
           src={property.imageUrls[0]!}
-          className="object-fill object-center"
+          className="object-cover object-center"
           alt=""
           layout="fill"
         />

@@ -7,12 +7,10 @@ import {
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SkeletonText } from "@/components/ui/skeleton";
-import { api, type RouterOutputs } from "@/utils/api";
+import { api } from "@/utils/api";
 import UserAvatar from "../UserAvatar";
-import { type HostProfile } from "@/server/db/schema";
+import { type HostTeam, type HostProfile } from "@/server/db/schema";
 import { PlusCircleIcon } from "lucide-react";
-
-type HostTeamsDropdown = RouterOutputs["hostTeams"]["getHostTeamsDropdown"];
 
 export default function HostTeamsDropdownItems({
   hostProfile,
@@ -20,7 +18,7 @@ export default function HostTeamsDropdownItems({
   setChtDialogOpen,
 }: {
   hostProfile: HostProfile | undefined;
-  hostTeams: HostTeamsDropdown | undefined;
+  hostTeams: HostTeam[] | undefined;
   setChtDialogOpen: (o: boolean) => void;
 }) {
   const setCurHostTeam = api.hostTeams.setCurHostTeam.useMutation();
