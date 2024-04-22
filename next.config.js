@@ -77,6 +77,18 @@ const config = {
         protocol: "https",
         hostname: "guesty-listing-images.s3.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "guestybookings.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.guesty.com",
+      },
+      {
+        protocol: "https",
+        hostname: "dx577khz83dc.cloudfront.net",
+      },
     ],
   },
   experimental: {

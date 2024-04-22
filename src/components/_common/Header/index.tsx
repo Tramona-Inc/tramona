@@ -33,7 +33,7 @@ export default function Header(props: HeaderProps) {
 function LargeHeader(props: HeaderProps) {
   const { status, data: session } = useSession();
 
-  const isHostPath = usePathname().split("/")[1];
+  const pathname = usePathname();
 
   return (
     <header className="container sticky top-0 z-50 flex h-header-height items-center bg-white">
@@ -56,7 +56,7 @@ function LargeHeader(props: HeaderProps) {
       <div className="flex flex-1 justify-end gap-5">
         {props.type === "dashboard" ? (
           <Button asChild variant="darkOutline">
-            {session?.user.role === "host" && isHostPath === "host" ? (
+            {session?.user.role === "host" && pathname === "/host" ? (
               <Link href="/">Switch to Traveller</Link>
             ) : session?.user.role !== "host" ? (
               <Link href="/for-hosts/sign-up">Become a host</Link>

@@ -21,9 +21,20 @@ import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import axios from "axios";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { z } from "zod";
+
+interface AddressComponent {
+  long_name: string;
+  short_name: string;
+  types: string[];
+}
+
+interface GeocodeResult {
+  address_components: AddressComponent[];
+  // Define other properties you need here
+}
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -151,26 +162,77 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-    getCoordinates: protectedProcedure
+  getCoordinates: protectedProcedure
     .input(z.object({ location: z.string() }))
     .query(async ({ input }) => {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.location)}&key=${env.GOOGLE_MAPS_KEY}`,
       );
-  
+
       const result = {
-        
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         coordinates: response.data.results[0].geometry.location as {
           lat: number;
           lng: number;
         },
-        
       };
       return result;
-
     }),
 
+  getCity: protectedProcedure
+    .input(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { latitude, longitude } = input;
+
+      try {
+        const response = await axios.get(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${env.GOOGLE_MAPS_KEY}`,
+        );
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        const results: GeocodeResult[] = response.data.results;
+        // Check if results are available and not empty
+        if (results && results.length > 0) {
+          // Extract city and state from the first result
+          const addressComponents = results[0]?.address_components;
+          let city = "";
+          let state = "";
+
+          if (addressComponents) {
+            // Check if addressComponents is not undefined
+            for (const component of addressComponents) {
+              const types = component.types;
+
+              // Check for city
+              if (types.includes("locality")) {
+                city = component.long_name;
+              }
+
+              // Check for state
+              if (types.includes("administrative_area_level_1")) {
+                state = component.short_name;
+              }
+            }
+          }
+
+          // Return city and state
+          return {
+            city,
+            state,
+          };
+        } else {
+          throw new Error("No results found");
+        }
+      } catch (error) {
+        console.error("Error retrieving city and state:", error);
+        throw new Error("Failed to retrieve city and state");
+      }
+    }),
   getByIdWithDetails: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
@@ -188,7 +250,7 @@ export const offersRouter = createTRPCRouter({
               checkIn: true,
               checkOut: true,
               numGuests: true,
-              location: true, 
+              location: true,
               id: true,
             },
             with: { madeByGroup: { with: { members: true } } },

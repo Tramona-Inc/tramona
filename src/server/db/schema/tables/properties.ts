@@ -1,9 +1,12 @@
+import { zodTime } from "@/utils/zod-utils";
 import {
   boolean,
+  date,
   doublePrecision,
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
   serial,
   smallint,
   text,
@@ -32,6 +35,17 @@ export const ALL_PROPERTY_TYPES = [
   "Townhouse",
   "Bungalow",
   "Hut",
+  "Studio",
+  "Aparthotel",
+  "Hotel",
+  "Yurt",
+  "Treehouse",
+  "Cottage",
+  "Guest suite",
+  "Tiny house",
+  "Bed & breakfast",
+  "Camper/rv",
+  "Serviced apartment",
   "Other",
   "Home",
   "Hotels",
@@ -127,11 +141,18 @@ export const properties = pgTable("properties", {
   maxNumGuests: smallint("max_num_guests").notNull(),
   numBeds: smallint("num_beds").notNull(),
   numBedrooms: smallint("num_bedrooms").notNull(),
-  numBathrooms: smallint("num_bathrooms").notNull(),
+  numBathrooms: doublePrecision("num_bathrooms"),
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
+
+  hostTeamId: varchar("host_team_id"),
+
   address: varchar("address", { length: 1000 }),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+
+  originalListingUrl: varchar("url"),
 
   checkInInfo: varchar("check_in_info"),
   checkInTime: time("check_in_time"),
@@ -139,8 +160,7 @@ export const properties = pgTable("properties", {
 
   // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
   amenities: varchar("amenities").array(),
-
-  otherAmenities: varchar("other_amenities").array(),
+  otherAmenities: varchar("other_amenities").array().notNull().default([]),
 
   imageUrls: varchar("image_url").array().notNull(),
 
@@ -164,16 +184,35 @@ export const properties = pgTable("properties", {
 });
 
 export type Property = typeof properties.$inferSelect;
+export type NewProperty = typeof properties.$inferInsert;
 export const propertySelectSchema = createSelectSchema(properties);
 
 // https://github.com/drizzle-team/drizzle-orm/issues/1609
 export const propertyInsertSchema = createInsertSchema(properties, {
   imageUrls: z.array(z.string().url()),
+  originalListingUrl: z.string().url(),
   amenities: z.array(z.string()),
   otherAmenities: z.array(z.string()),
+  checkInTime: zodTime,
+  checkOutTime: zodTime,
 });
 
 // make everything except id optional
 export const propertyUpdateSchema = propertyInsertSchema.partial().required({
   id: true,
 });
+
+export const bookedDates = pgTable(
+  "booked_dates",
+  {
+    propertyId: integer("property_id")
+      .notNull()
+      .references(() => properties.id),
+    date: date("date").notNull(),
+  },
+  (t) => ({
+    compoundKey: primaryKey({
+      columns: [t.date, t.propertyId],
+    }),
+  }),
+);

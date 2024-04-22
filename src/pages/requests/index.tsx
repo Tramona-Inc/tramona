@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
+import PropertyOfferTab from '@/components/requests/PropertyOfferTab';
 
 export function NewRequestButton() {
   return (
@@ -52,7 +53,7 @@ function RequestsTabs() {
         <ActiveRequestGroups />
       </TabsContent>
       <TabsContent value="propertyOffers">
-        {/* <InactiveRequestGroups /> */}
+        <PropertyOfferTab />
       </TabsContent>
       <TabsContent value="history">
         <InactiveRequestGroups />

@@ -27,6 +27,10 @@ export default function Listings() {
     },
   );
 
+  if (router.isFallback) {
+    return <h2>Loading</h2>
+  }
+
   return (
     <DashboardLayout type="guest">
       <Head>

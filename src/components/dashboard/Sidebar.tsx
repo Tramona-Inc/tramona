@@ -4,12 +4,23 @@ import { api } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
 import {
   ArrowLeftRight,
+  DollarSign,
+  Fence,
+  Handshake,
+  HistoryIcon,
+  HomeIcon,
+  InboxIcon,
+  LayoutDashboardIcon,
+  MessageCircleIcon,
+  TagIcon,
+  UploadIcon,
+  WrenchIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
-import { adminNavLinks, guestNavLinks, hostNavLinks } from '@/config/sideNavLinks';
+import SuitcaseIcon from '../_icons/SuitcaseIcon';
 
 function SidebarLink({
   href,
@@ -52,6 +63,38 @@ function SidebarLink({
   );
 }
 
+const adminNavLinks = [
+  { href: "/admin", name: "Dashboard", icon: LayoutDashboardIcon },
+  {
+    href: "/admin/incoming-requests",
+    name: "Incoming Requests",
+    icon: InboxIcon,
+  },
+  { href: "/admin/past-requests", name: "Past Requests", icon: HistoryIcon },
+  { href: "/admin/utility", name: "Utility", icon: WrenchIcon },
+  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/admin/property-upload", name: "Property Upload", icon: UploadIcon },
+  { href: "/dashboard", name: "Switch To Guest", icon: ArrowLeftRight },
+];
+
+const hostNavLinks = [
+  { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
+  {
+    href: "/host/incoming-request",
+    name: "Incoming Requests",
+    icon: Handshake,
+  },
+  { href: "/host/properties", name: "Properties", icon: Fence },
+  { href: "/host/payout", name: "Payout", icon: DollarSign },
+  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+];
+
+const guestNavLinks = [
+  { href: "/", name: "Home", icon: HomeIcon },
+  { href: "/requests", name: "Requests & Offers", icon: TagIcon },
+  { href: "/my-trips", name: "My Trips", icon: SuitcaseIcon },
+  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+];
 
 export default function Sidebar({
   type,

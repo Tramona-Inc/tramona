@@ -51,13 +51,24 @@ export const hostPropertyFormSchema = z.object({
   address: optional(zodString({ maxLen: 1000 })),
   checkInInfo: optional(zodString()),
   areaDescription: optional(zodString({ maxLen: Infinity })),
-  imageUrls: z.object({ value: zodUrl() }).array(),
+  imageUrls: z
+    .object({ value: zodUrl() })
+    .array()
+    .transform((arr) => arr.map((o) => o.value)),
 });
 
 type FormSchema = z.infer<typeof hostPropertyFormSchema>;
 
-export default function HostPropertyForm({setOpen}: {setOpen: (isOpen: boolean) => void }) {
-  const form = useForm<FormSchema>({
+export default function HostPropertyForm({
+  setOpen,
+}: {
+  setOpen: (isOpen: boolean) => void;
+}) {
+  const form = useForm<
+    z.input<typeof hostPropertyFormSchema>,
+    unknown,
+    FormSchema
+  >({
     resolver: zodResolver(hostPropertyFormSchema),
     defaultValues: {
       name: "",
@@ -79,7 +90,7 @@ export default function HostPropertyForm({setOpen}: {setOpen: (isOpen: boolean) 
     control: form.control,
   });
 
-  const { mutateAsync } = api.properties.hostInsertProperty.useMutation({
+  const { mutateAsync } = api.properties.create.useMutation({
     onSuccess: () => {
       form.reset();
       setOpen(false);
@@ -94,8 +105,8 @@ export default function HostPropertyForm({setOpen}: {setOpen: (isOpen: boolean) 
     },
   });
 
-  function onSubmit(values: FormSchema) {
-    void mutateAsync(values);
+  async function onSubmit(values: FormSchema) {
+    await mutateAsync(values);
   }
 
   return (

@@ -10,35 +10,6 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useRouter } from "next/router";
 import { z } from "zod";
 
-export const hostPropertyOnboardingSchema = z.object({
-  propertyType: z.enum(ALL_PROPERTY_TYPES),
-  roomType: z.enum(ALL_PROPERTY_ROOM_TYPES),
-
-  maxNumGuests: z.number(),
-  numBeds: z.number(),
-  numBedrooms: z.number(),
-  numBathrooms: z.number(),
-
-  address: z.string().max(1000),
-
-  checkInInfo: z.string(),
-  checkInTime: z.string(),
-  checkOutTime: z.string(),
-
-  amenities: z.string().array(),
-
-  otherAmenities: z.string().array(),
-
-  imageUrls: z.string().array(),
-  name: z.string().max(255),
-  about: z.string(),
-
-  petsAllowed: z.boolean().optional(),
-  smokingAllowed: z.boolean().optional(),
-
-  otherHouseRules: z.string().max(1000).optional(),
-});
-
 type OnboardingFooterProps = {
   handleNext?: () => void;
   isFormValid?: boolean; // New prop to indicate whether the form is valid
@@ -63,7 +34,7 @@ export default function OnboardingFooter({
 
   const router = useRouter();
 
-  const { mutate } = api.properties.hostInsertOnboardingProperty.useMutation({
+  const { mutate } = api.properties.create.useMutation({
     onSuccess: () => {
       resetSession();
       toast({
