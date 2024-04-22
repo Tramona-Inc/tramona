@@ -151,24 +151,21 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-    getCoordinates: protectedProcedure
+  getCoordinates: protectedProcedure
     .input(z.object({ location: z.string() }))
     .query(async ({ input }) => {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.location)}&key=${env.GOOGLE_MAPS_KEY}`,
       );
-  
+
       const result = {
-        
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         coordinates: response.data.results[0].geometry.location as {
           lat: number;
           lng: number;
         },
-        
       };
       return result;
-
     }),
 
   getByIdWithDetails: protectedProcedure
@@ -188,7 +185,7 @@ export const offersRouter = createTRPCRouter({
               checkIn: true,
               checkOut: true,
               numGuests: true,
-              location: true, 
+              location: true,
               id: true,
             },
             with: { madeByGroup: { with: { members: true } } },
