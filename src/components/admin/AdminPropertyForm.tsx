@@ -25,7 +25,6 @@ import { Textarea } from "../ui/textarea";
 import ImagesInput from "../_common/ImagesInput";
 import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
-import { useRouter } from "next/router";
 import {
   Select,
   SelectContent,
@@ -63,8 +62,8 @@ const formSchema = z.object({
   name: z.string().max(255),
   about: z.string(),
 
-  petsAllowed: z.string(),
-  smokingAllowed: z.string(),
+  petsAllowed: z.enum(["yes", "no"]).transform((s) => s === "yes"),
+  smokingAllowed: z.enum(["yes", "no"]).transform((s) => s === "yes"),
 
   otherHouseRules: z.string().max(1000).optional(),
 });
@@ -77,41 +76,38 @@ export default function AdminPropertyForm() {
     defaultValues: { otherAmenities: [] },
   });
 
-  const router = useRouter();
-
-  const { mutateAsync: adminInsertProperty } =
-    api.properties.adminInsertProperty.useMutation({
-      onSuccess: () => {
-        toast({
-          title: "Success!",
-          description: "Property successfully listed",
-        });
-        void router.push("/host/properties");
-      },
-    });
+  const { mutateAsync: createProperty } =
+    api.properties.createForHost.useMutation();
 
   async function onSubmit(data: FormSchema) {
-    await adminInsertProperty({
-      hostId: data.hostId,
-      propertyType: data.propertyType,
-      roomType: data.roomType,
-      maxNumGuests: data.maxNumGuests,
-      numBeds: data.numBeds,
-      numBedrooms: data.numBedrooms,
-      numBathrooms: data.numBathrooms,
-      address: data.address,
-      checkInInfo: data.checkInInfo,
-      checkInTime: data.checkInTime,
-      checkOutTime: data.checkOutTime,
-      amenities: data.amenities,
-      otherAmenities: data.otherAmenities,
-      imageUrls: data.imageUrls,
-      name: data.name,
-      about: data.about,
-      petsAllowed: data.petsAllowed === "true" ? true : false,
-      smokingAllowed: data.smokingAllowed === "true" ? true : false,
-      otherHouseRules: data.otherHouseRules ?? undefined,
-    });
+    const res = await createProperty(data);
+    switch (res.status) {
+      case "host not found":
+        form.setError(
+          "hostId",
+          {
+            message: "Host with this id not found, please try again",
+          },
+          { shouldFocus: true },
+        );
+        break;
+
+      case "user not a host":
+        form.setError(
+          "hostId",
+          {
+            message: "The user with this id isn't a host, please try again",
+          },
+          { shouldFocus: true },
+        );
+        break;
+
+      case "success":
+        toast({
+          title: `Successfully created property${res.hostName ? ` for ${res.hostName}` : ""}`,
+        });
+        break;
+    }
   }
 
   return (
@@ -374,21 +370,19 @@ export default function AdminPropertyForm() {
             <FormItem>
               <FormLabel>Are pets allowed?</FormLabel>
               <FormControl>
-                <div className="flex flex-row items-center space-x-4">
-                  <RadioGroup
-                    className="flex flex-row gap-10"
-                    onValueChange={field.onChange}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="true" id="true" />
-                      <Label htmlFor="allowed">Yes</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="false" id="false" />
-                      <Label htmlFor="allowed">No</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                <RadioGroup
+                  className="flex flex-row gap-10 pt-2"
+                  onValueChange={field.onChange}
+                >
+                  <Label className="flex items-center gap-2">
+                    <RadioGroupItem value="yes" />
+                    Yes
+                  </Label>
+                  <Label className="flex items-center gap-2">
+                    <RadioGroupItem value="no" />
+                    No
+                  </Label>
+                </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -401,21 +395,19 @@ export default function AdminPropertyForm() {
             <FormItem>
               <FormLabel>Is smoking allowed?</FormLabel>
               <FormControl>
-                <div className="flex flex-row items-center space-x-4">
-                  <RadioGroup
-                    className="flex flex-row gap-10"
-                    onValueChange={field.onChange}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="true" id="true" />
-                      <Label htmlFor="allowed">Yes</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="false" id="false" />
-                      <Label htmlFor="allowed">No</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                <RadioGroup
+                  className="flex flex-row gap-10 pt-2"
+                  onValueChange={field.onChange}
+                >
+                  <Label className="flex items-center gap-2">
+                    <RadioGroupItem value="yes" />
+                    Yes
+                  </Label>
+                  <Label className="flex items-center gap-2">
+                    <RadioGroupItem value="no" />
+                    No
+                  </Label>
+                </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>

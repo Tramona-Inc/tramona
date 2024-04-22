@@ -17,9 +17,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { zodInteger, zodString } from "@/utils/zod-utils";
 import { zodTime } from "@/utils/zod-utils";
-
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -41,7 +39,6 @@ export const ALL_PROPERTY_TYPES = [
   "Aparthotel",
   "Hotel",
   "Yurt",
-  "Hotel",
   "Treehouse",
   "Cottage",
   "Guest suite",
@@ -161,7 +158,7 @@ export const properties = pgTable("properties", {
 
   // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
   amenities: varchar("amenities").array(),
-  otherAmenities: varchar("other_amenities").array(),
+  otherAmenities: varchar("other_amenities").array().notNull().default([]),
 
   imageUrls: varchar("image_url").array().notNull(),
 
@@ -203,38 +200,6 @@ export const propertyUpdateSchema = propertyInsertSchema.partial().required({
   id: true,
 });
 
-
-export const adminPropertyInputSchema = z.object({
-  hostId: zodString(),
-
-  propertyType: z.enum(ALL_PROPERTY_TYPES),
-  roomType: z.enum(ALL_PROPERTY_ROOM_TYPES),
-
-  maxNumGuests: zodInteger({ min: 1 }),
-  numBeds: zodInteger({ min: 1 }),
-  numBedrooms: zodInteger({ min: 1 }),
-  numBathrooms: zodInteger({ min: 1 }),
-
-  address: z.string().max(1000),
-
-  checkInInfo: z.string(),
-  checkInTime: z.string(),
-  checkOutTime: z.string(),
-
-  amenities: z.string().array(),
-
-  otherAmenities: z.string().array(),
-
-  imageUrls: z.string().array(),
-  name: z.string().max(255),
-  about: z.string(),
-
-  petsAllowed: z.boolean(),
-  smokingAllowed: z.boolean(),
-
-  otherHouseRules: z.string().max(1000).optional(),
-});
-
 export const bookedDates = pgTable(
   "booked_dates",
   {
@@ -249,4 +214,3 @@ export const bookedDates = pgTable(
     }),
   }),
 );
-
