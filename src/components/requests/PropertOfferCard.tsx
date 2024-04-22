@@ -1,10 +1,13 @@
+import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
 import { EllipsisIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import MapPin from "../_icons/MapPin";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +16,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { toast } from "../ui/use-toast";
 
 type PropertyOfferCardProps = {
+  id: number;
   propertyId: number;
   location: string;
   offerNightlyPrice: number;
@@ -31,6 +36,22 @@ export default function PropertyOfferCard({
 }: {
   offer: PropertyOfferCardProps;
 }) {
+  const router = useRouter();
+
+  const { mutate } = api.biddings.delete.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "You've withdrawn from your offer",
+        description: "Offer is withdrawn",
+      });
+      void router.push("/");
+    },
+  });
+
+  function handleWithdraw() {
+    mutate({ id: offer.id });
+  }
+
   return (
     <div className="border-2xl flex flex-row rounded-lg border shadow-xl md:flex-row">
       <Link
@@ -66,16 +87,36 @@ export default function PropertyOfferCard({
             {"Las Vegas, Nevada"}
           </h1>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <EllipsisIcon className="mr-2" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="mr-10">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Withdraw</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Dialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <EllipsisIcon className="mr-2" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="mr-10">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <DialogTrigger>Withdraw</DialogTrigger>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DialogContent>
+              <div className="flex flex-col items-center justify-center gap-3">
+                <h1 className="text-lg font-bold">
+                  Are you sure you want to withdraw this offer?
+                </h1>
+                <p className="text-center text-sm">
+                  Your offer will be permanently withdrawn an dyou cannot undo
+                  this action.
+                </p>
+                <div className="flex flex-row gap-4">
+                  <Button variant={"secondary"}>Cancel</Button>
+                  <Button onClick={handleWithdraw}>Withdraw Offer</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
         <p>Requested: ${offer.offerNightlyPrice}/night</p>
         <p>{formatDateRange(offer.checkIn, offer.checkOut)}</p>

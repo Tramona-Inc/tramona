@@ -11,6 +11,7 @@ export default function PropertyOfferTab() {
           <PropertyOfferCard
             key={offer.id}
             offer={{
+              id: offer.id,
               propertyId: offer.property?.id ?? 0,
               location: "",
               offerNightlyPrice: offer.amount ?? 0,
