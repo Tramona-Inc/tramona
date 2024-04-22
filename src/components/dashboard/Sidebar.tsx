@@ -14,6 +14,7 @@ import {
   LayoutDashboardIcon,
   MessageCircleIcon,
   TagIcon,
+  UploadIcon,
   WrenchIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -75,6 +76,7 @@ const adminNavLinks = [
   { href: "/admin/past-requests", name: "Past Requests", icon: HistoryIcon },
   { href: "/admin/utility", name: "Utility", icon: WrenchIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/admin/property-upload", name: "Property Upload", icon: UploadIcon },
   { href: "/dashboard", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
