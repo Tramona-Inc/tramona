@@ -5,7 +5,7 @@ export default function PropertyOfferTab() {
   const { data: offers } = api.biddings.getMyBids.useQuery();
 
   return (
-    <div>
+    <div className="flex flex-col gap-5">
       {offers?.map((offer) => {
         return (
           <PropertyOfferCard

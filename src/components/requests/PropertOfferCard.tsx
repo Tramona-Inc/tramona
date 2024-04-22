@@ -5,6 +5,14 @@ import Link from "next/link";
 import MapPin from "../_icons/MapPin";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 type PropertyOfferCardProps = {
   propertyId: number;
@@ -58,7 +66,16 @@ export default function PropertyOfferCard({
             {"Las Vegas, Nevada"}
           </h1>
 
-          <EllipsisIcon className="mr-2" />
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <EllipsisIcon className="mr-2" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="mr-10">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Withdraw</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <p>Requested: ${offer.offerNightlyPrice}/night</p>
         <p>{formatDateRange(offer.checkIn, offer.checkOut)}</p>
