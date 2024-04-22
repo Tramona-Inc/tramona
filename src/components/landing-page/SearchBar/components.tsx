@@ -4,8 +4,23 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatDateRange } from "@/utils/utils";
-import { CalendarIcon, MapPinIcon, PlusIcon, X } from "lucide-react";
-import { useForm, type FieldPath, type FieldValues } from "react-hook-form";
+import {
+  CalendarDaysIcon,
+  CalendarIcon,
+  MapPinIcon,
+  Minus,
+  Plus,
+  PlusIcon,
+  SearchIcon,
+  UsersIcon,
+  X,
+} from "lucide-react";
+import {
+  useForm,
+  type FieldPath,
+  type FieldValues,
+  ControllerRenderProps,
+} from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -64,6 +79,21 @@ export const classNames = {
         ? cn("text-white/50", isFocused && "text-black/50")
         : cn("text-white", isFocused && "text-black"),
     ),
+  mobileButton: ({
+    isPlaceholder,
+    isFocused,
+  }: {
+    isPlaceholder: boolean;
+    isFocused: boolean;
+  }) =>
+    cn(
+      "peer flex h-10 w-full border border-gray/50 rounded-full p-6",
+      isFocused ? "bg-white" : "bg-white hover:bg-white/75",
+      isPlaceholder
+        ? cn("text-black/75", isFocused && "text-black/50")
+        : cn("text-black", isFocused && "text-black"),
+    ),
+  mobileErrorMsg: "pointer-events-none my-1",
 };
 
 export function LPFormLabel({
@@ -268,6 +298,228 @@ export default function LPDateRangePicker<
   );
 }
 
+export function MobileLocationInput<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <>
+          <FormLabel className="text-black">{formLabel}</FormLabel>
+
+          <PlacesPopover
+            open={isOpen}
+            setOpen={setIsOpen}
+            value={field.value}
+            onValueChange={field.onChange}
+            className="w-96 -translate-y-14 overflow-clip px-0 pt-0"
+            trigger={({ value, disabled }) => (
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                disabled={disabled}
+                className={cn(
+                  classNames.mobileButton({
+                    isPlaceholder: !field.value,
+                    isFocused: isOpen,
+                  }),
+                  "flex items-center text-left",
+                )}
+              >
+                <SearchIcon className="mr-3 h-5 w-5 shrink-0" />
+                <p className="flex-1 truncate">
+                  {value ?? "Enter your destination"}
+                </p>
+              </button>
+            )}
+          />
+          <MobileFormMessage />
+        </>
+      )}
+    />
+  );
+}
+
+export function MobileDateRangePicker<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <>
+          <FormLabel className="text-black">{formLabel}</FormLabel>
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={cn(
+                  classNames.mobileButton({
+                    isPlaceholder: !field.value,
+                    isFocused: isOpen,
+                  }),
+                  "flex items-center",
+                )}
+              >
+                <CalendarDaysIcon className="mr-3 h-5 w-5 shrink-0" />
+                {field.value
+                  ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    formatDateRange(field.value.from, field.value.to)
+                  : "Select dates"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto p-0 backdrop-blur-md"
+              align="center"
+              side="top"
+            >
+              <Calendar
+                mode="range"
+                selected={field.value}
+                onSelect={(e) => {
+                  if (e?.from && e.to === undefined) {
+                    e.to = e.from;
+                  }
+                  field.onChange(e);
+                }}
+                disabled={(date) => date < new Date()}
+                numberOfMonths={1}
+                showOutsideDays={true}
+              />
+            </PopoverContent>
+          </Popover>
+          <MobileFormMessage />
+        </>
+      )}
+    />
+  );
+}
+
+export function MobileGuestsPicker<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [numGuests, setNumGuests] = useState(1);
+
+  function onClick(
+    adjustment: number,
+    field: ControllerRenderProps<TFieldValues, TName>,
+  ) {
+    const guests = Math.max(1, Math.min(10, numGuests + adjustment));
+
+    setNumGuests(guests);
+    field.onChange(guests);
+  }
+
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <>
+          <FormLabel className="text-black">{formLabel}</FormLabel>
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={cn(
+                  classNames.mobileButton({
+                    isPlaceholder: !field.value,
+                    isFocused: isOpen,
+                  }),
+                  "flex items-center",
+                )}
+              >
+                <UsersIcon className="mr-3 h-5 w-5 shrink-0" />
+                {field.value ?? "Add guests"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto p-0 backdrop-blur-md"
+              align="start"
+              side="bottom"
+            >
+              <div className="flex items-center justify-between space-x-2">
+                Guests
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 shrink-0 rounded-full"
+                  onClick={() => onClick(-1, field)}
+                  disabled={numGuests <= 1}
+                >
+                  <Minus className="h-4 w-4" />
+                  <span className="sr-only">Decrease</span>
+                </Button>
+                <div className="flex-1 text-center">
+                  <div className="font-bold tracking-tighter">{numGuests}</div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 shrink-0 rounded-full"
+                  onClick={() => onClick(1, field)}
+                  disabled={numGuests >= 10}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="sr-only">Increase</span>
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <MobileFormMessage />
+        </>
+      )}
+    />
+  );
+}
+
+export function MobileFormMessage({
+  className,
+  ...props
+}: ComponentProps<typeof FormMessage>) {
+  return (
+    <FormMessage
+      className={cn(classNames.mobileErrorMsg, className)}
+      {...props}
+    />
+  );
+}
+
 export function AirbnbLinkDialog({
   parentForm,
   curTab,
@@ -366,11 +618,10 @@ export function AirbnbLinkDialog({
               <Button
                 type="submit"
                 onClick={form.handleSubmit((data) => onSubmit(data))}
-                isLoading={form.formState.isSubmitting}
                 disabled={form.formState.isSubmitting}
                 className="rounded-full"
               >
-                Add
+                {form.formState.isSubmitting ? "Crunching data..." : "Add"}
               </Button>
             </form>
           </Form>
