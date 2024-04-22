@@ -1,5 +1,6 @@
 import Document, { Html, Head, Main, NextScript } from "next/document";
 import Script from "next/script";
+import { mulish } from "./_app";
 
 class MyDocument extends Document {
   render() {
@@ -30,7 +31,7 @@ class MyDocument extends Document {
             `}
           </Script>
         </Head>
-        <body>
+        <body className={mulish.className}>
           <Main />
           <NextScript />
           <Script
