@@ -1,7 +1,7 @@
 import { Text } from "@react-email/components";
 import { Layout } from "./EmailComponents";
 
-export function GroupInviteEmail({
+export function HostTeamInviteEmail({
   email,
   name,
 }: {
@@ -9,16 +9,16 @@ export function GroupInviteEmail({
   name: string | null;
 }) {
   return (
-    <Layout title_preview="Tramona group invitation">
+    <Layout title_preview="Tramona hostTeam invitation">
       <div className="pt-2" style={{ textAlign: "center" }}>
         <div className="text-brand px-6 text-left text-base">
           <Text className="text-brand text-left text-2xl font-bold">
             {name ? `Hi ${name},` : ""}
           </Text>
           <Text className="text-brand text-left">
-            {name ?? email ?? "An anonymous user"} invited you to their request
-            on Tramona! Sign up at https://tramona.com/auth/signup with this
-            email to be added to the group.
+            {name ?? email ?? "An anonymous user"} invited you to their host
+            team on Tramona! Sign up at https://tramona.com/auth/signup with
+            this email to be added to the hostTeam.
           </Text>
         </div>
       </div>

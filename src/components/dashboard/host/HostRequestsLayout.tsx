@@ -7,7 +7,7 @@ import {
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TextSkeleton } from "@/components/ui/skeleton";
+import { SkeletonText } from "@/components/ui/skeleton";
 import { api, type RouterOutputs } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
 import { range } from "lodash";
@@ -44,7 +44,7 @@ export default function HostRequestsLayout({
                   Properties with requests will show up here
                 </EmptyStateDescription>
                 <EmptyStateFooter>
-                  <Button asChild>
+                  <Button asChild variant="outline">
                     <Link href="/host/properties">View all properties</Link>
                   </Button>
                 </EmptyStateFooter>
@@ -112,8 +112,8 @@ function SidebarPropertySkeleton() {
     <div className="flex gap-2 p-2">
       <div className="h-16 w-16 rounded-md bg-accent" />
       <div className="flex-1 text-sm">
-        <TextSkeleton />
-        <TextSkeleton className="w-2/3" />
+        <SkeletonText />
+        <SkeletonText className="w-2/3" />
         <Badge size="sm" variant="skeleton" className="w-20" />
       </div>
     </div>

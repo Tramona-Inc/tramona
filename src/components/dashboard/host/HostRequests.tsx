@@ -1,4 +1,4 @@
-import { TextSkeleton } from "@/components/ui/skeleton";
+import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { MapPinIcon } from "lucide-react";
 import { useRouter } from "next/router";
@@ -6,8 +6,8 @@ import { useRouter } from "next/router";
 export default function HostRequests() {
   const router = useRouter();
   const propertyId = parseInt(router.query.id as string);
-  const { data: requests } = api.requests.getByPropertyId.useQuery(propertyId);
 
+  const { data: requests } = api.requests.getByPropertyId.useQuery(propertyId);
   const { data: properties } = api.properties.getHostRequestsSidebar.useQuery();
   const property = properties?.find((p) => p.id === propertyId);
 
@@ -19,7 +19,7 @@ export default function HostRequests() {
           {property ? (
             <h2 className="font-bold">{property.name}</h2>
           ) : (
-            <TextSkeleton className="w-2/3" />
+            <SkeletonText className="w-2/3" />
           )}
         </div>
       </div>
