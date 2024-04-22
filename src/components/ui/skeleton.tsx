@@ -5,7 +5,7 @@ import { cn } from "@/utils/utils";
  *
  * It's `1lh` (one line height) tall, so it will line up
  */
-export function TextSkeleton({
+export function SkeletonText({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
