@@ -31,7 +31,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   groups: many(groupMembers),
   ownedGroups: many(groups),
   requestGroupsCreated: many(requestGroups),
-  hostTeams: many(hostTeams),
+  hostTeams: many(hostTeamMembers),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -59,6 +59,10 @@ export const hostProfilesRelations = relations(hostProfiles, ({ one }) => ({
   hostUser: one(users, {
     fields: [hostProfiles.userId],
     references: [users.id],
+  }),
+  curTeam: one(hostTeams, {
+    fields: [hostProfiles.curTeamId],
+    references: [hostTeams.id],
   }),
 }));
 
