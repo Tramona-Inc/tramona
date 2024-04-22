@@ -229,7 +229,12 @@ export default async function webhook(
 
       case "identity.verification_session.verified":
         const verificationSession  = event.data.object;
+        console.log('This is verified output')
+        console.log(verificationSession.verified_outputs)
         const userId = verificationSession.metadata.user_id;
+        console.log("this is the verification report")
+        console.log(verificationSession.last_verification_report)
+        console.log(typeof verificationSession.last_verification_report)
         if (userId) {
           await db
             .update(users)
@@ -237,8 +242,17 @@ export default async function webhook(
               isVerified: true
             })
             .where(eq(users.id, userId))
+            if(verificationSession.last_verification_report){
+              await db
+              .update(users)
+              .set({
+                verificationReportId: verificationSession.last_verification_report as string
+              })
+              .where(eq(users.id, userId))
+            }
           console.log("is now verified");
         }
+
         break;
 
       case 'identity.verification_session.requires_input': {
