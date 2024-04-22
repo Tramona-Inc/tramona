@@ -2,9 +2,15 @@ import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { LogOutIcon } from "lucide-react";
 import UserAvatar from "../_common/UserAvatar";
+import { loadStripe } from "@stripe/stripe-js";
+import { env } from "@/env";
+import IdentityModal from "../_utils/IdentityModal";
+import { BadgeCheck } from "lucide-react";
+import { api } from "@/utils/api";
 
 export default function ProfileSidebar() {
   const { data: session } = useSession({ required: true });
+  const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
   return (
     <div className="hidden w-96 justify-center bg-black pt-32 lg:flex">
@@ -27,7 +33,15 @@ export default function ProfileSidebar() {
               </p>
             </div>
           </div>
-          <div>
+          <div className="flex flex-col gap-y-2">
+            {session.user.isVerified ? (
+              <div className="flex flex-row gap-x-1 mb-2">
+                Verified
+                <BadgeCheck className="text-green-600"/>
+              </div>
+            ) : (
+              <IdentityModal stripePromise={stripePromise} />
+            )}
             <Button
               onClick={() => signOut()}
               variant="secondary"

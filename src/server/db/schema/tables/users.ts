@@ -56,6 +56,8 @@ export const users = pgTable(
     createdAt: timestamp("created_at", { mode: "string" })
       .notNull()
       .defaultNow(),
+    //stripe identity verifications 
+    isVerified: boolean("is_verified").default(false)
   },
   (t) => ({
     phoneNumberIdx: index("phone_number_idx").on(t.phoneNumber),

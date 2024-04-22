@@ -41,7 +41,7 @@ export default async function webhook(
   if (req.method === "POST") {
     const buf = await buffer(req);
     const sig = req.headers["stripe-signature"] as string;
-
+    console.log("atleast we got a request")
     let event;
 
     try {
@@ -62,7 +62,6 @@ export default async function webhook(
     // * You can add other event types to catch
     switch (event.type) {
       case "payment_intent.succeeded":
-        console.log("WOOOOO IT WORKED ");
         const paymentIntentSucceeded = event.data.object;
         await db
           .update(offers)
@@ -118,7 +117,6 @@ export default async function webhook(
         const savings =
           (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
         const tramonaServiceFee = getTramonaFeeTotal(savings);
-        const offerIdString = 
         await sendEmail({
           to: user!.email,
           subject: `Tramona Booking Confirmation ${property?.name}`,
@@ -229,6 +227,53 @@ export default async function webhook(
         }
         break;
 
+      case "identity.verification_session.verified":
+        const verificationSession  = event.data.object;
+        const userId = verificationSession.metadata.user_id;
+        if (userId) {
+          await db
+            .update(users)
+            .set({
+              isVerified: true
+            })
+            .where(eq(users.id, userId))
+          console.log("is now verified");
+        }
+        break;
+
+      case 'identity.verification_session.requires_input': {
+        // At least one of the verification checks failed
+        const verificationSession = event.data.object;
+
+        //.reaspon is reason why on of the checks failed
+        console.log('Verification check failed Reason: ' + verificationSession.last_error!.reason);
+        console.log('Verification check code: ' + verificationSession.last_error!.code);
+  
+        // Handle specific failure reasons
+        switch (verificationSession.last_error!.code) {
+        
+          case 'document_unverified_other': {
+            // The document was invalid
+            console.log('The submitted document was unverified')
+            break;
+          }
+          case 'document_expired': {
+            // The document was expired
+            console.log('The submitted document was expired')
+            break;
+          }
+          case 'document_type_not_supported': {
+            // document type not supported
+            console.log('The given document is not supported')
+            break;
+          }
+          default: {
+            // ...
+            console.log('There was a submission error, please check all documents are correct.')
+          }
+        }
+      }
+      
       default:
       // console.log(`Unhandled event type ${event.type}`);
     }

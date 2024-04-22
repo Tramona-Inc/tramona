@@ -3,6 +3,12 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import Stripe from "stripe";
 import { z } from "zod";
 
+
+
+// Define a schema for the request body
+//verification stripe identity
+const CreateVerificationSessionInput = z.object({});
+
 export const config = {
   api: {
     bodyParser: false,
@@ -101,4 +107,17 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
+    createVerificationSession: protectedProcedure
+    .query(async({ctx,input})=>{
+      const verificationSession = await stripe.identity.verificationSessions.create({
+        type: 'document',
+        metadata: {
+          user_id: ctx.user.id
+        },
+      });
+      
+      // Return only the client secret to the frontend.
+      const clientSecret = verificationSession.client_secret;
+      return clientSecret
+    })
 });
