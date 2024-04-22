@@ -19,7 +19,7 @@ const IdentityModal = ({ stripePromise } : {stripePromise: Promise<Stripe | null
 
   const handleClick = async () => {
     const stripe = await stripePromise;
-
+    
 
     if (!stripe) {
       // Stripe.js hasn't loaded yet. Make sure to disable
