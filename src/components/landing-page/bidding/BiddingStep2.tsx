@@ -1,31 +1,92 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectLabel,
-  SelectValue,
-} from "@/components/ui/select";
 import { type Property } from "@/server/db/schema";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { SelectGroup, SelectTrigger } from "@radix-ui/react-select";
 import Image from "next/image";
-import { FaApplePay } from "react-icons/fa";
 
+import { useStripe } from "@/components/requests/[id]/OfferCard/HowToBookDialog";
+import { Button } from "@/components/ui/button";
+import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import { formatDateRange, getNumNights } from "@/utils/utils";
+import {
+  EmbeddedCheckout,
+  EmbeddedCheckoutProvider,
+} from "@stripe/react-stripe-js";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import type Stripe from "stripe";
+
 function BiddingStep2({ property }: { property: Property }) {
+  const [options, setOptions] =
+    useState<Stripe.Response<Stripe.Checkout.Session>>();
+
+  const { mutateAsync: createSetupIntentSessionMutation } =
+    api.stripe.createSetupIntentSession.useMutation();
+
+  const { mutateAsync: getStripeSessionMutate } =
+    api.stripe.getStripeSession.useMutation();
+
+  // const { mutateAsync: getSetupIntentMutate } =
+  //   api.stripe.getSetUpIntent.useMutation();
+
+  const data = {
+    listingId: 123,
+    propertyId: 456,
+    requestId: 789,
+    name: "string",
+    price: 100,
+    description: "",
+    cancelUrl: "/payment-test", // Rename cancel_url to cancelUrl
+    totalSavings: 20,
+    phoneNumber: "123-456-7890",
+  };
+
+  const session = useSession({ required: true });
+
+  const stripePromise = useStripe();
+
+  async function checkout() {
+    const stripe = await stripePromise;
+
+    if (!session.data?.user) return;
+
+    // Creates Session for mode setup and creates customer
+    const response = await createSetupIntentSessionMutation(data);
+
+    console.log(response);
+
+    if (stripe !== null && response) {
+      const sesh = await getStripeSessionMutate({
+        sessionId: response.id,
+      });
+
+      if (sesh.metadata.setupIntent) {
+        // ! Only get setup intent for host/admin to accept offer
+        // const intent = await getSetupIntentMutate({
+        //   setupIntent: sesh.metadata.setupIntent as string,
+        // });
+
+        // console.log(intent);
+        // Creates and redirects user to URL
+        // await stripe.redirectToCheckout({
+        //   sessionId: response.id,
+        // });
+
+        setOptions(response);
+      }
+    }
+  }
+
+  useEffect(() => {
+    void checkout();
+  }, []);
+
   const date = useBidding((state) => state.date);
   const price = useBidding((state) => state.price);
 
   const step = useBidding((state) => state.step);
   const setStep = useBidding((state) => state.setStep);
-  const handlePressNext = () => {
-    setStep(step + 1);
-  };
 
-  const totalNightlyPrice = price * getNumNights(date.from, date.to);
+  const totalNightlyPrice = price * getNumNights(date.from, date.to) ?? 1;
 
   const tax = 1;
 
@@ -76,7 +137,8 @@ function BiddingStep2({ property }: { property: Property }) {
           <div className="text-base font-semibold">
             <div className="mt-8 flex flex-row justify-between">
               <p>
-                Offer Price: ${price} x {getNumNights(date.from, date.to)}{" "}
+                Offer Price: ${price} x{" "}
+                {getNumNights(date.from ?? new Date(), date.to ?? new Date())}{" "}
                 nights
               </p>
               <p>${totalNightlyPrice} </p>
@@ -93,7 +155,26 @@ function BiddingStep2({ property }: { property: Property }) {
           </div>
         </div>
 
-        <div className="flex w-full flex-col items-center gap-y-4 rounded-xl bg-popover px-4 py-6 md:py-20">
+        <div className="w-[500px]">
+          {options && (
+            <EmbeddedCheckoutProvider
+              stripe={stripePromise}
+              options={{ clientSecret: options.client_secret ?? "" }}
+            >
+              <EmbeddedCheckout />
+            </EmbeddedCheckoutProvider>
+          )}
+
+          <div className="flex w-full justify-center w-[500px]">
+            <Button
+              className="my-6 w-full py-5 text-lg"
+              onClick={() => setStep(step + 1)}
+            >
+              Send Offer
+            </Button>
+          </div>
+
+          {/* <div className="flex w-full flex-col items-center gap-y-4 rounded-xl bg-popover px-4 py-6 md:py-20">
           <Button className="w-full md:px-32 ">
             <FaApplePay size={48} />
           </Button>
@@ -104,28 +185,33 @@ function BiddingStep2({ property }: { property: Property }) {
             </span>
             <div className="mt-2 w-full border-t-2 border-accent" />
           </div>
-          <div className="grid w-full max-w-sm items-center text-base">
+          <div className="item-center flex w-full flex-col text-base">
             <Label htmlFor="email" className="mb-2">
               Card Information
             </Label>
-            <Input type="email" id="email" placeholder="Email" />
-            <div className="mb-10 flex flex-row">
-              <Input placeholder="MM / YY" />
-              <Input placeholder="123" />
+            <Input
+              type="email"
+              id="email"
+              placeholder="Email"
+              className="mb-2"
+            />
+            <div className="mb-10 grid grid-cols-2 gap-2">
+              <Input placeholder="MM / YY" className="" />
+              <Input placeholder="123" className="" />
             </div>
+
             <Label className="mb-2">Country or Region</Label>
             <Select>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="United States">
-                  United States
-                </SelectValue>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Theme" />
               </SelectTrigger>
               <SelectContent>
-                <SelectGroup>
-                  <SelectLabel></SelectLabel>
-                </SelectGroup>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="system">System</SelectItem>
               </SelectContent>
             </Select>
+
             <Input placeholder="Zip code" />
             <Button
               className="my-6 py-5 text-lg"
@@ -142,6 +228,7 @@ function BiddingStep2({ property }: { property: Property }) {
               <span className="text-blue-500 underline">Learn more</span>
             </p>
           </div>
+        </div> */}
         </div>
       </div>
     </div>

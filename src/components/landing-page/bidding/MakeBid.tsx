@@ -6,7 +6,6 @@ import BiddingStep2 from "./BiddingStep2";
 
 function MakeBid({ property }: { property: Property }) {
   const step = useBidding((state) => state.step);
-  const date = useBidding((state) => state.date);
 
   return (
     <div>
