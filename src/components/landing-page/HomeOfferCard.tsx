@@ -157,6 +157,7 @@ export default function HomeOfferCard({ property }: { property: Property }) {
             name="date"
             formLabel=""
             className="col-span-full sm:col-span-1"
+            propertyId={property.id}
           />
           <DialogLarge open={open} onOpenChange={setOpen}>
             <DialogTrigger className="">

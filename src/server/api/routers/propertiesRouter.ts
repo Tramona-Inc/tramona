@@ -2,6 +2,7 @@ import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import { hostPropertyOnboardingSchema } from "@/components/host/onboarding/OnboardingFooter";
 import {
   createTRPCRouter,
+  protectedProcedure,
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
@@ -14,7 +15,7 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { withCursorPagination } from "drizzle-pagination";
 import { z } from "zod";
-import { properties } from "./../../db/schema/tables/properties";
+import { bookedDates, properties } from "./../../db/schema/tables/properties";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -150,6 +151,16 @@ export const propertiesRouter = createTRPCRouter({
         hostId: ctx.user.id,
         hostName: ctx.user.name,
         imageUrls: input.imageUrls,
+      });
+    }),
+  getBlockedDates: protectedProcedure
+    .input(z.object({ propertyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.bookedDates.findMany({
+        where: eq(bookedDates.propertyId, input.propertyId),
+        columns: {
+          date: true
+        },
       });
     }),
 });
