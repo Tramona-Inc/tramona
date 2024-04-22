@@ -69,9 +69,9 @@ export function SidebarConversation({
       />
 
       <div>
-        <h1 className="font-bold">Property: {name}</h1>
-        <h1 className="font-bold">{displayParticipants}</h1>
-        <p className="line-clamp-2 text-xs text-muted-foreground">
+        <p className="font-semibold">{displayParticipants}</p>
+        <p className="text-sm font-semibold">{name}</p>
+        <p className="line-clamp-2 text-sm text-muted-foreground">
           {messages.length > 0 &&
             !messages[0]?.read &&
             messages[0]?.userId !== session?.user.id && (

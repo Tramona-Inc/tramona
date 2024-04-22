@@ -204,7 +204,7 @@ export default function MessagesSidebar({
         Messages
       </h1>
 
-      <ScrollArea className="">
+      <ScrollArea>
         {!isLoading ? (
           conversations && conversations.length > 0 ? (
             conversations.map((conversation) => (
