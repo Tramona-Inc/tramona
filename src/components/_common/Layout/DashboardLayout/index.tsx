@@ -7,7 +7,7 @@ type DashboardLayoutProps = {
   type: "admin" | "host" | "guest";
 };
 
-export default function DashboadLayout({
+export default function DashboardLayout({
   children,
   type,
 }: DashboardLayoutProps) {

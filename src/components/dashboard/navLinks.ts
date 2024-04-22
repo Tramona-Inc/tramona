@@ -11,6 +11,7 @@ import {
   WrenchIcon,
   HomeIcon,
   Users2Icon,
+  UploadIcon,
 } from "lucide-react";
 import SuitcaseIcon from "../_icons/SuitcaseIcon";
 import { type SidebarLinkProps } from "./SidebarLink";
@@ -50,6 +51,12 @@ export const adminNavLinks: SidebarLinkProps[] = [
     href: "/dashboard",
     name: "Switch To Guest",
     icon: ArrowLeftRight,
+    noChildren: false,
+  },
+  {
+    href: "/admin/property-upload",
+    name: "Property Upload",
+    icon: UploadIcon,
     noChildren: false,
   },
 ];

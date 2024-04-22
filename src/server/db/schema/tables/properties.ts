@@ -40,7 +40,6 @@ export const ALL_PROPERTY_TYPES = [
   "Aparthotel",
   "Hotel",
   "Yurt",
-  "Hotel",
   "Treehouse",
   "Cottage",
   "Guest suite",
@@ -161,7 +160,7 @@ export const properties = pgTable("properties", {
 
   // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
   amenities: varchar("amenities").array(),
-  otherAmenities: varchar("other_amenities").array(),
+  otherAmenities: varchar("other_amenities").array().notNull().default([]),
 
   imageUrls: varchar("image_url").array().notNull(),
 
