@@ -95,7 +95,7 @@ export const old_ALL_PROPERTY_AMENITIES = [
   "Pets Allowed",
   "Dishes & silverware",
   "Dining table and chairs",
-  "TV"
+  "TV",
 ] as const;
 
 export const amenityCategories = [
@@ -296,5 +296,5 @@ export const amenityCategories = [
 
 export const ALL_PROPERTY_AMENITIES = old_ALL_PROPERTY_AMENITIES;
 
-export type AmenityCategory = (typeof amenityCategories)[number]["category"]
+export type AmenityCategory = (typeof amenityCategories)[number]["category"];
 export type Amenity = (typeof ALL_PROPERTY_AMENITIES)[number];

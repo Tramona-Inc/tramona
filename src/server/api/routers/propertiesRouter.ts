@@ -99,13 +99,14 @@ export const propertiesRouter = createTRPCRouter({
       });
     }),
 
-  getHostProperties: roleRestrictedProcedure(["host"]).query(
-    async ({ ctx }) => {
+  getHostProperties: roleRestrictedProcedure(["host"])
+    .input(z.object({ limit: z.number().optional() }).optional())
+    .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findMany({
         where: eq(properties.hostId, ctx.user.id),
+        limit: input?.limit,
       });
-    },
-  ),
+    }),
   getHostRequestsSidebar: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
       return await ctx.db.query.properties

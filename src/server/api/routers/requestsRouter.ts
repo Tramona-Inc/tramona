@@ -420,21 +420,23 @@ export const requestsRouter = createTRPCRouter({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      return await db.query.requestsToProperties.findMany({
-        where: eq(requestsToProperties.propertyId, propertyId),
-        with: {
-          request: {
-            with: {
-              madeByGroup: {
-                with: {
-                  members: {
-                    with: {
-                      user: {
-                        columns: {
-                          name: true,
-                          email: true,
-                          image: true,
-                          id: true,
+      return await db.query.requestsToProperties
+        .findMany({
+          where: eq(requestsToProperties.propertyId, propertyId),
+          with: {
+            request: {
+              with: {
+                madeByGroup: {
+                  with: {
+                    members: {
+                      with: {
+                        user: {
+                          columns: {
+                            name: true,
+                            email: true,
+                            image: true,
+                            id: true,
+                          },
                         },
                       },
                     },
@@ -443,8 +445,8 @@ export const requestsRouter = createTRPCRouter({
               },
             },
           },
-        },
-      });
+        })
+        .then((res) => res.map((r) => r.request));
     }),
 
   // todo - change this when updaterequestinfo is not one to one anymore

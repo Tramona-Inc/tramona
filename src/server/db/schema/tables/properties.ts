@@ -18,7 +18,7 @@ import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
 import { zodTime } from "@/utils/zod-utils";
-import { hostTeams } from "./hostTeams";
+import { sql } from "drizzle-orm";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -160,7 +160,10 @@ export const properties = pgTable("properties", {
 
   // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
   amenities: varchar("amenities").array(),
-  otherAmenities: varchar("other_amenities").array().notNull().default([]),
+  otherAmenities: varchar("other_amenities")
+    .array()
+    .notNull()
+    .default(sql`'{}'`),
 
   imageUrls: varchar("image_url").array().notNull(),
 
