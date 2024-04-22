@@ -21,6 +21,7 @@ import { z } from "zod";
 
 const formSchema = z.object({
   price: zodNumber({ min: 1 }),
+  guest: zodNumber({ min: 1 }),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -32,15 +33,20 @@ function BiddingStep1({ property }: { property: Property }) {
   const setPrice = useBidding((state) => state.setPrice);
   const price = useBidding((state) => state.price);
 
+  const setGuest = useBidding((state) => state.setGuest);
+  const guest = useBidding((state) => state.guest);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       price: price ?? undefined,
+      guest: guest ?? undefined,
     },
   });
 
   function onSubmit(values: FormSchema) {
     setPrice(values.price);
+    setGuest(values.guest);
     setStep(step + 1);
   }
 
@@ -96,6 +102,20 @@ function BiddingStep1({ property }: { property: Property }) {
                         prefix="$"
                         suffix="/night"
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <p className="mb-2 mt-5 font-semibold">Number of guests</p>
+              <FormField
+                control={form.control}
+                name="guest"
+                render={({ field }) => (
+                  <FormItem className="col-span-full">
+                    <FormControl>
+                      <Input {...field} type="number" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

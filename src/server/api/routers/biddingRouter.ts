@@ -4,11 +4,10 @@ import {
   bids,
   groupMembers,
   groups,
-  requestGroups,
 } from "@/server/db/schema";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const biddingRouter = createTRPCRouter({
   getMyBids: protectedProcedure.query(async ({ ctx }) => {
@@ -17,35 +16,35 @@ export const biddingRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.transaction(async (tx) => {
-        try {
-          const requestGroupId = await tx
-            .insert(requestGroups)
-            .values({ createdByUserId: ctx.user.id, hasApproved: true })
-            .returning()
-            .then((res) => res[0]!.id);
+      try {
+        // const requestGroupId = await tx
+        //   .insert(requestGroups)
+        //   .values({ createdByUserId: ctx.user.id, hasApproved: true })
+        //   .returning()
+        //   .then((res) => res[0]!.id);
 
-          const madeByGroupId = await tx
-            .insert(groups)
-            .values({ ownerId: ctx.user.id })
-            .returning()
-            .then((res) => res[0]!.id);
+        const madeByGroupId = await ctx.db
+          .insert(groups)
+          .values({ ownerId: ctx.user.id })
+          .returning()
+          .then((res) => res[0]!.id);
 
-          await tx.insert(groupMembers).values({
-            userId: ctx.user.id,
-            groupId: madeByGroupId,
-          });
+        await ctx.db.insert(groupMembers).values({
+          userId: ctx.user.id,
+          groupId: madeByGroupId,
+        });
 
-          await tx
-            .insert(bids)
-            .values({ ...input, madeByGroupId: madeByGroupId });
-        } catch (error) {
-          return new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: JSON.stringify(error),
-          });
-        }
-      });
+        console.log("-------------------called");
+
+        await ctx.db
+          .insert(bids)
+          .values({ ...input, madeByGroupId: madeByGroupId });
+      } catch (error) {
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: JSON.stringify(error),
+        });
+      }
     }),
   update: protectedProcedure
     .input(bidInsertSchema)

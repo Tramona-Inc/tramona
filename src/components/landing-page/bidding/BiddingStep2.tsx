@@ -81,6 +81,7 @@ function BiddingStep2({ property }: { property: Property }) {
   }, []);
 
   const date = useBidding((state) => state.date);
+  const guest = useBidding((state) => state.guest);
   const price = useBidding((state) => state.price);
 
   const step = useBidding((state) => state.step);
@@ -91,6 +92,20 @@ function BiddingStep2({ property }: { property: Property }) {
   const tax = 1;
 
   const totalPrice = totalNightlyPrice * tax;
+
+  const { mutate } = api.biddings.create.useMutation({
+    onSuccess: () => {
+      setStep(step + 1);
+    },
+  });
+
+  function handleOffer() {
+    mutate({
+      propertyId: property.id,
+      numGuests: guest,
+      amount: price,
+    });
+  }
 
   return (
     <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl">
@@ -165,11 +180,8 @@ function BiddingStep2({ property }: { property: Property }) {
             </EmbeddedCheckoutProvider>
           )}
 
-          <div className="flex w-full justify-center w-[500px]">
-            <Button
-              className="my-6 w-full py-5 text-lg"
-              onClick={() => setStep(step + 1)}
-            >
+          <div className="flex w-full justify-center">
+            <Button className="my-6 w-full py-5 text-lg" onClick={handleOffer}>
               Send Offer
             </Button>
           </div>
