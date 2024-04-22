@@ -317,7 +317,7 @@ export default function DesktopSearchBar({
           />
 
           <LPDateRangePicker
-            control={form.control}
+            ontrol={form.control}
             name={`data.${curTab}.date`}
             formLabel="Check in/Check out"
             className="col-span-full lg:col-span-3"
