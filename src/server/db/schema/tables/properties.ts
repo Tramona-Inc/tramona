@@ -1,3 +1,4 @@
+import { zodTime } from "@/utils/zod-utils";
 import {
   boolean,
   date,
@@ -17,7 +18,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { zodTime } from "@/utils/zod-utils";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -145,6 +145,8 @@ export const properties = pgTable("properties", {
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
+
+  hostTeamId: varchar("host_team_id"),
 
   address: varchar("address", { length: 1000 }),
   latitude: doublePrecision("latitude"),

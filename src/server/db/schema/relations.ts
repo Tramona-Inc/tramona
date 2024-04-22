@@ -12,6 +12,7 @@ import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
+import { bids } from "./tables/bids";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -25,6 +26,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   groups: many(groupMembers),
   ownedGroups: many(groups),
   requestGroupsCreated: many(requestGroups),
+  bids: many(bids),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -81,6 +83,17 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
     references: [requestGroups.id],
   }),
   offers: many(offers),
+}));
+
+export const bidsRelations = relations(bids, ({ one }) => ({
+  madeByGroup: one(groups, {
+    fields: [bids.madeByGroupId],
+    references: [groups.id],
+  }),
+  property: one(properties, {
+    fields: [bids.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const requestGroupsRelations = relations(

@@ -1,7 +1,5 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { users } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -137,23 +135,26 @@ export const stripeRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      let stripeCustomerId = await ctx.db.query.users
-        .findFirst({
-          columns: {
-            stripeCustomerId: true,
-          },
-          where: eq(users.id, ctx.user.id),
-        })
-        .then((res) => res?.stripeCustomerId);
+      // let stripeCustomerId = await ctx.db.query.users
+      //   .findFirst({
+      //     columns: {
+      //       stripeCustomerId: true,
+      //     },
+      //     where: eq(users.id, ctx.user.id),
+      //   })
+      //   .then((res) => res?.stripeCustomerId);
 
-      if (!stripeCustomerId) {
-        stripeCustomerId = await stripe.customers
-          .create({
-            name: ctx.user.name ?? "",
-            email: ctx.user.email,
-          })
-          .then((res) => res.id);
-      }
+      // ! UNCOMMENT FOR TESTING PURPOSES
+      // if (!stripeCustomerId) {
+      //   stripeCustomerId = await stripe.customers
+      //     .create({
+      //       name: ctx.user.name ?? "",
+      //       email: ctx.user.email,
+      //     })
+      //     .then((res) => res.id);
+      // }
+
+      let stripeCustomerId = "cus_PwwCgSdIG3rWNx";
 
       const currentDate = new Date(); // Get the current date and time
 
@@ -178,7 +179,8 @@ export const stripeRouter = createTRPCRouter({
           currency: "usd",
           // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
           // cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
-          return_url: `${env.NEXTAUTH_URL}/payment-intent`,
+          // return_url: `${env.NEXTAUTH_URL}/payment-intent`,
+          redirect_on_completion: "never",
           metadata: metadata, // metadata access for checkout session
           customer: stripeCustomerId,
         });

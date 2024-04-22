@@ -2,7 +2,6 @@ import NavLink from "../_utils/NavLink";
 
 import { api } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
-import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
   DollarSign,
@@ -21,7 +20,7 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
-import SuitcaseIcon from "../_icons/SuitcaseIcon";
+import SuitcaseIcon from '../_icons/SuitcaseIcon';
 
 function SidebarLink({
   href,
@@ -38,24 +37,22 @@ function SidebarLink({
       render={({ selected }) => (
         <div
           className={cn(
-            "relative flex items-center gap-4 p-4 text-center font-medium lg:flex-col lg:gap-1 lg:px-2 lg:py-3 lg:text-xs",
-            selected
-              ? "bg-zinc-200 text-black"
-              : "text-zinc-700 hover:bg-zinc-200",
+            "relative flex transform items-center gap-4 p-4 text-center font-medium transition-all hover:translate-x-1 lg:flex-col lg:gap-1 lg:px-2 lg:py-3 lg:text-xs",
+            selected ? "text-[#2F5BF6]" : "text-[#5B616D",
           )}
         >
-          {selected && (
+          {/* {selected && (
             <motion.div
               layoutId="sidebar-indicator"
               transition={{ duration: 0.1, ease: "circOut" }}
               className="absolute inset-y-0 right-0 border-[3px] border-transparent border-r-black"
             />
-          )}
+          )} */}
 
           <Icon
             className={cn(
               "size-6 lg:size-8",
-              selected ? "text-black" : "text-zinc-700",
+              selected ? "text-[#2F5BF6]" : "text-[#5B616D]",
             )}
           />
 
@@ -150,13 +147,13 @@ export default function Sidebar({
   }, [totalUnreadMessages, notifyMe]);
 
   return (
-    <div className="sticky top-0 flex h-full w-64 flex-col border-r lg:w-24">
+    <div className="sticky top-0 flex h-full w-64 flex-col lg:w-20">
       {withLogo && (
         <div className="p-3">
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-center">
+      <div className="flex flex-1 flex-col justify-center gap-5">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
             <SidebarLink href={link.href} icon={link.icon}>

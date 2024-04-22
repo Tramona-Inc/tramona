@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import Spinner from "../_common/Spinner";
-import DesktopSearchBar from "../landing-page/SearchBar/DesktopSearchBar";
 
 import { api } from "@/utils/api";
 import { type UpcomingTrip } from "@/pages/my-trips";
 import { formatDateRange } from "@/utils/utils";
 import { Card, CardContent } from "../ui/card";
 import ActiveRequestGroups from "../requests/ActiveRequestGroups";
+import SimpleMastHead from "../landing-page/_sections/SimpleMastHead";
 
 function UpcomingTrips({ trips }: { trips: UpcomingTrip[] }) {
   if (trips.length === 0) {
@@ -51,11 +51,11 @@ export default function DashboardOverview() {
 
   return (
     <div className="col-span-10 2xl:col-span-11">
-      <div className="bg-zinc-700 px-10 py-10 xl:px-20 2xl:px-32">
-        <h1 className="pb-5 text-center text-4xl font-bold text-white">
+      <div className="px-10 py-10 xl:px-20 2xl:px-32">
+        <h1 className="pb-5 text-center text-4xl font-bold">
           Traveling? Submit a request now!
         </h1>
-        <DesktopSearchBar />
+        <SimpleMastHead />
       </div>
 
       <div className="grid grid-cols-1 gap-5 px-10 py-10 lg:grid-cols-10 xl:px-20 2xl:px-32">

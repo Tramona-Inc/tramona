@@ -36,10 +36,13 @@ const buttonVariants = cva(
         white: "bg-white text-black hover:bg-zinc-200",
         wrapper:
           "hover:bg-accent hover:text-accent-foreground gap-0 -m-1 h-auto rounded-full p-1",
-        increment:
-          "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
         outlineLight:
           "hover:border-black flex flex-row items-center gap-5 rounded-[12px] border-[2px] p-6 px-7 transition-all",
+        outlineMinimal:
+          "hover:border-black flex flex-row items-center gap-5 rounded-lg border-[2px] p-2 transition-all",
+        increment:
+          "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
+        underline: "hover:bg-accent text-zinc-800 underline",
       },
     },
     defaultVariants: {
