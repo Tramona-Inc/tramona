@@ -13,6 +13,7 @@ import { twilioRouter } from "./routers/twilioRouter";
 import { miscRouter } from "./routers/miscRouter";
 import { usersRouter } from "./routers/usersRouter";
 import { emailRouter } from "./routers/emailRouter";
+import { hostTeamsRouter } from "./routers/hostTeamsRouter";
 
 /**
  * This is the primary router for your server.
@@ -34,6 +35,7 @@ export const appRouter = createTRPCRouter({
   misc: miscRouter,
   groups: groupsRouter,
   emails: emailRouter,
+  hostTeams: hostTeamsRouter,
 });
 
 // export type definition of API

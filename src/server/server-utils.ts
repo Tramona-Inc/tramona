@@ -210,3 +210,12 @@ export async function getGroupOwnerId(groupId: number) {
     })
     .then((res) => res?.ownerId);
 }
+
+export async function getHostTeamOwnerId(hostTeamId: number) {
+  return await db.query.hostTeams
+    .findFirst({
+      columns: { ownerId: true },
+      where: eq(groups.id, hostTeamId),
+    })
+    .then((res) => res?.ownerId);
+}

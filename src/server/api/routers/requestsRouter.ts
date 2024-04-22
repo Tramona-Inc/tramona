@@ -16,6 +16,7 @@ import {
   users,
   requestUpdatedInfo,
   properties,
+  requestsToProperties,
 } from "@/server/db/schema";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -420,7 +421,7 @@ export const requestsRouter = createTRPCRouter({
       }
 
       return await db.query.requestsToProperties.findMany({
-        where: eq(properties.id, propertyId),
+        where: eq(requestsToProperties.propertyId, propertyId),
         with: {
           request: {
             with: {
