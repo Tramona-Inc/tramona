@@ -18,7 +18,7 @@ export const groups = pgTable("groups", {
   id: serial("id").primaryKey(),
   ownerId: text("owner_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
 });
 
 export const groupMembers = pgTable(

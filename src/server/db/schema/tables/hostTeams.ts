@@ -21,7 +21,7 @@ export const hostTeamMembers = pgTable(
   {
     hostTeamId: integer("host_team_id")
       .notNull()
-      .references(() => hostTeams.id),
+      .references(() => hostTeams.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -36,9 +36,9 @@ export const hostTeamInvites = pgTable(
   {
     hostTeamId: integer("host_team_id")
       .notNull()
-      .references(() => hostTeams.id),
+      .references(() => hostTeams.id, { onDelete: "cascade" }),
     inviteeEmail: text("invitee_email").notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.hostTeamId, vt.inviteeEmail] }),
