@@ -154,7 +154,7 @@ export const stripeRouter = createTRPCRouter({
       //     .then((res) => res.id);
       // }
 
-      let stripeCustomerId = "cus_PwwCgSdIG3rWNx";
+      const stripeCustomerId = "cus_PwwCgSdIG3rWNx";
 
       const currentDate = new Date(); // Get the current date and time
 
@@ -197,8 +197,6 @@ export const stripeRouter = createTRPCRouter({
       const session = await stripe.checkout.sessions.retrieve(input.sessionId, {
         expand: ["setup_intent"],
       });
-
-      console.log("woah", session);
 
       return {
         metadata: {

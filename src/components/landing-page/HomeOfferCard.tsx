@@ -73,8 +73,8 @@ export default function HomeOfferCard({ property }: { property: Property }) {
   const formSchema = z
     .object({
       date: z.object({
-        from: z.date(),
-        to: z.date(),
+        from: z.coerce.date(),
+        to: z.coerce.date(),
       }),
     })
     .refine((data) => data.date.to > data.date.from, {
