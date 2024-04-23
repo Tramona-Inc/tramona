@@ -93,6 +93,7 @@ export const classNames = {
         ? cn("text-black/75", isFocused && "text-black/50")
         : cn("text-black", isFocused && "text-black"),
     ),
+    mobileLabel: 'pointer-events-none text-sm text-black font-bold group-focus-within:text-black',
   mobileErrorMsg: "pointer-events-none my-1",
 };
 
@@ -319,7 +320,7 @@ export function MobileLocationInput<
       {...props}
       render={({ field }) => (
         <>
-          <FormLabel className="text-black">{formLabel}</FormLabel>
+          <FormLabel className={cn(classNames.mobileLabel)}>{formLabel}</FormLabel>
 
           <PlacesPopover
             open={isOpen}
@@ -374,7 +375,7 @@ export function MobileDateRangePicker<
       {...props}
       render={({ field }) => (
         <>
-          <FormLabel className="text-black">{formLabel}</FormLabel>
+          <FormLabel className={cn(classNames.mobileLabel)}>{formLabel}</FormLabel>
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
               <button
@@ -452,7 +453,7 @@ export function MobileGuestsPicker<
       {...props}
       render={({ field }) => (
         <>
-          <FormLabel className="text-black">{formLabel}</FormLabel>
+          <FormLabel className={cn(classNames.mobileLabel)}>{formLabel}</FormLabel>
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
               <button
@@ -472,6 +473,7 @@ export function MobileGuestsPicker<
               className="w-auto p-0 backdrop-blur-md"
               align="start"
               side="bottom"
+              onFocusOutside={() => field.onChange(numGuests)}
             >
               <div className="flex items-center justify-between space-x-2">
                 Guests
