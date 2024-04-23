@@ -92,7 +92,7 @@ export default function Listings() {
             !properties.pages[properties.pages.length - 1]?.nextCursor && (
               <div className="text-center opacity-60">
                 <p className="text-xs md:text-sm">
-                  No more currentProperties to load
+                  No more current Properties to load
                 </p>
               </div>
             )}

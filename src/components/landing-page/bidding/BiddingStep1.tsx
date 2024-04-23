@@ -18,6 +18,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { api } from "@/utils/api";
+import IdentityModal from "@/components/_utils/IdentityModal";
+import { env } from "@/env";
+import { loadStripe } from "@stripe/stripe-js";
 
 const formSchema = z.object({
   price: zodNumber({ min: 1 }),
@@ -35,6 +39,9 @@ function BiddingStep1({ property }: { property: Property }) {
 
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
+  //determine if user identity is verified
+  const { data: users } = api.users.myVerificationStatus.useQuery();
+  const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -47,7 +54,9 @@ function BiddingStep1({ property }: { property: Property }) {
   function onSubmit(values: FormSchema) {
     setPrice(values.price);
     setGuest(values.guest);
-    setStep(step + 1);
+    if (users?.isIdentityVerified === "true") {
+      setStep(step + 1);
+    }
   }
 
   return (
@@ -77,7 +86,7 @@ function BiddingStep1({ property }: { property: Property }) {
       </p>
       <div className="border-2 border-dashed border-accent px-24 py-2">
         {/* Change this to reccomended price */}
-        <p>$100 </p>
+        <p>{formatCurrency(property.originalNightlyPrice! * .85 ?? 0)} </p>
       </div>
       <p className="my-2 text-sm">Recommended Price</p>
       <div className=" flex w-5/6 flex-row text-accent">
@@ -122,11 +131,25 @@ function BiddingStep1({ property }: { property: Property }) {
                 )}
               />
             </div>
-            <Button className="mb-1 px-32" type="submit">
-              Review offer
-            </Button>
+            {users?.isIdentityVerified === "pending" ? (
+              <Button className="mb-1 px-32" disabled>
+                Verification Pending
+              </Button>
+            ) : users?.isIdentityVerified === "true" ? (
+              <Button className="mb-1 px-32" type="submit">
+                Review offer
+              </Button>
+            ) : (
+              <div className="flex flex-col items-center">
+                <p className=" text-xs text-muted-foreground mb-1">
+                  You must be verified before submitting an offer.
+                </p>
+                <IdentityModal stripePromise={stripePromise} />
+              </div>
+            )}
           </form>
         </Form>
+
         <p className=" mb-5 text-xs text-muted-foreground md:text-sm">
           Payment information will be taken in the next step
         </p>
