@@ -60,6 +60,7 @@ export const users = pgTable(
     //stripe identity verifications 
     isVerified: boolean("is_verified").default(false),
     verificationReportId: varchar("verification_report_id"),
+    dateOfBirth: varchar("date_of_birth"),
   },
   (t) => ({
     phoneNumberIdx: index("phone_number_idx").on(t.phoneNumber),
