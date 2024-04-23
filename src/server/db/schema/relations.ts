@@ -18,6 +18,7 @@ import {
   hostTeamMembers,
   hostTeams,
 } from "./tables/hostTeams";
+import { bids } from "./tables/bids";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -32,6 +33,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   ownedGroups: many(groups),
   requestGroupsCreated: many(requestGroups),
   hostTeams: many(hostTeamMembers),
+  bids: many(bids),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -98,6 +100,17 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   }),
   offers: many(offers),
   requestsToProperties: many(requestsToProperties),
+}));
+
+export const bidsRelations = relations(bids, ({ one }) => ({
+  madeByGroup: one(groups, {
+    fields: [bids.madeByGroupId],
+    references: [groups.id],
+  }),
+  property: one(properties, {
+    fields: [bids.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const requestGroupsRelations = relations(
@@ -204,7 +217,6 @@ export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
     references: [groups.id],
   }),
 }));
-
 export const hostTeamsRelations = relations(hostTeams, ({ one, many }) => ({
   owner: one(users, {
     fields: [hostTeams.ownerId],

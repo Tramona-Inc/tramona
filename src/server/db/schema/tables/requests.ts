@@ -32,6 +32,7 @@ export const requests = pgTable("requests", {
   minNumBedrooms: smallint("min_num_bedrooms").default(1),
   propertyType: propertyTypeEnum("property_type"),
   note: varchar("note", { length: 255 }),
+  airbnbLink: varchar("airbnb_link", { length: 512 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
 });

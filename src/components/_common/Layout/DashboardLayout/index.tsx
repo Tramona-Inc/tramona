@@ -1,4 +1,6 @@
+import MobileNav from "@/components/dashboard/MobileNav";
 import Sidebar from "@/components/dashboard/Sidebar";
+import { useSession } from "next-auth/react";
 import Header from "../../Header";
 import Footer from "../Footer";
 
@@ -11,15 +13,20 @@ export default function DashboardLayout({
   children,
   type,
 }: DashboardLayoutProps) {
+  const { data: session } = useSession();
+
   return (
     <>
-      <Header type="dashboard" sidebarType={type} />
+      <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
       <div className="flex">
-        <aside className="sticky bottom-0 top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
-          <Sidebar type={type} />
-        </aside>
+        {session && (
+          <aside className="sticky bottom-0 top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
+            <Sidebar type={type} />
+          </aside>
+        )}
         <main className="flex-1">{children}</main>
       </div>
+      <MobileNav type={type} />
       <Footer />
     </>
   );

@@ -11,14 +11,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { api, type RouterOutputs } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
 import { CalendarIcon } from "lucide-react";
 import { type FieldPath, type FieldValues } from "react-hook-form";
+
+type BlockedDates = RouterOutputs["properties"]["getBlockedDates"];
 
 export default function DateRangePicker<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
 >({
+  propertyId,
   className,
   formLabel,
   ...props
@@ -26,18 +30,33 @@ export default function DateRangePicker<
   React.ComponentProps<typeof FormField<TFieldValues, TName>>,
   "render"
 > & {
+  propertyId?: number;
   className: string;
   formLabel: string;
 }) {
+  let disabledDays: Date[] | undefined;
+
+  const { data, refetch } = api.properties.getBlockedDates.useQuery(
+    { propertyId: propertyId ?? 0 },
+    { enabled: false },
+  );
+  disabledDays = data?.map(
+    (date: { date: string | number | Date }) => new Date(date.date),
+  );
+
   return (
     <FormField
       {...props}
       render={({ field }) => (
-        <FormItem className={className}>
+        <FormItem>
           <FormLabel>{formLabel}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={field.value ? "filledInput" : "emptyInput"}>
+              <Button
+                onClick={() => propertyId && refetch()}
+                className={className}
+                variant={field.value ? "filledInput" : "emptyInput"}
+              >
                 {field.value
                   ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     formatDateRange(field.value.from, field.value.to)
@@ -59,7 +78,8 @@ export default function DateRangePicker<
                   }
                   field.onChange(e);
                 }}
-                disabled={(date) => date < new Date()}
+                disabled={disabledDays}
+                // disabled={(date) => date < new Date()}
                 numberOfMonths={1}
                 showOutsideDays={true}
               />

@@ -64,13 +64,13 @@ export default function Sidebar({
   }, [totalUnreadMessages, notifyMe]);
 
   return (
-    <div className="sticky top-0 flex h-full w-64 flex-col border-r lg:w-24">
+    <div className="sticky top-0 flex h-full w-64 flex-col lg:w-20">
       {withLogo && (
         <div className="p-3">
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-center">
+      <div className="flex flex-1 flex-col justify-center gap-5">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
             <SidebarLink

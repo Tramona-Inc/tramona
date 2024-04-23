@@ -1,4 +1,12 @@
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormLabel } from "@/components/ui/form";
 import {
   Select,
@@ -24,21 +32,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import LPDateRangePicker, {
+  AirbnbLinkDialog,
+  classNames,
   LPFormItem,
   LPFormLabel,
   LPFormMessage,
   LPInput,
   LPLocationInput,
-  classNames,
 } from "./components";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   data: z
@@ -52,6 +53,7 @@ const formSchema = z.object({
             to: z.date(),
           }),
           numGuests: zodInteger({ min: 1 }),
+          airbnbLink: optional(zodString({ maxLen: 500 })),
           roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES, "any"]),
           minNumBedrooms: optional(zodInteger()),
           minNumBeds: optional(zodInteger()),
@@ -65,12 +67,14 @@ const formSchema = z.object({
     .min(1),
 });
 
-type FormSchema = z.infer<typeof formSchema>;
+export type FormSchema = z.infer<typeof formSchema>;
 
 export default function DesktopSearchBar({
   afterSubmit,
+  mode,
 }: {
   afterSubmit?: () => void;
+  mode: "search" | "request";
 }) {
   const utils = api.useUtils();
 
@@ -253,7 +257,7 @@ export default function DesktopSearchBar({
                   "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
                   hasErrors && "pr-3",
                   isSelected
-                    ? "bg-white text-black"
+                    ? "border border-gray-200 bg-white text-black"
                     : "bg-black/50 text-white hover:bg-neutral-600/60",
                   showX && "pr-2",
                 )}
@@ -303,12 +307,13 @@ export default function DesktopSearchBar({
             </button>
           )}
         </div>
-        <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
+
+        <div className="grid grid-cols-2 rounded-3xl bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-12">
           <LPLocationInput
             control={form.control}
             name={`data.${curTab}.location`}
             formLabel="Location"
-            className="col-span-full lg:col-span-4"
+            className="col-span-full lg:col-span-3"
           />
 
           <LPDateRangePicker
@@ -322,10 +327,14 @@ export default function DesktopSearchBar({
             control={form.control}
             name={`data.${curTab}.numGuests`}
             render={({ field }) => (
-              <LPFormItem className="lg:col-span-2">
+              <LPFormItem className="lg:col-span-3">
                 <LPFormLabel>Number of guests</LPFormLabel>
                 <FormControl>
-                  <LPInput {...field} inputMode="numeric" />
+                  <LPInput
+                    {...field}
+                    inputMode="numeric"
+                    placeholder="Add total guests"
+                  />
                 </FormControl>
                 <LPFormMessage />
               </LPFormItem>
@@ -336,7 +345,7 @@ export default function DesktopSearchBar({
             control={form.control}
             name={`data.${curTab}.maxNightlyPriceUSD`}
             render={({ field }) => (
-              <LPFormItem className="lg:col-span-2">
+              <LPFormItem className="lg:col-span-3">
                 <LPFormLabel>Name your price</LPFormLabel>
                 <FormControl>
                   <LPInput
@@ -344,6 +353,7 @@ export default function DesktopSearchBar({
                     inputMode="decimal"
                     prefix="$"
                     suffix="/night"
+                    placeholder="Price/night"
                   />
                 </FormControl>
                 <LPFormMessage />
@@ -356,6 +366,10 @@ export default function DesktopSearchBar({
           </div>
         </div>
 
+        {mode === "request" && (
+          <AirbnbLinkDialog parentForm={form} curTab={curTab} />
+        )}
+
         <div className="flex justify-center">
           <Button
             disabled={form.formState.isSubmitting}
@@ -364,8 +378,8 @@ export default function DesktopSearchBar({
               checkPriceEstimation(data.data),
             )}
             size="lg"
-            variant="white"
-            className="rounded-full"
+            variant="outlineLight"
+            className="mt-5 rounded-full font-semibold"
           >
             Request Deal
           </Button>

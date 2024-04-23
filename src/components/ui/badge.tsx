@@ -15,6 +15,7 @@ const badgeVariants = cva(
         yellow: "bg-yellow-200 text-yellow-800",
         blue: "bg-blue-200 text-blue-800",
         gray: "bg-zinc-200 text-zinc-700",
+        lightGray: "bg-white text-[#4D535F]",
         solidRed: "bg-red-600 text-white",
         skeleton: "bg-accent animate-pulse",
       },
