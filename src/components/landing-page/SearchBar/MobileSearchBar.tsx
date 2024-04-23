@@ -249,7 +249,7 @@ export default function MobileSearchBar() {
   return (
     <Sheet>
       <SheetTrigger>Open</SheetTrigger>
-      <SheetContent side="bottom" className="h-full">
+      <SheetContent side="bottom" className="flex flex-col h-[95%]">
         <SheetHeader>
           <div className="flex w-full items-center justify-center gap-2 pb-5">
             <Button
