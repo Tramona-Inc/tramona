@@ -173,13 +173,15 @@ export const propertiesRouter = createTRPCRouter({
           with: { requestsToProperties: true },
         })
         .then((res) =>
-          res.map((p) => {
-            const { requestsToProperties, ...rest } = p;
-            return {
-              ...rest,
-              numRequests: requestsToProperties.length,
-            };
-          }),
+          res
+            .map((p) => {
+              const { requestsToProperties, ...rest } = p;
+              return {
+                ...rest,
+                numRequests: requestsToProperties.length,
+              };
+            })
+            .sort((a, b) => b.numRequests - a.numRequests),
         );
     },
   ),
