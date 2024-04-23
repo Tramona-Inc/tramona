@@ -13,7 +13,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq, lte, sql } from "drizzle-orm";
 import { withCursorPagination } from "drizzle-pagination";
 import { z } from "zod";
 import { bookedDates, properties } from "./../../db/schema/tables/properties";
@@ -123,11 +123,29 @@ export const propertiesRouter = createTRPCRouter({
       const limit = input.limit ?? 5;
       const { cursor } = input;
 
-      console.log("CURSOR", cursor);
+      const lat = -33.8930404;
+      const long = 151.2765367;
+      const radius = 50; // 10km.
 
-      const data = await ctx.db.query.properties.findMany(
-        withCursorPagination({
-          where: eq(properties.propertyType, "House"),
+      const data = await ctx.db.query.properties.findMany({
+        extras: {
+          distance: sql<number>`
+                      6371 * acos(
+                          cos(radians(${lat}))
+                              * cos(radians(${properties.latitude}))
+                              * cos(radians(${properties.longitude}) - radians(${long}))
+                          + sin(radians(${long}))
+                              * sin(radians(${properties.latitude}))
+                          )
+                      `.as("distance"),
+        },
+        where: and(
+          eq(properties.propertyType, "House"),
+          lte(sql`distance`, radius),
+        ),
+        ...withCursorPagination({
+          // where: eq(properties.propertyType, "House"),
+          // where: lte(sql`distance`, radius),
           limit: limit + 1,
           cursors: [
             // [
@@ -135,25 +153,47 @@ export const propertiesRouter = createTRPCRouter({
             //   "desc",
             //   cursor ? new Date(cursor) : undefined,
             // ],
-            [
-              properties.id,
-              "desc",
-              cursor ? cursor : undefined,
-            ],
+            [properties.id, "desc", cursor ? cursor : undefined],
           ],
         }),
-      );
+      });
 
       return {
         data,
         // nextCursor: data.length
         //   ? data[data.length - 1]?.createdAt.toISOString()
         //   : null,
-        nextCursor: data.length
-          ? data[data.length - 1]?.id
-          : null,
+        nextCursor: data.length ? data[data.length - 1]?.id : null,
       };
     }),
+
+  getCities: publicProcedure.query(async ({ ctx }) => {
+    const lat = -33.8930404;
+    const long = 151.2765367;
+    const radius = 50; // 10km.
+
+    const data = await ctx.db.query.properties.findMany({
+      extras: {
+        distance: sql<number>`
+                      6371 * acos(
+                          cos(radians(${lat}))
+                              * cos(radians(${properties.latitude}))
+                              * cos(radians(${properties.longitude}) - radians(${long}))
+                          + sin(radians(${long}))
+                              * sin(radians(${properties.latitude}))
+                          )
+                      `.as("distance"),
+      },
+      where: and(
+        eq(properties.propertyType, "House"),
+        lte(sql`distance`, radius),
+      ),
+    });
+
+    return {
+      data,
+    };
+  }),
 
   hostInsertProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)

@@ -1,4 +1,5 @@
 import { zodTime } from "@/utils/zod-utils";
+import { sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -18,7 +19,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { sql } from "drizzle-orm";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -183,7 +183,7 @@ export const properties = pgTable("properties", {
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),
 
-  createdAt: timestamp("created_at", {withTimezone: true}).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type Property = typeof properties.$inferSelect;
