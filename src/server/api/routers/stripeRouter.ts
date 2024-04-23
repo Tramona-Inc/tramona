@@ -224,7 +224,6 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
-<<<<<<< HEAD
     createVerificationSession: protectedProcedure
     .query(async({ctx,input})=>{
       const verificationSession = await stripe.identity.verificationSessions.create({
@@ -237,8 +236,7 @@ export const stripeRouter = createTRPCRouter({
       // Return only the client secret to the frontend.
       const clientSecret = verificationSession.client_secret;
       return clientSecret
-    })
-=======
+    }),
 
   getSetUpIntent: protectedProcedure
     .input(
@@ -255,5 +253,4 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   // TODO: create a PaymentIntent for admin/host to accept the bidding based of the user intent
->>>>>>> dev
 });

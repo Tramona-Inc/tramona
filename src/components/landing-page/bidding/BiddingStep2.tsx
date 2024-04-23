@@ -1,26 +1,3 @@
-<<<<<<< HEAD
-import { useBidding } from "@/utils/store/listingBidding";
-import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { FaApplePay } from "react-icons/fa";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectLabel,
-  SelectValue,
-} from "@/components/ui/select";
-import { SelectGroup, SelectTrigger } from "@radix-ui/react-select";
-
-import { Property } from "@/server/db/schema";
-function BiddingStep2({ property }: {property: Property}) {
-  const step = useBidding((state)=>state.step)
-  const setStep = useBidding((state)=>state.setStep)
-  const handlePressNext = () =>{
-    setStep(step + 1)
-=======
 import { type Property } from "@/server/db/schema";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import Image from "next/image";
@@ -130,7 +107,6 @@ function BiddingStep2({ property }: { property: Property }) {
       checkIn: date.from,
       checkOut: date.to,
     });
->>>>>>> dev
   }
 
   return (
@@ -140,15 +116,10 @@ function BiddingStep2({ property }: { property: Property }) {
       </h1>
       <div className="flex flex-col tracking-tight md:flex-row md:space-x-20">
         <div className="flex-col ">
-<<<<<<< HEAD
-          <h2 className="text-lg font-semibold mb-2 md:mb-5 md:text-2xl">Offer Details</h2>
-          <div className="-ml-2 flex  flex-row md:w-full items-center space-x-3 rounded-2xl border-2 border-accent px-3 md:pr-80 py-2 md:space-x-6 md:px-8">
-=======
           <h2 className="mb-2 text-lg font-semibold md:mb-5 md:text-2xl">
             Offer Details
           </h2>
           <div className="-ml-2 flex  flex-row items-center space-x-3 rounded-2xl border-2 border-accent px-3 py-2 md:w-full md:space-x-6 md:px-8 md:pr-80">
->>>>>>> dev
             <div className="h-[90px] w-[90px] md:h-[160px] md:w-[160px] ">
               <AspectRatio ratio={1} className="">
                 <Image
@@ -165,13 +136,9 @@ function BiddingStep2({ property }: { property: Property }) {
                 Airbnb price: ${property.originalNightlyPrice}/night
               </p>
               <p className="mt-3">Check-in/Check-out:</p>
-<<<<<<< HEAD
-              <p className="text-muted-foreground">Check in - check out</p>
-=======
               <p className="text-muted-foreground">
                 {formatDateRange(date.from, date.to)}
               </p>
->>>>>>> dev
               <ul className="my-4 flex flex-row text-nowrap text-xs tracking-tighter text-muted-foreground md:space-x-1 ">
                 <li className="">{property.maxNumGuests} Guests</li>
                 <li>&#8226;</li>
@@ -185,31 +152,6 @@ function BiddingStep2({ property }: { property: Property }) {
           </div>
           {/* Price Breakdown */}
           <div className="text-base font-semibold">
-<<<<<<< HEAD
-            <div className="flex flex-row justify-between mt-8">
-              <p>
-                Offer Price: $Biddingamount x numOfNights nights
-              </p>
-              <p>$Total </p>
-            </div>
-            <div className="flex flex-row justify-between my-4">
-              <p>
-                Taxes
-              </p>
-              <p>$20</p>
-            </div>
-            <hr />
-            <div className="flex flex-row justify-between my-2">
-              <p>
-                Offer Total
-              </p>
-              <p>$Total </p>
-          </div>
-        </div>
-        </div>
-
-        <div className="flex w-full flex-col items-center bg-popover px-4 py-6 md:py-20 gap-y-4 rounded-xl">
-=======
             <div className="mt-8 flex flex-row justify-between">
               <p>
                 Offer Price: ${price} x{" "}
@@ -247,7 +189,6 @@ function BiddingStep2({ property }: { property: Property }) {
           </div>
 
           {/* <div className="flex w-full flex-col items-center gap-y-4 rounded-xl bg-popover px-4 py-6 md:py-20">
->>>>>>> dev
           <Button className="w-full md:px-32 ">
             <FaApplePay size={48} />
           </Button>
@@ -258,30 +199,6 @@ function BiddingStep2({ property }: { property: Property }) {
             </span>
             <div className="mt-2 w-full border-t-2 border-accent" />
           </div>
-<<<<<<< HEAD
-          <div className="grid w-full max-w-sm items-center text-base">
-            <Label htmlFor="email" className="mb-2">Card Information</Label>
-            <Input type="email" id="email" placeholder="Email" />
-            <div className="flex flex-row mb-10">
-              <Input placeholder="MM / YY" />
-              <Input placeholder="123" />
-            </div>
-            <Label className="mb-2">Country or Region</Label>
-            <Select>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="United States">
-                  United States
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel></SelectLabel>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Input placeholder="Zip code" />
-            <Button className="my-6 py-5 text-lg" onClick={()=>handlePressNext()}>Send Offer</Button>
-=======
           <div className="item-center flex w-full flex-col text-base">
             <Label htmlFor="email" className="mb-2">
               Card Information
@@ -316,7 +233,6 @@ function BiddingStep2({ property }: { property: Property }) {
             >
               Send Offer
             </Button>
->>>>>>> dev
             <p className="text-xs text-muted-foreground">
               Offers are binding. If your offer is accepted, your card will be
               charged.
@@ -326,10 +242,7 @@ function BiddingStep2({ property }: { property: Property }) {
               <span className="text-blue-500 underline">Learn more</span>
             </p>
           </div>
-<<<<<<< HEAD
-=======
         </div> */}
->>>>>>> dev
         </div>
       </div>
     </div>

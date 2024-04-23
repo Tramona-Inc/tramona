@@ -1,29 +1,4 @@
 import Spinner from "@/components/_common/Spinner";
-<<<<<<< HEAD
-import { type Property } from "@/server/db/schema";
-import { api } from "@/utils/api";
-import HomeOfferCard from "../HomeOfferCard";
-
-export default function Listings() {
-  const { data: propertiesArray } = api.properties.getAll.useQuery();
-
-  console.log(propertiesArray)
-
-  const propertyCards = propertiesArray?.map((property: Property) => (
-    <HomeOfferCard key={property.id} property={property} />
-  ));
-
-  return (
-    <div>
-      {propertyCards ? (
-        <div className="grid gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-          {propertyCards}
-        </div>
-      ) : (
-        <Spinner />
-      )}
-    </div>
-=======
 import { api } from "@/utils/api";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
 import { useEffect, useMemo, useRef } from "react";
@@ -129,6 +104,5 @@ export default function Listings() {
         </div>
       )}
     </section>
->>>>>>> dev
   );
 }

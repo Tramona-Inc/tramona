@@ -112,11 +112,7 @@ export default async function webhook(
         const savings =
           (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
         const tramonaServiceFee = getTramonaFeeTotal(savings);
-<<<<<<< HEAD
-        await sendEmail({
-=======
         const offerIdString = await sendEmail({
->>>>>>> dev
           to: user!.email,
           subject: `Tramona Booking Confirmation ${property?.name}`,
           content: BookingConfirmationEmail({
