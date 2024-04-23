@@ -67,19 +67,17 @@ export default function Listings() {
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
-          {currentProperties.map((post, i) => (
-            <>
-              {i === currentProperties.length - 1 ? (
-                <div ref={ref} key={post.id} className="cursor-pointer">
-                  <HomeOfferCard key={post.id} property={post} />
-                </div>
-              ) : (
-                <div key={post.id} className="cursor-pointer">
-                  <HomeOfferCard property={post} />
-                </div>
-              )}
-            </>
-          ))}
+          {currentProperties.map((post, i) =>
+            i === currentProperties.length - 1 ? (
+              <div ref={ref} key={post.id} className="cursor-pointer">
+                <HomeOfferCard key={post.id} property={post} />
+              </div>
+            ) : (
+              <div key={post.id} className="cursor-pointer">
+                <HomeOfferCard property={post} />
+              </div>
+            ),
+          )}
 
           {isFetchingNextPage && (
             <div className="flex justify-center overflow-y-hidden">

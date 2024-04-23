@@ -115,7 +115,6 @@ export default function HomeOfferCard({ property }: { property: Property }) {
                     height={300}
                     width={300}
                     alt=""
-                    objectFit="cover"
                     className="aspect-square w-full rounded-xl object-cover"
                   />
                 </Link>
@@ -160,7 +159,7 @@ export default function HomeOfferCard({ property }: { property: Property }) {
             propertyId={property.id}
           />
           <DialogLarge open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="">
+            <DialogTrigger asChild>
               <Button
                 type={"submit"}
                 className="w-full rounded-xl"
