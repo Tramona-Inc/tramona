@@ -183,7 +183,7 @@ export const properties = pgTable("properties", {
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),
 
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", {withTimezone: true}).notNull().defaultNow(),
 });
 
 export type Property = typeof properties.$inferSelect;

@@ -115,25 +115,42 @@ export const propertiesRouter = createTRPCRouter({
   getAllInfiniteScroll: publicProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(100).nullish(),
-        cursor: z.string().nullish(), // <-- "cursor" needs to exist, but can be any type
+        limit: z.number().min(1).max(50).nullish(),
+        cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 11;
+      const limit = input.limit ?? 5;
       const { cursor } = input;
+
+      console.log("CURSOR", cursor);
 
       const data = await ctx.db.query.properties.findMany(
         withCursorPagination({
+          where: eq(properties.propertyType, "House"),
           limit: limit + 1,
-          cursors: [[properties.name, "desc", cursor ? cursor : undefined]],
+          cursors: [
+            // [
+            //   properties.createdAt,
+            //   "desc",
+            //   cursor ? new Date(cursor) : undefined,
+            // ],
+            [
+              properties.id,
+              "desc",
+              cursor ? cursor : undefined,
+            ],
+          ],
         }),
       );
 
       return {
         data,
+        // nextCursor: data.length
+        //   ? data[data.length - 1]?.createdAt.toISOString()
+        //   : null,
         nextCursor: data.length
-          ? data[data.length - 1]?.createdAt.toISOString()
+          ? data[data.length - 1]?.id
           : null,
       };
     }),
