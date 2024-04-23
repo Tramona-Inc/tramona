@@ -36,7 +36,7 @@ export default async function webhook(
   if (req.method === "POST") {
     const buf = await buffer(req);
     const sig = req.headers["stripe-signature"] as string;
-    console.log("atleast we got a request")
+    console.log("atleast we got a request");
     let event;
 
     try {
@@ -244,66 +244,100 @@ export default async function webhook(
         break;
 
       case "identity.verification_session.verified":
-        const verificationSession  = event.data.object;
-        console.log('This is verified output')
-        console.log(verificationSession.verified_outputs)
+        const verificationSession = event.data.object;
+
         const userId = verificationSession.metadata.user_id;
-        console.log("this is the verification report")
-        console.log(verificationSession.last_verification_report)
-        console.log(typeof verificationSession.last_verification_report)
+        //updating the users to be verified
         if (userId) {
           await db
             .update(users)
             .set({
-              isVerified: true
+              isVerified: true,
             })
-            .where(eq(users.id, userId))
-            if(verificationSession.last_verification_report){
-              await db
+            .where(eq(users.id, userId));
+          if (verificationSession.last_verification_report) {
+            await db
               .update(users)
               .set({
-                verificationReportId: verificationSession.last_verification_report as string
+                verificationReportId:
+                  verificationSession.last_verification_report as string,
               })
-              .where(eq(users.id, userId))
-            }
+              .where(eq(users.id, userId));
+          }
           console.log("is now verified");
-        }
+          //adding the users.DOB to the db
+          if (verificationSession.last_verification_report) {
+            console.log("This is last verification report id");
+            console.log(verificationSession.last_verification_report);
 
+            //verification report has all of the data on the user such DOB/Adress and documents
+            const verificationReport =
+              await stripe.identity.verificationReports.retrieve(
+                verificationSession.last_verification_report.toString(),
+                {
+                  expand: ["document.dob"],
+                },
+              );
+            console.log("This is last verification report object");
+            console.log(verificationReport.document);
+            if (verificationReport.document?.dob) {
+              const dob = verificationReport.document?.dob;
+              //formatting dob object into strin
+              const day = dob.day!.toString().padStart(2, "0");
+              const month = dob.month!.toString().padStart(2, "0");
+              const year = dob.year!.toString();
+
+              const dobString = `${day}/${month}/${year}`;
+              await db
+                .update(users)
+                .set({
+                  dateOfBirth: dobString,
+                })
+                .where(eq(users.id, userId));
+            }
+          }
+        }
         break;
 
-      case 'identity.verification_session.requires_input': {
+      case "identity.verification_session.requires_input": {
         // At least one of the verification checks failed
         const verificationSession = event.data.object;
 
         //.reaspon is reason why on of the checks failed
-        console.log('Verification check failed Reason: ' + verificationSession.last_error!.reason);
-        console.log('Verification check code: ' + verificationSession.last_error!.code);
-  
+        console.log(
+          "Verification check failed Reason: " +
+            verificationSession.last_error!.reason,
+        );
+        console.log(
+          "Verification check code: " + verificationSession.last_error!.code,
+        );
+
         // Handle specific failure reasons
         switch (verificationSession.last_error!.code) {
-        
-          case 'document_unverified_other': {
+          case "document_unverified_other": {
             // The document was invalid
-            console.log('The submitted document was unverified')
+            console.log("The submitted document was unverified");
             break;
           }
-          case 'document_expired': {
+          case "document_expired": {
             // The document was expired
-            console.log('The submitted document was expired')
+            console.log("The submitted document was expired");
             break;
           }
-          case 'document_type_not_supported': {
+          case "document_type_not_supported": {
             // document type not supported
-            console.log('The given document is not supported')
+            console.log("The given document is not supported");
             break;
           }
           default: {
             // ...
-            console.log('There was a submission error, please check all documents are correct.')
+            console.log(
+              "There was a submission error, please check all documents are correct.",
+            );
           }
         }
       }
-      
+
       default:
       // console.log(`Unhandled event type ${event.type}`);
     }

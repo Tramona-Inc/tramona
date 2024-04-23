@@ -13,9 +13,10 @@ export const config = {
   },
 };
 
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
   apiVersion: "2023-10-16",
 });
+
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure

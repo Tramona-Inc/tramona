@@ -12,10 +12,8 @@ export default function ProfileSidebar() {
   const { data: session } = useSession({ required: true });
   const {data: user} = api.users.myVerificationStatus.useQuery()
   const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-  const {data: verificationReportList} = api.stripe.getVerificationReports.useQuery()
-  const {data : verificationReport} = api.stripe.getVerificationReportsById.useQuery({verificationId: "vr_1P8XP0DeiqMLhyMw44angMNH"})
-  console.log(`this is the ${verificationReport}`)
-  console.log(verificationReport?.document)
+
+
   return (
     <div className="hidden w-96 justify-center bg-black pt-32 lg:flex">
       {session?.user && (
