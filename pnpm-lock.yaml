@@ -378,7 +378,7 @@ devDependencies:
     version: 3.55.7
   '@types/leaflet':
     specifier: ^1.9.8
-    version: 1.9.11
+    version: 1.9.12
   '@types/multer':
     specifier: ^1.4.11
     version: 1.4.11
@@ -8798,8 +8798,8 @@ packages:
       '@types/node': 20.12.7
     dev: false
 
-  /@types/leaflet@1.9.11:
-    resolution: {integrity: sha512-Cwqw9h+1LVnsuOutOSNHlIE1DBQ9U/0CCLfAkwtkgggrYRwf7SUlyZM0LQzngpwKyvFQbPLCf6hNMzly56pGZw==}
+  /@types/leaflet@1.9.12:
+    resolution: {integrity: sha512-BK7XS+NyRI291HIo0HCfE18Lp8oA30H1gpi1tf0mF3TgiCEzanQjOqNZ4x126SXzzi2oNSZhZ5axJp1k0iM6jg==}
     dependencies:
       '@types/geojson': 7946.0.14
     dev: true
