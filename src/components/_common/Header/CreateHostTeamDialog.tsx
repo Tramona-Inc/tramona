@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { useEffect, useRef } from "react";
 
 export default function CreateHostTeamDialog({
   open,
@@ -30,6 +32,7 @@ export default function CreateHostTeamDialog({
   open: boolean;
   setOpen: (o: boolean) => void;
 }) {
+  const { data: session } = useSession({ required: true });
   const router = useRouter();
 
   const { mutateAsync: createHostTeam } =
@@ -51,6 +54,21 @@ export default function CreateHostTeamDialog({
       .catch(() => errorToast());
   });
 
+  const suggestedTeamName = session
+    ? `${session.user.name ?? session.user.email.split("@")[0]}'s team`
+    : "";
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      form.setValue("name", suggestedTeamName);
+      setTimeout(() => inputRef.current?.select(), 0);
+    }
+  }, [form, open, suggestedTeamName]);
+
+  if (!session) return null;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
@@ -65,7 +83,12 @@ export default function CreateHostTeamDialog({
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input {...field} autoFocus placeholder="Team name" />
+                    <Input
+                      {...field}
+                      autoFocus
+                      placeholder="Team name"
+                      ref={inputRef}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
