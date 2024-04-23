@@ -11,7 +11,10 @@ const IdentityModal = ({ stripePromise } : {stripePromise: Promise<Stripe | null
     const fetchStripe = async () => {
       setStripe(await stripePromise);
     };
-    fetchStripe();
+    fetchStripe().catch((error) => {
+      // Handle any errors that occur during the fetchStripe function
+      console.error('Error fetching Stripe:', error);
+    });
   }, [stripePromise]);
 
     const {data} = api.stripe.createVerificationSession.useQuery()
