@@ -8,10 +8,17 @@ import {
   messages,
 } from "./tables/messages";
 import { offers } from "./tables/offers";
-import { properties } from "./tables/properties";
+import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
+import { requestsToProperties } from "./tables/requestsToProperties";
+import {
+  hostTeamInvites,
+  hostTeamMembers,
+  hostTeams,
+} from "./tables/hostTeams";
+import { bids } from "./tables/bids";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -25,6 +32,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   groups: many(groupMembers),
   ownedGroups: many(groups),
   requestGroupsCreated: many(requestGroups),
+  hostTeams: many(hostTeamMembers),
+  bids: many(bids),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -53,6 +62,10 @@ export const hostProfilesRelations = relations(hostProfiles, ({ one }) => ({
     fields: [hostProfiles.userId],
     references: [users.id],
   }),
+  curTeam: one(hostTeams, {
+    fields: [hostProfiles.curTeamId],
+    references: [hostTeams.id],
+  }),
 }));
 
 export const propertiesRelations = relations(properties, ({ one, many }) => ({
@@ -60,7 +73,20 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     fields: [properties.hostId],
     references: [users.id],
   }),
+  hostTeam: one(hostTeams, {
+    fields: [properties.hostTeamId],
+    references: [hostTeams.id],
+  }),
   offers: many(offers),
+  requestsToProperties: many(requestsToProperties),
+  bookedDates: many(bookedDates),
+}));
+
+export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
+  property: one(properties, {
+    fields: [bookedDates.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
@@ -73,6 +99,18 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
     references: [requestGroups.id],
   }),
   offers: many(offers),
+  requestsToProperties: many(requestsToProperties),
+}));
+
+export const bidsRelations = relations(bids, ({ one }) => ({
+  madeByGroup: one(groups, {
+    fields: [bids.madeByGroupId],
+    references: [groups.id],
+  }),
+  property: one(properties, {
+    fields: [bids.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const requestGroupsRelations = relations(
@@ -82,6 +120,20 @@ export const requestGroupsRelations = relations(
     createdByUser: one(users, {
       fields: [requestGroups.createdByUserId],
       references: [users.id],
+    }),
+  }),
+);
+
+export const requestsToPropertiesRelations = relations(
+  requestsToProperties,
+  ({ one }) => ({
+    request: one(requests, {
+      fields: [requestsToProperties.requestId],
+      references: [requests.id],
+    }),
+    property: one(properties, {
+      fields: [requestsToProperties.propertyId],
+      references: [properties.id],
     }),
   }),
 );
@@ -165,3 +217,36 @@ export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
     references: [groups.id],
   }),
 }));
+export const hostTeamsRelations = relations(hostTeams, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [hostTeams.ownerId],
+    references: [users.id],
+  }),
+  members: many(hostTeamMembers),
+  invites: many(hostTeamInvites),
+  properties: many(properties),
+}));
+
+export const hostTeamMembersRelations = relations(
+  hostTeamMembers,
+  ({ one }) => ({
+    hostTeam: one(hostTeams, {
+      fields: [hostTeamMembers.hostTeamId],
+      references: [hostTeams.id],
+    }),
+    user: one(users, {
+      fields: [hostTeamMembers.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const hostTeamInviteRelations = relations(
+  hostTeamInvites,
+  ({ one }) => ({
+    hostTeam: one(hostTeams, {
+      fields: [hostTeamInvites.hostTeamId],
+      references: [hostTeams.id],
+    }),
+  }),
+);

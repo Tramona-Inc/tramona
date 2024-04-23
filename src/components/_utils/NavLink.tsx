@@ -5,12 +5,14 @@ import type { ReactNode } from "react";
 export default function NavLink({
   href,
   render,
+  noChildren = false,
 }: {
   href: string;
   render: (props: { selected: boolean }) => ReactNode;
+  noChildren?: boolean;
 }) {
   const { asPath } = useRouter();
-  const isCurrentPage = asPath.endsWith(href);
+  const isCurrentPage = noChildren ? asPath === href : asPath.startsWith(href);
 
   return <Link href={href}>{render({ selected: isCurrentPage })}</Link>;
 }

@@ -4,7 +4,12 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { referralCodes, userUpdateSchema, users } from "@/server/db/schema";
+import {
+  hostProfiles,
+  referralCodes,
+  userUpdateSchema,
+  users,
+} from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
@@ -198,6 +203,12 @@ export const usersRouter = createTRPCRouter({
         })
         .then((res) => !!res);
     }),
+
+  getMyHostProfile: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.hostProfiles.findFirst({
+      where: eq(hostProfiles.userId, ctx.user.id),
+    });
+  }),
 
   checkCredentials: publicProcedure
     .input(

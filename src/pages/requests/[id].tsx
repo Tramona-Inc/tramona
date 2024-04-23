@@ -16,6 +16,10 @@ export default function Page() {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
 
+  if (router.isFallback) {
+    return <h2>Loading</h2>;
+  }
+
   const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery(
     { id: requestId },
     {
@@ -122,7 +126,9 @@ export default function Page() {
                         getNumNights(request.checkIn, request.checkOut)
                       }
                       totalPrice={offer.totalPrice}
-                      originalNightlyPrice={offer.property.originalNightlyPrice}
+                      originalNightlyPrice={
+                        offer.property.originalNightlyPrice ?? 0
+                      }
                       airbnbUrl={offer.property.airbnbUrl ?? ""}
                       checkIn={request.checkIn}
                       checkOut={request.checkOut}

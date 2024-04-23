@@ -11,6 +11,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Head from "next/head";
 
+import { Mulish } from "next/font/google";
+
+export const mulish = Mulish({
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },

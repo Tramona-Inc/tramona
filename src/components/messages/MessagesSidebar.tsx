@@ -11,6 +11,7 @@ import { cn } from "@/utils/utils";
 import { sub } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import MessageEmptySvg from "../_common/EmptyStateSvg/MessageEmptySvg";
 import Spinner from "../_common/Spinner";
 import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
@@ -204,7 +205,7 @@ export default function MessagesSidebar({
         Messages
       </h1>
 
-      <ScrollArea className="">
+      <ScrollArea className="h-full">
         {!isLoading ? (
           conversations && conversations.length > 0 ? (
             conversations.map((conversation) => (
@@ -216,8 +217,12 @@ export default function MessagesSidebar({
               />
             ))
           ) : (
-            <div className="grid h-screen-minus-header place-items-center text-muted-foreground">
-              <p>No conversations yet</p>
+            <div className="flex h-full flex-col items-center justify-center ">
+              <MessageEmptySvg />
+              <h2 className="text-2xl font-bold">No conversations yet</h2>
+              <p className="max-w-[300px] text-center text-muted-foreground">
+                Messages from your conversations will show up here.
+              </p>
             </div>
           )
         ) : (

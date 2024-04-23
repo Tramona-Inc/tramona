@@ -58,7 +58,7 @@ export function getHomePageFromRole(role: User["role"]) {
     case "guest":
       return "/dashboard";
     case "host":
-      return "/messages";
+      return "/host";
     case "admin":
       return "/admin";
   }

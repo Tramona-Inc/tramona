@@ -86,7 +86,7 @@ export default function SpecialDealsCard({ deal }: Props) {
         <div className="mx-2 mb-1 mt-4 flex items-center justify-between">
           <div className="text-center text-secondary-foreground/50">
             <p className="text-2xl line-through lg:text-xl xl:text-2xl">
-              {formatCurrency(deal.property.originalNightlyPrice)}
+              {formatCurrency(deal.property.originalNightlyPrice ?? 0)}
             </p>
             <p className="text-sm">Airbnb price</p>
           </div>

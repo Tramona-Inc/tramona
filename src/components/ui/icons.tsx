@@ -24,6 +24,30 @@ const iconComponents: Icons = {
   trash: Trash,
   success: BadgeCheck,
   chevronLeft: ChevronLeft,
+  search: () => (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M9.66928 19.4597C14.4561 19.4597 18.3366 15.5792 18.3366 10.7923C18.3366 6.0055 14.4561 2.125 9.66928 2.125C4.88245 2.125 1.00195 6.0055 1.00195 10.7923C1.00195 15.5792 4.88245 19.4597 9.66928 19.4597Z"
+        stroke="#2F5BF6"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M23 21.875L17 15.875"
+        stroke="#2F5BF6"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
   apple: () => {
     return (
       <svg

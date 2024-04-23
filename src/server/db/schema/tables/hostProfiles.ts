@@ -1,5 +1,6 @@
 import {
   boolean,
+  integer,
   pgEnum,
   pgTable,
   text,
@@ -7,6 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { hostTeams } from "./hostTeams";
 
 export const ALL_HOST_TYPES = ["airbnb", "direct", "vrbo", "other"] as const;
 
@@ -21,4 +23,9 @@ export const hostProfiles = pgTable("host_profiles", {
   becameHostAt: timestamp("became_host_at").notNull().defaultNow(),
   stripeAccountId: varchar("stripeAccountId"),
   chargesEnabled: boolean("charges_enabled").default(false),
+  curTeamId: integer("cur_team_id")
+    .notNull()
+    .references(() => hostTeams.id),
 });
+
+export type HostProfile = typeof hostProfiles.$inferSelect;

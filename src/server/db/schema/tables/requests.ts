@@ -10,8 +10,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { propertyTypeEnum } from "./properties";
 import { groups } from "./groups";
+import { propertyTypeEnum } from "./properties";
 import { users } from "./users";
 
 export const requests = pgTable("requests", {
@@ -32,6 +32,7 @@ export const requests = pgTable("requests", {
   minNumBedrooms: smallint("min_num_bedrooms").default(1),
   propertyType: propertyTypeEnum("property_type"),
   note: varchar("note", { length: 255 }),
+  airbnbLink: varchar("airbnb_link", { length: 512 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
 });
@@ -43,21 +44,22 @@ export const requestInsertSchema = createInsertSchema(requests);
 
 export const MAX_REQUEST_GROUP_SIZE = 10;
 
-// TO-DO: maybe add relation 
+// TO-DO: maybe add relation
 export const requestUpdatedInfo = pgTable("request_updated_info", {
   id: serial("id").primaryKey(),
-  requestId: integer("request_id")
-      .references(() => requests.id, { onDelete: "cascade" }),
+  requestId: integer("request_id").references(() => requests.id, {
+    onDelete: "cascade",
+  }),
   preferences: varchar("preferences", { length: 255 }),
   updatedPriceNightlyUSD: integer("updated_price_usd_nightly"),
-  propertyLinks: text("property_links"), 
+  propertyLinks: text("property_links"),
 });
 
 export const requestGroups = pgTable("request_groups", {
   id: serial("id").primaryKey(),
   createdByUserId: text("created_by_user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   hasApproved: boolean("has_approved").default(false).notNull(),
   confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
   haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),

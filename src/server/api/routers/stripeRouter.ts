@@ -75,14 +75,128 @@ export const stripeRouter = createTRPCRouter({
       });
     }),
 
+  authorizePayment: protectedProcedure
+    .input(
+      z.object({
+        listingId: z.number(),
+        propertyId: z.number(),
+        requestId: z.number(),
+        name: z.string(),
+        price: z.number(),
+        description: z.string(),
+        cancelUrl: z.string(),
+        images: z.array(z.string().url()),
+        userId: z.string(),
+        phoneNumber: z.string(),
+        totalSavings: z.number(),
+        // hostId: z.string(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      const currentDate = new Date(); // Get the current date and time
+
+      // Object that can be access through webhook and client
+      const metadata = {
+        user_id: ctx.user.id,
+        listing_id: input.listingId,
+        property_id: input.propertyId,
+        request_id: input.requestId,
+        price: input.price,
+        total_savings: input.totalSavings,
+        confirmed_at: currentDate.toISOString(),
+        phone_number: input.phoneNumber,
+        // host_id: input.hostId,
+      };
+
+      return stripe.paymentIntents.create({
+        payment_method_types: ["card"],
+        amount: input.price,
+        currency: "usd",
+        capture_method: "manual",
+        metadata: metadata, // metadata access for checkout session
+      });
+    }),
+
+  // Get the customer info
+  createSetupIntentSession: protectedProcedure
+    .input(
+      z.object({
+        listingId: z.number(),
+        propertyId: z.number(),
+        requestId: z.number(),
+        price: z.number(),
+        cancelUrl: z.string(),
+        name: z.string(),
+        description: z.string(),
+        // images: z.array(z.string().url()),
+        phoneNumber: z.string(),
+        totalSavings: z.number(),
+        // hostId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // let stripeCustomerId = await ctx.db.query.users
+      //   .findFirst({
+      //     columns: {
+      //       stripeCustomerId: true,
+      //     },
+      //     where: eq(users.id, ctx.user.id),
+      //   })
+      //   .then((res) => res?.stripeCustomerId);
+
+      // ! UNCOMMENT FOR TESTING PURPOSES
+      // if (!stripeCustomerId) {
+      //   stripeCustomerId = await stripe.customers
+      //     .create({
+      //       name: ctx.user.name ?? "",
+      //       email: ctx.user.email,
+      //     })
+      //     .then((res) => res.id);
+      // }
+
+      const stripeCustomerId = "cus_PwwCgSdIG3rWNx";
+
+      const currentDate = new Date(); // Get the current date and time
+
+      // Object that can be access through webhook and client
+      const metadata = {
+        user_id: ctx.user.id,
+        listing_id: input.listingId,
+        property_id: input.propertyId,
+        request_id: input.requestId,
+        price: input.price,
+        total_savings: input.totalSavings,
+        confirmed_at: currentDate.toISOString(),
+        phone_number: input.phoneNumber,
+        // host_id: input.hostId,
+      };
+
+      if (stripeCustomerId) {
+        return stripe.checkout.sessions.create({
+          ui_mode: "embedded",
+          mode: "setup",
+          payment_method_types: ["card"],
+          currency: "usd",
+          // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
+          // cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
+          // return_url: `${env.NEXTAUTH_URL}/payment-intent`,
+          redirect_on_completion: "never",
+          metadata: metadata, // metadata access for checkout session
+          customer: stripeCustomerId,
+        });
+      }
+    }),
+
   getStripeSession: protectedProcedure
     .input(
       z.object({
         sessionId: z.string(),
       }),
     )
-    .query(async ({ input }) => {
-      const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+    .mutation(async ({ input }) => {
+      const session = await stripe.checkout.sessions.retrieve(input.sessionId, {
+        expand: ["setup_intent"],
+      });
 
       return {
         metadata: {
@@ -98,7 +212,24 @@ export const stripeRouter = createTRPCRouter({
           confirmed_at: session.metadata?.confirmed_at,
           phoneNumber: session.metadata?.phone_number,
           // host_id: session.metadata?.host_id
+          setupIntent: session.setup_intent,
         },
       };
     }),
+
+  getSetUpIntent: protectedProcedure
+    .input(
+      z.object({
+        setupIntent: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const setupIntent = await stripe.setupIntents.retrieve(input.setupIntent);
+
+      return {
+        setupIntent: setupIntent,
+      };
+    }),
+
+  // TODO: create a PaymentIntent for admin/host to accept the bidding based of the user intent
 });
