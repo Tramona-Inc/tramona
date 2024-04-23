@@ -1,3 +1,4 @@
+import { BookingConfirmationEmail } from "@/components/email-templates/BookingConfirmationEmail";
 import { env } from "@/env";
 import {
   createConversationWithAdmin,
@@ -13,19 +14,13 @@ import {
   requests,
   users,
 } from "@/server/db/schema";
+import { sendEmail } from "@/server/server-utils";
+import { api } from "@/utils/api";
+import { getNumNights, getTramonaFeeTotal } from "@/utils/utils";
+import { formatDate } from "date-fns";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { api } from "@/utils/api";
-import { sendEmail } from "@/server/server-utils";
-import { BookingConfirmationEmail } from "@/components/email-templates/BookingConfirmationEmail";
-import { User } from "lucide-react";
-import { Payer } from "@aws-sdk/client-s3";
-import {
-  getNumNights,
-  getTramonaFeeTotal,
-} from "@/utils/utils";
-import { formatDate } from "date-fns";
 
 // ! Necessary for stripe
 export const config = {
@@ -117,7 +112,11 @@ export default async function webhook(
         const savings =
           (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
         const tramonaServiceFee = getTramonaFeeTotal(savings);
+<<<<<<< HEAD
         await sendEmail({
+=======
+        const offerIdString = await sendEmail({
+>>>>>>> dev
           to: user!.email,
           subject: `Tramona Booking Confirmation ${property?.name}`,
           content: BookingConfirmationEmail({
@@ -204,6 +203,27 @@ export default async function webhook(
 
       case "checkout.session.completed":
         const checkoutSessionCompleted = event.data.object;
+
+        if (checkoutSessionCompleted.metadata?.user_id) {
+          // * Insert Stripe Customer Id after session is completed
+          const stripeCustomerId = await db.query.users
+            .findFirst({
+              columns: {
+                stripeCustomerId: true,
+              },
+              where: eq(users.id, checkoutSessionCompleted.metadata.user_id),
+            })
+            .then((res) => res?.stripeCustomerId);
+
+          if (!stripeCustomerId) {
+            await db
+              .update(users)
+              .set({
+                stripeCustomerId: checkoutSessionCompleted.customer as string,
+              })
+              .where(eq(users.id, checkoutSessionCompleted.metadata.user_id));
+          }
+        }
 
         // * Make sure to check listing_id isnt' null
         if (

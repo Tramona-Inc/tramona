@@ -19,7 +19,7 @@ const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
 const subTriggerClassNames = ({ red }: { red: boolean }) =>
   cn(
-    "group relative flex cursor-pointer select-none items-center gap-3 p-2 text-sm font-medium outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[state=open]:bg-accent",
+    "group relative flex cursor-pointer select-none items-center gap-3 px-2 h-10 text-sm font-medium outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[state=open]:bg-accent",
     red
       ? "text-destructive focus:bg-destructive focus:text-white"
       : "focus:bg-accent focus:text-accent-foreground",
@@ -29,7 +29,7 @@ const itemClassNames = ({ red }: { red: boolean }) =>
   cn(subTriggerClassNames({ red }), "cursor-pointer");
 
 const contentClassNames = cn(
-  "z-50 min-w-40 overflow-hidden rounded-md border bg-popover py-2 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+  "z-50 min-w-52 overflow-hidden rounded-md border bg-popover py-2 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
 );
 
 const DropdownMenuSubTrigger = React.forwardRef<
@@ -102,12 +102,10 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     checked={checked}
     {...props}
   >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-      <DropdownMenuPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
-      </DropdownMenuPrimitive.ItemIndicator>
-    </span>
     {children}
+    <DropdownMenuPrimitive.ItemIndicator className="ml-auto">
+      <Check className="h-4 w-4" />
+    </DropdownMenuPrimitive.ItemIndicator>
   </DropdownMenuPrimitive.CheckboxItem>
 ));
 DropdownMenuCheckboxItem.displayName =

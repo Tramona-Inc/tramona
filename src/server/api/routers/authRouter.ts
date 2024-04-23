@@ -6,6 +6,7 @@ import { db } from "@/server/db";
 import {
   ALL_HOST_TYPES,
   hostProfiles,
+  hostTeams,
   referralCodes,
   users,
   type User,
@@ -239,11 +240,22 @@ export const authRouter = createTRPCRouter({
         }
 
         if (user) {
+          // create new team for just the host
+          const teamId = await ctx.db
+            .insert(hostTeams)
+            .values({
+              ownerId: user.id,
+              name: `${user.name ?? user.username ?? user.email}`,
+            })
+            .returning()
+            .then((res) => res[0]!.id);
+
           // Insert Host info
           await ctx.db.insert(hostProfiles).values({
             userId: user.id,
             type: input.hostType,
             profileUrl: input.profileUrl,
+            curTeamId: teamId,
           });
 
           // Send email verification token

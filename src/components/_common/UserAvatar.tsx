@@ -20,9 +20,9 @@ export default function UserAvatar({
   image,
   size,
 }: {
-  name: string | null | undefined;
-  email: string | null | undefined;
-  image: string | null | undefined;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
 } & AvatarVariants) {
   if (!name && !email) return <AnonymousAvatar size={size} />;
   const fallback = name ? getInitials(name) : email?.[0] ?? "?";

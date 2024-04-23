@@ -32,6 +32,7 @@ export const requests = pgTable("requests", {
   minNumBedrooms: smallint("min_num_bedrooms").default(1),
   propertyType: propertyTypeEnum("property_type"),
   note: varchar("note", { length: 255 }),
+  airbnbLink: varchar("airbnb_link", { length: 512 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
 });
@@ -58,7 +59,7 @@ export const requestGroups = pgTable("request_groups", {
   id: serial("id").primaryKey(),
   createdByUserId: text("created_by_user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   hasApproved: boolean("has_approved").default(false).notNull(),
   confirmationSentAt: timestamp("confirmation_sent_at").notNull().defaultNow(),
   haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),

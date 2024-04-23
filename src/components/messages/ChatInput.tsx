@@ -127,7 +127,7 @@ export default function ChatInput({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="m-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="p-2 pt-0">
         <FormField
           control={form.control}
           name="message"
@@ -136,7 +136,7 @@ export default function ChatInput({
               <FormControl>
                 <Input
                   placeholder="Type a message"
-                  className="rounded-full"
+                  className="rounded-xl"
                   autoFocus
                   {...field}
                 />

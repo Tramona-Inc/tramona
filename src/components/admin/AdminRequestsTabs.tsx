@@ -9,13 +9,18 @@ const navs = [
   },
   {
     title: "Past Requests",
-    description: "View completd requests thate user has booked",
+    description: "View completed requests that user has booked",
     href: "/admin/past-requests",
   },
   {
     title: "Utility",
-    description: "Additional utility functions for admin privelages only",
+    description: "Additional utility functions for admin privileges only",
     href: "/admin/utility",
+  },
+  {
+    title: "Admin Property Upload",
+    description: "Backdoor form to upload properties for hosts",
+    href: "/admin/property-upload",
   },
 ];
 

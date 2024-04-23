@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
 
@@ -22,4 +23,10 @@ export default function SimpleMastHead() {
       </Tabs>
     </div>
   );
+=======
+import SearchBar from "../SearchBar/SearchBar";
+
+export default function SimpleMastHead() {
+  return <SearchBar />;
+>>>>>>> dev
 }

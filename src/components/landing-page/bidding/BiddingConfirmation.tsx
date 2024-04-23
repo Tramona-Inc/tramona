@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import Image from "next/image";
@@ -7,6 +8,20 @@ import { useBidding } from "@/utils/store/listingBidding";
 import Link from "next/link";
 import { Property } from "@/server/db/schema";
 function BiddingConfirmation({ property }: { property: Property }) {
+=======
+import { Button } from "@/components/ui/button";
+import { type Property } from "@/server/db/schema";
+import { useBidding } from "@/utils/store/bidding";
+import { formatCurrency, formatDateRange } from "@/utils/utils";
+import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import { Lightbulb } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+function BiddingConfirmation({ property }: { property: Property }) {
+  const date = useBidding((state) => state.date);
+
+>>>>>>> dev
   const resetSession = useBidding((state) => state.resetSession);
   const step = useBidding((state) => state.step);
   const setStep = useBidding((state) => state.setStep);
@@ -41,10 +56,20 @@ function BiddingConfirmation({ property }: { property: Property }) {
             <div className="flex flex-col text-sm tracking-tight md:text-base md:tracking-tight">
               <h2 className="font-bold ">{property.name}</h2>
               <p className="text-xs md:text-base">
+<<<<<<< HEAD
                 Airbnb price: ${property.originalNightlyPrice}/night
               </p>
               <p className="mt-3">Check-in/Check-out:</p>
               <p className="text-muted-foreground">Check in - check out</p>
+=======
+                Airbnb price:{" "}
+                {formatCurrency(property?.originalNightlyPrice ?? 0)}/night
+              </p>
+              <p className="mt-3">Check-in/Check-out:</p>
+              <p className="text-muted-foreground">
+                {formatDateRange(date.from, date.to)}
+              </p>
+>>>>>>> dev
               <ul className="my-4 flex flex-row text-nowrap text-xs tracking-tighter text-muted-foreground md:space-x-1 ">
                 <li className="">{property.maxNumGuests} Guests</li>
                 <li>&#8226;</li>
@@ -72,6 +97,7 @@ function BiddingConfirmation({ property }: { property: Property }) {
           </div>
         </div>
       </div>
+<<<<<<< HEAD
       <Link href="/requests">
         <Button
           variant="default"
@@ -81,6 +107,16 @@ function BiddingConfirmation({ property }: { property: Property }) {
           See my Offers
         </Button>
       </Link>
+=======
+      <Button
+        asChild
+        variant="default"
+        className="mt-40 md:px-10 md:text-xl"
+        onClick={resetSession}
+      >
+        <Link href={`/requests`}>See my Offers</Link>
+      </Button>
+>>>>>>> dev
     </div>
   );
 }
