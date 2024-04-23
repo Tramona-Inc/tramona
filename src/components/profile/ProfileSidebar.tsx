@@ -10,9 +10,8 @@ import { api } from "@/utils/api";
 
 export default function ProfileSidebar() {
   const { data: session } = useSession({ required: true });
-  const {data: user} = api.users.myVerificationStatus.useQuery()
+  const { data: user } = api.users.myVerificationStatus.useQuery();
   const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-
 
   return (
     <div className="hidden w-96 justify-center bg-black pt-32 lg:flex">
@@ -36,13 +35,12 @@ export default function ProfileSidebar() {
             </div>
           </div>
           <div className="flex flex-col gap-y-2">
-            {user?.isIdentityVerified === 'true' ? (
-              <div className="flex flex-row gap-x-1 mb-2 items-center justify-center">
-                Verified
-                <BadgeCheck className="text-green-600"/>
-              </div>
-            ) : (
+            {user?.isIdentityVerified === "false" ? (
               <IdentityModal stripePromise={stripePromise} />
+            ) : user?.isIdentityVerified === "pending" ? (
+              <div className="flex justify-center mb-4 gap-x-2"> Pending <BadgeCheck className="text-yellow-600"></BadgeCheck> </div>
+            ) : (
+              <div className="flex justify-center mb-4 gap-x-2" > Verified <BadgeCheck className="text-green-600"></BadgeCheck></div>
             )}
             <Button
               onClick={() => signOut()}

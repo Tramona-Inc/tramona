@@ -242,7 +242,22 @@ export default async function webhook(
           // console.error("Metadata or listing_id is null or undefined");
         }
         break;
+      case "identity.verification_session.processing":
+        {
+          const verificationSession = event.data.object;
 
+          const userId = verificationSession.metadata.user_id;
+          //updating the users to be verified
+          if (userId) {
+            await db
+              .update(users)
+              .set({
+                isIdentityVerified: "pending",
+              })
+              .where(eq(users.id, userId));
+          }
+        }
+        break;
       case "identity.verification_session.verified":
         const verificationSession = event.data.object;
 
@@ -303,7 +318,7 @@ export default async function webhook(
         // At least one of the verification checks failed
         const verificationSession = event.data.object;
 
-        //.reaspon is reason why on of the checks failed
+        //.reason is reason why on of the checks failed
         console.log(
           "Verification check failed Reason: " +
             verificationSession.last_error!.reason,
