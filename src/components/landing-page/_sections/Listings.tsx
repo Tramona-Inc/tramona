@@ -91,16 +91,14 @@ export default function Listings() {
             properties?.pages.length &&
             !properties.pages[properties.pages.length - 1]?.nextCursor && (
               <div className="text-center opacity-60">
-                <p className="text-xs md:text-sm">
-                  No more currentProperties to load
-                </p>
+                <p className="text-xs md:text-sm">No more properties to load</p>
               </div>
             )}
         </>
       ) : (
-        // if there are no currentProperties to show, display a message
+        // if there are no properties to show, display a message
         <div className="flex justify-center">
-          <p className="text-sm text-white/60">No currentProperties to show</p>
+          <p className="text-sm text-white/60">No properties to show</p>
         </div>
       )}
     </section>
