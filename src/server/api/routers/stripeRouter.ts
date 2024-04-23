@@ -1,5 +1,7 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -135,26 +137,26 @@ export const stripeRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // let stripeCustomerId = await ctx.db.query.users
-      //   .findFirst({
-      //     columns: {
-      //       stripeCustomerId: true,
-      //     },
-      //     where: eq(users.id, ctx.user.id),
-      //   })
-      //   .then((res) => res?.stripeCustomerId);
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
+        })
+        .then((res) => res?.stripeCustomerId);
 
       // ! UNCOMMENT FOR TESTING PURPOSES
-      // if (!stripeCustomerId) {
-      //   stripeCustomerId = await stripe.customers
-      //     .create({
-      //       name: ctx.user.name ?? "",
-      //       email: ctx.user.email,
-      //     })
-      //     .then((res) => res.id);
-      // }
+      if (!stripeCustomerId) {
+        stripeCustomerId = await stripe.customers
+          .create({
+            name: ctx.user.name ?? "",
+            email: ctx.user.email,
+          })
+          .then((res) => res.id);
+      }
 
-      const stripeCustomerId = "cus_PwwCgSdIG3rWNx";
+      // const stripeCustomerId = "cus_PwwCgSdIG3rWNx";
 
       const currentDate = new Date(); // Get the current date and time
 
