@@ -2,6 +2,7 @@
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
+import ErrorMsg from "@/components/ui/ErrorMsg";
 import {
   Form,
   FormControl,
@@ -13,6 +14,7 @@ import {
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,16 +27,48 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const formSchema = z.object({
-  email: zodEmail(),
-  password: z.string(),
-});
-
 export default function SignIn({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const utils = api.useUtils();
+
+  const formSchema = z
+    .object({
+      email: zodEmail(),
+      password: z.string(),
+    })
+    .superRefine(async (credentials, ctx) => {
+      const result = await utils.users.checkCredentials.fetch(credentials);
+      if (result === "success") return;
+      switch (result) {
+        case "email not found":
+          ctx.addIssue({
+            message: "Account not found for this email",
+            code: "custom",
+            path: ["email"],
+          });
+          break;
+        case "incorrect credentials":
+          ctx.addIssue({
+            message: "Incorrect credentials, please try again",
+            code: "custom",
+            path: ["password"],
+          });
+          break;
+        case "incorrect password":
+          ctx.addIssue({
+            message: "Incorrect password, please try again",
+            code: "custom",
+            path: ["password"],
+          });
+          break;
+      }
+    });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
   });
 
   const { query } = useRouter();
@@ -106,7 +140,7 @@ export default function SignIn({
                     </FormItem>
                   )}
                 />
-                <FormMessage />
+                <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
                 <Button
                   disabled={form.formState.isSubmitting}
                   type="submit"
