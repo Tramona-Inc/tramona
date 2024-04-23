@@ -13,7 +13,7 @@ import { formatCurrency } from "@/utils/utils";
 import { zodNumber } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -22,6 +22,7 @@ import { api } from "@/utils/api";
 import IdentityModal from "@/components/_utils/IdentityModal";
 import { env } from "@/env";
 import { loadStripe } from "@stripe/stripe-js";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   price: zodNumber({ min: 1 }),
@@ -132,9 +133,17 @@ function BiddingStep1({ property }: { property: Property }) {
               />
             </div>
             {users?.isIdentityVerified === "pending" ? (
-              <Button className="mb-1 px-32" disabled>
+               <div className="flex flex-col items-center">
+               <p className=" text-xs text-muted-foreground mb-1">
+                 Verification takes about 3-5 minutes.
+               </p>
+               <div className="flex-row gap-x-1">
+              <Button className=" items-center flex flex-row justify-center" disabled>
                 Verification Pending
+                 <Loader2 className="animate-spin"/>
               </Button>
+               </div>
+              </div>
             ) : users?.isIdentityVerified === "true" ? (
               <Button className="mb-1 px-32" type="submit">
                 Review offer

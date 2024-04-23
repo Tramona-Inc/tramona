@@ -317,6 +317,18 @@ export default async function webhook(
       case "identity.verification_session.requires_input": {
         // At least one of the verification checks failed
         const verificationSession = event.data.object;
+        const userId = verificationSession.metadata.user_id;
+        //reset the user status to false 
+        if (userId) {
+          await db
+            .update(users)
+            .set({
+              isIdentityVerified: "false",
+            })
+            .where(eq(users.id, userId));
+        }
+
+
 
         //.reason is reason why on of the checks failed
         console.log(
