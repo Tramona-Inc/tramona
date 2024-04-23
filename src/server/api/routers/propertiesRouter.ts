@@ -172,27 +172,20 @@ export const propertiesRouter = createTRPCRouter({
     const long = 151.2765367;
     const radius = 50; // 10km.
 
-    const data = await ctx.db.query.properties.findMany({
+    return await ctx.db.query.properties.findMany({
       extras: {
-        distance: sql<number>`
-                      6371 * acos(
-                          cos(radians(${lat}))
-                              * cos(radians(${properties.latitude}))
-                              * cos(radians(${properties.longitude}) - radians(${long}))
-                          + sin(radians(${long}))
-                              * sin(radians(${properties.latitude}))
-                          )
-                      `.as("distance"),
+        distanceName: sql<number>`
+            6371 * acos(
+                cos(radians(${lat}))
+                * cos(radians(${properties.latitude}))
+                * cos(radians(${properties.longitude}) - radians(${long}))
+                + sin(radians(${long}))
+                * sin(radians(${properties.latitude}))
+                )
+            `.as("distance"),
       },
-      where: and(
-        eq(properties.propertyType, "House"),
-        lte(sql`distance`, radius),
-      ),
+      where: lte(sql`distance`, radius),
     });
-
-    return {
-      data,
-    };
   }),
 
   hostInsertProperty: roleRestrictedProcedure(["host"])
