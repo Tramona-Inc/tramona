@@ -176,9 +176,11 @@ export const miscRouter = createTRPCRouter({
 
         await browser.close();
 
-        const nightlyPrice = Number(
-          priceItems[0]?.split(" ")[0]?.replace("$", "").trim(),
+        const totalPrice = Number(
+          priceItems.slice(-1)[0]?.replace("$", "").replace(",", "").trim(),
         );
+        const numDays = Number(priceItems[0]?.split(" ")[2]);
+        const nightlyPrice = totalPrice / numDays;
         const propertyName =
           listingCardTextContent[0]?.substring(0, 255) ?? "Airbnb Property";
         const checkIn = new Date(searchParams.get("check_in")!);
