@@ -148,8 +148,6 @@ export const properties = pgTable("properties", {
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
 
-  hostTeamId: varchar("host_team_id"),
-
   address: varchar("address", { length: 1000 }),
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
