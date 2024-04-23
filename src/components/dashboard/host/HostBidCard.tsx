@@ -14,36 +14,32 @@ import {
   plural,
 } from "@/utils/utils";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
-import AcceptCityRequestDialog from "./AcceptCityRequestDialog";
-import { type Property } from "@/server/db/schema";
+import AcceptBidDialog from "./AcceptBidDialog";
 import { useState } from "react";
 
-export default function HostCityRequestCard({
-  request,
-  property,
+export default function HostBidCard({
+  bid,
 }: {
-  request: RouterOutputs["requests"]["getByPropertyId"][number];
-  property: Pick<Property, "id">;
+  bid: RouterOutputs["biddings"]["getByPropertyId"][number];
 }) {
-  const fmtdPrice = formatCurrency(request.maxTotalPrice);
-  const numNights = getNumNights(request.checkIn, request.checkOut);
-  const fmtdPricePerNight = formatCurrency(request.maxTotalPrice / numNights);
-  const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
+  const fmtdPrice = formatCurrency(bid.amount);
+  const numNights = getNumNights(bid.checkIn, bid.checkOut);
+  const fmtdPricePerNight = formatCurrency(bid.amount / numNights);
+  const fmtdDateRange = formatDateRange(bid.checkIn, bid.checkOut);
 
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
 
   return (
     <>
-      <AcceptCityRequestDialog
-        request={request}
-        property={property}
+      <AcceptBidDialog
+        bid={bid}
         open={acceptDialogOpen}
         setOpen={setAcceptDialogOpen}
       />
       <Card>
         {/* <div className="flex justify-between">
       <Badge variant="yellow">Pending</Badge>
-      <RequestGroupAvatars isAdminDashboard request={request} />
+      <BidGroupAvatars isAdminDashboard bid={bid} />
     </div> */}
         <div className="flex items-end gap-4">
           <div>
@@ -58,7 +54,7 @@ export default function HostCityRequestCard({
           </div>
           <div>
             <div className="font-semibold">
-              {plural(request.numGuests, "guest")}
+              {plural(bid.numGuests, "guest")}
             </div>
             <div className="text-muted-foreground">&nbsp;</div>
           </div>
@@ -72,7 +68,7 @@ export default function HostCityRequestCard({
             <DropdownMenuContent side="bottom" align="end">
               <DropdownMenuItem onClick={() => setAcceptDialogOpen(true)}>
                 <CheckIcon />
-                Make an offer
+                Accept
               </DropdownMenuItem>
               <DropdownMenuItem red>
                 <XIcon />
