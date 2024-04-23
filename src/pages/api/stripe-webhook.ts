@@ -252,7 +252,7 @@ export default async function webhook(
           await db
             .update(users)
             .set({
-              isVerified: true,
+              isIdentityVerified: "true",
             })
             .where(eq(users.id, userId));
           if (verificationSession.last_verification_report) {

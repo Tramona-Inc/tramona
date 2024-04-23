@@ -55,7 +55,6 @@ export const authOptions: NextAuthOptions = {
           referralTier: token.referralTier,
           phoneNumber: token.phoneNumber,
           createdAt: token.createdAt,
-          isVerified: token.isVerified
         },
       };
     },
@@ -79,7 +78,6 @@ export const authOptions: NextAuthOptions = {
         newToken.referralTier = user.referralTier;
         newToken.phoneNumber = user.phoneNumber;
         newToken.createdAt = user.createdAt;
-        newToken.isVerified = user.isVerified
       }
 
       return newToken;

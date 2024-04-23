@@ -39,11 +39,11 @@ export const usersRouter = createTRPCRouter({
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns:{
-        isVerified: true,
+        isIdentityVerified: true,
       },
     })
     return{
-      isVerified: res?.isVerified
+      isIdentityVerified: res?.isIdentityVerified
     }
   }),
 

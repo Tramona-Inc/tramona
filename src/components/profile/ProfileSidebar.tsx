@@ -36,7 +36,7 @@ export default function ProfileSidebar() {
             </div>
           </div>
           <div className="flex flex-col gap-y-2">
-            {user?.isVerified ? (
+            {user?.isIdentityVerified === 'true' ? (
               <div className="flex flex-row gap-x-1 mb-2 items-center justify-center">
                 Verified
                 <BadgeCheck className="text-green-600"/>
