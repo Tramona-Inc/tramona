@@ -11,7 +11,7 @@ export default function Listings() {
     fetchNextPage,
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
-    {},
+    { city: "Westminster, United States", },
     {
       // the cursor from where to start fetching thecurrentProperties
       getNextPageParam: (lastPage) => lastPage.nextCursor,

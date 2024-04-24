@@ -13,7 +13,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { withCursorPagination } from "drizzle-pagination";
 import { z } from "zod";
 import { bookedDates, properties } from "./../../db/schema/tables/properties";
@@ -117,6 +117,7 @@ export const propertiesRouter = createTRPCRouter({
       z.object({
         limit: z.number().min(1).max(50).nullish(),
         cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
+        city: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -130,11 +131,14 @@ export const propertiesRouter = createTRPCRouter({
       const data = await ctx.db.query.properties.findMany({
         ...withCursorPagination({
           // where: eq(properties.propertyType, "House"),
-          where: sql`
+          where: and(
+            sql`
                 6371 * acos(
                     SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
-                ) <= ${radius}
-          `,
+                ) <= ${radius}`,
+            // eq(properties.propertyType, "House"),
+            input.city ? eq(properties.address, input.city) : sql`TRUE`, // Conditionally include eq function
+          ),
           limit: limit + 1,
           cursors: [
             // [
