@@ -3,7 +3,6 @@ import Head from "next/head";
 import Listings from "./_sections/Listings";
 import SimpleMastHead from "./_sections/SimpleMastHead";
 import CitiesFilter from "./CitiesFilter";
-import LongLatFilter from './LongLatFilter';
 
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
@@ -23,8 +22,8 @@ export default function TravelerPage() {
 
       <div className="container flex flex-col space-y-5 bg-white">
         <CitiesFilter />
-        {/* <Listings /> */}
-        <LongLatFilter />
+        <Listings />
+        {/* <LongLatFilter /> */}
       </div>
     </div>
   );
