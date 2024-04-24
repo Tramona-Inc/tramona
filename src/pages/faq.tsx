@@ -80,7 +80,8 @@ export default function FAQ() {
                   <AccordionContent>
                     You will receive notifications via email and text message.
                     Additionally, you can check the status of your offers and
-                    requests in the "Offers/Requests" section of the website.
+                    requests in the &quot;Offers/Requests&quot; section of the
+                    website.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -92,8 +93,8 @@ export default function FAQ() {
                   <AccordionContent>
                     Once your offer is accepted, you will receive confirmation
                     via text and email, and your card will be charged for the
-                    booking. You will now see the trip in your 'My Trips'
-                    section of your account.
+                    booking. You will now see the trip in your &quot;My
+                    Trips&quot; section of your account.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -107,7 +108,8 @@ export default function FAQ() {
                     long as the host has not yet accepted it. Once offers are
                     accepted, the booking becomes binding according to the terms
                     set by the host. If your city request is accepted, you have
-                    24 hours to pay otherwise the host's offer will be canceled.
+                    24 hours to pay otherwise the host&apos;s offer will be
+                    canceled.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -131,8 +133,9 @@ export default function FAQ() {
                   </AccordionTrigger>
                   <AccordionContent>
                     You can contact the host directly through the messaging
-                    system on Tramona. Simply navigate to the listing you're
-                    interested in and click on the "Contact Host" button.
+                    system on Tramona. Simply navigate to the listing
+                    you&apos;re interested in and click on the &quot;Contact
+                    Host&quot; button.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -155,8 +158,8 @@ export default function FAQ() {
                   </AccordionTrigger>
                   <AccordionContent>
                     Negotiation on Tramona occurs when hosts counter a
-                    traveler's offer or city request. You can then choose to
-                    accept their counteroffer, make a new offer, or continue
+                    traveler&apos;s offer or city request. You can then choose
+                    to accept their counteroffer, make a new offer, or continue
                     negotiating until both parties reach an agreement.
                   </AccordionContent>
                 </AccordionItem>
@@ -241,7 +244,7 @@ export default function FAQ() {
                   <AccordionContent>
                     Payments for bookings made through Tramona are processed
                     securely via Stripe. Within your host dashboard, navigate to
-                    'Finances' and set up your payout account.
+                    &quot;Finances&quot; and set up your payout account.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -279,8 +282,8 @@ export default function FAQ() {
                     account. Offers that guests send are binding and if you
                     accept their offer, their card will be charged and the dates
                     booked and confirmed. You have the ability to accept, deny
-                    or counter a guest's offer. You have 24 hours to make a
-                    decision on a guest's offer before it expires.
+                    or counter a guest&apos;s offer. You have 24 hours to make a
+                    decision on a guest&apos;s offer before it expires.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -295,8 +298,8 @@ export default function FAQ() {
                     that city, you will receive notifications of all city
                     requests relevant to your listings. Upon receiving a city
                     request, you have the option to accept, deny, or counter the
-                    request. It's important to note that a city request is not
-                    binding once it has been sent out. However, if you, as a
+                    request. It&apos;s important to note that a city request is
+                    not binding once it has been sent out. However, if you, as a
                     host, choose to accept a city request, the guest will then
                     be required to proceed with payment to finalize the booking.
                   </AccordionContent>
