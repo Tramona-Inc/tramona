@@ -166,28 +166,31 @@ export const propertiesRouter = createTRPCRouter({
         nextCursor: data.length ? data[data.length - 1]?.id : null,
       };
     }),
-
   getCities: publicProcedure.query(async ({ ctx }) => {
-    const lat = -33.8930404;
-    const long = 151.2765367;
-    const radius = 50; // 10km.
+    const lat = 34.1010307;
+    const long = -118.3806008;
+    const radius = 1000; // 100km.
 
-    return await ctx.db.query.properties.findMany({
-      extras: {
-        distanceName: sql<number>`
+    // // Convert latitude and longitude to radians
+    // const lat = (lat * Math.PI) / 180;
+    // const long = (long * Math.PI) / 180;
+
+    const result = await ctx.db.execute(sql`
+        SELECT
+            id,
             6371 * acos(
-                cos(radians(${lat}))
-                * cos(radians(${properties.latitude}))
-                * cos(radians(${properties.longitude}) - radians(${long}))
-                + sin(radians(${long}))
-                * sin(radians(${properties.latitude}))
-                )
-            `.as("distance"),
-      },
-      where: lte(sql`distance`, radius),
-    });
-  }),
+                SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
+            ) AS distance
+        FROM
+            properties
+        WHERE
+            6371 * acos(
+                SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
+            ) <= ${radius}
+    `);
 
+    console.log(result);
+  }),
   hostInsertProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
     .mutation(async ({ ctx }) => {
