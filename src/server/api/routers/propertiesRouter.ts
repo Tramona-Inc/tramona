@@ -175,21 +175,27 @@ export const propertiesRouter = createTRPCRouter({
     // const lat = (lat * Math.PI) / 180;
     // const long = (long * Math.PI) / 180;
 
-    const result = await ctx.db.execute(sql`
-        SELECT
-            id,
-            6371 * acos(
-                SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
-            ) AS distance
-        FROM
-            properties
-        WHERE
+    // const result: Property[] = await ctx.db.execute(sql`
+    //     SELECT
+    //         *,
+    //         6371 * acos(
+    //             SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
+    //         ) AS distance
+    //     FROM
+    //         properties
+    //     WHERE
+    //         6371 * acos(
+    //             SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
+    //         ) <= ${radius}
+    // `);
+
+    return await ctx.db.query.properties.findMany({
+      where: sql`
             6371 * acos(
                 SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
             ) <= ${radius}
-    `);
-
-    console.log(result);
+      `,
+    });
   }),
   hostInsertProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
