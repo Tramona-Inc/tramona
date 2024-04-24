@@ -13,6 +13,9 @@ import { cn } from "@/utils/utils";
 import { Lightbulb, MessageCircle, Wallet } from "lucide-react";
 import router from "next/router";
 import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
+import TransparentPricingIcon from "@/components/_icons/TransparentPricingIcon";
+import WalletIcon from "@/components/_icons/WalletIcon";
+import SupportIcon from "@/components/_icons/SupportIcon";
 
 function StepperContentLayout({
   children,
@@ -30,33 +33,27 @@ function StepperContentLayout({
 
 function Step1(): JSX.Element {
   return (
-    <StepperContentLayout className="container gap-4 text-balance">
-      <div className="my-3 flex flex-col gap-8 text-center">
+    <StepperContentLayout className="container gap-1 text-balance">
+      <div className="my-3 flex flex-col gap-4 text-center">
         <h1 className="text-4xl font-bold lg:text-5xl">Welcome to Tramona!</h1>
-        <p className="text-xl font-bold lg:text-2xl">
+        <p className="text-xl font-semibold lg:text-2xl">
           Where you can find travel deals by bidding on rentals.
         </p>
-        <p className="text-xl font-bold">At Tramona, you can</p>
+        <p className="text-2xl font-bold">At Tramona, you can</p>
       </div>
 
-      <div className="my-8 grid grid-cols-3 gap-4 text-center font-semibold">
-        <div className="flex flex-col items-center space-y-4">
-          <div className=" text-teal-700">
-            <Wallet size={50} />
-          </div>
-          <p>Set your budget and request deals from relevant properties.</p>
-        </div>
-        <div className="flex flex-col items-center space-y-4">
-          <MessageCircle size={50} />
-          <p>
-            Negotiate directly with hosts to find a price that works for you
-            both.
-          </p>
-        </div>
-        <div className="flex flex-col items-center space-y-4">
-          <Wallet size={50} />
-          <p>Avoid hidden fees with transparent pricing.</p>
-        </div>
+      <div className="grid grid-cols-3 place-items-center gap-4">
+        <WalletIcon />
+        <SupportIcon />
+        <TransparentPricingIcon />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 text-center text-lg font-semibold">
+        <p>Set your budget and request deals from relevant properties.</p>
+        <p>
+          Negotiate directly with hosts to find a price that works for you both.
+        </p>
+        <p>Avoid hidden fees with transparent pricing.</p>
       </div>
     </StepperContentLayout>
   );
