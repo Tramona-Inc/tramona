@@ -16,6 +16,11 @@ import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg"
 import TransparentPricingIcon from "@/components/_icons/TransparentPricingIcon";
 import WalletIcon from "@/components/_icons/WalletIcon";
 import SupportIcon from "@/components/_icons/SupportIcon";
+import CircleIcon from "@/components/_icons/CircleIcon";
+import BounceIcon from "@/components/_icons/BounceIcon";
+import NoGpsIcon from "@/components/_icons/NoGpsIcon";
+import BeachIcon from "@/components/_icons/BeachIcon";
+import BeachIconMini from "@/components/_icons/BeachIconMini";
 
 function StepperContentLayout({
   children,
@@ -33,7 +38,7 @@ function StepperContentLayout({
 
 function Step1(): JSX.Element {
   return (
-    <StepperContentLayout className="container gap-1 text-balance">
+    <StepperContentLayout className="container gap-4 text-balance">
       <div className="my-3 flex flex-col gap-4 text-center">
         <h1 className="text-4xl font-bold lg:text-5xl">Welcome to Tramona!</h1>
         <p className="text-xl font-semibold lg:text-2xl">
@@ -60,31 +65,70 @@ function Step1(): JSX.Element {
 }
 
 function Step2(): JSX.Element {
-  const { data } = api.users.myReferralCode.useQuery();
-
   return (
-    <StepperContentLayout className="container gap-4 text-balance">
-      <div className="flex flex-col gap-10 text-center">
+    <StepperContentLayout className="container gap-4">
+      <div className="mb-3 text-center">
         <h1 className="text-4xl font-bold lg:text-5xl">How it works</h1>
-        <p className="text-lg font-medium lg:text-xl">
-          We offer a generous 30% base profit split with people you bring to the
-          platform.
-        </p>
       </div>
 
-      <div className="my-6 flex flex-col items-center gap-4 font-medium text-zinc-500">
-        <p className="text-lg lg:text-xl">Here is your referral code</p>
-        <p className="text-sm font-normal lg:text-base">
-          Share your code and start earning on other peoples travel
-        </p>
-
-        <p className="my-4 rounded-md border-2 px-10 py-4 text-5xl tracking-widest lg:text-7xl">
-          {data?.referralCode ?? "..."}
-        </p>
-
-        <p className="lg:text-lg">
-          This can also be found in your profile page
-        </p>
+      <div className="relative grid grid-cols-7 space-y-10">
+        <div className=" absolute -left-32 bottom-10 rotate-12">
+          <BounceIcon />
+        </div>
+        <div className="col-span-4 flex gap-4">
+          <div className="relative">
+            <CircleIcon />
+            <div className="absolute -left-3 -top-12">
+              <NoGpsIcon />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Make a request</h2>
+            <p>
+              Have a city and budget in mind? We&rsquo;ll do the rest and find
+              the perfect place for you.
+            </p>
+          </div>
+        </div>
+        <div className="col-span-2 col-start-2 col-end-6 flex gap-4">
+          <div>
+            <CircleIcon />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Make an offer</h2>
+            <p>
+              Found a property you love? Let the host know you&rsquo;re
+              interested by submitting an offer.
+            </p>
+          </div>
+        </div>
+        <div className="col-start-3 col-end-7 flex gap-4">
+          <div>
+            <CircleIcon />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Negotiate</h2>
+            <p>
+              Work with the host to tailor the price to suit your budget and
+              needs.
+            </p>
+          </div>
+        </div>
+        <div className="col-start-4 col-end-8 flex gap-4">
+          <div className="relative">
+            <CircleIcon />
+            <div className="absolute -left-8 -top-14">
+              <BeachIconMini />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Get Ready to Travel</h2>
+            <p>
+              Once you&rsquo;ve negotiated with the host and finalized the
+              details, it&rsquo;s time to prepare for your trip!
+            </p>
+          </div>
+        </div>
       </div>
     </StepperContentLayout>
   );
@@ -97,8 +141,8 @@ function Step3(): JSX.Element {
       <p className="text-xl font-semibold lg:text-2xl">
         And get properties out of your budget, for your budget
       </p>
-      <div className="my-5 flex justify-center">
-        <MyTripsEmptySvg />
+      <div className="flex justify-center">
+        <BeachIcon />
       </div>
       <div className="flex">
         <Lightbulb />

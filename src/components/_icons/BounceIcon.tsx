@@ -1,8 +1,8 @@
 export default function BounceIcon() {
   return (
     <svg
-      width="784"
-      height="522"
+      width="564"
+      height="302"
       viewBox="0 0 784 522"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
