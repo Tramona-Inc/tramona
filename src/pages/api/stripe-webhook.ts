@@ -21,6 +21,7 @@ import { formatDate } from "date-fns";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import { version } from "os";
 
 // ! Necessary for stripe
 export const config = {
@@ -282,19 +283,22 @@ export default async function webhook(
           console.log("is now verified");
           //adding the users.DOB to the db
           if (verificationSession.last_verification_report) {
-            console.log("This is last verification report id");
-            console.log(verificationSession.last_verification_report);
 
             //verification report has all of the data on the user such DOB/Adress and documents
+
+           
+            const verificationReportId = JSON.parse(JSON.stringify(verificationSession.last_verification_report)) as string;
+              console.log("This is last verification report id");
+              console.log(verificationReportId)
             const verificationReport =
               await stripe.identity.verificationReports.retrieve(
-                verificationSession.last_verification_report.toString(),
+                verificationReportId,
                 {
                   expand: ["document.dob"],
                 },
               );
-              console.log("This is last verification report object");
-              console.log(verificationReport.document);
+            console.log("This is last verification report object");
+            console.log(verificationReport.document);
             if (verificationReport.document?.dob) {
               const dob = verificationReport.document?.dob;
               //formatting dob object into strin
@@ -318,7 +322,7 @@ export default async function webhook(
         // At least one of the verification checks failed
         const verificationSession = event.data.object;
         const userId = verificationSession.metadata.user_id;
-        //reset the user status to false 
+        //reset the user status to false
         if (userId) {
           await db
             .update(users)
@@ -327,8 +331,6 @@ export default async function webhook(
             })
             .where(eq(users.id, userId));
         }
-
-
 
         //.reason is reason why on of the checks failed
         console.log(
