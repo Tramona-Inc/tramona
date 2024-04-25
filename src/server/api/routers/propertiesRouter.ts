@@ -121,6 +121,9 @@ export const propertiesRouter = createTRPCRouter({
         beds: z.number().optional(),
         rooms: z.number().optional(),
         bathrooms: z.number().optional(),
+        lat: z.number().optional(),
+        long: z.number().optional(),
+        radius: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -135,15 +138,18 @@ export const propertiesRouter = createTRPCRouter({
         ...withCursorPagination({
           // where: eq(properties.propertyType, "House"),
           where: and(
+            input.lat && input.long && input.radius ? 
             sql`
                 6371 * acos(
                     SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
-                ) <= ${radius}`,
+                ) <= ${radius}` : sql`TRUE`,
             // eq(properties.propertyType, "House"),
             input.city ? eq(properties.address, input.city) : sql`TRUE`, // Conditionally include eq function
             input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
             input.rooms ? lte(properties.numBedrooms, input.rooms) : sql`TRUE`, // Conditionally include eq function
-            input.bathrooms ? lte(properties.numBathrooms, input.bathrooms) : sql`TRUE`, // Conditionally include eq function
+            input.bathrooms
+              ? lte(properties.numBathrooms, input.bathrooms)
+              : sql`TRUE`, // Conditionally include eq function
           ),
           limit: limit + 1,
           cursors: [
