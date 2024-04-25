@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 type CitiesFilterState = {
+  open: boolean;
   filter: string;
   placeType: string;
   setFilter: (filter: string) => void;
@@ -14,6 +15,7 @@ type CitiesFilterState = {
   setBathrooms: (bathrooms: number) => void;
   houseRules: string[];
   setHouseRules: (houseRules: string[]) => void;
+  setOpen: (open: boolean) => void;
 };
 
 // export const useBidding = create<BiddingState>((set) => ({
@@ -37,6 +39,7 @@ type CitiesFilterState = {
 export const useCitiesFilter = create<CitiesFilterState>()(
   persist(
     (set) => ({
+      open: false,
       filter: "All",
       placeType: "Flexible",
       beds: 0,
@@ -60,6 +63,9 @@ export const useCitiesFilter = create<CitiesFilterState>()(
       },
       setHouseRules: (houseRules: string[]) => {
         set(() => ({ houseRules }));
+      },
+      setOpen: (open: boolean) => {
+        set(() => ({ open }));
       },
     }),
     {

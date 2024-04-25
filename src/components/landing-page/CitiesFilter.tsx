@@ -66,6 +66,9 @@ export default function CitiesFilter() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
 
+  const open = useCitiesFilter((state) => state.open);
+  const setOpen = useCitiesFilter((state) => state.setOpen);
+
   return (
     <div className="grid grid-cols-8">
       <div className="col-span-6 flex w-full items-center justify-center xl:col-span-7 ">
@@ -95,7 +98,7 @@ export default function CitiesFilter() {
         </Carousel>
       </div>
 
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
             variant={"outlineLight"}

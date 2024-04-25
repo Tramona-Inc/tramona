@@ -128,12 +128,14 @@ export default function PropertyFilter() {
   const setBathrooms = useCitiesFilter((state) => state.setBathrooms);
   const setBedrooms = useCitiesFilter((state) => state.setBedrooms);
   const setHouseRules = useCitiesFilter((state) => state.setHouseRules);
+  const setOpen = useCitiesFilter((state) => state.setOpen);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     setBeds(data.beds ?? 0);
     setBathrooms(data.bathrooms ?? 0);
     setBedrooms(data.bedrooms ?? 0);
     setHouseRules(data.houseRules ?? []);
+    setOpen(false);
 
     toast({
       title: "You submitted the following values:",
@@ -147,11 +149,14 @@ export default function PropertyFilter() {
 
   function reset(e: { preventDefault: () => void }) {
     e.preventDefault();
+    // Reset form values
     setBeds(0);
     setBathrooms(0);
     setBedrooms(0);
     setHouseRules([]);
     form.reset();
+    // Update state and reset form values after state updates are applied
+    setOpen(false);
   }
 
   return (
