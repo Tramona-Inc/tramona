@@ -13,10 +13,12 @@ import {
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Separator } from '../ui/separator';
+import { Separator } from "../ui/separator";
 
 const cities: string[] = [
   "All",
+  "Westminster, United States",
+  "Los Angeles, United States of America",
   "Los Angeles (LA)",
   "San Diego",
   "Orlando/Kissimmee",
@@ -96,7 +98,7 @@ export default function CitiesFilter() {
       </div>
 
       <Dialog>
-        <DialogTrigger>
+        <DialogTrigger asChild>
           <Button
             variant={"outlineLight"}
             className="col-span-2 ml-5 border-[1px] p-3 py-6 font-bold xl:col-span-1"
@@ -130,7 +132,7 @@ export default function CitiesFilter() {
           </div>
 
           <Separator />
-          
+
           <h1>Rooms and spaces</h1>
         </DialogContent>
       </Dialog>
