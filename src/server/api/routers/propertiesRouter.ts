@@ -13,7 +13,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, lte, sql } from "drizzle-orm";
 import { withCursorPagination } from "drizzle-pagination";
 import { z } from "zod";
 import { bookedDates, properties } from "./../../db/schema/tables/properties";
@@ -118,6 +118,9 @@ export const propertiesRouter = createTRPCRouter({
         limit: z.number().min(1).max(50).nullish(),
         cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
         city: z.string().optional(),
+        beds: z.number().optional(),
+        rooms: z.number().optional(),
+        bathrooms: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -138,7 +141,9 @@ export const propertiesRouter = createTRPCRouter({
                 ) <= ${radius}`,
             // eq(properties.propertyType, "House"),
             input.city ? eq(properties.address, input.city) : sql`TRUE`, // Conditionally include eq function
-            input.city ? eq(properties.address, input.city) : sql`TRUE`, // Conditionally include eq function
+            input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
+            input.rooms ? lte(properties.numBedrooms, input.rooms) : sql`TRUE`, // Conditionally include eq function
+            input.bathrooms ? lte(properties.numBathrooms, input.bathrooms) : sql`TRUE`, // Conditionally include eq function
           ),
           limit: limit + 1,
           cursors: [
