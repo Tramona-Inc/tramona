@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 
 const cities: string[] = [
   "All",
@@ -90,13 +91,20 @@ export default function CitiesFilter() {
         </Carousel>
       </div>
 
-      <Button
-        variant={"outlineLight"}
-        className="col-span-2 ml-5 border-[1px] p-3 py-6 font-bold xl:col-span-1"
-      >
-        <LucideListFilter />
-        Filter
-      </Button>
+      <Dialog>
+        <DialogTrigger>
+          <Button
+            variant={"outlineLight"}
+            className="col-span-2 ml-5 border-[1px] p-3 py-6 font-bold xl:col-span-1"
+          >
+            <LucideListFilter />
+            Filter
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+            
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

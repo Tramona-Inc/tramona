@@ -138,6 +138,7 @@ export const propertiesRouter = createTRPCRouter({
                 ) <= ${radius}`,
             // eq(properties.propertyType, "House"),
             input.city ? eq(properties.address, input.city) : sql`TRUE`, // Conditionally include eq function
+            input.city ? eq(properties.address, input.city) : sql`TRUE`, // Conditionally include eq function
           ),
           limit: limit + 1,
           cursors: [
