@@ -22,23 +22,25 @@ import { hostTeamsRouter } from "./routers/hostTeamsRouter";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  users: usersRouter,
-  referralCodes: referralCodesRouter,
-  requests: requestsRouter,
-  properties: propertiesRouter,
-  offers: offersRouter,
-  stripe: stripeRouter,
-  auth: authRouter,
-  myTrips: myTripsRouter,
-  twilio: twilioRouter,
-  messages: messagesRouter,
-  files: filesRouter,
-  misc: miscRouter,
-  groups: groupsRouter,
-  emails: emailRouter,
-  biddings: biddingRouter,
-  hostTeams: hostTeamsRouter,
+  api: createTRPCRouter({
+    users: usersRouter,
+    referralCodes: referralCodesRouter,
+    requests: requestsRouter,
+    properties: propertiesRouter,
+    offers: offersRouter,
+    stripe: stripeRouter,
+    auth: authRouter,
+    myTrips: myTripsRouter,
+    twilio: twilioRouter,
+    messages: messagesRouter,
+    files: filesRouter,
+    misc: miscRouter,
+    groups: groupsRouter,
+    emails: emailRouter,
+    biddings: biddingRouter,
+    hostTeams: hostTeamsRouter,
+  }),
 });
 
 // export type definition of API
-export type AppRouter = typeof appRouter;
+export type AppRouter = (typeof appRouter)["api"];

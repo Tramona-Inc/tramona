@@ -6,7 +6,7 @@ import { createTRPCContext } from "@/server/api/trpc";
 
 // export API handler
 export default createNextApiHandler({
-  router: appRouter,
+  router: appRouter.api,
   createContext: createTRPCContext,
   onError:
     env.NODE_ENV === "development"
