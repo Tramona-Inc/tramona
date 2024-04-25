@@ -6,7 +6,7 @@ import { useStripe } from "@/components/requests/[id]/OfferCard/HowToBookDialog"
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
-import { formatCurrency, formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
+import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
 import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
@@ -115,7 +115,6 @@ function BiddingStep2({ property }: { property: Property }) {
         Step 2 of 2: Confirm Payment{" "}
       </h1>
       <div className="flex flex-col tracking-tight md:flex-row md:space-x-20">
-        <div className="flex-col">
         <div className="flex-col">
           <h2 className="mb-2 text-lg font-semibold md:mb-5 md:text-2xl">
             Offer Details
