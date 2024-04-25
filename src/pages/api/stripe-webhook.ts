@@ -288,13 +288,13 @@ export default async function webhook(
             //verification report has all of the data on the user such DOB/Adress and documents
             const verificationReport =
               await stripe.identity.verificationReports.retrieve(
-                JSON.stringify(verificationSession.last_verification_report),
+                verificationSession.last_verification_report.toString(),
                 {
                   expand: ["document.dob"],
                 },
               );
-            console.log("This is last verification report object");
-            console.log(verificationReport.document);
+              console.log("This is last verification report object");
+              console.log(verificationReport.document);
             if (verificationReport.document?.dob) {
               const dob = verificationReport.document?.dob;
               //formatting dob object into strin

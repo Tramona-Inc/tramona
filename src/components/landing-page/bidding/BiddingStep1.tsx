@@ -135,7 +135,7 @@ function BiddingStep1({ property }: { property: Property }) {
             {users?.isIdentityVerified === "pending" ? (
                <div className="flex flex-col items-center">
                <p className=" text-xs text-muted-foreground mb-1">
-                 Verification takes about 3-5 minutes.
+                 Verification takes about 1-3 minutes.
                </p>
                <div className="flex-row gap-x-1">
               <Button className=" items-center flex flex-row justify-center" disabled>
