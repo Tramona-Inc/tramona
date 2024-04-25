@@ -89,7 +89,7 @@ export const hostNavLinks: SidebarLinkProps[] = [
   },
 ];
 export const guestNavLinks: SidebarLinkProps[] = [
-  { href: "/dashboard", name: "Home", icon: HomeIcon, noChildren: false },
+  { href: "/", name: "Home", icon: HomeIcon, noChildren: false },
   {
     href: "/requests",
     name: "Requests & Offers",

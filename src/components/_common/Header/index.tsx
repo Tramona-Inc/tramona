@@ -1,4 +1,4 @@
-import { MenuIcon } from "lucide-react";
+import { MenuIcon, CircleHelp } from "lucide-react";
 import Link from "next/link";
 import HeaderTopRight from "./HeaderTopRight";
 
@@ -36,7 +36,7 @@ function LargeHeader(props: HeaderProps) {
   const pathname = usePathname();
 
   return (
-    <header className="container sticky top-0 z-50 flex h-header-height items-center bg-white p-4 shadow-md lg:px-16">
+    <header className=" sticky top-0 z-50 flex h-header-height items-center bg-white p-4 shadow-md lg:px-24">
       <div className="flex flex-1 gap-4">
         <TramonaLogo />
       </div>
@@ -57,7 +57,7 @@ function LargeHeader(props: HeaderProps) {
         {props.type === "dashboard" ? (
           <Button asChild variant="darkOutline">
             {session?.user.role === "host" && pathname === "/host" ? (
-              <Link href="/">Switch to Traveller</Link>
+              <Link href="/">Switch to Traveler</Link>
             ) : session?.user.role !== "host" ? (
               <Link href="/for-hosts/sign-up">Become a host</Link>
             ) : (
@@ -71,7 +71,10 @@ function LargeHeader(props: HeaderProps) {
             </Link>
           </Button>
         )}
-        <HeaderTopRight />
+        <Link href="/faq">
+          <CircleHelp size={41} strokeWidth={1.7} className="text-primary"/>
+        </Link>
+        <HeaderTopRight/>
       </div>
     </header>
   );
@@ -120,7 +123,7 @@ function SmallHeader(props: HeaderProps) {
             </Link>
           </Button>
         )}
-
+      
         {/* <HeaderTopRight /> */}
       </div>
     </header>
