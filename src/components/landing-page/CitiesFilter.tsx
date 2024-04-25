@@ -1,5 +1,6 @@
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { cn } from "@/utils/utils";
+import { DialogTitle } from "@radix-ui/react-dialog";
 import { LucideListFilter } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -10,6 +11,9 @@ import {
   CarouselPrevious,
 } from "../ui/carousel";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Label } from "../ui/label";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Separator } from '../ui/separator';
 
 const cities: string[] = [
   "All",
@@ -102,7 +106,32 @@ export default function CitiesFilter() {
           </Button>
         </DialogTrigger>
         <DialogContent>
-            
+          <DialogTitle>Filter</DialogTitle>
+          <div>
+            <h1>Type of place</h1>
+            <RadioGroup defaultValue="option-one">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-one" id="option-one" />
+                <Label htmlFor="option-one">Flexible</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-one" id="option-one" />
+                <Label htmlFor="option-one">Entire place</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-one" id="option-one" />
+                <Label htmlFor="option-one">Private</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-one" id="option-one" />
+                <Label htmlFor="option-one">Other</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <Separator />
+          
+          <h1>Rooms and spaces</h1>
         </DialogContent>
       </Dialog>
     </div>
