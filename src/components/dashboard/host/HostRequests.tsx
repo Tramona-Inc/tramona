@@ -5,12 +5,14 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { plural } from "@/utils/utils";
 import HostCityRequestCard from "./HostCityRequestCard";
+import HostBidCard from "./HostBidCard";
 
 export default function HostRequests() {
   const router = useRouter();
   const propertyId = parseInt(router.query.id as string);
 
   const { data: requests } = api.requests.getByPropertyId.useQuery(propertyId);
+  const { data: bids } = api.biddings.getByPropertyId.useQuery(propertyId);
   const { data: properties } = api.properties.getHostRequestsSidebar.useQuery();
   const property = properties?.find((p) => p.id === propertyId);
 
@@ -50,6 +52,9 @@ export default function HostRequests() {
                 property={property}
               />
             ))
+          : null}
+        {bids && property
+          ? bids.map((bid) => <HostBidCard key={bid.id} bid={bid} />)
           : null}
       </div>
     </div>

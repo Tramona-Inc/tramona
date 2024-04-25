@@ -82,12 +82,12 @@ function BiddingStep1({ property }: { property: Property }) {
       <h2 className="mt-2 text-lg font-semibold">{property.name}</h2>
       <p className="my-3 text-sm">
         Airbnb&apos;s Price:{" "}
-        {formatCurrency(property?.originalNightlyPrice ?? 0)}
+        {property.originalNightlyPrice ? formatCurrency(property?.originalNightlyPrice * 1.13868 ) : "Prices unavailable"}
         /night
       </p>
-      <div className="border-2 border-dashed border-accent px-24 py-2">
+      <div className="border-2 border-dashed border-accent px-7 md:px-24 py-2">
         {/* Change this to reccomended price */}
-        <p>{formatCurrency(property.originalNightlyPrice! * .85 ?? 0)} </p>
+        <p>{property.originalNightlyPrice ? formatCurrency(property?.originalNightlyPrice) : "Estimate unavailable"}</p>
       </div>
       <p className="my-2 text-sm">Recommended Price</p>
       <div className=" flex w-5/6 flex-row text-accent">

@@ -61,25 +61,23 @@ export default function Listings() {
     <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
-        <div className="flex justify-center">
-          <Spinner />{" "}
+        <div className="col-span-full flex justify-center overflow-y-hidden">
+          <Spinner />
         </div>
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
-          {currentProperties.map((post, i) => (
-            <>
-              {i === currentProperties.length - 1 ? (
-                <div ref={ref} key={post.id} className="cursor-pointer">
-                  <HomeOfferCard key={post.id} property={post} />
-                </div>
-              ) : (
-                <div key={post.id} className="cursor-pointer">
-                  <HomeOfferCard property={post} />
-                </div>
-              )}
-            </>
-          ))}
+          {currentProperties.map((post, i) =>
+            i === currentProperties.length - 1 ? (
+              <div ref={ref} key={post.id} className="cursor-pointer">
+                <HomeOfferCard key={post.id} property={post} />
+              </div>
+            ) : (
+              <div key={post.id} className="cursor-pointer">
+                <HomeOfferCard property={post} />
+              </div>
+            ),
+          )}
 
           {isFetchingNextPage && (
             <div className="flex justify-center overflow-y-hidden">
@@ -91,16 +89,14 @@ export default function Listings() {
             properties?.pages.length &&
             !properties.pages[properties.pages.length - 1]?.nextCursor && (
               <div className="text-center opacity-60">
-                <p className="text-xs md:text-sm">
-                  No more current Properties to load
-                </p>
+                <p className="text-xs md:text-sm">No more properties to load</p>
               </div>
             )}
         </>
       ) : (
-        // if there are no currentProperties to show, display a message
+        // if there are no properties to show, display a message
         <div className="flex justify-center">
-          <p className="text-sm text-white/60">No currentProperties to show</p>
+          <p className="text-sm text-white/60">No properties to show</p>
         </div>
       )}
     </section>

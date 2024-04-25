@@ -17,9 +17,9 @@ export const bids = pgTable("bids", {
   checkIn: date("check_in", { mode: "date" }).notNull(),
   checkOut: date("check_out", { mode: "date" }).notNull(),
   numGuests: integer("num_guests").notNull().default(1),
-  amount: integer("amount"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  amount: integer("amount").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),
 });
 

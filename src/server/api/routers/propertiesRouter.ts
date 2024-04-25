@@ -6,6 +6,7 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
+  hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
@@ -139,7 +140,7 @@ export const propertiesRouter = createTRPCRouter({
 
   hostInsertProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx }) => {
       if (ctx.user.role !== "host") {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
@@ -154,20 +155,33 @@ export const propertiesRouter = createTRPCRouter({
     }),
   getHostRequestsSidebar: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
+      const curTeamId = await ctx.db.query.hostProfiles
+        .findFirst({
+          where: eq(hostProfiles.userId, ctx.user.id),
+          columns: { curTeamId: true },
+        })
+        .then((res) => res?.curTeamId);
+
+      if (!curTeamId) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
       return await ctx.db.query.properties
         .findMany({
           columns: { id: true, imageUrls: true, name: true, address: true },
-          where: eq(properties.hostId, ctx.user.id),
+          where: eq(properties.hostTeamId, curTeamId),
           with: { requestsToProperties: true },
         })
         .then((res) =>
-          res.map((p) => {
-            const { requestsToProperties, ...rest } = p;
-            return {
-              ...rest,
-              numRequests: requestsToProperties.length,
-            };
-          }),
+          res
+            .map((p) => {
+              const { requestsToProperties, ...rest } = p;
+              return {
+                ...rest,
+                numRequests: requestsToProperties.length,
+              };
+            })
+            .sort((a, b) => b.numRequests - a.numRequests),
         );
     },
   ),

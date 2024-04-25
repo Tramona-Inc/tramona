@@ -107,7 +107,7 @@ export function formatDateRange(fromDate: Date, toDate?: Date) {
 
 function removeTimezoneFromDate(date: Date) {
   // Convert to ISO string and split by 'T' to get date part
-  return date.toISOString().split("Z")[0];
+  return new Date(date).toISOString().split("Z")[0]; // todo fix hacky
 }
 
 export function formatDateMonthDay(date: Date) {
@@ -123,8 +123,11 @@ export function formatDateMonthDay(date: Date) {
 //   return formatDateRange(fromDate, toDate);
 // }
 
-export function getNumNights(from: Date, to: Date) {
-  return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+// todo fix hacky
+export function getNumNights(from: Date | string, to: Date | string) {
+  return Math.round(
+    (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),
+  );
 }
 
 /**
