@@ -8,11 +8,9 @@ import { useStepper } from "@/components/ui/use-stepper";
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
-import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
-import { Lightbulb, MessageCircle, Wallet } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 import router from "next/router";
-import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
 import TransparentPricingIcon from "@/components/_icons/TransparentPricingIcon";
 import WalletIcon from "@/components/_icons/WalletIcon";
 import SupportIcon from "@/components/_icons/SupportIcon";
@@ -162,10 +160,11 @@ const steps = [
 ] satisfies StepperConfig[];
 
 export default function Welcome() {
-  const { nextStep, activeStep, isLastStep } = useStepper({
-    initialStep: 0,
-    steps,
-  });
+  const { nextStep, activeStep, isLastStep, prevStep, isDisabledStep } =
+    useStepper({
+      initialStep: 0,
+      steps,
+    });
 
   return (
     <MainLayout type="auth">
@@ -191,42 +190,33 @@ export default function Welcome() {
           ))}
         </Stepper>
         <div className="my-5 flex justify-end">
-          {isLastStep ? (
-            <div className="flex gap-3">
-              <Button
-                size="lg"
-                className="border-teal-900 bg-transparent font-semibold text-primary hover:bg-transparent"
-              >
-                Back
-              </Button>
-              <Button
-                size="lg"
-                // asChild
-                className="rounded-lg bg-teal-900 font-semibold hover:bg-teal-950"
-                onClick={() => router.push("/")}
-              >
-                {/* <Link href="/dashboard"> */}
-                Start Traveling
-                {/* </Link> */}
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-3">
+          <div className="flex gap-3">
+            {!isLastStep && (
               <Button
                 size="lg"
                 className="rounded-lg border border-teal-900 bg-white font-semibold text-primary hover:bg-transparent"
+                onClick={() => router.push("/")}
               >
                 Skip
               </Button>
+            )}
+            {!isDisabledStep && (
               <Button
                 size="lg"
-                onClick={nextStep}
-                className="rounded-lg bg-teal-900 font-semibold hover:bg-teal-950"
+                className="border-teal-900 bg-zinc-200 font-semibold text-primary hover:bg-zinc-300"
+                onClick={prevStep}
               >
-                Next
+                Back
               </Button>
-            </div>
-          )}
+            )}
+            <Button
+              size="lg"
+              onClick={isLastStep ? () => router.push("/") : nextStep}
+              className="rounded-lg bg-teal-900 font-semibold hover:bg-teal-950"
+            >
+              {isLastStep ? "Start Traveling" : "Next"}
+            </Button>
+          </div>
         </div>
       </div>
     </MainLayout>
