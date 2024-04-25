@@ -110,7 +110,7 @@ function BiddingStep2({ property }: { property: Property }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl">
+    <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl ">
       <h1 className="text-lg font-semibold tracking-tight md:text-3xl">
         Step 2 of 2: Confirm Payment{" "}
       </h1>
@@ -119,8 +119,8 @@ function BiddingStep2({ property }: { property: Property }) {
           <h2 className="mb-2 text-lg font-semibold md:mb-5 md:text-2xl">
             Offer Details
           </h2>
-          <div className="flex gap-4 rounded-2xl border-2 border-accent p-2">
-            <div className="h-[90px] w-[90px] md:h-[160px] md:w-[160px]">
+          <div className="flex items-center  max-w-full gap-4 rounded-2xl border-2 border-accent p-2">
+            <div className="h-[85px] w-[85px] lg:h-[95px] lg:w-[95px] md:h-[160px] md:w-[160px]">
               <AspectRatio ratio={1} className="">
                 <Image
                   src={property.imageUrls[0]!}
@@ -130,7 +130,7 @@ function BiddingStep2({ property }: { property: Property }) {
                 />
               </AspectRatio>
             </div>
-            <div className="flex flex-col text-sm tracking-tighter md:text-base md:tracking-tight">
+            <div className="flex flex-col text-sm tracking-tight md:text-base">
               <h2 className="font-bold ">{property.name}</h2>
               {property.originalNightlyPrice && (
                 <p className="text-xs md:text-base">
@@ -138,11 +138,11 @@ function BiddingStep2({ property }: { property: Property }) {
                   /night
                 </p>
               )}
-              <p className="mt-3">Check-in/Check-out:</p>
+              <p className="mt-2 md:mt-3">Check-in/Check-out:</p>
               <p className="text-muted-foreground">
                 {formatDateRange(date.from, date.to)}
               </p>
-              <ul className="my-4 flex flex-row text-nowrap tracking-tighter text-muted-foreground md:space-x-1 ">
+              <ul className=" my-2 md:my-4 flex flex-row  gap-x-1 text-nowrap tracking-tighter text-muted-foreground text-xs md:text-base md:space-x-1 ">
                 <li className="">{property.maxNumGuests} Guests</li>
                 <li>&#8226;</li>
                 <li>{property.numBedrooms} Bedrooms</li>
@@ -154,8 +154,8 @@ function BiddingStep2({ property }: { property: Property }) {
             </div>
           </div>
           {/* Price Breakdown */}
-          <div className="text-base font-semibold">
-            <div className="mt-8 flex flex-row justify-between">
+          <div className="text-xs font-semibold md:text-base flex flex-col gap-y-2">
+            <div className="mt-8 flex flex-row justify-between ">
               <p>
                 Offer Price: ${price} &times;{" "}
                 {getNumNights(date.from ?? new Date(), date.to ?? new Date())}{" "}
@@ -175,7 +175,7 @@ function BiddingStep2({ property }: { property: Property }) {
           </div>
         </div>
 
-        <div className="w-[500px]">
+        <div className="w-[300px] md:w-[500px]">
           {options && (
             <EmbeddedCheckoutProvider
               stripe={stripePromise}
