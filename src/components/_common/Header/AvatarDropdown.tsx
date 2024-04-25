@@ -25,7 +25,6 @@ import { usePathname } from "next/navigation";
 function DropdownTop({ session }: { session: Session }) {
   const title = session.user.name ?? session.user.email ?? "Anonymous";
   const subtitle = session.user.name ? session.user.email : null;
- 
 
   return (
     <div className="flex items-center gap-2 pb-1 pl-3">
@@ -51,11 +50,11 @@ function DropdownTop({ session }: { session: Session }) {
   );
 }
 
-export default function AvatarDropdown({ session}: { session: Session}) {
+export default function AvatarDropdown({ session }: { session: Session }) {
   const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
   const pathname = usePathname();
-console.log(` this is the ${pathname}`)
+  console.log(` this is the ${pathname}`);
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
   return (
@@ -83,7 +82,7 @@ console.log(` this is the ${pathname}`)
               <DropdownMenuSeparator />
             </>
           )}
-          { session?.user.role === "host" && pathname === "/host" ? (
+          {session?.user.role === "host" && pathname === "/host" && (
             <>
               <HostTeamsDropdownItems
                 hostProfile={hostProfile}
@@ -98,24 +97,10 @@ console.log(` this is the ${pathname}`)
               </DropdownMenuItem>
               <DropdownMenuSeparator />
             </>
-          ): 
-          <>
-              <DropdownMenuItem asChild>
-                <Link href="/">
-                  <LayoutDashboardIcon />
-                  Dashboard
-                </Link>
-              </DropdownMenuItem>
-            </>
-          }
+          )}
           {session.user.role === "guest" && (
             <>
-              <DropdownMenuItem asChild>
-                <Link href="/">
-                  <LayoutDashboardIcon />
-                  Dashboard
-                </Link>
-              </DropdownMenuItem>
+              <DropdownMenuItem asChild></DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/for-hosts/sign-up">

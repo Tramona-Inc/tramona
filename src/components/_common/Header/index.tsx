@@ -55,7 +55,7 @@ function LargeHeader(props: HeaderProps) {
 
       <div className="flex flex-1 justify-end gap-5">
         {props.type === "dashboard" ? (
-          <Button asChild variant="darkOutline">
+          <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (
               <Link href="/">Switch to Traveler</Link>
             ) : session?.user.role !== "host" ? (

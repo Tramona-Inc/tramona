@@ -114,7 +114,7 @@ function BiddingStep2({ property }: { property: Property }) {
       <h1 className="text-lg font-semibold tracking-tight md:text-3xl">
         Step 2 of 2: Confirm Payment{" "}
       </h1>
-      <div className="flex flex-col tracking-tight md:flex-row md:space-x-20">
+      <div className="flex flex-col tracking-tight md:flex-row md:space-x-20 items-center md:items-start">
         <div className="flex-col">
           <h2 className="mb-2 text-lg font-semibold md:mb-5 md:text-2xl">
             Offer Details
@@ -175,7 +175,7 @@ function BiddingStep2({ property }: { property: Property }) {
           </div>
         </div>
 
-        <div className="w-[300px] md:w-[500px]">
+        <div className="w-[300px] md:w-[500px] mt-4">
           {options && (
             <EmbeddedCheckoutProvider
               stripe={stripePromise}
