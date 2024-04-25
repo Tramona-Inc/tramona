@@ -108,14 +108,19 @@ const FormSchema = z.object({
 });
 
 export default function PropertyFilter() {
+  const beds = useCitiesFilter((state) => state.beds);
+  const bedrooms = useCitiesFilter((state) => state.bedrooms);
+  const bathrooms = useCitiesFilter((state) => state.bathrooms);
+  const houseRules = useCitiesFilter((state) => state.houseRules);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       propertyType: "flexible",
-      beds: 0,
-      bedrooms: 0,
-      bathrooms: 0,
-      houseRules: [],
+      beds: beds,
+      bedrooms: bedrooms,
+      bathrooms: bathrooms,
+      houseRules: houseRules,
     },
   });
 
@@ -138,6 +143,15 @@ export default function PropertyFilter() {
         </pre>
       ),
     });
+  }
+
+  function reset(e: { preventDefault: () => void }) {
+    e.preventDefault();
+    setBeds(0);
+    setBathrooms(0);
+    setBedrooms(0);
+    setHouseRules([]);
+    form.reset();
   }
 
   return (
@@ -286,7 +300,7 @@ export default function PropertyFilter() {
           )}
         />
         <div className="flex flex-row justify-between">
-          <Button variant={"ghost"} onClick={(e) => { e.preventDefault(); form.reset()}}>
+          <Button variant={"ghost"} onClick={reset}>
             Clear
           </Button>
           <Button type="submit">Submit</Button>

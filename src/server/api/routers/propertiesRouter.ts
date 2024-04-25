@@ -119,7 +119,7 @@ export const propertiesRouter = createTRPCRouter({
         cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
         city: z.string().optional(),
         beds: z.number().optional(),
-        rooms: z.number().optional(),
+        bedrooms: z.number().optional(),
         bathrooms: z.number().optional(),
         lat: z.number().optional(),
         long: z.number().optional(),
@@ -145,9 +145,13 @@ export const propertiesRouter = createTRPCRouter({
                 ) <= ${radius}`
               : sql`TRUE`,
             // eq(properties.propertyType, "House"),
-            input.city && input.city !== 'All' ? eq(properties.address, input.city) : sql`TRUE`, // Conditionally include eq function for address
+            input.city && input.city !== "All"
+              ? eq(properties.address, input.city)
+              : sql`TRUE`, // Conditionally include eq function for address
             input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
-            input.rooms ? lte(properties.numBedrooms, input.rooms) : sql`TRUE`, // Conditionally include eq function
+            input.bedrooms
+              ? lte(properties.numBedrooms, input.bedrooms)
+              : sql`TRUE`, // Conditionally include eq function
             input.bathrooms
               ? lte(properties.numBathrooms, input.bathrooms)
               : sql`TRUE`, // Conditionally include eq function
