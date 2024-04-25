@@ -99,7 +99,7 @@ export default function MobileNav({
                 </h3>
                 <div className="flex flex-col space-y-6">
                   {guestMenuNavLinks.map((link, index) => (
-                    <div className="flex flex-row gap-x-4">
+                    <div className="flex flex-row gap-x-4" key={index}>
                       {link.icon}
                     <Link href={link.href} key={index} className="font-light">
                       {link.name}

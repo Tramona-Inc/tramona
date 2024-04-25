@@ -11,10 +11,10 @@ function LogInBtn() {
   );
 }
 
-export default function HeaderTopRight({pathname} : {pathname:string}) {
+export default function HeaderTopRight() {
   const { data: session, status } = useSession();
 
   return (
-    <>{status === "authenticated" && <AvatarDropdown session={session} pathname={pathname} />}</>
+    <>{status === "authenticated" && <AvatarDropdown session={session}/>}</>
   );
 }

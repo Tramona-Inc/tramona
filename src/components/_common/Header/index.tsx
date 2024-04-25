@@ -74,7 +74,7 @@ function LargeHeader(props: HeaderProps) {
         <Link href="/faq">
           <CircleHelp size={41} strokeWidth={1.7} className="text-primary"/>
         </Link>
-        <HeaderTopRight pathname={pathname}/>
+        <HeaderTopRight/>
       </div>
     </header>
   );
