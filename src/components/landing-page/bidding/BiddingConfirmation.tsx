@@ -1,3 +1,5 @@
+
+
 import { Button } from "@/components/ui/button";
 import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
@@ -9,6 +11,7 @@ import Link from "next/link";
 import { DialogClose } from "@/components/ui/dialog";
 function BiddingConfirmation({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
+
 
   const resetSession = useBidding((state) => state.resetSession);
   const step = useBidding((state) => state.step);
@@ -79,6 +82,7 @@ function BiddingConfirmation({ property }: { property: Property }) {
           </div>
         </div>
       </div>
+
       <Button
         asChild
         variant="default"

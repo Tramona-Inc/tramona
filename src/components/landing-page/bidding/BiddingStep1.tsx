@@ -13,11 +13,16 @@ import { formatCurrency } from "@/utils/utils";
 import { zodNumber } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { api } from "@/utils/api";
+import IdentityModal from "@/components/_utils/IdentityModal";
+import { env } from "@/env";
+import { loadStripe } from "@stripe/stripe-js";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   price: zodNumber({ min: 1 }),
@@ -35,6 +40,9 @@ function BiddingStep1({ property }: { property: Property }) {
 
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
+  //determine if user identity is verified
+  const { data: users } = api.users.myVerificationStatus.useQuery();
+  const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -47,7 +55,9 @@ function BiddingStep1({ property }: { property: Property }) {
   function onSubmit(values: FormSchema) {
     setPrice(values.price);
     setGuest(values.guest);
-    setStep(step + 1);
+    if (users?.isIdentityVerified === "true") {
+      setStep(step + 1);
+    }
   }
 
   return (
@@ -122,11 +132,33 @@ function BiddingStep1({ property }: { property: Property }) {
                 )}
               />
             </div>
-            <Button className="mb-1 px-32" type="submit">
-              Review offer
-            </Button>
+            {users?.isIdentityVerified === "pending" ? (
+               <div className="flex flex-col items-center">
+               <p className=" text-xs text-muted-foreground mb-1">
+                 Verification takes about 1-3 minutes.
+               </p>
+               <div className="flex-row gap-x-1">
+              <Button className=" items-center flex flex-row justify-center" disabled>
+                Verification Pending
+                 <Loader2 className="animate-spin"/>
+              </Button>
+               </div>
+              </div>
+            ) : users?.isIdentityVerified === "true" ? (
+              <Button className="mb-1 px-32" type="submit">
+                Review offer
+              </Button>
+            ) : (
+              <div className="flex flex-col items-center">
+                <p className=" text-xs text-muted-foreground mb-1">
+                  You must be verified before submitting an offer.
+                </p>
+                <IdentityModal stripePromise={stripePromise} />
+              </div>
+            )}
           </form>
         </Form>
+
         <p className=" mb-5 text-xs text-muted-foreground md:text-sm">
           Payment information will be taken in the next step
         </p>
