@@ -66,7 +66,7 @@ function IntroSection() {
               vacancies and increase your month-over-month profit.
             </p>
             <Link
-              href="for-hosts/sign-up"
+              href="host/onboarding"
               className={buttonVariants({ variant: "darkPrimary", size: "lg" })}
             >
               Sign Up Now

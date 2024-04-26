@@ -59,7 +59,7 @@ function LargeHeader(props: HeaderProps) {
             {session?.user.role === "host" && pathname === "/host" ? (
               <Link href="/">Switch to Traveler</Link>
             ) : session?.user.role !== "host" ? (
-              <Link href="/for-hosts/sign-up">Become a host</Link>
+              <Link href="/host/onboarding">Become a host</Link>
             ) : (
               <Link href="/host">Switch to Host</Link>
             )}
@@ -72,9 +72,9 @@ function LargeHeader(props: HeaderProps) {
           </Button>
         )}
         <Link href="/faq">
-          <CircleHelp size={41} strokeWidth={1.7} className="text-primary"/>
+          <CircleHelp size={41} strokeWidth={1.7} className="text-primary" />
         </Link>
-        <HeaderTopRight/>
+        <HeaderTopRight />
       </div>
     </header>
   );
@@ -123,7 +123,7 @@ function SmallHeader(props: HeaderProps) {
             </Link>
           </Button>
         )}
-      
+
         {/* <HeaderTopRight /> */}
       </div>
     </header>

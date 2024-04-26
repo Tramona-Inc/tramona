@@ -103,7 +103,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuItem asChild></DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/for-hosts/sign-up">
+                <Link href="/host/onboarding">
                   <UserCheck2Icon />
                   Become a Host
                 </Link>
