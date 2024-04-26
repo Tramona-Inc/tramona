@@ -3,9 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
-import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
-import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
 import { liveFeedOffers } from "@/components/offer-card/data";
 import { buttonVariants } from "@/components/ui/button";
 import {
