@@ -3,6 +3,7 @@ import {
   boolean,
   date,
   doublePrecision,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -217,5 +218,6 @@ export const bookedDates = pgTable(
     compoundKey: primaryKey({
       columns: [t.date, t.propertyId],
     }),
+    propertyidIdx: index().on(t.propertyId),
   }),
 );
