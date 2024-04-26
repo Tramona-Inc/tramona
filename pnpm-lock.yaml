@@ -186,7 +186,7 @@ dependencies:
     specifier: ^0.2.1
     version: 0.2.1(@types/react@18.2.74)(react-dom@18.2.0)(react@18.2.0)
   date-fns:
-    specifier: ^3.6.0
+    specifier: ^3.3.1
     version: 3.6.0
   dayjs:
     specifier: ^1.11.10
@@ -240,7 +240,7 @@ dependencies:
     specifier: ^1.0.2
     version: 1.0.2
   next:
-    specifier: ^14.1.4
+    specifier: ^14.0.4
     version: 14.1.4(@babel/core@7.23.7)(react-dom@18.2.0)(react@18.2.0)
   next-auth:
     specifier: ^4.24.5
@@ -18993,11 +18993,6 @@ packages:
         optional: true
     dependencies:
       '@types/react': 18.2.74
-      react: 18.2.0
-      use-sync-external-store: 1.2.0(react@18.2.0)
-    dev: false
-    dependencies:
-      '@types/react': 18.2.79
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
