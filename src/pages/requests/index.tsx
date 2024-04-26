@@ -2,14 +2,13 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/utils/api";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { Plus } from "lucide-react";
+import { HistoryIcon, HomeIcon, MapPinIcon, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
-import PropertyOfferTab from '@/components/requests/PropertyOfferTab';
+import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
 
 export function NewRequestButton() {
   return (
@@ -22,9 +21,8 @@ export function NewRequestButton() {
   );
 }
 
+// TODO: change to tab links, each with individual fetch
 function RequestsTabs() {
-  const { data: requests } = api.requests.getMyRequests.useQuery();
-
   return (
     <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
@@ -33,6 +31,7 @@ function RequestsTabs() {
           // count={requests?.activeRequestGroups.length ?? "blank"}
         >
           {/* <TagIcon /> Current Requests */}
+          <MapPinIcon />
           City Requests
         </TabsTrigger>
         <TabsTrigger
@@ -40,12 +39,14 @@ function RequestsTabs() {
           // count={requests?.inactiveRequestGroups.length ?? "blank"}
         >
           {/* <HistoryIcon /> Past Requests */}
+          <HomeIcon />
           Property Offers
         </TabsTrigger>
         <TabsTrigger
           value="history"
           // count={requests?.inactiveRequestGroups.length ?? "blank"}
         >
+          <HistoryIcon />
           History
         </TabsTrigger>
       </TabsList>

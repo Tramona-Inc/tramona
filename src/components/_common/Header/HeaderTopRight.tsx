@@ -15,6 +15,6 @@ export default function HeaderTopRight() {
   const { data: session, status } = useSession();
 
   return (
-    <>{status === "authenticated" && <AvatarDropdown session={session} />}</>
+    <>{status === "authenticated" && <AvatarDropdown session={session}/>}</>
   );
 }
