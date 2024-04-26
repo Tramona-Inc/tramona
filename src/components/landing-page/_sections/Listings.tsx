@@ -16,7 +16,7 @@ export default function Listings() {
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {
-      city: filter,
+      city: filter.id,
       beds: beds,
       bathrooms: bathrooms,
       bedrooms: bedrooms,

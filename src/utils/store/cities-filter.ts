@@ -1,11 +1,19 @@
+import { cities } from "@/components/landing-page/CitiesFilter";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+export type CitiesLatLong = {
+  id: string;
+  label: string;
+  long: number;
+  lat: number;
+};
+
 type CitiesFilterState = {
   open: boolean;
-  filter: string;
+  filter: CitiesLatLong;
   placeType: string;
-  setFilter: (filter: string) => void;
+  setFilter: (filter: CitiesLatLong) => void;
   setPlaceType: (placeType: string) => void;
   beds: number;
   bedrooms: number;
@@ -40,13 +48,13 @@ export const useCitiesFilter = create<CitiesFilterState>()(
   persist(
     (set) => ({
       open: false,
-      filter: "All",
+      filter: cities[0] ?? { id: "", label: "", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
       placeType: "Flexible",
       beds: 0,
       bedrooms: 0,
       bathrooms: 0,
       houseRules: [],
-      setFilter: (filter: string) => {
+      setFilter: (filter: CitiesLatLong) => {
         set(() => ({ filter }));
       },
       setPlaceType: (placeType: string) => {

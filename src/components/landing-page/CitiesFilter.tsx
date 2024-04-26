@@ -1,4 +1,4 @@
-import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { CitiesLatLong, useCitiesFilter } from "@/utils/store/cities-filter";
 import { cn } from "@/utils/utils";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { LucideListFilter } from "lucide-react";
@@ -13,53 +13,41 @@ import {
 } from "../ui/carousel";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 
-const cities: string[] = [
-  "All",
-  "Westminster, United States",
-  "Los Angeles, United States of America",
-  "Los Angeles (LA)",
-  "San Diego",
-  "Orlando/Kissimmee",
-  "Las Vegas",
-  "Washington DC",
-  "Seattle",
-  "Boston",
-  "Atlanta",
-  "Nashville",
-  "Austin",
-  "Denver",
-  "Portland",
-  "Charleston",
-  "Sedona",
-  "Scottsdale",
-  "Lake Tahoe",
-  "Hawaii - Maui",
-  "Hawaii - Kauai",
-  "Aspen",
-  "Outer Banks (OBX)",
-  "Palm Springs Area",
-  "Dallas Area",
-  "Palm Coast",
-  "Charlotte",
-  "Zion",
-  "Houston",
-  "Kansas City",
-  "Punta Cana",
-  "Philadelphia",
-  "St. Augustine",
-  "Eureka Springs",
-  "Boca Raton",
-  "Fort Lauderdale",
-  "Kitty Hawk",
-  "Fairfax, VA",
-  "Birmingham",
-  "Bozeman",
-  "Idaho",
-  "Joshua Tree",
-  "Oakland",
-  "South San Francisco",
-  "Arizona (assuming Phoenix or Tucson)",
-  "Multi City",
+export const cities: CitiesLatLong[] = [
+  { id: "all", label: "All", long: 0, lat: 0 },
+  {
+    id: "san_diego",
+    label: "San Diego",
+    long: -117.1611,
+    lat: 32.7157,
+  },
+  {
+    id: "nashville",
+    label: "Nashville",
+    long: -86.7816,
+    lat: 36.1627,
+  },
+  { id: "orlando", label: "Orlando", long: -81.3792, lat: 28.5383 },
+  {
+    id: "washington_dc",
+    label: "Washington DC",
+    long: -77.0369,
+    lat: 38.9072,
+  },
+  { id: "seattle", label: "Seattle", long: -122.3321, lat: 47.6062 },
+  { id: "atlanta", label: "Atlanta", long: -84.388, lat: 33.749 },
+  { id: "austin", label: "Austin", long: -97.7431, lat: 30.2672 },
+  { id: "miami", label: "Miami", long: -80.1917902, lat: 25.7616798 },
+  { id: "la", label: "LA", long: -118.2437, lat: 34.0522 },
+  {
+    id: "palm_springs_area",
+    label: "Palm Springs Area",
+    long: -116.5453,
+    lat: 33.8303,
+  },
+  { id: "vegas", label: "Vegas", long: -115.1398, lat: 36.1699 },
+  { id: "sf", label: "SF", long: -122.4194, lat: 37.7749 },
+  { id: "boston", label: "Boston", long: -71.0589, lat: 42.3601 },
 ];
 
 export default function CitiesFilter() {
@@ -88,7 +76,7 @@ export default function CitiesFilter() {
                   }}
                   className={cn(city === filter && "font-bold", "p-1")}
                 >
-                  {city}
+                  {city.label}
                 </Button>
               </CarouselItem>
             ))}
