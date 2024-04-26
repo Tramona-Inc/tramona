@@ -178,7 +178,7 @@ export default function Welcome() {
               size="lg"
               // asChild
               className="rounded-full pr-4"
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/")}
             >
               {/* <Link href="/dashboard"> */}
               Continue to dashboard <ChevronRight className="opacity-80" />

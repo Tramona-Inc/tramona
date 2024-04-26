@@ -1,3 +1,4 @@
+
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { cn } from "@/utils/utils";
 import { LucideListFilter } from "lucide-react";
@@ -12,6 +13,7 @@ import {
 
 const cities: string[] = [
   "All",
+
   "Los Angeles (LA)",
   "San Diego",
   "Orlando/Kissimmee",
@@ -58,6 +60,7 @@ const cities: string[] = [
 ];
 
 export default function CitiesFilter() {
+
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
 

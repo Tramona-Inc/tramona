@@ -56,7 +56,7 @@ export function formatPhoneNumber(phoneNumber: string) {
 export function getHomePageFromRole(role: User["role"]) {
   switch (role) {
     case "guest":
-      return "/dashboard";
+      return "/";
     case "host":
       return "/host";
     case "admin":
