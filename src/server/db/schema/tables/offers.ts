@@ -28,8 +28,10 @@ export const offers = pgTable(
     checkoutSessionId: varchar("checkout_session_id"),
   },
   (t) => ({
-    madePublicAtIndex: index("made_public_at_index").on(t.madePublicAt),
-    acceptedAtIndex: index("accepted_at_index").on(t.acceptedAt),
+    madePublicAtIndex: index().on(t.madePublicAt),
+    acceptedAtIndex: index().on(t.acceptedAt),
+    requestidIdx: index().on(t.requestId),
+    propertyidIdx: index().on(t.propertyId),
   }),
 );
 
