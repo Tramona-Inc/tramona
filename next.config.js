@@ -98,6 +98,7 @@ const config = {
   experimental: {
     scrollRestoration: true,
     bundlePagesExternals: true,
+    esmExternals: "loose",
   },
 };
 
