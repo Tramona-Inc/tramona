@@ -48,7 +48,7 @@ export const useCitiesFilter = create<CitiesFilterState>()(
   persist(
     (set) => ({
       open: false,
-      filter: cities[0] ?? { id: "", label: "", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
+      filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
       placeType: "Flexible",
       beds: 0,
       bedrooms: 0,

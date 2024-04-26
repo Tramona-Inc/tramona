@@ -130,10 +130,6 @@ export const propertiesRouter = createTRPCRouter({
       const limit = input.limit ?? 5;
       const { cursor } = input;
 
-      const lat = 34.1010307;
-      const long = -118.3806008;
-      const radius = 1000; // 100km.
-
       const data = await ctx.db.query.properties.findMany({
         ...withCursorPagination({
           // where: eq(properties.propertyType, "House"),
@@ -141,11 +137,11 @@ export const propertiesRouter = createTRPCRouter({
             input.lat && input.long && input.radius
               ? sql`
                 6371 * acos(
-                    SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
-                ) <= ${radius}`
+                    SIN(${input.lat}) * SIN(radians(latitude)) + COS(${input.lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${input.long})
+                ) <= ${input.radius}`
               : sql`TRUE`,
             // eq(properties.propertyType, "House"),
-            input.city && input.city !== "All"
+            input.city && input.city !== "all"
               ? eq(properties.address, input.city)
               : sql`TRUE`, // Conditionally include eq function for address
             input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function

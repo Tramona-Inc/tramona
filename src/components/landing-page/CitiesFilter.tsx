@@ -16,6 +16,12 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 export const cities: CitiesLatLong[] = [
   { id: "all", label: "All", long: 0, lat: 0 },
   {
+    id: "los_angeles",
+    label: "Los Angeles",
+    long: -118.3806008,
+    lat: 34.1010307,
+  },
+  {
     id: "san_diego",
     label: "San Diego",
     long: -117.1611,
@@ -57,6 +63,8 @@ export default function CitiesFilter() {
   const open = useCitiesFilter((state) => state.open);
   const setOpen = useCitiesFilter((state) => state.setOpen);
 
+  console.log(filter);
+
   return (
     <div className="grid grid-cols-8">
       <div className="col-span-5 flex w-full items-center justify-center xl:col-span-7 ">
@@ -74,7 +82,7 @@ export default function CitiesFilter() {
                   onClick={() => {
                     setFilter(city);
                   }}
-                  className={cn(city === filter && "font-bold", "p-1")}
+                  className={cn(city.id === filter.id && "font-bold", "p-1")}
                 >
                   {city.label}
                 </Button>

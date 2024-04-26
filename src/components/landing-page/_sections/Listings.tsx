@@ -16,10 +16,13 @@ export default function Listings() {
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {
-      city: filter.id,
+      // city: filter.id,
       beds: beds,
       bathrooms: bathrooms,
       bedrooms: bedrooms,
+      lat: filter.lat ?? 0,
+      long: filter.long ?? 0,
+      radius: 100000,
     },
     {
       // the cursor from where to start fetching thecurrentProperties
