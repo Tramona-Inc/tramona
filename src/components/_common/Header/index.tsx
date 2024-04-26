@@ -1,4 +1,4 @@
-import { MenuIcon, CircleHelp } from "lucide-react";
+import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 import HeaderTopRight from "./HeaderTopRight";
 
@@ -9,6 +9,7 @@ import { useIsLg } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
+import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 
 type HeaderProps =
   | {
@@ -53,7 +54,7 @@ function LargeHeader(props: HeaderProps) {
         )}
       </div>
 
-      <div className="flex flex-1 justify-end gap-5">
+      <div className="flex flex-1 justify-end gap-4">
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (
@@ -65,15 +66,22 @@ function LargeHeader(props: HeaderProps) {
             )}
           </Button>
         ) : (
-          <Button asChild variant="darkOutline">
+          <Button asChild variant="ghost" className="rounded-full">
             <Link href="/auth/signin">
               {status === "authenticated" ? "Switch to Dashboard" : "Log in"}
             </Link>
           </Button>
         )}
-        <Link href="/faq">
-          <CircleHelp size={41} strokeWidth={1.7} className="text-primary" />
-        </Link>
+        <Button
+          size="icon"
+          className="grid place-items-center rounded-full text-xl font-extrabold"
+          variant="outline"
+          asChild
+        >
+          <Link href="/faq">
+            <QuestionMarkIcon />
+          </Link>
+        </Button>
         <HeaderTopRight />
       </div>
     </header>
