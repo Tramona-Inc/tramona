@@ -13,7 +13,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { bookedDates, properties } from "./../../db/schema/tables/properties";
 
@@ -133,9 +133,6 @@ export const propertiesRouter = createTRPCRouter({
       const long = input.long ?? 0;
       const radius = input.radius;
 
-      console.log(lat);
-      console.log(long);
-
       const data = await ctx.db
         .select({
           id: properties.id,
@@ -145,18 +142,25 @@ export const propertiesRouter = createTRPCRouter({
           numBedrooms: properties.numBedrooms,
           numBeds: properties.numBeds,
           distance: sql`
-        6371 * ACOS(
-            SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
-        ) AS distance`,
+            6371 * ACOS(
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+            ) AS distance`,
         })
         .from(properties)
         .orderBy(sql`distance`)
         .where(
-          sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
-        );
-      // .limit(limit + 1);
+          and(
+            cursor ? gt(sql`
+              6371 * ACOS(
+                SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+              )
+            `, cursor) : undefined,
+            sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
+          ),
+        )
+        .limit(limit + 1);
 
-      console.log(data);
+      console.log(cursor);
 
       // const data = await ctx.db.query.properties.findMany({
       //   ...withCursorPagination({
@@ -197,7 +201,7 @@ export const propertiesRouter = createTRPCRouter({
         // nextCursor: data.length
         //   ? data[data.length - 1]?.createdAt.toISOString()
         //   : null,
-        nextCursor: data.length ? data[data.length - 1]?.id : null,
+        nextCursor: data.length ? data[data.length - 1]?.distance : null,
       };
     }),
   getCities: publicProcedure.query(async ({ ctx }) => {
