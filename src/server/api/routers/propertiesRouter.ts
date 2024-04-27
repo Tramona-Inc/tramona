@@ -129,8 +129,8 @@ export const propertiesRouter = createTRPCRouter({
       const limit = input.limit ?? 5;
       const { cursor } = input;
 
-      const lat = (input.lat ?? 0 * Math.PI) / 180;
-      const long = (input.long ?? 0 * Math.PI) / 180;
+      const lat = input.lat ?? 0;
+      const long = input.long ?? 0;
       const radius = input.radius;
 
       console.log(lat);
@@ -145,16 +145,16 @@ export const propertiesRouter = createTRPCRouter({
           numBedrooms: properties.numBedrooms,
           numBeds: properties.numBeds,
           distance: sql`
-          6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
-          ) AS distance`,
+        6371 * ACOS(
+            SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+        ) AS distance`,
         })
         .from(properties)
         .orderBy(sql`distance`)
         .where(
           sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
-        )
-        .limit(limit + 1);
+        );
+      // .limit(limit + 1);
 
       console.log(data);
 

@@ -1,7 +1,8 @@
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import Head from "next/head";
+import Listings from "./_sections/Listings";
 import SimpleMastHead from "./_sections/SimpleMastHead";
-import LongLatFilter from "./LongLatFilter";
+import CitiesFilter from "./CitiesFilter";
 
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
@@ -20,9 +21,9 @@ export default function TravelerPage() {
       </div>
 
       <div className="container flex flex-col space-y-5 bg-white">
-        {/* <CitiesFilter />
-        <Listings /> */}
-        <LongLatFilter />
+        <CitiesFilter />
+        <Listings />
+        {/* <LongLatFilter /> */}
       </div>
     </div>
   );
