@@ -146,13 +146,13 @@ export const propertiesRouter = createTRPCRouter({
           numBeds: properties.numBeds,
           distance: sql`
           6371 * ACOS(
-              SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
           ) AS distance`,
         })
         .from(properties)
         .orderBy(sql`distance`)
         .where(
-          sql`6371 * acos(SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})) <= ${radius}`,
+          sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
         )
         .limit(limit + 1);
 
@@ -201,26 +201,26 @@ export const propertiesRouter = createTRPCRouter({
       };
     }),
   getCities: publicProcedure.query(async ({ ctx }) => {
-    const nlat = 34.1010307;
-    const nlong = -118.3806008;
+    const lat = 34.1010307;
+    const long = -118.3806008;
     const radius = 10; // 100km.
 
     // // Convert latitude and longitude to radians
-    const lat = (nlat * Math.PI) / 180;
-    const long = (nlong * Math.PI) / 180;
+    // const lat = (nlat * Math.PI) / 180;
+    // const long = (nlong * Math.PI) / 180;
 
     const data = await ctx.db
       .select({
         id: properties.id,
         distance: sql`
         6371 * ACOS(
-            SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
+            SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
         ) AS distance`,
       })
       .from(properties)
       .orderBy(sql`distance`)
       .where(
-        sql`6371 * acos(SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})) <= ${radius}`,
+        sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
       );
 
     console.log(data);
