@@ -13,7 +13,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, sql, asc } from "drizzle-orm";
 import { z } from "zod";
 import { bookedDates, properties } from "./../../db/schema/tables/properties";
 
@@ -147,20 +147,20 @@ export const propertiesRouter = createTRPCRouter({
             ) AS distance`,
         })
         .from(properties)
-        .orderBy(sql`distance`)
+        .orderBy(asc(sql`distance`))
         .where(
           and(
-            cursor ? gt(sql`
-              6371 * ACOS(
-                SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
-              )
-            `, cursor) : undefined,
+            // cursor ? gt(sql`
+            //   6371 * ACOS(
+            //     SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+            //   )
+            // `, cursor) : undefined,
             sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
           ),
         )
-        .limit(limit + 1);
+        // .limit(limit + 1);
 
-      console.log(cursor);
+      console.log(data.forEach((property) => console.log(property.id)));
 
       // const data = await ctx.db.query.properties.findMany({
       //   ...withCursorPagination({
