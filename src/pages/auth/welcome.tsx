@@ -19,6 +19,15 @@ import BounceIcon from "@/components/_icons/BounceIcon";
 import NoGpsIcon from "@/components/_icons/NoGpsIcon";
 import BeachIcon from "@/components/_icons/BeachIcon";
 import BeachIconMini from "@/components/_icons/BeachIconMini";
+import BounceIconMobile from "@/components/_icons/BounceIconMobile";
+import { useEffect, useState } from "react";
+import CircleIconMobile from "@/components/_icons/CircleIconMobile";
+import NoGpsIconMobile from "@/components/_icons/NoGpsIconMobile";
+import BeachIconMiniMobile from "@/components/_icons/BeachIconMiniMobile";
+import WalletIconMobile from "@/components/_icons/WalletIconMobile";
+import SupportIconMobile from "@/components/_icons/SupportIconMobile";
+import TransparentPricingIconMobile from "@/components/_icons/TransparentPricingIconMobile";
+import BeachIconMobile from "@/components/_icons/BeachIconMobile";
 
 function StepperContentLayout({
   children,
@@ -35,92 +44,167 @@ function StepperContentLayout({
 }
 
 function Step1(): JSX.Element {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768); // Adjust the breakpoint as needed
+    }
+
+    // Initial call to set isMobile based on current window size
+    handleResize();
+
+    // Add event listener to update isMobile state when window is resized
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <StepperContentLayout className="container gap-4 text-balance">
-      <div className="my-3 flex flex-col gap-4 text-center">
-        <h1 className="text-4xl font-bold lg:text-5xl">Welcome to Tramona!</h1>
-        <p className="text-xl font-semibold lg:text-2xl">
+    <StepperContentLayout className="gap-4 lg:container">
+      <div className="flex flex-col gap-1 text-center leading-5 lg:gap-4 lg:leading-6">
+        <h1 className="text-3xl font-bold lg:text-5xl">Welcome to Tramona!</h1>
+        <p className="font-semibold lg:text-2xl">
           Where you can find travel deals by bidding on rentals.
         </p>
-        <p className="text-2xl font-bold">At Tramona, you can</p>
-      </div>
-
-      <div className="grid grid-cols-3 place-items-center gap-4">
-        <WalletIcon />
-        <SupportIcon />
-        <TransparentPricingIcon />
-      </div>
-
-      <div className="grid grid-cols-3 gap-4 text-center text-lg font-semibold">
-        <p>Set your budget and request deals from relevant properties.</p>
-        <p>
-          Negotiate directly with hosts to find a price that works for you both.
+        <p className="mt-2 text-xl font-bold lg:text-2xl">
+          At Tramona, you can
         </p>
-        <p>Avoid hidden fees with transparent pricing.</p>
+      </div>
+
+      <div className="grid grid-cols-1 text-balance text-center font-semibold leading-4 lg:grid-cols-3 lg:gap-4 lg:text-lg lg:leading-5">
+        <div className="h flex place-items-center lg:block">
+          {isMobile ? <WalletIconMobile /> : <WalletIcon />}
+          <div className="basis-5/6">
+            <p>Set your budget and request deals from relevant properties.</p>
+          </div>
+        </div>
+        <div className="flex place-items-center lg:block">
+          {isMobile ? <SupportIconMobile /> : <SupportIcon />}
+          <div className="basis-5/6">
+            <p>
+              Negotiate directly with hosts to find a price that works for you
+              both.
+            </p>
+          </div>
+        </div>
+        <div className="flex place-items-center lg:block">
+          {isMobile ? (
+            <TransparentPricingIconMobile />
+          ) : (
+            <TransparentPricingIcon />
+          )}
+          <div className="basis-5/6">
+            <p>Avoid hidden fees with transparent pricing.</p>
+          </div>
+        </div>
       </div>
     </StepperContentLayout>
   );
 }
 
 function Step2(): JSX.Element {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768); // Adjust the breakpoint as needed
+    }
+
+    // Initial call to set isMobile based on current window size
+    handleResize();
+
+    // Add event listener to update isMobile state when window is resized
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <StepperContentLayout className="container gap-4">
+    <StepperContentLayout className="gap-4 lg:container">
       <div className="mb-3 text-center">
-        <h1 className="text-4xl font-bold lg:text-5xl">How it works</h1>
+        <h1 className="text-3xl font-bold lg:text-5xl">How it works</h1>
       </div>
 
-      <div className="relative grid grid-cols-7 space-y-10">
-        <div className=" absolute -left-32 bottom-10 rotate-12">
-          <BounceIcon />
-        </div>
-        <div className="col-span-4 flex gap-4">
-          <div className="relative">
-            <CircleIcon />
-            <div className="absolute -left-3 -top-12">
-              <NoGpsIcon />
-            </div>
+      <div className="relative grid grid-cols-1 space-y-9 ps-10 leading-4 lg:grid-cols-7 lg:space-y-10 lg:leading-5">
+        {isMobile ? (
+          <div className="absolute -left-5 top-8">
+            <BounceIconMobile />
           </div>
-          <div>
-            <h2 className="text-xl font-bold">Make a request</h2>
+        ) : (
+          <div className="absolute -left-24 bottom-9 rotate-12">
+            <BounceIcon />
+          </div>
+        )}
+
+        <div className="col-span-1 flex gap-4 lg:col-span-4">
+          <div className="relative">
+            {isMobile ? (
+              <>
+                <CircleIconMobile />
+                <div className="absolute -left-14 -top-6">
+                  <NoGpsIconMobile />
+                </div>
+              </>
+            ) : (
+              <>
+                <CircleIcon />
+                <div className="absolute -left-3 -top-12">
+                  <NoGpsIcon />
+                </div>
+              </>
+            )}
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-bold lg:text-xl">Make a request</h2>
             <p>
               Have a city and budget in mind? We&rsquo;ll do the rest and find
               the perfect place for you.
             </p>
           </div>
         </div>
-        <div className="col-span-2 col-start-2 col-end-6 flex gap-4">
-          <div>
-            <CircleIcon />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold">Make an offer</h2>
+        <div className="col-span-1 flex gap-4 lg:col-start-2 lg:col-end-6">
+          <div>{isMobile ? <CircleIconMobile /> : <CircleIcon />}</div>
+          <div className="space-y-2">
+            <h2 className="font-bold lg:text-xl">Make an offer</h2>
             <p>
               Found a property you love? Let the host know you&rsquo;re
               interested by submitting an offer.
             </p>
           </div>
         </div>
-        <div className="col-start-3 col-end-7 flex gap-4">
-          <div>
-            <CircleIcon />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold">Negotiate</h2>
+        <div className="col-span-1 flex gap-4 lg:col-start-3 lg:col-end-7">
+          <div>{isMobile ? <CircleIconMobile /> : <CircleIcon />}</div>
+          <div className="space-y-2">
+            <h2 className="font-bold lg:text-xl">Negotiate</h2>
             <p>
               Work with the host to tailor the price to suit your budget and
               needs.
             </p>
           </div>
         </div>
-        <div className="col-start-4 col-end-8 flex gap-4">
+        <div className="col-span-1 flex gap-4 lg:col-start-4 lg:col-end-8">
           <div className="relative">
-            <CircleIcon />
-            <div className="absolute -left-8 -top-14">
-              <BeachIconMini />
-            </div>
+            {isMobile ? (
+              <>
+                <CircleIconMobile />
+                <div className="absolute -left-16 -top-6">
+                  <BeachIconMiniMobile />
+                </div>
+              </>
+            ) : (
+              <>
+                <CircleIcon />
+                <div className="absolute -left-8 -top-14">
+                  <BeachIconMini />
+                </div>
+              </>
+            )}
           </div>
-          <div>
-            <h2 className="text-xl font-bold">Get Ready to Travel</h2>
+          <div className="space-y-2">
+            <h2 className="font-bold lg:text-xl">Get Ready to Travel</h2>
             <p>
               Once you&rsquo;ve negotiated with the host and finalized the
               details, it&rsquo;s time to prepare for your trip!
@@ -133,18 +217,38 @@ function Step2(): JSX.Element {
 }
 
 function Step3(): JSX.Element {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768); // Adjust the breakpoint as needed
+    }
+
+    // Initial call to set isMobile based on current window size
+    handleResize();
+
+    // Add event listener to update isMobile state when window is resized
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <StepperContentLayout className="container gap-4 text-balance text-center">
-      <h1 className="text-4xl font-bold lg:text-5xl">Start traveling now</h1>
-      <p className="text-xl font-semibold lg:text-2xl">
+    <StepperContentLayout className="gap-4 text-center lg:container">
+      <h1 className="text-3xl font-bold lg:text-5xl">Start traveling now</h1>
+      <p className="text-lg font-semibold leading-5 lg:text-2xl lg:leading-6">
         And get properties out of your budget, for your budget
       </p>
       <div className="flex justify-center">
-        <BeachIcon />
+        {isMobile ? <BeachIconMobile /> : <BeachIcon />}
+        {/* <BeachIcon /> */}
       </div>
       <div className="flex">
-        <Lightbulb />
-        <p className="ps-2">
+        <div>
+          <Lightbulb />
+        </div>
+        <p className="ps-2 text-start leading-4 lg:text-center lg:leading-6">
           <span className="font-bold">Remember</span> : All offers you make are
           binding. If a Host accepts your offer, your card will be charged.
         </p>
