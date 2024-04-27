@@ -13,8 +13,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, eq, lte, sql } from "drizzle-orm";
-import { withCursorPagination } from "drizzle-pagination";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { bookedDates, properties } from "./../../db/schema/tables/properties";
 
@@ -130,39 +129,68 @@ export const propertiesRouter = createTRPCRouter({
       const limit = input.limit ?? 5;
       const { cursor } = input;
 
-      const data = await ctx.db.query.properties.findMany({
-        ...withCursorPagination({
-          // where: eq(properties.propertyType, "House"),
-          where: and(
-            input.lat && input.long && input.radius
-              ? sql`
-                6371 * acos(
-                    SIN(${input.lat}) * SIN(radians(latitude)) + COS(${input.lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${input.long})
-                ) <= ${input.radius}`
-              : sql`TRUE`,
-            // eq(properties.propertyType, "House"),
-            input.city && input.city !== "all"
-              ? eq(properties.address, input.city)
-              : sql`TRUE`, // Conditionally include eq function for address
-            input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
-            input.bedrooms
-              ? lte(properties.numBedrooms, input.bedrooms)
-              : sql`TRUE`, // Conditionally include eq function
-            input.bathrooms
-              ? lte(properties.numBathrooms, input.bathrooms)
-              : sql`TRUE`, // Conditionally include eq function
-          ),
-          limit: limit + 1,
-          cursors: [
-            // [
-            //   properties.createdAt,
-            //   "desc",
-            //   cursor ? new Date(cursor) : undefined,
-            // ],
-            [properties.id, "desc", cursor ? cursor : undefined],
-          ],
-        }),
-      });
+      const lat = (input.lat ?? 0 * Math.PI) / 180;
+      const long = (input.long ?? 0 * Math.PI) / 180;
+      const radius = input.radius;
+
+      console.log(lat);
+      console.log(long);
+
+      const data = await ctx.db
+        .select({
+          id: properties.id,
+          imageUrls: properties.imageUrls,
+          name: properties.name,
+          maxNumGuests: properties.maxNumGuests,
+          numBedrooms: properties.numBedrooms,
+          numBeds: properties.numBeds,
+          distance: sql`
+          6371 * ACOS(
+              SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
+          ) AS distance`,
+        })
+        .from(properties)
+        .orderBy(sql`distance`)
+        .where(
+          sql`6371 * acos(SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})) <= ${radius}`,
+        )
+        .limit(limit + 1);
+
+      console.log(data);
+
+      // const data = await ctx.db.query.properties.findMany({
+      //   ...withCursorPagination({
+      //     // where: eq(properties.propertyType, "House"),
+      //     where: and(
+      //       input.lat && input.long && input.radius
+      //         ? sql`
+      //           6371 * acos(
+      //               SIN(${input.lat}) * SIN(radians(latitude)) + COS(${input.lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${input.long})
+      //           ) <= ${input.radius}`
+      //         : sql`TRUE`,
+      //       // eq(properties.propertyType, "House"),
+      //       input.city && input.city !== "all"
+      //         ? eq(properties.address, input.city)
+      //         : sql`TRUE`, // Conditionally include eq function for address
+      //       input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
+      //       input.bedrooms
+      //         ? lte(properties.numBedrooms, input.bedrooms)
+      //         : sql`TRUE`, // Conditionally include eq function
+      //       input.bathrooms
+      //         ? lte(properties.numBathrooms, input.bathrooms)
+      //         : sql`TRUE`, // Conditionally include eq function
+      //     ),
+      //     limit: limit + 1,
+      //     cursors: [
+      //       // [
+      //       //   properties.createdAt,
+      //       //   "desc",
+      //       //   cursor ? new Date(cursor) : undefined,
+      //       // ],
+      //       [properties.id, "desc", cursor ? cursor : undefined],
+      //     ],
+      //   }),
+      // });
 
       return {
         data,
@@ -175,33 +203,12 @@ export const propertiesRouter = createTRPCRouter({
   getCities: publicProcedure.query(async ({ ctx }) => {
     const nlat = 34.1010307;
     const nlong = -118.3806008;
-    const radius = 1000; // 100km.
+    const radius = 10; // 100km.
 
     // // Convert latitude and longitude to radians
     const lat = (nlat * Math.PI) / 180;
     const long = (nlong * Math.PI) / 180;
 
-    // const result: Property[] = await ctx.db.execute(sql`
-    //     SELECT
-    //         *,
-    //         6371 * acos(
-    //             SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
-    //         ) AS distance
-    //     FROM
-    //         properties
-    //     WHERE
-    //         6371 * acos(
-    //             SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
-    //         ) <= ${radius}
-    // `);
-
-    // return await ctx.db.query.properties.findMany({
-    //   where: sql`
-    //         6371 * acos(
-    //             SIN(${lat}) * SIN(radians(latitude)) + COS(${lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${long})
-    //         ) <= ${radius}
-    //   `,
-    // });
     const data = await ctx.db
       .select({
         id: properties.id,

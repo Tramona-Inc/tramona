@@ -22,7 +22,7 @@ export default function Listings() {
       bedrooms: bedrooms,
       lat: filter.lat ?? 0,
       long: filter.long ?? 0,
-      radius: 100000,
+      radius: 40,
     },
     {
       // the cursor from where to start fetching thecurrentProperties
