@@ -114,7 +114,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           {...rest}
           ref={ref}
           className={cn(
-            "flex w-full flex-1 justify-center gap-6",
+            "flex w-full flex-1 justify-center gap-6 pb-4 lg:py-0",
             orientation === "vertical" ? "flex-col" : "flex-row",
             className,
           )}
@@ -281,7 +281,7 @@ export const StepperItem = React.forwardRef<HTMLDivElement, StepperItemProps>(
             data-clickable={isClickable}
             // disabled={!hasVisited}
             className={cn(
-              "aspect-square rounded-full border border-teal-900 bg-white hover:cursor-default hover:bg-white aria-[current=step]:bg-teal-900 data-[highlighted=true]:bg-teal-900 lg:h-8 lg:w-8",
+              "aspect-square h-5 w-5 rounded-full border border-teal-900 bg-white p-0 hover:cursor-default hover:bg-white aria-[current=step]:bg-teal-900 data-[highlighted=true]:bg-teal-900 lg:h-6 lg:w-6",
               // isCompletedStep ?? typeof RenderIcon !== "number" ? "" : "",
               // additionalClassName?.button,
             )}

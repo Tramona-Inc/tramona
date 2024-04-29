@@ -37,7 +37,7 @@ function StepperContentLayout({
   className?: string | null;
 }): JSX.Element {
   return (
-    <div className={cn("mt-5 flex flex-col gap-4 self-center", className)}>
+    <div className={cn("flex flex-col gap-4 self-center lg:mt-5", className)}>
       {children}
     </div>
   );
@@ -124,17 +124,17 @@ function Step2(): JSX.Element {
 
   return (
     <StepperContentLayout className="gap-4 lg:container">
-      <div className="mb-3 text-center">
+      <div className="text-center">
         <h1 className="text-3xl font-bold lg:text-5xl">How it works</h1>
       </div>
 
-      <div className="relative grid grid-cols-1 space-y-9 ps-10 leading-4 lg:grid-cols-7 lg:space-y-10 lg:leading-5">
+      <div className="relative grid grid-cols-1 space-y-9 ps-14 leading-4 lg:grid-cols-7 lg:space-y-10 lg:ps-0 lg:leading-5">
         {isMobile ? (
-          <div className="absolute -left-5 top-8">
+          <div className="absolute -left-1 top-8">
             <BounceIconMobile />
           </div>
         ) : (
-          <div className="absolute -left-24 bottom-9 rotate-12">
+          <div className="absolute -left-28 bottom-9 rotate-12">
             <BounceIcon />
           </div>
         )}
@@ -242,9 +242,8 @@ function Step3(): JSX.Element {
       </p>
       <div className="flex justify-center">
         {isMobile ? <BeachIconMobile /> : <BeachIcon />}
-        {/* <BeachIcon /> */}
       </div>
-      <div className="flex">
+      <div className="flex justify-center">
         <div>
           <Lightbulb />
         </div>
@@ -277,28 +276,29 @@ export default function Welcome() {
       </Head>
 
       <ReferralCodeDialog />
-
-      <div className="mx-auto flex w-full flex-col gap-4 px-5 py-10 lg:px-80">
-        <Stepper activeStep={activeStep} responsive={false}>
-          {steps.map((step, index) => (
-            <StepperItem
-              index={index}
-              key={index}
-              {...step}
-              additionalClassName={{
-                button: "bg-zinc-200",
-              }}
-            >
-              {step.children}
-            </StepperItem>
-          ))}
-        </Stepper>
-        <div className="my-5 flex justify-end">
-          <div className="flex gap-3">
+      <div className="mx-auto flex h-dvh w-full flex-col justify-between gap-4 px-5 py-5 lg:px-80 lg:py-10">
+        <div>
+          <Stepper activeStep={activeStep} responsive={false}>
+            {steps.map((step, index) => (
+              <StepperItem
+                index={index}
+                key={index}
+                {...step}
+                additionalClassName={{
+                  button: "bg-zinc-200",
+                }}
+              >
+                {step.children}
+              </StepperItem>
+            ))}
+          </Stepper>
+        </div>
+        <div className="my-5 flex justify-center lg:justify-end">
+          <div className="flex w-full gap-3 lg:w-auto">
             {!isLastStep && (
               <Button
                 size="lg"
-                className="rounded-lg border border-teal-900 bg-white font-semibold text-primary hover:bg-transparent"
+                className="basis-1/3 rounded-lg border border-teal-900 bg-zinc-100 font-semibold text-primary hover:bg-zinc-200"
                 onClick={() => router.push("/")}
               >
                 Skip
@@ -307,7 +307,7 @@ export default function Welcome() {
             {!isDisabledStep && (
               <Button
                 size="lg"
-                className="border-teal-900 bg-zinc-200 font-semibold text-primary hover:bg-zinc-300"
+                className="bg-zinc-100 font-semibold text-primary hover:bg-zinc-200"
                 onClick={prevStep}
               >
                 Back
@@ -316,7 +316,7 @@ export default function Welcome() {
             <Button
               size="lg"
               onClick={isLastStep ? () => router.push("/") : nextStep}
-              className="rounded-lg bg-teal-900 font-semibold hover:bg-teal-950"
+              className="basis-2/3 rounded-lg bg-teal-900 font-semibold hover:bg-teal-950"
             >
               {isLastStep ? "Start Traveling" : "Next"}
             </Button>
