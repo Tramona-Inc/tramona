@@ -5,7 +5,7 @@
       "schedule": "0 * * * *"
     },
     {
-      "path": "api/trpc/ping",
+      "path": "/api/trpc/ping",
       "schedule": "*/5 * * * *"
     }
   ]
