@@ -35,7 +35,7 @@ export default function Listings() {
 
   // a ref to the viewport
   const viewportRef = useRef<HTMLDivElement>(null);
-  // a ref to the last post element
+  // a ref to the last property element
   const { entry, ref } = useIntersection({
     root: viewportRef.current,
     threshold: 1,
@@ -69,14 +69,14 @@ export default function Listings() {
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
-          {currentProperties.map((post, i) =>
+          {currentProperties.map((property, i) =>
             i === currentProperties.length - 1 ? (
-              <div ref={ref} key={post.id} className="cursor-pointer">
-                <HomeOfferCard key={post.id} property={post} />
+              <div ref={ref} key={property.id} className="cursor-pointer">
+                <HomeOfferCard key={property.id} property={property} />
               </div>
             ) : (
-              <div key={post.id} className="cursor-pointer">
-                <HomeOfferCard property={post} />
+              <div key={property.id} className="cursor-pointer">
+                <HomeOfferCard property={property} />
               </div>
             ),
           )}
