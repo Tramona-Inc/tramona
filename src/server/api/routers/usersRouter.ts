@@ -36,6 +36,18 @@ export const usersRouter = createTRPCRouter({
     };
   }),
 
+  myVerificationStatus: protectedProcedure.query(async({ctx})=>{
+    const res = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns:{
+        isIdentityVerified: true,
+      },
+    })
+    return{
+      isIdentityVerified: res?.isIdentityVerified
+    }
+  }),
+
   myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
     const phone = await ctx.db.query.users
       .findFirst({

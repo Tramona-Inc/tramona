@@ -1,7 +1,13 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
+
+// Define a schema for the request body
+//verification stripe identity
+const CreateVerificationSessionInput = z.object({});
 
 export const config = {
   api: {
@@ -9,9 +15,10 @@ export const config = {
   },
 };
 
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
   apiVersion: "2023-10-16",
 });
+
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
@@ -135,26 +142,26 @@ export const stripeRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // let stripeCustomerId = await ctx.db.query.users
-      //   .findFirst({
-      //     columns: {
-      //       stripeCustomerId: true,
-      //     },
-      //     where: eq(users.id, ctx.user.id),
-      //   })
-      //   .then((res) => res?.stripeCustomerId);
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
+        })
+        .then((res) => res?.stripeCustomerId);
 
       // ! UNCOMMENT FOR TESTING PURPOSES
-      // if (!stripeCustomerId) {
-      //   stripeCustomerId = await stripe.customers
-      //     .create({
-      //       name: ctx.user.name ?? "",
-      //       email: ctx.user.email,
-      //     })
-      //     .then((res) => res.id);
-      // }
+      if (!stripeCustomerId) {
+        stripeCustomerId = await stripe.customers
+          .create({
+            name: ctx.user.name ?? "",
+            email: ctx.user.email,
+          })
+          .then((res) => res.id);
+      }
 
-      const stripeCustomerId = "cus_PwwCgSdIG3rWNx";
+      // const stripeCustomerId = "cus_PwwCgSdIG3rWNx";
 
       const currentDate = new Date(); // Get the current date and time
 
@@ -216,6 +223,40 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
+  createVerificationSession: protectedProcedure.query(
+    async ({ ctx, input }) => {
+      const verificationSession =
+        await stripe.identity.verificationSessions.create({
+          type: "document",
+          metadata: {
+            user_id: ctx.user.id,
+          },
+        });
+
+      // Return only the client secret to the frontend.
+      const clientSecret = verificationSession.client_secret;
+      return clientSecret;
+    },
+  ),
+
+  getVerificationReports: protectedProcedure.query(async ({ ctx, input }) => {
+    const verificationReport = await stripe.identity.verificationReports.list({
+      limit: 3,
+    });
+    return verificationReport;
+  }),
+
+  getVerificationReportsById: protectedProcedure
+  .input(z.object({ verificationId: z.string() }))
+  .query(
+    async ({ input }) => {
+      const verificationReport =
+        await stripe.identity.verificationReports.retrieve(
+          input.verificationId
+        );
+      return verificationReport;
+    },
+  ),
 
   getSetUpIntent: protectedProcedure
     .input(

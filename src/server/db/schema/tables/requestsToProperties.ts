@@ -12,7 +12,7 @@ export const requestsToProperties = pgTable(
       .notNull()
       .references(() => properties.id),
   },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.requestId, vt.propertyId] }),
+  (t) => ({
+    compoundKey: primaryKey({ columns: [t.requestId, t.propertyId] }),
   }),
 );

@@ -3,6 +3,7 @@
  * for Docker builds.
  */
 await import("./src/env.js");
+import NextBundleAnalyzer from "@next/bundle-analyzer";
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -97,7 +98,11 @@ const config = {
   },
   experimental: {
     scrollRestoration: true,
+    bundlePagesExternals: true,
+    esmExternals: "loose",
   },
 };
 
-export default config;
+export default NextBundleAnalyzer({ enabled: process.env.ANALYZE === "true" })(
+  config,
+);

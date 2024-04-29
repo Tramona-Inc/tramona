@@ -61,8 +61,8 @@ export default function Listings() {
     <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
-        <div className="flex justify-center">
-          <Spinner />{" "}
+        <div className="col-span-full flex justify-center overflow-y-hidden">
+          <Spinner />
         </div>
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
