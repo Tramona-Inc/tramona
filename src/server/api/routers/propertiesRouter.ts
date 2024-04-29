@@ -125,6 +125,7 @@ export const propertiesRouter = createTRPCRouter({
         beds: z.number().optional(),
         bedrooms: z.number().optional(),
         bathrooms: z.number().optional(),
+        houseRules: z.array(z.string()).optional(),
         lat: z.number().optional(),
         long: z.number().optional(),
         radius: z.number().optional(),
@@ -137,8 +138,6 @@ export const propertiesRouter = createTRPCRouter({
       const lat = input.lat ?? 0;
       const long = input.long ?? 0;
       const radius = input.radius;
-
-      console.log(input.roomType);
 
       const data = await ctx.db
         .select({
@@ -175,6 +174,12 @@ export const propertiesRouter = createTRPCRouter({
             input.bathrooms
               ? lte(properties.numBathrooms, input.bathrooms)
               : sql`TRUE`, // Conditionally include eq function
+            input.houseRules?.includes("pets allowed")
+              ? eq(properties.petsAllowed, true)
+              : sql`TRUE`,
+            input.houseRules?.includes("smoking allowed")
+              ? eq(properties.smokingAllowed, true)
+              : sql`TRUE`,
           ),
         )
         .limit(limit + 1)

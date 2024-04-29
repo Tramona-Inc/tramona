@@ -7,7 +7,7 @@ import HomeOfferCard from "../HomeOfferCard";
 
 export default function Listings() {
   const filter = useCitiesFilter((state) => state.filter);
-  const { beds, bedrooms, bathrooms, roomType } = useCitiesFilter(
+  const { beds, bedrooms, bathrooms, roomType, houseRules } = useCitiesFilter(
     (state) => state,
   );
 
@@ -23,6 +23,7 @@ export default function Listings() {
       beds: beds,
       bathrooms: bathrooms,
       bedrooms: bedrooms,
+      houseRules: houseRules,
       lat: filter.lat ?? 0,
       long: filter.long ?? 0,
       radius: 5,
