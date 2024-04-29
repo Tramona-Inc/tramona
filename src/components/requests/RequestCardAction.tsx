@@ -7,6 +7,7 @@ import { type DetailedRequest } from "./RequestCard";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
 import { getRequestWithGroupDetails } from "./RequestGroupAvatars";
+import RequestRefreshDialog from "./RequestRefreshDialog";
 
 export function RequestCardAction({ request }: { request: DetailedRequest }) {
   const { data: session } = useSession({ required: true });
@@ -40,7 +41,6 @@ export function RequestCardAction({ request }: { request: DetailedRequest }) {
         </Button>
       );
     case "rejected":
-      // return <Button className={secondaryBtn}>Revise</Button>;
       return null;
     case "booked":
       // return <Button className={primaryBtn}>Request again</Button>;

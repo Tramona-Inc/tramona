@@ -78,6 +78,7 @@ function LargeRequestCardBadge({ request }: { request: DetailedRequest }) {
       const msAgo = Date.now() - request.createdAt.getTime();
       const showTimeAgo = msAgo > 1000 * 60 * 60;
       const fmtdTimeAgo = showTimeAgo ? `(${formatInterval(msAgo)})` : "";
+
       return (
         <Badge size="lg" variant="yellow">
           Pending {fmtdTimeAgo}

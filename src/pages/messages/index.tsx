@@ -74,7 +74,7 @@ export default function MessagePage() {
         <title>
           {totalUnreadMessages && totalUnreadMessages > 0
             ? `(${totalUnreadMessages})`
-            : null}{" "}
+            : ""}{" "}
           Messages | Tramona
         </title>
       </Head>
