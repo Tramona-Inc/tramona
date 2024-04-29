@@ -197,7 +197,7 @@ export default function HomeOfferCard({
                   <ChevronLeft />
                 </Button>
               )}
-              <MakeBid property={property} />
+              <MakeBid propertyId={property.id} />
             </DialogContentLarge>
           </DialogLarge>
         </form>
