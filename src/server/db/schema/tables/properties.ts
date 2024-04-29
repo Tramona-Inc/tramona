@@ -54,6 +54,7 @@ export const ALL_PROPERTY_TYPES = [
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES = [
+  "Flexible",
   "Entire place",
   "Shared room",
   "Private room",
@@ -66,6 +67,8 @@ export const propertyRoomTypeEnum = pgEnum(
   "property_room_type",
   ALL_PROPERTY_ROOM_TYPES,
 );
+
+export const ALL_HOUSE_RULE_ITEMS = ["Pets allowed", "Smoking Allowed"];
 
 export const propertyAmenitiesEnum = pgEnum(
   "property_amenities",

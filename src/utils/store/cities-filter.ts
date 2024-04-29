@@ -1,6 +1,9 @@
 import { cities } from "@/components/landing-page/CitiesFilter";
+import { type ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema/tables/properties";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+
+type RoomType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
 
 export type CitiesLatLong = {
   id: string;
@@ -12,9 +15,9 @@ export type CitiesLatLong = {
 type CitiesFilterState = {
   open: boolean;
   filter: CitiesLatLong;
-  placeType: string;
+  roomType: RoomType;
   setFilter: (filter: CitiesLatLong) => void;
-  setPlaceType: (placeType: string) => void;
+  setRoomType: (roomType: RoomType) => void;
   beds: number;
   bedrooms: number;
   bathrooms: number;
@@ -49,7 +52,7 @@ export const useCitiesFilter = create<CitiesFilterState>()(
     (set) => ({
       open: false,
       filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
-      placeType: "Flexible",
+      roomType: "Flexible",
       beds: 0,
       bedrooms: 0,
       bathrooms: 0,
@@ -57,8 +60,8 @@ export const useCitiesFilter = create<CitiesFilterState>()(
       setFilter: (filter: CitiesLatLong) => {
         set(() => ({ filter }));
       },
-      setPlaceType: (placeType: string) => {
-        set(() => ({ placeType }));
+      setRoomType: (roomType: RoomType) => {
+        set(() => ({ roomType }));
       },
       setBeds: (beds: number) => {
         set(() => ({ beds }));

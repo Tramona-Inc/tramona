@@ -15,7 +15,11 @@ import {
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, gt, lte, sql } from "drizzle-orm";
 import { z } from "zod";
-import { bookedDates, properties } from "./../../db/schema/tables/properties";
+import {
+  ALL_PROPERTY_ROOM_TYPES,
+  bookedDates,
+  properties,
+} from "./../../db/schema/tables/properties";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -117,6 +121,7 @@ export const propertiesRouter = createTRPCRouter({
         limit: z.number().min(1).max(50).nullish(),
         cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
         city: z.string().optional(),
+        roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
         beds: z.number().optional(),
         bedrooms: z.number().optional(),
         bathrooms: z.number().optional(),
@@ -133,7 +138,7 @@ export const propertiesRouter = createTRPCRouter({
       const long = input.long ?? 0;
       const radius = input.radius;
 
-      console.log(cursor);
+      console.log(input.roomType);
 
       const data = await ctx.db
         .select({
@@ -153,9 +158,12 @@ export const propertiesRouter = createTRPCRouter({
         .where(
           and(
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
-            input.lat && input.long 
+            input.lat && input.long
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`, // Conditionally include eq function for address
+            input.roomType && input.roomType !== "Flexible"
+              ? eq(properties.roomType, input.roomType)
+              : sql`TRUE`, // Conditionally include place type condition
             input.city && input.city !== "all"
               ? eq(properties.address, input.city)
               : sql`TRUE`, // Conditionally include eq function for address
@@ -173,14 +181,6 @@ export const propertiesRouter = createTRPCRouter({
 
       return {
         data,
-        // nextCursor: data.length
-        //   ? data[data.length - 1]?.createdAt.toISOString()
-        //   : null,
-        // nextCursor: data.length > 0 ? data[data.length - 1]?.distance : null,
-        // nextCursor:
-        //   data.length && data[data.length - 1]?.distance !== cursor
-        //     ? data[data.length - 1]?.distance
-        //     : null,
         nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
       };
     }),

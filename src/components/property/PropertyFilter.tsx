@@ -6,6 +6,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CircleMinus, CirclePlus } from "lucide-react";
@@ -60,32 +61,6 @@ export function Total({
   );
 }
 
-const propertyTypeOptions = [
-  "Flexible",
-  "Entire Place",
-  "Private",
-  "Other",
-] as const;
-
-const propertyType = [
-  {
-    value: "Flexible",
-    title: "Flexible",
-  },
-  {
-    value: "Entire place",
-    title: "Entire Place",
-  },
-  {
-    value: "Private",
-    title: "Private",
-  },
-  {
-    value: "Other",
-    title: "Other",
-  },
-];
-
 const houseRuleItems = [
   {
     value: "pets allowed",
@@ -98,7 +73,7 @@ const houseRuleItems = [
 ];
 
 const FormSchema = z.object({
-  propertyType: z.enum(propertyTypeOptions, {
+  roomType: z.enum(ALL_PROPERTY_ROOM_TYPES, {
     required_error: "You need to select a notification type.",
   }),
   beds: z.number().nullish(),
@@ -112,11 +87,12 @@ export default function PropertyFilter() {
   const bedrooms = useCitiesFilter((state) => state.bedrooms);
   const bathrooms = useCitiesFilter((state) => state.bathrooms);
   const houseRules = useCitiesFilter((state) => state.houseRules);
+  const roomType = useCitiesFilter((state) => state.roomType);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      propertyType: "Flexible",
+      roomType: roomType,
       beds: beds,
       bedrooms: bedrooms,
       bathrooms: bathrooms,
@@ -128,9 +104,11 @@ export default function PropertyFilter() {
   const setBathrooms = useCitiesFilter((state) => state.setBathrooms);
   const setBedrooms = useCitiesFilter((state) => state.setBedrooms);
   const setHouseRules = useCitiesFilter((state) => state.setHouseRules);
+  const setRoomType = useCitiesFilter((state) => state.setRoomType);
   const setOpen = useCitiesFilter((state) => state.setOpen);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
+    setRoomType(data.roomType ?? "Other");
     setBeds(data.beds ?? 0);
     setBathrooms(data.bathrooms ?? 0);
     setBedrooms(data.bedrooms ?? 0);
@@ -164,7 +142,7 @@ export default function PropertyFilter() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="propertyType"
+          name="roomType"
           render={({ field }) => (
             <FormItem className="space-y-3">
               <FormLabel className="font-bold text-primary">
@@ -176,16 +154,16 @@ export default function PropertyFilter() {
                   defaultValue={field.value}
                   className="flex flex-col space-y-1"
                 >
-                  {propertyType.map((property) => (
+                  {ALL_PROPERTY_ROOM_TYPES.map((property) => (
                     <FormItem
-                      key={property.value}
+                      key={property}
                       className="flex items-center space-x-3 space-y-0"
                     >
                       <FormControl>
-                        <RadioGroupItem value={property.value} />
+                        <RadioGroupItem value={property} />
                       </FormControl>
                       <FormLabel className="font-normal text-primary">
-                        {property.title}
+                        {property}
                       </FormLabel>
                     </FormItem>
                   ))}
