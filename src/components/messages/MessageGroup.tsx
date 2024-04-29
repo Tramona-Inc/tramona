@@ -29,7 +29,7 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
           <p className="text-xs text-muted-foreground">
             {formatRelative(localTime, new Date())}
             {session.user.id === firstMessage.userId && firstMessage.read && (
-              <> • read</>
+              <> · read</>
             )}
           </p>
         </div>
