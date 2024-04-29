@@ -50,9 +50,9 @@ export default function RequestCard({
   return (
     <Card key={request.id}>
       <CardContent className="space-y-2">
-        <p className="font-mono text-xs uppercase text-muted-foreground">
+        {/* <p className="font-mono text-xs uppercase text-muted-foreground">
           Id: {request.id} · Request group Id: {request.requestGroupId}
-        </p>
+        </p> */}
         {request.requestGroup.hasApproved ? (
           <RequestCardBadge request={request} />
         ) : (
