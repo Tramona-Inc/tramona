@@ -185,8 +185,8 @@ export function getDiscountPercentage(
 
 // https://tailwindcss.com/docs/screens + tailwind.config.ts
 
-export const useScreenWidth = () => useWindowSize()?.width ?? 0;
-export const useIsDesktop = () => useScreenWidth() >= 640;
+export const useScreenWidth = () => useWindowSize().width ?? 0;
+export const useIsSm = () => useScreenWidth() >= 640;
 export const useIsMd = () => useScreenWidth() >= 768;
 export const useIsLg = () => useScreenWidth() >= 1024;
 

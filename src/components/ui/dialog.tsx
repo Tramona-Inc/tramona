@@ -2,7 +2,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import * as React from "react";
 
-import { cn, useIsDesktop } from "@/utils/utils";
+import { cn, useIsSm } from "@/utils/utils";
 import {
   Drawer,
   DrawerClose,
@@ -25,7 +25,7 @@ function Dialog({
   React.ComponentProps<typeof Drawer> & {
     nested?: boolean;
   }) {
-  return useIsDesktop() ? (
+  return useIsSm() ? (
     <DialogPrimitive.Root {...props} />
   ) : nested ? (
     <NestedDrawer {...props} />
@@ -40,7 +40,7 @@ function Dialog({
 function DialogTrigger(
   props: React.ComponentProps<typeof DialogPrimitive.Trigger>,
 ) {
-  return useIsDesktop() ? (
+  return useIsSm() ? (
     <DialogPrimitive.Trigger {...props} />
   ) : (
     <DrawerTrigger {...props} />
@@ -54,7 +54,7 @@ function DialogTrigger(
 function DialogPortal(
   props: React.ComponentProps<typeof DialogPrimitive.Portal>,
 ) {
-  return useIsDesktop() ? (
+  return useIsSm() ? (
     <DialogPrimitive.Portal {...props} />
   ) : (
     <DrawerPortal {...props} />
@@ -68,7 +68,7 @@ function DialogPortal(
 function DialogClose(
   props: React.ComponentProps<typeof DialogPrimitive.Close>,
 ) {
-  return useIsDesktop() ? (
+  return useIsSm() ? (
     <DialogPrimitive.Close {...props} />
   ) : (
     <DrawerClose {...props} />
@@ -82,7 +82,7 @@ const DialogOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(
   ({ className, ...props }, ref) =>
-    useIsDesktop() ? (
+    useIsSm() ? (
       <DialogPrimitive.Overlay
         ref={ref}
         className={cn(
@@ -101,7 +101,7 @@ const DialogContent = React.forwardRef<
     typeof DialogPrimitive.Content & typeof DrawerContent
   >
 >(({ className, children, ...props }, ref) =>
-  useIsDesktop() ? (
+  useIsSm() ? (
     <DialogPortal>
       <DialogOverlay>
         <DialogPrimitive.Content
@@ -133,7 +133,7 @@ const DialogHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) =>
-  useIsDesktop() ? (
+  useIsSm() ? (
     <div className={cn("space-y-1.5", className)} {...props} />
   ) : (
     <DrawerHeader className={className} {...props} />
@@ -144,7 +144,7 @@ const DialogFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) =>
-  useIsDesktop() ? (
+  useIsSm() ? (
     <div className={cn("flex justify-end gap-2", className)} {...props} />
   ) : (
     <DrawerFooter className={className} {...props} />
@@ -155,7 +155,7 @@ const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) =>
-  useIsDesktop() ? (
+  useIsSm() ? (
     <DialogPrimitive.Title
       ref={ref}
       className={cn(
@@ -174,7 +174,7 @@ const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) =>
-  useIsDesktop() ? (
+  useIsSm() ? (
     <DialogPrimitive.Description
       ref={ref}
       className={cn("leading-tight text-muted-foreground", className)}
