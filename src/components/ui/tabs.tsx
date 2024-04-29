@@ -38,7 +38,7 @@ const TabsTrigger = React.forwardRef<
         "group inline-flex items-center justify-center gap-2 whitespace-nowrap p-2 text-sm font-semibold text-muted-foreground hover:bg-muted focus-visible:bg-muted disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-primary sm:px-4 sm:py-3 sm:text-base",
         {
           // Conditionally add or remove border
-          "border-b-4": !noBorder,
+          "border-b-4 data-[state=active]:border-primary": !noBorder,
         },
         className,
       )}
