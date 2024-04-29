@@ -195,10 +195,6 @@ export const propertiesRouter = createTRPCRouter({
     const long = -118.3806008;
     const radius = 10; // 100km.
 
-    // // Convert latitude and longitude to radians
-    // const lat = (nlat * Math.PI) / 180;
-    // const long = (nlong * Math.PI) / 180;
-
     const data = await ctx.db
       .select({
         id: properties.id,

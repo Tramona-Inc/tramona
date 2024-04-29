@@ -23,6 +23,8 @@ export default function TravelerPage() {
       <div className="container flex flex-col space-y-5 bg-white">
         <CitiesFilter />
         <Listings />
+
+        {/* ! For testing purposes */}
         {/* <LongLatFilter /> */}
       </div>
     </div>
