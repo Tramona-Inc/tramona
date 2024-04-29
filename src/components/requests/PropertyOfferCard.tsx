@@ -84,7 +84,6 @@ export default function PropertyOfferCard({
           <h1 className="flex flex-row items-center font-bold md:text-xl">
             <MapPin />
             {offer.location}
-            {"Las Vegas, Nevada"}
           </h1>
 
           <Dialog>

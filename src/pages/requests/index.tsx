@@ -26,26 +26,15 @@ function RequestsTabs() {
   return (
     <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
-        <TabsTrigger
-          value="cityRequests"
-          // count={requests?.activeRequestGroups.length ?? "blank"}
-        >
-          {/* <TagIcon /> Current Requests */}
+        <TabsTrigger value="cityRequests">
           <MapPinIcon />
           City Requests
         </TabsTrigger>
-        <TabsTrigger
-          value="propertyOffers"
-          // count={requests?.inactiveRequestGroups.length ?? "blank"}
-        >
-          {/* <HistoryIcon /> Past Requests */}
+        <TabsTrigger value="propertyOffers">
           <HomeIcon />
           Property Offers
         </TabsTrigger>
-        <TabsTrigger
-          value="history"
-          // count={requests?.inactiveRequestGroups.length ?? "blank"}
-        >
+        <TabsTrigger value="history">
           <HistoryIcon />
           History
         </TabsTrigger>
@@ -74,8 +63,8 @@ export default function Page() {
       </Head>
 
       <DashboardLayout type="guest">
-        <div className="container col-span-10 min-h-screen-minus-header px-4 pb-64 pt-5 2xl:col-span-11">
-          <div className="mx-auto">
+        <div className="min-h-screen-minus-header px-4 pb-64 pt-5">
+          <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-4xl font-bold text-black">
                 Requests & Offers

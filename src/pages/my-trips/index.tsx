@@ -11,7 +11,7 @@ import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue"
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { type RouterOutputs, api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
-import MyTripsEmptySvg from '@/components/_common/EmptyStateSvg/MyTripsEmptySvg';
+import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
@@ -137,9 +137,7 @@ export default function MyTrips() {
                       })
                     ) : (
                       <div className="flex h-full flex-col items-center justify-center gap-5">
-                        <h1 className="text-2xl font-bold">
-                          No previous trips
-                        </h1>
+                        <p className="text-2xl font-bold">No previous trips</p>
                         <Button variant={"darkOutline"} asChild>
                           <Link href={"/requests"}>Book some trips!</Link>
                         </Button>
@@ -153,9 +151,7 @@ export default function MyTrips() {
         ) : (
           <EmptyStateValue
             title={"You have no upcoming trips"}
-            description={
-              "once you've booked a property your trips will show up here."
-            }
+            description={"Once you've booked a property, it will show up here."}
             redirectTitle={"Start Searching"}
             href={"/"}
           >

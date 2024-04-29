@@ -7,7 +7,7 @@ import {
   plural,
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
-import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
+import { BathIcon, BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
 import { type PropsWithChildren } from "react";
 import UserAvatar from "../../../_common/UserAvatar";
 import SaleTagIcon from "../../../_icons/SaleTagIcon";
@@ -133,6 +133,13 @@ export default function OfferCard({
                 <p className="flex items-center gap-2 text-lg font-semibold text-black">
                   {property.numBedrooms}{" "}
                   <DoorClosedIcon className="text-muted-foreground" />
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Bathrooms</p>
+                <p className="flex items-center gap-2 text-lg font-semibold text-black">
+                  {property.numBathrooms}{" "}
+                  <BathIcon className="text-muted-foreground" />
                 </p>
               </div>
               <div>
