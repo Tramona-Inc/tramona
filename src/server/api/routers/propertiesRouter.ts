@@ -147,6 +147,7 @@ export const propertiesRouter = createTRPCRouter({
           name: properties.name,
           maxNumGuests: properties.maxNumGuests,
           numBedrooms: properties.numBedrooms,
+          numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
           originalNightlyPrice: properties.originalNightlyPrice,
           distance: sql`

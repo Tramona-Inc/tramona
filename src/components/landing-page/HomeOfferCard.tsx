@@ -56,6 +56,7 @@ type PropertyCard = {
   imageUrls: string[];
   name: string;
   maxNumGuests: number;
+  numBathrooms: number | null;
   numBedrooms: number;
   numBeds: number;
   originalNightlyPrice: number | null;
