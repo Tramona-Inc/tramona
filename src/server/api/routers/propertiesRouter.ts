@@ -13,7 +13,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, sql } from "drizzle-orm";
+import { and, asc, eq, gt, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { bookedDates, properties } from "./../../db/schema/tables/properties";
 
@@ -150,64 +150,36 @@ export const propertiesRouter = createTRPCRouter({
             ) AS distance`,
         })
         .from(properties)
-        .orderBy(asc(sql`distance`))
         .where(
           and(
-            cursor
-              ? gt(
-                  sql`
-                  6371 * ACOS(
-                    SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
-                  )
-                `,
-                  cursor,
-                )
-              : undefined,
+            cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
             sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
+            input.city && input.city !== "all"
+              ? eq(properties.address, input.city)
+              : sql`TRUE`, // Conditionally include eq function for address
+            input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
+            input.bedrooms
+              ? lte(properties.numBedrooms, input.bedrooms)
+              : sql`TRUE`, // Conditionally include eq function
+            input.bathrooms
+              ? lte(properties.numBathrooms, input.bathrooms)
+              : sql`TRUE`, // Conditionally include eq function
           ),
         )
-        .limit(limit + 1);
-
-      // const data = await ctx.db.query.properties.findMany({
-      //   ...withCursorPagination({
-      //     // where: eq(properties.propertyType, "House"),
-      //     where: and(
-      //       input.lat && input.long && input.radius
-      //         ? sql`
-      //           6371 * acos(
-      //               SIN(${input.lat}) * SIN(radians(latitude)) + COS(${input.lat}) * COS(radians(latitude)) * COS(radians(longitude) - ${input.long})
-      //           ) <= ${input.radius}`
-      //         : sql`TRUE`,
-      //       // eq(properties.propertyType, "House"),
-      //       input.city && input.city !== "all"
-      //         ? eq(properties.address, input.city)
-      //         : sql`TRUE`, // Conditionally include eq function for address
-      //       input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
-      //       input.bedrooms
-      //         ? lte(properties.numBedrooms, input.bedrooms)
-      //         : sql`TRUE`, // Conditionally include eq function
-      //       input.bathrooms
-      //         ? lte(properties.numBathrooms, input.bathrooms)
-      //         : sql`TRUE`, // Conditionally include eq function
-      //     ),
-      //     limit: limit + 1,
-      //     cursors: [
-      //       // [
-      //       //   properties.createdAt,
-      //       //   "desc",
-      //       //   cursor ? new Date(cursor) : undefined,
-      //       // ],
-      //       [properties.id, "desc", cursor ? cursor : undefined],
-      //     ],
-      //   }),
-      // });
+        .limit(limit + 1)
+        .orderBy(asc(sql`id`));
 
       return {
         data,
         // nextCursor: data.length
         //   ? data[data.length - 1]?.createdAt.toISOString()
         //   : null,
-        nextCursor: data.length > 0 ? data[data.length - 1]?.distance : null,
+        // nextCursor: data.length > 0 ? data[data.length - 1]?.distance : null,
+        // nextCursor:
+        //   data.length && data[data.length - 1]?.distance !== cursor
+        //     ? data[data.length - 1]?.distance
+        //     : null,
+        nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
       };
     }),
   getCities: publicProcedure.query(async ({ ctx }) => {
