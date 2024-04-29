@@ -153,7 +153,9 @@ export const propertiesRouter = createTRPCRouter({
         .where(
           and(
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
-            sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
+            input.lat && input.long 
+              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
+              : sql`TRUE`, // Conditionally include eq function for address
             input.city && input.city !== "all"
               ? eq(properties.address, input.city)
               : sql`TRUE`, // Conditionally include eq function for address

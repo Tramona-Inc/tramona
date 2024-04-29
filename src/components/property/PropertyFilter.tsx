@@ -61,27 +61,27 @@ export function Total({
 }
 
 const propertyTypeOptions = [
-  "flexible",
-  "entire place",
-  "private",
-  "other",
+  "Flexible",
+  "Entire Place",
+  "Private",
+  "Other",
 ] as const;
 
 const propertyType = [
   {
-    value: "flexible",
+    value: "Flexible",
     title: "Flexible",
   },
   {
-    value: "entire place",
+    value: "Entire place",
     title: "Entire Place",
   },
   {
-    value: "private",
+    value: "Private",
     title: "Private",
   },
   {
-    value: "other",
+    value: "Other",
     title: "Other",
   },
 ];
@@ -116,7 +116,7 @@ export default function PropertyFilter() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      propertyType: "flexible",
+      propertyType: "Flexible",
       beds: beds,
       bedrooms: bedrooms,
       bathrooms: bathrooms,

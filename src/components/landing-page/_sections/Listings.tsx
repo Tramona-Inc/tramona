@@ -7,7 +7,9 @@ import HomeOfferCard from "../HomeOfferCard";
 
 export default function Listings() {
   const filter = useCitiesFilter((state) => state.filter);
-  const { beds, bedrooms, bathrooms } = useCitiesFilter((state) => state);
+  const { beds, bedrooms, bathrooms, placeType } = useCitiesFilter(
+    (state) => state,
+  );
 
   const {
     data: properties,
@@ -17,6 +19,7 @@ export default function Listings() {
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {
       // city: filter.id,
+      placeType: placeType,
       beds: beds,
       bathrooms: bathrooms,
       bedrooms: bedrooms,
