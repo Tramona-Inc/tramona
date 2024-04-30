@@ -8,7 +8,7 @@ import { useStepper } from "@/components/ui/use-stepper";
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import ReferralCodeDialog from "@/components/sign-up/ReferralCodeDialog";
-import { cn } from "@/utils/utils";
+import { cn, useIsMd } from "@/utils/utils";
 import { Lightbulb } from "lucide-react";
 import router from "next/router";
 import TransparentPricingIcon from "@/components/_icons/TransparentPricingIcon";
@@ -217,22 +217,7 @@ function Step2(): JSX.Element {
 }
 
 function Step3(): JSX.Element {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    function handleResize() {
-      setIsMobile(window.innerWidth < 768); // Adjust the breakpoint as needed
-    }
-
-    // Initial call to set isMobile based on current window size
-    handleResize();
-
-    // Add event listener to update isMobile state when window is resized
-    window.addEventListener("resize", handleResize);
-
-    // Clean up the event listener
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const isMobile = !useIsMd();
 
   return (
     <StepperContentLayout className="gap-4 text-center lg:container">
