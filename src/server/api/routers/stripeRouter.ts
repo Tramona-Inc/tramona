@@ -19,7 +19,6 @@ export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
   apiVersion: "2023-10-16",
 });
 
-
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
     .input(
@@ -194,6 +193,18 @@ export const stripeRouter = createTRPCRouter({
       }
     }),
 
+  getListOfPayments: protectedProcedure.query(async ({ ctx }) => {
+    console.log("ID------------------------", ctx.user.stripeCustomerId);
+
+    if (ctx.user.stripeCustomerId) {
+      console.log("CALLED")
+      return await stripe.paymentMethods.list({
+        type: "card",
+        limit: 3,
+        customer: ctx.user.stripeCustomerId,
+      });
+    }
+  }),
   getStripeSession: protectedProcedure
     .input(
       z.object({
@@ -247,16 +258,14 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   getVerificationReportsById: protectedProcedure
-  .input(z.object({ verificationId: z.string() }))
-  .query(
-    async ({ input }) => {
+    .input(z.object({ verificationId: z.string() }))
+    .query(async ({ input }) => {
       const verificationReport =
         await stripe.identity.verificationReports.retrieve(
-          input.verificationId
+          input.verificationId,
         );
       return verificationReport;
-    },
-  ),
+    }),
 
   getSetUpIntent: protectedProcedure
     .input(

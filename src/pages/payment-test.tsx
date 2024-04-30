@@ -1,7 +1,7 @@
-import { useStripe } from "@/components/requests/[id]/OfferCard/HowToBookDialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
+import { useStripe } from '@/utils/stripe-client';
 import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
@@ -19,6 +19,11 @@ export default function PaymentTest() {
 
   const { mutateAsync: getStripeSessionMutate } =
     api.stripe.getStripeSession.useMutation();
+
+  const { data: listOfPayments } =
+    api.stripe.getListOfPayments.useQuery();
+
+  console.log(listOfPayments)
 
   // const { mutateAsync: getSetupIntentMutate } =
   //   api.stripe.getSetUpIntent.useMutation();

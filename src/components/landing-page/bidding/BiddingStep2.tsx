@@ -17,6 +17,7 @@ function BiddingStep2({ property }: { property: Property }) {
   const guest = useBidding((state) => state.guest);
   const price = useBidding((state) => state.price);
   const options = useBidding((state) => state.options);
+  const resetSession = useBidding((state) => state.resetSession);
 
   const step = useBidding((state) => state.step);
   const setStep = useBidding((state) => state.setStep);
@@ -29,6 +30,7 @@ function BiddingStep2({ property }: { property: Property }) {
 
   const { mutate } = api.biddings.create.useMutation({
     onSuccess: () => {
+      resetSession();
       setStep(step + 1);
     },
   });
@@ -44,6 +46,7 @@ function BiddingStep2({ property }: { property: Property }) {
   }
 
   const stripePromise = useStripe();
+
 
   return (
     <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl ">
@@ -110,7 +113,6 @@ function BiddingStep2({ property }: { property: Property }) {
             </div>
           </div>
         </div>
-
         <div className="mt-4 w-[300px] md:w-[500px]">
           {options && (
             <EmbeddedCheckoutProvider

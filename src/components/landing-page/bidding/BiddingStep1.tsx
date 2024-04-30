@@ -87,7 +87,7 @@ function BiddingStep1({ property }: { property: Property }) {
     // Creates Session for mode setup and creates customer
     const response = await createSetupIntentSessionMutation(data);
 
-    console.log(response);
+    console.log("RESPONSE", response);
 
     if (stripe !== null && response) {
       const sesh = await getStripeSessionMutate({
@@ -106,6 +106,7 @@ function BiddingStep1({ property }: { property: Property }) {
         //   sessionId: response.id,
         // });
 
+        console.log("OPTIONS=============================", response);
         setOptions(response);
       }
     }
