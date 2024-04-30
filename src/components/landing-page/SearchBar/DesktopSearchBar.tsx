@@ -25,7 +25,13 @@ import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { cn, formatCurrency, getNumNights } from "@/utils/utils";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon, XIcon } from "lucide-react";
+import {
+  PlusIcon,
+  XIcon,
+  Filter,
+  UsersRoundIcon,
+  DollarSignIcon,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -237,129 +243,160 @@ export default function DesktopSearchBar({
         className="space-y-2"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: numTabs }).map((_, i) => {
-            const isSelected = curTab === i;
-            const hasErrors = tabsWithErrors.includes(i);
-            const showX = isSelected && numTabs > 1;
+        {mode == "request" && (
+          <div className="flex flex-wrap gap-1">
+            {Array.from({ length: numTabs }).map((_, i) => {
+              const isSelected = curTab === i;
+              const hasErrors = tabsWithErrors.includes(i);
+              const showX = isSelected && numTabs > 1;
 
-            // buttons in buttons arent allowed, so we only show the x button
-            // on the tab when the tab is selected, and make the tab a div instead
-            // of a button when its selected
-            const Comp = showX ? "div" : "button";
+              // buttons in buttons arent allowed, so we only show the x button
+              // on the tab when the tab is selected, and make the tab a div instead
+              // of a button when its selected
+              const Comp = showX ? "div" : "button";
 
-            return (
-              <Comp
-                key={i}
+              return (
+                <Comp
+                  key={i}
+                  type="button"
+                  onClick={showX ? undefined : () => setCurTab(i)}
+                  className={cn(
+                    "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
+                    hasErrors && "pr-3",
+                    isSelected
+                      ? "border border-gray-200 bg-white text-black"
+                      : "bg-white text-primary hover:bg-neutral-600/60",
+                    showX && "pr-2",
+                  )}
+                >
+                  Trip {i + 1}
+                  {hasErrors && (
+                    <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
+                      Errors
+                    </div>
+                  )}
+                  {showX && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (curTab === numTabs - 1) {
+                          setCurTab(numTabs - 2);
+                        }
+                        form.setValue(
+                          "data",
+                          data.filter((_, j) => j !== i),
+                        );
+                      }}
+                      className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
+                    >
+                      <XIcon className="size-3" />
+                    </button>
+                  )}
+                </Comp>
+              );
+            })}
+            {numTabs < MAX_REQUEST_GROUP_SIZE && (
+              <button
+                key=""
                 type="button"
-                onClick={showX ? undefined : () => setCurTab(i)}
-                className={cn(
-                  "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
-                  hasErrors && "pr-3",
-                  isSelected
-                    ? "border border-gray-200 bg-white text-black"
-                    : "bg-black/50 text-white hover:bg-neutral-600/60",
-                  showX && "pr-2",
-                )}
+                onClick={() => {
+                  setCurTab(numTabs);
+                  form.setValue("data", [
+                    ...data,
+                    defaultValues as FormSchema["data"][number],
+                  ]);
+                  // form.setFocus(`data.${data.length - 1}.location`);
+                }}
+                className="inline-flex items-center gap-1 rounded-full border-primary bg-accent p-2 pr-4 text-sm font-medium text-primary backdrop-blur-md hover:bg-neutral-600/60"
               >
-                Trip {i + 1}
-                {hasErrors && (
-                  <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
-                    Errors
-                  </div>
-                )}
-                {showX && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (curTab === numTabs - 1) {
-                        setCurTab(numTabs - 2);
-                      }
-                      form.setValue(
-                        "data",
-                        data.filter((_, j) => j !== i),
-                      );
-                    }}
-                    className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
-                  >
-                    <XIcon className="size-3" />
-                  </button>
-                )}
-              </Comp>
-            );
-          })}
-          {numTabs < MAX_REQUEST_GROUP_SIZE && (
-            <button
-              key=""
-              type="button"
-              onClick={() => {
-                setCurTab(numTabs);
-                form.setValue("data", [
-                  ...data,
-                  defaultValues as FormSchema["data"][number],
-                ]);
-                // form.setFocus(`data.${data.length - 1}.location`);
-              }}
-              className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
-            >
-              <PlusIcon className="size-4" />
-              Add another trip
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 rounded-3xl bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-12">
-          <LPLocationInput
-            control={form.control}
-            name={`data.${curTab}.location`}
-            formLabel="Location"
-            className="col-span-full lg:col-span-3"
-          />
-
-          <LPDateRangePicker
-            control={form.control}
-            name={`data.${curTab}.date`}
-            formLabel="Check in/Check out"
-            className="col-span-full lg:col-span-3"
-          />
-
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.numGuests`}
-            render={({ field }) => (
-              <LPFormItem className="lg:col-span-3">
-                <LPFormLabel>Number of guests</LPFormLabel>
-                <FormControl>
-                  <LPInput
-                    {...field}
-                    inputMode="numeric"
-                    placeholder="Add total guests"
-                  />
-                </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
+                <PlusIcon className="size-4" />
+                Add a trip
+              </button>
             )}
-          />
+          </div>
+        )}
+        <div className="flex-col rounded-3xl bg-white p-0.5 backdrop-blur-md">
+          <div className="flex flex-row gap-x-2">
+            <LPLocationInput
+              control={form.control}
+              name={`data.${curTab}.location`}
+              formLabel="Location"
+              className="rounded-lg border-2 border-border pr-24"
+            />
 
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.maxNightlyPriceUSD`}
-            render={({ field }) => (
-              <LPFormItem className="lg:col-span-3">
-                <LPFormLabel>Name your price</LPFormLabel>
-                <FormControl>
-                  <LPInput
-                    {...field}
-                    inputMode="decimal"
-                    prefix="$"
-                    suffix="/night"
-                    placeholder="Price/night"
-                  />
-                </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
-          />
+            <LPDateRangePicker
+              control={form.control}
+              name={`data.${curTab}.date`}
+              formLabel="Check in/Check out"
+              className="rounded-lg border-2 border-border pr-24"
+            />
+
+            <div className=" flex flex-row items-center justify-start rounded-md border-2 border-border px-4">
+              <UsersRoundIcon className="z-50 mr-[-23px] mt-4 h-6 w-6" />
+              <div className="z-10  mr-20 flex flex-row items-center">
+                <FormField
+                  control={form.control}
+                  name={`data.${curTab}.numGuests`}
+                  render={({ field }) => (
+                    <LPFormItem className=" z-10">
+                      <LPFormLabel className="z-20 ml-[-30px] text-sm ">
+                        Number of guests
+                      </LPFormLabel>
+                      <FormControl>
+                        <LPInput
+                          {...field}
+                          inputMode="numeric"
+                          placeholder="Add guests"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <LPFormMessage />
+                    </LPFormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className=" flex flex-row items-center justify-start rounded-md border-2 border-border px-2">
+              <DollarSignIcon className="z-50 mr-[-23px] mt-4 h-6 w-6" />
+              <div className="z-10  mr-28 flex flex-row items-center">
+                <FormField
+                  control={form.control}
+                  name={`data.${curTab}.maxNightlyPriceUSD`}
+                  render={({ field }) => (
+                    <LPFormItem className=" z-10">
+                      <LPFormLabel className="z-20 ml-[-28px] text-sm ">
+                        Price range
+                      </LPFormLabel>
+                      <FormControl>
+                        <LPInput
+                          {...field}
+                          inputMode="decimal"
+                          placeholder="Price per night"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <LPFormMessage />
+                    </LPFormItem>
+                  )}
+                />
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <Button
+                disabled={form.formState.isSubmitting}
+                type="button"
+                variant="default"
+                onClick={form.handleSubmit((data) =>
+                  checkPriceEstimation(data.data),
+                )}
+                size="lg"
+                className="mt-5 rounded-md font-semibold"
+              >
+                {mode === "search" ? "Search" : "Request Deal"}
+              </Button>
+            </div>
+          </div>
 
           <div className="col-span-full">
             <FiltersSection form={form} curTab={curTab} />
@@ -369,21 +406,6 @@ export default function DesktopSearchBar({
         {mode === "request" && (
           <AirbnbLinkDialog parentForm={form} curTab={curTab} />
         )}
-
-        <div className="flex justify-center">
-          <Button
-            disabled={form.formState.isSubmitting}
-            type="button"
-            onClick={form.handleSubmit((data) =>
-              checkPriceEstimation(data.data),
-            )}
-            size="lg"
-            variant="outlineLight"
-            className="mt-5 rounded-full font-semibold"
-          >
-            Request Deal
-          </Button>
-        </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
@@ -562,11 +584,13 @@ function FiltersSection({
           />
         </div>
       )}
-      <div className="flex justify-center p-2">
+
+      <div className="flex items-center justify-end p-3">
+        <Filter size={22} strokeWidth={1.5} />
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white hover:bg-white/20"
+          className="rounded-full bg-white/10 px-1 py-1 text-sm font-medium text-primary hover:bg-white/20"
         >
           {isExpanded ? "Hide filters" : "Add filters (optional)"}
         </button>

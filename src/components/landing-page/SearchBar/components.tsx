@@ -30,7 +30,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useMeasure } from "@uidotdev/usehooks";
-import { useState, type ComponentProps, forwardRef } from "react";
+import {
+  useState,
+  type ComponentProps,
+  forwardRef,
+  ReactElement,
+  ReactNode,
+} from "react";
 import { Calendar } from "@/components/ui/calendar";
 import PlacesPopover from "@/components/_common/PlacesPopover";
 import { Input } from "@/components/ui/input";
@@ -50,19 +56,19 @@ export const classNames = {
   wrapper: "group relative",
 
   label:
-    "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-white group-focus-within:text-black",
+    "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-primary group-focus-within:text-primary",
 
   // like label but for buttons
   buttonLabel: ({ isFocused }: { isFocused: boolean }) =>
     cn(
-      "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-white",
+      "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-primary",
       isFocused && "text-black",
     ),
 
   errorMsg: "pointer-events-none absolute left-8 top-14 z-10",
 
   input:
-    "peer block h-20 w-full rounded-full bg-transparent pt-4 text-white placeholder:text-white/50 hover:bg-white/10 focus:bg-white focus:outline-none focus:text-black placeholder:focus:text-black/50",
+    "peer block h-20 w-full rounded-full bg-transparent pt-4 text-primary placeholder:text-muted-foreground hover:bg-white/10 focus:bg-white focus:outline-none focus:text-black placeholder:focus:text-black/50",
 
   // like input but for buttons
   button: ({
@@ -76,8 +82,8 @@ export const classNames = {
       "peer flex h-20 w-full border-none rounded-full pt-4 px-8",
       isFocused ? "bg-white" : "bg-transparent hover:bg-white/10",
       isPlaceholder
-        ? cn("text-white/50", isFocused && "text-black/50")
-        : cn("text-white", isFocused && "text-black"),
+        ? cn("text-muted-foreground", isFocused && "text-black/50")
+        : cn("text-primary", isFocused && "text-black"),
     ),
   mobileButton: ({
     isPlaceholder,
@@ -132,7 +138,7 @@ export const LPInput = forwardRef<
   const [prefixRef, { width: prefixWidth }] = useMeasure();
   const [suffixRef, { width: suffixWidth }] = useMeasure();
 
-  const prefixEl = <p ref={prefixRef}>{prefix}</p>;
+  const prefixEl = <div ref={prefixRef}>{prefix}</div>;
   const suffixEl = <p ref={suffixRef}>{suffix}</p>;
 
   return (
@@ -158,18 +164,18 @@ export const LPInput = forwardRef<
 });
 
 // export function LPTextArea({
-//   value,
-//   defaultValue,
-//   className,
-//   ...props
+// value,
+// defaultValue,
+// className,
+// ...props
 // }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-//   return (
-//     <textarea
-//       className={cn(classNames.input, "px-8 pt-8", className)}
-//       value={defaultValue ?? value ?? ""}
-//       {...props}
-//     />
-//   );
+// return (
+// <textarea
+// className={cn(classNames.input, "px-8 pt-8", className)}
+// value={defaultValue ?? value ?? ""}
+// {...props}
+// />
+// );
 // }
 
 export function LPLocationInput<
@@ -202,7 +208,7 @@ export function LPLocationInput<
             setOpen={setIsOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className="w-96 -translate-y-14 overflow-clip px-0 pt-0"
+            className="w-96 -translate-y-12 overflow-clip px-0 pt-0"
             trigger={({ value, disabled }) => (
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -215,10 +221,10 @@ export function LPLocationInput<
                   "flex items-center text-left",
                 )}
               >
-                <p className="flex-1 truncate">
+                <MapPinIcon className="mx-auto h-6 w-6 shrink-0 text-primary" />
+                <p className="ml-2 flex-1 truncate text-sm">
                   {value ?? "Enter your destination"}
                 </p>
-                <MapPinIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
               </button>
             )}
           />
@@ -261,14 +267,14 @@ export default function LPDateRangePicker<
                     isPlaceholder: !field.value,
                     isFocused: isOpen,
                   }),
-                  "flex items-center",
+                  "flex items-center text-sm",
                 )}
               >
+                <CalendarIcon className="mr-3 h-6 w-6 text-primary" />
                 {field.value
                   ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     formatDateRange(field.value.from, field.value.to)
                   : "Select dates"}
-                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
               </button>
             </PopoverTrigger>
             <PopoverContent
