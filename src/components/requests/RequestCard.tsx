@@ -11,6 +11,7 @@ import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import RequestCardBadge from "./RequestCardBadge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -56,7 +57,16 @@ export default function RequestCard({
         {request.requestGroup.hasApproved ? (
           <RequestCardBadge request={request} />
         ) : (
-          <Badge variant="gray">Unconfirmed</Badge>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="gray">Unconfirmed</Badge>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-64">
+              You haven&apos;t confirmed your request yet. Check your text
+              messages or click &quot;Resend Confirmation&quot; to start getting
+              offers.
+            </TooltipContent>
+          </Tooltip>
         )}
         <div className="absolute right-4 top-2">
           {showAvatars && (

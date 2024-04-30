@@ -1,6 +1,7 @@
 import { getRequestStatus } from "@/utils/formatters";
 import { formatInterval, plural } from "@/utils/utils";
 import { Badge } from "../ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export default function RequestCardBadge({
   request,
@@ -19,9 +20,17 @@ export default function RequestCardBadge({
       const showTimeAgo = msAgo > 1000 * 60 * 60;
       const fmtdTimeAgo = showTimeAgo ? `(${formatInterval(msAgo)})` : "";
       return (
-        <Badge size={size} variant="yellow">
-          Pending {fmtdTimeAgo}
-        </Badge>
+        <Tooltip>
+          <TooltipTrigger>
+            <Badge size={size} variant="yellow">
+              Pending {fmtdTimeAgo}
+              {/* <QuestionMarkCircledIcon /> */}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            An offer is being found for your request.
+          </TooltipContent>
+        </Tooltip>
       );
     case "accepted":
       return (
