@@ -18,7 +18,7 @@ export default function HostRequestsOverview({
           <CardTitle>Incoming Requests</CardTitle>
           <div className="flex-1" />
           <Button variant="ghost" asChild>
-            <Link href="/host/incoming-requests">
+            <Link href="/host/requests">
               See all
               <ArrowRightIcon />
             </Link>

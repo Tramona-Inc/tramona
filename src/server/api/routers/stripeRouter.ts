@@ -5,15 +5,20 @@ import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 
+// Define a schema for the request body
+//verification stripe identity
+const CreateVerificationSessionInput = z.object({});
+
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
   apiVersion: "2023-10-16",
 });
+
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
@@ -218,6 +223,40 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
+  createVerificationSession: protectedProcedure.query(
+    async ({ ctx, input }) => {
+      const verificationSession =
+        await stripe.identity.verificationSessions.create({
+          type: "document",
+          metadata: {
+            user_id: ctx.user.id,
+          },
+        });
+
+      // Return only the client secret to the frontend.
+      const clientSecret = verificationSession.client_secret;
+      return clientSecret;
+    },
+  ),
+
+  getVerificationReports: protectedProcedure.query(async ({ ctx, input }) => {
+    const verificationReport = await stripe.identity.verificationReports.list({
+      limit: 3,
+    });
+    return verificationReport;
+  }),
+
+  getVerificationReportsById: protectedProcedure
+  .input(z.object({ verificationId: z.string() }))
+  .query(
+    async ({ input }) => {
+      const verificationReport =
+        await stripe.identity.verificationReports.retrieve(
+          input.verificationId
+        );
+      return verificationReport;
+    },
+  ),
 
   getSetUpIntent: protectedProcedure
     .input(

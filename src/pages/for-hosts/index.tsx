@@ -3,9 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
-import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
-import OfferCardsFeed from "@/components/offer-card/OfferCardsFeed";
 import { liveFeedOffers } from "@/components/offer-card/data";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -66,7 +64,7 @@ function IntroSection() {
               vacancies and increase your month-over-month profit.
             </p>
             <Link
-              href="for-hosts/sign-up"
+              href="host/onboarding"
               className={buttonVariants({ variant: "darkPrimary", size: "lg" })}
             >
               Sign Up Now

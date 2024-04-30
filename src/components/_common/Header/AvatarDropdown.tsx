@@ -21,7 +21,7 @@ import HostTeamsDropdownItems from "./HostTeamsDropdownItems";
 import { api } from "@/utils/api";
 import { useState } from "react";
 import CreateHostTeamDialog from "./CreateHostTeamDialog";
-
+import { usePathname } from "next/navigation";
 function DropdownTop({ session }: { session: Session }) {
   const title = session.user.name ?? session.user.email ?? "Anonymous";
   const subtitle = session.user.name ? session.user.email : null;
@@ -53,7 +53,8 @@ function DropdownTop({ session }: { session: Session }) {
 export default function AvatarDropdown({ session }: { session: Session }) {
   const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
-
+  const pathname = usePathname();
+  console.log(` this is the ${pathname}`);
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
   return (
@@ -81,7 +82,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuSeparator />
             </>
           )}
-          {session.user.role === "host" && (
+          {session?.user.role === "host" && pathname === "/host" && (
             <>
               <HostTeamsDropdownItems
                 hostProfile={hostProfile}
@@ -99,15 +100,10 @@ export default function AvatarDropdown({ session }: { session: Session }) {
           )}
           {session.user.role === "guest" && (
             <>
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard">
-                  <LayoutDashboardIcon />
-                  Dashboard
-                </Link>
-              </DropdownMenuItem>
+              <DropdownMenuItem asChild></DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/for-hosts/sign-up">
+                <Link href="/host/onboarding">
                   <UserCheck2Icon />
                   Become a Host
                 </Link>

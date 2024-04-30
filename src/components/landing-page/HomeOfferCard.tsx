@@ -9,10 +9,10 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import {
-  DialogContentLarge,
-  DialogLarge,
+  Dialog,
+  DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialogLarge";
+} from "@/components/ui/dialog"
 import { Form } from "@/components/ui/form";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
@@ -173,7 +173,7 @@ export default function HomeOfferCard({
             className="col-span-full sm:col-span-1"
             propertyId={property.id}
           />
-          <DialogLarge open={open} onOpenChange={setOpen}>
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button
                 type={"submit"}
@@ -183,11 +183,11 @@ export default function HomeOfferCard({
                 Make Offer
               </Button>
             </DialogTrigger>
-            <DialogContentLarge className="relative sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
-              {step !== 0 && (
+            <DialogContent className=" flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
+              {step !==0 && (
                 <Button
                   variant={"ghost"}
-                  className={cn("absolute left-2 top-2 md:left-4 md:top-4")}
+                  className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
                   onClick={() => {
                     if (step - 1 > -1) {
                       setStep(step - 1);
@@ -197,9 +197,9 @@ export default function HomeOfferCard({
                   <ChevronLeft />
                 </Button>
               )}
-              <MakeBid propertyId={property.id} />
-            </DialogContentLarge>
-          </DialogLarge>
+              <MakeBid propertyId={property} />
+            </DialogContent>
+          </Dialog>
         </form>
       </Form>
     </div>

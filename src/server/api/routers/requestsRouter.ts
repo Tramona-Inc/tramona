@@ -112,7 +112,7 @@ export const requestsRouter = createTRPCRouter({
   }),
 
   getAll: roleRestrictedProcedure(["admin"]).query(async () => {
-    console.log("getting all");
+z
     return await db.query.requests
       .findMany({
         with: {

@@ -11,7 +11,7 @@ function MakeBid({ propertyId }: { propertyId: number }) {
   });
 
   const step = useBidding((state) => state.step);
-
+  //we need to make a stop if the user is not verified 
   return (
     <>
       {

@@ -28,6 +28,12 @@ export const earningStatusEnum = pgEnum("earning_status", [
   "cancelled",
 ]);
 
+export const isIdentityVerifiedEnum = pgEnum("is_identity_verified", [
+  "false",
+  "true",
+  "pending",
+]);
+
 export const users = pgTable(
   "user",
   {
@@ -57,6 +63,10 @@ export const users = pgTable(
     createdAt: timestamp("created_at", { mode: "string" })
       .notNull()
       .defaultNow(),
+    //stripe identity verifications
+    isIdentityVerified: isIdentityVerifiedEnum("is_identity_verified").default("false").notNull(),
+    verificationReportId: varchar("verification_report_id"),
+    dateOfBirth: varchar("date_of_birth"),
   },
   (t) => ({
     phoneNumberIdx: index("phone_number_idx").on(t.phoneNumber),

@@ -1,4 +1,4 @@
-import { CitiesLatLong, useCitiesFilter } from "@/utils/store/cities-filter";
+import { type CitiesLatLong, useCitiesFilter } from "@/utils/store/cities-filter";
 import { cn } from "@/utils/utils";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { LucideListFilter } from "lucide-react";
