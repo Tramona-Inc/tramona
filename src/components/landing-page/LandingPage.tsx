@@ -25,7 +25,7 @@ export default function LandingPage() {
         </Head>
         <div className="bg-white">
           <div className="2xl:mx-12">
-            {isBannerVisible && (
+            {/* {isBannerVisible && (
               <div className="mb-0 mt-0 w-full place-items-center rounded-lg px-2 pt-2 lg:overflow-visible">
                 <div
                   role="alert"
@@ -50,7 +50,7 @@ export default function LandingPage() {
                   </button>
                 </div>
               </div>
-            )}
+            )} */}
             <MastHead />
             <HowItWorks />
             <SocialFeed />
