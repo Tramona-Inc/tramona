@@ -31,7 +31,7 @@ const DamageProtection = () => {
           </h2>
           <p className="text-lg text-gray-700 sm:text-xl">
             Discovering damages can be stressful, and your peace of mind is
-            our top priority. That's why we have partnered with Superhog to
+            our top priority. That&apos;s why we have partnered with Superhog to
             provide all our hosts/property managers with damage protection up
             to $50,000.
           </p>
