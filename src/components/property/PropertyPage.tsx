@@ -308,7 +308,7 @@ export default function PropertyPage({ property }: { property: Property }) {
           </section>
         </div>
         <div className="flex-1">
-          <BiddingForm price={property.originalNightlyPrice ?? 0} />
+          <BiddingForm propertyId={property.id} price={property.originalNightlyPrice ?? 0} />
         </div>
       </div>
       <hr className="h-px border-0 bg-gray-300" />

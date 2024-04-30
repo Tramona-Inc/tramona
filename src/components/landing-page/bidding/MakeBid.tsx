@@ -1,19 +1,30 @@
-import { type Property } from "@/server/db/schema";
+import Spinner from '@/components/_common/Spinner';
+import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import BiddingConfirmation from "./BiddingConfirmation";
 import BiddingStep1 from "./BiddingStep1";
 import BiddingStep2 from "./BiddingStep2";
 
+function MakeBid({ propertyId }: { propertyId: number }) {
+  const { data: property, isLoading } = api.properties.getById.useQuery({
+    id: propertyId,
+  });
 
-function MakeBid({ property }: { property: Property }) {
   const step = useBidding((state) => state.step);
   //we need to make a stop if the user is not verified 
   return (
-    <div>
-      {step == 0 && <BiddingStep1 property={property} />}
-      {step == 1 && <BiddingStep2 property={property} />}
-      {step == 2 && <BiddingConfirmation property={property} />}
-    </div>
+    <>
+      {
+        isLoading ? <Spinner /> : 
+        property && (
+          <div>
+            {step == 0 && <BiddingStep1 property={property} />}
+            {step == 1 && <BiddingStep2 property={property} />}
+            {step == 2 && <BiddingConfirmation property={property} />}
+          </div>
+        )
+      }
+    </>
   );
 }
 

@@ -27,7 +27,13 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function BiddingForm({ price }: { price: number }) {
+export default function BiddingForm({
+  propertyId,
+  price,
+}: {
+  propertyId: number;
+  price: number;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {},
@@ -65,6 +71,7 @@ export default function BiddingForm({ price }: { price: number }) {
             name="date"
             formLabel=""
             className="col-span-full rounded-3xl sm:col-span-1"
+            propertyId={propertyId}
           />
 
           <FormField
