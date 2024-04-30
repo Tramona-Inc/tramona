@@ -27,8 +27,9 @@ export default function Page() {
     },
   );
 
+  // ik this seems dumb but its better because it reuses the same
+  // getMyRequests query that we (probably) already have cached
   const { data: requests } = api.requests.getMyRequests.useQuery();
-
   const request = requests?.activeRequestGroups
     .map((group) => group.requests)
     .flat(1)
@@ -96,23 +97,17 @@ export default function Page() {
                         offerPropertyName: offer.property.name,
                       })
                     }
-                    size="lg"
                     variant="outline"
                     className="rounded-full"
                   >
-                    Message
+                    Message host
                   </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full"
-                    asChild
-                  >
+                  <Button variant="outline" className="rounded-full" asChild>
                     <Link href={`/offers/${offer.id}`}>More details</Link>
                   </Button>
                   {false /* offer.isPremium */ ? (
                     <PaywallDialog>
-                      <Button size="lg" variant="gold" className="rounded-lg">
+                      <Button variant="gold" className="rounded-lg">
                         Join Tramona Lisa
                       </Button>
                     </PaywallDialog>
@@ -136,9 +131,7 @@ export default function Page() {
                       offer={offer}
                       isAirbnb={offer.property.airbnbUrl !== null}
                     >
-                      <Button size="lg" className="min-w-32 rounded-full">
-                        Book
-                      </Button>
+                      <Button className="min-w-20 rounded-full">Book</Button>
                     </HowToBookDialog>
                   )}
                 </OfferCard>

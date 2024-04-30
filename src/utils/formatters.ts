@@ -31,7 +31,7 @@ export function getFmtdFilters(
     !withoutNote && filters.note,
   ].filter(Boolean);
 
-  return fmtdFiltersList.length === 0 ? undefined : fmtdFiltersList.join(" • ");
+  return fmtdFiltersList.length === 0 ? undefined : fmtdFiltersList.join(" · ");
 }
 
 export function getRequestStatus(request: {

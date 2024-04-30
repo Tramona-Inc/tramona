@@ -22,7 +22,16 @@ import {
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import "leaflet/dist/leaflet.css";
-import { ArrowLeftToLineIcon, ArrowRightToLineIcon, CalendarDays, CheckIcon, ChevronRight, ImagesIcon, MapPin, UsersRoundIcon } from "lucide-react";
+import {
+  ArrowLeftToLineIcon,
+  ArrowRightToLineIcon,
+  CalendarDays,
+  CheckIcon,
+  ChevronRight,
+  ImagesIcon,
+  MapPin,
+  UsersRoundIcon,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,7 +40,7 @@ import { useMediaQuery } from "../_utils/useMediaQuery";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import { AspectRatio } from "../ui/aspect-ratio";
 import OfferPhotos from "./OfferPhotos";
-import { Badge } from '../ui/badge';
+import { Badge } from "../ui/badge";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
@@ -517,7 +526,7 @@ export default function OfferPage({
       {property.checkInTime && (
         <div>
           <hr className="h-px border-0 bg-gray-300" />
-          <section id="house-rules" className="scroll-mt-36 mt-4">
+          <section id="house-rules" className="mt-4 scroll-mt-36">
             <h1 className="text-lg font-bold">House rules</h1>
             {property.checkInTime && property.checkOutTime && (
               <div className="my-2 flex items-center justify-start gap-16">
