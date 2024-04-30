@@ -121,6 +121,7 @@
     "react-phone-number-input": "^3.3.9",
     "recharts": "^2.12.3",
     "resend": "^3.1.0",
+    "solid": "link:@heroicons/react/solid",
     "stripe": "^14.23.0",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.2.1",

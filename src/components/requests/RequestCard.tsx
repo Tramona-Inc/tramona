@@ -1,9 +1,8 @@
 import { type RouterOutputs } from "@/utils/api";
-import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
+import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
-  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
@@ -11,6 +10,8 @@ import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
+import RequestCardBadge from "./RequestCardBadge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -56,7 +57,16 @@ export default function RequestCard({
         {request.requestGroup.hasApproved ? (
           <RequestCardBadge request={request} />
         ) : (
-          <Badge variant="gray">Unconfirmed</Badge>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="gray">Unconfirmed</Badge>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-64">
+              You haven&apos;t confirmed your request yet. Check your text
+              messages or click &quot;Resend Confirmation&quot; to start getting
+              offers.
+            </TooltipContent>
+          </Tooltip>
         )}
         <div className="absolute right-4 top-2">
           {showAvatars && (
@@ -100,30 +110,4 @@ export default function RequestCard({
       <CardFooter>{children}</CardFooter>
     </Card>
   );
-}
-
-export function RequestCardBadge({
-  request,
-}: {
-  request: {
-    createdAt: Date;
-    resolvedAt: Date | null;
-    numOffers: number;
-  };
-}) {
-  switch (getRequestStatus(request)) {
-    case "pending":
-      const msAgo = Date.now() - request.createdAt.getTime();
-      const showTimeAgo = msAgo > 1000 * 60 * 60;
-      const fmtdTimeAgo = showTimeAgo ? `(${formatInterval(msAgo)})` : "";
-      return <Badge variant="yellow">Pending {fmtdTimeAgo}</Badge>;
-    case "accepted":
-      return (
-        <Badge variant="green">{plural(request.numOffers, "offer")}</Badge>
-      );
-    case "rejected":
-      return <Badge variant="red">Rejected</Badge>;
-    case "booked":
-      return <Badge variant="blue">Booked</Badge>;
-  }
 }

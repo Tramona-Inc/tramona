@@ -1,16 +1,15 @@
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
+import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
-  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import { type DetailedRequest } from "../RequestCard";
 import RequestRefreshDialog from "../RequestRefreshDialog";
+import RequestCardBadge from "../RequestCardBadge";
 
 export default function LargeRequestCard({
   request,
@@ -65,42 +64,9 @@ export default function LargeRequestCard({
         )}
       </CardContent>
       <div className="flex justify-end">
-        <LargeRequestCardBadge request={request} />
+        <RequestCardBadge size="lg" request={request} />
       </div>
       {request.numOffers > 0 && <RequestRefreshDialog request={request} />}
     </Card>
   );
-}
-
-function LargeRequestCardBadge({ request }: { request: DetailedRequest }) {
-  switch (getRequestStatus(request)) {
-    case "pending":
-      const msAgo = Date.now() - request.createdAt.getTime();
-      const showTimeAgo = msAgo > 1000 * 60 * 60;
-      const fmtdTimeAgo = showTimeAgo ? `(${formatInterval(msAgo)})` : "";
-
-      return (
-        <Badge size="lg" variant="yellow">
-          Pending {fmtdTimeAgo}
-        </Badge>
-      );
-    case "accepted":
-      return (
-        <Badge size="lg" variant="green">
-          {plural(request.numOffers, "offer")}
-        </Badge>
-      );
-    case "rejected":
-      return (
-        <Badge size="lg" variant="red">
-          Rejected
-        </Badge>
-      );
-    case "booked":
-      return (
-        <Badge size="lg" variant="blue">
-          Used
-        </Badge>
-      );
-  }
 }

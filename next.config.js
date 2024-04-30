@@ -94,6 +94,11 @@ const config = {
         protocol: "https",
         hostname: "assets.guesty.com",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com"
+      },
+
     ],
   },
   experimental: {

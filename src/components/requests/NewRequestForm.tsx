@@ -17,7 +17,7 @@ import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
+import { capitalize, getNumNights, plural, useIsSm } from "@/utils/utils";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FilterIcon } from "lucide-react";
@@ -87,7 +87,7 @@ export default function NewRequestForm({
 }) {
   const { status } = useSession();
 
-  const isDesktop = useIsDesktop();
+  const isDesktop = useIsSm();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
