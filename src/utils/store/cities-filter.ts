@@ -1,9 +1,32 @@
+import { cities } from "@/components/landing-page/CitiesFilter";
+import { type ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema/tables/properties";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+type RoomType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
+
+export type CitiesLatLong = {
+  id: string;
+  label: string;
+  long: number;
+  lat: number;
+};
+
 type CitiesFilterState = {
-  filter: string;
-  setFilter: (filter: string) => void;
+  open: boolean;
+  filter: CitiesLatLong;
+  roomType: RoomType;
+  setFilter: (filter: CitiesLatLong) => void;
+  setRoomType: (roomType: RoomType) => void;
+  beds: number;
+  bedrooms: number;
+  bathrooms: number;
+  setBeds: (beds: number) => void;
+  setBedrooms: (bedrooms: number) => void;
+  setBathrooms: (bathrooms: number) => void;
+  houseRules: string[];
+  setHouseRules: (houseRules: string[]) => void;
+  setOpen: (open: boolean) => void;
 };
 
 // export const useBidding = create<BiddingState>((set) => ({
@@ -27,9 +50,33 @@ type CitiesFilterState = {
 export const useCitiesFilter = create<CitiesFilterState>()(
   persist(
     (set) => ({
-      filter: "All",
-      setFilter: (filter: string) => {
+      open: false,
+      filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
+      roomType: "Flexible",
+      beds: 0,
+      bedrooms: 0,
+      bathrooms: 0,
+      houseRules: [],
+      setFilter: (filter: CitiesLatLong) => {
         set(() => ({ filter }));
+      },
+      setRoomType: (roomType: RoomType) => {
+        set(() => ({ roomType }));
+      },
+      setBeds: (beds: number) => {
+        set(() => ({ beds }));
+      },
+      setBedrooms: (bedrooms: number) => {
+        set(() => ({ bedrooms }));
+      },
+      setBathrooms: (bathrooms: number) => {
+        set(() => ({ bathrooms }));
+      },
+      setHouseRules: (houseRules: string[]) => {
+        set(() => ({ houseRules }));
+      },
+      setOpen: (open: boolean) => {
+        set(() => ({ open }));
       },
     }),
     {
