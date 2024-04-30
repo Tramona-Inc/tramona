@@ -83,7 +83,6 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^0.2.1",
-    "compromise": "^14.13.0",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
     "drizzle-orm": "^0.30.0",
