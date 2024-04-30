@@ -1,7 +1,8 @@
+import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
 import {
   Dialog,
@@ -20,27 +21,168 @@ import {
   getTramonaFeeTotal,
   plural,
 } from "@/utils/utils";
+import { AspectRatio } from "../ui/aspect-ratio";
 import { StarFilledIcon } from "@radix-ui/react-icons";
-import "leaflet/dist/leaflet.css";
 import {
-  ArrowLeftToLineIcon,
-  ArrowRightToLineIcon,
-  CalendarDays,
   CheckIcon,
-  ChevronRight,
+  XIcon,
   ImagesIcon,
+  ChevronRight,
   MapPin,
+  ZapIcon,
+  BaggageClaimIcon,
+  TreePalmIcon,
+  LandPlotIcon,
+  FishIcon,
+  FlameKindlingIcon,
+  TreeDeciduousIcon,
+  MountainSnowIcon,
+  MountainIcon,
+  CookingPotIcon,
+  ShieldCheckIcon,
   UsersRoundIcon,
+  CalendarDays,
+  EggFriedIcon,
 } from "lucide-react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../_common/Spinner";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
-import { AspectRatio } from "../ui/aspect-ratio";
+import "leaflet/dist/leaflet.css";
+import dynamic from "next/dynamic";
 import OfferPhotos from "./OfferPhotos";
-import { Badge } from "../ui/badge";
+import { useMediaQuery } from "../_utils/useMediaQuery";
+import { FunctionComponent, SVGProps } from "react";
+import {
+  WifiIcon,
+  UtensilsIcon,
+  Tv2Icon,
+  WashingMachineIcon,
+  ThermometerSnowflakeIcon,
+  ChefHatIcon,
+  MicrowaveIcon,
+  HeaterIcon,
+  DogIcon,
+  AccessibilityIcon,
+  BathIcon,
+  DumbbellIcon,
+  CircleParkingIcon,
+  CoffeeIcon,
+  WavesIcon,
+  CrossIcon,
+  AlarmSmokeIcon,
+  ArrowLeftToLineIcon,
+  ArrowRightToLineIcon,
+} from "lucide-react";
+import AmenitiesComponent from "./CategorizedAmenities";
+
+type LucideIcon = FunctionComponent<SVGProps<SVGSVGElement>>;
+type AmenityIcons = {
+  [amenityName: string]: LucideIcon;
+};
+
+// prettier-ignore
+const amenityIcons: AmenityIcons = {
+  "Wireless Internet": WifiIcon,
+  "TV": Tv2Icon,
+  "Washer": WashingMachineIcon,
+  "Cookware": ChefHatIcon,
+  "Air conditioning": ThermometerSnowflakeIcon,
+  "Dishes and silverware": UtensilsIcon,
+  "Microwave": MicrowaveIcon,
+  "Breakfast": EggFriedIcon,
+  "Kitchen": CookingPotIcon,
+  "Heating": HeaterIcon,
+  "Pets Allowed": DogIcon,
+  "Wheelchair accessible": AccessibilityIcon,
+  "Bathtub": BathIcon,
+  "Gym": DumbbellIcon,
+  "Free parking on street": CircleParkingIcon,
+  "Paid parking off premises": CircleParkingIcon,
+  "Paid parking on premises": CircleParkingIcon,
+  "Free parking on premises": CircleParkingIcon,
+  "Coffee maker": CoffeeIcon,
+  "Swimming pool": WavesIcon,
+  "Beach": TreePalmIcon,
+  "Golf course front": LandPlotIcon,
+  "Golf view": LandPlotIcon,
+  "Lake": WavesIcon,
+  "Mountain": MountainIcon,
+  "Near Ocean": FishIcon,
+  "Sea view": FishIcon,
+  "Resort": MountainSnowIcon,
+  "Garden or backyard": TreeDeciduousIcon,
+  "Indoor fireplace": FlameKindlingIcon,
+  "First aid kit": CrossIcon,
+  "Carbon monoxide detector": AlarmSmokeIcon,
+};
+
+type AmenityItemProps = {
+  name: keyof AmenityIcons;
+};
+
+const AmenityItem: React.FC<AmenityItemProps> = ({ name }) => {
+  const IconComponent = amenityIcons[name];
+  if (!IconComponent) return null;
+  return (
+    <div className="flex items-center space-x-2 py-2 md:py-6">
+      {IconComponent && <IconComponent className="h-5 w-5" />}
+      <span>{name}</span>
+    </div>
+  );
+};
+
+const amenityPriorityOrder = [
+  "Wireless Internet",
+  "Air conditioning",
+  "Heating",
+  "Kitchen",
+  "Washer",
+  "Dryer",
+  "Gym",
+  "Breakfast",
+  "Pets Allowed",
+  "Wheelchair accessible",
+  "Bathtub",
+];
+
+type PropertyAmenitiesProps = {
+  amenities: string[];
+};
+
+const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
+  amenities = [],
+}) => {
+  const isMobile = useMediaQuery("(max-width: 640px)");
+
+  if (!Array.isArray(amenities) || amenities.length === 0) {
+    return <p>No amenities to display.</p>;
+  }
+
+  const sortedAmenities = amenities.sort((a, b) => {
+    const indexA = amenityPriorityOrder.indexOf(a);
+    const indexB = amenityPriorityOrder.indexOf(b);
+    return (
+      (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB)
+    );
+  });
+
+  let toDisplay = 9;
+  if (isMobile) {
+    toDisplay = 5;
+  }
+  const topAmenities = sortedAmenities
+    .filter((amenity) => amenityIcons[amenity])
+    .slice(0, toDisplay);
+
+  return (
+    <div className="gap-4 py-6 md:grid md:grid-cols-3">
+      {topAmenities.map((amenity, index) => (
+        <AmenityItem key={index} name={amenity} />
+      ))}
+    </div>
+  );
+};
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
@@ -78,6 +220,7 @@ export default function OfferPage({
   if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
     isBooked = true;
   }
+  console.log(request);
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: property.address!,
@@ -95,16 +238,16 @@ export default function OfferPage({
 
   const discountPercentage = getDiscountPercentage(
     property.originalNightlyPrice ?? 0,
-    offerNightlyPrice,
+    offerNightlyPrice ?? 0,
   );
 
   const checkInDate = formatDateMonthDay(request.checkIn);
   const checkOutDate = formatDateMonthDay(request.checkOut);
   const numNights = getNumNights(request.checkIn, request.checkOut);
-
-  const originalTotal = property.originalNightlyPrice
-    ? property.originalNightlyPrice * numNights
-    : 0;
+  if (property.originalNightlyPrice === null) {
+    throw new Error("originalNightlyPrice is required but was not provided.");
+  }
+  const originalTotal = property.originalNightlyPrice * numNights;
 
   const tramonaServiceFee = getTramonaFeeTotal(
     originalTotal - offer.totalPrice,
@@ -283,41 +426,6 @@ export default function OfferPage({
       <hr className="h-px border-0 bg-gray-300" />
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
-          <h1 className="items-center text-lg font-semibold sm:text-3xl">
-            {property.name}{" "}
-            <Badge className=" -translate-y-1 bg-primary text-white">
-              {discountPercentage}% off
-            </Badge>
-          </h1>
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-1">
-              {property.numRatings > 0 && (
-                <Badge variant="secondary" icon={<StarFilledIcon />}>
-                  {property.avgRating} ({property.numRatings})
-                </Badge>
-              )}
-              <Badge variant="secondary">
-                {plural(property.numBedrooms, "bedroom")}
-              </Badge>
-              <Badge variant="secondary">
-                {plural(property.numBeds, "bed")}
-              </Badge>
-              {property.numBathrooms && (
-                <Badge variant="secondary">
-                  {plural(property.numBathrooms, "bathroom")}
-                </Badge>
-              )}
-              <Badge variant="secondary">{property.roomType}</Badge>
-            </div>
-            <div className="flex flex-wrap items-center gap-1">
-              {property.amenities?.map((amenity) => (
-                <Badge variant="secondary" key={amenity}>
-                  {amenity}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
           <section>
             <div className="flex items-center gap-2">
               <UserAvatar
@@ -331,10 +439,14 @@ export default function OfferPage({
               </div>
             </div>
           </section>
-          <section>
-            <div className="z-20 max-w-2xl rounded-lg bg-zinc-200 px-4 py-2 text-zinc-700">
-              <div className="line-clamp-3 break-words">{property.about}</div>
-              <div className="flex justify-end">
+          <hr className="h-px border-0 bg-gray-300" />
+          <section id="overview" className="scroll-mt-36">
+            <h1 className="text-lg font-semibold md:text-xl">
+              About this property
+            </h1>
+            <div className="z-20 max-w-2xl py-2 text-zinc-700">
+              <div className="line-clamp-5 break-words">{property.about}</div>
+              <div className="flex justify-start py-2">
                 <Dialog>
                   <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
                     Show more
@@ -353,32 +465,27 @@ export default function OfferPage({
               </div>
             </div>
           </section>
-          <section className="space-y-1">
-            {coordinateData && (
-              <div className="relative z-10">
-                <MapContainer
-                  center={[
-                    coordinateData.coordinates.lat,
-                    coordinateData.coordinates.lng,
-                  ]}
-                  zoom={15}
-                  scrollWheelZoom={false}
-                  style={{ height: "400px" }}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <Circle
-                    center={[
-                      coordinateData.coordinates.lat,
-                      coordinateData.coordinates.lng,
-                    ]}
-                    radius={200} // Adjust radius as needed
-                    pathOptions={{ color: "red" }} // Customize circle color and other options
-                  />
-                </MapContainer>
-              </div>
+          <hr className="h-px border-0 bg-gray-300" />
+          <section id="amenities" className="scroll-mt-36">
+            <h1 className="text-lg font-semibold md:text-xl">Amenitites</h1>
+            <PropertyAmenities amenities={property.amenities || []} />
+            {property.amenities && (
+              <Dialog>
+                <DialogTrigger className="inline-flex w-full items-center justify-center rounded-lg border border-black px-2.5 py-2 text-foreground md:w-1/4">
+                  Show all amenities
+                </DialogTrigger>
+
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle className="">Amenities</DialogTitle>
+                  </DialogHeader>
+                  <div className="max-h-96 overflow-y-scroll">
+                    <AmenitiesComponent
+                      propertyAmenities={property.amenities}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
             )}
           </section>
         </div>
@@ -458,7 +565,7 @@ export default function OfferPage({
                 isBooked={isBooked}
                 listingId={offer.id}
                 propertyName={property.name}
-                originalNightlyPrice={property.originalNightlyPrice ?? 0}
+                originalNightlyPrice={property.originalNightlyPrice}
                 airbnbUrl={property.airbnbUrl ?? ""}
                 checkIn={request.checkIn}
                 checkOut={request.checkOut}
@@ -526,7 +633,7 @@ export default function OfferPage({
       {property.checkInTime && (
         <div>
           <hr className="h-px border-0 bg-gray-300" />
-          <section id="house-rules" className="mt-4 scroll-mt-36">
+          <section id="house-rules" className="scroll-mt-36">
             <h1 className="text-lg font-bold">House rules</h1>
             {property.checkInTime && property.checkOutTime && (
               <div className="my-2 flex items-center justify-start gap-16">
