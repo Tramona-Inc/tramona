@@ -261,7 +261,7 @@ export default function Welcome() {
       </Head>
 
       <ReferralCodeDialog />
-      <div className="mx-auto flex h-dvh w-full flex-col justify-between gap-4 px-5 py-5 lg:px-80 lg:py-10">
+      <div className="mx-auto flex min-h-screen-minus-header max-w-3xl flex-col justify-between gap-4 p-4">
         <div>
           <Stepper activeStep={activeStep} responsive={false}>
             {steps.map((step, index) => (
@@ -301,7 +301,7 @@ export default function Welcome() {
             <Button
               size="lg"
               onClick={isLastStep ? () => router.push("/") : nextStep}
-              className="basis-2/3 rounded-lg bg-teal-900 font-semibold hover:bg-teal-950"
+              className="flex-1 rounded-lg bg-teal-900 font-semibold hover:bg-teal-950"
             >
               {isLastStep ? "Start Traveling" : "Next"}
             </Button>
