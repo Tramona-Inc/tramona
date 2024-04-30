@@ -315,8 +315,8 @@ export default function DesktopSearchBar({
             )}
           </div>
         )}
-        <div className="flex-col rounded-3xl bg-white p-0.5 backdrop-blur-md">
-          <div className="flex flex-row gap-x-2">
+        <div className="flex-col rounded-3xl bg-white backdrop-blur-md">
+          <div className="flex flex-row items-center gap-x-2">
             <LPLocationInput
               control={form.control}
               name={`data.${curTab}.location`}
@@ -328,7 +328,7 @@ export default function DesktopSearchBar({
               control={form.control}
               name={`data.${curTab}.date`}
               formLabel="Check in/Check out"
-              className="rounded-lg border-2 border-border pr-24"
+              className="rounded-lg border-2 border-border pr-36"
             />
 
             <div className=" flex flex-row items-center justify-start rounded-md border-2 border-border px-4">
@@ -339,7 +339,7 @@ export default function DesktopSearchBar({
                   name={`data.${curTab}.numGuests`}
                   render={({ field }) => (
                     <LPFormItem className=" z-10">
-                      <LPFormLabel className="z-20 ml-[-30px] text-sm ">
+                      <LPFormLabel className="z-20 ml-[-32px] text-sm ">
                         Number of guests
                       </LPFormLabel>
                       <FormControl>
@@ -359,7 +359,7 @@ export default function DesktopSearchBar({
 
             <div className=" flex flex-row items-center justify-start rounded-md border-2 border-border px-2">
               <DollarSignIcon className="z-50 mr-[-23px] mt-4 h-6 w-6" />
-              <div className="z-10  mr-28 flex flex-row items-center">
+              <div className="z-10 mr-20 flex flex-row items-center">
                 <FormField
                   control={form.control}
                   name={`data.${curTab}.maxNightlyPriceUSD`}
@@ -391,7 +391,7 @@ export default function DesktopSearchBar({
                   checkPriceEstimation(data.data),
                 )}
                 size="lg"
-                className="mt-5 rounded-md font-semibold"
+                className=" rounded-lg py-9 font-semibold"
               >
                 {mode === "search" ? "Search" : "Request Deal"}
               </Button>

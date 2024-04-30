@@ -9,7 +9,7 @@ export default function SearchBar() {
       <div className="flex items-center justify-center">
         <Tabs
           defaultValue={"search"}
-          className="rounded-lg border-2 border-border bg-white px-20 shadow-sm"
+          className="rounded-lg border-2 border-border bg-white px-10 shadow-sm"
         >
           <TabsList noBorder className=" flex items-center justify-center">
             <TabsTrigger value="search" className="border-b-2 ">
