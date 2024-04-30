@@ -1,3 +1,4 @@
+import type Stripe from "stripe";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -9,11 +10,13 @@ type BiddingState = {
     to: Date;
   };
   step: number;
+  options: Stripe.Response<Stripe.Checkout.Session> | null;
   setPrice: (price: number) => void;
   setGuest: (guest: number) => void;
   setDate: (from: Date, to: Date) => void;
   setStep: (step: number) => void;
   resetSession: () => void;
+  setOptions: (options: Stripe.Response<Stripe.Checkout.Session>) => void;
 };
 
 // export const useBidding = create<BiddingState>((set) => ({
@@ -44,6 +47,7 @@ export const useBidding = create<BiddingState>()(
         to: new Date(),
       },
       step: 0,
+      options: null,
       setPrice: (price: number) => {
         set(() => ({ price }));
       },
@@ -58,6 +62,9 @@ export const useBidding = create<BiddingState>()(
       },
       resetSession: () => {
         sessionStorage.removeItem("bidding-state");
+      },
+      setOptions: (options: Stripe.Response<Stripe.Checkout.Session>) => {
+        set(() => ({ options }));
       },
     }),
     {

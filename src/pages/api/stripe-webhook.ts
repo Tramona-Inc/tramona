@@ -21,7 +21,6 @@ import { formatDate } from "date-fns";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { version } from "os";
 
 // ! Necessary for stripe
 export const config = {
@@ -213,6 +212,7 @@ export default async function webhook(
             .then((res) => res?.stripeCustomerId);
 
           if (!stripeCustomerId) {
+            console.log("INSERTING CUSTOMER ID");
             await db
               .update(users)
               .set({
@@ -283,13 +283,13 @@ export default async function webhook(
           console.log("is now verified");
           //adding the users.DOB to the db
           if (verificationSession.last_verification_report) {
-
             //verification report has all of the data on the user such DOB/Adress and documents
 
-           
-            const verificationReportId = JSON.parse(JSON.stringify(verificationSession.last_verification_report)) as string;
-              console.log("This is last verification report id");
-              console.log(verificationReportId)
+            const verificationReportId = JSON.parse(
+              JSON.stringify(verificationSession.last_verification_report),
+            ) as string;
+            console.log("This is last verification report id");
+            console.log(verificationReportId);
             const verificationReport =
               await stripe.identity.verificationReports.retrieve(
                 verificationReportId,

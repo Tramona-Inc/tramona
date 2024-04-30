@@ -1,3 +1,4 @@
+import IdentityModal from "@/components/_utils/IdentityModal";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -8,21 +9,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { type Property } from "@/server/db/schema";
+import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
+import { useStripe } from "@/utils/stripe-client";
 import { formatCurrency } from "@/utils/utils";
 import { zodNumber } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { ArrowRight, Loader } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { api } from "@/utils/api";
-import IdentityModal from "@/components/_utils/IdentityModal";
-import { env } from "@/env";
-import { loadStripe } from "@stripe/stripe-js";
-import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   price: zodNumber({ min: 1 }),
@@ -38,11 +37,12 @@ function BiddingStep1({ property }: { property: Property }) {
   const setPrice = useBidding((state) => state.setPrice);
   const price = useBidding((state) => state.price);
 
+  const setOptions = useBidding((state) => state.setOptions);
+
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
   //determine if user identity is verified
   const { data: users } = api.users.myVerificationStatus.useQuery();
-  const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -52,11 +52,62 @@ function BiddingStep1({ property }: { property: Property }) {
     },
   });
 
-  function onSubmit(values: FormSchema) {
+  const stripePromise = useStripe();
+  const session = useSession({ required: true });
+
+  const { mutateAsync: createSetupIntentSessionMutation } =
+    api.stripe.createSetupIntentSession.useMutation();
+
+  const { mutateAsync: getStripeSessionMutate } =
+    api.stripe.getStripeSession.useMutation();
+
+  const data = {
+    listingId: 123,
+    propertyId: 456,
+    requestId: 789,
+    name: "string",
+    price: 100,
+    description: "",
+    cancelUrl: "/payment-test", // Rename cancel_url to cancelUrl
+    totalSavings: 20,
+    phoneNumber: "123-456-7890",
+  };
+
+  async function onSubmit(values: FormSchema) {
     setPrice(values.price);
     setGuest(values.guest);
     if (users?.isIdentityVerified === "true") {
       setStep(step + 1);
+    }
+
+    const stripe = await stripePromise;
+
+    if (!session.data?.user) return;
+
+    // Creates Session for mode setup and creates customer
+    const response = await createSetupIntentSessionMutation(data);
+
+    console.log(response);
+
+    if (stripe !== null && response) {
+      const sesh = await getStripeSessionMutate({
+        sessionId: response.id,
+      });
+
+      if (sesh.metadata.setupIntent) {
+        // ! Only get setup intent for host/admin to accept offer
+        // const intent = await getSetupIntentMutate({
+        //   setupIntent: sesh.metadata.setupIntent as string,
+        // });
+
+        // console.log(intent);
+        // Creates and redirects user to URL
+        // await stripe.redirectToCheckout({
+        //   sessionId: response.id,
+        // });
+
+        setOptions(response);
+      }
     }
   }
 
@@ -82,12 +133,18 @@ function BiddingStep1({ property }: { property: Property }) {
       <h2 className="mt-2 text-lg font-semibold">{property.name}</h2>
       <p className="my-3 text-sm">
         Airbnb&apos;s Price:{" "}
-        {property.originalNightlyPrice ? formatCurrency(property?.originalNightlyPrice * 1.13868 ) : "Prices unavailable"}
+        {property.originalNightlyPrice
+          ? formatCurrency(property?.originalNightlyPrice * 1.13868)
+          : "Prices unavailable"}
         /night
       </p>
-      <div className="border-2 border-dashed border-accent px-7 md:px-24 py-2">
+      <div className="border-2 border-dashed border-accent px-7 py-2 md:px-24">
         {/* Change this to reccomended price */}
-        <p>{property.originalNightlyPrice ? formatCurrency(property?.originalNightlyPrice) : "Estimate unavailable"}</p>
+        <p>
+          {property.originalNightlyPrice
+            ? formatCurrency(property?.originalNightlyPrice)
+            : "Estimate unavailable"}
+        </p>
       </div>
       <p className="my-2 text-sm">Recommended Price</p>
       <div className=" flex w-5/6 flex-row text-accent">
@@ -133,16 +190,19 @@ function BiddingStep1({ property }: { property: Property }) {
               />
             </div>
             {users?.isIdentityVerified === "pending" ? (
-               <div className="flex flex-col items-center">
-               <p className=" text-xs text-muted-foreground mb-1">
-                 Verification takes about 1-3 minutes.
-               </p>
-               <div className="flex-row gap-x-1">
-              <Button className=" items-center flex flex-row justify-center" disabled>
-                Verification Pending
-                 <Loader2 className="animate-spin"/>
-              </Button>
-               </div>
+              <div className="flex flex-col items-center">
+                <p className=" mb-1 text-xs text-muted-foreground">
+                  Verification takes about 1-3 minutes.
+                </p>
+                <div className="flex-row gap-x-1">
+                  <Button
+                    className=" flex flex-row items-center justify-center"
+                    disabled
+                  >
+                    Verification Pending
+                    <Loader2 className="animate-spin" />
+                  </Button>
+                </div>
               </div>
             ) : users?.isIdentityVerified === "true" ? (
               <Button className="mb-1 px-32" type="submit">
@@ -150,7 +210,7 @@ function BiddingStep1({ property }: { property: Property }) {
               </Button>
             ) : (
               <div className="flex flex-col items-center">
-                <p className=" text-xs text-muted-foreground mb-1">
+                <p className=" mb-1 text-xs text-muted-foreground">
                   You must be verified before submitting an offer.
                 </p>
                 <IdentityModal stripePromise={stripePromise} />
