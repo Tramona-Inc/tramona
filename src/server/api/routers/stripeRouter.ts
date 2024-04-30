@@ -194,7 +194,7 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   getListOfPayments: protectedProcedure.query(async ({ ctx }) => {
-    console.log("ID------------------------", ctx.user.stripeCustomerId);
+    console.log("ID------------------------", ctx.user);
 
     if (ctx.user.stripeCustomerId) {
       console.log("CALLED")
