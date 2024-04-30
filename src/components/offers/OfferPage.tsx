@@ -120,12 +120,12 @@ export default function OfferPage({
   const firstImageUrl: string = property.imageUrls?.[0] ?? "";
   return (
     <div className="space-y-4">
-      <Link
+      {/* <Link
         href={isBooked ? "/requests" : `/requests/${request.id}`}
         className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
       >
         &larr; Back to offers
-      </Link>
+      </Link> */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-2">
           <h1 className="items-center text-lg font-semibold sm:text-3xl">

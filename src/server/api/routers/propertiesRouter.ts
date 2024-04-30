@@ -17,6 +17,13 @@ import { eq } from "drizzle-orm";
 import { withCursorPagination } from "drizzle-pagination";
 import { z } from "zod";
 import { bookedDates, properties } from "./../../db/schema/tables/properties";
+import { env } from "@/env";
+
+
+const googleMapsClient = require('@google/maps').createClient({
+  key: env.GOOGLE_MAPS_KEY,
+  Promise: Promise,
+});
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -26,10 +33,20 @@ export const propertiesRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
+      let lat, lng;
+
+      if (!input.latitude || !input.longitude) {
+        const response = await googleMapsClient.geocode({ address: input.address }).asPromise();
+        lat = response.json.results[0].geometry.location.lat;
+        lng = response.json.results[0].geometry.location.lng;
+      }
+
       return await ctx.db
         .insert(properties)
         .values({
           ...input,
+          latitude: lat,
+          longitude: lng,
           hostId: ctx.user.role === "admin" ? null : ctx.user.id,
         })
         .returning({ id: properties.id })
