@@ -77,9 +77,7 @@ import {
 import AmenitiesComponent from "./CategorizedAmenities";
 
 type LucideIcon = FunctionComponent<SVGProps<SVGSVGElement>>;
-type AmenityIcons = {
-  [amenityName: string]: LucideIcon;
-};
+type AmenityIcons = Record<string, LucideIcon>;
 
 // prettier-ignore
 const amenityIcons: AmenityIcons = {
@@ -220,7 +218,6 @@ export default function OfferPage({
   if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
     isBooked = true;
   }
-  console.log(request);
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: property.address!,
@@ -468,7 +465,7 @@ export default function OfferPage({
           <hr className="h-px border-0 bg-gray-300" />
           <section id="amenities" className="scroll-mt-36">
             <h1 className="text-lg font-semibold md:text-xl">Amenitites</h1>
-            <PropertyAmenities amenities={property.amenities || []} />
+            <PropertyAmenities amenities={property.amenities ?? []} />
             {property.amenities && (
               <Dialog>
                 <DialogTrigger className="inline-flex w-full items-center justify-center rounded-lg border border-black px-2.5 py-2 text-foreground md:w-1/4">
