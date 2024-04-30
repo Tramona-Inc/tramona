@@ -47,6 +47,6 @@ export function successfulAdminOfferToast({
 
   toast({
     title: `Offer ${isUpdate ? "updated" : "sent"}: ${propertyName}`,
-    description: `${fmtdTotalPrice} • ${fmtdNightlyPrice} • ${fmtdDateRange}`,
+    description: `${fmtdTotalPrice} · ${fmtdNightlyPrice} · ${fmtdDateRange}`,
   });
 }

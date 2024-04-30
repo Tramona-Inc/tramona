@@ -16,25 +16,15 @@ export default function FAQ() {
       </Head>
 
       <MainLayout type="marketing">
-        <div className="col-span-10 mx-auto max-w-3xl p-4 pb-32 2xl:col-span-11">
+        <div className="mx-auto max-w-3xl p-4 pb-32">
           <h1 className="pb-12 pt-20 text-center text-3xl font-bold">
             Frequently Asked Questions
           </h1>
 
           <Tabs defaultValue="traveler">
-            <TabsList className="flex w-full border-0">
-              <TabsTrigger
-                value="traveler"
-                className="px-4 text-lg data-[state=active]:border-b-4 data-[state=active]:border-b-black data-[state=active]:font-bold"
-              >
-                Travelers
-              </TabsTrigger>
-              <TabsTrigger
-                value="host"
-                className="px-4 text-lg data-[state=active]:border-b-4 data-[state=active]:border-b-black data-[state=active]:font-bold"
-              >
-                Hosts
-              </TabsTrigger>
+            <TabsList className="flex w-full">
+              <TabsTrigger value="traveler">Travelers</TabsTrigger>
+              <TabsTrigger value="host">Hosts</TabsTrigger>
             </TabsList>
 
             <TabsContent value="traveler">

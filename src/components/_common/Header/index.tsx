@@ -37,19 +37,27 @@ function LargeHeader(props: HeaderProps) {
   const pathname = usePathname();
 
   return (
-    <header className=" sticky top-0 z-50 flex h-header-height items-center bg-white p-4 shadow-md lg:px-24">
+    <header className=" sticky top-0 z-50 flex h-header-height items-center border-b bg-white p-4 lg:px-24">
       <div className="flex flex-1 gap-4">
         <TramonaLogo />
       </div>
 
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-8">
         {props.type === "marketing" && (
           <>
-            {/* {headerLinks.map(({ href, label }, i) => (
-                <HeaderLink key={i} href={href}>
-                  {label}
-                </HeaderLink>
-              ))} */}
+            {status !== "authenticated" && (
+              <>
+                <Link href="/how-it-works" className="font-semibold">
+                  How it works
+                </Link>
+                <Link href="/faq" className="font-semibold">
+                  FAQ
+                </Link>
+                <Link href="/support" className="font-semibold">
+                  Contact
+                </Link>
+              </>
+            )}
           </>
         )}
       </div>
@@ -72,16 +80,26 @@ function LargeHeader(props: HeaderProps) {
             </Link>
           </Button>
         )}
-        <Button
-          size="icon"
-          className="grid place-items-center rounded-full text-xl font-extrabold"
-          variant="outline"
-          asChild
-        >
-          <Link href="/faq">
-            <QuestionMarkIcon />
-          </Link>
-        </Button>
+        {status !== "authenticated" && (
+          <button className="rounded-lg bg-[#004236] px-4 text-sm text-white">
+            <Link href="/auth/signup">Sign Up</Link>
+          </button>
+        )}
+        {status == "authenticated" && (
+          <>
+            <Button
+              size="icon"
+              className="grid place-items-center rounded-full text-xl font-extrabold"
+              variant="outline"
+              asChild
+            >
+              <Link href="/faq">
+                <QuestionMarkIcon />
+              </Link>
+            </Button>
+          </>
+        )}
+
         <HeaderTopRight />
       </div>
     </header>
@@ -114,7 +132,7 @@ function SmallHeader(props: HeaderProps) {
   const { status } = useSession();
 
   return (
-    <header className="container sticky top-0 z-50 flex h-header-height items-center bg-white text-sm shadow-md sm:text-base">
+    <header className="container sticky top-0 z-50 flex h-header-height items-center border-b bg-white text-sm sm:text-base">
       {/* {props.type === "dashboard" && (
         <div className="flex-1">
           <SmallSidebar {...props} />
