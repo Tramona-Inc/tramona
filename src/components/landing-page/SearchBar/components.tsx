@@ -199,7 +199,9 @@ export function LPLocationInput<
       {...props}
       render={({ field }) => (
         <LPFormItem className={className}>
-          <FormLabel className={classNames.buttonLabel({ isFocused: isOpen })}>
+          <FormLabel
+            className={`ml-[-15px] mt-[-5px] ${classNames.buttonLabel({ isFocused: isOpen })}`}
+          >
             {formLabel}
           </FormLabel>
 
@@ -208,7 +210,7 @@ export function LPLocationInput<
             setOpen={setIsOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className="w-96 -translate-y-12 overflow-clip px-0 pt-0"
+            className="w-96 -translate-y-14 overflow-clip px-0 pt-0"
             trigger={({ value, disabled }) => (
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -221,14 +223,14 @@ export function LPLocationInput<
                   "flex items-center text-left",
                 )}
               >
-                <MapPinIcon className="mx-auto h-6 w-6 shrink-0 text-primary" />
-                <p className="ml-2 flex-1 truncate text-sm">
+                <MapPinIcon className="mx-auto mb-4 ml-[-16px] h-5 w-5 shrink-0 text-primary" />
+                <p className="mb-4 ml-2 flex-1 truncate text-sm">
                   {value ?? "Enter your destination"}
                 </p>
               </button>
             )}
           />
-          <LPFormMessage />
+          <LPFormMessage className="mt-2" />
         </LPFormItem>
       )}
     />
@@ -256,7 +258,9 @@ export default function LPDateRangePicker<
       {...props}
       render={({ field }) => (
         <LPFormItem className={className}>
-          <FormLabel className={classNames.buttonLabel({ isFocused: isOpen })}>
+          <FormLabel
+            className={`ml-[-15px] mt-[-5px] ${classNames.buttonLabel({ isFocused: isOpen })}`}
+          >
             {formLabel}
           </FormLabel>
           <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -267,18 +271,22 @@ export default function LPDateRangePicker<
                     isPlaceholder: !field.value,
                     isFocused: isOpen,
                   }),
-                  "flex items-center text-sm",
+                  "mb-4 flex items-center text-sm",
                 )}
               >
-                <CalendarIcon className="mr-3 h-6 w-6 text-primary" />
-                {field.value
-                  ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    formatDateRange(field.value.from, field.value.to)
-                  : "Select dates"}
+                <CalendarIcon className="mb-4 ml-[-15px] mr-3 h-5 w-5 text-primary" />
+                {field.value ? (
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                  <p className="mb-4">
+                    {formatDateRange(field.value.from, field.value.to)}
+                  </p>
+                ) : (
+                  <p className="mb-4 text-sm">Select dates</p>
+                )}
               </button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-auto p-0 backdrop-blur-md"
+              className="w-auto -translate-y-8 p-0 backdrop-blur-md"
               align="start"
               side="top"
             >
@@ -297,7 +305,7 @@ export default function LPDateRangePicker<
               />
             </PopoverContent>
           </Popover>
-          <LPFormMessage />
+          <LPFormMessage className="mt-2" />
         </LPFormItem>
       )}
     />

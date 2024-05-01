@@ -37,6 +37,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Input } from "@/components/ui/input";
 import LPDateRangePicker, {
   AirbnbLinkDialog,
   classNames,
@@ -321,25 +322,25 @@ export default function DesktopSearchBar({
               control={form.control}
               name={`data.${curTab}.location`}
               formLabel="Location"
-              className="rounded-lg border-2 border-border pr-24"
+              className=" relative h-[66px] rounded-lg border-2 border-border pr-24"
             />
 
             <LPDateRangePicker
               control={form.control}
               name={`data.${curTab}.date`}
               formLabel="Check in/Check out"
-              className="rounded-lg border-2 border-border pr-36"
+              className="h-[66px] rounded-lg border-2 border-border pr-36"
             />
 
-            <div className=" flex flex-row items-center justify-start rounded-md border-2 border-border px-4">
-              <UsersRoundIcon className="z-50 mr-[-23px] mt-4 h-6 w-6" />
+            <div className="  z-20 flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-4">
+              <UsersRoundIcon className="z-20 mr-[-23px] mt-4 h-5 w-5" />
               <div className="z-10  mr-20 flex flex-row items-center">
                 <FormField
                   control={form.control}
                   name={`data.${curTab}.numGuests`}
                   render={({ field }) => (
                     <LPFormItem className=" z-10">
-                      <LPFormLabel className="z-20 ml-[-32px] text-sm ">
+                      <LPFormLabel className="z-20 mb-10 ml-[-32px] mt-[-7px] text-sm ">
                         Number of guests
                       </LPFormLabel>
                       <FormControl>
@@ -347,25 +348,25 @@ export default function DesktopSearchBar({
                           {...field}
                           inputMode="numeric"
                           placeholder="Add guests"
-                          className="text-sm"
+                          className="z-10 ml-1 h-16 text-sm "
                         />
                       </FormControl>
-                      <LPFormMessage />
+                      <LPFormMessage className="mt-2" />
                     </LPFormItem>
                   )}
                 />
               </div>
             </div>
 
-            <div className=" flex flex-row items-center justify-start rounded-md border-2 border-border px-2">
-              <DollarSignIcon className="z-50 mr-[-23px] mt-4 h-6 w-6" />
+            <div className=" flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-2">
+              <DollarSignIcon className="z-50 mr-[-23px] mt-4 h-5 w-5" />
               <div className="z-10 mr-20 flex flex-row items-center">
                 <FormField
                   control={form.control}
                   name={`data.${curTab}.maxNightlyPriceUSD`}
                   render={({ field }) => (
                     <LPFormItem className=" z-10">
-                      <LPFormLabel className="z-20 ml-[-28px] text-sm ">
+                      <LPFormLabel className="z-20 ml-[-28px] mt-[-7px] text-sm ">
                         Price range
                       </LPFormLabel>
                       <FormControl>
@@ -373,10 +374,10 @@ export default function DesktopSearchBar({
                           {...field}
                           inputMode="decimal"
                           placeholder="Price per night"
-                          className="text-sm"
+                          className="z-10 h-16 text-sm"
                         />
                       </FormControl>
-                      <LPFormMessage />
+                      <LPFormMessage className="mt-2" />
                     </LPFormItem>
                   )}
                 />
@@ -391,7 +392,7 @@ export default function DesktopSearchBar({
                   checkPriceEstimation(data.data),
                 )}
                 size="lg"
-                className=" rounded-lg py-9 font-semibold"
+                className=" rounded-lg py-8 font-semibold"
               >
                 {mode === "search" ? "Search" : "Request Deal"}
               </Button>
@@ -504,7 +505,7 @@ function FiltersSection({
                 <FormControl>
                   <LPInput {...field} inputMode="numeric" suffix="or more" />
                 </FormControl>
-                <LPFormMessage />
+                <LPFormMessage className="mt-2" />
               </LPFormItem>
             )}
           />
@@ -517,7 +518,7 @@ function FiltersSection({
                 <FormControl>
                   <LPInput {...field} inputMode="numeric" suffix="or more" />
                 </FormControl>
-                <LPFormMessage />
+                <LPFormMessage className="mt-2" />
               </LPFormItem>
             )}
           />
@@ -561,7 +562,7 @@ function FiltersSection({
                     ))}
                   </SelectContent>
                 </Select>
-                <LPFormMessage />
+                <LPFormMessage className="mt-2" />
               </LPFormItem>
             )}
           />
@@ -578,7 +579,7 @@ function FiltersSection({
                     placeholder="e.g. Pet friendly, close to the ocean"
                   />
                 </FormControl>
-                <LPFormMessage />
+                <LPFormMessage className="mt-2" />
               </LPFormItem>
             )}
           />
