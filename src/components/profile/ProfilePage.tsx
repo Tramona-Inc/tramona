@@ -1,6 +1,7 @@
 import {
   Camera,
   Edit,
+  Ellipsis,
   Facebook,
   Instagram,
   Share,
@@ -117,29 +118,62 @@ export default function ProfilePage() {
     },
   ];
 
+  const destinations = [
+    {
+      city: "New York City, NY, USA",
+      date: "July 14-28",
+    },
+    {
+      city: "New York City, NY, USA",
+      date: "July 14-28",
+    },
+    {
+      city: "New York City, NY, USA",
+      date: "July 14-28",
+    },
+    {
+      city: "New York City, NY, USA",
+      date: "July 14-28",
+    },
+    {
+      city: "New York City, NY, USA",
+      date: "July 14-28",
+    },
+    {
+      city: "New York City, NY, USA",
+      date: "July 14-28",
+    },
+  ];
+
   return (
     <div className="mx-auto mb-3 max-w-4xl space-y-3">
       <div className="rounded-lg border">
-        <div className="relative h-52 bg-teal-900">
+        <div className="relative h-40 bg-teal-900 lg:h-52">
           {/* <img
             src="https://t3.ftcdn.net/jpg/05/70/41/84/360_F_570418433_m1DoCjzGbZhDQKs96hMThzUz736s2zhl.jpg"
             alt=""
             className="w-full object-cover"
           />
           <p>image will go here</p> */}
-          <Button className="absolute bottom-4 right-4 bg-primary/20">
+          <Button className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-primary/20 p-0 lg:w-auto lg:rounded-lg lg:px-3">
             <Camera />
-            Edit Cover Photo
+            <p className="hidden lg:block">Edit Cover Photo</p>
           </Button>
         </div>
-        <div className="relative grid grid-cols-4 bg-slate-100 px-6 py-8">
+        <div className="relative grid grid-cols-1 gap-4 p-5 lg:grid-cols-4 lg:gap-0 lg:p-4">
           <img
             src="https://images.ctfassets.net/rt5zmd3ipxai/25pHfG94sGlRALOqbRvSxl/9f591d8263607fdf923b962cbfcde2a9/NVA-panda.jpg"
             alt=""
-            className="absolute bottom-3 left-10 h-40 w-40 rounded-full border border-white object-cover"
+            className="absolute bottom-44 left-5 h-36 w-36 rounded-full border border-white object-cover lg:bottom-3 lg:left-10 lg:h-40 lg:w-40"
           />
-          <div className="col-span-2 col-start-2 flex flex-col gap-1">
-            <h2 className="text-2xl font-bold">Aaron Soukaphay</h2>
+          <Button
+            size="icon"
+            className="absolute rounded-full opacity-25 lg:hidden"
+          >
+            <Camera />
+          </Button>
+          <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:mt-0">
+            <h2 className="text-xl font-bold lg:text-2xl">Aaron Soukaphay</h2>
             <p className="font-semibold">Tustin CA, USA</p>
             <div className="flex space-x-2">
               <Facebook />
@@ -148,12 +182,12 @@ export default function ProfilePage() {
               <Twitter />
             </div>
           </div>
-          <div className="col-start-4 flex justify-end gap-3">
-            <Button className="bg-zinc-200 text-primary hover:bg-zinc-300">
+          <div className="flex gap-3 lg:col-start-4 lg:justify-end">
+            <Button className="w-1/2 bg-zinc-200 text-primary hover:bg-zinc-300 lg:w-auto">
               <Edit />
               Edit Profile
             </Button>
-            <Button className="bg-zinc-200 text-primary hover:bg-zinc-300">
+            <Button className="w-1/2 bg-zinc-200 text-primary hover:bg-zinc-300 lg:w-auto">
               <Share />
               Share
             </Button>
@@ -190,14 +224,29 @@ export default function ProfilePage() {
             <Button>Share</Button>
           </TabsList>
           <TabsContent value="properties">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
               {properties.map((property, i) => (
                 <HomeOfferCard key={i} property={property} />
               ))}
             </div>
           </TabsContent>
           <TabsContent value="destinations">
-            <p>destinations content</p>
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
+              {destinations.map((destination, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between rounded-lg border p-4"
+                >
+                  <div>
+                    <h3 className="font-bold">{destination.city}</h3>
+                    <p>{destination.date}</p>
+                  </div>
+                  <div>
+                    <Ellipsis />
+                  </div>
+                </div>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
