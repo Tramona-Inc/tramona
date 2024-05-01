@@ -2,12 +2,11 @@ import { type Property } from "@/server/db/schema";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import Image from "next/image";
 
-import PaymentFormTest from "@/pages/payment-form-test";
-import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import { useStripe } from "@/utils/stripe-client";
 import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
 import { Elements } from "@stripe/react-stripe-js";
+import BidPaymentForm from "./BidPaymentForm";
 
 function BiddingStep2({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
@@ -34,13 +33,6 @@ function BiddingStep2({ property }: { property: Property }) {
     checkIn: date.from,
     checkOut: date.to,
   };
-
-  const { mutate } = api.biddings.create.useMutation({
-    onSuccess: () => {
-      resetSession();
-      setStep(step + 1);
-    },
-  });
 
   const stripePromise = useStripe();
 
@@ -110,7 +102,7 @@ function BiddingStep2({ property }: { property: Property }) {
               stripe={stripePromise}
               options={{ clientSecret: clientSecret }}
             >
-              <PaymentFormTest
+              <BidPaymentForm
                 bid={bid}
                 clientSecret={clientSecret}
                 setupIntent={setupIntent}
