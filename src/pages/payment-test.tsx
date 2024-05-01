@@ -2,9 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
-import { Elements, PaymentElement, useElements } from "@stripe/react-stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import PaymentFormTest from "./payment-form-test";
 
 export default function PaymentTest() {
   const [options, setOptions] = useState<string>("");
@@ -12,7 +13,6 @@ export default function PaymentTest() {
 
   const { data: session } = useSession({ required: true });
   const stripePromise = useStripe();
-  const elements = useElements(); // Move this line inside the component function
 
   const { mutateAsync: createSetupIntentSessionMutation } =
     api.stripe.createSetupIntentSession.useMutation();
@@ -29,6 +29,7 @@ export default function PaymentTest() {
     console.log(response?.client_secret);
 
     if (response?.client_secret && response.id) {
+      setSetupIntent(response.id);
       setOptions(response.client_secret);
     }
   }
@@ -41,9 +42,11 @@ export default function PaymentTest() {
         </DialogTrigger>
         <DialogContent>
           {options && (
-            <Elements stripe={stripePromise} options={{ clientSecret: options }}>
-              <PaymentElement />
-              <Button onClick={save}>Save</Button>
+            <Elements
+              stripe={stripePromise}
+              options={{ clientSecret: options }}
+            >
+              <PaymentFormTest options={options} setupIntent={setupIntent} />
             </Elements>
           )}
         </DialogContent>

@@ -1,57 +1,57 @@
 import { Button } from "@/components/ui/button";
-import { useStripe } from '@/utils/stripe-client';
-import { PaymentElement, useElements } from "@stripe/react-stripe-js";
+import { api } from '@/utils/api';
+import {
+  PaymentElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js";
 
-export default function PaymentTestForm() {
-  const stripePromise = useStripe();
-  const elements = useElements(); // Move this line inside the component function
+export default function PaymentFormTest({
+  options,
+  setupIntent,
+}: {
+  options: string;
+  setupIntent: string;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
 
+  const { mutateAsync: confirmPaymentIntentMutation } =
+    api.stripe.confirmPaymentIntentSetup.useMutation();
 
-  async function save() {
-    const stripe = await stripePromise;
+  const handleSubmit = async (event: { preventDefault: () => void }) => {
+    event.preventDefault();
 
-    if (!stripe || !elements) return;
-
-    const cardElement = elements.getElement(PaymentElement);
-    if (!cardElement) return;
-
-    const { paymentMethod, error } = await stripe.createPaymentMethod({
-      type: "card",
-      card: cardElement,
-    });
-
-    if (error) {
-      console.error("Error creating payment method:", error.message);
-      // Handle error
+    if (stripe === null || elements === null) {
       return;
     }
 
-    if (!paymentMethod) {
-      console.error("No payment method created");
-      // Handle no payment method created
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
       return;
     }
 
-    const { error: confirmError } = await stripe.confirmPaymentIntent(options, {
-      payment_method: paymentMethod.id,
+    const { error } = await stripe.confirmSetup({
+      elements,
+      clientSecret: options,
+      confirmParams: {
+        return_url: `${window.location.origin}/payment-test`,
+      },
+      // Uncomment below if you only want redirect for redirect-based payments
+      redirect: "if_required",
     });
 
-    if (confirmError) {
-      console.error("Error confirming payment intent:", confirmError.message);
-      // Handle error confirming payment intent
-      return;
+
+
+    if (!error) {
+      void confirmPaymentIntentMutation({ setupIntent });
     }
-
-    void confirmPaymentIntentMutation({
-      setupIntent: setupIntent,
-    });
-  }
-
+  };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <PaymentElement />
-      <Button onClick={save}>Save</Button>
-    </div>
+      <Button type={"submit"}>Save</Button>
+    </form>
   );
 }
