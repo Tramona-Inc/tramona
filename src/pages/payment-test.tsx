@@ -2,76 +2,34 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
-import {
-  EmbeddedCheckout,
-  EmbeddedCheckoutProvider,
-} from "@stripe/react-stripe-js";
+import { Elements, PaymentElement, useElements } from "@stripe/react-stripe-js";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import type Stripe from "stripe";
 
 export default function PaymentTest() {
-  const [options, setOptions] =
-    useState<Stripe.Response<Stripe.Checkout.Session>>();
+  const [options, setOptions] = useState<string>("");
+  const [setupIntent, setSetupIntent] = useState<string>("");
+
+  const { data: session } = useSession({ required: true });
+  const stripePromise = useStripe();
+  const elements = useElements(); // Move this line inside the component function
 
   const { mutateAsync: createSetupIntentSessionMutation } =
     api.stripe.createSetupIntentSession.useMutation();
 
-  const { mutateAsync: getStripeSessionMutate } =
-    api.stripe.getStripeSession.useMutation();
-
-  const { data: listOfPayments } = api.stripe.getListOfPayments.useQuery();
-
-  console.log(listOfPayments?.data);
-
-  // const { mutateAsync: getSetupIntentMutate } =
-  //   api.stripe.getSetUpIntent.useMutation();
-
-  const data = {
-    listingId: 123,
-    propertyId: 456,
-    requestId: 789,
-    name: "string",
-    price: 100,
-    description: "",
-    cancelUrl: "/payment-test", // Rename cancel_url to cancelUrl
-    totalSavings: 20,
-    phoneNumber: "123-456-7890",
-  };
-
-  const session = useSession({ required: true });
-
-  const stripePromise = useStripe();
+  const { mutateAsync: confirmPaymentIntentMutation } =
+    api.stripe.confirmPaymentIntentSetup.useMutation();
 
   async function checkout() {
-    const stripe = await stripePromise;
-
-    if (!session.data?.user) return;
+    if (!session?.user) return;
 
     // Creates Session for mode setup and creates customer
-    const response = await createSetupIntentSessionMutation(data);
+    const response = await createSetupIntentSessionMutation();
 
-    console.log(response);
+    console.log(response?.client_secret);
 
-    if (stripe !== null && response) {
-      const sesh = await getStripeSessionMutate({
-        sessionId: response.id,
-      });
-
-      if (sesh.metadata.setupIntent) {
-        // ! Only get setup intent for host/admin to accept offer
-        // const intent = await getSetupIntentMutate({
-        //   setupIntent: sesh.metadata.setupIntent as string,
-        // });
-
-        // console.log(intent);
-        // Creates and redirects user to URL
-        // await stripe.redirectToCheckout({
-        //   sessionId: response.id,
-        // });
-
-        setOptions(response);
-      }
+    if (response?.client_secret && response.id) {
+      setOptions(response.client_secret);
     }
   }
 
@@ -83,12 +41,10 @@ export default function PaymentTest() {
         </DialogTrigger>
         <DialogContent>
           {options && (
-            <EmbeddedCheckoutProvider
-              stripe={stripePromise}
-              options={{ clientSecret: options.client_secret ?? "" }}
-            >
-              <EmbeddedCheckout />
-            </EmbeddedCheckoutProvider>
+            <Elements stripe={stripePromise} options={{ clientSecret: options }}>
+              <PaymentElement />
+              <Button onClick={save}>Save</Button>
+            </Elements>
           )}
         </DialogContent>
       </Dialog>

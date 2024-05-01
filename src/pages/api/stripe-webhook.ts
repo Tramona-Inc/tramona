@@ -200,28 +200,6 @@ export default async function webhook(
       case "checkout.session.completed":
         const checkoutSessionCompleted = event.data.object;
 
-        if (checkoutSessionCompleted.metadata?.user_id) {
-          // * Insert Stripe Customer Id after session is completed
-          const stripeCustomerId = await db.query.users
-            .findFirst({
-              columns: {
-                stripeCustomerId: true,
-              },
-              where: eq(users.id, checkoutSessionCompleted.metadata.user_id),
-            })
-            .then((res) => res?.stripeCustomerId);
-
-          if (!stripeCustomerId) {
-            console.log("INSERTING CUSTOMER ID");
-            await db
-              .update(users)
-              .set({
-                stripeCustomerId: checkoutSessionCompleted.customer as string,
-              })
-              .where(eq(users.id, checkoutSessionCompleted.metadata.user_id));
-          }
-        }
-
         // * Make sure to check listing_id isnt' null
         if (
           checkoutSessionCompleted.metadata &&

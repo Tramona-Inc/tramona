@@ -7,10 +7,7 @@ import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import { useStripe } from "@/utils/stripe-client";
 import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
-import {
-  EmbeddedCheckout,
-  EmbeddedCheckoutProvider,
-} from "@stripe/react-stripe-js";
+import { Elements, PaymentElement } from "@stripe/react-stripe-js";
 
 function BiddingStep2({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
@@ -35,7 +32,16 @@ function BiddingStep2({ property }: { property: Property }) {
     },
   });
 
+  const { mutate: finishPaymentIntentMutation } =
+    api.stripe.finishPaymentIntentSetup.useMutation();
+
   function handleOffer() {
+    if (options) {
+      finishPaymentIntentMutation({
+        setupIntent: options.setup_intent as string,
+      });
+    }
+
     mutate({
       propertyId: property.id,
       numGuests: guest,
@@ -91,7 +97,6 @@ function BiddingStep2({ property }: { property: Property }) {
               </ul>
             </div>
           </div>
-          {/* Price Breakdown */}
           <div className="flex flex-col gap-y-2 text-xs font-semibold md:text-base">
             <div className="mt-8 flex flex-row justify-between ">
               <p>
@@ -101,10 +106,6 @@ function BiddingStep2({ property }: { property: Property }) {
               </p>
               <p>${totalNightlyPrice} </p>
             </div>
-            {/* <div className="my-4 flex flex-row justify-between">
-              <p>Taxes</p>
-              <p>$20</p>
-            </div> */}
             <hr />
             <div className="my-2 flex flex-row justify-between">
               <p>Offer Total</p>
@@ -114,12 +115,12 @@ function BiddingStep2({ property }: { property: Property }) {
         </div>
         <div className="mt-4 w-[300px] md:w-[500px]">
           {options && (
-            <EmbeddedCheckoutProvider
+            <Elements
               stripe={stripePromise}
               options={{ clientSecret: options.client_secret ?? "" }}
             >
-              <EmbeddedCheckout />
-            </EmbeddedCheckoutProvider>
+              <PaymentElement />
+            </Elements>
           )}
 
           <div className="flex w-full justify-center">
@@ -127,62 +128,6 @@ function BiddingStep2({ property }: { property: Property }) {
               Send Offer
             </Button>
           </div>
-
-          {/* <div className="flex w-full flex-col items-center gap-y-4 rounded-xl bg-popover px-4 py-6 md:py-20">
-          <Button className="w-full md:px-32 ">
-            <FaApplePay size={48} />
-          </Button>
-          <div className=" mt-5 flex w-11/12 flex-row text-sm text-accent">
-            <div className="mt-2 w-full border-t-2 border-accent" />
-            <span className="mx-4 text-nowrap text-muted-foreground">
-              Or pay with card
-            </span>
-            <div className="mt-2 w-full border-t-2 border-accent" />
-          </div>
-          <div className="item-center flex w-full flex-col text-base">
-            <Label htmlFor="email" className="mb-2">
-              Card Information
-            </Label>
-            <Input
-              type="email"
-              id="email"
-              placeholder="Email"
-              className="mb-2"
-            />
-            <div className="mb-10 grid grid-cols-2 gap-2">
-              <Input placeholder="MM / YY" className="" />
-              <Input placeholder="123" className="" />
-            </div>
-
-            <Label className="mb-2">Country or Region</Label>
-            <Select>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Theme" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Input placeholder="Zip code" />
-            <Button
-              className="my-6 py-5 text-lg"
-              onClick={() => handlePressNext()}
-            >
-              Send Offer
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Offers are binding. If your offer is accepted, your card will be
-              charged.
-            </p>
-            <p className="mt-10 text-center text-xs">
-              Host cancellation policy{" "}
-              <span className="text-blue-500 underline">Learn more</span>
-            </p>
-          </div>
-        </div> */}
         </div>
       </div>
     </div>
