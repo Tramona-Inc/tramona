@@ -38,6 +38,8 @@ function BiddingStep1({ property }: { property: Property }) {
   const price = useBidding((state) => state.price);
 
   const setOptions = useBidding((state) => state.setOptions);
+  const setClientSecret = useBidding((state) => state.setClientSecret);
+  const setSetupIntent = useBidding((state) => state.setSetupIntent);
 
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
@@ -85,26 +87,13 @@ function BiddingStep1({ property }: { property: Property }) {
     if (!session.data?.user) return;
 
     // Creates Session for mode setup and creates customer
-    const response = await createSetupIntentSessionMutation(data);
+    const response = await createSetupIntentSessionMutation();
 
     if (stripe !== null && response) {
-      const sesh = await getStripeSessionMutate({
-        sessionId: response.id,
-      });
-
-      if (sesh.metadata.setupIntent) {
-        // ! Only get setup intent for host/admin to accept offer
-        // const intent = await getSetupIntentMutate({
-        //   setupIntent: sesh.metadata.setupIntent as string,
-        // });
-
-        // console.log(intent);
-        // Creates and redirects user to URL
-        // await stripe.redirectToCheckout({
-        //   sessionId: response.id,
-        // });
-
+      if (response.client_secret && response.id) {
         setOptions(response);
+        setSetupIntent(response.id);
+        setClientSecret(response.client_secret);
       }
     }
   }

@@ -2,18 +2,20 @@ import { type Property } from "@/server/db/schema";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
+import PaymentFormTest from "@/pages/payment-form-test";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import { useStripe } from "@/utils/stripe-client";
 import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
-import { Elements, PaymentElement } from "@stripe/react-stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 
 function BiddingStep2({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
   const guest = useBidding((state) => state.guest);
   const price = useBidding((state) => state.price);
   const options = useBidding((state) => state.options);
+  const clientSecret = useBidding((state) => state.clientSecret);
+  const setupIntent = useBidding((state) => state.setupIntent);
   const resetSession = useBidding((state) => state.resetSession);
 
   const step = useBidding((state) => state.step);
@@ -25,31 +27,20 @@ function BiddingStep2({ property }: { property: Property }) {
 
   const totalPrice = totalNightlyPrice * tax;
 
+  const bid = {
+    propertyId: property.id,
+    numGuests: guest,
+    amount: price,
+    checkIn: date.from,
+    checkOut: date.to,
+  };
+
   const { mutate } = api.biddings.create.useMutation({
     onSuccess: () => {
       resetSession();
       setStep(step + 1);
     },
   });
-
-  const { mutate: finishPaymentIntentMutation } =
-    api.stripe.finishPaymentIntentSetup.useMutation();
-
-  function handleOffer() {
-    if (options) {
-      finishPaymentIntentMutation({
-        setupIntent: options.setup_intent as string,
-      });
-    }
-
-    mutate({
-      propertyId: property.id,
-      numGuests: guest,
-      amount: price,
-      checkIn: date.from,
-      checkOut: date.to,
-    });
-  }
 
   const stripePromise = useStripe();
 
@@ -114,20 +105,24 @@ function BiddingStep2({ property }: { property: Property }) {
           </div>
         </div>
         <div className="mt-4 w-[300px] md:w-[500px]">
-          {options && (
+          {options && clientSecret && setupIntent && (
             <Elements
               stripe={stripePromise}
-              options={{ clientSecret: options.client_secret ?? "" }}
+              options={{ clientSecret: clientSecret }}
             >
-              <PaymentElement />
+              <PaymentFormTest
+                bid={bid}
+                clientSecret={clientSecret}
+                setupIntent={setupIntent}
+              />
             </Elements>
           )}
-
+          {/* 
           <div className="flex w-full justify-center">
             <Button className="my-6 w-full py-5 text-lg" onClick={handleOffer}>
               Send Offer
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
