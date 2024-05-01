@@ -8,10 +8,117 @@ import {
   Youtube,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import HomeOfferCard from "../landing-page/HomeOfferCard";
 
 export default function ProfilePage() {
+  const properties = [
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+      ],
+      name: "Beautiful Villa on the Beach",
+      maxNumGuests: 4,
+      numBathrooms: 2,
+      numBedrooms: 2,
+      numBeds: 2,
+      originalNightlyPrice: 15000,
+      distance: "24 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+      ],
+      name: "Beautiful Villa on the Beach",
+      maxNumGuests: 4,
+      numBathrooms: 2,
+      numBedrooms: 2,
+      numBeds: 2,
+      originalNightlyPrice: 15000,
+      distance: "24 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+      ],
+      name: "Beautiful Villa on the Beach",
+      maxNumGuests: 4,
+      numBathrooms: 2,
+      numBedrooms: 2,
+      numBeds: 2,
+      originalNightlyPrice: 15000,
+      distance: "24 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+      ],
+      name: "Beautiful Villa on the Beach",
+      maxNumGuests: 4,
+      numBathrooms: 2,
+      numBedrooms: 2,
+      numBeds: 2,
+      originalNightlyPrice: 15000,
+      distance: "24 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+      ],
+      name: "Beautiful Villa on the Beach",
+      maxNumGuests: 4,
+      numBathrooms: 2,
+      numBedrooms: 2,
+      numBeds: 2,
+      originalNightlyPrice: 15000,
+      distance: "24 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
+      ],
+      name: "Beautiful Villa on the Beach",
+      maxNumGuests: 4,
+      numBathrooms: 2,
+      numBedrooms: 2,
+      numBeds: 2,
+      originalNightlyPrice: 15000,
+      distance: "24 miles",
+    },
+  ];
+
   return (
-    <div className="mx-auto max-w-4xl space-y-3">
+    <div className="mx-auto mb-3 max-w-4xl space-y-3">
       <div className="rounded-lg border">
         <div className="relative h-52 bg-teal-900">
           {/* <img
@@ -54,9 +161,46 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div>About Me</div>
+      <div className="space-y-2 rounded-lg border p-4">
+        <h2 className="font-bold">About Me</h2>
+        <p>
+          My name is Aaron. I am from Tustin, CA. I love traveling! I love
+          traveling! I love traveling! I love traveling! I love traveling! I
+          love traveling! I love traveling!
+        </p>
+      </div>
 
-      <div>Bucket List</div>
+      <div className="space-y-5 rounded-lg border p-4">
+        <h2 className="font-bold">Bucket List</h2>
+        <Tabs defaultValue="properties" className="space-y-5">
+          <TabsList className="items-center space-x-2">
+            <TabsTrigger
+              value="properties"
+              className="rounded-full border aria-[selected=true]:bg-teal-800/50"
+            >
+              Properties
+            </TabsTrigger>
+            <TabsTrigger
+              value="destinations"
+              className="rounded-full border aria-[selected=true]:bg-teal-800/50"
+            >
+              Destinations
+            </TabsTrigger>
+            <Button>Add</Button>
+            <Button>Share</Button>
+          </TabsList>
+          <TabsContent value="properties">
+            <div className="grid grid-cols-3 gap-4">
+              {properties.map((property, i) => (
+                <HomeOfferCard key={i} property={property} />
+              ))}
+            </div>
+          </TabsContent>
+          <TabsContent value="destinations">
+            <p>destinations content</p>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
