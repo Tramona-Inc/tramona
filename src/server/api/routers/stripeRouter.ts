@@ -181,7 +181,7 @@ export const stripeRouter = createTRPCRouter({
         return stripe.checkout.sessions.create({
           ui_mode: "embedded",
           mode: "setup",
-          payment_method_types: ["card"],
+          payment_method_types: ["card",],
           currency: "usd",
           // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
           // cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
@@ -194,10 +194,7 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   getListOfPayments: protectedProcedure.query(async ({ ctx }) => {
-    console.log("ID------------------------", ctx.user);
-
     if (ctx.user.stripeCustomerId) {
-      console.log("CALLED")
       return await stripe.paymentMethods.list({
         type: "card",
         limit: 3,

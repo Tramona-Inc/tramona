@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
-import { useStripe } from '@/utils/stripe-client';
+import { useStripe } from "@/utils/stripe-client";
 import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
@@ -20,10 +20,9 @@ export default function PaymentTest() {
   const { mutateAsync: getStripeSessionMutate } =
     api.stripe.getStripeSession.useMutation();
 
-  const { data: listOfPayments } =
-    api.stripe.getListOfPayments.useQuery();
+  const { data: listOfPayments } = api.stripe.getListOfPayments.useQuery();
 
-  console.log(listOfPayments)
+  console.log(listOfPayments?.data);
 
   // const { mutateAsync: getSetupIntentMutate } =
   //   api.stripe.getSetUpIntent.useMutation();
@@ -84,7 +83,10 @@ export default function PaymentTest() {
         </DialogTrigger>
         <DialogContent>
           {options && (
-            <EmbeddedCheckoutProvider stripe={stripePromise} options={{clientSecret: options.client_secret ?? ''}}>
+            <EmbeddedCheckoutProvider
+              stripe={stripePromise}
+              options={{ clientSecret: options.client_secret ?? "" }}
+            >
               <EmbeddedCheckout />
             </EmbeddedCheckoutProvider>
           )}

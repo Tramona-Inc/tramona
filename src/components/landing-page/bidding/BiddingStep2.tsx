@@ -47,7 +47,6 @@ function BiddingStep2({ property }: { property: Property }) {
 
   const stripePromise = useStripe();
 
-
   return (
     <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl ">
       <h1 className="text-lg font-semibold tracking-tight md:text-3xl">
