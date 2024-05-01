@@ -355,6 +355,7 @@ z
     }),
 
   // update request
+  // todo: slack message 
   updateRequest: protectedProcedure
     .input(updateRequestInputSchema)
     .mutation(async ({ ctx, input }) => {

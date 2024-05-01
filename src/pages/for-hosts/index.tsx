@@ -42,7 +42,7 @@ const DamageProtection = () => {
           </p>
         </div>
         <div className="w-full md:w-1/2">
-          <div className="h-64 w-full overflow-hidden rounded-lg shadow-lg md:h-auto">
+          <div className="h-64 w-full overflow-hidden rounded-lg md:h-auto">
             <Image
               src="/assets/images/landing-page/damage_protection.jpeg"
               alt=""
@@ -166,7 +166,7 @@ export default function HostWelcome() {
   const steps = [
     {
       number: "1",
-      title: "Travelers Make an Offer on Your Property",
+      title: "Travelers Make Property Offers",
       description:
         "Travelers send you offers for properties that you host on Tramona.",
     },
