@@ -109,12 +109,6 @@ function BiddingStep2({ property }: { property: Property }) {
               />
             </Elements>
           )}
-          {/* 
-          <div className="flex w-full justify-center">
-            <Button className="my-6 w-full py-5 text-lg" onClick={handleOffer}>
-              Send Offer
-            </Button>
-          </div> */}
         </div>
       </div>
     </div>

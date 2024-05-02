@@ -1,8 +1,15 @@
-import { date, integer, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+  date,
+  index,
+  integer,
+  pgTable,
+  serial,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { properties } from "./properties";
-import { index } from "drizzle-orm/pg-core";
 
 export const bids = pgTable(
   "bids",
@@ -20,10 +27,8 @@ export const bids = pgTable(
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
 
-    
     acceptedAt: timestamp("accepted_at"),
-    paymentIntentId: varchar("payment_intent_id"),
-    checkoutSessionId: varchar("checkout_session_id"),
+    setupIntentId: varchar("setup_intent_id"),
 
     numGuests: integer("num_guests").notNull().default(1),
     amount: integer("amount").notNull(),

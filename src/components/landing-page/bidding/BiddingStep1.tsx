@@ -49,8 +49,8 @@ function BiddingStep1({ property }: { property: Property }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      price: price ?? undefined,
-      guest: guest ?? undefined,
+      price: price,
+      guest: guest,
     },
   });
 
@@ -59,21 +59,6 @@ function BiddingStep1({ property }: { property: Property }) {
 
   const { mutateAsync: createSetupIntentSessionMutation } =
     api.stripe.createSetupIntentSession.useMutation();
-
-  const { mutateAsync: getStripeSessionMutate } =
-    api.stripe.getStripeSession.useMutation();
-
-  const data = {
-    listingId: 123,
-    propertyId: 456,
-    requestId: 789,
-    name: "string",
-    price: 100,
-    description: "",
-    cancelUrl: "/payment-test", // Rename cancel_url to cancelUrl
-    totalSavings: 20,
-    phoneNumber: "123-456-7890",
-  };
 
   async function onSubmit(values: FormSchema) {
     setPrice(values.price);
@@ -121,7 +106,7 @@ function BiddingStep1({ property }: { property: Property }) {
       <p className="my-3 text-sm">
         Airbnb&apos;s Price:{" "}
         {property.originalNightlyPrice
-          ? formatCurrency(property?.originalNightlyPrice * 1.13868)
+          ? formatCurrency(property.originalNightlyPrice * 1.13868)
           : "Prices unavailable"}
         /night
       </p>
@@ -129,7 +114,7 @@ function BiddingStep1({ property }: { property: Property }) {
         {/* Change this to reccomended price */}
         <p>
           {property.originalNightlyPrice
-            ? formatCurrency(property?.originalNightlyPrice)
+            ? formatCurrency(property.originalNightlyPrice)
             : "Estimate unavailable"}
         </p>
       </div>

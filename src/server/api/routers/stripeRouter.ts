@@ -143,7 +143,10 @@ export const stripeRouter = createTRPCRouter({
         })
         .then((res) => res.id);
 
-      await ctx.db.update(users).set({ stripeCustomerId }).where(eq(users.id, ctx.user.id));
+      await ctx.db
+        .update(users)
+        .set({ stripeCustomerId })
+        .where(eq(users.id, ctx.user.id));
     }
 
     if (stripeCustomerId) {
@@ -187,13 +190,15 @@ export const stripeRouter = createTRPCRouter({
 
   getListOfPayments: protectedProcedure.query(async ({ ctx }) => {
     if (ctx.user.stripeCustomerId) {
-      return await stripe.paymentMethods.list({
+      const cards = await stripe.paymentMethods.list({
         type: "card",
-        limit: 3,
         customer: ctx.user.stripeCustomerId,
       });
+
+      return cards;
     }
   }),
+
   getStripeSession: protectedProcedure
     .input(
       z.object({

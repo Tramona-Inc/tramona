@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
@@ -39,6 +38,8 @@ export default function BidPaymentForm({
     },
   });
 
+  const { data: cards } = api.stripe.getListOfPayments.useQuery();
+
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
@@ -70,6 +71,9 @@ export default function BidPaymentForm({
   return (
     <form onSubmit={handleSubmit}>
       <PaymentElement />
+      <>
+        {cards && cards.data.map((card) => <p key={card.id}>{card.card?.last4}</p>)}
+      </>
       <Button type={"submit"}>Save</Button>
     </form>
   );
