@@ -7,6 +7,14 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 export default function BidPaymentForm({
   clientSecret,
   setupIntent,
@@ -38,7 +46,7 @@ export default function BidPaymentForm({
     },
   });
 
-  const { data: cards } = api.stripe.getListOfPayments.useQuery();
+  const { data: payments } = api.stripe.getListOfPayments.useQuery();
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
@@ -70,10 +78,26 @@ export default function BidPaymentForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      <PaymentElement />
-      <>
-        {cards && cards.data.map((card) => <p key={card.id}>{card.card?.last4}</p>)}
-      </>
+      {payments ? (
+        <>
+          <Select defaultValue={payments.defaultPaymentMethod}>
+            <SelectTrigger className="">
+              <SelectValue placeholder="Credit Cards" />
+            </SelectTrigger>
+            <SelectContent>
+              {payments.cards.data.map((payment) => (
+                <SelectItem key={payment.id} value={payment.id}>
+                  **** **** **** {payment.card?.last4}{" "}
+                  <span className="capitalize">{payment.card?.brand}</span>{" "}
+                  {payment.card?.exp_month}/{payment.card?.exp_year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </>
+      ) : (
+        <PaymentElement />
+      )}
       <Button type={"submit"}>Save</Button>
     </form>
   );

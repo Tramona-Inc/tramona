@@ -63,6 +63,7 @@ function BiddingStep1({ property }: { property: Property }) {
   async function onSubmit(values: FormSchema) {
     setPrice(values.price);
     setGuest(values.guest);
+
     if (users?.isIdentityVerified === "true") {
       setStep(step + 1);
     }

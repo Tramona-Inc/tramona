@@ -195,7 +195,17 @@ export const stripeRouter = createTRPCRouter({
         customer: ctx.user.stripeCustomerId,
       });
 
-      return cards;
+      const customer: Customer = await stripe.customers.retrieve(
+        ctx.user.stripeCustomerId,
+      );
+
+      return {
+        // ! Need to get type of invoice_settings
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        defaultPaymentMethod: customer?.invoice_settings
+          ?.default_payment_method as string,
+        cards,
+      };
     }
   }),
 
