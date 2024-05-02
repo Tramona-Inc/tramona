@@ -318,7 +318,7 @@ export default function DesktopSearchBar({
             )}
           </div>
         )}
-        <div className="flex-col rounded-3xl bg-white pb-7 backdrop-blur-md">
+        <div className="flex-col rounded-3xl bg-white pb-6 backdrop-blur-md">
           <div className="flex flex-row items-center gap-x-2">
             <LPLocationInput
               control={form.control}
@@ -401,9 +401,9 @@ export default function DesktopSearchBar({
             </div>
           </div>
           {mode === "request" && (
-            <div className="flex flex-col ">
+            <div className="flex flex-col gap-y-2">
               <div className="flex w-full flex-row justify-between ">
-                <p className="w-11/12 pt-3 text-xs text-[#004236] 2xl:text-base">
+                <p className="w-11/12 pt-3 text-xs text-[#004236] 2xl:text-sm">
                   Instead of just seeing listed prices, requesting a deal lets
                   you set your budget and we&apos;ll send you offers from
                   properties. This way, you can find the perfect place to stay
@@ -425,13 +425,15 @@ export default function DesktopSearchBar({
                 curTab={curTab}
                 isExpanded={isExpanded}
               />
+              <div className="flex flex-col">
+                <AirbnbLinkDialog parentForm={form} curTab={curTab} />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Have a property you are eyeing, input the Airbnb link here.
+                </p>
+              </div>
             </div>
           )}
         </div>
-
-        {mode === "request" && (
-          <AirbnbLinkDialog parentForm={form} curTab={curTab} />
-        )}
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
@@ -519,7 +521,7 @@ function FiltersSection({
 
   return (
     isExpanded && (
-      <div className="my-3 grid max-w-fit grid-cols-2 grid-rows-1 justify-start gap-x-3 lg:grid-cols-4  lg:justify-start">
+      <div className=" grid max-w-fit grid-cols-2 grid-rows-1 justify-start gap-x-3 lg:grid-cols-4  lg:justify-start">
         <FormField
           control={form.control}
           name={`data.${curTab}.roomType`}

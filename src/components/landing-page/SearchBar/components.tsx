@@ -586,7 +586,7 @@ export function AirbnbLinkDialog({
           type="button"
           variant="outline"
           size="sm"
-          className="mb-4 rounded-full text-xs"
+          className="rounded-full text-xs"
           onClick={() => setDialogOpen(true)}
         >
           Add a Link
@@ -597,7 +597,7 @@ export function AirbnbLinkDialog({
           type="button"
           variant="secondary"
           size="sm"
-          className="mb-4 rounded-full rounded-full text-xs "
+          className="rounded-full text-xs "
           onClick={() => setDialogOpen(true)}
         >
           <X />
