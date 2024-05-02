@@ -148,7 +148,7 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto mb-5 max-w-4xl space-y-3">
-      <div className="rounded-lg border">
+      <section className="rounded-lg border">
         <div className="relative h-40 bg-teal-900 lg:h-52">
           <div className="absolute inset-0 overflow-hidden">
             <img
@@ -174,7 +174,6 @@ export default function ProfilePage() {
           >
             <Camera />
           </Button>
-          <div></div>
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:mt-0">
             <h2 className="text-xl font-bold lg:text-2xl">Aaron Soukaphay</h2>
             <p className="font-semibold">Tustin CA, USA</p>
@@ -196,18 +195,18 @@ export default function ProfilePage() {
             </Button>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="space-y-2 rounded-lg border p-4">
+      <section className="space-y-2 rounded-lg border p-4">
         <h2 className="font-bold">About Me</h2>
         <p>
           My name is Aaron. I am from Tustin, CA. I love traveling! I love
           traveling! I love traveling! I love traveling! I love traveling! I
           love traveling! I love traveling!
         </p>
-      </div>
+      </section>
 
-      <div className="space-y-5 rounded-lg border p-4">
+      <section className="space-y-5 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-bold">Bucket List</h2>
           <div className="lg:hidden">
@@ -265,7 +264,7 @@ export default function ProfilePage() {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </section>
     </div>
   );
 }

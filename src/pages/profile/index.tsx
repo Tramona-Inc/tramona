@@ -18,7 +18,9 @@ export default function Page() {
       <Head>
         <title>Profile | Tramona</title>
       </Head>
-      <ProfilePage />
+      {/* <ProfilePage /> */}
+      <ReferralDashboard />
+
       {/* <div className="flex min-h-screen-minus-header">
         <ProfileSidebar />
         <div className="flex-1 overflow-clip">
@@ -38,7 +40,6 @@ export default function Page() {
                 <SecurityIcon /> Change password
               </TabsTrigger>
             </TabsList>
-
             <TabsContent value="referralDashboard">
               <ReferralDashboard />
             </TabsContent>
