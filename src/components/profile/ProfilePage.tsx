@@ -4,6 +4,7 @@ import {
   Ellipsis,
   Facebook,
   Instagram,
+  Plus,
   Share,
   Twitter,
   Youtube,
@@ -146,15 +147,16 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="mx-auto mb-3 max-w-4xl space-y-3">
+    <div className="mx-auto mb-5 max-w-4xl space-y-3">
       <div className="rounded-lg border">
         <div className="relative h-40 bg-teal-900 lg:h-52">
-          {/* <img
-            src="https://t3.ftcdn.net/jpg/05/70/41/84/360_F_570418433_m1DoCjzGbZhDQKs96hMThzUz736s2zhl.jpg"
-            alt=""
-            className="w-full object-cover"
-          />
-          <p>image will go here</p> */}
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src="https://t3.ftcdn.net/jpg/05/70/41/84/360_F_570418433_m1DoCjzGbZhDQKs96hMThzUz736s2zhl.jpg"
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          </div>
           <Button className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-primary/20 p-0 lg:w-auto lg:rounded-lg lg:px-3">
             <Camera />
             <p className="hidden lg:block">Edit Cover Photo</p>
@@ -168,10 +170,11 @@ export default function ProfilePage() {
           />
           <Button
             size="icon"
-            className="absolute rounded-full opacity-25 lg:hidden"
+            className="absolute left-32 top-2 rounded-full bg-primary/20 lg:hidden"
           >
             <Camera />
           </Button>
+          <div></div>
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:mt-0">
             <h2 className="text-xl font-bold lg:text-2xl">Aaron Soukaphay</h2>
             <p className="font-semibold">Tustin CA, USA</p>
@@ -205,9 +208,24 @@ export default function ProfilePage() {
       </div>
 
       <div className="space-y-5 rounded-lg border p-4">
-        <h2 className="font-bold">Bucket List</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-bold">Bucket List</h2>
+          <div className="lg:hidden">
+            <Ellipsis />
+          </div>
+          <div className="hidden space-x-2 lg:block">
+            <Button variant="ghost" className=" font-bold text-teal-900">
+              <Plus />
+              Add
+            </Button>
+            <Button variant="ghost" className="font-bold text-teal-900">
+              <Share />
+              Share
+            </Button>
+          </div>
+        </div>
         <Tabs defaultValue="properties" className="space-y-5">
-          <TabsList className="items-center space-x-2">
+          <TabsList noBorder className="items-center space-x-2">
             <TabsTrigger
               value="properties"
               className="rounded-full border aria-[selected=true]:bg-teal-800/50"
@@ -220,8 +238,6 @@ export default function ProfilePage() {
             >
               Destinations
             </TabsTrigger>
-            <Button>Add</Button>
-            <Button>Share</Button>
           </TabsList>
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
