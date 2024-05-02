@@ -60,6 +60,8 @@ function BiddingStep1({ property }: { property: Property }) {
   const { mutateAsync: createSetupIntentSessionMutation } =
     api.stripe.createSetupIntentSession.useMutation();
 
+  const { update } = useSession();
+
   async function onSubmit(values: FormSchema) {
     setPrice(values.price);
     setGuest(values.guest);
@@ -74,6 +76,7 @@ function BiddingStep1({ property }: { property: Property }) {
 
     // Creates Session for mode setup and creates customer
     const response = await createSetupIntentSessionMutation();
+    void update();
 
     if (stripe !== null && response) {
       if (response.client_secret && response.id) {

@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
           referralTier: token.referralTier,
           phoneNumber: token.phoneNumber,
           createdAt: token.createdAt,
-          stripeCustomerId: token.stripeCustomerId,
+          stripeCustomerId: token.stripeCustomerId
         },
       };
     },

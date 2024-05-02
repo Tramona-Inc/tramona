@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { users } from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
@@ -189,21 +190,28 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   getListOfPayments: protectedProcedure.query(async ({ ctx }) => {
+
     if (ctx.user.stripeCustomerId) {
       const cards = await stripe.paymentMethods.list({
         type: "card",
         customer: ctx.user.stripeCustomerId,
       });
 
-      const customer: Customer = await stripe.customers.retrieve(
+      const customer = await stripe.customers.retrieve(
         ctx.user.stripeCustomerId,
       );
 
+      if (customer.deleted) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Customer not found",
+        });
+      }
+
+
       return {
         // ! Need to get type of invoice_settings
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        defaultPaymentMethod: customer?.invoice_settings
-          ?.default_payment_method as string,
+        defaultPaymentMethod: customer.invoice_settings.default_payment_method,
         cards,
       };
     }
@@ -238,21 +246,19 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
-  createVerificationSession: protectedProcedure.query(
-    async ({ ctx, input }) => {
-      const verificationSession =
-        await stripe.identity.verificationSessions.create({
-          type: "document",
-          metadata: {
-            user_id: ctx.user.id,
-          },
-        });
+  createVerificationSession: protectedProcedure.query(async ({ ctx }) => {
+    const verificationSession =
+      await stripe.identity.verificationSessions.create({
+        type: "document",
+        metadata: {
+          user_id: ctx.user.id,
+        },
+      });
 
-      // Return only the client secret to the frontend.
-      const clientSecret = verificationSession.client_secret;
-      return clientSecret;
-    },
-  ),
+    // Return only the client secret to the frontend.
+    const clientSecret = verificationSession.client_secret;
+    return clientSecret;
+  }),
 
   getVerificationReports: protectedProcedure.query(async ({ ctx, input }) => {
     const verificationReport = await stripe.identity.verificationReports.list({

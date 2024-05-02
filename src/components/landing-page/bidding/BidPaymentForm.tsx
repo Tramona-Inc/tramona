@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSession } from "next-auth/react";
 
 export default function BidPaymentForm({
   clientSecret,
@@ -30,6 +31,9 @@ export default function BidPaymentForm({
     checkOut: Date;
   };
 }) {
+
+  const { update } = useSession();
+
   const stripe = useStripe();
   const elements = useElements();
 
@@ -41,12 +45,14 @@ export default function BidPaymentForm({
 
   const { mutate: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: () => {
+      void update(); //update session
       // resetSession();
       setStep(step + 1);
     },
   });
 
   const { data: payments } = api.stripe.getListOfPayments.useQuery();
+
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
@@ -78,23 +84,23 @@ export default function BidPaymentForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      {payments ? (
-        <>
-          <Select defaultValue={payments.defaultPaymentMethod}>
-            <SelectTrigger className="">
-              <SelectValue placeholder="Credit Cards" />
-            </SelectTrigger>
-            <SelectContent>
-              {payments.cards.data.map((payment) => (
-                <SelectItem key={payment.id} value={payment.id}>
-                  **** **** **** {payment.card?.last4}{" "}
-                  <span className="capitalize">{payment.card?.brand}</span>{" "}
-                  {payment.card?.exp_month}/{payment.card?.exp_year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </>
+      {payments && payments.cards.data.length > 0 ? (
+        <Select
+          defaultValue={(payments.defaultPaymentMethod as string) ?? undefined}
+        >
+          <SelectTrigger className="">
+            <SelectValue placeholder="Credit Cards" />
+          </SelectTrigger>
+          <SelectContent>
+            {payments.cards.data.map((payment) => (
+              <SelectItem key={payment.id} value={payment.id}>
+                **** **** **** {payment.card?.last4}{" "}
+                <span className="capitalize">{payment.card?.brand}</span>{" "}
+                {payment.card?.exp_month}/{payment.card?.exp_year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       ) : (
         <PaymentElement />
       )}
