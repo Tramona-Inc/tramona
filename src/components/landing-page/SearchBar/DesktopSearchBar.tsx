@@ -31,6 +31,7 @@ import {
   Filter,
   UsersRoundIcon,
   DollarSignIcon,
+  ChevronDown,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -47,6 +48,7 @@ import LPDateRangePicker, {
   LPInput,
   LPLocationInput,
 } from "./components";
+import { SelectIcon } from "@radix-ui/react-select";
 
 const formSchema = z.object({
   data: z
@@ -394,12 +396,18 @@ export default function DesktopSearchBar({
                 size="lg"
                 className=" rounded-lg py-8 font-semibold"
               >
-                {mode === "search" ? "Search" : "Request Deal"}
+                {mode === "search" ? "Search" : "Submit request"}
               </Button>
             </div>
           </div>
-
-          <div className="col-span-full">
+          <div className="">
+            {mode === "request" && (
+              <p className="w-5/6 text-[#004236]">
+                Instead of just seeing listed prices, requesting a deal lets you
+                set your budget and we’ll send you offers from properties. This
+                way, you can find the perfect place to stay within your means!
+              </p>
+            )}
             <FiltersSection form={form} curTab={curTab} />
           </div>
         </div>
@@ -493,9 +501,52 @@ function FiltersSection({
   const [roomTypeDDIsOpen, setRoomTypeDDIsOpen] = useState(false);
 
   return (
-    <div>
+    <div className="relative flex w-full flex-row-reverse justify-between">
+      <div className="flex flex-row items-start justify-end p-3">
+        <Filter size={22} strokeWidth={1.5} />
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="rounded-full bg-white/10 px-1 py-1 text-sm font-medium text-primary hover:bg-white/20"
+        >
+          {isExpanded ? "Hide filters" : "Add filters (optional)"}
+        </button>
+      </div>
       {isExpanded && (
-        <div className="grid grid-cols-2 lg:grid-cols-5">
+        <div className="my-3 grid max-w-fit grid-cols-2 grid-rows-1 justify-start gap-x-3 lg:grid-cols-4  lg:justify-start">
+          <FormField
+            control={form.control}
+            name={`data.${curTab}.roomType`}
+            render={({ field }) => (
+              <LPFormItem className="col-span-1 border-none bg-white text-base">
+                <Select
+                  onValueChange={field.onChange}
+                  open={roomTypeDDIsOpen}
+                  onOpenChange={setRoomTypeDDIsOpen}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue
+                        className="SelectValue"
+                        placeholder="Type of place"
+                      />
+                      <SelectIcon>
+                        <ChevronDown className="h-4 w-4" />
+                      </SelectIcon>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-white">
+                    {ALL_PROPERTY_ROOM_TYPES.map((roomType) => (
+                      <SelectItem key={roomType} value={roomType}>
+                        {roomType}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <LPFormMessage className="mt-2" />
+              </LPFormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name={`data.${curTab}.minNumBedrooms`}
@@ -509,7 +560,7 @@ function FiltersSection({
               </LPFormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name={`data.${curTab}.minNumBeds`}
             render={({ field }) => (
@@ -521,81 +572,26 @@ function FiltersSection({
                 <LPFormMessage className="mt-2" />
               </LPFormItem>
             )}
-          />
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.roomType`}
-            render={({ field }) => (
-              <LPFormItem className="col-span-full lg:col-span-1">
-                <FormLabel
-                  className={classNames.buttonLabel({
-                    isFocused: roomTypeDDIsOpen,
-                  })}
-                >
-                  Room Type
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  open={roomTypeDDIsOpen}
-                  onOpenChange={setRoomTypeDDIsOpen}
-                >
-                  <FormControl>
-                    <SelectTrigger
-                      className={cn(
-                        classNames.button({
-                          isPlaceholder: field.value === "any",
-                          isFocused: roomTypeDDIsOpen,
-                        }),
-                        "text-base",
-                      )}
-                    >
-                      <SelectValue placeholder="" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="any">Any</SelectItem>
-                    {ALL_PROPERTY_ROOM_TYPES.map((roomType) => (
-                      <SelectItem key={roomType} value={roomType}>
-                        {roomType}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <LPFormMessage className="mt-2" />
-              </LPFormItem>
-            )}
-          />
+          /> */}
 
           <FormField
             control={form.control}
             name={`data.${curTab}.note`}
             render={({ field }) => (
-              <LPFormItem className="col-span-2">
-                <LPFormLabel>Additional notes</LPFormLabel>
+              <LPFormItem className="relative z-20 col-span-2 h-10 rounded-lg border-2 border-border">
                 <FormControl>
                   <LPInput
                     {...field}
-                    placeholder="e.g. Pet friendly, close to the ocean"
+                    placeholder="Additional notes"
+                    className=" mt-[-3px] h-7"
                   />
                 </FormControl>
-                <LPFormMessage className="mt-2" />
+                <LPFormMessage className="z-10 mt-5" />
               </LPFormItem>
             )}
           />
         </div>
       )}
-
-      <div className="flex items-center justify-end p-3">
-        <Filter size={22} strokeWidth={1.5} />
-        <button
-          type="button"
-          onClick={() => setIsExpanded((prev) => !prev)}
-          className="rounded-full bg-white/10 px-1 py-1 text-sm font-medium text-primary hover:bg-white/20"
-        >
-          {isExpanded ? "Hide filters" : "Add filters (optional)"}
-        </button>
-      </div>
     </div>
   );
 }

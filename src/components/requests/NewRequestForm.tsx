@@ -25,6 +25,7 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import DateRangePicker from "../_common/DateRangePicker";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import {
   Select,
   SelectContent,
@@ -58,6 +59,7 @@ import {
 } from "../ui/drawer";
 import ErrorMsg from "../ui/ErrorMsg";
 import { toast } from "../ui/use-toast";
+import { SelectIcon, SelectIcon } from "@radix-ui/react-select";
 
 const formSchema = z
   .object({
@@ -397,6 +399,9 @@ function FiltersSection({
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="" />
+                  <SelectIcon>
+                    <CaretSortIcon className="h-4 w-4 opacity-50" />
+                  </SelectIcon>
                 </SelectTrigger>
               </FormControl>
               <SelectContent>

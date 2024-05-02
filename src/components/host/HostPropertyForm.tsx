@@ -36,6 +36,8 @@ import {
 import { Textarea } from "../ui/textarea";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
+import { SelectIcon } from "@radix-ui/react-select";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 
 export const hostPropertyFormSchema = z.object({
   name: zodString(),
@@ -164,6 +166,9 @@ export default function HostPropertyForm({
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a property type" />
+                      <SelectIcon>
+                        <CaretSortIcon className="h-4 w-4 opacity-50" />
+                      </SelectIcon>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

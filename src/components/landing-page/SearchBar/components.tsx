@@ -68,7 +68,7 @@ export const classNames = {
   errorMsg: "pointer-events-none absolute left-8 top-14 z-10",
 
   input:
-    "peer block h-20 w-full rounded-full bg-transparent pt-4 text-primary placeholder:text-muted-foreground hover:bg-white/10 focus:bg-white focus:outline-none focus:text-black placeholder:focus:text-black/50",
+    "peer block h-12 w-full rounded-full bg-transparent pt-4 text-primary placeholder:text-muted-foreground hover:bg-white/10  focus:outline-none focus:text-black placeholder:focus:text-black/50",
 
   // like input but for buttons
   button: ({
@@ -79,7 +79,7 @@ export const classNames = {
     isFocused: boolean;
   }) =>
     cn(
-      "peer flex h-20 w-full border-none rounded-full pt-4 px-8",
+      "peer flex h-20 w-full   pt-4 px-8",
       isFocused ? "bg-white" : "bg-transparent hover:bg-white/10",
       isPlaceholder
         ? cn("text-muted-foreground", isFocused && "text-black/50")
