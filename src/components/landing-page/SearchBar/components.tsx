@@ -7,10 +7,10 @@ import { cn, formatDateRange } from "@/utils/utils";
 import {
   CalendarDaysIcon,
   CalendarIcon,
+  ChevronDown,
   MapPinIcon,
   Minus,
   Plus,
-  PlusIcon,
   SearchIcon,
   UsersIcon,
   X,
@@ -210,7 +210,7 @@ export function LPLocationInput<
             setOpen={setIsOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className="w-96 -translate-y-14 overflow-clip px-0 pt-0"
+            className=" w-60 -translate-y-14 overflow-clip px-0 pt-0 2xl:w-80"
             trigger={({ value, disabled }) => (
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -223,8 +223,8 @@ export function LPLocationInput<
                   "flex items-center text-left",
                 )}
               >
-                <MapPinIcon className="mx-auto mb-4 ml-[-16px] h-5 w-5 shrink-0 text-primary" />
-                <p className="mb-4 ml-2 flex-1 truncate text-sm">
+                <MapPinIcon className="mx-auto mb-4 ml-[-16px] h-5 w-5 text-primary" />
+                <p className="mb-4 ml-2 flex-1 truncate text-xs xl:text-sm">
                   {value ?? "Enter your destination"}
                 </p>
               </button>
@@ -281,7 +281,9 @@ export default function LPDateRangePicker<
                     {formatDateRange(field.value.from, field.value.to)}
                   </p>
                 ) : (
-                  <p className="mb-4 text-sm">Select dates</p>
+                  <p className="mb-4 whitespace-nowrap text-xs xl:text-sm">
+                    Select dates
+                  </p>
                 )}
               </button>
             </PopoverTrigger>
@@ -582,20 +584,20 @@ export function AirbnbLinkDialog({
       {parentForm.getValues(`data.${curTab}.airbnbLink`) === undefined ? (
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
-          className="rounded-full"
+          className="mb-4 rounded-full text-xs"
           onClick={() => setDialogOpen(true)}
         >
-          <PlusIcon />
-          Add an Airbnb Link
+          Add a Link
+          <ChevronDown />
         </Button>
       ) : (
         <Button
           type="button"
           variant="secondary"
           size="sm"
-          className="rounded-full"
+          className="mb-4 rounded-full rounded-full text-xs "
           onClick={() => setDialogOpen(true)}
         >
           <X />

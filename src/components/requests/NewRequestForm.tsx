@@ -59,7 +59,7 @@ import {
 } from "../ui/drawer";
 import ErrorMsg from "../ui/ErrorMsg";
 import { toast } from "../ui/use-toast";
-import { SelectIcon, SelectIcon } from "@radix-ui/react-select";
+import { SelectIcon } from "@radix-ui/react-select";
 
 const formSchema = z
   .object({
