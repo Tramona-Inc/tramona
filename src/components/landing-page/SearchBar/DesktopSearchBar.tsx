@@ -32,6 +32,7 @@ import {
   UsersRoundIcon,
   DollarSignIcon,
   ChevronDown,
+  InfoIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -48,7 +49,14 @@ import LPDateRangePicker, {
   LPInput,
   LPLocationInput,
 } from "./components";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SelectIcon } from "@radix-ui/react-select";
+import { Info } from "../../email-templates/EmailComponentsWithoutHost";
 
 const formSchema = z.object({
   data: z
@@ -401,14 +409,14 @@ export default function DesktopSearchBar({
             </div>
           </div>
           {mode === "request" && (
-            <div className="flex flex-col gap-y-2">
-              <div className="flex w-full flex-row justify-between ">
-                <p className="w-11/12 pt-3 text-xs text-[#004236] 2xl:text-sm">
+            <div className="flex flex-col gap-y-4">
+              <div className="flex w-11/12 flex-row justify-between">
+                <div className="flex w-10/12 items-center pt-3 text-xs text-[#004236] 2xl:text-sm">
                   Instead of just seeing listed prices, requesting a deal lets
-                  you set your budget and we&apos;ll send you offers from
-                  properties. This way, you can find the perfect place to stay
-                  within your means!
-                </p>
+                  you set your budget, and we&apos;ll match you with hosts who
+                  have properties in the city and accept your price. This way,
+                  you can find the perfect place to stay within your means!
+                </div>
                 <div className="flex flex-row items-center p-3">
                   <Filter size={22} strokeWidth={1.5} />
                   <button
@@ -521,7 +529,7 @@ function FiltersSection({
 
   return (
     isExpanded && (
-      <div className=" grid max-w-fit grid-cols-2 grid-rows-1 justify-start gap-x-3 lg:grid-cols-4  lg:justify-start">
+      <div className=" After the flow what elsex-3 grid max-w-fit grid-cols-2 grid-rows-1 justify-start lg:grid-cols-4  lg:justify-start">
         <FormField
           control={form.control}
           name={`data.${curTab}.roomType`}
