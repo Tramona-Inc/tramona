@@ -1,4 +1,7 @@
-import { type CitiesLatLong, useCitiesFilter } from "@/utils/store/cities-filter";
+import {
+  type CitiesLatLong,
+  useCitiesFilter,
+} from "@/utils/store/cities-filter";
 import { cn } from "@/utils/utils";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { LucideListFilter } from "lucide-react";
@@ -52,7 +55,7 @@ export const cities: CitiesLatLong[] = [
     lat: 33.8303,
   },
   { id: "vegas", label: "Vegas", long: -115.1398, lat: 36.1699 },
-  { id: "sf", label: "SF", long: -122.4194, lat: 37.7749 },
+  { id: "sf", label: "San francisco", long: -122.4194, lat: 37.7749 },
   { id: "boston", label: "Boston", long: -71.0589, lat: 42.3601 },
 ];
 
@@ -82,7 +85,10 @@ export default function CitiesFilter() {
                   onClick={() => {
                     setFilter(city);
                   }}
-                  className={cn(city.id === filter.id && "font-bold", "p-1")}
+                  className={cn(
+                    city.id === filter.id && "font-bold",
+                    "p-1 text-lg",
+                  )}
                 >
                   {city.label}
                 </Button>
