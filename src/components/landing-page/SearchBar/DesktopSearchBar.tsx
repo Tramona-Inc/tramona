@@ -51,19 +51,8 @@ import LPDateRangePicker, {
   LPInput,
   LPLocationInput,
 } from "./components";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { SelectIcon } from "@radix-ui/react-select";
 import { Info } from "../../email-templates/EmailComponentsWithoutHost";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 const formSchema = z.object({
   data: z
@@ -441,7 +430,7 @@ export default function DesktopSearchBar({
                 isExpanded={isExpanded}
               />
               <div className="flex flex-col">
-                <AirbnbLinkDialog parentForm={form} curTab={curTab} />
+                {/* <AirbnbLinkDialog parentForm={form} curTab={curTab} /> */}
                 <AirbnbLinkPopover parentForm={form} curTab={curTab} />
                 <p className="mt-1 text-xs text-muted-foreground">
                   Have a property you are eyeing, input the Airbnb link here.

@@ -13,6 +13,7 @@ import {
   Plus,
   SearchIcon,
   UsersIcon,
+  DollarSignIcon,
   X,
 } from "lucide-react";
 import {
@@ -94,7 +95,7 @@ export const classNames = {
     isFocused: boolean;
   }) =>
     cn(
-      "peer flex h-10 w-full border border-gray/50 rounded-full p-6",
+      "peer flex h-10 w-full border border-gray/50 rounded-md p-6",
       isFocused ? "bg-white" : "bg-white hover:bg-white/75",
       isPlaceholder
         ? cn("text-black/75", isFocused && "text-black/50")
@@ -645,35 +646,39 @@ export function MobileGuestsPicker<
               </button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-auto p-0 backdrop-blur-md"
+              className="w-80 bg-white p-4 backdrop-blur-md"
               align="start"
               side="bottom"
             >
-              <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center justify-between space-x-3">
                 Guests
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 rounded-full"
-                  onClick={() => onClick(-1, field)}
-                  disabled={numGuests <= 1}
-                >
-                  <Minus className="h-4 w-4" />
-                  <span className="sr-only">Decrease</span>
-                </Button>
-                <div className="flex-1 text-center">
-                  <div className="font-bold tracking-tighter">{numGuests}</div>
+                <div className="flex flex-row items-center gap-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7 shrink-0 rounded-full"
+                    onClick={() => onClick(-1, field)}
+                    disabled={numGuests <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                    <span className="sr-only">Decrease</span>
+                  </Button>
+                  <div className="flex-1 text-center">
+                    <div className="flex items-center font-bold tracking-tighter">
+                      {numGuests}
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7 shrink-0 rounded-full"
+                    onClick={() => onClick(1, field)}
+                    disabled={numGuests >= 10}
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">Increase</span>
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 rounded-full"
-                  onClick={() => onClick(1, field)}
-                  disabled={numGuests >= 10}
-                >
-                  <Plus className="h-4 w-4" />
-                  <span className="sr-only">Increase</span>
-                </Button>
               </div>
             </PopoverContent>
           </Popover>
@@ -705,7 +710,20 @@ export function MobilePriceInput<
       render={({ field }) => (
         <>
           <FormLabel className="text-black">{formLabel}</FormLabel>
-          <LPFormItem></LPFormItem>
+          <LPFormItem>
+            <div className="flex items-center justify-between space-x-2 rounded-md border-2 bg-white px-4 py-2">
+              <DollarSignIcon strokeWidth={1} />
+              <div className="flex-1 text-center">
+                <input
+                  type="decimal"
+                  value=""
+                  onChange={(e) => setPrice(Number(e.target.value))} ///I know this doesn't work, nothing i wrote makes sense -neal
+                  className="focus-none w-full bg-transparent bg-white text-start placeholder:text-foreground focus:text-black focus:outline-none"
+                  placeholder="Price per night"
+                />
+              </div>
+            </div>
+          </LPFormItem>
           <MobileFormMessage />
         </>
       )}
@@ -882,10 +900,10 @@ export function AirbnbLinkPopover({
               type="button"
               variant="outline"
               size="sm"
-              className="rounded-full text-xs"
+              className="rounded-full border-none bg-accent text-xs"
             >
-              Add a Link
-              <ChevronDown />
+              Add a link
+              <ChevronDown size={20} />
             </Button>
           ) : (
             <Button
@@ -902,9 +920,9 @@ export function AirbnbLinkPopover({
             </Button>
           )}
         </PopoverTrigger>
-        <PopoverContent align="start">
+        <PopoverContent align="start" className="w-96 bg-white ">
           <Form {...form}>
-            <form className="flex flex-col gap-4">
+            <form className="flex flex-col gap-4 bg-white">
               <FormField
                 control={form.control}
                 name={"airbnbLink"}
@@ -912,7 +930,12 @@ export function AirbnbLinkPopover({
                 render={({ field }) => (
                   <LPFormItem className="">
                     <FormLabel>
-                      <p>Airbnb Link</p>
+                      <div className="mb-4 flex  flex-row justify-between">
+                        <div className=" h-full items-center text-primary">
+                          Airbnb Link
+                        </div>
+                        <button className="text-[#004236] ">Clear</button>
+                      </div>
                     </FormLabel>
                     <FormControl>
                       <Input {...field} type="text" placeholder="Enter link" />
@@ -928,7 +951,7 @@ export function AirbnbLinkPopover({
                 disabled={form.formState.isSubmitting}
                 className="rounded-full"
               >
-                {form.formState.isSubmitting ? "Crunching data..." : "Add"}
+                {form.formState.isSubmitting ? "Crunching data..." : "Done"}
               </Button>
             </form>
           </Form>

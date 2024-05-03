@@ -16,6 +16,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  AirbnbLinkPopover,
   MobileDateRangePicker,
   MobileGuestsPicker,
   MobileLocationInput,
@@ -67,7 +68,7 @@ function SearchTab() {
     <Form {...form}>
       <form className="flex  flex-col justify-between">
         <div className="flex flex-col">
-          <div className="grid gap-3">
+          <div className="grid gap-2">
             <MobileLocationInput
               control={form.control}
               name="location"
@@ -96,7 +97,7 @@ function SearchTab() {
               className="col-span-full"
             />
           </div>
-          <Separator />
+          <Separator className="my-4" />
           <div className="flex justify-between ">
             <Button type="reset" variant="ghost">
               Clear all
@@ -176,9 +177,15 @@ function RequestDealTab() {
     <Form {...form}>
       <form
         // onSubmit={form.handleSubmit((data) => onSubmit(data.data))}
-        className="flex   flex-col justify-between"
+        className="flex flex-col justify-between gap-y-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
+        <div className="my-3  items-center text-xs text-[#004236]">
+          Instead of just seeing listed prices, requesting a deal lets you set
+          your budget, and we&apos;ll match you with hosts who have properties
+          in the city and accept your price. This way, you can find the perfect
+          place to stay within your means!
+        </div>
         <div className="flex flex-wrap gap-1">
           {Array.from({ length: numTabs }).map((_, i) => {
             const isSelected = curTab === i;
@@ -249,27 +256,61 @@ function RequestDealTab() {
             </button>
           )}
         </div>
-        <div className="w-10/12 items-center pt-3 text-xs text-[#004236]">
-          Instead of just seeing listed prices, requesting a deal lets you set
-          your budget, and we&apos;ll match you with hosts who have properties
-          in the city and accept your price. This way, you can find the perfect
-          place to stay within your means!
-        </div>
-        <Separator />
-        <div className="flex justify-between ">
-          <Button type="reset" variant="ghost">
-            Clear all
-          </Button>
 
-          <Button
-            type="submit"
-            variant="default"
-            // onClick={form.handleSubmit((data) => onSubmit(data))}
-            className=""
-          >
-            Submit request
-          </Button>
-        </div>
+        <Form {...form}>
+          <form className="flex  flex-col justify-between">
+            <div className="flex flex-col">
+              <div className="grid gap-1">
+                <MobileLocationInput
+                  control={form.control}
+                  name="location"
+                  formLabel="Location"
+                  className="col-span-full"
+                />
+
+                <MobileDateRangePicker
+                  control={form.control}
+                  name="date"
+                  formLabel="Select dates"
+                  className="col-span-full"
+                />
+
+                <MobileGuestsPicker
+                  control={form.control}
+                  name="numGuests"
+                  formLabel="Add guests"
+                  className="col-span-full"
+                />
+
+                <MobilePriceInput
+                  control={form.control}
+                  name="maxNightlyPriceUSD"
+                  formLabel="Price Range"
+                  className="col-span-full"
+                />
+              </div>
+              {/* <AirbnbLinkPopover /> */}
+              <p className="mt-1 text-xs text-muted-foreground">
+                Have a property you are eyeing, input the Airbnb link here.
+              </p>
+              <Separator className="my-4" />
+              <div className="flex justify-between ">
+                <Button type="reset" variant="ghost">
+                  Clear all
+                </Button>
+
+                <Button
+                  type="submit"
+                  variant="default"
+                  // onClick={form.handleSubmit((data) => onSubmit(data))}
+                  className=""
+                >
+                  Submit request
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
       </form>
     </Form>
   );
