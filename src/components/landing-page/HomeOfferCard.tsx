@@ -99,8 +99,6 @@ export default function HomeOfferCard({
   });
 
   const setDate = useBidding((state) => state.setDate);
-  const setStep = useBidding((state) => state.setStep);
-  const step = useBidding((state) => state.step);
   const resetSession = useBidding((state) => state.resetSession);
 
   const [open, setOpen] = useState(false);
@@ -148,7 +146,7 @@ export default function HomeOfferCard({
         </p>
         <p>
           <span className="text-xs">Airbnb Price: </span>
-          {formatCurrency(property?.originalNightlyPrice ?? 0)}
+          {formatCurrency(property.originalNightlyPrice ?? 0)}
           <span className="text-xs">/night</span>
         </p>
       </div>

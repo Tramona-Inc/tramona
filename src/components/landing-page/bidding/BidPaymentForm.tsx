@@ -98,7 +98,7 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-5">
       <PaymentElement />
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <Button isLoading={isLoading} type="submit">

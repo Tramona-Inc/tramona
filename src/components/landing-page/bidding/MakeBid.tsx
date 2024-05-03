@@ -15,7 +15,6 @@ function MakeBid({ propertyId }: { propertyId: number }) {
 
   const step = useBidding((state) => state.step);
   const setStep = useBidding((state) => state.setStep);
-  //we need to make a stop if the user is not verified
 
   return (
     <div>
@@ -32,6 +31,7 @@ function MakeBid({ propertyId }: { propertyId: number }) {
           <ChevronLeft />
         </Button>
       )}
+
       {isLoading ? (
         <Spinner />
       ) : (

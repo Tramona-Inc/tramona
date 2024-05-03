@@ -147,7 +147,7 @@ function BiddingStep2({ property }: { property: Property }) {
       <div className="flex flex-col items-center tracking-tight md:flex-row md:items-start md:space-x-20">
         <div className="mt-4 w-[300px] md:w-[500px]">
           {payments && payments.cards.data.length > 0 ? (
-            <>
+            <div className='space-y-5'>
               <Select
                 defaultValue={payments.defaultPaymentMethod as string}
                 onValueChange={(value) => {
@@ -169,9 +169,9 @@ function BiddingStep2({ property }: { property: Property }) {
                 </SelectContent>
               </Select>
               <Button onClick={onSubmit} type="submit">
-                Save
+                Send Offer
               </Button>
-            </>
+            </div>
           ) : (
             <Elements stripe={stripePromise} options={options}>
               <BidPaymentForm bid={bid} />

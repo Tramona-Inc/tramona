@@ -57,7 +57,15 @@ export const useBidding = create<BiddingState>()(
         set(() => ({ step }));
       },
       resetSession: () => {
-        sessionStorage.removeItem("bidding-state");
+        set(() => ({
+          price: 0,
+          guest: 1,
+          date: {
+            from: new Date(),
+            to: new Date(),
+          },
+          step: 0,
+        }));
       },
     }),
     {
