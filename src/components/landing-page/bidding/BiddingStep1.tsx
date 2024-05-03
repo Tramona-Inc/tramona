@@ -128,7 +128,7 @@ function BiddingStep1({ property }: { property: Property }) {
                       />
                     </FormControl>
                     <FormMessage />
-                    {price !== 0 && price <= reccomendedPrice / 100 && (
+                    {price > 0 && price <= reccomendedPrice / 100 && (
                       <p className="max-w-[300px] text-destructive">
                         The host will be more likely to respond if your offer is
                         around ${(reccomendedPrice / 100).toFixed(2)}
