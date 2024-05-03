@@ -65,8 +65,6 @@ export default function CitiesFilter() {
   const open = useCitiesFilter((state) => state.open);
   const setOpen = useCitiesFilter((state) => state.setOpen);
 
-  console.log(filter);
-
   return (
     <div className="grid grid-cols-8">
       <div className="col-span-5 flex w-full items-center justify-center xl:col-span-7 ">
