@@ -70,7 +70,7 @@ export default function ReferralDashboard() {
           </div>
           <p className="text-2xl font-semibold">{user?.referralTier}</p>
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="border-r-2">
               <p className="text-4xl font-semibold">
                 {data?.numSignUpsUsingCode ?? "-"}
               </p>
@@ -82,7 +82,7 @@ export default function ReferralDashboard() {
               </p>
               <p>Bookings</p>
             </div>
-            <div className="col-span-2">
+            <div className="col-span-2 border-t-2 pt-4">
               <p className="text-4xl font-semibold">
                 {formatCurrency(data?.totalBookingVolume ?? 0)}
               </p>
@@ -101,56 +101,52 @@ export default function ReferralDashboard() {
             <ChevronRight size={16} />
           </div>
         </section>
-        <div className="col-span-2">
+        <div className="col-span-2 space-y-6 rounded-lg border p-4">
           <section className="space-y-2">
-            <div>
-              <h3 className="text-2xl font-semibold">
-                Share your referral link
-              </h3>
-              <p className="text-base text-muted-foreground">
-                Share your referral link by copying and sending it or sharing it
-                on your social media.
-              </p>
-            </div>
+            <h3 className="text-xl font-bold">Share your referral link</h3>
+            <p className="text-sm">
+              Share your referral link by copying and sending it or sharing it
+              on your social media.
+            </p>
 
-            <div className="space-y-2">
-              <Input value={url} className="text-base" disabled />
+            <div className="flex items-center justify-between">
+              <div className="basis-5/6">
+                <Input value={url} className="text-base" disabled />
+              </div>
               <CopyToClipboardBtn
                 message={url}
                 render={({ justCopied, copyMessage }) => (
-                  <Button size="lg" className="w-full" onClick={copyMessage}>
-                    {justCopied ? "Copied!" : "Copy link"}
+                  <Button onClick={copyMessage} className="bg-teal-900 px-6">
+                    {justCopied ? "Copied!" : "Copy"}
                   </Button>
                 )}
               />
             </div>
           </section>
           <section className="space-y-2">
-            <div>
-              <h3 className="text-2xl font-semibold">Share a message</h3>
-              <p className="text-base text-muted-foreground">
-                Your referral link will be automatically added to the end of the
-                message.
-              </p>
-            </div>
+            <h3 className="text-xl font-bold">Share a message</h3>
+            <p className="text-sm">
+              Your referral link will be automatically added to the end of the
+              message.
+            </p>
 
             <Textarea
               ref={textAreaRef}
-              disabled={!isEditingMessage}
+              // disabled={!isEditingMessage}
               defaultValue={`${message}`}
               onChange={(e) => setMessage(e.target.value)}
               className="h-24 text-base"
             />
-            <div className="flex gap-2">
+            <div className="flex justify-end">
               <CopyToClipboardBtn
                 message={messageWithLink}
                 render={({ justCopied, copyMessage }) => (
-                  <Button onClick={copyMessage} size="lg" className="flex-1">
-                    {justCopied ? "Copied!" : "Copy message"}
+                  <Button onClick={copyMessage} className="bg-teal-900 px-6">
+                    {justCopied ? "Copied!" : "Copy"}
                   </Button>
                 )}
               />
-              {isEditingMessage ? (
+              {/* {isEditingMessage ? (
                 <Button
                   onClick={() => {
                     saveReferralMessage();
@@ -174,7 +170,7 @@ export default function ReferralDashboard() {
                 >
                   Edit message
                 </Button>
-              )}
+              )} */}
             </div>
           </section>
         </div>

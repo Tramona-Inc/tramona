@@ -1,4 +1,5 @@
 import {
+  Bookmark,
   Camera,
   Edit,
   Ellipsis,
@@ -209,39 +210,66 @@ export default function ProfilePage() {
       <section className="space-y-5 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-bold">Bucket List</h2>
-          <div className="lg:hidden">
-            <Ellipsis />
-          </div>
-          <div className="hidden space-x-2 lg:block">
-            <Button variant="ghost" className=" font-bold text-teal-900">
-              <Plus />
-              Add
-            </Button>
-            <Button variant="ghost" className="font-bold text-teal-900">
+          <div className="hidden items-center gap-4 lg:flex">
+            <p className="font-bold">
+              Your Bucket List link: Tramona.com/AaronSoukaphay
+            </p>
+            <Button className="rounded-full bg-teal-900">Copy</Button>
+            <Button className="bg-teal-900 font-bold">
               <Share />
               Share
             </Button>
           </div>
+          <Button variant="ghost" className=" font-bold text-teal-900">
+            <Plus />
+            Add
+          </Button>
         </div>
         <Tabs defaultValue="properties" className="space-y-5">
-          <TabsList noBorder className="items-center space-x-2">
-            <TabsTrigger
-              value="properties"
-              className="rounded-full border aria-[selected=true]:bg-teal-800/50"
-            >
-              Properties
-            </TabsTrigger>
-            <TabsTrigger
-              value="destinations"
-              className="rounded-full border aria-[selected=true]:bg-teal-800/50"
-            >
-              Destinations
-            </TabsTrigger>
+          <TabsList
+            noBorder
+            className="items-center divide-x-2 divide-primary text-center lg:divide-x-4"
+          >
+            <div className="basis-1/2 lg:basis-auto lg:space-x-2 lg:pe-4">
+              <TabsTrigger
+                value="properties"
+                className="rounded-full border aria-[selected=true]:bg-teal-800/50"
+              >
+                Properties
+              </TabsTrigger>
+              <TabsTrigger
+                value="destinations"
+                className="rounded-full border aria-[selected=true]:bg-teal-800/50"
+              >
+                Destinations
+              </TabsTrigger>
+            </div>
+            <div className="basis-1/2 lg:basis-auto lg:space-x-2 lg:ps-4">
+              <TabsTrigger
+                value="bucketListGiven"
+                className="rounded-full border aria-[selected=true]:bg-teal-800/50"
+              >
+                Bucket List Given
+              </TabsTrigger>
+              <TabsTrigger
+                value="bucketListReceived"
+                className="rounded-full border aria-[selected=true]:bg-teal-800/50"
+              >
+                Bucket List Received
+              </TabsTrigger>
+            </div>
           </TabsList>
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
               {properties.map((property, i) => (
-                <HomeOfferCard key={i} property={property} />
+                <div key={i} className="relative">
+                  <HomeOfferCard property={property} />
+                  <div className="absolute right-2 top-2">
+                    <Button className="rounded-full" variant="secondary">
+                      Added to bucket list
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           </TabsContent>
