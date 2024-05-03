@@ -263,28 +263,28 @@ function RequestDealTab() {
               <div className="grid gap-1">
                 <MobileLocationInput
                   control={form.control}
-                  name="location"
+                  name={`data.${curTab}.location`}
                   formLabel="Location"
                   className="col-span-full"
                 />
 
                 <MobileDateRangePicker
                   control={form.control}
-                  name="date"
+                  name={`data.${curTab}.date`}
                   formLabel="Select dates"
                   className="col-span-full"
                 />
 
                 <MobileGuestsPicker
                   control={form.control}
-                  name="numGuests"
+                  name={`data.${curTab}.numGuests`}
                   formLabel="Add guests"
                   className="col-span-full"
                 />
 
                 <MobilePriceInput
                   control={form.control}
-                  name="maxNightlyPriceUSD"
+                  name={`data.${curTab}.maxNightlyPriceUSD`}
                   formLabel="Price Range"
                   className="col-span-full"
                 />

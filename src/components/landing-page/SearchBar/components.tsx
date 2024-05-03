@@ -280,7 +280,10 @@ export default function LPDateRangePicker<
                 {field.value ? (
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                   <p className="mb-4">
-                    {formatDateRange(field.value.from, field.value.to)}
+                    {formatDateRange(
+                      field.value.from as Date,
+                      field.value.to as Date,
+                    )}
                   </p>
                 ) : (
                   <p className="mb-4 whitespace-nowrap text-xs xl:text-sm">
