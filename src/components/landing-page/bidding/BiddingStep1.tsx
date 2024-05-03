@@ -17,7 +17,6 @@ import { zodNumber } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -37,10 +36,6 @@ function BiddingStep1({ property }: { property: Property }) {
   const setPrice = useBidding((state) => state.setPrice);
   const price = useBidding((state) => state.price);
 
-  const setOptions = useBidding((state) => state.setOptions);
-  const setClientSecret = useBidding((state) => state.setClientSecret);
-  const setSetupIntent = useBidding((state) => state.setSetupIntent);
-
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
   //determine if user identity is verified
@@ -55,12 +50,6 @@ function BiddingStep1({ property }: { property: Property }) {
   });
 
   const stripePromise = useStripe();
-  const session = useSession({ required: true });
-
-  const { mutateAsync: createSetupIntentSessionMutation } =
-    api.stripe.createSetupIntentSession.useMutation();
-
-  const { update } = useSession();
 
   async function onSubmit(values: FormSchema) {
     setPrice(values.price);
@@ -68,22 +57,6 @@ function BiddingStep1({ property }: { property: Property }) {
 
     if (users?.isIdentityVerified === "true") {
       setStep(step + 1);
-    }
-
-    const stripe = await stripePromise;
-
-    if (!session.data?.user) return;
-
-    // Creates Session for mode setup and creates customer
-    const response = await createSetupIntentSessionMutation();
-    void update();
-
-    if (stripe !== null && response) {
-      if (response.client_secret && response.id) {
-        setOptions(response);
-        setSetupIntent(response.id);
-        setClientSecret(response.client_secret);
-      }
     }
   }
 

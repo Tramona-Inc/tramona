@@ -163,6 +163,54 @@ export const stripeRouter = createTRPCRouter({
     }
   }),
 
+  // Get the customer info
+  createPaymentIntent: protectedProcedure
+    .input(
+      z.object({
+        amount: z.number(),
+        currency: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
+        })
+        .then((res) => res?.stripeCustomerId);
+
+      // Create a customer id if it doesn't exist
+      if (!stripeCustomerId) {
+        stripeCustomerId = await stripe.customers
+          .create({
+            name: ctx.user.name ?? "",
+            email: ctx.user.email,
+          })
+          .then((res) => res.id);
+
+        await ctx.db
+          .update(users)
+          .set({ stripeCustomerId })
+          .where(eq(users.id, ctx.user.id));
+      }
+
+      if (stripeCustomerId) {
+        const options: Stripe.PaymentIntentCreateParams = {
+          amount: input.amount,
+          currency: input.currency,
+          setup_future_usage: "off_session", // is both of and on session
+          // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+          automatic_payment_methods: { enabled: true },
+        };
+
+        const response = await stripe.paymentIntents.create(options);
+
+        return response;
+      }
+    }),
+
   confirmPaymentIntentSetup: protectedProcedure
     .input(
       z.object({
@@ -190,7 +238,6 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   getListOfPayments: protectedProcedure.query(async ({ ctx }) => {
-
     if (ctx.user.stripeCustomerId) {
       const cards = await stripe.paymentMethods.list({
         type: "card",
@@ -207,7 +254,6 @@ export const stripeRouter = createTRPCRouter({
           message: "Customer not found",
         });
       }
-
 
       return {
         // ! Need to get type of invoice_settings

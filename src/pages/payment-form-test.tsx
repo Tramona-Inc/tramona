@@ -10,7 +10,7 @@ export default function PaymentFormTest({
   options,
   setupIntent,
 }: {
-  options: string;
+  options?: string;
   setupIntent: string;
 }) {
   const stripe = useStripe();
