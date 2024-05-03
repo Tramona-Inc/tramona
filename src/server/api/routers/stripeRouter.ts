@@ -201,6 +201,8 @@ export const stripeRouter = createTRPCRouter({
           },
           customer: stripeCustomerId,
           payment_method: input.paymentMethod,
+          // Set the payment method as default for the customer
+          usage: "off_session", // or 'on_session' depending on your use case
         };
 
         const response = await stripe.setupIntents.create(options);
@@ -273,13 +275,13 @@ export const stripeRouter = createTRPCRouter({
         await stripe.paymentMethods.attach(si.payment_method as string, {
           customer: ctx.user.stripeCustomerId,
         });
-      } else {
-        await stripe.customers.update(si.customer as string, {
-          invoice_settings: {
-            default_payment_method: si.payment_method as string,
-          },
-        });
       }
+
+      await stripe.customers.update(si.customer as string, {
+        invoice_settings: {
+          default_payment_method: si.payment_method as string,
+        },
+      });
 
       await ctx.db
         .update(users)

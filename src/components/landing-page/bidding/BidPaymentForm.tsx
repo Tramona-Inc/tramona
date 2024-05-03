@@ -40,6 +40,7 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
 
   const { update } = useSession();
 
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
