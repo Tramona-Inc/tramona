@@ -81,17 +81,16 @@ function BiddingStep2({ property }: { property: Property }) {
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
   const totalPrice = totalNightlyPrice;
 
-
   const options: StripeElementsOptions = {
-    mode: "payment",
-    amount: totalPrice,
+    mode: "setup",
     currency: "usd",
+    paymentMethodCreation: "manual",
   };
 
   const bid = {
     propertyId: property.id,
     numGuests: guest,
-    amount: price,
+    amount: totalPrice,
     checkIn: date.from,
     checkOut: date.to,
   };

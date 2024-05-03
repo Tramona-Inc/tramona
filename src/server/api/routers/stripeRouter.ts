@@ -163,6 +163,51 @@ export const stripeRouter = createTRPCRouter({
     }
   }),
 
+  createSetupIntent: protectedProcedure
+    .input(
+      z.object({
+        paymentMethod: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
+        })
+        .then((res) => res?.stripeCustomerId);
+
+      // Create a customer id if it doesn't exist
+      if (!stripeCustomerId) {
+        stripeCustomerId = await stripe.customers
+          .create({
+            name: ctx.user.name ?? "",
+            email: ctx.user.email,
+          })
+          .then((res) => res.id);
+
+        await ctx.db
+          .update(users)
+          .set({ stripeCustomerId })
+          .where(eq(users.id, ctx.user.id));
+      }
+
+      if (stripeCustomerId) {
+        const options: Stripe.SetupIntentCreateParams = {
+          automatic_payment_methods: {
+            enabled: true,
+          },
+          customer: stripeCustomerId,
+          payment_method: input.paymentMethod,
+        };
+
+        const response = await stripe.setupIntents.create(options);
+        return response;
+      }
+    }),
+
   // Get the customer info
   createPaymentIntent: protectedProcedure
     .input(
@@ -211,7 +256,7 @@ export const stripeRouter = createTRPCRouter({
       }
     }),
 
-  confirmPaymentIntentSetup: protectedProcedure
+  confirmSetupIntent: protectedProcedure
     .input(
       z.object({
         setupIntent: z.string(),
@@ -235,6 +280,11 @@ export const stripeRouter = createTRPCRouter({
           },
         });
       }
+
+      await ctx.db
+        .update(users)
+        .set({ setupIntentId: input.setupIntent })
+        .where(eq(users.id, ctx.user.id));
     }),
 
   getListOfPayments: protectedProcedure.query(async ({ ctx }) => {
