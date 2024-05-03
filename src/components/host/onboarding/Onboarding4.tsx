@@ -20,6 +20,8 @@ import { api } from "@/utils/api";
 import LeafletMap from "./LeafletMap";
 import SaveAndExit from "./SaveAndExit";
 import { useState, useEffect } from "react";
+import { SelectIcon } from "@radix-ui/react-select";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 const formSchema = z.object({
   country: zodString(),
   street: zodString(),
@@ -145,6 +147,9 @@ export default function Onboarding4() {
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Country /region" />
+                      <SelectIcon>
+                        <CaretSortIcon className="h-4 w-4 opacity-50" />
+                      </SelectIcon>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="United States">
@@ -225,9 +230,7 @@ export default function Onboarding4() {
             </div>
           </Form>
           {coordinateData && (
-            <div className="z-0"> 
-
-
+            <div className="z-0">
               <LeafletMap
                 lat={coordinateData.coordinates.lat}
                 lng={coordinateData.coordinates.lng}

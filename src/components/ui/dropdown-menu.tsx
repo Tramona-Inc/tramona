@@ -54,6 +54,7 @@ const DropdownMenuSubContent = React.forwardRef<
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(contentClassNames, className)}
+    collisionPadding={8}
     {...props}
   />
 ));
@@ -70,6 +71,7 @@ const DropdownMenuContent = React.forwardRef<
       sideOffset={sideOffset}
       className={cn(contentClassNames, className)}
       onCloseAutoFocus={(e) => e.preventDefault()}
+      collisionPadding={8}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
