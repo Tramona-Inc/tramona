@@ -7,12 +7,13 @@ import { cn, formatDateRange } from "@/utils/utils";
 import {
   CalendarDaysIcon,
   CalendarIcon,
+  ChevronDown,
   MapPinIcon,
   Minus,
   Plus,
-  PlusIcon,
   SearchIcon,
   UsersIcon,
+  DollarSignIcon,
   X,
 } from "lucide-react";
 import {
@@ -30,7 +31,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useMeasure } from "@uidotdev/usehooks";
-import { useState, type ComponentProps, forwardRef } from "react";
+import {
+  useState,
+  type ComponentProps,
+  forwardRef,
+  ReactElement,
+  ReactNode,
+} from "react";
 import { Calendar } from "@/components/ui/calendar";
 import PlacesPopover from "@/components/_common/PlacesPopover";
 import { Input } from "@/components/ui/input";
@@ -43,6 +50,7 @@ import { api } from "@/utils/api";
 import { type FormSchema as ParentFormSchema } from "./DesktopSearchBar";
 import { TRPCError } from "@trpc/server";
 import { errorToast } from "@/utils/toasts";
+import { Separator } from "@/components/ui/separator";
 
 // LP is short for landing page
 
@@ -50,19 +58,19 @@ export const classNames = {
   wrapper: "group relative",
 
   label:
-    "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-white group-focus-within:text-black",
+    "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-primary group-focus-within:text-primary",
 
   // like label but for buttons
   buttonLabel: ({ isFocused }: { isFocused: boolean }) =>
     cn(
-      "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-white",
+      "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-primary",
       isFocused && "text-black",
     ),
 
   errorMsg: "pointer-events-none absolute left-8 top-14 z-10",
 
   input:
-    "peer block h-20 w-full rounded-full bg-transparent pt-4 text-white placeholder:text-white/50 hover:bg-white/10 focus:bg-white focus:outline-none focus:text-black placeholder:focus:text-black/50",
+    "peer block h-12 w-full rounded-full bg-transparent pt-4 text-primary placeholder:text-muted-foreground hover:bg-white/10  focus:outline-none focus:text-black placeholder:focus:text-black/50",
 
   // like input but for buttons
   button: ({
@@ -73,11 +81,11 @@ export const classNames = {
     isFocused: boolean;
   }) =>
     cn(
-      "peer flex h-20 w-full border-none rounded-full pt-4 px-8",
+      "peer flex h-20 w-full   pt-4 px-8",
       isFocused ? "bg-white" : "bg-transparent hover:bg-white/10",
       isPlaceholder
-        ? cn("text-white/50", isFocused && "text-black/50")
-        : cn("text-white", isFocused && "text-black"),
+        ? cn("text-muted-foreground", isFocused && "text-black/50")
+        : cn("text-primary", isFocused && "text-black"),
     ),
   mobileButton: ({
     isPlaceholder,
@@ -87,7 +95,7 @@ export const classNames = {
     isFocused: boolean;
   }) =>
     cn(
-      "peer flex h-10 w-full border border-gray/50 rounded-full p-6",
+      "peer flex h-10 w-full border border-gray/50 rounded-md p-6",
       isFocused ? "bg-white" : "bg-white hover:bg-white/75",
       isPlaceholder
         ? cn("text-black/75", isFocused && "text-black/50")
@@ -132,7 +140,7 @@ export const LPInput = forwardRef<
   const [prefixRef, { width: prefixWidth }] = useMeasure();
   const [suffixRef, { width: suffixWidth }] = useMeasure();
 
-  const prefixEl = <p ref={prefixRef}>{prefix}</p>;
+  const prefixEl = <div ref={prefixRef}>{prefix}</div>;
   const suffixEl = <p ref={suffixRef}>{suffix}</p>;
 
   return (
@@ -158,18 +166,18 @@ export const LPInput = forwardRef<
 });
 
 // export function LPTextArea({
-//   value,
-//   defaultValue,
-//   className,
-//   ...props
+// value,
+// defaultValue,
+// className,
+// ...props
 // }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-//   return (
-//     <textarea
-//       className={cn(classNames.input, "px-8 pt-8", className)}
-//       value={defaultValue ?? value ?? ""}
-//       {...props}
-//     />
-//   );
+// return (
+// <textarea
+// className={cn(classNames.input, "px-8 pt-8", className)}
+// value={defaultValue ?? value ?? ""}
+// {...props}
+// />
+// );
 // }
 
 export function LPLocationInput<
@@ -193,7 +201,9 @@ export function LPLocationInput<
       {...props}
       render={({ field }) => (
         <LPFormItem className={className}>
-          <FormLabel className={classNames.buttonLabel({ isFocused: isOpen })}>
+          <FormLabel
+            className={`ml-[-15px] mt-[-5px] ${classNames.buttonLabel({ isFocused: isOpen })}`}
+          >
             {formLabel}
           </FormLabel>
 
@@ -202,7 +212,7 @@ export function LPLocationInput<
             setOpen={setIsOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className="w-96 -translate-y-14 overflow-clip px-0 pt-0"
+            className=" w-60 -translate-y-14 overflow-clip px-0 pt-0 2xl:w-80"
             trigger={({ value, disabled }) => (
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -215,14 +225,14 @@ export function LPLocationInput<
                   "flex items-center text-left",
                 )}
               >
-                <p className="flex-1 truncate">
+                <MapPinIcon className="mx-auto mb-4 ml-[-16px] h-5 w-5 text-primary" />
+                <p className="mb-4 ml-2 flex-1 truncate text-xs xl:text-sm">
                   {value ?? "Enter your destination"}
                 </p>
-                <MapPinIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
               </button>
             )}
           />
-          <LPFormMessage />
+          <LPFormMessage className="mt-2" />
         </LPFormItem>
       )}
     />
@@ -250,7 +260,9 @@ export default function LPDateRangePicker<
       {...props}
       render={({ field }) => (
         <LPFormItem className={className}>
-          <FormLabel className={classNames.buttonLabel({ isFocused: isOpen })}>
+          <FormLabel
+            className={`ml-[-15px] mt-[-5px] ${classNames.buttonLabel({ isFocused: isOpen })}`}
+          >
             {formLabel}
           </FormLabel>
           <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -261,18 +273,27 @@ export default function LPDateRangePicker<
                     isPlaceholder: !field.value,
                     isFocused: isOpen,
                   }),
-                  "flex items-center",
+                  "mb-4 flex items-center text-sm",
                 )}
               >
-                {field.value
-                  ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    formatDateRange(field.value.from, field.value.to)
-                  : "Select dates"}
-                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                <CalendarIcon className="mb-4 ml-[-15px] mr-3 h-5 w-5 text-primary" />
+                {field.value ? (
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                  <p className="mb-4">
+                    {formatDateRange(
+                      field.value.from as Date,
+                      field.value.to as Date,
+                    )}
+                  </p>
+                ) : (
+                  <p className="mb-4 whitespace-nowrap text-xs xl:text-sm">
+                    Select dates
+                  </p>
+                )}
               </button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-auto p-0 backdrop-blur-md"
+              className="w-auto -translate-y-8 p-0 backdrop-blur-md"
               align="start"
               side="top"
             >
@@ -291,8 +312,167 @@ export default function LPDateRangePicker<
               />
             </PopoverContent>
           </Popover>
-          <LPFormMessage />
+          <LPFormMessage className="mt-2" />
         </LPFormItem>
+      )}
+    />
+  );
+}
+
+export function DesktopGuestsPicker<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [numGuests, setNumGuests] = useState(1);
+  const [numRooms, setNumRooms] = useState(1);
+  const [numBathrooms, setNumBathrooms] = useState(1);
+  const [numBeds, setNumBeds] = useState(1);
+
+  function onClick(
+    adjustment: number,
+    field: ControllerRenderProps<TFieldValues, TName>,
+  ) {
+    const guests = Math.max(1, Math.min(10, numGuests + adjustment));
+    const rooms = Math.max(1, Math.min(10, numRooms + adjustment));
+    const bathrooms = Math.max(1, Math.min(10, numBathrooms + adjustment));
+    const beds = Math.max(1, Math.min(10, numBeds + adjustment));
+
+    setNumGuests(guests);
+    field.onChange(guests);
+    setNumGuests(rooms);
+    field.onChange(rooms);
+    setNumBathrooms(bathrooms);
+    field.onChange(bathrooms);
+    setNumBeds(beds);
+    field.onChange(beds);
+  }
+
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <>
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={`border-xl focus:primary mx-2 h-11 rounded-xl border-2 border-border px-3 text-sm ${field.value ? "text-primary" : "text-muted-foreground"}`}
+              >
+                {field.value
+                  ? `Beds(${field.value}) Bathrooms(${field.value}) Bedrooms(${field.value})`
+                  : "Beds (Any) Bathrooms(Any) Bedrooms(Any)"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-full bg-white p-0 tracking-tight"
+              align="start"
+              side="bottom"
+            >
+              <div className=" flex w-96 flex-col items-center gap-y-3 bg-white px-6 py-4">
+                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
+                  Beds
+                  <div className="flex flex-row gap-x-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full border-2"
+                      onClick={() => onClick(-1, field)}
+                      disabled={numGuests <= 1}
+                    >
+                      <Minus className="h-6 w-6" />
+                      <span className="sr-only">Decrease</span>
+                    </Button>
+                    <div className="text-center">
+                      <div className="font-bold tracking-tighter">
+                        {numGuests}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full"
+                      onClick={() => onClick(1, field)}
+                      disabled={numGuests >= 10}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="sr-only">Increase</span>
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
+                  Bathrooms
+                  <div className="flex flex-row gap-x-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full border-2"
+                      onClick={() => onClick(-1, field)}
+                      disabled={numGuests <= 1}
+                    >
+                      <Minus className="h-6 w-6" />
+                      <span className="sr-only">Decrease</span>
+                    </Button>
+                    <div className="text-center">
+                      <div className="font-bold tracking-tighter">
+                        {numGuests}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full"
+                      onClick={() => onClick(1, field)}
+                      disabled={numGuests >= 10}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="sr-only">Increase</span>
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
+                  Bedrooms
+                  <div className="flex flex-row gap-x-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full border-2"
+                      onClick={() => onClick(-1, field)}
+                      disabled={numGuests <= 1}
+                    >
+                      <Minus className="h-6 w-6" />
+                      <span className="sr-only">Decrease</span>
+                    </Button>
+                    <div className="text-center">
+                      <div className="font-bold tracking-tighter">
+                        {numGuests}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full"
+                      onClick={() => onClick(1, field)}
+                      disabled={numGuests >= 10}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="sr-only">Increase</span>
+                    </Button>
+                  </div>
+                </div>
+                <Separator className="my-2 w-full" />
+                <Button className="mx-2 w-full">Done</Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </>
       )}
     />
   );
@@ -469,35 +649,39 @@ export function MobileGuestsPicker<
               </button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-auto p-0 backdrop-blur-md"
+              className="w-80 bg-white p-4 backdrop-blur-md"
               align="start"
               side="bottom"
             >
-              <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center justify-between space-x-3">
                 Guests
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 rounded-full"
-                  onClick={() => onClick(-1, field)}
-                  disabled={numGuests <= 1}
-                >
-                  <Minus className="h-4 w-4" />
-                  <span className="sr-only">Decrease</span>
-                </Button>
-                <div className="flex-1 text-center">
-                  <div className="font-bold tracking-tighter">{numGuests}</div>
+                <div className="flex flex-row items-center gap-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7 shrink-0 rounded-full"
+                    onClick={() => onClick(-1, field)}
+                    disabled={numGuests <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                    <span className="sr-only">Decrease</span>
+                  </Button>
+                  <div className="flex-1 text-center">
+                    <div className="flex items-center font-bold tracking-tighter">
+                      {numGuests}
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7 shrink-0 rounded-full"
+                    onClick={() => onClick(1, field)}
+                    disabled={numGuests >= 10}
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">Increase</span>
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 rounded-full"
-                  onClick={() => onClick(1, field)}
-                  disabled={numGuests >= 10}
-                >
-                  <Plus className="h-4 w-4" />
-                  <span className="sr-only">Increase</span>
-                </Button>
               </div>
             </PopoverContent>
           </Popover>
@@ -507,7 +691,48 @@ export function MobileGuestsPicker<
     />
   );
 }
+export function MobilePriceInput<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
+  const [price, setPrice] = useState(0);
 
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <>
+          <FormLabel className="text-black">{formLabel}</FormLabel>
+          <LPFormItem>
+            <div className="flex items-center justify-between space-x-2 rounded-md border-2 bg-white px-4 py-2">
+              <DollarSignIcon strokeWidth={1} />
+              <div className="flex-1 text-center">
+                <input
+                  type="decimal"
+                  value=""
+                  onChange={(e) => setPrice(Number(e.target.value))} ///I know this doesn't work, nothing i wrote makes sense -neal
+                  className="focus-none w-full bg-transparent bg-white text-start placeholder:text-foreground focus:text-black focus:outline-none"
+                  placeholder="Price per night"
+                />
+              </div>
+            </div>
+          </LPFormItem>
+          <MobileFormMessage />
+        </>
+      )}
+    />
+  );
+}
 export function MobileFormMessage({
   className,
   ...props
@@ -568,20 +793,20 @@ export function AirbnbLinkDialog({
       {parentForm.getValues(`data.${curTab}.airbnbLink`) === undefined ? (
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
-          className="rounded-full"
+          className="rounded-full text-xs"
           onClick={() => setDialogOpen(true)}
         >
-          <PlusIcon />
-          Add an Airbnb Link
+          Add a Link
+          <ChevronDown />
         </Button>
       ) : (
         <Button
           type="button"
           variant="secondary"
           size="sm"
-          className="rounded-full"
+          className="rounded-full text-xs "
           onClick={() => setDialogOpen(true)}
         >
           <X />
@@ -627,6 +852,114 @@ export function AirbnbLinkDialog({
           </Form>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+export function AirbnbLinkPopover({
+  parentForm,
+  curTab,
+}: {
+  parentForm: ReturnType<typeof useForm<ParentFormSchema>>;
+  curTab: number;
+}) {
+  const utils = api.useUtils();
+
+  const formSchema = z.object({
+    airbnbLink: zodString({ maxLen: 512 }),
+  });
+
+  type FormSchema = z.infer<typeof formSchema>;
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = async (data: FormSchema) => {
+    const response = await utils.misc.scrapeUsingLink.fetch({
+      url: data.airbnbLink,
+    });
+
+    if (response instanceof TRPCError) {
+      errorToast("Couldn't retrieve data from AirBnB, please try again.");
+    } else {
+      parentForm.setValue(`data.${curTab}.airbnbLink`, data.airbnbLink);
+      parentForm.setValue(
+        `data.${curTab}.maxNightlyPriceUSD`,
+        response.nightlyPrice,
+      );
+      parentForm.setValue(`data.${curTab}.location`, response.propertyName);
+      parentForm.setValue(`data.${curTab}.date.from`, response.checkIn);
+      parentForm.setValue(`data.${curTab}.date.to`, response.checkOut);
+      parentForm.setValue(`data.${curTab}.numGuests`, response.numGuests);
+    }
+  };
+
+  return (
+    <div>
+      <Popover>
+        <PopoverTrigger asChild>
+          {parentForm.getValues(`data.${curTab}.airbnbLink`) === undefined ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full border-none bg-accent text-xs"
+            >
+              Add a link
+              <ChevronDown size={20} />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="rounded-full text-xs"
+            >
+              <X />
+              {parentForm
+                .getValues(`data.${curTab}.airbnbLink`)!
+                .substring(0, 50)}
+              ...
+            </Button>
+          )}
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-96 bg-white ">
+          <Form {...form}>
+            <form className="flex flex-col gap-4 bg-white">
+              <FormField
+                control={form.control}
+                name={"airbnbLink"}
+                defaultValue={parentForm.getValues(`data.${curTab}.airbnbLink`)}
+                render={({ field }) => (
+                  <LPFormItem className="">
+                    <FormLabel>
+                      <div className="mb-4 flex  flex-row justify-between">
+                        <div className=" h-full items-center text-primary">
+                          Airbnb Link
+                        </div>
+                        <button className="text-[#004236] ">Clear</button>
+                      </div>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} type="text" placeholder="Enter link" />
+                    </FormControl>
+                    <FormMessage />
+                  </LPFormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                onClick={form.handleSubmit((data) => onSubmit(data))}
+                disabled={form.formState.isSubmitting}
+                className="rounded-full"
+              >
+                {form.formState.isSubmitting ? "Crunching data..." : "Done"}
+              </Button>
+            </form>
+          </Form>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
