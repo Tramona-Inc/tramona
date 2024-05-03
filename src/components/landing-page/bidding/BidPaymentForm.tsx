@@ -38,8 +38,7 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { update } = useSession();
-
+  const { data: session, update } = useSession();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

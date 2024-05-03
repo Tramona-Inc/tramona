@@ -184,7 +184,7 @@ export default function HomeOfferCard({
               </Button>
             </DialogTrigger>
             <DialogContent className=" flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
-              {step !==0 && (
+              {step !== 0 && (
                 <Button
                   variant={"ghost"}
                   className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
