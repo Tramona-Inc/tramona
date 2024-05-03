@@ -34,7 +34,7 @@ function BiddingStep1({ property }: { property: Property }) {
   const setStep = useBidding((state) => state.setStep);
 
   const setPrice = useBidding((state) => state.setPrice);
-  const price = useBidding((state) => state.price);
+  const currentPrice = useBidding((state) => state.price);
 
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
@@ -44,7 +44,7 @@ function BiddingStep1({ property }: { property: Property }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      price: price,
+      price: currentPrice,
       guest: guest,
     },
   });
@@ -59,6 +59,14 @@ function BiddingStep1({ property }: { property: Property }) {
       setStep(step + 1);
     }
   }
+
+  const threshhold = 1.2;
+
+  const reccomendedPrice = property.originalNightlyPrice
+    ? property.originalNightlyPrice / threshhold
+    : 0;
+
+  const { price } = form.watch();
 
   return (
     <div className="flex w-full flex-col items-center justify-center">
@@ -120,6 +128,12 @@ function BiddingStep1({ property }: { property: Property }) {
                       />
                     </FormControl>
                     <FormMessage />
+                    {price !== 0 && price <= reccomendedPrice / 100 && (
+                      <p className="max-w-[300px] text-destructive">
+                        The host will be more likely to respond if your offer is
+                        around ${(reccomendedPrice / 100).toFixed(2)}
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
