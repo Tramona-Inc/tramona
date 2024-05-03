@@ -2,11 +2,22 @@ import { type Property } from "@/server/db/schema";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import Image from "next/image";
 
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import { useStripe } from "@/utils/stripe-client";
 import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import BidPaymentForm from "./BidPaymentForm";
 
 function BiddingInfoCard({ property }: { property: Property }) {
@@ -73,11 +84,25 @@ function BiddingInfoCard({ property }: { property: Property }) {
 }
 
 function BiddingStep2({ property }: { property: Property }) {
+  const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
+    onSuccess: () => {
+      setStep(step + 1);
+    },
+  });
+  const { data: payments } = api.stripe.getListOfPayments.useQuery();
+  const { data: session } = useSession();
+
+  const [currentPaymentMethodId, setCurrentPaymentMethodId] = useState<
+    string | undefined
+  >(payments?.defaultPaymentMethod as string | undefined);
+
   const stripePromise = useStripe();
 
   const date = useBidding((state) => state.date);
   const price = useBidding((state) => state.price);
   const guest = useBidding((state) => state.guest);
+  const step = useBidding((state) => state.step);
+  const setStep = useBidding((state) => state.setStep);
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
   const totalPrice = totalNightlyPrice;
 
@@ -103,9 +128,46 @@ function BiddingStep2({ property }: { property: Property }) {
       <BiddingInfoCard property={property} />
       <div className="flex flex-col items-center tracking-tight md:flex-row md:items-start md:space-x-20">
         <div className="mt-4 w-[300px] md:w-[500px]">
-          <Elements stripe={stripePromise} options={options}>
-            <BidPaymentForm bid={bid} />
-          </Elements>
+          {payments && payments.cards.data.length > 0 ? (
+            <>
+              <Select
+                defaultValue={payments.defaultPaymentMethod as string}
+                onValueChange={(value) => {
+                  console.log("Selected payment method:", value);
+                  setCurrentPaymentMethodId(value);
+                }}
+              >
+                <SelectTrigger className="">
+                  <SelectValue placeholder="Credit Cards" />
+                </SelectTrigger>
+                <SelectContent>
+                  {payments.cards.data.map((payment) => (
+                    <SelectItem key={payment.id} value={payment.id}>
+                      **** **** **** {payment.card?.last4}{" "}
+                      <span className="capitalize">{payment.card?.brand}</span>{" "}
+                      {payment.card?.exp_month}/{payment.card?.exp_year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={() =>
+                  void createBiddingMutate({
+                    ...bid,
+                    paymentMethodId: currentPaymentMethodId,
+                    setupIntentId: session?.user.setupIntentId,
+                  })
+                }
+                type="submit"
+              >
+                Save
+              </Button>
+            </>
+          ) : (
+            <Elements stripe={stripePromise} options={options}>
+              <BidPaymentForm bid={bid} />
+            </Elements>
+          )}
         </div>
       </div>
     </div>

@@ -271,11 +271,13 @@ export const stripeRouter = createTRPCRouter({
         throw new Error("Payment method not found");
       }
 
-      if (ctx.user.stripeCustomerId) {
-        await stripe.paymentMethods.attach(si.payment_method as string, {
-          customer: ctx.user.stripeCustomerId,
-        });
+      if (!ctx.user.stripeCustomerId) {
+        throw new Error("Customer not found");
       }
+
+      await stripe.paymentMethods.attach(si.payment_method as string, {
+        customer: ctx.user.stripeCustomerId,
+      });
 
       await stripe.customers.update(si.customer as string, {
         invoice_settings: {

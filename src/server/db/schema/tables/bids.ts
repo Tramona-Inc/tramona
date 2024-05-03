@@ -29,6 +29,7 @@ export const bids = pgTable(
 
     acceptedAt: timestamp("accepted_at"),
     setupIntentId: varchar("setup_intent_id"),
+    paymentMethodId: varchar("payment_method_id"),
 
     numGuests: integer("num_guests").notNull().default(1),
     amount: integer("amount").notNull(),

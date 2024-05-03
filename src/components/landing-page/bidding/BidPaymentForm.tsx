@@ -18,6 +18,8 @@ type Bid = {
 };
 
 export default function BidPaymentForm({ bid }: { bid: Bid }) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const step = useBidding((state) => state.step);
   const setStep = useBidding((state) => state.setStep);
 
@@ -29,6 +31,7 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
 
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: () => {
+      setIsLoading(false);
       setStep(step + 1);
     },
   });
@@ -43,6 +46,8 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    setIsLoading(true);
+
     if (!stripe || !elements) {
       // Stripe.js has not yet loaded.
       return;
@@ -50,6 +55,7 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
 
     // Submit payment details to Stripe.
     const { error: submitError } = await elements.submit();
+
     if (submitError) {
       setErrorMessage(submitError.message ?? "An error occurred.");
       return;
@@ -75,7 +81,7 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
       paymentMethod: paymentMethod.id,
     });
 
-    void await update();
+    await update();
 
     if (setupIntent) {
       await confirmSetupIntentMutation({
@@ -84,14 +90,20 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
     }
 
     // Create bidding after confirming setup intent.
-    void createBiddingMutate({ ...bid });
+    void createBiddingMutate({
+      ...bid,
+      setupIntentId: setupIntent?.id,
+      paymentMethodId: paymentMethod.id,
+    });
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <PaymentElement />
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-      <Button type="submit">Save</Button>
+      <Button isLoading={isLoading} type="submit">
+        Save
+      </Button>
     </form>
   );
 }
