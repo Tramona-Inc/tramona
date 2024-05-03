@@ -17,7 +17,7 @@ import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BidPaymentForm from "./BidPaymentForm";
 
 function BiddingInfoCard({ property }: { property: Property }) {
@@ -120,6 +120,24 @@ function BiddingStep2({ property }: { property: Property }) {
     checkOut: date.to,
   };
 
+  async function onSubmit() {
+    if (session?.user) {
+      if (session.user.setupIntentId !== null) {
+        await createBiddingMutate({
+          ...bid,
+          paymentMethodId: currentPaymentMethodId,
+          setupIntentId: session.user.setupIntentId,
+        });
+      }
+    }
+  }
+
+  useEffect(() => {
+    setCurrentPaymentMethodId(
+      payments?.defaultPaymentMethod as string | undefined,
+    );
+  }, [payments]);
+
   return (
     <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl ">
       <h1 className="text-lg font-semibold tracking-tight md:text-3xl">
@@ -150,16 +168,7 @@ function BiddingStep2({ property }: { property: Property }) {
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                onClick={() =>
-                  void createBiddingMutate({
-                    ...bid,
-                    paymentMethodId: currentPaymentMethodId,
-                    setupIntentId: session?.user.setupIntentId,
-                  })
-                }
-                type="submit"
-              >
+              <Button onClick={onSubmit} type="submit">
                 Save
               </Button>
             </>

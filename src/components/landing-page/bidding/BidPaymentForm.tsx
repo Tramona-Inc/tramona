@@ -41,7 +41,7 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { data: session, update } = useSession();
+  const { update } = useSession();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -81,13 +81,13 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
       paymentMethod: paymentMethod.id,
     });
 
-    await update();
-
     if (setupIntent) {
       await confirmSetupIntentMutation({
         setupIntent: setupIntent.id,
       });
     }
+
+    await update();
 
     // Create bidding after confirming setup intent.
     void createBiddingMutate({

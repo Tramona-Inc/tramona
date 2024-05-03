@@ -219,6 +219,32 @@ export const stripeRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const options: Stripe.PaymentIntentCreateParams = {
+        amount: input.amount,
+        currency: input.currency,
+        setup_future_usage: "off_session", // is both of and on session
+        // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+        automatic_payment_methods: { enabled: true },
+      };
+
+      const response = await stripe.paymentIntents.create(options);
+
+      return response;
+    }),
+
+  confirmSetupIntent: protectedProcedure
+    .input(
+      z.object({
+        setupIntent: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const si = await stripe.setupIntents.retrieve(input.setupIntent);
+
+      if (!si.payment_method) {
+        throw new Error("Payment method not found");
+      }
+
       let stripeCustomerId = await ctx.db.query.users
         .findFirst({
           columns: {
@@ -243,40 +269,12 @@ export const stripeRouter = createTRPCRouter({
           .where(eq(users.id, ctx.user.id));
       }
 
-      if (stripeCustomerId) {
-        const options: Stripe.PaymentIntentCreateParams = {
-          amount: input.amount,
-          currency: input.currency,
-          setup_future_usage: "off_session", // is both of and on session
-          // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
-          automatic_payment_methods: { enabled: true },
-        };
-
-        const response = await stripe.paymentIntents.create(options);
-
-        return response;
-      }
-    }),
-
-  confirmSetupIntent: protectedProcedure
-    .input(
-      z.object({
-        setupIntent: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const si = await stripe.setupIntents.retrieve(input.setupIntent);
-
-      if (!si.payment_method) {
-        throw new Error("Payment method not found");
-      }
-
-      if (!ctx.user.stripeCustomerId) {
+      if (!stripeCustomerId) {
         throw new Error("Customer not found");
       }
 
       await stripe.paymentMethods.attach(si.payment_method as string, {
-        customer: ctx.user.stripeCustomerId,
+        customer: stripeCustomerId,
       });
 
       await stripe.customers.update(si.customer as string, {
