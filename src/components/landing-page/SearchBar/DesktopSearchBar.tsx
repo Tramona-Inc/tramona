@@ -42,7 +42,9 @@ import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import LPDateRangePicker, {
   AirbnbLinkDialog,
+  AirbnbLinkPopover,
   classNames,
+  DesktopGuestsPicker,
   LPFormItem,
   LPFormLabel,
   LPFormMessage,
@@ -57,6 +59,11 @@ import {
 } from "@/components/ui/tooltip";
 import { SelectIcon } from "@radix-ui/react-select";
 import { Info } from "../../email-templates/EmailComponentsWithoutHost";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const formSchema = z.object({
   data: z
@@ -435,6 +442,7 @@ export default function DesktopSearchBar({
               />
               <div className="flex flex-col">
                 <AirbnbLinkDialog parentForm={form} curTab={curTab} />
+                <AirbnbLinkPopover parentForm={form} curTab={curTab} />
                 <p className="mt-1 text-xs text-muted-foreground">
                   Have a property you are eyeing, input the Airbnb link here.
                 </p>
@@ -541,7 +549,7 @@ function FiltersSection({
                 onOpenChange={setRoomTypeDDIsOpen}
               >
                 <FormControl>
-                  <SelectTrigger className="bg-white">
+                  <SelectTrigger className="rounded-xl border-2 border-border bg-white">
                     <SelectValue
                       className="SelectValue"
                       placeholder="Type of place"
@@ -563,14 +571,14 @@ function FiltersSection({
             </LPFormItem>
           )}
         />
+        {/* Beds Bathroom Bedrooms filter */}
         <FormField
           control={form.control}
           name={`data.${curTab}.minNumBedrooms`}
           render={({ field }) => (
             <LPFormItem>
-              <LPFormLabel>Bedrooms</LPFormLabel>
               <FormControl>
-                <LPInput {...field} inputMode="numeric" suffix="or more" />
+                <DesktopGuestsPicker name="numOfBeds" className="text-sm" />
               </FormControl>
               <LPFormMessage className="mt-2" />
             </LPFormItem>
@@ -594,12 +602,12 @@ function FiltersSection({
           control={form.control}
           name={`data.${curTab}.note`}
           render={({ field }) => (
-            <LPFormItem className="relative z-20 col-span-2 h-10 rounded-lg border-2 border-border">
+            <LPFormItem className="relative z-20 col-span-2 h-11 rounded-lg border-2 border-border">
               <FormControl>
                 <LPInput
                   {...field}
                   placeholder="Additional notes"
-                  className=" mt-[-3px] h-7"
+                  className=" mt-[-3px] h-8 text-sm"
                 />
               </FormControl>
               <LPFormMessage className="z-10 mt-5" />

@@ -49,6 +49,7 @@ import { api } from "@/utils/api";
 import { type FormSchema as ParentFormSchema } from "./DesktopSearchBar";
 import { TRPCError } from "@trpc/server";
 import { errorToast } from "@/utils/toasts";
+import { Separator } from "@/components/ui/separator";
 
 // LP is short for landing page
 
@@ -314,6 +315,165 @@ export default function LPDateRangePicker<
   );
 }
 
+export function DesktopGuestsPicker<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [numGuests, setNumGuests] = useState(1);
+  const [numRooms, setNumRooms] = useState(1);
+  const [numBathrooms, setNumBathrooms] = useState(1);
+  const [numBeds, setNumBeds] = useState(1);
+
+  function onClick(
+    adjustment: number,
+    field: ControllerRenderProps<TFieldValues, TName>,
+  ) {
+    const guests = Math.max(1, Math.min(10, numGuests + adjustment));
+    const rooms = Math.max(1, Math.min(10, numRooms + adjustment));
+    const bathrooms = Math.max(1, Math.min(10, numBathrooms + adjustment));
+    const beds = Math.max(1, Math.min(10, numBeds + adjustment));
+
+    setNumGuests(guests);
+    field.onChange(guests);
+    setNumGuests(rooms);
+    field.onChange(rooms);
+    setNumBathrooms(bathrooms);
+    field.onChange(bathrooms);
+    setNumBeds(beds);
+    field.onChange(beds);
+  }
+
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <>
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={`border-xl focus:primary mx-2 h-11 rounded-xl border-2 border-border px-3 text-sm ${field.value ? "text-primary" : "text-muted-foreground"}`}
+              >
+                {field.value
+                  ? `Beds(${field.value}) Bathrooms(${field.value}) Bedrooms(${field.value})`
+                  : "Beds (Any) Bathrooms(Any) Bedrooms(Any)"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-full bg-white p-0 tracking-tight"
+              align="start"
+              side="bottom"
+            >
+              <div className=" flex w-96 flex-col items-center gap-y-3 bg-white px-6 py-4">
+                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
+                  Beds
+                  <div className="flex flex-row gap-x-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full border-2"
+                      onClick={() => onClick(-1, field)}
+                      disabled={numGuests <= 1}
+                    >
+                      <Minus className="h-6 w-6" />
+                      <span className="sr-only">Decrease</span>
+                    </Button>
+                    <div className="text-center">
+                      <div className="font-bold tracking-tighter">
+                        {numGuests}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full"
+                      onClick={() => onClick(1, field)}
+                      disabled={numGuests >= 10}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="sr-only">Increase</span>
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
+                  Bathrooms
+                  <div className="flex flex-row gap-x-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full border-2"
+                      onClick={() => onClick(-1, field)}
+                      disabled={numGuests <= 1}
+                    >
+                      <Minus className="h-6 w-6" />
+                      <span className="sr-only">Decrease</span>
+                    </Button>
+                    <div className="text-center">
+                      <div className="font-bold tracking-tighter">
+                        {numGuests}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full"
+                      onClick={() => onClick(1, field)}
+                      disabled={numGuests >= 10}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="sr-only">Increase</span>
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
+                  Bedrooms
+                  <div className="flex flex-row gap-x-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full border-2"
+                      onClick={() => onClick(-1, field)}
+                      disabled={numGuests <= 1}
+                    >
+                      <Minus className="h-6 w-6" />
+                      <span className="sr-only">Decrease</span>
+                    </Button>
+                    <div className="text-center">
+                      <div className="font-bold tracking-tighter">
+                        {numGuests}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-5 w-5 shrink-0 rounded-full"
+                      onClick={() => onClick(1, field)}
+                      disabled={numGuests >= 10}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="sr-only">Increase</span>
+                    </Button>
+                  </div>
+                </div>
+                <Separator className="my-2 w-full" />
+                <Button className="mx-2 w-full">Done</Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </>
+      )}
+    />
+  );
+}
+
 export function MobileLocationInput<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
@@ -523,7 +683,35 @@ export function MobileGuestsPicker<
     />
   );
 }
+export function MobilePriceInput<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  className,
+  formLabel,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
+  "render"
+> & {
+  className: string;
+  formLabel: string;
+}) {
+  const [price, setPrice] = useState(0);
 
+  return (
+    <FormField
+      {...props}
+      render={({ field }) => (
+        <>
+          <FormLabel className="text-black">{formLabel}</FormLabel>
+          <LPFormItem></LPFormItem>
+          <MobileFormMessage />
+        </>
+      )}
+    />
+  );
+}
 export function MobileFormMessage({
   className,
   ...props
@@ -643,6 +831,109 @@ export function AirbnbLinkDialog({
           </Form>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+export function AirbnbLinkPopover({
+  parentForm,
+  curTab,
+}: {
+  parentForm: ReturnType<typeof useForm<ParentFormSchema>>;
+  curTab: number;
+}) {
+  const utils = api.useUtils();
+
+  const formSchema = z.object({
+    airbnbLink: zodString({ maxLen: 512 }),
+  });
+
+  type FormSchema = z.infer<typeof formSchema>;
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = async (data: FormSchema) => {
+    const response = await utils.misc.scrapeUsingLink.fetch({
+      url: data.airbnbLink,
+    });
+
+    if (response instanceof TRPCError) {
+      errorToast("Couldn't retrieve data from AirBnB, please try again.");
+    } else {
+      parentForm.setValue(`data.${curTab}.airbnbLink`, data.airbnbLink);
+      parentForm.setValue(
+        `data.${curTab}.maxNightlyPriceUSD`,
+        response.nightlyPrice,
+      );
+      parentForm.setValue(`data.${curTab}.location`, response.propertyName);
+      parentForm.setValue(`data.${curTab}.date.from`, response.checkIn);
+      parentForm.setValue(`data.${curTab}.date.to`, response.checkOut);
+      parentForm.setValue(`data.${curTab}.numGuests`, response.numGuests);
+    }
+  };
+
+  return (
+    <div>
+      <Popover>
+        <PopoverTrigger asChild>
+          {parentForm.getValues(`data.${curTab}.airbnbLink`) === undefined ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full text-xs"
+            >
+              Add a Link
+              <ChevronDown />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="rounded-full text-xs"
+            >
+              <X />
+              {parentForm
+                .getValues(`data.${curTab}.airbnbLink`)!
+                .substring(0, 50)}
+              ...
+            </Button>
+          )}
+        </PopoverTrigger>
+        <PopoverContent align="start">
+          <Form {...form}>
+            <form className="flex flex-col gap-4">
+              <FormField
+                control={form.control}
+                name={"airbnbLink"}
+                defaultValue={parentForm.getValues(`data.${curTab}.airbnbLink`)}
+                render={({ field }) => (
+                  <LPFormItem className="">
+                    <FormLabel>
+                      <p>Airbnb Link</p>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} type="text" placeholder="Enter link" />
+                    </FormControl>
+                    <FormMessage />
+                  </LPFormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                onClick={form.handleSubmit((data) => onSubmit(data))}
+                disabled={form.formState.isSubmitting}
+                className="rounded-full"
+              >
+                {form.formState.isSubmitting ? "Crunching data..." : "Add"}
+              </Button>
+            </form>
+          </Form>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
