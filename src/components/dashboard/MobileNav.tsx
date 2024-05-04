@@ -101,11 +101,10 @@ export default function MobileNav({
                   {guestMenuNavLinks.map((link, index) => (
                     <div className="flex flex-row gap-x-4" key={index}>
                       {link.icon}
-                    <Link href={link.href} key={index} className="font-light">
-                      {link.name}
-                    </Link>
+                      <Link href={link.href} key={index} className="font-light">
+                        {link.name}
+                      </Link>
                     </div>
-                    
                   ))}
                 </div>
               </div>
@@ -119,7 +118,7 @@ export default function MobileNav({
                   </Button>
                 ) : !isHost ? (
                   <Button asChild variant="darkOutline">
-                    <Link href="/for-hosts/sign-up">Become a host</Link>
+                    <Link href="/host/onboarding">Become a host</Link>
                   </Button>
                 ) : (
                   <Button asChild variant="darkOutline">
@@ -127,11 +126,11 @@ export default function MobileNav({
                   </Button>
                 )}
                 <Button
-              onClick={() => signOut()}
-              className="w-full gap-2 mb-12"
-            >
-              Log out
-            </Button>
+                  onClick={() => signOut()}
+                  className="mb-12 w-full gap-2"
+                >
+                  Log out
+                </Button>
               </div>
             </SheetContent>
           </Sheet>

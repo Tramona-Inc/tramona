@@ -185,8 +185,8 @@ export function getDiscountPercentage(
 
 // https://tailwindcss.com/docs/screens + tailwind.config.ts
 
-export const useScreenWidth = () => useWindowSize()?.width ?? 0;
-export const useIsDesktop = () => useScreenWidth() >= 640;
+export const useScreenWidth = () => useWindowSize().width ?? 0;
+export const useIsSm = () => useScreenWidth() >= 640;
 export const useIsMd = () => useScreenWidth() >= 768;
 export const useIsLg = () => useScreenWidth() >= 1024;
 
@@ -220,4 +220,18 @@ export function convertUTCDateToLocalDate(date: Date) {
   newDate.setHours(hours - offset);
 
   return newDate;
+}
+
+export function checkDuplicates(nums: number[]) {
+  const set = new Set();
+
+  for (const num of nums) {
+    if (set.has(num)) {
+      return true;
+    }
+
+    set.add(num);
+  }
+
+  return false;
 }

@@ -32,6 +32,8 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { CaretSortIcon } from "@radix-ui/react-icons";
+import { SelectIcon } from "@radix-ui/react-select";
 
 const formSchema = z
   .object({
@@ -232,6 +234,9 @@ export default function HostSignUpForm() {
                   <FormControl>
                     <SelectTrigger className="w-[180px] capitalize">
                       <SelectValue placeholder="Please choose" />
+                      <SelectIcon>
+                        <CaretSortIcon className="h-4 w-4 opacity-50" />
+                      </SelectIcon>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="capitalize">

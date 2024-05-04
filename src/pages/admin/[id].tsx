@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { api } from "@/utils/api";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { RequestCardBadge } from "@/components/requests/RequestCard";
+import RequestCardBadge from "@/components/requests/RequestCardBadge";
 
 export default function Page() {
   const router = useRouter();

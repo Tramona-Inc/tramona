@@ -1,8 +1,10 @@
 import { zodTime } from "@/utils/zod-utils";
+import { sql } from "drizzle-orm";
 import {
   boolean,
   date,
   doublePrecision,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -18,7 +20,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { sql } from "drizzle-orm";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -54,6 +55,7 @@ export const ALL_PROPERTY_TYPES = [
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES = [
+  "Flexible",
   "Entire place",
   "Shared room",
   "Private room",
@@ -66,6 +68,8 @@ export const propertyRoomTypeEnum = pgEnum(
   "property_room_type",
   ALL_PROPERTY_ROOM_TYPES,
 );
+
+export const ALL_HOUSE_RULE_ITEMS = ["Pets allowed", "Smoking Allowed"];
 
 export const propertyAmenitiesEnum = pgEnum(
   "property_amenities",
@@ -217,5 +221,6 @@ export const bookedDates = pgTable(
     compoundKey: primaryKey({
       columns: [t.date, t.propertyId],
     }),
+    propertyidIdx: index().on(t.propertyId),
   }),
 );

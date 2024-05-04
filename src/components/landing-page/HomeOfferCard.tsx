@@ -14,7 +14,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Form } from "@/components/ui/form";
-import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,7 +51,23 @@ function CarouselDots({ count, current }: { count: number; current: number }) {
   );
 }
 
-export default function HomeOfferCard({ property }: { property: Property }) {
+type PropertyCard = {
+  id: number;
+  imageUrls: string[];
+  name: string;
+  maxNumGuests: number;
+  numBathrooms: number | null;
+  numBedrooms: number;
+  numBeds: number;
+  originalNightlyPrice: number | null;
+  distance: unknown;
+};
+
+export default function HomeOfferCard({
+  property,
+}: {
+  property: PropertyCard;
+}) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -182,7 +197,7 @@ export default function HomeOfferCard({ property }: { property: Property }) {
                   <ChevronLeft />
                 </Button>
               )}
-              <MakeBid property={property} />
+              <MakeBid propertyId={property.id} />
             </DialogContent>
           </Dialog>
         </form>

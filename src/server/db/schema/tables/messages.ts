@@ -35,8 +35,8 @@ export const messages = pgTable(
       .defaultNow(),
   },
   (t) => ({
-    conversationIndex: index("conversationIndex").on(t.conversationId),
-    userIndex: index("userIndex").on(t.userId),
+    conversationidIdx: index().on(t.conversationId),
+    useridIdx: index().on(t.userId),
   }),
 );
 
@@ -52,8 +52,8 @@ export const conversationParticipants = pgTable(
         onDelete: "cascade",
       }),
   },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.conversationId, vt.userId] }),
+  (tt) => ({
+    compoundKey: primaryKey({ columns: [tt.conversationId, tt.userId] }),
   }),
 );
 

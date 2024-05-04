@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   pgTable,
   primaryKey,
@@ -8,13 +9,19 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
-export const hostTeams = pgTable("host_teams", {
-  id: serial("id").primaryKey(),
-  name: text("name"),
-  ownerId: text("owner_id")
-    .notNull()
-    .references(() => users.id),
-});
+export const hostTeams = pgTable(
+  "host_teams",
+  {
+    id: serial("id").primaryKey(),
+    name: text("name"),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id),
+  },
+  (t) => ({
+    owneridIdx: index().on(t.ownerId),
+  }),
+);
 
 export type HostTeam = typeof hostTeams.$inferSelect;
 
@@ -42,7 +49,8 @@ export const hostTeamInvites = pgTable(
     inviteeEmail: text("invitee_email").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.hostTeamId, vt.inviteeEmail] }),
+  (t) => ({
+    compoundKey: primaryKey({ columns: [t.hostTeamId, t.inviteeEmail] }),
+    hostTeamidIdx: index().on(t.hostTeamId),
   }),
 );

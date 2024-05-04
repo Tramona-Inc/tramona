@@ -33,6 +33,8 @@ import {
   SelectValue,
 } from "../ui/select";
 import { capitalize } from "@/utils/utils";
+import { SelectIcon } from "@radix-ui/react-select";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 
 const formSchema = z.object({
   hostId: zodString(),
@@ -142,6 +144,9 @@ export default function AdminPropertyForm() {
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a property type" />
+                    <SelectIcon>
+                      <CaretSortIcon className="h-4 w-4 opacity-50" />
+                    </SelectIcon>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

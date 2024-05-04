@@ -31,7 +31,7 @@ export default function MastHead() {
               </p>
             </div>
 
-            <div className="mx-auto w-full max-w-5xl">
+            <div className="md:mx-auto md:w-full md:max-w-5xl">
               <SearchBar />
             </div>
           </div>

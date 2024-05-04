@@ -17,7 +17,7 @@ import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
-import { capitalize, getNumNights, plural, useIsDesktop } from "@/utils/utils";
+import { capitalize, getNumNights, plural, useIsSm } from "@/utils/utils";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FilterIcon } from "lucide-react";
@@ -25,6 +25,7 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import DateRangePicker from "../_common/DateRangePicker";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import {
   Select,
   SelectContent,
@@ -58,6 +59,7 @@ import {
 } from "../ui/drawer";
 import ErrorMsg from "../ui/ErrorMsg";
 import { toast } from "../ui/use-toast";
+import { SelectIcon } from "@radix-ui/react-select";
 
 const formSchema = z
   .object({
@@ -87,7 +89,7 @@ export default function NewRequestForm({
 }) {
   const { status } = useSession();
 
-  const isDesktop = useIsDesktop();
+  const isDesktop = useIsSm();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -397,6 +399,9 @@ function FiltersSection({
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="" />
+                  <SelectIcon>
+                    <CaretSortIcon className="h-4 w-4 opacity-50" />
+                  </SelectIcon>
                 </SelectTrigger>
               </FormControl>
               <SelectContent>

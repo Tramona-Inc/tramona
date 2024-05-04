@@ -74,7 +74,7 @@ function BiddingStep1({ property }: { property: Property }) {
             src={property.imageUrls[0]!}
             alt="Property Photo"
             fill
-            className="object-fit rounded-xl"
+            className="rounded-xl object-cover"
           />
         </AspectRatio>
       </div>

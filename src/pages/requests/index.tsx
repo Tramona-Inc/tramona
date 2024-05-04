@@ -2,14 +2,13 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import NewRequestDialog from "@/components/requests/NewRequestDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/utils/api";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { Plus } from "lucide-react";
+import { HistoryIcon, HomeIcon, MapPinIcon, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
-import PropertyOfferTab from '@/components/requests/PropertyOfferTab';
+import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
 
 export function NewRequestButton() {
   return (
@@ -22,30 +21,21 @@ export function NewRequestButton() {
   );
 }
 
+// TODO: change to tab links, each with individual fetch
 function RequestsTabs() {
-  const { data: requests } = api.requests.getMyRequests.useQuery();
-
   return (
     <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
-        <TabsTrigger
-          value="cityRequests"
-          // count={requests?.activeRequestGroups.length ?? "blank"}
-        >
-          {/* <TagIcon /> Current Requests */}
+        <TabsTrigger value="cityRequests">
+          <MapPinIcon />
           City Requests
         </TabsTrigger>
-        <TabsTrigger
-          value="propertyOffers"
-          // count={requests?.inactiveRequestGroups.length ?? "blank"}
-        >
-          {/* <HistoryIcon /> Past Requests */}
+        <TabsTrigger value="propertyOffers">
+          <HomeIcon />
           Property Offers
         </TabsTrigger>
-        <TabsTrigger
-          value="history"
-          // count={requests?.inactiveRequestGroups.length ?? "blank"}
-        >
+        <TabsTrigger value="history">
+          <HistoryIcon />
           History
         </TabsTrigger>
       </TabsList>
@@ -73,8 +63,8 @@ export default function Page() {
       </Head>
 
       <DashboardLayout type="guest">
-        <div className="container col-span-10 min-h-screen-minus-header px-4 pb-64 pt-5 2xl:col-span-11">
-          <div className="mx-auto">
+        <div className="min-h-screen-minus-header px-4 pb-64 pt-5">
+          <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-4xl font-bold text-black">
                 Requests & Offers

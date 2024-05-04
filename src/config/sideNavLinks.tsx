@@ -24,7 +24,7 @@ export const adminNavLinks = [
   { href: "/admin/past-requests", name: "Past Requests", icon: HistoryIcon },
   { href: "/admin/utility", name: "Utility", icon: WrenchIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/dashboard", name: "Switch To Guest", icon: ArrowLeftRight },
+  { href: "/requests", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
 export const hostMobileNavLinks = [

@@ -1,7 +1,4 @@
-import {
-  EmailTemplate,
-  type EmailTemplateProps,
-} from "@/components/HostSignUp/EmailTemplate";
+import { type EmailTemplateProps, EmailTemplate } from '@/components/ambassador/EmailTemplate';
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
