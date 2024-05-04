@@ -55,8 +55,10 @@ function BiddingStep1({ property }: { property: Property }) {
     setPrice(values.price);
     setGuest(values.guest);
 
+    setStep(1);
+
     if (users?.isIdentityVerified === "true") {
-      setStep(step + 1);
+      setStep(1);
     }
   }
 

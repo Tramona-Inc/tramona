@@ -85,8 +85,16 @@ function BiddingInfoCard({ property }: { property: Property }) {
 
 function BiddingStep2({ property }: { property: Property }) {
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
-    onSuccess: () => {
-      setStep(step + 1);
+    onSuccess: (data) => {
+      if (data?.result.result === "error") {
+        setError("true");
+      } else {
+        setStep(step + 1);
+      }
+    },
+    onError: (error) => {
+      console.log("error", error.message);
+      setError(error.message);
     },
   });
   const { data: payments } = api.stripe.getListOfPayments.useQuery();
@@ -95,6 +103,7 @@ function BiddingStep2({ property }: { property: Property }) {
   const [currentPaymentMethodId, setCurrentPaymentMethodId] = useState<
     string | undefined
   >(payments?.defaultPaymentMethod as string | undefined);
+  const [error, setError] = useState("");
 
   const stripePromise = useStripe();
 
@@ -144,41 +153,39 @@ function BiddingStep2({ property }: { property: Property }) {
         Step 2 of 2: Confirm Payment{" "}
       </h1>
       <BiddingInfoCard property={property} />
-      <div className="flex flex-col items-center tracking-tight md:flex-row md:items-start md:space-x-20">
-        <div className="mt-4 w-[300px] md:w-[500px]">
-          {payments && payments.cards.data.length > 0 ? (
-            <div className='space-y-5'>
-              <Select
-                defaultValue={payments.defaultPaymentMethod as string}
-                onValueChange={(value) => {
-                  console.log("Selected payment method:", value);
-                  setCurrentPaymentMethodId(value);
-                }}
-              >
-                <SelectTrigger className="">
-                  <SelectValue placeholder="Credit Cards" />
-                </SelectTrigger>
-                <SelectContent>
-                  {payments.cards.data.map((payment) => (
-                    <SelectItem key={payment.id} value={payment.id}>
-                      **** **** **** {payment.card?.last4}{" "}
-                      <span className="capitalize">{payment.card?.brand}</span>{" "}
-                      {payment.card?.exp_month}/{payment.card?.exp_year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button onClick={onSubmit} type="submit">
-                Send Offer
-              </Button>
-            </div>
-          ) : (
-            <Elements stripe={stripePromise} options={options}>
-              <BidPaymentForm bid={bid} />
-            </Elements>
-          )}
-        </div>
+      <div className="mt-4 w-[300px] md:w-[500px]">
+        {payments && payments.cards.data.length > 0 ? (
+          <div className="space-y-5">
+            <Select
+              defaultValue={payments.defaultPaymentMethod as string}
+              onValueChange={(value) => {
+                setCurrentPaymentMethodId(value);
+              }}
+            >
+              <SelectTrigger className="">
+                <SelectValue placeholder="Credit Cards" />
+              </SelectTrigger>
+              <SelectContent>
+                {payments.cards.data.map((payment) => (
+                  <SelectItem key={payment.id} value={payment.id}>
+                    **** **** **** {payment.card?.last4}{" "}
+                    <span className="capitalize">{payment.card?.brand}</span>{" "}
+                    {payment.card?.exp_month}/{payment.card?.exp_year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={onSubmit} type="submit">
+              Send Offer
+            </Button>
+          </div>
+        ) : (
+          <Elements stripe={stripePromise} options={options}>
+            <BidPaymentForm bid={bid} />
+          </Elements>
+        )}
       </div>
+      <p>{error}</p>
     </div>
   );
 }

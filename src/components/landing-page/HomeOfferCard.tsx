@@ -146,7 +146,7 @@ export default function HomeOfferCard({
         </p>
         <p>
           <span className="text-xs">Airbnb Price: </span>
-          {formatCurrency(property.originalNightlyPrice ?? 0)}
+          {formatCurrency(property?.originalNightlyPrice ?? 0)}
           <span className="text-xs">/night</span>
         </p>
       </div>
@@ -176,7 +176,7 @@ export default function HomeOfferCard({
                 Make Offer
               </Button>
             </DialogTrigger>
-            <DialogContent className="flex sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
+            <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
               <MakeBid propertyId={property.id} />
             </DialogContent>
           </Dialog>

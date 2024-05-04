@@ -9,8 +9,8 @@ import {
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNull } from "drizzle-orm";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const biddingRouter = createTRPCRouter({
   getMyBids: protectedProcedure.query(async ({ ctx }) => {
@@ -35,33 +35,33 @@ export const biddingRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
     .mutation(async ({ ctx, input }) => {
-      try {
-        // const requestGroupId = await tx
-        //   .insert(requestGroups)
-        //   .values({ createdByUserId: ctx.user.id, hasApproved: true })
-        //   .returning()
-        //   .then((res) => res[0]!.id);
+      console.log("CREATING");
+      console.log("CREATING 1");
+      // Check if bid already exist with user and property id
+      const exists = await ctx.db.query.bids.findFirst({
+        where: and(eq(bids.propertyId, input.propertyId)),
+      });
 
-        const madeByGroupId = await ctx.db
-          .insert(groups)
-          .values({ ownerId: ctx.user.id })
-          .returning()
-          .then((res) => res[0]!.id);
+      console.log("CREATING 2");
 
-        await ctx.db.insert(groupMembers).values({
-          userId: ctx.user.id,
-          groupId: madeByGroupId,
-        });
-
-        await ctx.db
-          .insert(bids)
-          .values({ ...input, madeByGroupId: madeByGroupId });
-      } catch (error) {
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: JSON.stringify(error),
-        });
+      if (exists) {
+        new TRPCError({ code: "BAD_REQUEST" });
       }
+
+      const madeByGroupId = await ctx.db
+        .insert(groups)
+        .values({ ownerId: ctx.user.id })
+        .returning()
+        .then((res) => res[0]!.id);
+
+      await ctx.db.insert(groupMembers).values({
+        userId: ctx.user.id,
+        groupId: madeByGroupId,
+      });
+
+      await ctx.db
+        .insert(bids)
+        .values({ ...input, madeByGroupId: madeByGroupId });
     }),
 
   update: protectedProcedure
