@@ -93,7 +93,7 @@ export default function ReferralDashboard() {
           </div>
           <div className="flex items-center gap-1">
             <Link
-              href="/account"
+              href="/account/balance"
               className={
                 "text-sm font-bold hover:underline hover:underline-offset-2"
               }
