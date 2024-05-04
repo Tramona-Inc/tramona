@@ -108,8 +108,8 @@ importers:
         specifier: ^0.0.13
         version: 0.0.13
       '@react-email/tailwind':
-        specifier: ^0.0.15
-        version: 0.0.15(react@18.2.0)
+        specifier: ^0.0.16
+        version: 0.0.16(react@18.2.0)
       '@react-google-maps/api':
         specifier: ^2.19.3
         version: 2.19.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
