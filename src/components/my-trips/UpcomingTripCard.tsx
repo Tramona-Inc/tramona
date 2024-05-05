@@ -1,7 +1,10 @@
 import Link from "next/link";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { useRouter } from "next/router";
 
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import {
   Sheet,
   SheetClose,
@@ -13,11 +16,29 @@ import {
 } from "../ui/sheet";
 import { MessageCircle } from "lucide-react";
 
+import { api } from "@/utils/api";
+import { cn, formatDateRange } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
 import MapPin from "../_icons/MapPin";
 import { type UpcomingTrip } from "./UpcomingTrips";
 
+// Plugin for relative time
+dayjs.extend(relativeTime);
+
 export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
+  const router = useRouter();
+
+  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
+    onSuccess: (conversationId) => {
+      void router.push(`/messages?conversationId=${conversationId}`);
+    },
+  });
+
+  function handleConversation() {
+    // TODO: only messages admin for now
+    mutate();
+  }
+
   return (
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-lg border lg:flex-row">
@@ -26,30 +47,34 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
             variant="lightGray"
             className="absolute left-4 top-4 font-bold"
           >
-            Trip in 7 days
+            Trip {dayjs(trip.request.checkIn).fromNow()}
           </Badge>
-          <img
-            src={"https://placehold.co/600x400.png"}
-            width={600}
-            height={400}
-          />
+          <img src={trip.property.imageUrls[0]} width={600} height={400} />
         </div>
 
         <div className="flex w-full flex-col gap-5 p-4 lg:gap-8 lg:p-10">
           <div className="flex w-full flex-col justify-between gap-3 lg:flex-row lg:gap-6">
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">Property Name/Title</h2>
+              <h2 className="text-2xl font-bold">{trip.property.name}</h2>
               <div className="flex gap-2">
-                <UserAvatar name={"Pam"} />
+                <UserAvatar
+                  name={trip.property.host?.name}
+                  image={trip.property.host?.image}
+                />
                 <div className="flex w-full justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Hosted by</p>
-                    <p>Pam</p>
+                    <p>
+                      {trip.property.host?.name
+                        ? trip.property.host.name
+                        : "info@tramona"}
+                    </p>
                   </div>
                   <Button
                     variant="secondary"
                     size="sm"
                     className="w-[170px] text-sm md:w-[200px] lg:hidden"
+                    onClick={() => handleConversation()}
                   >
                     <MessageCircle className="w-4 md:w-5" /> Message your host
                   </Button>
@@ -60,14 +85,16 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
               <h3 className="text-xl font-bold">Location</h3>
               <div className="flex">
                 <MapPin />
-                <p>1234 Sunshine Blvd Los Angeles, CA, USA</p>
+                <p>{trip.property.address}</p>
               </div>
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold">Check-in details</h3>
-              <p>Thu Apr 25 - Tue Apr 30</p>
+              <p>
+                {formatDateRange(trip.request.checkIn, trip.request.checkOut)}
+              </p>
               <Link
-                href={`/my-trips/${1}`}
+                href={`/my-trips/${trip.id}`}
                 className="text-sm font-bold underline underline-offset-4"
               >
                 View more
@@ -81,6 +108,7 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
             <Button
               variant="secondary"
               className="hidden w-[175px] text-xs lg:flex lg:w-[160px] xl:w-[200px] xl:text-sm"
+              onClick={() => handleConversation()}
             >
               <MessageCircle className="w-4 xl:w-5" /> Message your host
             </Button>
@@ -165,12 +193,15 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
               </SheetContent>
             </Sheet>
 
-            <Button
-              variant="outline"
-              className="w-[170px] text-xs lg:w-[160px] xl:w-[200px] xl:text-sm"
+            <Link
+              href={"/faq"}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "w-[170px] text-xs lg:w-[160px] xl:w-[200px] xl:text-sm",
+              )}
             >
               Help
-            </Button>
+            </Link>
           </div>
         </div>
       </div>
