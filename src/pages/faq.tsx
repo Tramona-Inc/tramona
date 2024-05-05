@@ -1,4 +1,4 @@
-import MainLayout from "@/components/_common/Layout/MainLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Accordion,
@@ -15,7 +15,7 @@ export default function FAQ() {
         <title>FAQ | Tramona</title>
       </Head>
 
-      <MainLayout type="marketing">
+      <DashboardLayout type="guest">
         <div className="mx-auto max-w-3xl p-4 pb-32">
           <h1 className="pb-12 pt-20 text-center text-3xl font-bold">
             Frequently Asked Questions
@@ -298,7 +298,7 @@ export default function FAQ() {
             </TabsContent>
           </Tabs>
         </div>
-      </MainLayout>
+      </DashboardLayout>
     </>
   );
 }
