@@ -1,9 +1,10 @@
 import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useRouter } from "next/router";
 
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import {
   Sheet,
   SheetClose,
@@ -15,7 +16,8 @@ import {
 } from "../ui/sheet";
 import { MessageCircle } from "lucide-react";
 
-import { formatDateRange } from "@/utils/utils";
+import { api } from "@/utils/api";
+import { cn, formatDateRange } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
 import MapPin from "../_icons/MapPin";
 import { type UpcomingTrip } from "./UpcomingTrips";
@@ -24,7 +26,18 @@ import { type UpcomingTrip } from "./UpcomingTrips";
 dayjs.extend(relativeTime);
 
 export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
-  console.log(trip);
+  const router = useRouter();
+
+  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
+    onSuccess: (conversationId) => {
+      void router.push(`/messages?conversationId=${conversationId}`);
+    },
+  });
+
+  function handleConversation() {
+    // TODO: only messages admin for now
+    mutate();
+  }
 
   return (
     <div className="w-full">
@@ -51,12 +64,17 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
                 <div className="flex w-full justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Hosted by</p>
-                    <p>{trip.property.host?.name}</p>
+                    <p>
+                      {trip.property.host?.name
+                        ? trip.property.host.name
+                        : "info@tramona"}
+                    </p>
                   </div>
                   <Button
                     variant="secondary"
                     size="sm"
                     className="w-[170px] text-sm md:w-[200px] lg:hidden"
+                    onClick={() => handleConversation()}
                   >
                     <MessageCircle className="w-4 md:w-5" /> Message your host
                   </Button>
@@ -90,6 +108,7 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
             <Button
               variant="secondary"
               className="hidden w-[175px] text-xs lg:flex lg:w-[160px] xl:w-[200px] xl:text-sm"
+              onClick={() => handleConversation()}
             >
               <MessageCircle className="w-4 xl:w-5" /> Message your host
             </Button>
@@ -174,12 +193,15 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
               </SheetContent>
             </Sheet>
 
-            <Button
-              variant="outline"
-              className="w-[170px] text-xs lg:w-[160px] xl:w-[200px] xl:text-sm"
+            <Link
+              href={"/faq"}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "w-[170px] text-xs lg:w-[160px] xl:w-[200px] xl:text-sm",
+              )}
             >
               Help
-            </Button>
+            </Link>
           </div>
         </div>
       </div>

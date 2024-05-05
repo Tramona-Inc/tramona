@@ -1,5 +1,6 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -14,12 +15,9 @@ import {
 } from "lucide-react";
 import UserAvatar from "@/components/_common/UserAvatar";
 
-import { useEffect, useState } from "react";
-import { type LatLngTuple } from "leaflet";
-import "leaflet/dist/leaflet.css";
-
 import { cn, formatCurrency, plural } from "@/utils/utils";
 import { api, type RouterOutputs } from "@/utils/api";
+import "leaflet/dist/leaflet.css";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
@@ -46,14 +44,18 @@ const Marker = dynamic(
 type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export default function TripPage({ trip }: { trip: OfferWithDetails }) {
-  console.log(trip);
-  const [center, setCenter] = useState<LatLngTuple>([0, 0]);
-  const [zoom, setZoom] = useState(10);
+  const router = useRouter();
 
-  useEffect(() => {
-    setCenter([50.5, 30.5]);
-    setZoom(14);
-  }, []);
+  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
+    onSuccess: (conversationId) => {
+      void router.push(`/messages?conversationId=${conversationId}`);
+    },
+  });
+
+  function handleConversation() {
+    // TODO: only messages admin for now
+    mutate();
+  }
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: trip.property.address!,
@@ -119,6 +121,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                   variant="secondary"
                   size="sm"
                   className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
+                  onClick={() => handleConversation()}
                 >
                   <MessageCircle className="w-4 lg:w-5" /> Message your host
                 </Button>
@@ -178,7 +181,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                         coordinateData.coordinates.lat,
                         coordinateData.coordinates.lng,
                       ]}
-                      zoom={zoom}
+                      zoom={14}
                       scrollWheelZoom={false}
                       className="h-[300px]"
                     >
@@ -186,7 +189,12 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       />
-                      <Marker position={center} />
+                      <Marker
+                        position={[
+                          coordinateData.coordinates.lat,
+                          coordinateData.coordinates.lng,
+                        ]}
+                      />
                     </MapContainer>
                   </div>
                 )}
@@ -294,7 +302,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                 coordinateData.coordinates.lat,
                 coordinateData.coordinates.lng,
               ]}
-              zoom={zoom}
+              zoom={14}
               scrollWheelZoom={false}
               className="h-[700px]"
             >
