@@ -204,8 +204,8 @@ importers:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.30.10(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.11.5)(postgres@3.4.4)(react@18.2.0))(zod@3.22.4)
       embla-carousel-autoplay:
-        specifier: 8.0.2
-        version: 8.0.2(embla-carousel@8.0.0)
+        specifier: 8.0.4
+        version: 8.0.4(embla-carousel@8.0.0)
       embla-carousel-react:
         specifier: 8.0.0
         version: 8.0.0(react@18.2.0)
@@ -5618,10 +5618,10 @@ packages:
   elliptic@6.5.5:
     resolution: {integrity: sha512-7EjbcmUm17NQFu4Pmgmq2olYMj8nwMnpcddByChSUjArp8F5DQWcIcpriwO4ZToLNAJig0yiyjswfyGNje/ixw==}
 
-  embla-carousel-autoplay@8.0.2:
-    resolution: {integrity: sha512-31lBigAkHeI4k1767uYcr9Gm2y12mzLpVsi+QRxIWQT8J4AtRoHLOhd8YJFiXf22DbI/j78+IaeJK4lZRlFxUw==}
+  embla-carousel-autoplay@8.0.4:
+    resolution: {integrity: sha512-Ilmgn+d09o2M23yvl4cYwfO8VnZi7YXQl9UGYIflLGhtFaZW9PKU67TaW8teRjaDhS3I+uz3osBFDO407YPjfQ==}
     peerDependencies:
-      embla-carousel: 8.0.2
+      embla-carousel: 8.0.4
 
   embla-carousel-react@8.0.0:
     resolution: {integrity: sha512-qT0dii8ZwoCtEIBE6ogjqU2+5IwnGfdt2teKjCzW88JRErflhlCpz8KjWnW8xoRZOP8g0clRtsMEFoAgS/elfA==}
@@ -16539,7 +16539,7 @@ snapshots:
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
 
-  embla-carousel-autoplay@8.0.2(embla-carousel@8.0.0):
+  embla-carousel-autoplay@8.0.4(embla-carousel@8.0.0):
     dependencies:
       embla-carousel: 8.0.0
 
