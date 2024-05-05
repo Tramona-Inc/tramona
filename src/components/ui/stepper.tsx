@@ -114,7 +114,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           {...rest}
           ref={ref}
           className={cn(
-            "flex w-full flex-1 justify-between gap-4 text-center",
+            "flex w-full flex-1 justify-center gap-6 pb-4 lg:py-0",
             orientation === "vertical" ? "flex-col" : "flex-row",
             className,
           )}
@@ -149,8 +149,8 @@ Stepper.displayName = "Stepper";
 const stepperItemVariants = cva("relative flex flex-row gap-2", {
   variants: {
     isLastStep: {
-      true: "flex-[0_0_auto] justify-end",
-      false: "flex-[1_0_auto] justify-start",
+      true: "",
+      false: "",
     },
     isVertical: {
       true: "flex-col",
@@ -228,14 +228,14 @@ export const StepperItem = React.forwardRef<HTMLDivElement, StepperItemProps>(
       [isCurrentStep, isCompletedStep],
     );
 
-    const Success = React.useMemo(
-      () => successIcon ?? <Check />,
-      [successIcon],
-    );
+    // const Success = React.useMemo(
+    //   () => successIcon ?? <Check />,
+    //   [successIcon],
+    // );
     const Error = React.useMemo(() => errorIcon ?? <X />, [errorIcon]);
 
     const RenderIcon = React.useMemo(() => {
-      if (isCompletedStep) return Success;
+      // if (isCompletedStep) return Success;
       if (isCurrentStep) {
         if (isError) return Error;
         if (isLoading) return <Loader2 className="animate-spin" />;
@@ -244,7 +244,7 @@ export const StepperItem = React.forwardRef<HTMLDivElement, StepperItemProps>(
       return index + 1;
     }, [
       isCompletedStep,
-      Success,
+      // Success,
       isCurrentStep,
       Error,
       isError,
@@ -279,17 +279,22 @@ export const StepperItem = React.forwardRef<HTMLDivElement, StepperItemProps>(
             data-invalid={isCurrentStep && isError}
             data-highlighted={isCompletedStep}
             data-clickable={isClickable}
-            disabled={!hasVisited}
+            // disabled={!hasVisited}
             className={cn(
-              "aspect-square rounded-full aria-[current=step]:border-2 aria-[current=step]:border-primary data-[highlighted=true]:bg-primary data-[highlighted=true]:text-white lg:h-12 lg:w-12",
-              isCompletedStep ?? typeof RenderIcon !== "number"
-                ? "px-3 py-2"
-                : "",
-              additionalClassName?.button,
+              "aspect-square h-5 w-5 rounded-full border border-teal-900 bg-white p-0 hover:cursor-default hover:bg-white aria-[current=step]:bg-teal-900 data-[highlighted=true]:bg-teal-900 lg:h-6 lg:w-6",
+              // isCompletedStep ?? typeof RenderIcon !== "number" ? "" : "",
+              // additionalClassName?.button,
             )}
+            // className={cn(
+            //   "aspect-square rounded-full aria-[current=step]:border-2 aria-[current=step]:border-primary data-[highlighted=true]:bg-primary data-[highlighted=true]:text-white lg:h-12 lg:w-12",
+            //   isCompletedStep ?? typeof RenderIcon !== "number"
+            //     ? "px-3 py-2"
+            //     : "",
+            //   additionalClassName?.button,
+            // )}
             variant={isCurrentStep && isError ? "destructive" : variant}
           >
-            {RenderIcon}
+            {/* {RenderIcon} */}
           </Button>
           <StepperItemLabel
             label={label}
@@ -301,14 +306,14 @@ export const StepperItem = React.forwardRef<HTMLDivElement, StepperItemProps>(
             isCurrentStep={isCurrentStep}
           />
         </div>
-        <StepperItemConnector
+        {/* <StepperItemConnector
           index={index}
           isLastStep={!!isLastStep}
           hasLabel={!!label || !!description}
           isCompletedStep={isCompletedStep ?? false}
         >
           {(isCurrentStep ?? isCompletedStep) && children}
-        </StepperItemConnector>
+        </StepperItemConnector> */}
       </div>
     );
   },

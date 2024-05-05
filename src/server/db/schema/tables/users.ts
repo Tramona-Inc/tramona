@@ -28,6 +28,12 @@ export const earningStatusEnum = pgEnum("earning_status", [
   "cancelled",
 ]);
 
+export const isIdentityVerifiedEnum = pgEnum("is_identity_verified", [
+  "false",
+  "true",
+  "pending",
+]);
+
 export const users = pgTable(
   "user",
   {
@@ -57,45 +63,67 @@ export const users = pgTable(
     createdAt: timestamp("created_at", { mode: "string" })
       .notNull()
       .defaultNow(),
+    //stripe identity verifications
+    isIdentityVerified: isIdentityVerifiedEnum("is_identity_verified").default("false").notNull(),
+    verificationReportId: varchar("verification_report_id"),
+    dateOfBirth: varchar("date_of_birth"),
   },
   (t) => ({
-    phoneNumberIdx: index("phone_number_idx").on(t.phoneNumber),
-    emailIdx: index("email_idx").on(t.email),
+    phoneNumberIdx: index().on(t.phoneNumber),
+    emailIdx: index().on(t.email),
   }),
 );
 
 export type User = typeof users.$inferSelect;
 
-export const referralCodes = pgTable("referral_codes", {
-  referralCode: varchar("referral_code", {
-    length: REFERRAL_CODE_LENGTH,
-  }).primaryKey(),
-  ownerId: text("owner_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  totalBookingVolume: integer("total_booking_volume").notNull().default(0),
-  numSignUpsUsingCode: integer("num_sign_ups_using_code").notNull().default(0),
-  numBookingsUsingCode: integer("num_bookings_using_code").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+export const referralCodes = pgTable(
+  "referral_codes",
+  {
+    referralCode: varchar("referral_code", {
+      length: REFERRAL_CODE_LENGTH,
+    }).primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    totalBookingVolume: integer("total_booking_volume").notNull().default(0),
+    numSignUpsUsingCode: integer("num_sign_ups_using_code")
+      .notNull()
+      .default(0),
+    numBookingsUsingCode: integer("num_bookings_using_code")
+      .notNull()
+      .default(0),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    ownerIdIdx: index("owner_id_idx").on(t.ownerId),
+  }),
+);
 
-export const referralEarnings = pgTable("referral_earnings", {
-  id: serial("id").primaryKey(),
-  referralCode: text("referral_code")
-    .notNull()
-    .references(() => referralCodes.referralCode, { onDelete: "set null" }),
-  refereeId: text("referee_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "set null" }),
-  offerId: integer("offer_id")
-    .notNull()
-    .references(() => offers.id, { onDelete: "cascade" }),
-  earningStatus: earningStatusEnum("earning_status")
-    .notNull()
-    .default("pending"),
-  cashbackEarned: integer("cashback_earned").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+export const referralEarnings = pgTable(
+  "referral_earnings",
+  {
+    id: serial("id").primaryKey(),
+    referralCode: text("referral_code")
+      .notNull()
+      .references(() => referralCodes.referralCode, { onDelete: "set null" }),
+    refereeId: text("referee_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
+    offerId: integer("offer_id")
+      .notNull()
+      .references(() => offers.id, { onDelete: "cascade" }),
+    earningStatus: earningStatusEnum("earning_status")
+      .notNull()
+      .default("pending"),
+    cashbackEarned: integer("cashback_earned").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    referralCodeIdx: index().on(t.referralCode),
+    refereeIdIdx: index().on(t.refereeId),
+    offerIdIdx: index().on(t.offerId),
+  }),
+);
 
 export type ReferralEarnings = typeof referralEarnings.$inferSelect;
 export const referralEarningsSelectSchema =

@@ -25,21 +25,34 @@ import { errorToast, successfulRequestToast } from "@/utils/toasts";
 import { cn, formatCurrency, getNumNights } from "@/utils/utils";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon, XIcon } from "lucide-react";
+import {
+  PlusIcon,
+  XIcon,
+  Filter,
+  UsersRoundIcon,
+  DollarSignIcon,
+  ChevronDown,
+  InfoIcon,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Input } from "@/components/ui/input";
 import LPDateRangePicker, {
   AirbnbLinkDialog,
+  AirbnbLinkPopover,
   classNames,
+  DesktopGuestsPicker,
   LPFormItem,
   LPFormLabel,
   LPFormMessage,
   LPInput,
   LPLocationInput,
 } from "./components";
+import { SelectIcon } from "@radix-ui/react-select";
+import { Info } from "../../email-templates/EmailComponentsWithoutHost";
 
 const formSchema = z.object({
   data: z
@@ -92,7 +105,7 @@ export default function DesktopSearchBar({
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogDescription, setDialogDescription] = useState("");
-
+  const [isExpanded, setIsExpanded] = useState(false);
   const [curTab, setCurTab] = useState(0);
 
   const mutation = api.requests.createMultiple.useMutation();
@@ -237,152 +250,194 @@ export default function DesktopSearchBar({
         className="space-y-2"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: numTabs }).map((_, i) => {
-            const isSelected = curTab === i;
-            const hasErrors = tabsWithErrors.includes(i);
-            const showX = isSelected && numTabs > 1;
+        {mode == "request" && (
+          <div className="flex flex-wrap gap-1">
+            {Array.from({ length: numTabs }).map((_, i) => {
+              const isSelected = curTab === i;
+              const hasErrors = tabsWithErrors.includes(i);
+              const showX = isSelected && numTabs > 1;
 
-            // buttons in buttons arent allowed, so we only show the x button
-            // on the tab when the tab is selected, and make the tab a div instead
-            // of a button when its selected
-            const Comp = showX ? "div" : "button";
+              // buttons in buttons arent allowed, so we only show the x button
+              // on the tab when the tab is selected, and make the tab a div instead
+              // of a button when its selected
+              const Comp = showX ? "div" : "button";
 
-            return (
-              <Comp
-                key={i}
+              return (
+                <Comp
+                  key={i}
+                  type="button"
+                  onClick={showX ? undefined : () => setCurTab(i)}
+                  className={cn(
+                    "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
+                    hasErrors && "pr-3",
+                    isSelected
+                      ? "border border-gray-200 bg-white text-black"
+                      : "bg-white text-primary hover:bg-neutral-600/60",
+                    showX && "pr-2",
+                  )}
+                >
+                  Trip {i + 1}
+                  {hasErrors && (
+                    <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
+                      Errors
+                    </div>
+                  )}
+                  {showX && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (curTab === numTabs - 1) {
+                          setCurTab(numTabs - 2);
+                        }
+                        form.setValue(
+                          "data",
+                          data.filter((_, j) => j !== i),
+                        );
+                      }}
+                      className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
+                    >
+                      <XIcon className="size-3" />
+                    </button>
+                  )}
+                </Comp>
+              );
+            })}
+            {numTabs < MAX_REQUEST_GROUP_SIZE && (
+              <button
+                key=""
                 type="button"
-                onClick={showX ? undefined : () => setCurTab(i)}
-                className={cn(
-                  "inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium backdrop-blur-md",
-                  hasErrors && "pr-3",
-                  isSelected
-                    ? "border border-gray-200 bg-white text-black"
-                    : "bg-black/50 text-white hover:bg-neutral-600/60",
-                  showX && "pr-2",
-                )}
+                onClick={() => {
+                  setCurTab(numTabs);
+                  form.setValue("data", [
+                    ...data,
+                    defaultValues as FormSchema["data"][number],
+                  ]);
+                  // form.setFocus(`data.${data.length - 1}.location`);
+                }}
+                className="inline-flex items-center gap-1 rounded-full border-primary bg-accent p-2 pr-4 text-sm font-medium text-primary backdrop-blur-md hover:bg-neutral-600/60"
               >
-                Trip {i + 1}
-                {hasErrors && (
-                  <div className="rounded-full bg-red-400 px-1 text-xs font-medium text-black">
-                    Errors
-                  </div>
+                <PlusIcon className="size-4" />
+                Add a trip
+              </button>
+            )}
+          </div>
+        )}
+        <div className="flex-col rounded-3xl bg-white pb-6 backdrop-blur-md">
+          <div className="flex flex-row items-center gap-x-2">
+            <LPLocationInput
+              control={form.control}
+              name={`data.${curTab}.location`}
+              formLabel="Location"
+              className=" relative h-[66px] rounded-lg border-2 border-border 2xl:pr-24"
+            />
+
+            <LPDateRangePicker
+              control={form.control}
+              name={`data.${curTab}.date`}
+              formLabel="Check in/Check out"
+              className="h-[66px] rounded-lg border-2 border-border pr-2 lg:pr-9 2xl:pr-36"
+            />
+
+            <div className=" z-20 flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-4">
+              <UsersRoundIcon className="z-20 mr-[-23px] mt-4 h-5 w-5" />
+              <div className=" z-10 flex flex-row items-center 2xl:mr-20">
+                <FormField
+                  control={form.control}
+                  name={`data.${curTab}.numGuests`}
+                  render={({ field }) => (
+                    <LPFormItem className=" z-10">
+                      <LPFormLabel className="z-20 mb-10 ml-[-32px] mt-[-7px] whitespace-nowrap text-xs xl:text-sm">
+                        Number of guests
+                      </LPFormLabel>
+                      <FormControl>
+                        <LPInput
+                          {...field}
+                          inputMode="numeric"
+                          placeholder="Add guests"
+                          className="z-10 ml-1 h-16 text-xs xl:text-sm "
+                        />
+                      </FormControl>
+                      <LPFormMessage className="mt-2" />
+                    </LPFormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className=" flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-2">
+              <DollarSignIcon className="z-50 mr-[-23px] mt-4 h-5 w-5" />
+              <div className="z-10 flex flex-row items-center 2xl:mr-20">
+                <FormField
+                  control={form.control}
+                  name={`data.${curTab}.maxNightlyPriceUSD`}
+                  render={({ field }) => (
+                    <LPFormItem className=" z-10">
+                      <LPFormLabel className="z-20 ml-[-28px] mt-[-7px] text-sm ">
+                        Price range
+                      </LPFormLabel>
+                      <FormControl>
+                        <LPInput
+                          {...field}
+                          inputMode="decimal"
+                          placeholder="Price per night"
+                          className="z-10 h-16 text-xs xl:text-sm"
+                        />
+                      </FormControl>
+                      <LPFormMessage className="mt-2" />
+                    </LPFormItem>
+                  )}
+                />
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <Button
+                disabled={form.formState.isSubmitting}
+                type="button"
+                variant="default"
+                onClick={form.handleSubmit((data) =>
+                  checkPriceEstimation(data.data),
                 )}
-                {showX && (
+                size="lg"
+                className=" rounded-lg py-8 font-semibold"
+              >
+                {mode === "search" ? "Search" : "Submit request"}
+              </Button>
+            </div>
+          </div>
+          {mode === "request" && (
+            <div className="flex flex-col gap-y-4">
+              <div className="flex w-11/12 flex-row justify-between">
+                <div className="flex w-10/12 items-center pt-3 text-xs text-[#004236] 2xl:text-sm">
+                  Instead of just seeing listed prices, requesting a deal lets
+                  you set your budget, and we&apos;ll match you with hosts who
+                  have properties in the city and accept your price. This way,
+                  you can find the perfect place to stay within your means!
+                </div>
+                <div className="flex flex-row items-center p-3">
+                  <Filter size={22} strokeWidth={1.5} />
                   <button
                     type="button"
-                    onClick={() => {
-                      if (curTab === numTabs - 1) {
-                        setCurTab(numTabs - 2);
-                      }
-                      form.setValue(
-                        "data",
-                        data.filter((_, j) => j !== i),
-                      );
-                    }}
-                    className="rounded-full p-1 hover:bg-black/10 active:bg-black/20"
+                    onClick={() => setIsExpanded((prev) => !prev)}
+                    className="whitespace-nowrap rounded-full bg-white/10 py-1 pl-1 text-sm font-medium text-primary hover:bg-white/20"
                   >
-                    <XIcon className="size-3" />
+                    {isExpanded ? "Hide filters" : "Add filters"}
                   </button>
-                )}
-              </Comp>
-            );
-          })}
-          {numTabs < MAX_REQUEST_GROUP_SIZE && (
-            <button
-              key=""
-              type="button"
-              onClick={() => {
-                setCurTab(numTabs);
-                form.setValue("data", [
-                  ...data,
-                  defaultValues as FormSchema["data"][number],
-                ]);
-                // form.setFocus(`data.${data.length - 1}.location`);
-              }}
-              className="inline-flex items-center gap-1 rounded-full bg-black/50 p-2 pr-4 text-sm font-medium text-white backdrop-blur-md hover:bg-neutral-600/60"
-            >
-              <PlusIcon className="size-4" />
-              Add another trip
-            </button>
+                </div>
+              </div>
+              <FiltersSection
+                form={form}
+                curTab={curTab}
+                isExpanded={isExpanded}
+              />
+              <div className="flex flex-col">
+                {/* <AirbnbLinkDialog parentForm={form} curTab={curTab} /> */}
+                <AirbnbLinkPopover parentForm={form} curTab={curTab} />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Have a property you are eyeing, input the Airbnb link here.
+                </p>
+              </div>
+            </div>
           )}
-        </div>
-
-        <div className="grid grid-cols-2 rounded-3xl bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-12">
-          <LPLocationInput
-            control={form.control}
-            name={`data.${curTab}.location`}
-            formLabel="Location"
-            className="col-span-full lg:col-span-3"
-          />
-
-          <LPDateRangePicker
-            control={form.control}
-            name={`data.${curTab}.date`}
-            formLabel="Check in/Check out"
-            className="col-span-full lg:col-span-3"
-          />
-
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.numGuests`}
-            render={({ field }) => (
-              <LPFormItem className="lg:col-span-3">
-                <LPFormLabel>Number of guests</LPFormLabel>
-                <FormControl>
-                  <LPInput
-                    {...field}
-                    inputMode="numeric"
-                    placeholder="Add total guests"
-                  />
-                </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.maxNightlyPriceUSD`}
-            render={({ field }) => (
-              <LPFormItem className="lg:col-span-3">
-                <LPFormLabel>Name your price</LPFormLabel>
-                <FormControl>
-                  <LPInput
-                    {...field}
-                    inputMode="decimal"
-                    prefix="$"
-                    suffix="/night"
-                    placeholder="Price/night"
-                  />
-                </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
-          />
-
-          <div className="col-span-full">
-            <FiltersSection form={form} curTab={curTab} />
-          </div>
-        </div>
-
-        {mode === "request" && (
-          <AirbnbLinkDialog parentForm={form} curTab={curTab} />
-        )}
-
-        <div className="flex justify-center">
-          <Button
-            disabled={form.formState.isSubmitting}
-            type="button"
-            onClick={form.handleSubmit((data) =>
-              checkPriceEstimation(data.data),
-            )}
-            size="lg"
-            variant="outlineLight"
-            className="mt-5 rounded-full font-semibold"
-          >
-            Request Deal
-          </Button>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -460,117 +515,95 @@ export default function DesktopSearchBar({
 function FiltersSection({
   form,
   curTab,
+  isExpanded,
 }: {
   form: ReturnType<typeof useForm<FormSchema>>;
   curTab: number;
+  isExpanded: boolean;
 }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   // DD is short for dropdown
   const [roomTypeDDIsOpen, setRoomTypeDDIsOpen] = useState(false);
 
   return (
-    <div>
-      {isExpanded && (
-        <div className="grid grid-cols-2 lg:grid-cols-5">
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.minNumBedrooms`}
-            render={({ field }) => (
-              <LPFormItem>
-                <LPFormLabel>Bedrooms</LPFormLabel>
+    isExpanded && (
+      <div className=" After the flow what elsex-3 grid max-w-fit grid-cols-2 grid-rows-1 justify-start lg:grid-cols-4  lg:justify-start">
+        <FormField
+          control={form.control}
+          name={`data.${curTab}.roomType`}
+          render={({ field }) => (
+            <LPFormItem className="col-span-1 border-none bg-white text-base">
+              <Select
+                onValueChange={field.onChange}
+                open={roomTypeDDIsOpen}
+                onOpenChange={setRoomTypeDDIsOpen}
+              >
                 <FormControl>
-                  <LPInput {...field} inputMode="numeric" suffix="or more" />
+                  <SelectTrigger className="rounded-xl border-2 border-border bg-white">
+                    <SelectValue
+                      className="SelectValue"
+                      placeholder="Type of place"
+                    />
+                    <SelectIcon>
+                      <ChevronDown className="h-4 w-4" />
+                    </SelectIcon>
+                  </SelectTrigger>
                 </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.minNumBeds`}
-            render={({ field }) => (
-              <LPFormItem>
-                <LPFormLabel>Beds</LPFormLabel>
-                <FormControl>
-                  <LPInput {...field} inputMode="numeric" suffix="or more" />
-                </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.roomType`}
-            render={({ field }) => (
-              <LPFormItem className="col-span-full lg:col-span-1">
-                <FormLabel
-                  className={classNames.buttonLabel({
-                    isFocused: roomTypeDDIsOpen,
-                  })}
-                >
-                  Room Type
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  open={roomTypeDDIsOpen}
-                  onOpenChange={setRoomTypeDDIsOpen}
-                >
+                <SelectContent className="bg-white">
+                  {ALL_PROPERTY_ROOM_TYPES.map((roomType) => (
+                    <SelectItem key={roomType} value={roomType}>
+                      {roomType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <LPFormMessage className="mt-2" />
+            </LPFormItem>
+          )}
+        />
+        {/* Beds Bathroom Bedrooms filter */}
+        <FormField
+          control={form.control}
+          name={`data.${curTab}.minNumBedrooms`}
+          render={({ field }) => (
+            <LPFormItem>
+              <FormControl>
+                <DesktopGuestsPicker name="numOfBeds" className="text-sm" />
+              </FormControl>
+              <LPFormMessage className="mt-2" />
+            </LPFormItem>
+          )}
+        />
+        {/* <FormField
+              control={form.control}
+              name={`data.${curTab}.minNumBeds`}
+              render={({ field }) => (
+                <LPFormItem>
+                  <LPFormLabel>Beds</LPFormLabel>
                   <FormControl>
-                    <SelectTrigger
-                      className={cn(
-                        classNames.button({
-                          isPlaceholder: field.value === "any",
-                          isFocused: roomTypeDDIsOpen,
-                        }),
-                        "text-base",
-                      )}
-                    >
-                      <SelectValue placeholder="" />
-                    </SelectTrigger>
+                    <LPInput {...field} inputMode="numeric" suffix="or more" />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="any">Any</SelectItem>
-                    {ALL_PROPERTY_ROOM_TYPES.map((roomType) => (
-                      <SelectItem key={roomType} value={roomType}>
-                        {roomType}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
-          />
+                  <LPFormMessage className="mt-2" />
+                </LPFormItem>
+              )}
+            /> */}
 
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.note`}
-            render={({ field }) => (
-              <LPFormItem className="col-span-2">
-                <LPFormLabel>Additional notes</LPFormLabel>
-                <FormControl>
-                  <LPInput
-                    {...field}
-                    placeholder="e.g. Pet friendly, close to the ocean"
-                  />
-                </FormControl>
-                <LPFormMessage />
-              </LPFormItem>
-            )}
-          />
-        </div>
-      )}
-      <div className="flex justify-center p-2">
-        <button
-          type="button"
-          onClick={() => setIsExpanded((prev) => !prev)}
-          className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white hover:bg-white/20"
-        >
-          {isExpanded ? "Hide filters" : "Add filters (optional)"}
-        </button>
+        <FormField
+          control={form.control}
+          name={`data.${curTab}.note`}
+          render={({ field }) => (
+            <LPFormItem className="relative z-20 col-span-2 h-11 rounded-lg border-2 border-border">
+              <FormControl>
+                <LPInput
+                  {...field}
+                  placeholder="Additional notes"
+                  className=" mt-[-3px] h-8 text-sm"
+                />
+              </FormControl>
+              <LPFormMessage className="z-10 mt-5" />
+            </LPFormItem>
+          )}
+        />
       </div>
-    </div>
+    )
   );
 }

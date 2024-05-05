@@ -31,8 +31,8 @@ export const groupMembers = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
   },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.groupId, vt.userId] }),
+  (t) => ({
+    compoundKey: primaryKey({ columns: [t.groupId, t.userId] }),
   }),
 );
 

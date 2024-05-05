@@ -48,7 +48,7 @@ export const adminNavLinks: SidebarLinkProps[] = [
     noChildren: false,
   },
   {
-    href: "/dashboard",
+    href: "/requests",
     name: "Switch To Guest",
     icon: ArrowLeftRight,
     noChildren: false,
@@ -89,10 +89,10 @@ export const hostNavLinks: SidebarLinkProps[] = [
   },
 ];
 export const guestNavLinks: SidebarLinkProps[] = [
-  { href: "/dashboard", name: "Home", icon: HomeIcon, noChildren: false },
+  { href: "/", name: "Home", icon: HomeIcon, noChildren: false },
   {
     href: "/requests",
-    name: "Requests & Offers",
+    name: "Requests & Offers",
     icon: TagIcon,
     noChildren: false,
   },

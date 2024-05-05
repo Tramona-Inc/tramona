@@ -31,7 +31,7 @@ export function getFmtdFilters(
     !withoutNote && filters.note,
   ].filter(Boolean);
 
-  return fmtdFiltersList.length === 0 ? undefined : fmtdFiltersList.join(" • ");
+  return fmtdFiltersList.length === 0 ? undefined : fmtdFiltersList.join(" · ");
 }
 
 export function getRequestStatus(request: {
@@ -56,7 +56,7 @@ export function formatPhoneNumber(phoneNumber: string) {
 export function getHomePageFromRole(role: User["role"]) {
   switch (role) {
     case "guest":
-      return "/dashboard";
+      return "/";
     case "host":
       return "/host";
     case "admin":

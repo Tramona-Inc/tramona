@@ -1,4 +1,7 @@
-import { type EmailTemplateProps, EmailTemplate } from "@/components/ambassador/EmailTemplate";
+import {
+  type EmailTemplateProps,
+  EmailTemplate,
+} from "@/components/ambassador/EmailTemplate";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -15,8 +18,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       to: ["info@tramona.com"],
       subject: "New Ambassador Program Application",
       text: "Applications",
-      react: EmailTemplate(bodyData)
-    })
+      react: EmailTemplate(bodyData),
+    });
 
     if (error) {
       return res.status(400).json(error);

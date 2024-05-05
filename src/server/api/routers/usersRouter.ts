@@ -1,3 +1,4 @@
+import * as bcrypt from "bcrypt";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -33,6 +34,18 @@ export const usersRouter = createTRPCRouter({
       role: res?.role ?? "guest",
       referralCodeUsed: res?.referralCodeUsed ?? null,
     };
+  }),
+
+  myVerificationStatus: protectedProcedure.query(async({ctx})=>{
+    const res = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns:{
+        isIdentityVerified: true,
+      },
+    })
+    return{
+      isIdentityVerified: res?.isIdentityVerified
+    }
   }),
 
   myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
@@ -208,4 +221,35 @@ export const usersRouter = createTRPCRouter({
       where: eq(hostProfiles.userId, ctx.user.id),
     });
   }),
+
+  checkCredentials: publicProcedure
+    .input(
+      z.object({
+        email: z.string(),
+        password: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { email, password } = input;
+
+      const user = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+
+      if (!user) {
+        return "email not found";
+      }
+
+      if (!user.password) {
+        return "incorrect credentials";
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return "incorrect password";
+      }
+
+      return "success";
+    }),
 });

@@ -9,12 +9,11 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import {
-  DialogContentLarge,
-  DialogLarge,
+  Dialog,
+  DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialogLarge";
+} from "@/components/ui/dialog"
 import { Form } from "@/components/ui/form";
-import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,7 +51,23 @@ function CarouselDots({ count, current }: { count: number; current: number }) {
   );
 }
 
-export default function HomeOfferCard({ property }: { property: Property }) {
+type PropertyCard = {
+  id: number;
+  imageUrls: string[];
+  name: string;
+  maxNumGuests: number;
+  numBathrooms: number | null;
+  numBedrooms: number;
+  numBeds: number;
+  originalNightlyPrice: number | null;
+  distance: unknown;
+};
+
+export default function HomeOfferCard({
+  property,
+}: {
+  property: PropertyCard;
+}) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -73,8 +88,8 @@ export default function HomeOfferCard({ property }: { property: Property }) {
   const formSchema = z
     .object({
       date: z.object({
-        from: z.date(),
-        to: z.date(),
+        from: z.coerce.date(),
+        to: z.coerce.date(),
       }),
     })
     .refine((data) => data.date.to > data.date.from, {
@@ -115,7 +130,6 @@ export default function HomeOfferCard({ property }: { property: Property }) {
                     height={300}
                     width={300}
                     alt=""
-                    objectFit="cover"
                     className="aspect-square w-full rounded-xl object-cover"
                   />
                 </Link>
@@ -159,8 +173,8 @@ export default function HomeOfferCard({ property }: { property: Property }) {
             className="col-span-full sm:col-span-1"
             propertyId={property.id}
           />
-          <DialogLarge open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="">
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
               <Button
                 type={"submit"}
                 className="w-full rounded-xl"
@@ -169,11 +183,11 @@ export default function HomeOfferCard({ property }: { property: Property }) {
                 Make Offer
               </Button>
             </DialogTrigger>
-            <DialogContentLarge className="relative sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
-              {step !== 0 && (
+            <DialogContent className=" flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
+              {step !==0 && (
                 <Button
                   variant={"ghost"}
-                  className={cn("absolute left-2 top-2 md:left-4 md:top-4")}
+                  className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
                   onClick={() => {
                     if (step - 1 > -1) {
                       setStep(step - 1);
@@ -183,9 +197,9 @@ export default function HomeOfferCard({ property }: { property: Property }) {
                   <ChevronLeft />
                 </Button>
               )}
-              <MakeBid property={property} />
-            </DialogContentLarge>
-          </DialogLarge>
+              <MakeBid propertyId={property.id} />
+            </DialogContent>
+          </Dialog>
         </form>
       </Form>
     </div>
