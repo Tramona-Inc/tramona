@@ -398,7 +398,7 @@ export default function DesktopSearchBar({
                   checkPriceEstimation(data.data),
                 )}
                 size="lg"
-                className=" rounded-lg py-8 font-semibold"
+                className="bg-[#004236] rounded-lg py-8 font-semibold"
               >
                 {mode === "search" ? "Search" : "Submit request"}
               </Button>

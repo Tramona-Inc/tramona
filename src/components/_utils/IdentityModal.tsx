@@ -2,10 +2,11 @@ import { api } from "@/utils/api";
 import { Button } from "../ui/button";
 import React, { useState, useEffect } from 'react';
 import { Stripe } from "@stripe/stripe-js";
-
+import { useSession } from "next-auth/react";
 
 const IdentityModal = ({ stripePromise } : {stripePromise: Promise<Stripe | null>}) => {
   const [stripe, setStripe] = useState<Stripe | null>(null);
+  const { update } = useSession();
 
   useEffect(() => {
     const fetchStripe = async () => {
@@ -37,6 +38,7 @@ const IdentityModal = ({ stripePromise } : {stripePromise: Promise<Stripe | null
       console.log('[error]', error);
     } else {
       console.log('Verification submitted!');
+      update();
     }
   };
 
