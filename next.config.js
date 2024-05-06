@@ -43,11 +43,6 @@ const config = {
         // pathname: "/im/pictures/**",
       },
       {
-        hostname: "localhost",
-        // port: "",
-        // pathname: "/im/pictures/**",
-      },
-      {
         protocol: "https",
         hostname: "trpc-test.s3.amazonaws.com",
       },
