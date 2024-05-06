@@ -217,7 +217,7 @@ importers:
         version: 0.0.1-security
       input-otp:
         specifier: ^1.2.0
-        version: 1.2.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 1.2.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
@@ -238,7 +238,7 @@ importers:
         version: 1.4.5-lts.1
       nanoid:
         specifier: ^5.0.6
-        version: 5.0.6
+        version: 5.0.7
       net:
         specifier: ^1.0.2
         version: 1.0.2
@@ -271,7 +271,7 @@ importers:
         version: 18.2.0
       react-day-picker:
         specifier: ^8.10.0
-        version: 8.10.0(date-fns@3.6.0)(react@18.2.0)
+        version: 8.10.1(date-fns@3.6.0)(react@18.2.0)
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
@@ -6546,8 +6546,8 @@ packages:
   input-format@0.3.10:
     resolution: {integrity: sha512-5cFv/kOZD7Ch0viprVkuYPDkAU7HBZYBx8QrIpQ6yXUWbAQ0+RQ8IIojDJOf/RO6FDJLL099HDSK2KoVZ2zevg==}
 
-  input-otp@1.2.3:
-    resolution: {integrity: sha512-pxYvgnihL9KAdpcShX2+iKctdMRbDs36bIqd8uIsN3e5vv9VjMv2bhO3S5Bl1PjcDPsA/OXZe5R71n8oVtucfQ==}
+  input-otp@1.2.4:
+    resolution: {integrity: sha512-md6rhmD+zmMnUh5crQNSQxq3keBRYvE3odbr4Qb9g2NWzQv9azi+t1a3X4TBTbh98fsGHgEEJlzbe1q860uGCA==}
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
@@ -7269,8 +7269,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.0.6:
-    resolution: {integrity: sha512-rRq0eMHoGZxlvaFOUdK1Ev83Bd1IgzzR+WJ3IbDJ7QOSdAxYjlurSPqFs9s4lJg29RT6nPwizFtJhQS6V5xgiA==}
+  nanoid@5.0.7:
+    resolution: {integrity: sha512-oLxFY2gd2IqnjcYyOXD8XGCftpGtZP2AbHbOkthDkvRywH5ayNtPVy9YlOPcHckXzbLTCHpkb7FB+yuxKV13pQ==}
     engines: {node: ^18 || >=20}
     hasBin: true
 
@@ -8139,8 +8139,8 @@ packages:
     peerDependencies:
       react: ^16.3.0 || ^17.0.1 || ^18.0.0
 
-  react-day-picker@8.10.0:
-    resolution: {integrity: sha512-mz+qeyrOM7++1NCb1ARXmkjMkzWVh2GL9YiPbRjKe0zHccvekk4HE+0MPOZOrosn8r8zTHIIeOUXTmXRqmkRmg==}
+  react-day-picker@8.10.1:
+    resolution: {integrity: sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==}
     peerDependencies:
       date-fns: ^2.28.0 || ^3.0.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -17891,7 +17891,7 @@ snapshots:
     dependencies:
       prop-types: 15.8.1
 
-  input-otp@1.2.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  input-otp@1.2.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -18578,7 +18578,7 @@ snapshots:
 
   nanoid@3.3.7: {}
 
-  nanoid@5.0.6: {}
+  nanoid@5.0.7: {}
 
   napi-build-utils@1.0.2: {}
 
@@ -19491,7 +19491,7 @@ snapshots:
       react: 18.2.0
       tween-functions: 1.2.0
 
-  react-day-picker@8.10.0(date-fns@3.6.0)(react@18.2.0):
+  react-day-picker@8.10.1(date-fns@3.6.0)(react@18.2.0):
     dependencies:
       date-fns: 3.6.0
       react: 18.2.0
