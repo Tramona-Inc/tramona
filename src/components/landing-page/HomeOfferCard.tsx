@@ -8,11 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
@@ -153,7 +149,7 @@ export default function HomeOfferCard({
         </p>
         <p>
           <span className="text-xs">Airbnb Price: </span>
-          {formatCurrency(property?.originalNightlyPrice ?? 0)}
+          {formatCurrency(property.originalNightlyPrice ?? 0)}
           <span className="text-xs">/night</span>
         </p>
       </div>
@@ -184,7 +180,7 @@ export default function HomeOfferCard({
               </Button>
             </DialogTrigger>
             <DialogContent className=" flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
-              {step !==0 && (
+              {step !== 0 && (
                 <Button
                   variant={"ghost"}
                   className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
