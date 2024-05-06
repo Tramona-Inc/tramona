@@ -31,7 +31,7 @@ export default function MastHead() {
         <hr className="block md:hidden h-px bg-gray-200 border-0"></hr>
         <p className="mt-5 text-center text-sm md:text-base text-gray-700">
           See a property you like? Make an offer and Tramona will create the deal for you.
-          Don't see a property you like? Request a deal.
+          Don&apos;t see a property you like? Request a deal.
         </p>
       </div>
     </section>

@@ -38,7 +38,7 @@ const IdentityModal = ({ stripePromise } : {stripePromise: Promise<Stripe | null
       console.log('[error]', error);
     } else {
       console.log('Verification submitted!');
-      update();
+      await update();
     }
   };
 
