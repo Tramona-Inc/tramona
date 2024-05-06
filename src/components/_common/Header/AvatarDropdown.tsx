@@ -8,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  LayoutDashboardIcon,
   LogOutIcon,
   UserCheck2Icon,
   UserCheckIcon,
@@ -23,7 +22,7 @@ import { useState } from "react";
 import CreateHostTeamDialog from "./CreateHostTeamDialog";
 import { usePathname } from "next/navigation";
 function DropdownTop({ session }: { session: Session }) {
-  const title = session.user.name ?? session.user.email ?? "Anonymous";
+  const title = session.user.name ?? session.user.email;
   const subtitle = session.user.name ? session.user.email : null;
 
   return (
@@ -54,7 +53,6 @@ export default function AvatarDropdown({ session }: { session: Session }) {
   const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
   const pathname = usePathname();
-  console.log(` this is the ${pathname}`);
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
   return (
@@ -82,7 +80,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuSeparator />
             </>
           )}
-          {session?.user.role === "host" && pathname === "/host" && (
+          {session.user.role === "host" && pathname === "/host" && (
             <>
               <HostTeamsDropdownItems
                 hostProfile={hostProfile}
