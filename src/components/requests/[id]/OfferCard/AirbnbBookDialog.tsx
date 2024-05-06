@@ -60,8 +60,6 @@ export default function AirbnbBookDialog(
   )} and I'd like to book it at that price.`;
 
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
-  const getSession = api.stripe.getStripeSession.useMutation();
-  const getSetupIntent = api.stripe.getSetUpIntent.useMutation();
   const createSetupCheckout = api.stripe.createSetupIntentSession.useMutation();
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
@@ -89,14 +87,6 @@ export default function AirbnbBookDialog(
     const stripe = await stripePromise;
 
     if (stripe !== null && response) {
-      const sesh = await getSession.mutateAsync({
-        sessionId: response.id,
-      });
-
-      const intent = await getSetupIntent.mutateAsync({
-        setupIntent: sesh.metadata.setupIntent as string,
-      });
-      console.log(intent);
       await stripe.redirectToCheckout({
         sessionId: response.id,
       });
