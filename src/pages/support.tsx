@@ -1,5 +1,6 @@
 // import ContactIcon from '@/components/icons/contact';
 // import EditIcon from '@/components/icons/large-edit-icon';
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,7 +20,6 @@ import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import MainLayout from "@/components/_common/Layout/MainLayout";
 
 const formSchema = z.object({
   name: zodString(),
@@ -122,7 +122,7 @@ function ContactForm() {
 
 export default function Page() {
   return (
-    <MainLayout>
+    <DashboardLayout type="guest">
     <div className="mx-auto max-w-3xl space-y-8 p-4 pb-32">
       <h1 className="pt-20 text-3xl font-bold">Get support</h1>
       <section className="space-y-4 rounded-xl border p-4 shadow-md">
@@ -158,6 +158,6 @@ export default function Page() {
         <ContactForm />
       </section>
     </div>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

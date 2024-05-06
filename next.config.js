@@ -96,9 +96,12 @@ const config = {
       },
       {
         protocol: "https",
-        hostname: "res.cloudinary.com"
+        hostname: "res.cloudinary.com",
       },
-
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
     ],
   },
   experimental: {

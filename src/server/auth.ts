@@ -57,6 +57,7 @@ export const authOptions: NextAuthOptions = {
           createdAt: token.createdAt,
           stripeCustomerId: token.stripeCustomerId,
           setupIntentId: token.setupIntentId,
+          isIdentityVerified: token.isIdentityVerified,
         },
       };
     },
@@ -82,6 +83,7 @@ export const authOptions: NextAuthOptions = {
         newToken.createdAt = user.createdAt;
         newToken.stripeCustomerId = user.stripeCustomerId;
         newToken.setupIntentId = user.setupIntentId;
+        newToken.isIdentityVerified = user.isIdentityVerified
       }
 
       return newToken;
