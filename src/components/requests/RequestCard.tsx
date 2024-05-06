@@ -98,19 +98,21 @@ export default function RequestCard({
               isAdminDashboard={isAdminDashboard}
             />
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <EllipsisIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem red onClick={() => setOpen(true)}>
-                <TrashIcon />
-                Withdraw
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {!isAdminDashboard && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <EllipsisIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem red onClick={() => setOpen(true)}>
+                  <TrashIcon />
+                  Withdraw
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         <div className="flex items-start gap-1">
           <MapPinIcon className="shrink-0 text-zinc-300" />
