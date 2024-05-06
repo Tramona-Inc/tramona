@@ -22,6 +22,7 @@ import { z } from "zod";
 import { Button } from "../ui/button";
 import MakeBid from "./bidding/MakeBid";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
+import { plural } from "@/utils/utils";
 
 function Dot({ isCurrent }: { isCurrent: boolean }) {
   return (
@@ -157,8 +158,12 @@ export default function HomeOfferCard({
         )}
       </div>
       <p className="text-xs">
-        {property.maxNumGuests} guests, {property.numBedrooms} bedrooms,{" "}
-        {property.numBeds} beds, {property.numBathrooms} baths
+        {plural(property.maxNumGuests, "guest")},{" "}
+        {plural(property.numBedrooms, "bedroom")},{" "}
+        {plural(property.numBeds, "bed")}
+        {property.numBathrooms && (
+          <>, {plural(property.numBathrooms, "bath")}</>
+        )}
       </p>
       <Form {...form}>
         <form
