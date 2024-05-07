@@ -24,12 +24,14 @@ function MakeBid({ propertyId }: { propertyId: number }) {
 
   const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
   const [message, setMessage] = useState("");
-  const { status, data: session } = useSession();
+  const { status, data: session, update } = useSession();
   const verificationStatus = session?.user.isIdentityVerified;
+  const [completed, setCompleted] = useState(false); // Flag to track if verification is completed
 
   useEffect(() => {
     switch (verificationStatus) {
       case "pending":
+        void update();
         setMessage(
           "Your identity verification is still pending. Please allow 2-3 minutes for processing. Contact support if this takes longer.",
         );
@@ -37,8 +39,16 @@ function MakeBid({ propertyId }: { propertyId: number }) {
       case "false":
         setMessage("To start making offers, help us verify your identity.");
         break;
+      case "true":
+        setMessage(""); // Reset message if verified
+        setCompleted(true); // Set completed to true
+        break;
     }
   }, [verificationStatus]);
+
+  // if (verificationStatus === "pending") {
+  //   void update();
+  // }
 
   if (verificationStatus === "false" || verificationStatus === "pending") {
     return (

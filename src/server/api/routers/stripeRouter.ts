@@ -390,4 +390,15 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   // TODO: create a PaymentIntent for admin/host to accept the bidding based of the user intent
+
+  getVerificationStatus: protectedProcedure.query(({ ctx, input }) => {
+    const result = ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        isIdentityVerified: true,
+      },
+    });
+
+    return result;
+  }),
 });
