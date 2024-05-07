@@ -8,7 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
@@ -154,7 +154,7 @@ export default function HomeOfferCard({
           <span className="text-xs">/night</span>
         </p>
       </div>
-      <p className="text-xs">
+      <p className="overflow-hidden text-ellipsis text-xs">
         {property.maxNumGuests} guests, {property.numBedrooms} bedrooms,{" "}
         {property.numBeds} beds, {property.numBathrooms} baths
       </p>
@@ -171,15 +171,26 @@ export default function HomeOfferCard({
             propertyId={property.id}
           />
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button
-                type={"submit"}
-                className="w-full rounded-xl"
-                disabled={!form.formState.isValid || alreadyBid}
-              >
-                {alreadyBid ? "Already Bid" : "Make Offer"}
-              </Button>
-            </DialogTrigger>
+            {/* Removed trigger to have control on open and close */}
+            <div>
+              {alreadyBid ? (
+                <Button
+                  type={"submit"}
+                  className={"w-full rounded-xl"}
+                  disabled={alreadyBid}
+                >
+                  Already Bid
+                </Button>
+              ) : (
+                <Button
+                  type={"submit"}
+                  className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
+                  // disabled={!form.formState.isValid}
+                >
+                  Make Offer
+                </Button>
+              )}
+            </div>
             <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
               <MakeBid propertyId={property.id} />
             </DialogContent>
