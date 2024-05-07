@@ -9,26 +9,33 @@ import {
   useVerification,
 } from "@/components/_utils/VerificationContext";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import MastHead from "./_sections/MastHead";
 
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
 
   return (
     <VerificationProvider>
-      <div className="relative mb-20 overflow-x-hidden bg-white pt-10">
+      <div className="mb-20 overflow-x-hidden bg-white">
         <Head>
           <title>Tramona</title>
         </Head>
         <VerificationBanner />
-        <div className="container">
+
+        {/* <div className="container">
           <SimpleMastHead />
         </div>
 
         <div className="py-5">
           <div className="border-[1px]" />
+        </div> */}
+
+        <div>
+          <MastHead />
         </div>
 
-        <div className="container flex flex-col space-y-5 bg-white">
+
+        <div className="md:mt-72 container flex flex-col space-y-5 bg-white">
           <CitiesFilter />
           <Listings />
         </div>
