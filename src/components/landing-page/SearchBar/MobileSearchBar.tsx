@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/sheet";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-
+import { Separator } from "@/components/ui/separator";
 import { z } from "zod";
 import { optional, zodInteger, zodString } from "@/utils/zod-utils";
 import {
@@ -16,14 +16,16 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  AirbnbLinkPopover,
   MobileDateRangePicker,
   MobileGuestsPicker,
   MobileLocationInput,
+  MobilePriceInput,
 } from "./components";
 import { useState } from "react";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
-import { PlusIcon, XIcon } from "lucide-react";
+import { PlusIcon, XIcon, SearchIcon } from "lucide-react";
 
 function SearchTab() {
   const formSchema = z
@@ -64,42 +66,52 @@ function SearchTab() {
 
   return (
     <Form {...form}>
-      <form className="flex h-full flex-col justify-between">
-        <div className="grid gap-3">
-          <MobileLocationInput
-            control={form.control}
-            name="location"
-            formLabel="Location"
-            className="col-span-full"
-          />
+      <form className="flex  flex-col justify-between">
+        <div className="flex flex-col">
+          <div className="grid gap-2">
+            <MobileLocationInput
+              control={form.control}
+              name="location"
+              formLabel="Location"
+              className="col-span-full"
+            />
 
-          <MobileDateRangePicker
-            control={form.control}
-            name="date"
-            formLabel="Select dates"
-            className="col-span-full"
-          />
+            <MobileDateRangePicker
+              control={form.control}
+              name="date"
+              formLabel="Select dates"
+              className="col-span-full"
+            />
 
-          <MobileGuestsPicker
-            control={form.control}
-            name="numGuests"
-            formLabel="Add guests"
-            className="col-span-full"
-          />
-        </div>
+            <MobileGuestsPicker
+              control={form.control}
+              name="numGuests"
+              formLabel="Add guests"
+              className="col-span-full"
+            />
 
-        <div className="flex justify-between">
-          <Button type="reset" variant="ghost">
-            Clear all
-          </Button>
+            <MobilePriceInput
+              control={form.control}
+              name="maxNightlyPriceUSD"
+              formLabel="Price Range"
+              className="col-span-full"
+            />
+          </div>
+          <Separator className="my-4" />
+          <div className="flex justify-between ">
+            <Button type="reset" variant="ghost">
+              Clear all
+            </Button>
 
-          <Button
-            type="submit"
-            variant="default"
-            // onClick={form.handleSubmit((data) => onSubmit(data))}
-          >
-            Search
-          </Button>
+            <Button
+              type="submit"
+              variant="default"
+              // onClick={form.handleSubmit((data) => onSubmit(data))}
+              className=""
+            >
+              Submit request
+            </Button>
+          </div>
         </div>
       </form>
     </Form>
@@ -165,9 +177,15 @@ function RequestDealTab() {
     <Form {...form}>
       <form
         // onSubmit={form.handleSubmit((data) => onSubmit(data.data))}
-        className="space-y-2"
+        className="flex flex-col justify-between gap-y-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
+        <div className="my-3  items-center text-xs text-[#004236]">
+          Instead of just seeing listed prices, requesting a deal lets you set
+          your budget, and we&apos;ll match you with hosts who have properties
+          in the city and accept your price. This way, you can find the perfect
+          place to stay within your means!
+        </div>
         <div className="flex flex-wrap gap-1">
           {Array.from({ length: numTabs }).map((_, i) => {
             const isSelected = curTab === i;
@@ -238,6 +256,61 @@ function RequestDealTab() {
             </button>
           )}
         </div>
+
+        <Form {...form}>
+          <form className="flex  flex-col justify-between">
+            <div className="flex flex-col">
+              <div className="grid gap-1">
+                <MobileLocationInput
+                  control={form.control}
+                  name={`data.${curTab}.location`}
+                  formLabel="Location"
+                  className="col-span-full"
+                />
+
+                <MobileDateRangePicker
+                  control={form.control}
+                  name={`data.${curTab}.date`}
+                  formLabel="Select dates"
+                  className="col-span-full"
+                />
+
+                <MobileGuestsPicker
+                  control={form.control}
+                  name={`data.${curTab}.numGuests`}
+                  formLabel="Add guests"
+                  className="col-span-full"
+                />
+
+                <MobilePriceInput
+                  control={form.control}
+                  name={`data.${curTab}.maxNightlyPriceUSD`}
+                  formLabel="Price Range"
+                  className="col-span-full"
+                />
+              </div>
+              {/* <AirbnbLinkPopover /> */}
+              <p className="mt-1 text-xs text-muted-foreground">
+                Have a property you are eyeing, input the Airbnb link here.
+              </p>
+              <Separator className="my-4" />
+              <div className="flex justify-between ">
+                <Button type="reset" variant="ghost">
+                  Clear all
+                </Button>
+
+                <Button
+                  type="submit"
+                  variant="default"
+                  // onClick={form.handleSubmit((data) => onSubmit(data))}
+                  className=""
+                >
+                  Submit request
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
       </form>
     </Form>
   );
@@ -248,10 +321,15 @@ export default function MobileSearchBar() {
 
   return (
     <Sheet>
-      <SheetTrigger>Open</SheetTrigger>
-      <SheetContent side="bottom" className="h-full">
+      <SheetTrigger>
+        <div className="fixed top-16 z-40 flex w-5/6 flex-row gap-x-3 rounded-full border-2 border-border bg-white px-3 py-5 text-center font-semibold text-muted-foreground shadow-lg">
+          <SearchIcon />
+          Name your price or submit an offer
+        </div>
+      </SheetTrigger>
+      <SheetContent side="top" className="h-full">
         <SheetHeader>
-          <div className="flex w-full items-center justify-center gap-2 pb-5">
+          <div className="flex h-full w-full items-center justify-center gap-2 pb-5">
             <Button
               variant="link"
               className={cn(mode === "search" && "underline")}

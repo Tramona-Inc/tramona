@@ -6,6 +6,7 @@ import {
   Fence,
   Handshake,
   HistoryIcon,
+  HomeIcon,
   InboxIcon,
   LayoutDashboardIcon,
   MessageCircleIcon,
@@ -22,9 +23,14 @@ export const adminNavLinks = [
     icon: InboxIcon,
   },
   { href: "/admin/past-requests", name: "Past Requests", icon: HistoryIcon },
+  {
+    href: "/admin/incoming-property-offers",
+    name: "Incoming Property Offers",
+    icon: HomeIcon,
+  },
   { href: "/admin/utility", name: "Utility", icon: WrenchIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/dashboard", name: "Switch To Guest", icon: ArrowLeftRight },
+  { href: "/requests", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
 export const hostMobileNavLinks = [
