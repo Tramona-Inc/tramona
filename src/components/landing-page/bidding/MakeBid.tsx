@@ -32,17 +32,17 @@ function MakeBid({ propertyId }: { propertyId: number }) {
     switch (verificationStatus) {
       case "pending":
         void update();
-        setMessage(
-          "Your identity verification is still pending. Please allow 2-3 minutes for processing. Contact support if this takes longer.",
-        );
+        // setMessage(
+        //   "Your identity verification is still pending. Please allow 2-3 minutes for processing. Contact support if this takes longer.",
+        // );
         break;
       case "false":
         setMessage("To start making offers, help us verify your identity.");
         break;
-      case "true":
-        setMessage(""); // Reset message if verified
-        setCompleted(true); // Set completed to true
-        break;
+      // case "true":
+      //   setMessage(""); // Reset message if verified
+      //   setCompleted(true); // Set completed to true
+      //   break;
     }
   }, [verificationStatus]);
 
@@ -50,7 +50,8 @@ function MakeBid({ propertyId }: { propertyId: number }) {
   //   void update();
   // }
 
-  if (verificationStatus === "false" || verificationStatus === "pending") {
+  // if (verificationStatus === "false" || verificationStatus === "pending") {
+  if (verificationStatus === "false") {
     return (
       <>
         <div className="flex flex-col items-center">
@@ -72,9 +73,7 @@ function MakeBid({ propertyId }: { propertyId: number }) {
           </div>
 
           <hr className="mx-auto my-4 h-px w-[90%] border-0 bg-gray-300 md:my-10"></hr>
-          {verificationStatus == "false" && (
-            <IdentityModal stripePromise={stripePromise} />
-          )}
+          <IdentityModal stripePromise={stripePromise} />
         </div>
       </>
     );

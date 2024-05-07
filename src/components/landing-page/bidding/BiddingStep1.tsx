@@ -154,7 +154,7 @@ function BiddingStep1({ property }: { property: Property }) {
                 )}
               />
             </div>
-            {users?.isIdentityVerified === "pending" ? (
+            {/* {users?.isIdentityVerified === "pending" ? (
               <div className="flex flex-col items-center">
                 <p className=" mb-1 text-xs text-muted-foreground">
                   Verification takes about 1-3 minutes.
@@ -169,7 +169,8 @@ function BiddingStep1({ property }: { property: Property }) {
                   </Button>
                 </div>
               </div>
-            ) : users?.isIdentityVerified === "true" ? (
+            ) :  */}
+            { users?.isIdentityVerified === "true" ? (
               <Button className="mb-1 px-32" type="submit">
                 Review offer
               </Button>
