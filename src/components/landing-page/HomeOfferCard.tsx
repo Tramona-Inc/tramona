@@ -110,6 +110,10 @@ export default function HomeOfferCard({
     setDate(values.date.from, values.date.to);
   }
 
+  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+
+  const alreadyBid = propertyIdBids.includes(property.id);
+
   return (
     <div className="space-y-2">
       <Carousel setApi={setApi}>
@@ -171,9 +175,9 @@ export default function HomeOfferCard({
               <Button
                 type={"submit"}
                 className="w-full rounded-xl"
-                disabled={!form.formState.isValid}
+                disabled={!form.formState.isValid || alreadyBid}
               >
-                Make Offer
+               {alreadyBid ? "Already Bid" : "Make Offer"}
               </Button>
             </DialogTrigger>
             <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">

@@ -84,13 +84,13 @@ function BiddingInfoCard({ property }: { property: Property }) {
 }
 
 function BiddingStep2({ property }: { property: Property }) {
+
+  const addPropertyIdBids = useBidding((state) => state.addPropertyIdBids);
+
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
-    onSuccess: (data) => {
-      if (data?.result.result === "error") {
-        setError("true");
-      } else {
-        setStep(step + 1);
-      }
+    onSuccess: () => {
+      addPropertyIdBids(property.id);
+      setStep(step + 1);
     },
     onError: (error) => {
       console.log("error", error.message);
