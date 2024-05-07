@@ -5,12 +5,12 @@ import { useVerification, VerificationProvider } from "./VerificationContext";
 import { api } from "@/utils/api";
 import { ZodUndefined } from "zod";
 import { useSession } from 'next-auth/react';
+import { useStripe } from '@/utils/stripe-client';
 
-const IdentityModal = ({
-  stripePromise,
-}: {
-  stripePromise: Promise<Stripe | null>;
-}) => {
+const IdentityModal = () => {
+  const stripePromise = useStripe();
+
+
   const [stripe, setStripe] = useState<Stripe | null>(null);
   const { setVerificationStatus, setShowVerificationBanner } =
     useVerification();

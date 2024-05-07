@@ -1,4 +1,3 @@
-import IdentityModal from "@/components/_utils/IdentityModal";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,12 +10,11 @@ import { Input } from "@/components/ui/input";
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
-import { useStripe } from "@/utils/stripe-client";
 import { formatCurrency } from "@/utils/utils";
 import { zodNumber } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -48,8 +46,6 @@ function BiddingStep1({ property }: { property: Property }) {
       guest: guest,
     },
   });
-
-  const stripePromise = useStripe();
 
   async function onSubmit(values: FormSchema) {
     setPrice(values.price);
@@ -169,8 +165,7 @@ function BiddingStep1({ property }: { property: Property }) {
                   </Button>
                 </div>
               </div>
-            ) :  */}
-            { users?.isIdentityVerified === "true" ? (
+            ) : users?.isIdentityVerified === "true" ? (
               <Button className="mb-1 px-32" type="submit">
                 Review offer
               </Button>
@@ -181,7 +176,10 @@ function BiddingStep1({ property }: { property: Property }) {
                 </p>
                 <IdentityModal stripePromise={stripePromise} />
               </div>
-            )}
+            )} */}
+            <Button className="mb-1 px-32" type="submit">
+              Review offer
+            </Button>
           </form>
         </Form>
 

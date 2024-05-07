@@ -73,7 +73,7 @@ function MakeBid({ propertyId }: { propertyId: number }) {
           </div>
 
           <hr className="mx-auto my-4 h-px w-[90%] border-0 bg-gray-300 md:my-10"></hr>
-          <IdentityModal stripePromise={stripePromise} />
+          <IdentityModal />
         </div>
       </>
     );
