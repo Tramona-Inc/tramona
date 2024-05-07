@@ -1,4 +1,4 @@
-import { formatCurrency, getNumNights } from "@/utils/utils";
+import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -18,10 +18,12 @@ import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 
 const formSchema = z.object({
-  date: z.object({
-    from: z.date(),
-    to: z.date(),
-  }),
+  date: z
+    .object({
+      from: z.date(),
+      to: z.date(),
+    })
+    .optional(),
   numGuests: zodInteger({ min: 1 }),
 });
 
@@ -39,21 +41,18 @@ export default function BiddingForm({
     defaultValues: {},
   });
 
-  const { watch } = form;
-
-  const totalNightlyPrice =
-    price *
-    getNumNights(
-      watch("date.from") ?? new Date(),
-      watch("date.to") ?? new Date(),
-    );
+  const formValues = form.watch();
+  const numNights = formValues.date
+    ? getNumNights(formValues.date.from, formValues.date.to)
+    : 0;
+  const totalNightlyPrice = price * numNights;
 
   async function onSubmit(data: FormSchema) {
     let url: string | null = null;
   }
 
   return (
-    <Card className="">
+    <Card>
       <h2 className="flex items-center text-3xl font-semibold">
         {formatCurrency(price)}
         <span className="ml-2 py-0 text-sm font-normal text-gray-500">
@@ -70,7 +69,7 @@ export default function BiddingForm({
             control={form.control}
             name="date"
             formLabel=""
-            className="col-span-full rounded-3xl sm:col-span-1"
+            className="rounded-full"
             propertyId={propertyId}
           />
 
@@ -78,12 +77,12 @@ export default function BiddingForm({
             control={form.control}
             name="numGuests"
             render={({ field }) => (
-              <FormItem className="col-span-full">
+              <FormItem>
                 <FormControl>
                   <Input
                     {...field}
                     autoFocus
-                    className="rounded-3xl"
+                    className="rounded-full"
                     suffix={"Guests"}
                     placeholder="Guests"
                   />
@@ -97,19 +96,14 @@ export default function BiddingForm({
 
       <div className="flex flex-row justify-between">
         <p>
-          {formatCurrency(price)} x{" "}
-          {getNumNights(
-            watch("date.from") ?? new Date(),
-            watch("date.to") ?? new Date(),
-          )}{" "}
-          nights
+          {formatCurrency(price)} &times; {plural(numNights, "night")}
         </p>
-        <p>{formatCurrency(totalNightlyPrice ?? 0)} </p>
+        <p>{formatCurrency(totalNightlyPrice)}</p>
       </div>
 
       <Separator />
 
-      <Button className="rounded-3xl">Make Offer</Button>
+      <Button className="rounded-full">Make Offer</Button>
     </Card>
   );
 }

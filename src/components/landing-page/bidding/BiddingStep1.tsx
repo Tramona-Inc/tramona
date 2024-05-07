@@ -13,7 +13,7 @@ import { formatCurrency } from "@/utils/utils";
 import { zodNumber } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { ArrowRight, Loader } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -23,6 +23,7 @@ import IdentityModal from "@/components/_utils/IdentityModal";
 import { env } from "@/env";
 import { loadStripe } from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 
 const formSchema = z.object({
   price: zodNumber({ min: 1 }),
@@ -47,8 +48,8 @@ function BiddingStep1({ property }: { property: Property }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      price: price ?? undefined,
-      guest: guest ?? undefined,
+      price,
+      guest,
     },
   });
 
@@ -82,12 +83,18 @@ function BiddingStep1({ property }: { property: Property }) {
       <h2 className="mt-2 text-lg font-semibold">{property.name}</h2>
       <p className="my-3 text-sm">
         Airbnb&apos;s Price:{" "}
-        {property.originalNightlyPrice ? formatCurrency(property?.originalNightlyPrice * 1.13868 ) : "Prices unavailable"}
+        {property.originalNightlyPrice
+          ? formatCurrency(property.originalNightlyPrice * AVG_AIRBNB_MARKUP)
+          : "Prices unavailable"}
         /night
       </p>
-      <div className="border-2 border-dashed border-accent px-7 md:px-24 py-2">
+      <div className="border-2 border-dashed border-accent px-7 py-2 md:px-24">
         {/* Change this to reccomended price */}
-        <p>{property.originalNightlyPrice ? formatCurrency(property?.originalNightlyPrice) : "Estimate unavailable"}</p>
+        <p>
+          {property.originalNightlyPrice
+            ? formatCurrency(property.originalNightlyPrice)
+            : "Estimate unavailable"}
+        </p>
       </div>
       <p className="my-2 text-sm">Recommended Price</p>
       <div className=" flex w-5/6 flex-row text-accent">
@@ -133,16 +140,19 @@ function BiddingStep1({ property }: { property: Property }) {
               />
             </div>
             {users?.isIdentityVerified === "pending" ? (
-               <div className="flex flex-col items-center">
-               <p className=" text-xs text-muted-foreground mb-1">
-                 Verification takes about 1-3 minutes.
-               </p>
-               <div className="flex-row gap-x-1">
-              <Button className=" items-center flex flex-row justify-center" disabled>
-                Verification Pending
-                 <Loader2 className="animate-spin"/>
-              </Button>
-               </div>
+              <div className="flex flex-col items-center">
+                <p className=" mb-1 text-xs text-muted-foreground">
+                  Verification takes about 1-3 minutes.
+                </p>
+                <div className="flex-row gap-x-1">
+                  <Button
+                    className=" flex flex-row items-center justify-center"
+                    disabled
+                  >
+                    Verification Pending
+                    <Loader2 className="animate-spin" />
+                  </Button>
+                </div>
               </div>
             ) : users?.isIdentityVerified === "true" ? (
               <Button className="mb-1 px-32" type="submit">
@@ -150,7 +160,7 @@ function BiddingStep1({ property }: { property: Property }) {
               </Button>
             ) : (
               <div className="flex flex-col items-center">
-                <p className=" text-xs text-muted-foreground mb-1">
+                <p className=" mb-1 text-xs text-muted-foreground">
                   You must be verified before submitting an offer.
                 </p>
                 <IdentityModal stripePromise={stripePromise} />

@@ -12,12 +12,6 @@ export default function NavLink({
   noChildren?: boolean;
 }) {
   const { asPath } = useRouter();
-  const isCurrentPage =
-  noChildren && href === "/"
-    ? asPath === href
-    : asPath === href || asPath.startsWith(`${href}/`);
-
-
-
+  const isCurrentPage = noChildren ? asPath === href : asPath.startsWith(href);
   return <Link href={href}>{render({ selected: isCurrentPage })}</Link>;
 }
