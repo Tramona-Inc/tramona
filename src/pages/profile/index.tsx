@@ -18,8 +18,8 @@ export default function Page() {
       <Head>
         <title>Profile | Tramona</title>
       </Head>
-      {/* <ProfilePage /> */}
-      <ReferralDashboard />
+      <ProfilePage />
+      {/* <ReferralDashboard /> */}
 
       {/* <div className="flex min-h-screen-minus-header">
         <ProfileSidebar />

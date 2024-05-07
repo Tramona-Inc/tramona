@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import HomeOfferCard from "../landing-page/HomeOfferCard";
 
 export default function ProfilePage() {
-  const properties = [
+  const givenProperties = [
     {
       id: 1,
       imageUrls: [
@@ -117,6 +117,93 @@ export default function ProfilePage() {
       numBeds: 2,
       originalNightlyPrice: 15000,
       distance: "24 miles",
+    },
+  ];
+  const receivedProperties = [
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+      ],
+      name: "Entire Villa in Temecula, California",
+      maxNumGuests: 4,
+      numBathrooms: 6,
+      numBedrooms: 3,
+      numBeds: 6,
+      originalNightlyPrice: 23000,
+      distance: "48 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+      ],
+      name: "Entire Villa in Temecula, California",
+      maxNumGuests: 4,
+      numBathrooms: 6,
+      numBedrooms: 3,
+      numBeds: 6,
+      originalNightlyPrice: 23000,
+      distance: "48 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+      ],
+      name: "Entire Villa in Temecula, California",
+      maxNumGuests: 4,
+      numBathrooms: 6,
+      numBedrooms: 3,
+      numBeds: 6,
+      originalNightlyPrice: 23000,
+      distance: "48 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+      ],
+      name: "Entire Villa in Temecula, California",
+      maxNumGuests: 4,
+      numBathrooms: 6,
+      numBedrooms: 3,
+      numBeds: 6,
+      originalNightlyPrice: 23000,
+      distance: "48 miles",
+    },
+    {
+      id: 1,
+      imageUrls: [
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
+      ],
+      name: "Entire Villa in Temecula, California",
+      maxNumGuests: 4,
+      numBathrooms: 6,
+      numBedrooms: 3,
+      numBeds: 6,
+      originalNightlyPrice: 23000,
+      distance: "48 miles",
     },
   ];
 
@@ -171,7 +258,7 @@ export default function ProfilePage() {
           />
           <Button
             size="icon"
-            className="absolute left-32 top-2 rounded-full bg-primary/20 lg:hidden"
+            className="absolute left-28 top-0 rounded-full bg-primary/20 lg:hidden"
           >
             <Camera />
           </Button>
@@ -190,10 +277,6 @@ export default function ProfilePage() {
               <Edit />
               Edit Profile
             </Button>
-            <Button className="w-1/2 bg-zinc-200 text-primary hover:bg-zinc-300 lg:w-auto">
-              <Share />
-              Share
-            </Button>
           </div>
         </div>
       </section>
@@ -210,68 +293,83 @@ export default function ProfilePage() {
       <section className="space-y-5 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-bold">Bucket List</h2>
-          <div className="hidden items-center gap-4 lg:flex">
-            <p className="font-bold">
-              Your Bucket List link: Tramona.com/AaronSoukaphay
-            </p>
-            <Button className="rounded-full bg-teal-900">Copy</Button>
-            <Button className="bg-teal-900 font-bold">
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              className="hidden font-bold text-teal-800 lg:flex"
+            >
               <Share />
               Share
             </Button>
+            <Button variant="ghost" className=" font-bold text-teal-800">
+              <Plus />
+              Add
+            </Button>
           </div>
-          <Button variant="ghost" className=" font-bold text-teal-900">
-            <Plus />
-            Add
-          </Button>
         </div>
-        <Tabs defaultValue="properties" className="space-y-5">
-          <TabsList
-            noBorder
-            className="items-center divide-x-2 divide-primary text-center lg:divide-x-4"
-          >
-            <div className="basis-1/2 lg:basis-auto lg:space-x-2 lg:pe-4">
-              <TabsTrigger
-                value="properties"
-                className="rounded-full border aria-[selected=true]:bg-teal-800/50"
-              >
-                Properties
-              </TabsTrigger>
-              <TabsTrigger
-                value="destinations"
-                className="rounded-full border aria-[selected=true]:bg-teal-800/50"
-              >
-                Destinations
-              </TabsTrigger>
-            </div>
-            <div className="basis-1/2 lg:basis-auto lg:space-x-2 lg:ps-4">
-              <TabsTrigger
-                value="bucketListGiven"
-                className="rounded-full border aria-[selected=true]:bg-teal-800/50"
-              >
-                Bucket List Given
-              </TabsTrigger>
-              <TabsTrigger
-                value="bucketListReceived"
-                className="rounded-full border aria-[selected=true]:bg-teal-800/50"
-              >
-                Bucket List Received
-              </TabsTrigger>
-            </div>
+        <Tabs defaultValue="properties" className="space-y-4">
+          <TabsList>
+            <TabsTrigger
+              value="properties"
+              className="font-bold data-[state=active]:border-teal-800 data-[state=active]:text-teal-800"
+            >
+              Properties
+            </TabsTrigger>
+            <TabsTrigger
+              value="destinations"
+              className="font-bold data-[state=active]:border-teal-800 data-[state=active]:text-teal-800"
+            >
+              Destinations
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="properties">
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {properties.map((property, i) => (
-                <div key={i} className="relative">
-                  <HomeOfferCard property={property} />
-                  <div className="absolute right-2 top-2">
-                    <Button className="rounded-full" variant="secondary">
-                      Added to bucket list
-                    </Button>
-                  </div>
+            <Tabs defaultValue="given" className="space-y-4">
+              <TabsList noBorder className="space-x-2">
+                <TabsTrigger
+                  value="given"
+                  className="rounded-full border-2 font-bold data-[state=active]:border-teal-800 data-[state=active]:bg-muted"
+                >
+                  Given
+                </TabsTrigger>
+                <TabsTrigger
+                  value="received"
+                  className="rounded-full border-2 font-bold data-[state=active]:border-teal-800 data-[state=active]:bg-muted"
+                >
+                  Received
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="given">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
+                  {givenProperties.map((property, i) => (
+                    <div key={i} className="relative">
+                      <HomeOfferCard property={property} />
+                      <div className="absolute right-2 top-2">
+                        <Button variant="secondary" className="rounded-full">
+                          Added to bucket list
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </TabsContent>
+              <TabsContent value="received">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
+                  {receivedProperties.map((property, i) => (
+                    <div key={i} className="relative">
+                      <HomeOfferCard property={property} />
+                      <div className="absolute right-2 top-2">
+                        <Button
+                          className="h-10 w-10 rounded-full p-0"
+                          variant="secondary"
+                        >
+                          <Bookmark />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
           <TabsContent value="destinations">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
