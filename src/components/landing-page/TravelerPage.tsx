@@ -8,7 +8,7 @@ import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import Head from "next/head";
 import { useEffect } from "react";
 import Listings from "./_sections/Listings";
-import SimpleMastHead from "./_sections/SimpleMastHead";
+import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
 import CitiesFilter from "./CitiesFilter";
 
@@ -38,15 +38,20 @@ export default function TravelerPage() {
           <title>Tramona</title>
         </Head>
         <VerificationBanner />
-        <div className="container">
+
+        {/* <div className="container">
           <SimpleMastHead />
         </div>
 
         <div className="py-5">
           <div className="border-[1px]" />
+        </div> */}
+
+        <div>
+          <MastHead />
         </div>
 
-        <div className="container flex flex-col space-y-5 bg-white">
+        <div className="container flex flex-col space-y-5 bg-white md:mt-72">
           <CitiesFilter />
           <Listings />
         </div>

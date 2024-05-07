@@ -338,7 +338,7 @@ export default function DesktopSearchBar({
               className="h-[66px] rounded-lg border-2 border-border pr-2 lg:pr-9 2xl:pr-36"
             />
 
-            <div className=" z-20 flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-4">
+            <div className=" z-20 flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-5">
               <UsersRoundIcon className="z-20 mr-[-23px] mt-4 h-5 w-5" />
               <div className=" z-10 flex flex-row items-center 2xl:mr-20">
                 <FormField
@@ -346,7 +346,7 @@ export default function DesktopSearchBar({
                   name={`data.${curTab}.numGuests`}
                   render={({ field }) => (
                     <LPFormItem className=" z-10">
-                      <LPFormLabel className="z-20 mb-10 ml-[-32px] mt-[-7px] whitespace-nowrap text-xs xl:text-sm">
+                      <LPFormLabel className="z-20 mb-10 ml-[-32px] mt-[-5px] whitespace-nowrap text-sm md:text-xs md:font-bold">
                         Number of guests
                       </LPFormLabel>
                       <FormControl>
@@ -364,7 +364,7 @@ export default function DesktopSearchBar({
               </div>
             </div>
 
-            <div className=" flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-2">
+            <div className=" flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-4">
               <DollarSignIcon className="z-50 mr-[-23px] mt-4 h-5 w-5" />
               <div className="z-10 flex flex-row items-center 2xl:mr-20">
                 <FormField
@@ -372,7 +372,7 @@ export default function DesktopSearchBar({
                   name={`data.${curTab}.maxNightlyPriceUSD`}
                   render={({ field }) => (
                     <LPFormItem className=" z-10">
-                      <LPFormLabel className="z-20 ml-[-28px] mt-[-7px] text-sm ">
+                      <LPFormLabel className="z-20 ml-[-28px] mt-[-5px] text-sm md:text-xs md:font-bold">
                         Price range
                       </LPFormLabel>
                       <FormControl>

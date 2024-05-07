@@ -1,10 +1,13 @@
 import Image from "next/image";
-import SearchBar from "../SearchBar/SearchBar";
+import SearchBar, { DesktopSearchLayout, MobileSearchLayout } from "../SearchBar/SearchBar";
+import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 
 export default function MastHead() {
+  const isMobile = useMediaQuery("(max-width: 640px)");
+
   return (
-    <section className="relative flex md:min-h-screen flex-col bg-white">
-      <div className="relative w-full">
+    <section className="relative flex flex-col bg-white">
+      <div className="w-full">
         <Image
           src="/assets/images/landing-page/main.png"
           alt="Main Background"
@@ -12,26 +15,31 @@ export default function MastHead() {
           height={0}
           sizes="100vw"
           priority
-          className="h-[250px] w-full object-cover md:h-auto md:w-full"
+          className="h-[370px] md:h-[450px] w-full object-cover md:w-full"
         />
       </div>
 
-      <div className="md:absolute left-0 right-0 z-10 px-8 pt-8 top-10 md:top-10">
-        <h1 className="text-center text-3xl font-bold text-gray-900 md:text-5xl">
+      <div className="absolute mx-auto max-w-4xl left-0 right-0 z-10 px-5 md:px-8 pt-24 -top-12 md:top-10">
+        <h1 className="mx-auto max-w-2xl text-center text-3xl font-extrabold text-gray-900 md:text-5xl md:leading-tight">
           The first perfectly efficient travel marketplace
         </h1>
-        <p className="mt-2 text-center text-lg text-gray-700 md:text-xl">
+        <p className="mt-8 text-center text-base md:text-lg text-gray-900 font-semibold">
           Shop the same properties you see on Airbnb, without the fees and
           Airbnb markup price
         </p>
+        {isMobile && (
+          <div className="mt-10 mx-auto w-full">
+            <MobileSearchLayout />
+          </div>
+        )}
       </div>
 
-      <div className="mt-0 w-full px-8 mb-20 md:absolute md:-bottom-10 md:z-10 md:mt-40">
-        <SearchBar />
-        <hr className="block md:hidden h-px bg-gray-200 border-0"></hr>
-        <p className="mt-5 text-center text-sm md:text-base text-gray-700">
+      <div className="mt-0 w-full px-8 mb-10 md:mb-20 md:absolute md:top-60 md:z-10 md:mt-40">
+        {!isMobile && <DesktopSearchLayout />}
+        {/* <hr className="block md:hidden h-px bg-gray-200 border-0"></hr> */}
+        <p className="mt-14 mx-auto max-w-3xl text-center text-sm md:text-xl md:leading-8 text-gray-800">
           See a property you like? Make an offer and Tramona will create the deal for you.
-          Don&apos;t see a property you like? Request a deal.
+          <br></br>Don&apos;t see a property you like? Request a deal.
         </p>
       </div>
     </section>
