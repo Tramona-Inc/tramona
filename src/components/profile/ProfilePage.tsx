@@ -29,46 +29,50 @@ import Link from "next/link";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import CopyToClipboardBtn from "../_utils/CopyToClipboardBtn";
 import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import DateRangePicker from "../_common/DateRangePicker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import PlacesInput from "../_common/PlacesInput";
+import { zodString } from "@/utils/zod-utils";
+import { Form } from "../ui/form";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
   const user = session?.user;
 
-  const { data, isLoading } = api.users.myReferralCode.useQuery();
+  const { data } = api.users.myReferralCode.useQuery();
 
   const code =
     user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
   const url = `https://tramona.com/auth/signup?code=${code}`;
 
-  const formSchema = z.object({
-    destination: z.string(),
-    dates: z.string(),
-  });
+  const formSchema = z
+    .object({
+      destination: zodString(),
+      dates: z.object({
+        from: z.coerce.date(),
+        to: z.coerce.date(),
+      }),
+    })
+    .refine((data) => data.dates.to > data.dates.from, {
+      message: "Must stay for at least 1 night",
+      path: ["dates"],
+    });
 
   type FormSchema = z.infer<typeof formSchema>;
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      destination: "New York City, NY, USA",
-      dates: "January 1-7, 2023",
-    },
   });
 
   const givenProperties = [
@@ -452,7 +456,8 @@ export default function ProfilePage() {
                   </DialogTitle>
                 </DialogHeader>
                 <div className="h-60 space-y-2">
-                  {/* <Form {...form}>
+                  {/* TODO: Add form submit function */}
+                  <Form {...form}>
                     <form>
                       <PlacesInput
                         control={form.control}
@@ -467,7 +472,7 @@ export default function ProfilePage() {
                         className="col-span-full sm:col-span-1"
                       />
                     </form>
-                  </Form> */}
+                  </Form>
                 </div>
                 <DialogFooter className="border-t-2 pt-4">
                   <Button className="w-full bg-teal-900">Done</Button>
