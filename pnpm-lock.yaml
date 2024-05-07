@@ -205,7 +205,7 @@ importers:
         version: 0.5.1(drizzle-orm@0.30.10(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.11.5)(postgres@3.4.4)(react@18.2.0))(zod@3.22.4)
       embla-carousel-autoplay:
         specifier: 8.0.4
-        version: 8.0.4(embla-carousel@8.0.0)
+        version: 8.0.4(embla-carousel@8.0.4)
       embla-carousel-react:
         specifier: 8.0.0
         version: 8.0.0(react@18.2.0)
@@ -299,9 +299,6 @@ importers:
       resend:
         specifier: ^3.1.0
         version: 3.2.0
-      solid:
-        specifier: link:@heroicons/react/solid
-        version: link:@heroicons/react/solid
       stripe:
         specifier: ^14.23.0
         version: 14.23.0
@@ -418,8 +415,8 @@ importers:
         specifier: ^0.20.17
         version: 0.20.17
       embla-carousel:
-        specifier: 8.0.0
-        version: 8.0.0
+        specifier: 8.0.4
+        version: 8.0.4
       eslint:
         specifier: ^8.56.0
         version: 8.57.0
@@ -5635,6 +5632,9 @@ packages:
 
   embla-carousel@8.0.0:
     resolution: {integrity: sha512-ecixcyqS6oKD2nh5Nj5MObcgoSILWNI/GtBxkidn5ytFaCCmwVHo2SecksaQZHcARMMpIR2dWOlSIdA1LkZFUA==}
+
+  embla-carousel@8.0.4:
+    resolution: {integrity: sha512-INndmilrV9KY4Wnb4F2tI55DuQnFjf3GPOaPDT2LGYiKhIWVNUhv1nz/RI7CZ6WoIZ8MYHP4t6Qm/cqpcGHknA==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -16539,9 +16539,9 @@ snapshots:
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
 
-  embla-carousel-autoplay@8.0.4(embla-carousel@8.0.0):
+  embla-carousel-autoplay@8.0.4(embla-carousel@8.0.4):
     dependencies:
-      embla-carousel: 8.0.0
+      embla-carousel: 8.0.4
 
   embla-carousel-react@8.0.0(react@18.2.0):
     dependencies:
@@ -16554,6 +16554,8 @@ snapshots:
       embla-carousel: 8.0.0
 
   embla-carousel@8.0.0: {}
+
+  embla-carousel@8.0.4: {}
 
   emoji-regex@8.0.0: {}
 
