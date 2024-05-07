@@ -177,7 +177,7 @@ export default function HomeOfferCard({
                 className="w-full rounded-xl"
                 disabled={!form.formState.isValid || alreadyBid}
               >
-               {alreadyBid ? "Already Bid" : "Make Offer"}
+                {alreadyBid ? "Already Bid" : "Make Offer"}
               </Button>
             </DialogTrigger>
             <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">

@@ -1,11 +1,9 @@
 import Spinner from "@/components/_common/Spinner";
 import IdentityModal from "@/components/_utils/IdentityModal";
 import { Button } from "@/components/ui/button";
-import { env } from "@/env";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import { cn } from "@/utils/utils";
-import { loadStripe } from "@stripe/stripe-js";
 import { ChevronLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -22,11 +20,9 @@ function MakeBid({ propertyId }: { propertyId: number }) {
   const step = useBidding((state) => state.step);
   const setStep = useBidding((state) => state.setStep);
 
-  const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
   const [message, setMessage] = useState("");
   const { status, data: session, update } = useSession();
   const verificationStatus = session?.user.isIdentityVerified;
-  const [completed, setCompleted] = useState(false); // Flag to track if verification is completed
 
   useEffect(() => {
     switch (verificationStatus) {

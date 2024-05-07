@@ -15,7 +15,10 @@ import CitiesFilter from "./CitiesFilter";
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
 
-  const { data, error } = api.biddings.getAllPropertyBids.useQuery();
+  const { data, error } = api.biddings.getAllPropertyBids.useQuery(undefined, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+  });
 
   const setInitialBids = useBidding((state) => state.setInitialBids);
   const propertyIdBids = useBidding((state) => state.propertyIdBids);
