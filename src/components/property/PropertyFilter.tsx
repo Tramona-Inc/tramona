@@ -33,8 +33,9 @@ export function Total({
       <div className="grid max-w-[150px] grid-cols-3 place-items-center">
         <Button
           variant="ghost"
-          className="text-md "
           size={"icon"}
+          className="rounded-full"
+          disabled={total === 0}
           onClick={(e) => {
             e.preventDefault(); // Prevent form submission
             if (total - 1 > -1) {
@@ -47,8 +48,8 @@ export function Total({
         <div className="font-semibold">{total}</div>
         <Button
           variant="ghost"
-          className="text-md"
           size={"icon"}
+          className="rounded-full"
           onClick={(e) => {
             e.preventDefault(); // Prevent form submission
             setTotal(total + 1);
