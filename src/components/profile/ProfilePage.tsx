@@ -1,10 +1,16 @@
 import {
   Bookmark,
+  Calendar,
   Camera,
   Edit,
   Ellipsis,
   Facebook,
   Instagram,
+  Mail,
+  MapPin,
+  MessageCircle,
+  MessageCircleMore,
+  MessagesSquare,
   Plus,
   Share,
   Twitter,
@@ -13,8 +19,58 @@ import {
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import HomeOfferCard from "../landing-page/HomeOfferCard";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import CopyToClipboardBtn from "../_utils/CopyToClipboardBtn";
+import { useSession } from "next-auth/react";
+import { api } from "@/utils/api";
+import { Form, useForm } from "react-hook-form";
+import DateRangePicker from "../_common/DateRangePicker";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import PlacesInput from "../_common/PlacesInput";
 
 export default function ProfilePage() {
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  const { data, isLoading } = api.users.myReferralCode.useQuery();
+
+  const code =
+    user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
+  const url = `https://tramona.com/auth/signup?code=${code}`;
+
+  const formSchema = z.object({
+    destination: z.string(),
+    dates: z.string(),
+  });
+
+  type FormSchema = z.infer<typeof formSchema>;
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      destination: "New York City, NY, USA",
+      dates: "January 1-7, 2023",
+    },
+  });
+
   const givenProperties = [
     {
       id: 1,
@@ -206,7 +262,6 @@ export default function ProfilePage() {
       distance: "48 miles",
     },
   ];
-
   const destinations = [
     {
       city: "New York City, NY, USA",
@@ -231,6 +286,36 @@ export default function ProfilePage() {
     {
       city: "New York City, NY, USA",
       date: "July 14-28",
+    },
+  ];
+  const socials = [
+    {
+      name: "Twitter",
+      icon: <Twitter />,
+    },
+    {
+      name: "Email",
+      icon: <Mail />,
+    },
+    {
+      name: "Messages",
+      icon: <MessagesSquare />,
+    },
+    {
+      name: "WhatsApp",
+      icon: <MessageCircle />,
+    },
+    {
+      name: "Messenger",
+      icon: <MessageCircleMore />,
+    },
+    {
+      name: "Facebook",
+      icon: <Facebook />,
+    },
+    {
+      name: "More Options",
+      icon: <Ellipsis />,
     },
   ];
 
@@ -294,30 +379,114 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between">
           <h2 className="font-bold">Bucket List</h2>
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              className="hidden font-bold text-teal-800 lg:flex"
-            >
-              <Share />
-              Share
-            </Button>
-            <Button variant="ghost" className=" font-bold text-teal-800">
-              <Plus />
-              Add
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="hidden font-bold text-teal-900 lg:flex"
+                >
+                  <Share />
+                  Share
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader className="border-b-2 pb-4">
+                  <DialogTitle>
+                    <h2 className="text-center">Share</h2>
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold">Your link</h2>
+                  <div className="flex gap-2">
+                    <div className="basis-5/6">
+                      <Input value={url} className="text-base" disabled />
+                    </div>
+                    <CopyToClipboardBtn
+                      message={url}
+                      render={({ justCopied, copyMessage }) => (
+                        <Button
+                          onClick={copyMessage}
+                          className="w-full bg-teal-900 px-6 lg:w-auto"
+                        >
+                          {justCopied ? "Copied!" : "Copy"}
+                        </Button>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {socials.map((social, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 rounded-lg border-2 p-4"
+                      >
+                        {social.icon}
+                        <p className="font-semibold">{social.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="font-bold text-teal-900">
+                    <Plus />
+                    Add
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <Link href="/">
+                    <DropdownMenuItem>Property</DropdownMenuItem>
+                  </Link>
+                  <DialogTrigger asChild>
+                    <DropdownMenuItem>Destination</DropdownMenuItem>
+                  </DialogTrigger>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DialogContent>
+                <DialogHeader className="border-b-2 pb-4">
+                  <DialogTitle className="text-center font-bold">
+                    Add to bucket list
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="h-60 space-y-2">
+                  {/* <Form {...form}>
+                    <form>
+                      <PlacesInput
+                        control={form.control}
+                        name="destination"
+                        formLabel="Destination"
+                        className="col-span-full sm:col-span-1"
+                      />
+                      <DateRangePicker
+                        control={form.control}
+                        name="dates"
+                        formLabel="Dates"
+                        className="col-span-full sm:col-span-1"
+                      />
+                    </form>
+                  </Form> */}
+                </div>
+                <DialogFooter className="border-t-2 pt-4">
+                  <Button className="w-full bg-teal-900">Done</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <Tabs defaultValue="properties" className="space-y-4">
           <TabsList>
             <TabsTrigger
               value="properties"
-              className="font-bold data-[state=active]:border-teal-800 data-[state=active]:text-teal-800"
+              className="font-bold data-[state=active]:border-teal-900 data-[state=active]:text-teal-900"
             >
               Properties
             </TabsTrigger>
             <TabsTrigger
               value="destinations"
-              className="font-bold data-[state=active]:border-teal-800 data-[state=active]:text-teal-800"
+              className="font-bold data-[state=active]:border-teal-900 data-[state=active]:text-teal-900"
             >
               Destinations
             </TabsTrigger>
@@ -327,13 +496,13 @@ export default function ProfilePage() {
               <TabsList noBorder className="space-x-2">
                 <TabsTrigger
                   value="given"
-                  className="rounded-full border-2 font-bold data-[state=active]:border-teal-800 data-[state=active]:bg-muted"
+                  className="rounded-full border-2 font-bold data-[state=active]:border-teal-900 data-[state=active]:bg-muted"
                 >
                   Given
                 </TabsTrigger>
                 <TabsTrigger
                   value="received"
-                  className="rounded-full border-2 font-bold data-[state=active]:border-teal-800 data-[state=active]:bg-muted"
+                  className="rounded-full border-2 font-bold data-[state=active]:border-teal-900 data-[state=active]:bg-muted"
                 >
                   Received
                 </TabsTrigger>
