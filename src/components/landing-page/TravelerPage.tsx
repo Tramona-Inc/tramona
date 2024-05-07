@@ -38,7 +38,7 @@ export default function TravelerPage() {
   const bannerType = session?.user?.isIdentityVerified;
 
   return (
-    <div className="relative mb-20 overflow-x-hidden bg-white">
+    <div className="mb-20 overflow-x-hidden bg-white">
       <Head>
         <title>Tramona</title>
       </Head>
@@ -51,10 +51,10 @@ export default function TravelerPage() {
       <div>
         <MastHead />
       </div>
-      <div className="py-5">
+      {/* <div className="py-5">
         <div className="border-[1px]" />
-      </div>
-      <div className="container flex flex-col space-y-5 bg-white">
+      </div> */}
+      <div className="md:mt-72 container flex flex-col space-y-5 bg-white">
         <CitiesFilter />
         <Listings />
         {/* ! For testing purposes */}
