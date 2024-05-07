@@ -35,20 +35,44 @@ export const biddingRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
     .mutation(async ({ ctx, input }) => {
-      const madeByGroupId = await ctx.db
-        .insert(groups)
-        .values({ ownerId: ctx.user.id })
-        .returning()
-        .then((res) => res[0]!.id);
-
-      await ctx.db.insert(groupMembers).values({
-        userId: ctx.user.id,
-        groupId: madeByGroupId,
+      // Check if already exists
+      const bidExist = await ctx.db.query.bids.findMany({
+        where: exists(
+          ctx.db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.groupId, bids.madeByGroupId),
+                eq(groupMembers.userId, ctx.user.id),
+                eq(bids.propertyId, input.propertyId),
+              ),
+            ),
+        ),
+        columns: {
+          propertyId: true,
+        },
       });
 
-      await ctx.db
-        .insert(bids)
-        .values({ ...input, madeByGroupId: madeByGroupId });
+      if (bidExist.length > 0) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+      else {
+        const madeByGroupId = await ctx.db
+          .insert(groups)
+          .values({ ownerId: ctx.user.id })
+          .returning()
+          .then((res) => res[0]!.id);
+
+        await ctx.db.insert(groupMembers).values({
+          userId: ctx.user.id,
+          groupId: madeByGroupId,
+        });
+
+        await ctx.db
+          .insert(bids)
+          .values({ ...input, madeByGroupId: madeByGroupId });
+      }
     }),
 
   update: protectedProcedure
