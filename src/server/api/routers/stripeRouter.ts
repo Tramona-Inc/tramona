@@ -125,43 +125,74 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   // Get the customer info
-  createSetupIntentSession: protectedProcedure.mutation(async ({ ctx }) => {
-    let stripeCustomerId = await ctx.db.query.users
-      .findFirst({
-        columns: {
-          stripeCustomerId: true,
-        },
-        where: eq(users.id, ctx.user.id),
-      })
-      .then((res) => res?.stripeCustomerId);
-
-    // Create a customer id if it doesn't exist
-    if (!stripeCustomerId) {
-      stripeCustomerId = await stripe.customers
-        .create({
-          name: ctx.user.name ?? "",
-          email: ctx.user.email,
+  createSetupIntentSession: protectedProcedure
+    .input(
+      z.object({
+        listingId: z.number(),
+        propertyId: z.number(),
+        requestId: z.number(),
+        price: z.number(),
+        cancelUrl: z.string(),
+        name: z.string(),
+        description: z.string(),
+        // images: z.array(z.string().url()),
+        phoneNumber: z.string(),
+        totalSavings: z.number(),
+        // hostId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
         })
-        .then((res) => res.id);
+        .then((res) => res?.stripeCustomerId);
 
-      await ctx.db
-        .update(users)
-        .set({ stripeCustomerId })
-        .where(eq(users.id, ctx.user.id));
-    }
+      // ! UNCOMMENT FOR TESTING PURPOSES
+      if (!stripeCustomerId) {
+        stripeCustomerId = await stripe.customers
+          .create({
+            name: ctx.user.name ?? "",
+            email: ctx.user.email,
+          })
+          .then((res) => res.id);
+      }
 
-    if (stripeCustomerId) {
-      const options: Stripe.SetupIntentCreateParams = {
-        automatic_payment_methods: {
-          enabled: true,
-        },
-        customer: stripeCustomerId,
+      // const stripeCustomerId = "cus_PwwCgSdIG3rWNx";
+
+      const currentDate = new Date(); // Get the current date and time
+
+      // Object that can be access through webhook and client
+      const metadata = {
+        user_id: ctx.user.id,
+        listing_id: input.listingId,
+        property_id: input.propertyId,
+        request_id: input.requestId,
+        price: input.price,
+        total_savings: input.totalSavings,
+        confirmed_at: currentDate.toISOString(),
+        phone_number: input.phoneNumber,
+        // host_id: input.hostId,
       };
 
-      const response = await stripe.setupIntents.create(options);
-      return response;
-    }
-  }),
+      if (stripeCustomerId) {
+        return stripe.checkout.sessions.create({
+          ui_mode: "embedded",
+          mode: "setup",
+          payment_method_types: ["card"],
+          currency: "usd",
+          // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
+          // cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
+          // return_url: `${env.NEXTAUTH_URL}/payment-intent`,
+          redirect_on_completion: "never",
+          metadata: metadata, // metadata access for checkout session
+          customer: stripeCustomerId,
+        });
+      }
+    }),
 
   createSetupIntent: protectedProcedure
     .input(

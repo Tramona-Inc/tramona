@@ -20,13 +20,15 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import MakeBid from "./bidding/MakeBid";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
+import { plural } from "@/utils/utils";
 
 function Dot({ isCurrent }: { isCurrent: boolean }) {
   return (
     <div
       className={cn(
-        "h-3 w-3 rounded-full border border-white",
-        isCurrent ? "h-4 w-4 bg-white" : "bg-transparent",
+        "rounded-full border border-white",
+        isCurrent ? "h-4 w-4 bg-white" : "h-3 w-3 bg-transparent",
       )}
     ></div>
   );
@@ -148,15 +150,21 @@ export default function HomeOfferCard({
         <p className="max-w-full overflow-hidden text-ellipsis text-nowrap font-semibold">
           {property.name}
         </p>
-        <p>
-          <span className="text-xs">Airbnb Price: </span>
-          {formatCurrency(property.originalNightlyPrice ?? 0)}
-          <span className="text-xs">/night</span>
-        </p>
+        {property.originalNightlyPrice && (
+          <p>
+            <span className="text-xs">Airbnb Price: </span>
+            {formatCurrency(AVG_AIRBNB_MARKUP * property.originalNightlyPrice)}
+            <span className="text-xs">/night</span>
+          </p>
+        )}
       </div>
-      <p className="overflow-hidden text-ellipsis text-xs">
-        {property.maxNumGuests} guests, {property.numBedrooms} bedrooms,{" "}
-        {property.numBeds} beds, {property.numBathrooms} baths
+      <p className="text-xs">
+        {plural(property.maxNumGuests, "guest")},{" "}
+        {plural(property.numBedrooms, "bedroom")},{" "}
+        {plural(property.numBeds, "bed")}
+        {property.numBathrooms && (
+          <>, {plural(property.numBathrooms, "bath")}</>
+        )}
       </p>
       <Form {...form}>
         <form

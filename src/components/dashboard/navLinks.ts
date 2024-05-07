@@ -4,7 +4,6 @@ import {
   Handshake,
   FenceIcon,
   HistoryIcon,
-  InboxIcon,
   LayoutDashboardIcon,
   MessageCircleIcon,
   TagIcon,
@@ -12,6 +11,7 @@ import {
   HomeIcon,
   Users2Icon,
   UploadIcon,
+  MapPinIcon,
 } from "lucide-react";
 import SuitcaseIcon from "../_icons/SuitcaseIcon";
 import { type SidebarLinkProps } from "./SidebarLink";
@@ -25,8 +25,14 @@ export const adminNavLinks: SidebarLinkProps[] = [
   },
   {
     href: "/admin/incoming-requests",
-    name: "Incoming Requests",
-    icon: InboxIcon,
+    name: "Incoming City Requests",
+    icon: MapPinIcon,
+    noChildren: false,
+  },
+  {
+    href: "/admin/incoming-property-offers",
+    name: "Incoming Property Offers",
+    icon: HomeIcon,
     noChildren: false,
   },
   {
@@ -48,15 +54,15 @@ export const adminNavLinks: SidebarLinkProps[] = [
     noChildren: false,
   },
   {
-    href: "/requests",
-    name: "Switch To Guest",
-    icon: ArrowLeftRight,
-    noChildren: false,
-  },
-  {
     href: "/admin/property-upload",
     name: "Property Upload",
     icon: UploadIcon,
+    noChildren: false,
+  },
+  {
+    href: "/requests",
+    name: "Switch To Guest",
+    icon: ArrowLeftRight,
     noChildren: false,
   },
 ];
@@ -89,7 +95,7 @@ export const hostNavLinks: SidebarLinkProps[] = [
   },
 ];
 export const guestNavLinks: SidebarLinkProps[] = [
-  { href: "/", name: "Home", icon: HomeIcon, noChildren: false },
+  { href: "/", name: "Home", icon: HomeIcon, noChildren: true },
   {
     href: "/requests",
     name: "Requests & Offers",

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
-import { useStripe } from "@/utils/stripe-client";
 import {
   cn,
   formatCurrency,
@@ -17,6 +16,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
+import { useStripe } from '@/utils/stripe-client';
 
 export default function AirbnbBookDialog(
   props: React.PropsWithChildren<{

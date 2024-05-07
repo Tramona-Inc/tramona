@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency } from "@/utils/utils";
 import { zodNumber } from "@/utils/zod-utils";
@@ -90,7 +91,7 @@ function BiddingStep1({ property }: { property: Property }) {
       <p className="my-3 text-sm">
         Airbnb&apos;s Price:{" "}
         {property.originalNightlyPrice
-          ? formatCurrency(property.originalNightlyPrice * 1.13868)
+          ? formatCurrency(property.originalNightlyPrice * AVG_AIRBNB_MARKUP)
           : "Prices unavailable"}
         /night
       </p>
