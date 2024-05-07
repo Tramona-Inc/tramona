@@ -1,17 +1,32 @@
-import React from "react";
-import Head from "next/head";
-import Listings from "./_sections/Listings";
-import SimpleMastHead from "./_sections/SimpleMastHead";
-import CitiesFilter from "./CitiesFilter";
-import Banner from "./Banner";
 import {
   VerificationProvider,
   useVerification,
 } from "@/components/_utils/VerificationContext";
+import { api } from "@/utils/api";
+import { useBidding } from "@/utils/store/bidding";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import Head from "next/head";
+import { useEffect } from "react";
+import Listings from "./_sections/Listings";
+import SimpleMastHead from "./_sections/SimpleMastHead";
+import Banner from "./Banner";
+import CitiesFilter from "./CitiesFilter";
 
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
+
+  const { data, error } = api.biddings.getAllPropertyBids.useQuery();
+
+  const setInitialBids = useBidding((state) => state.setInitialBids);
+  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+
+  useEffect(() => {
+    if (!error) {
+      setInitialBids(data ?? []);
+    }
+  }, [data, error, setInitialBids]);
+
+  console.log("Initial", propertyIdBids);
 
   return (
     <VerificationProvider>

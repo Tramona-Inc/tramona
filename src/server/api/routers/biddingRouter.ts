@@ -35,19 +35,6 @@ export const biddingRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
     .mutation(async ({ ctx, input }) => {
-      console.log("CREATING");
-      console.log("CREATING 1");
-      // Check if bid already exist with user and property id
-      const exists = await ctx.db.query.bids.findFirst({
-        where: and(eq(bids.propertyId, input.propertyId)),
-      });
-
-      console.log("CREATING 2");
-
-      if (exists) {
-        new TRPCError({ code: "BAD_REQUEST" });
-      }
-
       const madeByGroupId = await ctx.db
         .insert(groups)
         .values({ ownerId: ctx.user.id })
@@ -147,4 +134,25 @@ export const biddingRouter = createTRPCRouter({
         .set({ resolvedAt: new Date() })
         .where(eq(bids.id, input.bidId));
     }),
+
+  getAllPropertyBids: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db.query.bids.findMany({
+      where: exists(
+        ctx.db
+          .select()
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, bids.madeByGroupId),
+              eq(groupMembers.userId, ctx.user.id),
+            ),
+          ),
+      ),
+      columns: {
+        propertyId: true,
+      },
+    });
+
+    return result.map((res) => res.propertyId);
+  }),
 });

@@ -146,7 +146,7 @@ export default function HomeOfferCard({
         </p>
         <p>
           <span className="text-xs">Airbnb Price: </span>
-          {formatCurrency(property?.originalNightlyPrice ?? 0)}
+          {formatCurrency(property.originalNightlyPrice ?? 0)}
           <span className="text-xs">/night</span>
         </p>
       </div>

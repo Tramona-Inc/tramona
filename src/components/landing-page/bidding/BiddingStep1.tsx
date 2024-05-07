@@ -28,7 +28,6 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 function BiddingStep1({ property }: { property: Property }) {
-  const step = useBidding((state) => state.step);
   const setStep = useBidding((state) => state.setStep);
 
   const setPrice = useBidding((state) => state.setPrice);
@@ -48,14 +47,16 @@ function BiddingStep1({ property }: { property: Property }) {
   });
 
   async function onSubmit(values: FormSchema) {
+    console.log("click");
+
     setPrice(values.price);
     setGuest(values.guest);
 
     setStep(1);
 
-    if (users?.isIdentityVerified === "true") {
-      setStep(1);
-    }
+    // if (users?.isIdentityVerified === "true") {
+    //   setStep(1);
+    // }
   }
 
   const threshhold = 1.2;
