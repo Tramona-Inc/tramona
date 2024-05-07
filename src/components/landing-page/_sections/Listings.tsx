@@ -66,7 +66,7 @@ export default function Listings() {
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <>
-          {([...Array(18)] as undefined[]).map((_, i) => (
+          {(new Array(18) as undefined[]).map((_, i) => (
             <div key={i} className="">
               <Skeleton className="h-[250px] w-[230px] rounded-xl" />
               <div className="ml-2 mt-2 flex  flex-col space-y-2">
