@@ -1,12 +1,57 @@
+import NavLink from "../_utils/NavLink";
+
 import { api } from "@/utils/api";
-import { plural } from "@/utils/utils";
-import { ArrowLeftRight } from "lucide-react";
+import { cn, plural } from "@/utils/utils";
+import {
+  ArrowLeftRight,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
-import { adminNavLinks, hostNavLinks, guestNavLinks } from "./navLinks";
-import { SidebarLink } from "./SidebarLink";
+import { adminNavLinks, guestNavLinks, hostNavLinks } from '@/config/sideNavLinks';
+
+function SidebarLink({
+  href,
+  children,
+  icon: Icon,
+}: {
+  href: string;
+  children: React.ReactNode;
+  icon: React.FC<{ className?: string }>;
+}) {
+  return (
+    <NavLink
+      href={href}
+      render={({ selected }) => (
+        <div
+          className={cn(
+            "relative flex transform items-center gap-4 p-4 text-center font-medium transition-all hover:translate-x-1 lg:flex-col lg:gap-1 lg:px-2 lg:py-3 lg:text-xs",
+            selected ? "text-[#2F5BF6]" : "text-[#5B616D",
+          )}
+        >
+          {/* {selected && (
+            <motion.div
+              layoutId="sidebar-indicator"
+              transition={{ duration: 0.1, ease: "circOut" }}
+              className="absolute inset-y-0 right-0 border-[3px] border-transparent border-r-black"
+            />
+          )} */}
+
+          <Icon
+            className={cn(
+              "size-6 lg:size-8",
+              selected ? "text-[#2F5BF6]" : "text-[#5B616D]",
+            )}
+          />
+
+          {children}
+        </div>
+      )}
+    />
+  );
+}
+
 
 export default function Sidebar({
   type,
@@ -28,12 +73,7 @@ export default function Sidebar({
         : isAdmin
           ? [
               ...guestNavLinks,
-              {
-                href: "/admin",
-                name: "Switch To Admin",
-                icon: ArrowLeftRight,
-                noChildren: false,
-              },
+              { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
           : guestNavLinks;
 
@@ -70,15 +110,12 @@ export default function Sidebar({
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col pt-8">
+      <div className="flex flex-1 flex-col justify-center gap-5">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
-            <SidebarLink
-              href={link.href}
-              icon={link.icon}
-              name={link.name}
-              noChildren={link.noChildren}
-            />
+            <SidebarLink href={link.href} icon={link.icon}>
+              {link.name}
+            </SidebarLink>
             {totalUnreadMessages !== undefined &&
               totalUnreadMessages > 0 &&
               link.name === "Messages" && (
@@ -101,3 +138,4 @@ export default function Sidebar({
     </div>
   );
 }
+
