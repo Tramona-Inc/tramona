@@ -1,25 +1,64 @@
 import CardSelect from "@/components/_common/CardSelect";
 import AssistedListing from "@/components/_icons/AssistedListing";
 import ManuallyAdd from "@/components/_icons/ManuallyAdd";
+import { useRouter } from "next/router";
 import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
+import { on } from "events";
+import { useState } from "react";
+import { Dialog } from "@/components/ui/dialog";
 
-const items = [
-  {
-    id: "1",
-    icon: <ManuallyAdd />,
-    title: "Manually Add",
-    text: "Complete a simple step-by-step process to add your property information",
-  },
-  {
-    id: "2",
-    icon: <AssistedListing />,
-    title: "Assisted Listing",
-    text: "Have the Tramona onboarding team set up my account.",
-  },
-];
+export default function Onboarding1({
+  onPressNext,
+}: {
+  onPressNext: () => void;
+}) {
+  const router = useRouter();
 
-export default function Onboarding1() {
+  const [showModal, setShowModal] = useState(false);
+
+  const openModal = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  const items = [
+    {
+      id: "1",
+      icon: <ManuallyAdd />,
+      title: "Manually Add",
+      text: "Complete a simple step-by-step process to add your property information",
+      onClick: onPressNext,
+    },
+    {
+      id: "2",
+      icon: <AssistedListing />,
+      title: "Assisted Listing",
+      text: "Have the Tramona onboarding team set up my account.",
+      onClick: openModal,
+    },
+  ];
+
+  const handleCalendlyLink = () => {
+    <iframe
+      title="Calendly Scheduler"
+      src="http://calendly.com/tramona"
+      style={{
+        width: "100%",
+        height: "800px",
+        border: "0",
+      }}
+    ></iframe>;
+    // Handle the Calendly link here
+    // Close the modal
+    closeModal();
+    // Navigate to "/host" route
+    void router.push("/host");
+  };
+
   return (
     <>
       <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-2">
@@ -41,7 +80,12 @@ export default function Onboarding1() {
 
           <div className="flex flex-col gap-10">
             {items.map((item) => (
-              <CardSelect key={item.title} title={item.title} text={item.text}>
+              <CardSelect
+                key={item.title}
+                title={item.title}
+                text={item.text}
+                onClick={item.onClick}
+              >
                 {item.icon}
               </CardSelect>
             ))}
@@ -50,6 +94,13 @@ export default function Onboarding1() {
       </div>
 
       <OnboardingFooter isForm={false} />
+      <Dialog open={showModal} onClose={closeModal}>
+        <div className="flex flex-col items-center justify-center">
+          <p>Click the button below to schedule a meeting:</p>
+          {/* Button to open the Calendly link */}
+          <button onClick={handleCalendlyLink}>Schedule Meeting</button>
+        </div>
+      </Dialog>
     </>
   );
 }

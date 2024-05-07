@@ -13,10 +13,15 @@ import OnboardingLayout from "../../components/host/onboarding/layout";
 
 export default function Onboarding() {
   const progress = useHostOnboarding((state) => state.progress);
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+
+  function onPressNext() {
+    setProgress(progress + 1);
+  }
 
   return (
     <OnboardingLayout>
-      {progress === 0 && <Onboarding1 />}
+      {progress === 0 && <Onboarding1 onPressNext={onPressNext}/>}
       {progress === 1 && <Onboarding2 />}
       {progress === 2 && <Onboarding3 />}
       {progress === 3 && <Onboarding4 />}
