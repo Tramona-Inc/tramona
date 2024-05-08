@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useState } from "react";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
 import {
@@ -11,9 +11,9 @@ import {
 import { type Property } from "@/server/db/schema";
 import { api, type RouterOutputs } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
-import UserAvatar from "@/components/_common/UserAvatar";
 import "leaflet/dist/leaflet.css";
 import {
+  ArrowLeftIcon,
   ArrowLeftToLineIcon,
   ArrowRightToLineIcon,
   ChevronRight,
@@ -51,11 +51,6 @@ const Circle = dynamic(
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
-
-
-
-
-
 export default function PropertyPage({ property }: { property: Property }) {
   let isBooked = false;
 
@@ -84,9 +79,12 @@ export default function PropertyPage({ property }: { property: Property }) {
     <div className="space-y-4">
       <Link
         href={isBooked ? "/requests" : `/`}
-        className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "icon" }),
+          "rounded-full",
+        )}
       >
-        &larr; Back to Home Page
+        <ArrowLeftIcon />
       </Link>
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-2">
@@ -94,7 +92,7 @@ export default function PropertyPage({ property }: { property: Property }) {
             {property.name}
           </h1>
           <div className="text-sm font-medium">
-            <span>{plural(property.maxNumGuests, "Guest")}</span>
+            <span>{plural(property.maxNumGuests, "guest")}</span>
             <span className="mx-2">·</span>
             <span>{plural(property.numBedrooms, "bedroom")}</span>
             <span className="mx-2">·</span>
@@ -290,8 +288,10 @@ export default function PropertyPage({ property }: { property: Property }) {
             <PropertyAmenities amenities={property.amenities ?? []} />
             {property.amenities && (
               <Dialog>
-                <DialogTrigger className="inline-flex w-full items-center justify-center rounded-lg border border-black px-2.5 py-2 text-foreground md:w-1/4">
-                  Show all amenities
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Show all amenities
+                  </Button>
                 </DialogTrigger>
 
                 <DialogContent className="max-w-4xl">
