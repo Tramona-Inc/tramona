@@ -22,7 +22,7 @@ importers:
         version: 3.3.4(react-hook-form@7.51.4(react@18.2.0))
       '@mantine/hooks':
         specifier: ^7.8.0
-        version: 7.9.0(react@18.2.0)
+        version: 7.9.1(react@18.2.0)
       '@next/bundle-analyzer':
         specifier: ^14.2.3
         version: 14.2.3
@@ -1955,8 +1955,8 @@ packages:
   '@juggle/resize-observer@3.4.0':
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
 
-  '@mantine/hooks@7.9.0':
-    resolution: {integrity: sha512-LKgyrlaIK0S/gcn/VDbhqLBZOYjvhXfVcH7rMs4MIBVD+wuRo2LvvAYe3cUfQbBCfmlpRjqvewwvsIYYsjSofQ==}
+  '@mantine/hooks@7.9.1':
+    resolution: {integrity: sha512-nb2Ar+2HfGxLjGZgObapeUeqcQsUWJ+rvj4X2KNTUy3+YpvLIMD3CqREowWHF7/5OTGh4BCyBqQNZ9JFpnMeHQ==}
     peerDependencies:
       react: ^18.2.0
 
@@ -11900,7 +11900,7 @@ snapshots:
 
   '@juggle/resize-observer@3.4.0': {}
 
-  '@mantine/hooks@7.9.0(react@18.2.0)':
+  '@mantine/hooks@7.9.1(react@18.2.0)':
     dependencies:
       react: 18.2.0
 
