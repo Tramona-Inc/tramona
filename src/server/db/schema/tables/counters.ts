@@ -1,6 +1,7 @@
 import {
   index,
   integer,
+  pgEnum,
   pgTable,
   serial,
   text,
@@ -10,6 +11,12 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { bids } from "./bids";
 import { properties } from "./properties";
 import { users } from "./users";
+
+export const counterStatusEnum = pgEnum("bid_status", [
+  "Pending",
+  "Accepted",
+  "Rejected",
+]);
 
 export const counters = pgTable(
   "counters",
@@ -32,6 +39,7 @@ export const counters = pgTable(
     counterAmount: integer("counter_amount").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    status: counterStatusEnum("status").notNull().default("Pending"),
     statusUpdatedAt: timestamp("status_updated_at"),
   },
   (t) => ({
