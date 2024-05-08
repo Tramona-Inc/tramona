@@ -321,8 +321,8 @@ export default function MobileSearchBar() {
 
   return (
     <Sheet>
-      <SheetTrigger>
-        <div className="fixed top-16 z-40 flex w-5/6 flex-row gap-x-3 rounded-full border-2 border-border bg-white px-3 py-5 text-center font-semibold text-muted-foreground shadow-lg">
+      <SheetTrigger className="w-full">
+        <div className="z-40 flex flex-row gap-x-3 rounded-lg border-2 border-border bg-white px-3 py-5 text-center font-semibold text-muted-foreground shadow-lg">
           <SearchIcon />
           Name your price or submit an offer
         </div>

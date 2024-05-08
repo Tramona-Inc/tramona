@@ -14,14 +14,18 @@ export function DesktopSearchLayout() {
     <div className="flex items-center justify-center">
       <Tabs
         defaultValue={"search"}
-        className="rounded-lg border-2 border-border bg-white px-10 shadow-sm"
+        className="rounded-3xl border-2 border-border bg-white px-10 shadow-sm"
       >
-        <TabsList noBorder className=" flex items-center justify-center">
-          <TabsTrigger value="search" className="border-b-2 ">
-            Search Properties
+        <TabsList noBorder className="flex items-center justify-center">
+          <TabsTrigger value="search" className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]">
+            <span className="text-sm">
+              Search Properties
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="request" className="border-b-2">
-            Request Deal
+          <TabsTrigger value="request" className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]">
+            <span className="text-sm">
+              Request Deal
+            </span>
           </TabsTrigger>
         </TabsList>
         <div className="mb-5 mt-[-2px] w-full border-b-2 border-border" />

@@ -8,12 +8,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -102,8 +101,6 @@ export default function HomeOfferCard({
   });
 
   const setDate = useBidding((state) => state.setDate);
-  const setStep = useBidding((state) => state.setStep);
-  const step = useBidding((state) => state.step);
   const resetSession = useBidding((state) => state.resetSession);
 
   const [open, setOpen] = useState(false);
@@ -114,6 +111,10 @@ export default function HomeOfferCard({
     setOpen(true);
     setDate(values.date.from, values.date.to);
   }
+
+  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+
+  const alreadyBid = propertyIdBids.includes(property.id);
 
   return (
     <div className="space-y-2">
@@ -178,29 +179,27 @@ export default function HomeOfferCard({
             propertyId={property.id}
           />
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button
-                type={"submit"}
-                className="w-full rounded-xl"
-                disabled={!form.formState.isValid}
-              >
-                Make Offer
-              </Button>
-            </DialogTrigger>
-            <DialogContent className=" flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
-              {step !== 0 && (
+            {/* Removed trigger to have control on open and close */}
+            <div>
+              {alreadyBid ? (
                 <Button
-                  variant={"ghost"}
-                  className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
-                  onClick={() => {
-                    if (step - 1 > -1) {
-                      setStep(step - 1);
-                    }
-                  }}
+                  type={"submit"}
+                  className={"w-full rounded-xl"}
+                  disabled={alreadyBid}
                 >
-                  <ChevronLeft />
+                  Already Bid
+                </Button>
+              ) : (
+                <Button
+                  type={"submit"}
+                  className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
+                  // disabled={!form.formState.isValid}
+                >
+                  Make Offer
                 </Button>
               )}
+            </div>
+            <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
               <MakeBid propertyId={property.id} />
             </DialogContent>
           </Dialog>
