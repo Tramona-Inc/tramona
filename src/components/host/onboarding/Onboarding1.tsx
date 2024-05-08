@@ -6,8 +6,15 @@ import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
 import { on } from "events";
 import { useState } from "react";
-import { Dialog } from "@/components/ui/dialog";
+import { InlineWidget, useCalendlyEventListener } from 'react-calendly';
 
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 export default function Onboarding1({
   onPressNext,
 }: {
@@ -16,6 +23,11 @@ export default function Onboarding1({
   const router = useRouter();
 
   const [showModal, setShowModal] = useState(false);
+  const [eventScheduled, setEventScheduled] = useState(false);
+
+  useCalendlyEventListener({
+    onEventScheduled: () => setEventScheduled(true),
+  });
 
   const openModal = () => {
     setShowModal(true);
@@ -23,6 +35,9 @@ export default function Onboarding1({
 
   const closeModal = () => {
     setShowModal(false);
+    if (eventScheduled) {
+      void router.push("/host");
+    }
   };
 
   const items = [
@@ -41,23 +56,6 @@ export default function Onboarding1({
       onClick: openModal,
     },
   ];
-
-  const handleCalendlyLink = () => {
-    <iframe
-      title="Calendly Scheduler"
-      src="http://calendly.com/tramona"
-      style={{
-        width: "100%",
-        height: "800px",
-        border: "0",
-      }}
-    ></iframe>;
-    // Handle the Calendly link here
-    // Close the modal
-    closeModal();
-    // Navigate to "/host" route
-    void router.push("/host");
-  };
 
   return (
     <>
@@ -94,12 +92,18 @@ export default function Onboarding1({
       </div>
 
       <OnboardingFooter isForm={false} />
-      <Dialog open={showModal} onClose={closeModal}>
-        <div className="flex flex-col items-center justify-center">
-          <p>Click the button below to schedule a meeting:</p>
-          {/* Button to open the Calendly link */}
-          <button onClick={handleCalendlyLink}>Schedule Meeting</button>
-        </div>
+      <Dialog open={showModal} onOpenChange={closeModal}>
+        <DialogClose className="hidden" />
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assisted Listing</DialogTitle>
+          </DialogHeader>
+          <p>
+            Our team will help you set up your account. Click the button below
+            to schedule a meeting with us.
+          </p>
+          <InlineWidget url="https://calendly.com/tramona" />
+        </DialogContent>
       </Dialog>
     </>
   );
