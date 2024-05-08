@@ -51,7 +51,8 @@ export default function Page() {
             <Badge variant="secondary" className="empty:hidden">
               {propertyOffers?.length}
             </Badge>
-            <div className="flex-1"></div>
+          </div>
+          <div className="flex justify-end pb-2">
             <Button
               onClick={() => createRandomOffer.mutate()}
               disabled={createRandomOffer.isLoading}

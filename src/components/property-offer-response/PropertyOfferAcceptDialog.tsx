@@ -4,8 +4,8 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
 import { toast } from "../ui/use-toast";
@@ -34,11 +34,14 @@ export function PropertyOfferAcceptDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <DialogTitle>Are you sure you want to accept this offer?</DialogTitle>
-        <DialogDescription>
-          This will auto-reject any conflicting offers. This can not be undone.
+        <DialogHeader>
+          <DialogTitle>Are you sure you want to accept this offer?</DialogTitle>
+        </DialogHeader>
+        <p>
+          This will auto-reject any conflicting offers and schedule a booking
+          for the requested dates.
           {/* TODO: display the conflicting offers */}
-        </DialogDescription>
+        </p>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="secondary">Cancel</Button>

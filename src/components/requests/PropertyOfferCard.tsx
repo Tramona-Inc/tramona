@@ -41,12 +41,16 @@ export default function PropertyOfferCard({
       isGuestDashboard?: false;
       offer: RouterOutputs["biddings"]["getAllPending"][number];
     }) {
+  const badge = (
+    <Badge variant={getBadgeColor(offer.status)}>{offer.status}</Badge>
+  );
+
   return (
     <Card className="overflow-clip p-0">
       <CardContent className="flex">
         <Link
           href={`/property/${offer.propertyId}`}
-          className="relative w-40 shrink-0 bg-accent p-2"
+          className="relative hidden w-40 shrink-0 bg-accent p-2 sm:block"
         >
           <Image
             src={offer.property.imageUrls[0]!}
@@ -54,11 +58,10 @@ export default function PropertyOfferCard({
             className="object-cover"
             alt=""
           />
-          <Badge variant={getBadgeColor(offer.status)} className="absolute">
-            {offer.status}
-          </Badge>
+          <div className="absolute hidden sm:block">{badge}</div>
         </Link>
         <div className="flex w-full flex-col p-4">
+          <div className="sm:hidden">{badge}</div>
           <div className="flex justify-between">
             <p className="text-lg font-semibold">{offer.property.name}</p>
             <div className="ml-auto flex -translate-y-2 translate-x-2 items-center gap-2">

@@ -40,7 +40,11 @@ export function PropertyOfferRejectDialog({
           <DialogClose asChild>
             <Button variant="secondary">Cancel</Button>
           </DialogClose>
-          <Button onClick={rejectOffer} disabled={mutation.isLoading}>
+          <Button
+            variant="destructive"
+            onClick={rejectOffer}
+            disabled={mutation.isLoading}
+          >
             Reject offer
           </Button>
         </DialogFooter>
