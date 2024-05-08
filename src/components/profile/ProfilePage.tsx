@@ -75,6 +75,7 @@ export default function ProfilePage() {
     resolver: zodResolver(formSchema),
   });
 
+  // TODO: pull values from database
   const givenProperties = [
     {
       id: 1,
