@@ -36,7 +36,10 @@ const DropdownMenuTrigger = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Trigger
     ref={ref}
-    className={cn("data-[state=open]:bg-accent", className)}
+    className={cn(
+      // "data-[state=open]:bg-accent",
+      className,
+    )}
     {...props}
   />
 ));
