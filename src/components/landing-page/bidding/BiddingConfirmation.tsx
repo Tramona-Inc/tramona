@@ -76,24 +76,20 @@ function BiddingConfirmation({ property }: { property: Property }) {
         </div>
       </div>
 
-      <Button
-        asChild
-        variant="default"
-        className="mt-40 px-5 md:px-10 md:text-lg"
-        onClick={resetSession}
-      >
-        <Link href={`/requests`}>See my Offers</Link>
-      </Button>
-      <Button
-        asChild
-        variant="outline"
-        className="mt-2 md:px-8 md:text-lg"
-        onClick={() => {
-          resetSession();
-        }}
-      >
-        <Link href={`/`}>Back to listings</Link>
-      </Button>
+      <div className="mt-10 flex flex-row gap-5">
+        <Button asChild variant="greenPrimary" onClick={resetSession}>
+          <Link href={`/requests`}>See my Offers</Link>
+        </Button>
+        <Button
+          asChild
+          variant="secondary"
+          onClick={() => {
+            resetSession();
+          }}
+        >
+          <Link href={`/`}>Back to listings</Link>
+        </Button>
+      </div>
     </div>
   );
 }

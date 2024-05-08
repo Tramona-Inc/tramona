@@ -32,7 +32,7 @@ export const counters = pgTable(
     counterAmount: integer("counter_amount").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
-    resolvedAt: timestamp("resolved_at"),
+    statusUpdatedAt: timestamp("status_updated_at"),
   },
   (t) => ({
     bidId: index().on(t.bidId),

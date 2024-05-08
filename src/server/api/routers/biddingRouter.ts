@@ -12,7 +12,7 @@ import {
   counters,
 } from "@/server/db/schema/tables/counters";
 import { TRPCError } from "@trpc/server";
-import { and, count, eq, exists, isNull } from "drizzle-orm";
+import { and, eq, exists, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
