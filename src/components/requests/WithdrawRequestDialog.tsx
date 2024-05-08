@@ -44,7 +44,9 @@ export default function WithdrawRequestDialog({
           <DialogClose asChild>
             <Button variant={"secondary"}>Cancel</Button>
           </DialogClose>
-          <Button onClick={handleWithdraw}>Withdraw Request</Button>
+          <Button variant="destructive" onClick={handleWithdraw}>
+            Withdraw Request
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

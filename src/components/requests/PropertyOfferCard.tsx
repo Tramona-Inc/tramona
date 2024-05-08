@@ -1,16 +1,4 @@
-import { type RouterOutputs } from "@/utils/api";
-import {
-  daysBetweenDates,
-  formatCurrency,
-  formatDateRange,
-  plural,
-} from "@/utils/utils";
-import { EllipsisIcon, TrashIcon } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
-import MapPin from "../_icons/MapPin";
-import { Badge } from "../ui/badge";
+import { CalendarIcon, EllipsisIcon, TrashIcon, UsersIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -18,90 +6,123 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { type RouterOutputs } from "@/utils/api";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
+import Image from "next/image";
+import Link from "next/link";
+import { Badge, type BadgeProps } from "../ui/badge";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
+import { useState } from "react";
+import { Card, CardContent } from "../ui/card";
+import RequestGroupAvatars from "./RequestGroupAvatars";
+import { PropertyOfferResponseDD } from "../property-offer-response/PropertyOfferResponseDD";
+import { type Bid } from "@/server/db/schema";
+
+function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
+  switch (status) {
+    case "Pending":
+      return "yellow";
+    case "Accepted":
+      return "green";
+    case "Rejected":
+      return "red";
+  }
+}
 
 export default function PropertyOfferCard({
   offer,
-}: {
-  offer: RouterOutputs["biddings"]["getMyBids"][number];
-}) {
-  const isAccepted = !!offer.resolvedAt;
+  isGuestDashboard,
+}:
+  | {
+      isGuestDashboard: true;
+      offer: RouterOutputs["biddings"]["getMyBids"][number];
+    }
+  | {
+      isGuestDashboard?: false;
+      offer: RouterOutputs["biddings"]["getAllPending"][number];
+    }) {
+  const badge = (
+    <Badge variant={getBadgeColor(offer.status)}>{offer.status}</Badge>
+  );
 
+  return (
+    <Card className="overflow-clip p-0">
+      <CardContent className="flex">
+        <Link
+          href={`/property/${offer.propertyId}`}
+          className="relative hidden w-40 shrink-0 bg-accent p-2 sm:block"
+        >
+          <Image
+            src={offer.property.imageUrls[0]!}
+            layout="fill"
+            className="object-cover"
+            alt=""
+          />
+          <div className="absolute hidden sm:block">{badge}</div>
+        </Link>
+        <div className="flex w-full flex-col p-4">
+          <div className="sm:hidden">{badge}</div>
+          <div className="flex justify-between">
+            <p className="text-lg font-semibold">{offer.property.name}</p>
+            <div className="ml-auto flex -translate-y-2 translate-x-2 items-center gap-2">
+              <RequestGroupAvatars
+                request={offer}
+                isAdminDashboard={!isGuestDashboard}
+              />
+              {isGuestDashboard && offer.status === "Pending" && (
+                <PropertyOfferCardDropdown offerId={offer.id} />
+              )}
+            </div>
+          </div>
+          <div className="text-muted-foreground">
+            <p>
+              offer for{" "}
+              <b className="text-lg text-foreground">
+                {formatCurrency(offer.amount)}
+              </b>
+              /night
+            </p>
+            <div className="flex items-center gap-1">
+              <CalendarIcon className="size-4" />
+              {formatDateRange(offer.checkIn, offer.checkOut)}
+              <UsersIcon className="ml-3 size-4" />
+              {plural(offer.numGuests, "guest")}
+            </div>
+          </div>
+          {!isGuestDashboard && (
+            <div className="flex justify-end gap-2">
+              <PropertyOfferResponseDD offerId={offer.id} />
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PropertyOfferCardDropdown({ offerId }: { offerId: number }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-2xl flex flex-row rounded-lg border shadow-md md:flex-row">
+    <>
       <WithdrawPropertyOfferDialog
-        offerId={offer.id}
+        offerId={offerId}
         open={open}
         onOpenChange={setOpen}
       />
-      <Link
-        href={`/property/${offer.propertyId}`}
-        className="relative flex items-center justify-center max-md:ml-5 md:h-[200px] md:w-1/3"
-      >
-        <Badge
-          variant={offer.resolvedAt ? "green" : "lightGray"}
-          className="xs:top-5 absolute left-2 top-7 z-40 md:left-2 md:top-2"
-        >
-          {isAccepted ? "Accepted" : "Pending"}
-        </Badge>
-        <Image
-          alt=""
-          className="max-md absolute hidden rounded-lg md:block md:rounded-r-none"
-          src={offer.property.imageUrls[0]!}
-          fill
-          objectFit="cover"
-        />
-        <Image
-          alt=""
-          className="aspect-square rounded-md object-cover"
-          src={offer.property.imageUrls[0]!}
-          height={200}
-          width={200}
-        />
-      </Link>
-      <div className="flex w-full flex-col space-y-3 p-5">
-        <div className="flex flex-row justify-between">
-          <p className="flex flex-row items-center font-bold md:text-xl">
-            <MapPin />
-            {offer.property.name}
-          </p>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <EllipsisIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem red onClick={() => setOpen(true)}>
-                <TrashIcon />
-                Withdraw
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <p>
-          Offered{" "}
-          {formatCurrency(
-            offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut),
-          )}
-          /night
-        </p>
-        <p>{formatDateRange(offer.checkIn, offer.checkOut)}</p>
-
-        <div className="flex flex-row justify-between">
-          <p>{plural(offer.numGuests, "guest")}</p>
-          <div className="hidden flex-row font-semibold md:block">
-            {/* <Button variant={"secondary"} className="font-semibold">
-              Resend Confirmation
-            </Button>
-            <Button variant={"underline"} className="font-semibold">
-              Update request
-            </Button> */}
-          </div>
-        </div>
-      </div>
-    </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <EllipsisIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem red onClick={() => setOpen(true)}>
+            <TrashIcon />
+            Withdraw
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
         </div>
         <hr className="my-6 h-px border-none bg-neutral-300" />
         <div className="flex w-full flex-col items-center justify-between text-center sm:flex-row">
-          <div className="mb-4 text-sm text-gray-400 sm:mb-0">
+          <div className="mb-4 text-sm text-zinc-500 sm:mb-0">
             © {currentYear} Tramona. All rights reserved.
           </div>
           <div className="flex gap-4">

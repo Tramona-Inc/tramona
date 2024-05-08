@@ -2,6 +2,10 @@ import { relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
 import { bids } from "./tables/bids";
+import {
+  bucketListDestinations,
+  bucketListProperties,
+} from "./tables/bucketList";
 import { counters } from "./tables/counters";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
 import { hostProfiles } from "./tables/hostProfiles";
@@ -36,6 +40,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   hostTeams: many(hostTeamMembers),
   bids: many(bids),
   counters: many(counters),
+  bucketListDestinations: many(bucketListDestinations),
+  bucketListProperties: many(bucketListProperties),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -231,6 +237,7 @@ export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
     references: [groups.id],
   }),
 }));
+
 export const hostTeamsRelations = relations(hostTeams, ({ one, many }) => ({
   owner: one(users, {
     fields: [hostTeams.ownerId],
@@ -261,6 +268,30 @@ export const hostTeamInviteRelations = relations(
     hostTeam: one(hostTeams, {
       fields: [hostTeamInvites.hostTeamId],
       references: [hostTeams.id],
+    }),
+  }),
+);
+
+export const bucketListDestinationsRelations = relations(
+  bucketListDestinations,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [bucketListDestinations.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const bucketListPropertiesRelations = relations(
+  bucketListProperties,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [bucketListProperties.userId],
+      references: [users.id],
+    }),
+    property: one(properties, {
+      fields: [bucketListProperties.propertyId],
+      references: [properties.id],
     }),
   }),
 );

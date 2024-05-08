@@ -11,6 +11,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
+import { z } from "zod";
+import { sql } from "drizzle-orm";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
@@ -34,6 +36,10 @@ export const isIdentityVerifiedEnum = pgEnum("is_identity_verified", [
   "pending",
 ]);
 
+// NOTE: every time you add a column to the users table,
+// you can choose to either add it to the session (e.g. session.user.newColumn)
+// or not. If you do want to, go to src/server/auth.ts and youll see 3 places
+// where you need to add the new column
 export const users = pgTable(
   "user",
   {
@@ -70,6 +76,13 @@ export const users = pgTable(
       .notNull(),
     verificationReportId: varchar("verification_report_id"),
     dateOfBirth: varchar("date_of_birth"),
+
+    profileUrl: varchar("profile_url", { length: 1000 }),
+    location: varchar("location", { length: 1000 }),
+    socials: varchar("socials")
+      .array()
+      .default(sql`'{}'`),
+    about: text("about"),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),
@@ -138,7 +151,9 @@ export type ReferralCode = typeof referralCodes.$inferSelect;
 export const referralCodeSelectSchema = createSelectSchema(referralCodes);
 export const referralCodeInsertSchema = createInsertSchema(referralCodes);
 
-export const userInsertSchema = createInsertSchema(users);
+export const userInsertSchema = createInsertSchema(users, {
+  socials: z.string().array(),
+});
 export const userSelectSchema = createSelectSchema(users);
 export const userUpdateSchema = userInsertSchema
   .partial()
