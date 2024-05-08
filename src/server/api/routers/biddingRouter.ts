@@ -7,9 +7,12 @@ import {
   hostTeamMembers,
   properties,
 } from "@/server/db/schema";
-import { counterInsertSchema } from "@/server/db/schema/tables/counters";
+import {
+  counterInsertSchema,
+  counters,
+} from "@/server/db/schema/tables/counters";
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, isNull } from "drizzle-orm";
+import { and, count, eq, exists, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -181,15 +184,19 @@ export const biddingRouter = createTRPCRouter({
   }),
 
   createCounter: protectedProcedure
-    .input(
-      counterInsertSchema.omit({
-        resolvedAt: true,
-        updatedAt: true,
-        createdAt: true,
-      }),
-    )
+    .input(counterInsertSchema)
     .mutation(async ({ ctx, input }) => {
-      const counters = ctx.db.query.counters.findMany({})
+      const { bidId, propertyId, userId, counterAmount } = input;
 
+      // const totalCounters = ctx.db
+      //   .select({
+      //     value: count(),
+      //   })
+      //   .from(counters)
+      //   .where(eq(counters.userId, ctx.user.id));
+
+      await ctx.db
+        .insert(counters)
+        .values({ bidId, propertyId, userId, counterAmount });
     }),
 });
