@@ -4,7 +4,7 @@ import { properties } from "./properties";
 
 export const bucketListDestinations = pgTable("bucket_list_destinations", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  userId: varchar("user_id")
     .notNull()
     .references(() => users.id),
   city: varchar("city").notNull(),
@@ -14,7 +14,7 @@ export const bucketListDestinations = pgTable("bucket_list_destinations", {
 
 export const bucketListProperties = pgTable("bucket_list_properties", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  userId: varchar("user_id")
     .notNull()
     .references(() => users.id),
   propertyId: integer("property_id")
