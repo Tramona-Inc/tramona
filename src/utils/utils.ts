@@ -105,6 +105,21 @@ export function formatDateRange(fromDate: Date, toDate?: Date) {
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
 }
 
+export function daysBetweenDates(date1: Date, date2: Date): number {
+  // Convert the date strings to Date objects
+  const date1Obj = new Date(date1);
+  const date2Obj = new Date(date2);
+
+  // Calculate the difference between the two dates in milliseconds
+  const diffMilliseconds = Math.abs(date2Obj.getTime() - date1Obj.getTime());
+
+  // Convert milliseconds to days
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+  const totalDays = Math.floor(diffMilliseconds / millisecondsPerDay);
+
+  return totalDays;
+}
+
 function removeTimezoneFromDate(date: Date) {
   // Convert to ISO string and split by 'T' to get date part
   return new Date(date).toISOString().split("Z")[0]; // todo fix hacky

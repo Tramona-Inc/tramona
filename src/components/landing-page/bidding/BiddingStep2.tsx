@@ -84,7 +84,6 @@ function BiddingInfoCard({ property }: { property: Property }) {
 }
 
 function BiddingStep2({ property }: { property: Property }) {
-
   const addPropertyIdBids = useBidding((state) => state.addPropertyIdBids);
 
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
@@ -124,7 +123,7 @@ function BiddingStep2({ property }: { property: Property }) {
   const bid = {
     propertyId: property.id,
     numGuests: guest,
-    amount: totalPrice,
+    amount: totalPrice * 100, //convert to stripe cents
     checkIn: date.from,
     checkOut: date.to,
   };

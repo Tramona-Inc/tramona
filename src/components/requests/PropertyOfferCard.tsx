@@ -1,4 +1,16 @@
+import { type RouterOutputs } from "@/utils/api";
+import {
+  daysBetweenDates,
+  formatCurrency,
+  formatDateRange,
+  plural,
+} from "@/utils/utils";
 import { EllipsisIcon, TrashIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import MapPin from "../_icons/MapPin";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -6,14 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { type RouterOutputs } from "@/utils/api";
-import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
-import Image from "next/image";
-import Link from "next/link";
-import MapPin from "../_icons/MapPin";
-import { Badge } from "../ui/badge";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
-import { useState } from "react";
 
 export default function PropertyOfferCard({
   offer,
@@ -76,7 +81,13 @@ export default function PropertyOfferCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <p>Offered {formatCurrency(offer.amount)}/night</p>
+        <p>
+          Offered{" "}
+          {formatCurrency(
+            offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut),
+          )}
+          /night
+        </p>
         <p>{formatDateRange(offer.checkIn, offer.checkOut)}</p>
 
         <div className="flex flex-row justify-between">
