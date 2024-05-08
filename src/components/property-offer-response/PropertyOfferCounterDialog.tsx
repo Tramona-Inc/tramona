@@ -15,7 +15,6 @@ import { z } from "zod";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 
 const formSchema = z.object({
   counterPrice: zodInteger(),
@@ -47,9 +46,6 @@ function CounterForm() {
               <FormControl>
                 <Input {...field} prefix={"$"} />
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -76,8 +72,7 @@ export function PropertyOfferCounterDialog({
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Counter Offer</DialogTitle>
         </DialogHeader>
-        <Label>Your counter offer price</Label>
-        <Input type="number" />
+        <CounterForm />
       </DialogContent>
     </Dialog>
   );
