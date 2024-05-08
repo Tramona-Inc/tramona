@@ -34,6 +34,10 @@ export const isIdentityVerifiedEnum = pgEnum("is_identity_verified", [
   "pending",
 ]);
 
+// NOTE: every time you add a column to the users table,
+// you can choose to either add it to the session (e.g. session.user.newColumn)
+// or not. If you do want to, go to src/server/auth.ts and youll see 3 places
+// where you need to add the new column
 export const users = pgTable(
   "user",
   {
@@ -64,9 +68,17 @@ export const users = pgTable(
       .notNull()
       .defaultNow(),
     //stripe identity verifications
-    isIdentityVerified: isIdentityVerifiedEnum("is_identity_verified").default("false").notNull(),
+    isIdentityVerified: isIdentityVerifiedEnum("is_identity_verified")
+      .default("false")
+      .notNull(),
     verificationReportId: varchar("verification_report_id"),
     dateOfBirth: varchar("date_of_birth"),
+
+    profileUrl: varchar("profile_url", { length: 1000 }),
+    location: varchar("location", { length: 1000 }),
+    socials: varchar("socials").array(),
+    about: text("about"),
+    destinations: varchar("destinations").array(),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),
