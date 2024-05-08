@@ -96,15 +96,12 @@ const config = {
       },
       {
         protocol: "https",
-        hostname: "res.cloudinary.com"
+        hostname: "res.cloudinary.com",
       },
-
     ],
   },
   experimental: {
     scrollRestoration: true,
-    bundlePagesExternals: true,
-    esmExternals: "loose",
   },
 };
 

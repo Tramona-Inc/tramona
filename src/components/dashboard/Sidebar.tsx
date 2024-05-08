@@ -70,7 +70,7 @@ export default function Sidebar({
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-center gap-5">
+      <div className="flex flex-1 flex-col pt-8">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
             <SidebarLink
