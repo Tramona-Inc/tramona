@@ -31,7 +31,19 @@ declare module "next-auth" {
   interface User extends TramonaUser {}
 
   interface Session extends DefaultSession {
-    user: TramonaUser;
+    user: Pick<
+      TramonaUser,
+      | "name"
+      | "email"
+      | "image"
+      | "id"
+      | "role"
+      | "username"
+      | "referralCodeUsed"
+      | "referralTier"
+      | "phoneNumber"
+      | "createdAt"
+    >;
   }
 }
 

@@ -5,7 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
-import { getFmtdFilters } from "@/utils/formatters";
+import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
@@ -98,7 +98,7 @@ export default function RequestCard({
               isAdminDashboard={isAdminDashboard}
             />
           )}
-          {!isAdminDashboard && (
+          {!isAdminDashboard && getRequestStatus(request) === "pending" && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
