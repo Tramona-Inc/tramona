@@ -1,4 +1,5 @@
 import {
+  type Bid,
   bidInsertSchema,
   bidSelectSchema,
   bids,
@@ -8,9 +9,32 @@ import {
   properties,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, isNull } from "drizzle-orm";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { and, desc, eq, exists, isNull } from "drizzle-orm";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  roleRestrictedProcedure,
+} from "../trpc";
 import { z } from "zod";
+import { db } from "@/server/db";
+import { random } from "lodash";
+import { add } from "date-fns";
+
+async function updateBidStatus({
+  id,
+  status,
+}: {
+  id: number;
+  status: Bid["status"];
+}) {
+  await db.transaction(async (tx) => {
+    await tx.update(bids).set({ status }).where(eq(bids.id, id));
+    await tx
+      .update(bids)
+      .set({ statusUpdatedAt: new Date() })
+      .where(eq(bids.id, id));
+  });
+}
 
 export const biddingRouter = createTRPCRouter({
   getMyBids: protectedProcedure.query(async ({ ctx }) => {
@@ -27,7 +51,12 @@ export const biddingRouter = createTRPCRouter({
           ),
       ),
       with: {
-        property: true,
+        property: {
+          columns: { id: true, imageUrls: true, name: true, address: true },
+        },
+        madeByGroup: {
+          with: { members: { with: { user: true } }, invites: true },
+        },
       },
     });
   }),
@@ -80,6 +109,7 @@ export const biddingRouter = createTRPCRouter({
         .set({ updatedAt: new Date(), amount: input.amount })
         .where(eq(bids.id, input.id!));
     }),
+
   delete: protectedProcedure
     .input(bidSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
@@ -131,20 +161,83 @@ export const biddingRouter = createTRPCRouter({
       }
 
       return await ctx.db.query.bids.findMany({
-        where: and(eq(bids.propertyId, propertyId), isNull(bids.resolvedAt)),
+        where: and(eq(bids.propertyId, propertyId), eq(bids.status, "Pending")),
       });
     }),
+
+  getAllPending: roleRestrictedProcedure(["admin"]).query(async () => {
+    return await db.query.bids.findMany({
+      with: {
+        madeByGroup: {
+          with: { members: { with: { user: true } }, invites: true },
+        },
+        property: {
+          columns: { id: true, name: true, address: true, imageUrls: true },
+        },
+      },
+      where: eq(bids.status, "Pending"),
+      orderBy: desc(bids.createdAt),
+    });
+  }),
 
   accept: protectedProcedure
     .input(z.object({ bidId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      // todo: authorizaiton
+      if (ctx.user.role !== "admin") {
+        const hostId = await ctx.db.query.bids
+          .findFirst({
+            where: eq(bids.id, input.bidId),
+            columns: {},
+            with: { property: { columns: { hostId: true } } },
+          })
+          .then((res) => res?.property.hostId);
 
-      // todo: send travellers email
+        if (hostId !== ctx.user.id) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+      }
 
-      await ctx.db
-        .update(bids)
-        .set({ resolvedAt: new Date() })
-        .where(eq(bids.id, input.bidId));
+      await updateBidStatus({ id: input.bidId, status: "Accepted" });
+
+      // TODO: email travellers
     }),
+
+  reject: protectedProcedure
+    .input(z.object({ bidId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        const hostId = await ctx.db.query.bids
+          .findFirst({
+            where: eq(bids.id, input.bidId),
+            columns: {},
+            with: { property: { columns: { hostId: true } } },
+          })
+          .then((res) => res?.property.hostId);
+
+        if (hostId !== ctx.user.id) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+      }
+
+      await updateBidStatus({ id: input.bidId, status: "Rejected" });
+
+      // TODO: email travellers
+    }),
+
+  createRandom: protectedProcedure.mutation(async ({ ctx }) => {
+    const groupId = await ctx.db
+      .insert(groups)
+      .values({ ownerId: ctx.user.id })
+      .returning()
+      .then((res) => res[0]!.id);
+
+    await ctx.db.insert(bids).values({
+      amount: random(200, 300) * 100,
+      checkIn: add(new Date(), { days: random(1, 10) }),
+      checkOut: add(new Date(), { days: random(11, 20) }),
+      madeByGroupId: groupId,
+      propertyId: random(3000, 6000),
+      numGuests: random(1, 5),
+    });
+  }),
 });

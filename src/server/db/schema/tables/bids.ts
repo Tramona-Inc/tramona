@@ -1,8 +1,17 @@
-import { date, integer, pgTable, serial, timestamp } from "drizzle-orm/pg-core";
+import {
+  date,
+  integer,
+  pgEnum,
+  pgTable,
+  serial,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { properties } from "./properties";
 import { index } from "drizzle-orm/pg-core";
+
+const bidStatusEnum = pgEnum("bid_status", ["Pending", "Accepted", "Rejected"]);
 
 export const bids = pgTable(
   "bids",
@@ -21,13 +30,14 @@ export const bids = pgTable(
     checkOut: date("check_out", { mode: "date" }).notNull(),
     numGuests: integer("num_guests").notNull().default(1),
     amount: integer("amount").notNull(),
+    status: bidStatusEnum("status").notNull().default("Pending"),
+    statusUpdatedAt: timestamp("status_updated_at").notNull().defaultNow(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
-    resolvedAt: timestamp("resolved_at"),
   },
   (t) => ({
-    madeByGroupidIdx: index().on(t.madeByGroupId),
-    propertyidIdx: index().on(t.propertyId),
+    madeByGroupIdIdx: index().on(t.madeByGroupId),
+    propertyIdIdx: index().on(t.propertyId),
   }),
 );
 
