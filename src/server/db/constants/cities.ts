@@ -233,7 +233,6 @@ export const ALL_CITIES = [
   "Salt Lake City, United States",
   "Pompano Beach, United States",
   "Aspen, United States",
-  "4",
   "Platte Woods, United States",
   "Monument, United States of America",
   "Palo Alto, United States",
