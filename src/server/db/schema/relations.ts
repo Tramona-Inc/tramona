@@ -19,7 +19,6 @@ import {
   hostTeams,
 } from "./tables/hostTeams";
 import { bids } from "./tables/bids";
-import { profile } from "console";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -251,11 +250,3 @@ export const hostTeamInviteRelations = relations(
     }),
   }),
 );
-
-export const profileRelations = relations(profile, ({ one, many }) => ({
-  user: one(users, {
-    fields: [profile.userId],
-    references: [users.id],
-  }),
-  properties: many(properties),
-}));
