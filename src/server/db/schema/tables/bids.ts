@@ -11,7 +11,11 @@ import { groups } from "./groups";
 import { properties } from "./properties";
 import { index } from "drizzle-orm/pg-core";
 
-const bidStatusEnum = pgEnum("bid_status", ["Pending", "Accepted", "Rejected"]);
+export const bidStatusEnum = pgEnum("bid_status", [
+  "Pending",
+  "Accepted",
+  "Rejected",
+]);
 
 export const bids = pgTable(
   "bids",
