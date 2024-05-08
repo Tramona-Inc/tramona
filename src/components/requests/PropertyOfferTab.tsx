@@ -10,9 +10,13 @@ export default function PropertyOfferTab() {
   if (!offers) return <Spinner />;
 
   return offers.length > 0 ? (
-    <div className="flex flex-col gap-4">
+    <div className="grid gap-4 lg:grid-cols-2">
       {offers.map((offer) => (
-        <PropertyOfferCard key={offer.id} offer={offer} />
+        <PropertyOfferCard
+          key={offer.id}
+          offer={offer}
+          isGuestDashboard={true}
+        />
       ))}
     </div>
   ) : (
