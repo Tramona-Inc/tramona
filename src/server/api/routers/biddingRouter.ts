@@ -7,6 +7,7 @@ import {
   hostTeamMembers,
   properties,
 } from "@/server/db/schema";
+import { counterInsertSchema } from "@/server/db/schema/tables/counters";
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNull } from "drizzle-orm";
 import { z } from "zod";
@@ -56,8 +57,7 @@ export const biddingRouter = createTRPCRouter({
 
       if (bidExist.length > 0) {
         throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-      else {
+      } else {
         const madeByGroupId = await ctx.db
           .insert(groups)
           .values({ ownerId: ctx.user.id })
@@ -179,4 +179,17 @@ export const biddingRouter = createTRPCRouter({
 
     return result.map((res) => res.propertyId);
   }),
+
+  createCounter: protectedProcedure
+    .input(
+      counterInsertSchema.omit({
+        resolvedAt: true,
+        updatedAt: true,
+        createdAt: true,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const counters = ctx.db.query.counters.findMany({})
+
+    }),
 });
