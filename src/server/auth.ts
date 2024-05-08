@@ -55,6 +55,10 @@ export const authOptions: NextAuthOptions = {
           referralTier: token.referralTier,
           phoneNumber: token.phoneNumber,
           createdAt: token.createdAt,
+          profileUrl: token.profileUrl,
+          location: token.location,
+          socials: token.socials,
+          about: token.about,
         },
       };
     },
@@ -78,6 +82,10 @@ export const authOptions: NextAuthOptions = {
         newToken.referralTier = user.referralTier;
         newToken.phoneNumber = user.phoneNumber;
         newToken.createdAt = user.createdAt;
+        newToken.profileUrl = token.profileUrl;
+        newToken.location = token.location;
+        newToken.socials = token.socials;
+        newToken.about = token.about;
       }
 
       return newToken;
