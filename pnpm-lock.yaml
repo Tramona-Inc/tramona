@@ -22,7 +22,7 @@ importers:
         version: 3.3.4(react-hook-form@7.51.4(react@18.2.0))
       '@mantine/hooks':
         specifier: ^7.8.0
-        version: 7.9.0(react@18.2.0)
+        version: 7.9.1(react@18.2.0)
       '@next/bundle-analyzer':
         specifier: ^14.2.3
         version: 14.2.3
@@ -172,7 +172,7 @@ importers:
         version: 2.4.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       aws-sdk:
         specifier: ^2.1569.0
-        version: 2.1589.0
+        version: 2.1615.0
       axios:
         specifier: ^1.6.7
         version: 1.6.8
@@ -295,7 +295,7 @@ importers:
         version: 3.3.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       recharts:
         specifier: ^2.12.3
-        version: 2.12.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 2.12.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       resend:
         specifier: ^3.1.0
         version: 3.2.0
@@ -1955,8 +1955,8 @@ packages:
   '@juggle/resize-observer@3.4.0':
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
 
-  '@mantine/hooks@7.9.0':
-    resolution: {integrity: sha512-LKgyrlaIK0S/gcn/VDbhqLBZOYjvhXfVcH7rMs4MIBVD+wuRo2LvvAYe3cUfQbBCfmlpRjqvewwvsIYYsjSofQ==}
+  '@mantine/hooks@7.9.1':
+    resolution: {integrity: sha512-nb2Ar+2HfGxLjGZgObapeUeqcQsUWJ+rvj4X2KNTUy3+YpvLIMD3CqREowWHF7/5OTGh4BCyBqQNZ9JFpnMeHQ==}
     peerDependencies:
       react: ^18.2.0
 
@@ -4465,8 +4465,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  aws-sdk@2.1589.0:
-    resolution: {integrity: sha512-Tt3UHH6hoUEAjbCscqvfEAoq9VSTN5iSQO9XSisiiH/QJo8sf+iLCYmfJHM4tVkd92bQH61/xxj9t2Mazwc/WQ==}
+  aws-sdk@2.1615.0:
+    resolution: {integrity: sha512-07xIbWiO8/3gdcTGk4u/gBsts+zLmaXSNjOLHjOyMiLpzyeRJGH269vIYwnl7SymZT89Xl3D17cMbHgoKgeXOw==}
     engines: {node: '>= 10.0.0'}
 
   axe-core@4.7.0:
@@ -8206,8 +8206,8 @@ packages:
   recharts-scale@0.4.5:
     resolution: {integrity: sha512-kivNFO+0OcUNu7jQquLXAxz1FIwZj8nrj+YkOKc5694NbjCvcT6aSZiIzNzd2Kul4o4rTto8QVR9lMNtxD4G1w==}
 
-  recharts@2.12.6:
-    resolution: {integrity: sha512-D+7j9WI+D0NHauah3fKHuNNcRK8bOypPW7os1DERinogGBGaHI7i6tQKJ0aUF3JXyBZ63dyfKIW2WTOPJDxJ8w==}
+  recharts@2.12.7:
+    resolution: {integrity: sha512-hlLJMhPQfv4/3NBSAyq3gzGg4h2v69RJh6KU7b3pXYNNAELs9kEoXOjbkxdXpALqKBoVmVptGfLpxdaVYqjmXQ==}
     engines: {node: '>=14'}
     peerDependencies:
       react: ^16.0.0 || ^17.0.0 || ^18.0.0
@@ -11900,7 +11900,7 @@ snapshots:
 
   '@juggle/resize-observer@3.4.0': {}
 
-  '@mantine/hooks@7.9.0(react@18.2.0)':
+  '@mantine/hooks@7.9.1(react@18.2.0)':
     dependencies:
       react: 18.2.0
 
@@ -15246,7 +15246,7 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  aws-sdk@2.1589.0:
+  aws-sdk@2.1615.0:
     dependencies:
       buffer: 4.9.2
       events: 1.1.1
@@ -19576,7 +19576,7 @@ snapshots:
     dependencies:
       decimal.js-light: 2.5.1
 
-  recharts@2.12.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  recharts@2.12.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       clsx: 2.1.1
       eventemitter3: 4.0.7
