@@ -112,7 +112,7 @@ export const requestsRouter = createTRPCRouter({
   }),
 
   getAll: roleRestrictedProcedure(["admin"]).query(async () => {
-z
+    z;
     return await db.query.requests
       .findMany({
         with: {
@@ -215,7 +215,7 @@ z
 
       if (env.NODE_ENV !== "production") return;
 
-      const name = ctx.user.name ?? ctx.user.email ?? "Someone";
+      const name = ctx.user.name ?? ctx.user.email;
 
       if (input.length > 1) {
         sendSlackMessage(
@@ -355,7 +355,7 @@ z
     }),
 
   // update request
-  // todo: slack message 
+  // todo: slack message
   updateRequest: protectedProcedure
     .input(updateRequestInputSchema)
     .mutation(async ({ ctx, input }) => {

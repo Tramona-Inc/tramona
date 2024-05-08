@@ -11,6 +11,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
+import { z } from "zod";
+import { sql } from "drizzle-orm";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
@@ -77,9 +79,10 @@ export const users = pgTable(
 
     profileUrl: varchar("profile_url", { length: 1000 }),
     location: varchar("location", { length: 1000 }),
-    socials: varchar("socials").array(),
+    socials: varchar("socials")
+      .array()
+      .default(sql`'{}'`),
     about: text("about"),
-    destinations: varchar("destinations").array(),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),
@@ -148,7 +151,9 @@ export type ReferralCode = typeof referralCodes.$inferSelect;
 export const referralCodeSelectSchema = createSelectSchema(referralCodes);
 export const referralCodeInsertSchema = createInsertSchema(referralCodes);
 
-export const userInsertSchema = createInsertSchema(users);
+export const userInsertSchema = createInsertSchema(users, {
+  socials: z.string().array(),
+});
 export const userSelectSchema = createSelectSchema(users);
 export const userUpdateSchema = userInsertSchema
   .partial()
