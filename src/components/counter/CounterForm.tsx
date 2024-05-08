@@ -3,13 +3,19 @@ function OfferDetails() {
     <div>
       <section className="flex flex-col">
         <h2>Counter offer details</h2>
-        <div className="flex flex-row">
+        <div className="flex w-full flex-row">
           <div className="h-[200px] w-[200px]" />
-          <h3>Property title</h3>
-          <p>Airbnb Price: </p>
-          <p>Check-in/Check-out:</p>
-
+          <div className="flex flex-col">
+            <h3>Property title</h3>
+            <p>Airbnb Price: </p>
+            <p>Check-in/Check-out:</p>
+          </div>
         </div>
+        <section>
+          <p>Counter offer price:</p>
+          <p>Taxes</p>
+          <p>Counter offer total</p>
+        </section>
       </section>
     </div>
   );
@@ -17,8 +23,8 @@ function OfferDetails() {
 
 function ReviewProperty() {
   return (
-    <div className="flex w-full flex-col items-center justify-center">
-      <h1>Reivew counter offer</h1>
+    <div className="flex w-full flex-col">
+      <h1 className="text-center">Reivew counter offer</h1>
       <OfferDetails />
     </div>
   );
