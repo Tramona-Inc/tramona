@@ -64,16 +64,9 @@ export const users = pgTable(
       .notNull()
       .defaultNow(),
     //stripe identity verifications
-    isIdentityVerified: isIdentityVerifiedEnum("is_identity_verified")
-      .default("false")
-      .notNull(),
+    isIdentityVerified: isIdentityVerifiedEnum("is_identity_verified").default("false").notNull(),
     verificationReportId: varchar("verification_report_id"),
     dateOfBirth: varchar("date_of_birth"),
-
-    profileUrl: varchar("profile_url", { length: 1000 }),
-    location: varchar("location", { length: 1000 }),
-    socials: varchar("socials").array(),
-    about: text("about"),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),

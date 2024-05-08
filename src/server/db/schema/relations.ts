@@ -252,10 +252,10 @@ export const hostTeamInviteRelations = relations(
   }),
 );
 
-// export const profileRelations = relations(profile, ({ one, many }) => ({
-//   user: one(users, {
-//     fields: [profile.userId],
-//     references: [users.id],
-//   }),
-//   properties: many(properties),
-// }));
+export const profileRelations = relations(profile, ({ one, many }) => ({
+  user: one(users, {
+    fields: [profile.userId],
+    references: [users.id],
+  }),
+  properties: many(properties),
+}));
