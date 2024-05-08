@@ -122,8 +122,7 @@ export default function RequestCard({
         </div>
         <div className="text-zinc-500">
           <p>
-            requested{" "}
-            <strong className="text-lg text-zinc-600">{fmtdPrice}</strong>
+            requested <b className="text-lg text-foreground">{fmtdPrice}</b>
             <span className="text-sm">/night</span>
           </p>
           <div className="flex items-center gap-1">
