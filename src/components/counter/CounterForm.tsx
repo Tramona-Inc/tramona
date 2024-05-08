@@ -9,12 +9,25 @@ function OfferDetails() {
             <h3>Property title</h3>
             <p>Airbnb Price: </p>
             <p>Check-in/Check-out:</p>
+            <div className="flex flex-row">
+              <div>Host Counter Offer</div>
+              <div>Your Offer: </div>
+            </div>
           </div>
         </div>
         <section>
-          <p>Counter offer price:</p>
-          <p>Taxes</p>
-          <p>Counter offer total</p>
+          <div className="flex flex-row justify-between">
+            <p>Counter offer price:</p>
+            <p>Price</p>
+          </div>
+          <div className="flex flex-row justify-between">
+            <p>Taxes</p>
+            <p>Price</p>
+          </div>
+          <div className="flex flex-row justify-between">
+            <p>Counter offer toal</p>
+            <p>Price</p>
+          </div>
         </section>
       </section>
     </div>
