@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { users } from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
@@ -18,7 +19,6 @@ export const config = {
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
   apiVersion: "2023-10-16",
 });
-
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
@@ -194,6 +194,158 @@ export const stripeRouter = createTRPCRouter({
       }
     }),
 
+  createSetupIntent: protectedProcedure
+    .input(
+      z.object({
+        paymentMethod: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
+        })
+        .then((res) => res?.stripeCustomerId);
+
+      // Create a customer id if it doesn't exist
+      if (!stripeCustomerId) {
+        stripeCustomerId = await stripe.customers
+          .create({
+            name: ctx.user.name ?? "",
+            email: ctx.user.email,
+          })
+          .then((res) => res.id);
+
+        await ctx.db
+          .update(users)
+          .set({ stripeCustomerId })
+          .where(eq(users.id, ctx.user.id));
+      }
+
+      if (stripeCustomerId) {
+        const options: Stripe.SetupIntentCreateParams = {
+          automatic_payment_methods: {
+            enabled: true,
+          },
+          customer: stripeCustomerId,
+          payment_method: input.paymentMethod,
+          // Set the payment method as default for the customer
+          usage: "off_session", // or 'on_session' depending on your use case
+        };
+
+        const response = await stripe.setupIntents.create(options);
+        return response;
+      }
+    }),
+
+  // Get the customer info
+  createPaymentIntent: protectedProcedure
+    .input(
+      z.object({
+        amount: z.number(),
+        currency: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const options: Stripe.PaymentIntentCreateParams = {
+        amount: input.amount,
+        currency: input.currency,
+        setup_future_usage: "off_session", // is both of and on session
+        // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+        automatic_payment_methods: { enabled: true },
+      };
+
+      const response = await stripe.paymentIntents.create(options);
+
+      return response;
+    }),
+
+  confirmSetupIntent: protectedProcedure
+    .input(
+      z.object({
+        setupIntent: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const si = await stripe.setupIntents.retrieve(input.setupIntent);
+
+      if (!si.payment_method) {
+        throw new Error("Payment method not found");
+      }
+
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
+        })
+        .then((res) => res?.stripeCustomerId);
+
+      // Create a customer id if it doesn't exist
+      if (!stripeCustomerId) {
+        stripeCustomerId = await stripe.customers
+          .create({
+            name: ctx.user.name ?? "",
+            email: ctx.user.email,
+          })
+          .then((res) => res.id);
+
+        await ctx.db
+          .update(users)
+          .set({ stripeCustomerId })
+          .where(eq(users.id, ctx.user.id));
+      }
+
+      if (!stripeCustomerId) {
+        throw new Error("Customer not found");
+      }
+
+      await stripe.paymentMethods.attach(si.payment_method as string, {
+        customer: stripeCustomerId,
+      });
+
+      await stripe.customers.update(si.customer as string, {
+        invoice_settings: {
+          default_payment_method: si.payment_method as string,
+        },
+      });
+
+      await ctx.db
+        .update(users)
+        .set({ setupIntentId: input.setupIntent })
+        .where(eq(users.id, ctx.user.id));
+    }),
+
+  getListOfPayments: protectedProcedure.query(async ({ ctx }) => {
+    if (ctx.user.stripeCustomerId) {
+      const cards = await stripe.paymentMethods.list({
+        type: "card",
+        customer: ctx.user.stripeCustomerId,
+      });
+
+      const customer = await stripe.customers.retrieve(
+        ctx.user.stripeCustomerId,
+      );
+
+      if (customer.deleted) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Customer not found",
+        });
+      }
+
+      return {
+        // ! Need to get type of invoice_settings
+        defaultPaymentMethod: customer.invoice_settings.default_payment_method,
+        cards,
+      };
+    }
+  }),
+
   getStripeSession: protectedProcedure
     .input(
       z.object({
@@ -223,21 +375,19 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
-  createVerificationSession: protectedProcedure.query(
-    async ({ ctx, input }) => {
-      const verificationSession =
-        await stripe.identity.verificationSessions.create({
-          type: "document",
-          metadata: {
-            user_id: ctx.user.id,
-          },
-        });
+  createVerificationSession: protectedProcedure.query(async ({ ctx }) => {
+    const verificationSession =
+      await stripe.identity.verificationSessions.create({
+        type: "document",
+        metadata: {
+          user_id: ctx.user.id,
+        },
+      });
 
-      // Return only the client secret to the frontend.
-      const clientSecret = verificationSession.client_secret;
-      return clientSecret;
-    },
-  ),
+    // Return only the client secret to the frontend.
+    const clientSecret = verificationSession.client_secret;
+    return clientSecret;
+  }),
 
   getVerificationReports: protectedProcedure.query(async ({ ctx, input }) => {
     const verificationReport = await stripe.identity.verificationReports.list({
@@ -247,16 +397,14 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   getVerificationReportsById: protectedProcedure
-  .input(z.object({ verificationId: z.string() }))
-  .query(
-    async ({ input }) => {
+    .input(z.object({ verificationId: z.string() }))
+    .query(async ({ input }) => {
       const verificationReport =
         await stripe.identity.verificationReports.retrieve(
-          input.verificationId
+          input.verificationId,
         );
       return verificationReport;
-    },
-  ),
+    }),
 
   getSetUpIntent: protectedProcedure
     .input(
@@ -273,4 +421,15 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   // TODO: create a PaymentIntent for admin/host to accept the bidding based of the user intent
+
+  getVerificationStatus: protectedProcedure.query(({ ctx, input }) => {
+    const result = ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        isIdentityVerified: true,
+      },
+    });
+
+    return result;
+  }),
 });

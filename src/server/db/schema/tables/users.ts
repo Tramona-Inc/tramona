@@ -1,13 +1,13 @@
 import {
-  serial,
+  boolean,
+  index,
   integer,
   pgEnum,
   pgTable,
+  serial,
   text,
   timestamp,
   varchar,
-  index,
-  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
@@ -62,6 +62,7 @@ export const users = pgTable(
     lastTextAt: timestamp("last_text_at").defaultNow(),
     isWhatsApp: boolean("is_whats_app").default(false).notNull(),
     stripeCustomerId: varchar("stripe_customer_id"),
+    setupIntentId: varchar("setup_intent_id"),
 
     // mode: "string" cuz nextauth doesnt serialize/deserialize dates
     createdAt: timestamp("created_at", { mode: "string" })

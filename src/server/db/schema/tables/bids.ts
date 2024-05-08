@@ -1,15 +1,16 @@
 import {
   date,
+  index,
   integer,
-  pgEnum,
   pgTable,
   serial,
   timestamp,
+  varchar,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { properties } from "./properties";
-import { index } from "drizzle-orm/pg-core";
 
 export const bidStatusEnum = pgEnum("bid_status", [
   "Pending",
@@ -32,6 +33,11 @@ export const bids = pgTable(
       }),
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
+
+    acceptedAt: timestamp("accepted_at"),
+    setupIntentId: varchar("setup_intent_id"),
+    paymentMethodId: varchar("payment_method_id"),
+
     numGuests: integer("num_guests").notNull().default(1),
     amount: integer("amount").notNull(),
     status: bidStatusEnum("status").notNull().default("Pending"),

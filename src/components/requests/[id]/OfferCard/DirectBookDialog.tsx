@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
+import { useStripe } from "@/utils/stripe-client";
 import {
   formatCurrency,
   formatDateMonthDay,
@@ -14,7 +15,6 @@ import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
-import { useStripe } from "./HowToBookDialog";
 
 export default function DirectBookDialog(
   props: React.PropsWithChildren<{

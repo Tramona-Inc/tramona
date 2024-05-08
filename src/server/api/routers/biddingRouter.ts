@@ -10,12 +10,12 @@ import {
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, exists, isNull } from "drizzle-orm";
+import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";
-import { z } from "zod";
 import { db } from "@/server/db";
 import { random } from "lodash";
 import { add } from "date-fns";
@@ -64,13 +64,28 @@ export const biddingRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
     .mutation(async ({ ctx, input }) => {
-      try {
-        // const requestGroupId = await tx
-        //   .insert(requestGroups)
-        //   .values({ createdByUserId: ctx.user.id, hasApproved: true })
-        //   .returning()
-        //   .then((res) => res[0]!.id);
+      // Check if already exists
+      const bidExist = await ctx.db.query.bids.findMany({
+        where: exists(
+          ctx.db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.groupId, bids.madeByGroupId),
+                eq(groupMembers.userId, ctx.user.id),
+                eq(bids.propertyId, input.propertyId),
+              ),
+            ),
+        ),
+        columns: {
+          propertyId: true,
+        },
+      });
 
+      if (bidExist.length > 0) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      } else {
         const madeByGroupId = await ctx.db
           .insert(groups)
           .values({ ownerId: ctx.user.id })
@@ -85,11 +100,6 @@ export const biddingRouter = createTRPCRouter({
         await ctx.db
           .insert(bids)
           .values({ ...input, madeByGroupId: madeByGroupId });
-      } catch (error) {
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: JSON.stringify(error),
-        });
       }
     }),
 
@@ -178,6 +188,27 @@ export const biddingRouter = createTRPCRouter({
       where: eq(bids.status, "Pending"),
       orderBy: desc(bids.createdAt),
     });
+  }),
+
+  getAllPropertyBids: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db.query.bids.findMany({
+      where: exists(
+        ctx.db
+          .select()
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, bids.madeByGroupId),
+              eq(groupMembers.userId, ctx.user.id),
+            ),
+          ),
+      ),
+      columns: {
+        propertyId: true,
+      },
+    });
+
+    return result.map((res) => res.propertyId);
   }),
 
   accept: protectedProcedure
