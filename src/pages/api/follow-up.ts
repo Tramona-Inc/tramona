@@ -1,4 +1,4 @@
-import { type NextApiRequest, type NextApiResponse } from "next";
+import { type NextApiResponse } from "next";
 
 import { db } from "@/server/db";
 import { requestGroups, requests, users } from "@/server/db/schema";
@@ -10,7 +10,7 @@ import { sub } from "date-fns";
 
 // "request" means request group in this code
 
-export default async function cron(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(res: NextApiResponse) {
   const usersWithUnconfirmedRequests = await db
     .select({
       phoneNumber: users.phoneNumber,

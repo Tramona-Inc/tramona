@@ -1,4 +1,7 @@
-import { type CitiesLatLong, useCitiesFilter } from "@/utils/store/cities-filter";
+import {
+  type CitiesLatLong,
+  useCitiesFilter,
+} from "@/utils/store/cities-filter";
 import { cn } from "@/utils/utils";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { LucideListFilter } from "lucide-react";
@@ -44,15 +47,14 @@ export const cities: CitiesLatLong[] = [
   { id: "atlanta", label: "Atlanta", long: -84.388, lat: 33.749 },
   { id: "austin", label: "Austin", long: -97.7431, lat: 30.2672 },
   { id: "miami", label: "Miami", long: -80.1917902, lat: 25.7616798 },
-  { id: "la", label: "LA", long: -118.2437, lat: 34.0522 },
   {
     id: "palm_springs_area",
     label: "Palm Springs Area",
     long: -116.5453,
     lat: 33.8303,
   },
-  { id: "vegas", label: "Vegas", long: -115.1398, lat: 36.1699 },
-  { id: "sf", label: "SF", long: -122.4194, lat: 37.7749 },
+  { id: "las vegas", label: "Las Vegas", long: -115.1398, lat: 36.1699 },
+  { id: "sf", label: "San francisco", long: -122.4194, lat: 37.7749 },
   { id: "boston", label: "Boston", long: -71.0589, lat: 42.3601 },
 ];
 
@@ -63,11 +65,9 @@ export default function CitiesFilter() {
   const open = useCitiesFilter((state) => state.open);
   const setOpen = useCitiesFilter((state) => state.setOpen);
 
-  console.log(filter);
-
   return (
     <div className="grid grid-cols-8">
-      <div className="col-span-5 flex w-full items-center justify-center xl:col-span-7 ">
+      <div className="col-span-5 flex w-full items-center justify-center md:col-span-7 ">
         <Carousel
           opts={{
             align: "start",
@@ -82,7 +82,10 @@ export default function CitiesFilter() {
                   onClick={() => {
                     setFilter(city);
                   }}
-                  className={cn(city.id === filter.id && "font-bold", "p-1")}
+                  className={cn(
+                    city.id === filter.id && "font-bold",
+                    "p-1 text-lg",
+                  )}
                 >
                   {city.label}
                 </Button>
@@ -98,7 +101,7 @@ export default function CitiesFilter() {
         <DialogTrigger asChild>
           <Button
             variant={"outlineLight"}
-            className="col-span-3 ml-5  border-[1px] p-3 py-6 font-bold xl:col-span-1 "
+            className="col-span-3 ml-5  border-[1px] p-3 py-6 font-bold md:col-span-1 "
           >
             <div className="grid grid-cols-2 place-items-center gap-1 md:gap-5">
               <LucideListFilter />

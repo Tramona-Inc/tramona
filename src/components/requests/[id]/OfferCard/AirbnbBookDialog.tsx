@@ -16,7 +16,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
-import { useStripe } from "./HowToBookDialog";
+import { useStripe } from '@/utils/stripe-client';
 
 export default function AirbnbBookDialog(
   props: React.PropsWithChildren<{
@@ -60,6 +60,8 @@ export default function AirbnbBookDialog(
   )} and I'd like to book it at that price.`;
 
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
+  const getSession = api.stripe.getStripeSession.useMutation();
+  const getSetupIntent = api.stripe.getSetUpIntent.useMutation();
   const createSetupCheckout = api.stripe.createSetupIntentSession.useMutation();
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
@@ -87,6 +89,14 @@ export default function AirbnbBookDialog(
     const stripe = await stripePromise;
 
     if (stripe !== null && response) {
+      const sesh = await getSession.mutateAsync({
+        sessionId: response.id,
+      });
+
+      const intent = await getSetupIntent.mutateAsync({
+        setupIntent: sesh.metadata.setupIntent as string,
+      });
+      console.log(intent);
       await stripe.redirectToCheckout({
         sessionId: response.id,
       });
