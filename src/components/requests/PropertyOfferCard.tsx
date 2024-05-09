@@ -120,13 +120,18 @@ export default function PropertyOfferCard({
           {userCanCounter && (
             <div>
               <div className="flex flex-row justify-between">
-                <h1>Hosts Counter Offer: {formatCurrency(counterNightlyPrice)} /night</h1>
-                <h1>Your offer: {formatCurrency(userOfferNightlyPrice)} /night</h1>
+                <h1>
+                  Hosts Counter Offer: {formatCurrency(counterNightlyPrice)}{" "}
+                  /night
+                </h1>
+                <h1>
+                  Your offer: {formatCurrency(userOfferNightlyPrice)} /night
+                </h1>
               </div>
-              <div>
+              <div className="flex gap-2">
                 <Button>Accept</Button>
-                <Button>Re-counter</Button>
-                <Button>Decline</Button>
+                <Button variant={"outline"}>Re-counter</Button>
+                <Button variant={"outline"}>Decline</Button>
               </div>
             </div>
           )}
