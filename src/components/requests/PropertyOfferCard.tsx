@@ -1,5 +1,6 @@
 import { type Bid } from "@/server/db/schema";
 import { type RouterOutputs } from "@/utils/api";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import {
   daysBetweenDates,
   formatCurrency,
@@ -60,7 +61,8 @@ export default function PropertyOfferCard({
     offer.counters.length > 0 &&
     counter?.status === "Pending" &&
     counter.userId !== session?.user.id &&
-    offer.status !== "Rejected" && offer.status !== "Accepted";
+    offer.status !== "Rejected" &&
+    offer.status !== "Accepted";
 
   // ! clean up
   const counterNightlyPrice = counter
@@ -105,6 +107,17 @@ export default function PropertyOfferCard({
             </div>
           </div>
           <div className="text-muted-foreground">
+            <p>
+              Airbnb Price for{" "}
+              <b className="text-lg text-foreground">
+                {formatCurrency(
+                  offer.property.originalNightlyPrice
+                    ? offer.property.originalNightlyPrice * AVG_AIRBNB_MARKUP
+                    : 0,
+                )}
+              </b>
+              /night
+            </p>
             <p>
               offer for{" "}
               <b className="text-lg text-foreground">
