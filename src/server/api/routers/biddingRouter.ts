@@ -62,14 +62,15 @@ export const biddingRouter = createTRPCRouter({
         madeByGroup: {
           with: { members: { with: { user: true } }, invites: true },
         },
+        // Gets the latest counter
         counters: {
           orderBy: (counters, { desc }) => [desc(counters.createdAt)],
-          limit: 1,
           columns: {
             id: true,
             counterAmount: true,
             createdAt: true,
             status: true,
+            userId: true,
           },
         },
       },
@@ -219,6 +220,7 @@ export const biddingRouter = createTRPCRouter({
             counterAmount: true,
             createdAt: true,
             status: true,
+            userId: true,
           },
         },
       },

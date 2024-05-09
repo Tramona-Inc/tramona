@@ -2,6 +2,7 @@ import { type Bid } from "@/server/db/schema";
 import { type RouterOutputs } from "@/utils/api";
 import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { CalendarIcon, EllipsisIcon, TrashIcon, UsersIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -28,10 +29,6 @@ function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
       return "red";
   }
 }
-interface OfferProps {
-  isGuestDashboard: boolean;
-  offer: RouterOutputs["biddings"]["getMyBids"][number] | RouterOutputs["biddings"]["getAllPending"][number];
-}
 
 export default function PropertyOfferCard({
   offer,
@@ -48,6 +45,13 @@ export default function PropertyOfferCard({
   const badge = (
     <Badge variant={getBadgeColor(offer.status)}>{offer.status}</Badge>
   );
+
+  const { data: session } = useSession();
+
+  const userCounter =
+    offer.counters.length > 0 &&
+    offer.counters[0]?.status === "Pending" &&
+    offer.counters[0].userId !== session?.user.id;
 
   return (
     <Card className="overflow-clip p-0">
@@ -96,6 +100,11 @@ export default function PropertyOfferCard({
           {!isGuestDashboard && (
             <div className="flex justify-end gap-2">
               <PropertyOfferResponseDD offerId={offer.id} />
+            </div>
+          )}
+          {userCounter && (
+            <div>
+              <Button>Accept</Button>
             </div>
           )}
         </div>
