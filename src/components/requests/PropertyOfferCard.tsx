@@ -1,6 +1,11 @@
 import { type Bid } from "@/server/db/schema";
 import { type RouterOutputs } from "@/utils/api";
-import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
+import {
+  daysBetweenDates,
+  formatCurrency,
+  formatDateRange,
+  plural,
+} from "@/utils/utils";
 import { CalendarIcon, EllipsisIcon, TrashIcon, UsersIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -48,10 +53,20 @@ export default function PropertyOfferCard({
 
   const { data: session } = useSession();
 
-  const userCounter =
+  const counter = offer.counters[0];
+
+  const userCanCounter =
     offer.counters.length > 0 &&
-    offer.counters[0]?.status === "Pending" &&
-    offer.counters[0].userId !== session?.user.id;
+    counter?.status === "Pending" &&
+    counter.userId !== session?.user.id;
+
+  const counterNightlyPrice = counter
+    ? counter.counterAmount / daysBetweenDates(offer.checkIn, offer.checkOut)
+    : 0;
+
+  const userOfferNightlyPrice = counter
+    ? offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut)
+    : 0;
 
   return (
     <Card className="overflow-clip p-0">
@@ -102,9 +117,17 @@ export default function PropertyOfferCard({
               <PropertyOfferResponseDD offerId={offer.id} />
             </div>
           )}
-          {userCounter && (
+          {userCanCounter && (
             <div>
-              <Button>Accept</Button>
+              <div className="flex flex-row justify-between">
+                <h1>Hosts Counter Offer: {formatCurrency(counterNightlyPrice)} /night</h1>
+                <h1>Your offer: {formatCurrency(userOfferNightlyPrice)} /night</h1>
+              </div>
+              <div>
+                <Button>Accept</Button>
+                <Button>Re-counter</Button>
+                <Button>Decline</Button>
+              </div>
             </div>
           )}
         </div>
