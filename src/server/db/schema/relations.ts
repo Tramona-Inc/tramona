@@ -39,7 +39,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   requestGroupsCreated: many(requestGroups),
   hostTeams: many(hostTeamMembers),
   bids: many(bids),
-  counters: many(counters),
   bucketListDestinations: many(bucketListDestinations),
   bucketListProperties: many(bucketListProperties),
 }));
@@ -124,11 +123,11 @@ export const bidsRelations = relations(bids, ({ one, many }) => ({
 
 export const countersRelations = relations(counters, ({ one }) => ({
   bid: one(bids, {
-    fields: [counters.id],
+    fields: [counters.bidId],
     references: [bids.id],
   }),
   property: one(properties, {
-    fields: [counters.id],
+    fields: [counters.propertyId],
     references: [properties.id],
   }),
 }));

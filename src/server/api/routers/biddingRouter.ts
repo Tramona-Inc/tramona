@@ -62,6 +62,13 @@ export const biddingRouter = createTRPCRouter({
         madeByGroup: {
           with: { members: { with: { user: true } }, invites: true },
         },
+        counters: {
+          columns: {
+            id: true,
+            counterAmount: true,
+            createdAt: true,
+          },
+        },
       },
     });
   }),

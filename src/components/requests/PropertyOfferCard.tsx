@@ -1,22 +1,22 @@
+import { type Bid } from "@/server/db/schema";
+import { type RouterOutputs } from "@/utils/api";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { CalendarIcon, EllipsisIcon, TrashIcon, UsersIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { PropertyOfferResponseDD } from "../property-offer-response/PropertyOfferResponseDD";
+import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { type RouterOutputs } from "@/utils/api";
-import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
-import Image from "next/image";
-import Link from "next/link";
-import { Badge, type BadgeProps } from "../ui/badge";
-import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
-import { useState } from "react";
-import { Card, CardContent } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
-import { PropertyOfferResponseDD } from "../property-offer-response/PropertyOfferResponseDD";
-import { type Bid } from "@/server/db/schema";
+import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
 
 function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
@@ -44,6 +44,8 @@ export default function PropertyOfferCard({
   const badge = (
     <Badge variant={getBadgeColor(offer.status)}>{offer.status}</Badge>
   );
+
+  console.log(offer.counters)
 
   return (
     <Card className="overflow-clip p-0">
