@@ -301,7 +301,7 @@ importers:
         version: 3.2.0
       stripe:
         specifier: ^14.23.0
-        version: 14.23.0
+        version: 14.25.0
       superjson:
         specifier: ^2.2.1
         version: 2.2.1
@@ -7981,6 +7981,10 @@ packages:
     resolution: {integrity: sha512-trVZiI6RMOkO476zLGaBIzszOdFPnCCXHPG9kn0yuS1uz6xdVxPfZdB3vUig9pxPFDM9BRAgz/YUIVQ1/vuiUg==}
     engines: {node: '>=0.6'}
 
+  qs@6.12.1:
+    resolution: {integrity: sha512-zWmv4RSuB9r2mYQw3zxQuHWeU+42aKi1wWig/j4ele4ygELZ7PEO6MM7rim9oAQH2A5MWfsAVf/jPvTPgCbvUQ==}
+    engines: {node: '>=0.6'}
+
   querystring-es3@0.2.1:
     resolution: {integrity: sha512-773xhDQnZBMFobEiztv8LIl70ch5MSF/jUQVlhwFyBILqq96anmoctVIYz+ZRp0qbCKATTn6ev02M3r7Ga5vqA==}
     engines: {node: '>=0.4.x'}
@@ -8693,8 +8697,8 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  stripe@14.23.0:
-    resolution: {integrity: sha512-OPD7LqBmni6uDdqA05GGgMZyyRWxJOehONBNC9tYgY4Uh089EtXd6QLIgRGrqTDlQH3cA2BXo848nxwa/zsQzw==}
+  stripe@14.25.0:
+    resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
     engines: {node: '>=12.*'}
 
   strnum@1.0.5:
@@ -14183,7 +14187,7 @@ snapshots:
     dependencies:
       '@storybook/client-logger': 7.6.17
       memoizerific: 1.11.3
-      qs: 6.12.0
+      qs: 6.12.1
 
   '@storybook/telemetry@7.6.17':
     dependencies:
@@ -19256,6 +19260,10 @@ snapshots:
     dependencies:
       side-channel: 1.0.6
 
+  qs@6.12.1:
+    dependencies:
+      side-channel: 1.0.6
+
   querystring-es3@0.2.1: {}
 
   querystring@0.2.0: {}
@@ -20152,10 +20160,10 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  stripe@14.23.0:
+  stripe@14.25.0:
     dependencies:
       '@types/node': 20.12.11
-      qs: 6.12.0
+      qs: 6.12.1
 
   strnum@1.0.5: {}
 
@@ -20644,7 +20652,7 @@ snapshots:
   url@0.11.3:
     dependencies:
       punycode: 1.4.1
-      qs: 6.12.0
+      qs: 6.12.1
 
   urlpattern-polyfill@10.0.0: {}
 
