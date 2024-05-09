@@ -1,27 +1,16 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
-import OfferTabs from "@/components/offers/OfferTabs";
-import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
-import OfferCard, { OfferWithProperty } from "@/components/requests/[id]/OfferCard";
-import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
-import PaywallDialog from "@/components/requests/[id]/PaywallDialog";
-import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
-import { getNumNights } from "@/utils/utils";
-import { TagIcon } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState, useEffect, useRef, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Map,
-  Marker,
   GoogleApiWrapper,
   Circle,
-  InfoWindow,
-  OverlayView,
-  GoogleAPI,
+  type GoogleAPI,
 } from "google-maps-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -149,5 +138,5 @@ const [effectHasRun, setEffectHasRun] = useState(false)
 }
 
 export default GoogleApiWrapper({
-  apiKey: "AIzaSyAQk4DZA7D-9OSMigdN97169Pg5dk8p5Zk",
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",
 })(Page);

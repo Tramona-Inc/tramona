@@ -1,6 +1,6 @@
 import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
 import {
@@ -12,10 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
 import {
-  cn,
   formatCurrency,
   formatDateMonthDay,
-  formatDateWeekMonthDay,
   getDiscountPercentage,
   getNumNights,
   getTramonaFeeTotal,
@@ -26,16 +24,13 @@ import {
   CheckIcon,
   ImagesIcon,
   ChevronRight,
-  MapPin,
   UsersRoundIcon,
   CalendarDays,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
 import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
 import {
@@ -44,25 +39,6 @@ import {
 } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
-
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((module) => module.MapContainer),
-  {
-    ssr: false, // Disable server-side rendering for this component
-  },
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((module) => module.TileLayer),
-  {
-    ssr: false,
-  },
-);
-const Circle = dynamic(
-  () => import("react-leaflet").then((module) => module.Circle),
-  {
-    ssr: false,
-  },
-);
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -81,10 +57,6 @@ export default function OfferPage({
   if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
     isBooked = true;
   }
-
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: property.address!,
-  });
 
   const isMobile = useMediaQuery("(max-width: 640px)");
 
@@ -123,13 +95,6 @@ export default function OfferPage({
   const firstImageUrl: string = property.imageUrls?.[0] ?? "";
   return (
     <div className="space-y-4">
-      {/* <Link
-        href={isBooked ? "/requests" : `/requests/${request.id}`}
-        className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
-      >
-        &larr; Back to offers
-      </Link> */}
-
       <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background mt-4">
         <Dialog>
           {isMobile ? (
@@ -255,9 +220,6 @@ export default function OfferPage({
         <a href="#amenities" className="text-gray-600 hover:text-gray-800">
           Amenities
         </a>
-        {/* <a href="#location" className="text-gray-600 hover:text-gray-800">
-          Location
-        </a> */}
         {property.checkInTime && (
           <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
             House rules
@@ -461,40 +423,6 @@ export default function OfferPage({
           </Card>
         </div>
       </div>
-      {/* <hr className="h-px border-0 bg-gray-300" />
-      <section id="location" className="scroll-mt-36 space-y-1">
-        <h1 className="text-lg font-semibold md:text-xl">Location</h1>
-        <div className="inline-flex items-center justify-center py-2 text-base">
-          <MapPin className="mr-2" />
-          {request.location}
-        </div>
-        {coordinateData && (
-          <div className="relative z-10">
-            <MapContainer
-              center={[
-                coordinateData.coordinates.lat,
-                coordinateData.coordinates.lng,
-              ]}
-              zoom={15}
-              scrollWheelZoom={false}
-              style={{ height: "500px" }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Circle
-                center={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
-                ]}
-                radius={200} // Adjust radius as needed
-                pathOptions={{ color: "black" }} // Customize circle color and other options
-              />
-            </MapContainer>
-          </div>
-        )}
-      </section> */}
       {property.checkInTime && (
         <div>
           <hr className="h-px border-0 bg-gray-300" />

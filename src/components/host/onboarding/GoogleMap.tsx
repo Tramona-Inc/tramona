@@ -86,5 +86,5 @@ function GoogleMap(
 }
 
 export default GoogleApiWrapper({
-  apiKey: "AIzaSyAQk4DZA7D-9OSMigdN97169Pg5dk8p5Zk",
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",
 })(GoogleMap);
