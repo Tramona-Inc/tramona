@@ -101,7 +101,10 @@ export default function PropertyOfferCard({
             <p>
               offer for{" "}
               <b className="text-lg text-foreground">
-                {formatCurrency(offer.amount)}
+                {formatCurrency(
+                  offer.amount /
+                    daysBetweenDates(offer.checkIn, offer.checkOut),
+                )}
               </b>
               /night
             </p>
@@ -117,6 +120,15 @@ export default function PropertyOfferCard({
               <PropertyOfferResponseDD offerId={offer.id} />
             </div>
           )} */}
+
+          {/* Display for host initially */}
+          {!isGuestDashboard && offer.counters.length === 0 && (
+            <PropertyCounterOptions
+              offerId={offer.id}
+              counterNightlyPrice={counterNightlyPrice}
+              userOfferNightlyPrice={userOfferNightlyPrice}
+            />
+          )}
 
           {userCanCounter && (
             <PropertyCounterOptions

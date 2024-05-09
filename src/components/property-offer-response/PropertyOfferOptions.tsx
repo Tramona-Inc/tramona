@@ -19,15 +19,17 @@ export default function PropertyCounterOptions({
 
   return (
     <div>
-      <div className="flex flex-row justify-between">
-        <h1>
-          {session?.user.role === "admin" || session?.user.role === "host"
-            ? "Traveller"
-            : "Host"}{" "}
-          Counter Offer: {formatCurrency(counterNightlyPrice)} /night
-        </h1>
-        <h1>Your offer: {formatCurrency(userOfferNightlyPrice)} /night</h1>
-      </div>
+      {counterNightlyPrice !== 0 && userOfferNightlyPrice !== 0 && (
+        <div className="flex flex-row justify-between">
+          <h1>
+            {session?.user.role === "admin" || session?.user.role === "host"
+              ? "Traveller"
+              : "Host"}{" "}
+            Counter Offer: {formatCurrency(counterNightlyPrice)} /night
+          </h1>
+          <h1>Your offer: {formatCurrency(userOfferNightlyPrice)} /night</h1>
+        </div>
+      )}
       <div className="flex gap-2">
         <Button>Accept</Button>
         <TravellerCounterDialog

@@ -65,6 +65,8 @@ export default function CounterForm({
     }
   }
 
+  const originalBidPrice = data?.amount / daysBetweenDates(data?.checkIn, data?.checkOut);
+
   return (
     <>
       {isLoading ? (
@@ -73,7 +75,7 @@ export default function CounterForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <h1>Original Offer</h1>
-            {data && <p>{formatCurrency(counterNightlyPrice)} /night</p>}
+            {data && <p>{counterNightlyPrice !== 0 ? formatCurrency(counterNightlyPrice) : formatCurrency(originalBidPrice)} /night</p>}
             <FormField
               control={form.control}
               name="counterPrice"
