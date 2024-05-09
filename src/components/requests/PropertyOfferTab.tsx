@@ -9,8 +9,6 @@ export default function PropertyOfferTab() {
 
   if (!offers) return <Spinner />;
 
-  console.log(offers);
-
   return offers.length > 0 ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {offers.map((offer) => (

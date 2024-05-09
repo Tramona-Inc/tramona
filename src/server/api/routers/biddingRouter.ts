@@ -208,6 +208,13 @@ export const biddingRouter = createTRPCRouter({
         property: {
           columns: { id: true, name: true, address: true, imageUrls: true },
         },
+        counters: {
+          columns: {
+            id: true,
+            counterAmount: true,
+            createdAt: true,
+          },
+        },
       },
       where: eq(bids.status, "Pending"),
       orderBy: desc(bids.createdAt),

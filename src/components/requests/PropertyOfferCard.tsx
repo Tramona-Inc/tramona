@@ -28,6 +28,10 @@ function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
       return "red";
   }
 }
+interface OfferProps {
+  isGuestDashboard: boolean;
+  offer: RouterOutputs["biddings"]["getMyBids"][number] | RouterOutputs["biddings"]["getAllPending"][number];
+}
 
 export default function PropertyOfferCard({
   offer,
@@ -44,8 +48,6 @@ export default function PropertyOfferCard({
   const badge = (
     <Badge variant={getBadgeColor(offer.status)}>{offer.status}</Badge>
   );
-
-  console.log(offer.counters)
 
   return (
     <Card className="overflow-clip p-0">
