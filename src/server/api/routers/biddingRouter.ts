@@ -47,6 +47,35 @@ async function updateBidStatus({
   });
 }
 
+async function userWithBid({
+  userId,
+  bidId,
+}: {
+  userId: string;
+  bidId: number;
+}) {
+  const hostId = await db.query.bids
+    .findFirst({
+      where: eq(bids.id, bidId),
+      columns: {},
+      with: { property: { columns: { hostId: true } } },
+    })
+    .then((res) => res?.property.hostId);
+
+  const bidInfo = await db.query.bids.findFirst({
+    where: eq(bids.id, bidId),
+    with: {
+      madeByGroup: {
+        with: { members: { with: { user: true } }, invites: true },
+      },
+    },
+  });
+
+  const bidUserId = bidInfo?.madeByGroup.ownerId;
+
+  return bidUserId === userId || hostId === userId;
+}
+
 export const biddingRouter = createTRPCRouter({
   // ! update query so host/admin can see all the queries (add when we work on host flow)
   getMyBids: protectedProcedure.query(async ({ ctx }) => {
@@ -276,26 +305,12 @@ export const biddingRouter = createTRPCRouter({
   accept: protectedProcedure
     .input(z.object({ bidId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const hostId = await ctx.db.query.bids
-        .findFirst({
-          where: eq(bids.id, input.bidId),
-          columns: {},
-          with: { property: { columns: { hostId: true } } },
-        })
-        .then((res) => res?.property.hostId);
-
-      const bidInfo = await ctx.db.query.bids.findFirst({
-        where: eq(bids.id, input.bidId),
-        with: {
-          madeByGroup: {
-            with: { members: { with: { user: true } }, invites: true },
-          },
-        },
+      const userIsWithBid = await userWithBid({
+        userId: ctx.user.id,
+        bidId: input.bidId,
       });
 
-      const bidUserId = bidInfo?.madeByGroup.ownerId;
-
-      if (bidUserId !== ctx.user.id && hostId !== ctx.user.id) {
+      if (!userIsWithBid) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       } else {
         await updateBidStatus({ id: input.bidId, status: "Accepted" });
@@ -307,19 +322,16 @@ export const biddingRouter = createTRPCRouter({
   reject: protectedProcedure
     .input(z.object({ bidId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      // const hostId = await ctx.db.query.bids
-      //   .findFirst({
-      //     where: eq(bids.id, input.bidId),
-      //     columns: {},
-      //     with: { property: { columns: { hostId: true } } },
-      //   })
-      //   .then((res) => res?.property.hostId);
+      const userIsWithBid = await userWithBid({
+        userId: ctx.user.id,
+        bidId: input.bidId,
+      });
 
-      // if (hostId !== ctx.user.id) {
-      //   throw new TRPCError({ code: "UNAUTHORIZED" });
-      // }
-
-      await updateBidStatus({ id: input.bidId, status: "Rejected" });
+      if (!userIsWithBid) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      } else {
+        await updateBidStatus({ id: input.bidId, status: "Rejected" });
+      }
 
       // TODO: email travellers
     }),
