@@ -2,9 +2,9 @@ import Head from "next/head";
 import { useMemo } from "react";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
 import PastTrips from "@/components/my-trips/PastTrips";
+import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { api } from "@/utils/api";
 
@@ -15,6 +15,11 @@ export default function MyTrips() {
     api.myTrips.getUpcomingTrips.useQuery({ date });
   const { data: pastTrips, isLoading: loadingPastTrips } =
     api.myTrips.getPreviousTrips.useQuery({ date });
+
+  const { data: acceptedBids, isLoading: loadingBids } =
+    api.myTrips.getAcceptedBids.useQuery();
+
+  console.log(acceptedBids);
 
   return (
     <DashboardLayout type="guest">

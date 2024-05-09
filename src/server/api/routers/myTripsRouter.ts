@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { groupMembers, offers, requests } from "@/server/db/schema";
+import { bids, groupMembers, offers, requests } from "@/server/db/schema";
 import { and, eq, exists, inArray, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 
@@ -196,4 +196,48 @@ export const myTripsRouter = createTRPCRouter({
 
       return displayAllUpcomingTrips;
     }),
+  getAcceptedBids: protectedProcedure.query(async ({ ctx, input }) => {
+    return await ctx.db.query.bids.findMany({
+      where: and(
+        exists(
+          ctx.db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.groupId, bids.madeByGroupId),
+                eq(groupMembers.userId, ctx.user.id),
+              ),
+            ),
+        ),
+        eq(bids.status, "Accepted"),
+        isNotNull(bids.paymentIntentId),
+      ),
+      with: {
+        property: {
+          columns: {
+            id: true,
+            imageUrls: true,
+            name: true,
+            address: true,
+            originalNightlyPrice: true,
+          },
+        },
+        madeByGroup: {
+          with: { members: { with: { user: true } }, invites: true },
+        },
+        // Gets the latest counter
+        counters: {
+          orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+          columns: {
+            id: true,
+            counterAmount: true,
+            createdAt: true,
+            status: true,
+            userId: true,
+          },
+        },
+      },
+    });
+  }),
 });
