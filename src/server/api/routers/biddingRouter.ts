@@ -38,6 +38,12 @@ async function updateBidStatus({
       .update(bids)
       .set({ statusUpdatedAt: new Date() })
       .where(eq(bids.id, id));
+    if (status === "Accepted") {
+      await tx
+        .update(bids)
+        .set({ acceptedAt: new Date() })
+        .where(eq(bids.id, id));
+    }
   });
 }
 
