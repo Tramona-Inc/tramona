@@ -292,19 +292,17 @@ export const biddingRouter = createTRPCRouter({
   reject: protectedProcedure
     .input(z.object({ bidId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "admin") {
-        const hostId = await ctx.db.query.bids
-          .findFirst({
-            where: eq(bids.id, input.bidId),
-            columns: {},
-            with: { property: { columns: { hostId: true } } },
-          })
-          .then((res) => res?.property.hostId);
+      // const hostId = await ctx.db.query.bids
+      //   .findFirst({
+      //     where: eq(bids.id, input.bidId),
+      //     columns: {},
+      //     with: { property: { columns: { hostId: true } } },
+      //   })
+      //   .then((res) => res?.property.hostId);
 
-        if (hostId !== ctx.user.id) {
-          throw new TRPCError({ code: "UNAUTHORIZED" });
-        }
-      }
+      // if (hostId !== ctx.user.id) {
+      //   throw new TRPCError({ code: "UNAUTHORIZED" });
+      // }
 
       await updateBidStatus({ id: input.bidId, status: "Rejected" });
 

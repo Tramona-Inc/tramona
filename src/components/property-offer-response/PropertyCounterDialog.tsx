@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
 import CounterForm from "./CounterForm";
 
-export function TravellerCounterDialog({
+export function PropertyCounterDialog({
   offerId,
   open,
   setOpen,
@@ -23,7 +23,11 @@ export function TravellerCounterDialog({
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Counter Offer</DialogTitle>
         </DialogHeader>
-        <CounterForm offerId={offerId} setOpen={setOpen} counterNightlyPrice={counterNightlyPrice}/>
+        <CounterForm
+          offerId={offerId}
+          setOpen={setOpen}
+          counterNightlyPrice={counterNightlyPrice}
+        />
       </DialogContent>
     </Dialog>
   );

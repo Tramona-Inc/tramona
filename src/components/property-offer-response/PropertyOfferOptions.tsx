@@ -2,7 +2,8 @@ import { formatCurrency } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { TravellerCounterDialog } from "./TravellerCounterDialog";
+import { PropertyCounterDialog } from "./PropertyCounterDialog";
+import PropertyDeclineDialog from './PropertyDeclineDialog';
 
 export default function PropertyCounterOptions({
   offerId,
@@ -14,6 +15,7 @@ export default function PropertyCounterOptions({
   previousOfferNightlyPrice: number;
 }) {
   const [counterOpen, setCounterOpen] = useState(false);
+  const [declineOpen, setDeclineOpen] = useState(false);
 
   const { data: session } = useSession();
 
@@ -36,13 +38,17 @@ export default function PropertyCounterOptions({
       </div>
       <div className="flex gap-2">
         <Button>Accept</Button>
-        <TravellerCounterDialog
+        <PropertyCounterDialog
           offerId={offerId}
           open={counterOpen}
           setOpen={setCounterOpen}
           counterNightlyPrice={counterNightlyPrice}
         />
-        <Button variant={"outline"}>Decline</Button>
+        <PropertyDeclineDialog 
+          offerId={offerId}
+          open={declineOpen}
+          onOpenChange={setDeclineOpen}
+        />
       </div>
     </div>
   );
