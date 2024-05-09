@@ -1,3 +1,4 @@
+import { db } from "@/server/db";
 import {
   type Bid,
   bidInsertSchema,
@@ -12,17 +13,17 @@ import {
   counterInsertSchema,
   counters,
 } from "@/server/db/schema/tables/counters";
+import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, exists, isNull } from "drizzle-orm";
+import { add } from "date-fns";
+import { and, desc, eq, exists } from "drizzle-orm";
+import { random } from "lodash";
 import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";
-import { db } from "@/server/db";
-import { random } from "lodash";
-import { add } from "date-fns";
 
 async function updateBidStatus({
   id,
@@ -64,6 +65,18 @@ export const biddingRouter = createTRPCRouter({
       },
     });
   }),
+
+  getBidInfo: protectedProcedure
+    .input(
+      z.object({
+        bidId: zodInteger(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.bids.findFirst({
+        where: eq(bids.id, input.bidId),
+      });
+    }),
 
   create: protectedProcedure
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
