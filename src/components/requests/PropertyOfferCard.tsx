@@ -60,7 +60,7 @@ export default function PropertyOfferCard({
     offer.counters.length > 0 &&
     counter?.status === "Pending" &&
     counter.userId !== session?.user.id &&
-    offer.status !== "Rejected";
+    offer.status !== "Rejected" && offer.status !== "Accepted";
 
   // ! clean up
   const counterNightlyPrice = counter

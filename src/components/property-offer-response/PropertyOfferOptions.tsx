@@ -1,9 +1,9 @@
 import { formatCurrency } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { PropertyAcceptDialog } from "./PropertyAcceptDialog";
 import { PropertyCounterDialog } from "./PropertyCounterDialog";
-import PropertyDeclineDialog from './PropertyDeclineDialog';
+import PropertyDeclineDialog from "./PropertyDeclineDialog";
 
 export default function PropertyCounterOptions({
   offerId,
@@ -14,20 +14,19 @@ export default function PropertyCounterOptions({
   counterNightlyPrice: number;
   previousOfferNightlyPrice: number;
 }) {
+  const [acceptOpen, setAcceptOpen] = useState(false);
   const [counterOpen, setCounterOpen] = useState(false);
   const [declineOpen, setDeclineOpen] = useState(false);
 
   const { data: session } = useSession();
 
   return (
-    <div>
-      <div className="flex flex-row justify-between">
+    <div className="flex flex-col gap-5">
+      <div className="mt-5 flex flex-row justify-between">
         {counterNightlyPrice !== 0 && (
           <h1>
-            {session?.user.role === "admin" || session?.user.role === "host"
-              ? "Traveller"
-              : "Host"}{" "}
-            Counter Offer: {formatCurrency(counterNightlyPrice)} /night
+            {session?.user.role === "guest" ? "Host" : "Traveller"} Counter
+            Offer: {formatCurrency(counterNightlyPrice)} /night
           </h1>
         )}
         {previousOfferNightlyPrice !== 0 && (
@@ -37,14 +36,19 @@ export default function PropertyCounterOptions({
         )}
       </div>
       <div className="flex gap-2">
-        <Button>Accept</Button>
+        <PropertyAcceptDialog
+          offerId={offerId}
+          open={acceptOpen}
+          setOpen={setAcceptOpen}
+          counterNightlyPrice={counterNightlyPrice}
+        />
         <PropertyCounterDialog
           offerId={offerId}
           open={counterOpen}
           setOpen={setCounterOpen}
           counterNightlyPrice={counterNightlyPrice}
         />
-        <PropertyDeclineDialog 
+        <PropertyDeclineDialog
           offerId={offerId}
           open={declineOpen}
           onOpenChange={setDeclineOpen}
