@@ -63,10 +63,13 @@ export const biddingRouter = createTRPCRouter({
           with: { members: { with: { user: true } }, invites: true },
         },
         counters: {
+          orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+          limit: 1,
           columns: {
             id: true,
             counterAmount: true,
             createdAt: true,
+            status: true,
           },
         },
       },
@@ -209,10 +212,13 @@ export const biddingRouter = createTRPCRouter({
           columns: { id: true, name: true, address: true, imageUrls: true },
         },
         counters: {
+          orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+          limit: 1,
           columns: {
             id: true,
             counterAmount: true,
             createdAt: true,
+            status: true,
           },
         },
       },
