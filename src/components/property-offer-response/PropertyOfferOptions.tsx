@@ -7,11 +7,11 @@ import { TravellerCounterDialog } from "./TravellerCounterDialog";
 export default function PropertyCounterOptions({
   offerId,
   counterNightlyPrice,
-  userOfferNightlyPrice,
+  previousOfferNightlyPrice,
 }: {
   offerId: number;
   counterNightlyPrice: number;
-  userOfferNightlyPrice: number;
+  previousOfferNightlyPrice: number;
 }) {
   const [counterOpen, setCounterOpen] = useState(false);
 
@@ -19,17 +19,21 @@ export default function PropertyCounterOptions({
 
   return (
     <div>
-      {counterNightlyPrice !== 0 && userOfferNightlyPrice !== 0 && (
-        <div className="flex flex-row justify-between">
+      <div className="flex flex-row justify-between">
+        {counterNightlyPrice !== 0 && (
           <h1>
             {session?.user.role === "admin" || session?.user.role === "host"
               ? "Traveller"
               : "Host"}{" "}
             Counter Offer: {formatCurrency(counterNightlyPrice)} /night
           </h1>
-          <h1>Your offer: {formatCurrency(userOfferNightlyPrice)} /night</h1>
-        </div>
-      )}
+        )}
+        {previousOfferNightlyPrice !== 0 && (
+          <h1>
+            Your offer: {formatCurrency(previousOfferNightlyPrice)} /night
+          </h1>
+        )}
+      </div>
       <div className="flex gap-2">
         <Button>Accept</Button>
         <TravellerCounterDialog

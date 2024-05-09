@@ -65,7 +65,7 @@ export default function CounterForm({
     }
   }
 
-  const originalBidPrice = data?.amount / daysBetweenDates(data?.checkIn, data?.checkOut);
+  const originalBidPrice = (data?.amount ?? 0) / daysBetweenDates(data?.checkIn, data?.checkOut);
 
   return (
     <>

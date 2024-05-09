@@ -42,6 +42,7 @@ async function updateBidStatus({
 }
 
 export const biddingRouter = createTRPCRouter({
+  // ! update query so host/admin can see all the queries (add when we work on host flow)
   getMyBids: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.bids.findMany({
       where: exists(

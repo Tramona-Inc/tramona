@@ -54,19 +54,28 @@ export default function PropertyOfferCard({
   const { data: session } = useSession();
 
   const counter = offer.counters[0];
+  const previousCounter = offer.counters[1];
+
+  console.log(offer);
 
   const userCanCounter =
     offer.counters.length > 0 &&
     counter?.status === "Pending" &&
     counter.userId !== session?.user.id;
 
+  // ! clean up
+
   const counterNightlyPrice = counter
     ? counter.counterAmount / daysBetweenDates(offer.checkIn, offer.checkOut)
     : 0;
 
-  const userOfferNightlyPrice = counter
-    ? offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut)
-    : 0;
+  // ! previous counter for host/admin will always be 0 cause it can only gets one counter
+  // ! update query so host can see all counters
+  const previousCounterNightlyPrice =
+    offer.counters.length > 1 && previousCounter
+      ? previousCounter.counterAmount /
+        daysBetweenDates(offer.checkIn, offer.checkOut)
+      : 0;
 
   return (
     <Card className="overflow-clip p-0">
@@ -126,7 +135,7 @@ export default function PropertyOfferCard({
             <PropertyCounterOptions
               offerId={offer.id}
               counterNightlyPrice={counterNightlyPrice}
-              userOfferNightlyPrice={userOfferNightlyPrice}
+              previousOfferNightlyPrice={previousCounterNightlyPrice}
             />
           )}
 
@@ -134,7 +143,7 @@ export default function PropertyOfferCard({
             <PropertyCounterOptions
               offerId={offer.id}
               counterNightlyPrice={counterNightlyPrice}
-              userOfferNightlyPrice={userOfferNightlyPrice}
+              previousOfferNightlyPrice={previousCounterNightlyPrice}
             />
           )}
         </div>
