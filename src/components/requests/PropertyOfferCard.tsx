@@ -56,15 +56,13 @@ export default function PropertyOfferCard({
   const counter = offer.counters[0];
   const previousCounter = offer.counters[1];
 
-  console.log(offer);
-
   const userCanCounter =
     offer.counters.length > 0 &&
     counter?.status === "Pending" &&
-    counter.userId !== session?.user.id;
+    counter.userId !== session?.user.id &&
+    offer.status !== "Rejected";
 
   // ! clean up
-
   const counterNightlyPrice = counter
     ? counter.counterAmount / daysBetweenDates(offer.checkIn, offer.checkOut)
     : 0;
