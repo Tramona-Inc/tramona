@@ -292,7 +292,7 @@ importers:
         version: 4.2.1(leaflet@1.9.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-phone-number-input:
         specifier: ^3.3.9
-        version: 3.3.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 3.4.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       recharts:
         specifier: ^2.12.3
         version: 2.12.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -5029,8 +5029,8 @@ packages:
       typescript:
         optional: true
 
-  country-flag-icons@1.5.10:
-    resolution: {integrity: sha512-x3elaK+ZY23W1YtFsNQknRdURzkV7g3Z93AoA7SHZJUEXbVjRsNh4h9Uf09+OjWF/4u8tXeAt37gezGRdwR/2g==}
+  country-flag-icons@1.5.11:
+    resolution: {integrity: sha512-B+mvFywunkRJs270k7kCBjhogvIA0uNn6GAXv6m2cPn3rrwqZzZVr2gBWcz+Cz7OGVWlcbERlYRIX0S6OGr8Bw==}
 
   create-ecdh@4.0.4:
     resolution: {integrity: sha512-mf+TCx8wWc9VpuxfP2ht0iSISLZnt0JgWlrOKZiNqyUZWnjIaCIVNQArMHnCZKfEYRg6IM7A+NeJoN8gf/Ws0A==}
@@ -6847,8 +6847,8 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  libphonenumber-js@1.10.59:
-    resolution: {integrity: sha512-HeTsOrDF/hWhEiKqZVwg9Cqlep5x2T+IYDENvT2VRj3iX8JQ7Y+omENv+AIn0vC8m6GYhivfCed5Cgfw27r5SA==}
+  libphonenumber-js@1.11.1:
+    resolution: {integrity: sha512-Wze1LPwcnzvcKGcRHFGFECTaLzxOtujwpf924difr5zniyYv1C2PiW0419qDR7m8lKDxsImu5mwxFuXhXpjmvw==}
 
   lilconfig@2.1.0:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
@@ -8110,8 +8110,8 @@ packages:
       react: ^18.0.0
       react-dom: ^18.0.0
 
-  react-phone-number-input@3.3.10:
-    resolution: {integrity: sha512-onv6ETMejyA4Wi0/6Ay00FcSokHIJcowLUcwdizpALSpeXPFqbyrjHQSL8+pgkxIIruRxr5nyIAB8LT+Sa/Vlg==}
+  react-phone-number-input@3.4.1:
+    resolution: {integrity: sha512-guuenZqU/DYvDBFzFdTrppC4rs+q5ybTFHrxEo9VGvX0pPLWM4ZXlRa0llT7LRAvfxX8RjQNnQkkCiTHTzhLZA==}
     peerDependencies:
       react: '>=16.8'
       react-dom: '>=16.8'
@@ -15887,7 +15887,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.4.5
 
-  country-flag-icons@1.5.10: {}
+  country-flag-icons@1.5.11: {}
 
   create-ecdh@4.0.4:
     dependencies:
@@ -18123,7 +18123,7 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  libphonenumber-js@1.10.59: {}
+  libphonenumber-js@1.11.1: {}
 
   lilconfig@2.1.0: {}
 
@@ -19448,12 +19448,12 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  react-phone-number-input@3.3.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  react-phone-number-input@3.4.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       classnames: 2.5.1
-      country-flag-icons: 1.5.10
+      country-flag-icons: 1.5.11
       input-format: 0.3.10
-      libphonenumber-js: 1.10.59
+      libphonenumber-js: 1.11.1
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
