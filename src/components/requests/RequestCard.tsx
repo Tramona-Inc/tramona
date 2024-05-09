@@ -5,7 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
-import { getFmtdFilters } from "@/utils/formatters";
+import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
@@ -98,7 +98,7 @@ export default function RequestCard({
               isAdminDashboard={isAdminDashboard}
             />
           )}
-          {!isAdminDashboard && (
+          {!isAdminDashboard && getRequestStatus(request) === "pending" && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
@@ -122,8 +122,7 @@ export default function RequestCard({
         </div>
         <div className="text-zinc-500">
           <p>
-            requested{" "}
-            <strong className="text-lg text-zinc-600">{fmtdPrice}</strong>
+            requested <b className="text-lg text-foreground">{fmtdPrice}</b>
             <span className="text-sm">/night</span>
           </p>
           <div className="flex items-center gap-1">
