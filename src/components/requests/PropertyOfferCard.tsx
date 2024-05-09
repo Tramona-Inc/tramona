@@ -147,6 +147,7 @@ export default function PropertyOfferCard({
               offerId={offer.id}
               counterNightlyPrice={counterNightlyPrice}
               previousOfferNightlyPrice={previousCounterNightlyPrice}
+              totalCounterAmount={counter?.counterAmount ?? offer.amount} // If no counter/ original price
             />
           )}
 
@@ -155,6 +156,7 @@ export default function PropertyOfferCard({
               offerId={offer.id}
               counterNightlyPrice={counterNightlyPrice}
               previousOfferNightlyPrice={previousCounterNightlyPrice}
+              totalCounterAmount={counter.counterAmount}
             />
           )}
         </div>

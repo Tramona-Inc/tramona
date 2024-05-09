@@ -8,11 +8,13 @@ export function PropertyAcceptDialog({
   open,
   setOpen,
   counterNightlyPrice,
+  totalCounterAmount,
 }: {
   offerId: number;
   open: boolean;
   setOpen: (o: boolean) => void;
   counterNightlyPrice: number;
+  totalCounterAmount: number,
 }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -27,6 +29,7 @@ export function PropertyAcceptDialog({
           offerId={offerId}
           setOpen={setOpen}
           counterNightlyPrice={counterNightlyPrice}
+          totalCounterAmount={totalCounterAmount}
         />
       </DialogContent>
     </Dialog>

@@ -9,10 +9,12 @@ export default function PropertyCounterOptions({
   offerId,
   counterNightlyPrice,
   previousOfferNightlyPrice,
+  totalCounterAmount,
 }: {
   offerId: number;
   counterNightlyPrice: number;
   previousOfferNightlyPrice: number;
+  totalCounterAmount: number;
 }) {
   const [acceptOpen, setAcceptOpen] = useState(false);
   const [counterOpen, setCounterOpen] = useState(false);
@@ -41,6 +43,7 @@ export default function PropertyCounterOptions({
           open={acceptOpen}
           setOpen={setAcceptOpen}
           counterNightlyPrice={counterNightlyPrice}
+          totalCounterAmount={totalCounterAmount}
         />
         <PropertyCounterDialog
           offerId={offerId}

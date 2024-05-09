@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { db } from "@/server/db";
 import {
   type Bid,
@@ -8,6 +9,7 @@ import {
   groups,
   hostTeamMembers,
   properties,
+  users,
 } from "@/server/db/schema";
 import {
   counterInsertSchema,
@@ -24,13 +26,16 @@ import {
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";
+import { stripe } from "./stripeRouter";
 
 async function updateBidStatus({
   id,
   status,
+  paymentIntentId,
 }: {
   id: number;
   status: Bid["status"];
+  paymentIntentId?: string;
 }) {
   await db.transaction(async (tx) => {
     await tx.update(bids).set({ status }).where(eq(bids.id, id));
@@ -38,6 +43,12 @@ async function updateBidStatus({
       .update(bids)
       .set({ statusUpdatedAt: new Date() })
       .where(eq(bids.id, id));
+    if (paymentIntentId) {
+      await tx
+        .update(bids)
+        .set({ paymentIntentId: paymentIntentId })
+        .where(eq(bids.id, id));
+    }
     if (status === "Accepted") {
       await tx
         .update(bids)
@@ -252,7 +263,13 @@ export const biddingRouter = createTRPCRouter({
           with: { members: { with: { user: true } }, invites: true },
         },
         property: {
-          columns: { id: true, name: true, address: true, imageUrls: true, originalNightlyPrice: true },
+          columns: {
+            id: true,
+            name: true,
+            address: true,
+            imageUrls: true,
+            originalNightlyPrice: true,
+          },
         },
         counters: {
           orderBy: (counters, { desc }) => [desc(counters.createdAt)],
@@ -308,21 +325,68 @@ export const biddingRouter = createTRPCRouter({
         .insert(counters)
         .values({ bidId, propertyId, userId, counterAmount });
     }),
+
   accept: protectedProcedure
-    .input(z.object({ bidId: z.number() }))
+    .input(z.object({ bidId: z.number(), amount: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const userIsWithBid = await userWithBid({
         userId: ctx.user.id,
         bidId: input.bidId,
       });
 
-      if (!userIsWithBid) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      } else {
-        await updateBidStatus({ id: input.bidId, status: "Accepted" });
+      const bidInfo = await db.query.bids.findFirst({
+        where: eq(bids.id, input.bidId),
+        with: {
+          madeByGroup: {
+            with: { members: { with: { user: true } }, invites: true },
+          },
+        },
+      });
+
+      if (!bidInfo) {
+        throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      // TODO: email travellers
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, bidInfo.madeByGroup.ownerId),
+      });
+
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const metadata = {
+        bid_id: input.bidId,
+        property_id: bidInfo.propertyId,
+        confirmed_at: new Date().toUTCString(),
+      };
+
+      if (user.stripeCustomerId && bidInfo.paymentMethodId) {
+        // Create payment intent
+        const pi = await stripe.paymentIntents.create({
+          payment_method: bidInfo.paymentMethodId,
+          amount: input.amount,
+          currency: "usd",
+          capture_method: "automatic", // Change capture_method to automatic
+          metadata: metadata, // metadata access for checkout session
+          customer: user.stripeCustomerId, // Add null check for 'user' variable
+          return_url: `${env.NEXTAUTH_URL}/my-trips`, // Specify return_url here
+          confirm: true,
+        });
+
+        if (pi.status === "succeeded") {
+          if (!userIsWithBid) {
+            throw new TRPCError({ code: "UNAUTHORIZED" });
+          } else {
+            await updateBidStatus({
+              id: input.bidId,
+              status: "Accepted",
+              paymentIntentId: pi.id,
+            });
+          }
+        }
+      }
+      // TODO: email travllers
     }),
 
   reject: protectedProcedure

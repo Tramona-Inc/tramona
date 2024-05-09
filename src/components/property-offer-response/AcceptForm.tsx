@@ -17,19 +17,19 @@ export default function AcceptForm({
   offerId,
   setOpen,
   counterNightlyPrice,
+  totalCounterAmount,
 }: {
   offerId: number;
   setOpen: (open: boolean) => void;
   counterNightlyPrice: number;
+  totalCounterAmount: number;
 }) {
   const { mutateAsync } = api.biddings.accept.useMutation();
 
   async function onSubmit() {
-    void mutateAsync({ bidId: offerId });
+    void mutateAsync({ bidId: offerId, amount: totalCounterAmount });
 
     setOpen(false);
-
-    console.log("pressed");
   }
 
   return (
