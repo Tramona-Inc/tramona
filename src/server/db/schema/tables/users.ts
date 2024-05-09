@@ -76,9 +76,9 @@ export const users = pgTable(
 
     profileUrl: varchar("profile_url", { length: 1000 }),
     location: varchar("location", { length: 1000 }),
-    socials: varchar("socials").array(),
+    socials: varchar("socials").array().default(['','','','']),
     about: text("about"),
-    destinations: varchar("destinations").array(),
+    // destinations: varchar("destinations").array(),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),

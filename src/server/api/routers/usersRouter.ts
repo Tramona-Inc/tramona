@@ -10,7 +10,7 @@ import {
   userUpdateSchema,
   users,
 } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";

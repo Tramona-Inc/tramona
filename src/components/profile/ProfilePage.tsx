@@ -45,37 +45,25 @@ import { z } from "zod";
 import PlacesInput from "../_common/PlacesInput";
 import { zodString } from "@/utils/zod-utils";
 import { Form } from "../ui/form";
+import DestinationCard from "./DestinationCard";
+import EditProfileDialog from "./EditProfileDialog";
+import { useDialogState } from "@/utils/dialog";
+import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
+import React from "react";
+import dayjs from "dayjs";
+import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDialog";
+import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
-  const user = session?.user;
+  useSession({ required: true });
 
-  const { data } = api.users.myReferralCode.useQuery();
+  // const { data } = api.users.myReferralCode.useQuery();
 
-  const code =
-    user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
+  // const code =
+  //   user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
+  const code = "489302";
   const url = `https://tramona.com/auth/signup?code=${code}`;
-
-  const formSchema = z
-    .object({
-      destination: zodString(),
-      dates: z.object({
-        from: z.coerce.date(),
-        to: z.coerce.date(),
-      }),
-    })
-    .refine((data) => data.dates.to > data.dates.from, {
-      message: "Must stay for at least 1 night",
-      path: ["dates"],
-    });
-
-  type FormSchema = z.infer<typeof formSchema>;
-
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
-  });
-
-  // TODO: pull values from database
+  
   const givenProperties = [
     {
       id: 1,
@@ -267,32 +255,6 @@ export default function ProfilePage() {
       distance: "48 miles",
     },
   ];
-  const destinations = [
-    {
-      city: "New York City, NY, USA",
-      date: "July 14-28",
-    },
-    {
-      city: "New York City, NY, USA",
-      date: "July 14-28",
-    },
-    {
-      city: "New York City, NY, USA",
-      date: "July 14-28",
-    },
-    {
-      city: "New York City, NY, USA",
-      date: "July 14-28",
-    },
-    {
-      city: "New York City, NY, USA",
-      date: "July 14-28",
-    },
-    {
-      city: "New York City, NY, USA",
-      date: "July 14-28",
-    },
-  ];
   const socials = [
     {
       name: "Twitter",
@@ -324,8 +286,27 @@ export default function ProfilePage() {
     },
   ];
 
+  const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
+
+  const [
+    selectedBLDestinationId, 
+    setSelectedBLDestinationId
+  ] = React.useState<number | null>(null);
+
+  const selectedBLDestination = React.useMemo(() => {
+    return profileInfo?.bucketListDestinations.find((d) => d.id === selectedBLDestinationId)
+  }, [profileInfo, selectedBLDestinationId])
+
+  const editProfileDialogState = useDialogState();
+  const editBLDestinationDialogState = useDialogState();
+  const addBLDestinationDialogState = useDialogState();
+
+  const deleteBLDDialogState = useDialogState();
+
   return (
     <div className="mx-auto mb-5 max-w-4xl space-y-3">
+
+      {/* Profile Header */}
       <section className="rounded-lg border">
         <div className="relative h-40 bg-teal-900 lg:h-52">
           <div className="absolute inset-0 overflow-hidden">
@@ -353,17 +334,20 @@ export default function ProfilePage() {
             <Camera />
           </Button>
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:mt-0">
-            <h2 className="text-xl font-bold lg:text-2xl">Aaron Soukaphay</h2>
-            <p className="font-semibold">Tustin CA, USA</p>
-            <div className="flex space-x-2">
-              <Facebook />
-              <Youtube />
-              <Instagram />
-              <Twitter />
+            <h2 className="text-xl font-bold lg:text-2xl">{profileInfo?.name}</h2>
+            <p className="font-semibold">{profileInfo?.location}</p>
+            <div className="mt-2 flex space-x-2">
+              { (profileInfo?.socials?.[0]) && <Facebook href={profileInfo.socials[0]} /> }
+              { (profileInfo?.socials?.[1]) && <Youtube href={profileInfo.socials[1]} /> }
+              { (profileInfo?.socials?.[2]) && <Instagram href={profileInfo.socials[2]} /> }
+              { (profileInfo?.socials?.[3]) && <Twitter href={profileInfo.socials[3]} /> }
             </div>
           </div>
           <div className="flex gap-3 lg:col-start-4 lg:justify-end">
-            <Button className="w-1/2 bg-zinc-200 text-primary hover:bg-zinc-300 lg:w-auto">
+            <Button 
+              className="w-1/2 bg-[#cfd8d6]/75 text-primary hover:bg-[#cfd8d6] lg:w-auto" 
+              onClick={() => editProfileDialogState.setState("open")}
+            >
               <Edit />
               Edit Profile
             </Button>
@@ -371,12 +355,11 @@ export default function ProfilePage() {
         </div>
       </section>
 
+      {/* About Me */}
       <section className="space-y-2 rounded-lg border p-4">
         <h2 className="font-bold">About Me</h2>
         <p>
-          My name is Aaron. I am from Tustin, CA. I love traveling! I love
-          traveling! I love traveling! I love traveling! I love traveling! I
-          love traveling! I love traveling!
+          {profileInfo?.about ?? ""}
         </p>
       </section>
 
@@ -433,53 +416,24 @@ export default function ProfilePage() {
               </DialogContent>
             </Dialog>
 
-            <Dialog>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="font-bold text-teal-900">
-                    <Plus />
-                    Add
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <Link href="/">
-                    <DropdownMenuItem>Property</DropdownMenuItem>
-                  </Link>
-                  <DialogTrigger asChild>
-                    <DropdownMenuItem>Destination</DropdownMenuItem>
-                  </DialogTrigger>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DialogContent>
-                <DialogHeader className="border-b-2 pb-4">
-                  <DialogTitle className="text-center font-bold">
-                    Add to bucket list
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="h-60 space-y-2">
-                  {/* TODO: Add form submit function */}
-                  <Form {...form}>
-                    <form>
-                      <PlacesInput
-                        control={form.control}
-                        name="destination"
-                        formLabel="Destination"
-                        className="col-span-full sm:col-span-1"
-                      />
-                      <DateRangePicker
-                        control={form.control}
-                        name="dates"
-                        formLabel="Dates"
-                        className="col-span-full sm:col-span-1"
-                      />
-                    </form>
-                  </Form>
-                </div>
-                <DialogFooter className="border-t-2 pt-4">
-                  <Button className="w-full bg-teal-900">Done</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="font-bold text-teal-900">
+                  <Plus />
+                  Add
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <Link href="/">
+                  <DropdownMenuItem>Property</DropdownMenuItem>
+                </Link>
+                <DropdownMenuItem 
+                  onClick={() => addBLDestinationDialogState.setState("open")}
+                >
+                  Destination
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <Tabs defaultValue="properties" className="space-y-4">
@@ -497,75 +451,71 @@ export default function ProfilePage() {
               Destinations
             </TabsTrigger>
           </TabsList>
+
+          {/* Properties Tab */}
           <TabsContent value="properties">
-            <Tabs defaultValue="given" className="space-y-4">
-              <TabsList noBorder className="space-x-2">
-                <TabsTrigger
-                  value="given"
-                  className="rounded-full border-2 font-bold data-[state=active]:border-teal-900 data-[state=active]:bg-muted"
-                >
-                  Given
-                </TabsTrigger>
-                <TabsTrigger
-                  value="received"
-                  className="rounded-full border-2 font-bold data-[state=active]:border-teal-900 data-[state=active]:bg-muted"
-                >
-                  Received
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="given">
-                <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-                  {givenProperties.map((property, i) => (
-                    <div key={i} className="relative">
-                      <HomeOfferCard property={property} />
-                      <div className="absolute right-2 top-2">
-                        <Button variant="secondary" className="rounded-full">
-                          Added to bucket list
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="received">
-                <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-                  {receivedProperties.map((property, i) => (
-                    <div key={i} className="relative">
-                      <HomeOfferCard property={property} />
-                      <div className="absolute right-2 top-2">
-                        <Button
-                          className="h-10 w-10 rounded-full p-0"
-                          variant="secondary"
-                        >
-                          <Bookmark />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
-          </TabsContent>
-          <TabsContent value="destinations">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {destinations.map((destination, i) => (
-                <div
-                  key={i}
-                  className="flex justify-between rounded-lg border p-4"
-                >
-                  <div>
-                    <h3 className="font-bold">{destination.city}</h3>
-                    <p>{destination.date}</p>
-                  </div>
-                  <div>
-                    <Ellipsis />
+              {givenProperties.map((property, i) => (
+                <div key={i} className="relative">
+                  <HomeOfferCard property={property} />
+                  <div className="absolute right-2 top-2">
+                    <Button variant="secondary" className="rounded-full">
+                      Added to bucket list
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           </TabsContent>
+
+          {/* Destinations Tab */}
+          <TabsContent value="destinations">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
+              {profileInfo?.bucketListDestinations.map((destination) => (
+                <DestinationCard 
+                  key={destination.id} 
+                  destination={destination}
+                  onEdit={() => {
+                    setSelectedBLDestinationId(destination.id);
+                    editBLDestinationDialogState.setState("open");
+                  }}
+                  onDelete={() => {
+                    setSelectedBLDestinationId(destination.id);
+                    deleteBLDDialogState.setState("open");
+                  }}
+                />
+              ))}
+            </div>
+          </TabsContent>
         </Tabs>
       </section>
+
+      <AddBucketListDestinationDialog 
+        state={addBLDestinationDialogState}
+      />
+      <EditBucketListDestinationDialog 
+        state={editBLDestinationDialogState}
+        destinationData={selectedBLDestination!}
+      />
+      <DeleteBucketListDestinationDialog 
+        state={deleteBLDDialogState}
+        destinationId={selectedBLDestinationId!}
+      />
+
+      {profileInfo && (
+        <EditProfileDialog
+          state={editProfileDialogState}
+          profileInfo={{
+            name: profileInfo.name!,
+            about: profileInfo.about!,
+            location: profileInfo.location!,
+            facebook_link: profileInfo.socials![0],
+            youtube_link: profileInfo.socials![1],
+            instagram_link: profileInfo.socials![2],
+            twitter_link: profileInfo.socials![3]
+          }}
+        />
+      )}
     </div>
   );
 }
