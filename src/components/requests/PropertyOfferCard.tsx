@@ -11,7 +11,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { PropertyOfferResponseDD } from "../property-offer-response/PropertyOfferResponseDD";
+import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -112,28 +112,18 @@ export default function PropertyOfferCard({
               {plural(offer.numGuests, "guest")}
             </div>
           </div>
-          {!isGuestDashboard && (
+          {/* {!isGuestDashboard && (
             <div className="flex justify-end gap-2">
               <PropertyOfferResponseDD offerId={offer.id} />
             </div>
-          )}
+          )} */}
+
           {userCanCounter && (
-            <div>
-              <div className="flex flex-row justify-between">
-                <h1>
-                  Hosts Counter Offer: {formatCurrency(counterNightlyPrice)}{" "}
-                  /night
-                </h1>
-                <h1>
-                  Your offer: {formatCurrency(userOfferNightlyPrice)} /night
-                </h1>
-              </div>
-              <div className="flex gap-2">
-                <Button>Accept</Button>
-                <Button variant={"outline"}>Re-counter</Button>
-                <Button variant={"outline"}>Decline</Button>
-              </div>
-            </div>
+            <PropertyCounterOptions
+              offerId={offer.id}
+              counterNightlyPrice={counterNightlyPrice}
+              userOfferNightlyPrice={userOfferNightlyPrice}
+            />
           )}
         </div>
       </CardContent>
