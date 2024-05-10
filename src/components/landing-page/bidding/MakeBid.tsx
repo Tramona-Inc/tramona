@@ -22,7 +22,8 @@ function MakeBid({ propertyId }: { propertyId: number }) {
 
   const [message, setMessage] = useState("");
   const { status, data: session, update } = useSession();
-  const verificationStatus = session?.user.isIdentityVerified;
+  // const verificationStatus = session?.user.isIdentityVerified;
+  const verificationStatus = "true"; // ! Later make it not skippable
 
   useEffect(() => {
     switch (verificationStatus) {
