@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Bookmark,
   Calendar,
@@ -38,223 +39,24 @@ import { Input } from "../ui/input";
 import CopyToClipboardBtn from "../_utils/CopyToClipboardBtn";
 import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
-import { useForm } from "react-hook-form";
-import DateRangePicker from "../_common/DateRangePicker";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import PlacesInput from "../_common/PlacesInput";
-import { zodString } from "@/utils/zod-utils";
-import { Form } from "../ui/form";
 import DestinationCard from "./DestinationCard";
 import EditProfileDialog from "./EditProfileDialog";
 import { useDialogState } from "@/utils/dialog";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
-import React from "react";
-import dayjs from "dayjs";
 import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDialog";
 import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
+import { useCitiesFilter } from "@/utils/store/cities-filter";
+import BucketListHomeOfferCard from "./BucketListHomeOfferCard";
 
 export default function ProfilePage() {
-  useSession({ required: true });
+  const { data: session } = useSession({ required: true });
 
-  // const { data } = api.users.myReferralCode.useQuery();
+  const { data } = api.users.myReferralCode.useQuery();
 
-  // const code =
-  //   user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
-  const code = "489302";
+  const code =
+    session?.user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
   const url = `https://tramona.com/auth/signup?code=${code}`;
   
-  const givenProperties = [
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-      ],
-      name: "Beautiful Villa on the Beach",
-      maxNumGuests: 4,
-      numBathrooms: 2,
-      numBedrooms: 2,
-      numBeds: 2,
-      originalNightlyPrice: 15000,
-      distance: "24 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-      ],
-      name: "Beautiful Villa on the Beach",
-      maxNumGuests: 4,
-      numBathrooms: 2,
-      numBedrooms: 2,
-      numBeds: 2,
-      originalNightlyPrice: 15000,
-      distance: "24 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-      ],
-      name: "Beautiful Villa on the Beach",
-      maxNumGuests: 4,
-      numBathrooms: 2,
-      numBedrooms: 2,
-      numBeds: 2,
-      originalNightlyPrice: 15000,
-      distance: "24 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-      ],
-      name: "Beautiful Villa on the Beach",
-      maxNumGuests: 4,
-      numBathrooms: 2,
-      numBedrooms: 2,
-      numBeds: 2,
-      originalNightlyPrice: 15000,
-      distance: "24 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-      ],
-      name: "Beautiful Villa on the Beach",
-      maxNumGuests: 4,
-      numBathrooms: 2,
-      numBedrooms: 2,
-      numBeds: 2,
-      originalNightlyPrice: 15000,
-      distance: "24 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-        "https://a0.muscache.com/im/pictures/4fb2e4a4-35c8-4062-bc63-caf9d2b20147.jpg?im_w=720",
-      ],
-      name: "Beautiful Villa on the Beach",
-      maxNumGuests: 4,
-      numBathrooms: 2,
-      numBedrooms: 2,
-      numBeds: 2,
-      originalNightlyPrice: 15000,
-      distance: "24 miles",
-    },
-  ];
-  const receivedProperties = [
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-      ],
-      name: "Entire Villa in Temecula, California",
-      maxNumGuests: 4,
-      numBathrooms: 6,
-      numBedrooms: 3,
-      numBeds: 6,
-      originalNightlyPrice: 23000,
-      distance: "48 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-      ],
-      name: "Entire Villa in Temecula, California",
-      maxNumGuests: 4,
-      numBathrooms: 6,
-      numBedrooms: 3,
-      numBeds: 6,
-      originalNightlyPrice: 23000,
-      distance: "48 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-      ],
-      name: "Entire Villa in Temecula, California",
-      maxNumGuests: 4,
-      numBathrooms: 6,
-      numBedrooms: 3,
-      numBeds: 6,
-      originalNightlyPrice: 23000,
-      distance: "48 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-      ],
-      name: "Entire Villa in Temecula, California",
-      maxNumGuests: 4,
-      numBathrooms: 6,
-      numBedrooms: 3,
-      numBeds: 6,
-      originalNightlyPrice: 23000,
-      distance: "48 miles",
-    },
-    {
-      id: 1,
-      imageUrls: [
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-        "https://a0.muscache.com/im/pictures/prohost-api/Hosting-689337770931210679/original/4e454dc9-30af-4786-9ea5-ded22c8dc9cd.jpeg?im_w=1200",
-      ],
-      name: "Entire Villa in Temecula, California",
-      maxNumGuests: 4,
-      numBathrooms: 6,
-      numBedrooms: 3,
-      numBeds: 6,
-      originalNightlyPrice: 23000,
-      distance: "48 miles",
-    },
-  ];
   const socials = [
     {
       name: "Twitter",
@@ -286,7 +88,16 @@ export default function ProfilePage() {
     },
   ];
 
+  const filter = useCitiesFilter((state) => state.filter);
+
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
+
+  const {
+    data: bucketListProperties
+  } = api.profile.getAllPropertiesWithDetails.useQuery({
+    lat: filter.lat ?? 0,
+    long: filter.long ?? 0
+  });
 
   const [
     selectedBLDestinationId, 
@@ -455,15 +266,12 @@ export default function ProfilePage() {
           {/* Properties Tab */}
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {givenProperties.map((property, i) => (
-                <div key={i} className="relative">
-                  <HomeOfferCard property={property} />
-                  <div className="absolute right-2 top-2">
-                    <Button variant="secondary" className="rounded-full">
-                      Added to bucket list
-                    </Button>
-                  </div>
-                </div>
+              {bucketListProperties?.map((property) => (
+                <BucketListHomeOfferCard key={property!.id} property={{
+                  ...property!,
+                  propertyId: property!.id,
+                  bucketListPropertyId: property!.bucketListId
+                }} />
               ))}
             </div>
           </TabsContent>

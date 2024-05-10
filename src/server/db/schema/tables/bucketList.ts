@@ -1,7 +1,7 @@
 import { date, integer, pgTable, serial, varchar, text } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { properties } from "./properties";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createSelectSchema } from "drizzle-zod";
 import { zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 
@@ -23,8 +23,6 @@ export const bucketListProperties = pgTable("bucket_list_properties", {
   propertyId: integer("property_id")
     .notNull()
     .references(() => properties.id),
-  plannedCheckIn: date("planned_check_in", { mode: "date" }).notNull(),
-  plannedCheckOut: date("planned_check_out", { mode: "date" }).notNull(),
 });
 
 export type BucketListDestination = typeof bucketListDestinations.$inferSelect;
@@ -53,3 +51,5 @@ export const ProfileInfoSchema = z.object({
                   .optional()
                   .or(z.literal(''))
 });
+
+export const BucketListPropertySchema = createSelectSchema(bucketListProperties);
