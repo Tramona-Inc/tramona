@@ -3,10 +3,60 @@ import { useMemo } from "react";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import PastTrips from "@/components/my-trips/PastTrips";
-import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
+import UpcomingTrips, {
+  UpcomingTrip,
+} from "@/components/my-trips/UpcomingTrips";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { api } from "@/utils/api";
+import { api, RouterOutputs } from "@/utils/api";
+
+type MyTripsType<T> = T extends (infer U)[] ? U : never;
+
+export type AcceptedBids = MyTripsType<
+  RouterOutputs["myTrips"]["getAcceptedBids"]
+>;
+
+export type AcceptedTrips = MyTripsType<
+  RouterOutputs["myTrips"]["getUpcomingTrips"]
+>;
+
+const transformBookedTrips = (trip: AcceptedTrips): UpcomingTrip => {
+  return {
+    id: trip.id,
+    request: {
+      checkIn: new Date(trip.request.checkIn),
+      checkOut: new Date(trip.request.checkOut),
+    },
+    property: {
+      name: trip.property.name,
+      imageUrls: trip.property.imageUrls,
+      address: trip.property.address,
+      host: {
+        name: trip.property.host?.name ?? "",
+        image: trip.property.host?.image ?? "",
+      },
+    },
+  };
+};
+
+const transformAcceptedBids = (trip: AcceptedBids): UpcomingTrip => {
+  return {
+    id: trip.property.id,
+    request: {
+      checkIn: new Date(trip.checkIn),
+      checkOut: new Date(trip.checkOut),
+    },
+    property: {
+      name: trip.property.name,
+      imageUrls: trip.property.imageUrls,
+      address: trip.property.address,
+      host: {
+        name: trip.property.host?.name ?? "",
+        image: trip.property.host?.image ?? "",
+      },
+    },
+  };
+};
 
 export default function MyTrips() {
   const date = useMemo(() => new Date(), []); // useMemo from React
@@ -19,7 +69,22 @@ export default function MyTrips() {
   const { data: acceptedBids, isLoading: loadingBids } =
     api.myTrips.getAcceptedBids.useQuery();
 
-  console.log(acceptedBids);
+  // Transform accepted bids and trips
+  const transformedTrips: UpcomingTrip[] = (trips ?? []).map(
+    transformBookedTrips,
+  );
+  const transformedAcceptedBids: UpcomingTrip[] = (acceptedBids ?? []).map(
+    transformAcceptedBids,
+  );
+
+  // Combine both transformed arrays
+  const combinedTrips: UpcomingTrip[] = [
+    ...transformedTrips,
+    ...transformedAcceptedBids,
+  ];
+
+  // Sort the combined array based on dates
+  combinedTrips.sort((a, b) => Number(a.request.checkIn) - Number(b.request.checkIn));
 
   return (
     <DashboardLayout type="guest">
@@ -47,7 +112,7 @@ export default function MyTrips() {
           </TabsList>
           <TabsContent value="upcoming">
             <div className="grid grid-cols-1 gap-3 pt-8 md:gap-5 lg:gap-8">
-              <UpcomingTrips trips={trips} isLoading={loadingTrips} />
+              <UpcomingTrips trips={combinedTrips} isLoading={loadingTrips} />
             </div>
           </TabsContent>
           <TabsContent value="history">

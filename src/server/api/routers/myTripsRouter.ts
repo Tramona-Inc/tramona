@@ -213,6 +213,11 @@ export const myTripsRouter = createTRPCRouter({
         eq(bids.status, "Accepted"),
         isNotNull(bids.paymentIntentId),
       ),
+      columns: {
+        id: true,
+        checkIn: true,
+        checkOut: true,
+      },
       with: {
         property: {
           columns: {
@@ -221,6 +226,14 @@ export const myTripsRouter = createTRPCRouter({
             name: true,
             address: true,
             originalNightlyPrice: true,
+          },
+          with: {
+            host: {
+              columns: {
+                name: true,
+                image: true,
+              },
+            },
           },
         },
         madeByGroup: {
