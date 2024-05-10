@@ -51,7 +51,7 @@ export default function TravelerPage() {
           <MastHead />
         </div>
 
-        <div className="container flex flex-col space-y-5 bg-white">
+        <div className="space-y-4">
           <CitiesFilter />
           <Listings />
         </div>

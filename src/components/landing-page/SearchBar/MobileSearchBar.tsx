@@ -36,7 +36,7 @@ function SearchTab() {
         from: z.date(),
         to: z.date(),
       }),
-      numGuests: zodInteger({ min: 1 }),
+      numGuests: z.number(),
       airbnbLink: optional(zodString({ maxLen: 500 })),
       roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES, "any"]),
       minNumBedrooms: optional(zodInteger()),
@@ -52,6 +52,7 @@ function SearchTab() {
 
   const defaultValues: Partial<FormSchema> = {
     roomType: "any",
+    numGuests: 1,
   };
 
   const form = useForm<FormSchema>({
@@ -93,7 +94,7 @@ function SearchTab() {
             <MobilePriceInput
               control={form.control}
               name="maxNightlyPriceUSD"
-              formLabel="Price Range"
+              formLabel="Maximum price"
               className="col-span-full"
             />
           </div>
@@ -258,7 +259,7 @@ function RequestDealTab() {
         </div>
 
         <Form {...form}>
-          <form className="flex  flex-col justify-between">
+          <form className="flex flex-col justify-between">
             <div className="flex flex-col">
               <div className="grid gap-1">
                 <MobileLocationInput
@@ -285,14 +286,14 @@ function RequestDealTab() {
                 <MobilePriceInput
                   control={form.control}
                   name={`data.${curTab}.maxNightlyPriceUSD`}
-                  formLabel="Price Range"
+                  formLabel="Maximum price"
                   className="col-span-full"
                 />
               </div>
               {/* <AirbnbLinkPopover /> */}
-              <p className="mt-1 text-xs text-muted-foreground">
+              {/* <p className="mt-1 text-xs text-muted-foreground">
                 Have a property you are eyeing, input the Airbnb link here.
-              </p>
+              </p> */}
               <Separator className="my-4" />
               <div className="flex justify-between ">
                 <Button type="reset" variant="ghost">

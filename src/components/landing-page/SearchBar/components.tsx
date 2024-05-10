@@ -9,19 +9,12 @@ import {
   CalendarIcon,
   ChevronDown,
   MapPinIcon,
-  Minus,
-  Plus,
   SearchIcon,
   UsersIcon,
   DollarSignIcon,
   X,
 } from "lucide-react";
-import {
-  useForm,
-  type FieldPath,
-  type FieldValues,
-  ControllerRenderProps,
-} from "react-hook-form";
+import { useForm, type FieldPath, type FieldValues } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -31,13 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useMeasure } from "@uidotdev/usehooks";
-import {
-  useState,
-  type ComponentProps,
-  forwardRef,
-  ReactElement,
-  ReactNode,
-} from "react";
+import { useState, type ComponentProps, forwardRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import PlacesPopover from "@/components/_common/PlacesPopover";
 import { Input } from "@/components/ui/input";
@@ -50,7 +37,7 @@ import { api } from "@/utils/api";
 import { type FormSchema as ParentFormSchema } from "./DesktopSearchBar";
 import { TRPCError } from "@trpc/server";
 import { errorToast } from "@/utils/toasts";
-import { Separator } from "@/components/ui/separator";
+import { CounterInput } from "@/components/_common/CounterInput";
 
 // LP is short for landing page
 
@@ -58,19 +45,19 @@ export const classNames = {
   wrapper: "group relative",
 
   label:
-    "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-primary group-focus-within:text-primary",
+    "pointer-events-none absolute left-2 top-2 z-10 text-xs font-bold text-secondary-foreground group-focus-within:text-primary",
 
   // like label but for buttons
   buttonLabel: ({ isFocused }: { isFocused: boolean }) =>
     cn(
-      "pointer-events-none absolute left-8 top-3 z-10 text-sm font-semibold text-primary",
+      "pointer-events-none absolute left-8 top-3 z-10 text-xs font-bold text-primary",
       isFocused && "text-black",
     ),
 
   errorMsg: "pointer-events-none absolute left-8 top-14 z-10",
 
   input:
-    "peer block h-12 w-full rounded-full bg-transparent pt-4 text-primary placeholder:text-muted-foreground hover:bg-white/10  focus:outline-none focus:text-black placeholder:focus:text-black/50",
+    "focus:outline-none text-left block h-16 pt-4 text-sm placeholder:text-muted-foreground px-6 absolute inset-0 text-foreground rounded-md border",
 
   // like input but for buttons
   button: ({
@@ -132,9 +119,19 @@ export const LPInput = forwardRef<
   React.InputHTMLAttributes<HTMLInputElement> & {
     prefix?: string;
     suffix?: string;
+    icon: React.ReactNode;
   }
 >(function LPInput(
-  { className, value, defaultValue, prefix, suffix, placeholder, ...props },
+  {
+    className,
+    value,
+    defaultValue,
+    prefix,
+    suffix,
+    placeholder,
+    icon,
+    ...props
+  },
   ref,
 ) {
   const [prefixRef, { width: prefixWidth }] = useMeasure();
@@ -161,6 +158,7 @@ export const LPInput = forwardRef<
         {prefixEl}
         {suffixEl}
       </div>
+      <div className=" pointer-events-none absolute left-2 top-8">{icon}</div>
     </div>
   );
 });
@@ -200,38 +198,32 @@ export function LPLocationInput<
     <FormField
       {...props}
       render={({ field }) => (
-        <LPFormItem className={className}>
-          <FormLabel
-            className={`ml-[-15px] mt-[-5px] md:text-xs md:font-bold ${classNames.buttonLabel({ isFocused: isOpen })}`}
-          >
-            {formLabel}
-          </FormLabel>
-
+        <LPFormItem className={cn(classNames.wrapper, className)}>
+          <FormLabel className={classNames.label}>{formLabel}</FormLabel>
           <PlacesPopover
             open={isOpen}
             setOpen={setIsOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className=" w-60 -translate-y-14 overflow-clip px-0 pt-0 2xl:w-80"
+            className="w-80 -translate-x-1 -translate-y-12 overflow-clip px-0 pt-0 2xl:w-96"
             trigger={({ value, disabled }) => (
               <button
+                className={cn(classNames.input, "pl-8")}
                 onClick={() => setIsOpen(!isOpen)}
                 disabled={disabled}
-                className={cn(
-                  classNames.button({
-                    isPlaceholder: !field.value,
-                    isFocused: isOpen,
-                  }),
-                  "flex items-center text-left",
-                )}
               >
-                <MapPinIcon className="mx-auto mb-4 ml-[-16px] h-5 w-5 text-primary" />
-                <p className="mb-4 ml-2 flex-1 truncate text-xs xl:text-sm">
+                <p
+                  className={cn(
+                    "line-clamp-1",
+                    !value && "text-muted-foreground",
+                  )}
+                >
                   {value ?? "Enter your destination"}
                 </p>
               </button>
             )}
           />
+          <MapPinIcon className="absolute left-2 top-8 size-4" />
           <LPFormMessage className="mt-2" />
         </LPFormItem>
       )}
@@ -260,35 +252,21 @@ export default function LPDateRangePicker<
       {...props}
       render={({ field }) => (
         <LPFormItem className={className}>
-          <FormLabel
-            className={`ml-[-15px] mt-[-5px] md:text-xs md:font-bold ${classNames.buttonLabel({ isFocused: isOpen })}`}
-          >
-            {formLabel}
-          </FormLabel>
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
-              <button
-                className={cn(
-                  classNames.button({
-                    isPlaceholder: !field.value,
-                    isFocused: isOpen,
-                  }),
-                  "mb-4 flex items-center text-sm",
-                )}
-              >
-                <CalendarIcon className="mb-4 ml-[-15px] mr-3 h-5 w-5 text-primary" />
+              <button className="relative block h-16 w-full rounded-md border px-6 pt-4 text-left text-sm">
+                <FormLabel className={classNames.label}>{formLabel}</FormLabel>
+                <CalendarIcon className="absolute left-2 top-8 size-4" />
                 {field.value ? (
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                  <p className="mb-4">
+                  <p className="pl-4">
                     {formatDateRange(
                       field.value.from as Date,
                       field.value.to as Date,
                     )}
                   </p>
                 ) : (
-                  <p className="mb-4 whitespace-nowrap text-xs xl:text-sm">
-                    Select dates
-                  </p>
+                  <p className="pl-4 text-muted-foreground">Select dates</p>
                 )}
               </button>
             </PopoverTrigger>
@@ -314,165 +292,6 @@ export default function LPDateRangePicker<
           </Popover>
           <LPFormMessage className="mt-2" />
         </LPFormItem>
-      )}
-    />
-  );
-}
-
-export function DesktopGuestsPicker<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->({
-  className,
-  ...props
-}: Omit<
-  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
-  "render"
-> & {
-  className: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [numGuests, setNumGuests] = useState(1);
-  const [numRooms, setNumRooms] = useState(1);
-  const [numBathrooms, setNumBathrooms] = useState(1);
-  const [numBeds, setNumBeds] = useState(1);
-
-  function onClick(
-    adjustment: number,
-    field: ControllerRenderProps<TFieldValues, TName>,
-  ) {
-    const guests = Math.max(1, Math.min(10, numGuests + adjustment));
-    const rooms = Math.max(1, Math.min(10, numRooms + adjustment));
-    const bathrooms = Math.max(1, Math.min(10, numBathrooms + adjustment));
-    const beds = Math.max(1, Math.min(10, numBeds + adjustment));
-
-    setNumGuests(guests);
-    field.onChange(guests);
-    setNumGuests(rooms);
-    field.onChange(rooms);
-    setNumBathrooms(bathrooms);
-    field.onChange(bathrooms);
-    setNumBeds(beds);
-    field.onChange(beds);
-  }
-
-  return (
-    <FormField
-      {...props}
-      render={({ field }) => (
-        <>
-          <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
-              <button
-                className={`border-xl focus:primary mx-2 h-11 rounded-xl border-2 border-border px-3 text-sm ${field.value ? "text-primary" : "text-muted-foreground"}`}
-              >
-                {field.value
-                  ? `Beds(${field.value}) Bathrooms(${field.value}) Bedrooms(${field.value})`
-                  : "Beds (Any) Bathrooms(Any) Bedrooms(Any)"}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-full bg-white p-0 tracking-tight"
-              align="start"
-              side="bottom"
-            >
-              <div className=" flex w-96 flex-col items-center gap-y-3 bg-white px-6 py-4">
-                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
-                  Beds
-                  <div className="flex flex-row gap-x-4">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-5 w-5 shrink-0 rounded-full border-2"
-                      onClick={() => onClick(-1, field)}
-                      disabled={numGuests <= 1}
-                    >
-                      <Minus className="h-6 w-6" />
-                      <span className="sr-only">Decrease</span>
-                    </Button>
-                    <div className="text-center">
-                      <div className="font-bold tracking-tighter">
-                        {numGuests}
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-5 w-5 shrink-0 rounded-full"
-                      onClick={() => onClick(1, field)}
-                      disabled={numGuests >= 10}
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="sr-only">Increase</span>
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
-                  Bathrooms
-                  <div className="flex flex-row gap-x-4">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-5 w-5 shrink-0 rounded-full border-2"
-                      onClick={() => onClick(-1, field)}
-                      disabled={numGuests <= 1}
-                    >
-                      <Minus className="h-6 w-6" />
-                      <span className="sr-only">Decrease</span>
-                    </Button>
-                    <div className="text-center">
-                      <div className="font-bold tracking-tighter">
-                        {numGuests}
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-5 w-5 shrink-0 rounded-full"
-                      onClick={() => onClick(1, field)}
-                      disabled={numGuests >= 10}
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="sr-only">Increase</span>
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex w-full items-center justify-between gap-y-2 space-x-2 bg-white">
-                  Bedrooms
-                  <div className="flex flex-row gap-x-4">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-5 w-5 shrink-0 rounded-full border-2"
-                      onClick={() => onClick(-1, field)}
-                      disabled={numGuests <= 1}
-                    >
-                      <Minus className="h-6 w-6" />
-                      <span className="sr-only">Decrease</span>
-                    </Button>
-                    <div className="text-center">
-                      <div className="font-bold tracking-tighter">
-                        {numGuests}
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-5 w-5 shrink-0 rounded-full"
-                      onClick={() => onClick(1, field)}
-                      disabled={numGuests >= 10}
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="sr-only">Increase</span>
-                    </Button>
-                  </div>
-                </div>
-                <Separator className="my-2 w-full" />
-                <Button className="mx-2 w-full">Done</Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </>
       )}
     />
   );
@@ -611,21 +430,10 @@ export function MobileGuestsPicker<
   React.ComponentProps<typeof FormField<TFieldValues, TName>>,
   "render"
 > & {
-  className: string;
+  className?: string;
   formLabel: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [numGuests, setNumGuests] = useState(1);
-
-  function onClick(
-    adjustment: number,
-    field: ControllerRenderProps<TFieldValues, TName>,
-  ) {
-    const guests = Math.max(1, Math.min(10, numGuests + adjustment));
-
-    setNumGuests(guests);
-    field.onChange(guests);
-  }
 
   return (
     <FormField
@@ -648,40 +456,10 @@ export function MobileGuestsPicker<
                 {field.value ?? "Add guests"}
               </button>
             </PopoverTrigger>
-            <PopoverContent
-              className="w-80 bg-white p-4 backdrop-blur-md"
-              align="start"
-              side="bottom"
-            >
-              <div className="flex items-center justify-between space-x-3">
+            <PopoverContent align="start" side="bottom">
+              <div className="flex items-center justify-between">
                 Guests
-                <div className="flex flex-row items-center gap-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-7 w-7 shrink-0 rounded-full"
-                    onClick={() => onClick(-1, field)}
-                    disabled={numGuests <= 1}
-                  >
-                    <Minus className="h-4 w-4" />
-                    <span className="sr-only">Decrease</span>
-                  </Button>
-                  <div className="flex-1 text-center">
-                    <div className="flex items-center font-bold tracking-tighter">
-                      {numGuests}
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-7 w-7 shrink-0 rounded-full"
-                    onClick={() => onClick(1, field)}
-                    disabled={numGuests >= 10}
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span className="sr-only">Increase</span>
-                  </Button>
-                </div>
+                <CounterInput value={field.value} setValue={field.onChange} />
               </div>
             </PopoverContent>
           </Popover>
@@ -691,6 +469,7 @@ export function MobileGuestsPicker<
     />
   );
 }
+
 export function MobilePriceInput<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
@@ -705,8 +484,6 @@ export function MobilePriceInput<
   className: string;
   formLabel: string;
 }) {
-  const [price, setPrice] = useState(0);
-
   return (
     <FormField
       {...props}
@@ -714,13 +491,13 @@ export function MobilePriceInput<
         <>
           <FormLabel className="text-black">{formLabel}</FormLabel>
           <LPFormItem>
-            <div className="flex items-center justify-between space-x-2 rounded-md border-2 bg-white px-4 py-2">
+            <div className="flex items-center justify-between space-x-2 rounded-md border bg-white px-4 py-3">
               <DollarSignIcon strokeWidth={1} />
               <div className="flex-1 text-center">
                 <input
                   type="decimal"
-                  value=""
-                  onChange={(e) => setPrice(Number(e.target.value))} ///I know this doesn't work, nothing i wrote makes sense -neal
+                  value={field.value}
+                  onChange={field.onChange}
                   className="focus-none w-full bg-transparent bg-white text-start placeholder:text-foreground focus:text-black focus:outline-none"
                   placeholder="Price per night"
                 />
