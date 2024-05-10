@@ -180,6 +180,7 @@ export const propertiesRouter = createTRPCRouter({
             input.houseRules?.includes("smoking allowed")
               ? eq(properties.smokingAllowed, true)
               : sql`TRUE`,
+            eq(properties.isPrivate, false),
           ),
         )
         .limit(limit + 1)

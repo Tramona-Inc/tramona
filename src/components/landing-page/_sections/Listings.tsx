@@ -95,14 +95,6 @@ export default function Listings() {
               <Spinner />
             </div>
           )}
-
-          {!isFetchingNextPage &&
-            properties?.pages.length &&
-            !properties.pages[properties.pages.length - 1]?.nextCursor && (
-              <div className="text-center opacity-60">
-                <p className="text-xs md:text-sm">No more properties to load</p>
-              </div>
-            )}
         </>
       ) : (
         // if there are no properties to show, display a message
