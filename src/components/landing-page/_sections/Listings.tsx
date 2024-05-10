@@ -1,10 +1,9 @@
-import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
 import { useEffect, useMemo, useRef } from "react";
 import HomeOfferCard from "../HomeOfferCard";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 export default function Listings() {
   const filter = useCitiesFilter((state) => state.filter);
@@ -60,22 +59,23 @@ export default function Listings() {
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
-  const divArray = Array.from({ length: 18 }, (_, index) => (
-    // TODO: move this down to where spinner is
-    <div key={index} className="">
-      <Skeleton className="h-[250px] w-[230px] rounded-xl" />
-      <div className="ml-2 mt-2 flex  flex-col space-y-2">
-        <Skeleton className="  h-5 w-[210px]" />
-        <Skeleton className="h-5 w-[180px]" />
-        <Skeleton className="h-5 w-[180px]" />
+  const skeletons = Array.from({ length: 12 }, (_, index) => (
+    <div key={index}>
+      <Skeleton className="aspect-square rounded-xl" />
+      <div className="flex h-[90px] flex-col justify-center">
+        <SkeletonText />
+        <SkeletonText />
       </div>
+      <Skeleton className="h-10 rounded-lg" />
+      <Skeleton className="mt-2 h-10 rounded-xl" />
     </div>
   ));
+
   return (
     <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
-        <>{divArray}</>
+        <>{skeletons}</>
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
@@ -88,11 +88,7 @@ export default function Listings() {
             </div>
           ))}
 
-          {isFetchingNextPage && (
-            <div className="flex justify-center overflow-y-hidden">
-              <Spinner />
-            </div>
-          )}
+          {isFetchingNextPage && skeletons}
         </>
       ) : (
         // if there are no properties to show, display a message

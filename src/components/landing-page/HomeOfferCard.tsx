@@ -36,7 +36,7 @@ function Dot({ isCurrent }: { isCurrent: boolean }) {
 
 function CarouselDots({ count, current }: { count: number; current: number }) {
   return (
-    <div className="absolute bottom-2 flex w-full justify-center">
+    <div className="pointer-events-none absolute bottom-2 flex w-full justify-center">
       <div className="flex h-4 items-center gap-2 rounded-full bg-black/40 p-1">
         {Array(count)
           .fill(null)
