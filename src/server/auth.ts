@@ -31,7 +31,23 @@ declare module "next-auth" {
   interface User extends TramonaUser {}
 
   interface Session extends DefaultSession {
-    user: TramonaUser;
+    user: Pick<
+      TramonaUser,
+      | "name"
+      | "email"
+      | "image"
+      | "id"
+      | "role"
+      | "username"
+      | "referralCodeUsed"
+      | "referralTier"
+      | "phoneNumber"
+      | "createdAt"
+      | "stripeCustomerId"
+      | "setupIntentId"
+      | "isIdentityVerified"
+      | "isWhatsApp"
+    >;
   }
 }
 
@@ -58,6 +74,7 @@ export const authOptions: NextAuthOptions = {
           stripeCustomerId: token.stripeCustomerId,
           setupIntentId: token.setupIntentId,
           isIdentityVerified: token.isIdentityVerified,
+          isWhatsApp: token.isWhatsApp,
         },
       };
     },
@@ -83,7 +100,8 @@ export const authOptions: NextAuthOptions = {
         newToken.createdAt = user.createdAt;
         newToken.stripeCustomerId = user.stripeCustomerId;
         newToken.setupIntentId = user.setupIntentId;
-        newToken.isIdentityVerified = user.isIdentityVerified
+        newToken.isIdentityVerified = user.isIdentityVerified;
+        newToken.isWhatsApp = user.isWhatsApp;
       }
 
       return newToken;

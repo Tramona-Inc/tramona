@@ -9,14 +9,19 @@ import Onboarding7 from "@/components/host/onboarding/Onboarding7";
 import Onboarding8 from "@/components/host/onboarding/Onboarding8";
 import Onboarding9 from "@/components/host/onboarding/Onboarding9";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import OnboardingLayout from "../../components/host/onboarding/layout";
+import OnboardingLayout from "../components/host/onboarding/layout";
 
 export default function Onboarding() {
   const progress = useHostOnboarding((state) => state.progress);
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+
+  function onPressNext() {
+    setProgress(progress + 1);
+  }
 
   return (
     <OnboardingLayout>
-      {progress === 0 && <Onboarding1 />}
+      {progress === 0 && <Onboarding1 onPressNext={onPressNext}/>}
       {progress === 1 && <Onboarding2 />}
       {progress === 2 && <Onboarding3 />}
       {progress === 3 && <Onboarding4 />}

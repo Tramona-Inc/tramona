@@ -188,6 +188,7 @@ export const properties = pgTable("properties", {
   mapScreenshot: text("map_screenshot"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  isPrivate: boolean("is_private").notNull().default(false),
 });
 
 export type Property = typeof properties.$inferSelect;
@@ -215,7 +216,7 @@ export const bookedDates = pgTable(
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id),
-    date: date("date").notNull(),
+    date: date("date", { mode: "date" }).notNull(),
   },
   (t) => ({
     compoundKey: primaryKey({
