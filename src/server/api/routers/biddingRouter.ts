@@ -110,6 +110,8 @@ export const biddingRouter = createTRPCRouter({
             name: true,
             address: true,
             originalNightlyPrice: true,
+            longitude: true,
+            latitude: true,
           },
         },
         madeByGroup: {
@@ -269,6 +271,8 @@ export const biddingRouter = createTRPCRouter({
             address: true,
             imageUrls: true,
             originalNightlyPrice: true,
+            longitude: true,
+            latitude: true,
           },
         },
         counters: {

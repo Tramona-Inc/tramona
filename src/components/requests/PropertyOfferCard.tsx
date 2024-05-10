@@ -1,5 +1,5 @@
 import { type Bid } from "@/server/db/schema";
-import { type RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import {
   daysBetweenDates,
@@ -7,11 +7,12 @@ import {
   formatDateRange,
   plural,
 } from "@/utils/utils";
-import { CalendarIcon, EllipsisIcon, TrashIcon, UsersIcon } from "lucide-react";
+import { EllipsisIcon, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import MapPin from "../_icons/MapPin";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -22,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { Separator } from "../ui/separator";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
 
@@ -77,6 +79,17 @@ export default function PropertyOfferCard({
         daysBetweenDates(offer.checkIn, offer.checkOut)
       : 0;
 
+  console.log(offer.property.latitude);
+
+  const { data: addressData } = api.offers.getCity.useQuery({
+    latitude: offer.property.latitude!,
+    longitude: offer.property.longitude!,
+  });
+
+  const location = addressData
+    ? `${addressData.city || ""}, ${addressData.state || ""}`
+    : null;
+
   return (
     <Card className="overflow-clip p-0">
       <CardContent className="flex">
@@ -90,12 +103,13 @@ export default function PropertyOfferCard({
             className="object-cover"
             alt=""
           />
-          <div className="absolute hidden sm:block">{badge}</div>
+          {/* <div className="absolute hidden sm:block">{badge}</div> */}
         </Link>
-        <div className="flex w-full flex-col p-4">
-          <div className="sm:hidden">{badge}</div>
+
+        <div className="flex w-full flex-col gap-2 p-2">
           <div className="flex justify-between">
-            <p className="text-lg font-semibold">{offer.property.name}</p>
+            {/* <div className="sm:hidden">{badge}</div> */}
+            <div>{badge}</div>
             <div className="ml-auto flex -translate-y-2 translate-x-2 items-center gap-2">
               <RequestGroupAvatars
                 request={offer}
@@ -106,34 +120,43 @@ export default function PropertyOfferCard({
               )}
             </div>
           </div>
-          <div className="text-muted-foreground">
-            <p>
-              Airbnb Price for{" "}
-              <b className="text-lg text-foreground">
-                {formatCurrency(
-                  offer.property.originalNightlyPrice
-                    ? offer.property.originalNightlyPrice * AVG_AIRBNB_MARKUP
-                    : 0,
-                )}
-              </b>
+
+          <div>
+            <p className="text-lg font-bold text-black ">
+              {offer.property.name}
+            </p>
+
+            <p className="text-xs text-muted-foreground">
+              Airbnb Price:{" "}
+              {formatCurrency(
+                offer.property.originalNightlyPrice
+                  ? offer.property.originalNightlyPrice * AVG_AIRBNB_MARKUP
+                  : 0,
+              )}
               /night
             </p>
-            <p>
-              offer for{" "}
-              <b className="text-lg text-foreground">
-                {formatCurrency(
-                  offer.amount /
-                    daysBetweenDates(offer.checkIn, offer.checkOut),
-                )}
-              </b>
-              /night
-            </p>
-            <div className="flex items-center gap-1">
-              <CalendarIcon className="size-4" />
-              {formatDateRange(offer.checkIn, offer.checkOut)}
-              <UsersIcon className="ml-3 size-4" />
+
+            <div className="flex flex-row items-center">
+              <MapPin />
+              <h2 className="text-md font-semibold">{location}</h2>
+            </div>
+
+            <div className="text-md flex items-center gap-1 font-semibold">
+              {formatDateRange(offer.checkIn, offer.checkOut)} &middot;{" "}
               {plural(offer.numGuests, "guest")}
             </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-sm ">
+              <span className="font-semibold">Your Offer: </span>
+              {formatCurrency(
+                offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut),
+              )}
+              /night
+            </p>
           </div>
           {/* {!isGuestDashboard && (
             <div className="flex justify-end gap-2">
