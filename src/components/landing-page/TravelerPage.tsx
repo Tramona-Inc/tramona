@@ -33,7 +33,7 @@ export default function TravelerPage() {
 
   return (
     <VerificationProvider>
-      <div className="relative mb-20 overflow-x-hidden bg-white pt-10">
+      <div className="relative mb-20 overflow-x-hidden bg-white">
         <Head>
           <title>Tramona</title>
         </Head>
@@ -51,7 +51,7 @@ export default function TravelerPage() {
           <MastHead />
         </div>
 
-        <div className="container flex flex-col space-y-5 bg-white md:mt-72">
+        <div className="container flex flex-col space-y-5 bg-white">
           <CitiesFilter />
           <Listings />
         </div>

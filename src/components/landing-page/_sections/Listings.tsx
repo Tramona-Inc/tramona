@@ -4,7 +4,7 @@ import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
 import { useEffect, useMemo, useRef } from "react";
 import HomeOfferCard from "../HomeOfferCard";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Listings() {
   const filter = useCitiesFilter((state) => state.filter);
@@ -25,8 +25,8 @@ export default function Listings() {
       bathrooms: bathrooms,
       bedrooms: bedrooms,
       houseRules: houseRules,
-      lat: filter.lat ?? 0,
-      long: filter.long ?? 0,
+      lat: filter.lat,
+      long: filter.long,
       radius: 5,
     },
     {
@@ -61,6 +61,7 @@ export default function Listings() {
     [properties],
   );
   const divArray = Array.from({ length: 18 }, (_, index) => (
+    // TODO: move this down to where spinner is
     <div key={index} className="">
       <Skeleton className="h-[250px] w-[230px] rounded-xl" />
       <div className="ml-2 mt-2 flex  flex-col space-y-2">
@@ -71,24 +72,21 @@ export default function Listings() {
     </div>
   ));
   return (
-    <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+    <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <>{divArray}</>
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
-          {currentProperties.map((property, i) =>
-            i === currentProperties.length - 1 ? (
-              <div ref={ref} key={property.id} className="cursor-pointer">
-                <HomeOfferCard key={property.id} property={property} />
-              </div>
-            ) : (
-              <div key={property.id} className="cursor-pointer">
-                <HomeOfferCard property={property} />
-              </div>
-            ),
-          )}
+          {currentProperties.map((property, i) => (
+            <div
+              ref={i === currentProperties.length - 1 ? ref : undefined}
+              key={property.id}
+            >
+              <HomeOfferCard property={property} />
+            </div>
+          ))}
 
           {isFetchingNextPage && (
             <div className="flex justify-center overflow-y-hidden">

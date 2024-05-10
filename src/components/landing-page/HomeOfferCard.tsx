@@ -27,8 +27,8 @@ function Dot({ isCurrent }: { isCurrent: boolean }) {
   return (
     <div
       className={cn(
-        "rounded-full border border-white",
-        isCurrent ? "h-4 w-4 bg-white" : "h-3 w-3 bg-transparent",
+        "rounded-full transition-all duration-500",
+        isCurrent ? "size-2.5 bg-white" : "size-1.5 bg-white/50",
       )}
     ></div>
   );
@@ -36,8 +36,8 @@ function Dot({ isCurrent }: { isCurrent: boolean }) {
 
 function CarouselDots({ count, current }: { count: number; current: number }) {
   return (
-    <div className="absolute bottom-10 flex w-full justify-center">
-      <div className=" flex items-center gap-2 rounded-full bg-zinc-300/25 px-3 py-1">
+    <div className="absolute bottom-2 flex w-full justify-center">
+      <div className="flex h-4 items-center gap-2 rounded-full bg-black/40 p-1">
         {Array(count)
           .fill(null)
           .map((_, idx) => (
@@ -153,7 +153,9 @@ export default function HomeOfferCard({
         {property.originalNightlyPrice && (
           <p>
             <span className="text-xs">Airbnb Price: </span>
-            {formatCurrency(AVG_AIRBNB_MARKUP * property.originalNightlyPrice)}
+            {formatCurrency(AVG_AIRBNB_MARKUP * property.originalNightlyPrice, {
+              round: true,
+            })}
             <span className="text-xs">/night</span>
           </p>
         )}

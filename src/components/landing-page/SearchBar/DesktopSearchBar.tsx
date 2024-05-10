@@ -398,7 +398,7 @@ export default function DesktopSearchBar({
                   checkPriceEstimation(data.data),
                 )}
                 size="lg"
-                className="bg-[#004236] rounded-lg py-8 font-semibold"
+                className="rounded-lg bg-[#004236] py-8 font-semibold"
               >
                 {mode === "search" ? "Search" : "Submit request"}
               </Button>
@@ -407,22 +407,20 @@ export default function DesktopSearchBar({
           {mode === "request" && (
             <div className="flex flex-col gap-y-4">
               <div className="flex w-11/12 flex-row justify-between">
-                <div className="flex w-10/12 items-center pt-3 text-xs text-[#004236] 2xl:text-sm">
+                <div className="flex w-10/12 items-center pt-3 text-xs text-muted-foreground 2xl:text-sm">
                   Instead of just seeing listed prices, requesting a deal lets
                   you set your budget, and we&apos;ll match you with hosts who
                   have properties in the city and accept your price. This way,
                   you can find the perfect place to stay within your means!
                 </div>
-                <div className="flex flex-row items-center p-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsExpanded((prev) => !prev)}
+                >
                   <Filter size={22} strokeWidth={1.5} />
-                  <button
-                    type="button"
-                    onClick={() => setIsExpanded((prev) => !prev)}
-                    className="whitespace-nowrap rounded-full bg-white/10 py-1 pl-1 text-sm font-medium text-primary hover:bg-white/20"
-                  >
-                    {isExpanded ? "Hide filters" : "Add filters"}
-                  </button>
-                </div>
+                  {isExpanded ? "Hide filters" : "Add filters"}
+                </Button>
               </div>
               <FiltersSection
                 form={form}
