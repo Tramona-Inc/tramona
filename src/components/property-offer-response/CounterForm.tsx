@@ -83,14 +83,17 @@ export default function CounterForm({
                 {formatCurrency(originalNightlyBiddingOffer)}/night
               </h1>
 
-              {previousOfferNightlyPrice > 0 && counterNightlyPrice > 0 && (
+              {previousOfferNightlyPrice > 0 && (
+                <h1 className="">
+                  <span className="font-bold">
+                    Your Previous Counter offer:{" "}
+                  </span>
+                  {formatCurrency(previousOfferNightlyPrice)}/night
+                </h1>
+              )}
+
+              {counterNightlyPrice > 0 && (
                 <>
-                  <h1 className="">
-                    <span className="font-bold">
-                      Your Previous Counter offer:{" "}
-                    </span>
-                    {formatCurrency(previousOfferNightlyPrice)}/night
-                  </h1>
                   <Separator />
                   <h1>
                     <span className="font-bold">
