@@ -141,7 +141,7 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 10;
+      const limit = input.limit ?? 12;
       const { cursor } = input;
 
       const lat = input.lat ?? 0;
@@ -192,7 +192,7 @@ export const propertiesRouter = createTRPCRouter({
             eq(properties.isPrivate, false),
           ),
         )
-        .limit(limit + 1)
+        .limit(limit)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
