@@ -38,7 +38,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   ownedGroups: many(groups),
   requestGroupsCreated: many(requestGroups),
   hostTeams: many(hostTeamMembers),
-  bids: many(bids),
   bucketListDestinations: many(bucketListDestinations),
   bucketListProperties: many(bucketListProperties),
 }));
@@ -217,6 +216,7 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   members: many(groupMembers),
   invites: many(groupInvites),
   requests: many(requests),
+  bids: many(bids),
 }));
 
 export const groupMembersRelations = relations(groupMembers, ({ one }) => ({

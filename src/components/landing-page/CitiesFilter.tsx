@@ -54,7 +54,7 @@ export const cities: CitiesLatLong[] = [
     lat: 33.8303,
   },
   { id: "las vegas", label: "Las Vegas", long: -115.1398, lat: 36.1699 },
-  { id: "sf", label: "San francisco", long: -122.4194, lat: 37.7749 },
+  { id: "sf", label: "San Francisco", long: -122.4194, lat: 37.7749 },
   { id: "boston", label: "Boston", long: -71.0589, lat: 42.3601 },
 ];
 

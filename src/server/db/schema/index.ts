@@ -15,3 +15,6 @@ export * from "./tables/properties";
 export * from "./tables/requests";
 export * from "./tables/requestsToProperties";
 export * from "./tables/users";
+export * from "./tables/hostTeams";
+export * from "./tables/bids";
+export * from "./tables/bucketList";

@@ -13,7 +13,12 @@ import {
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import { useStripe } from "@/utils/stripe-client";
-import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
+import {
+  formatCurrency,
+  formatDateRange,
+  getNumNights,
+  plural,
+} from "@/utils/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
@@ -54,15 +59,12 @@ function BiddingInfoCard({ property }: { property: Property }) {
           <p className="text-muted-foreground">
             {formatDateRange(date.from, date.to)}
           </p>
-          <ul className=" my-2 flex flex-row gap-x-1  text-nowrap text-xs tracking-tighter text-muted-foreground md:my-4 md:space-x-1 md:text-base ">
-            <li className="">{property.maxNumGuests} Guests</li>
-            <li>·</li>
-            <li>{property.numBedrooms} Bedrooms</li>
-            <li>·</li>
-            <li>{property.numBeds} Beds</li>
-            <li>·</li>
-            <li>{property.numBathrooms} Baths</li>
-          </ul>
+          <p className="my-2 text-nowrap text-xs tracking-tighter text-muted-foreground md:my-4 md:text-base">
+            {plural(property.maxNumGuests, "guest")} ·{" "}
+            {plural(property.numBedrooms, "bedroom")} ·{" "}
+            {plural(property.numBeds, "bed")} ·{" "}
+            {property.numBathrooms && plural(property.numBathrooms, "bath")}
+          </p>
         </div>
       </div>
       <div className="flex flex-col gap-y-2 text-xs font-semibold md:text-base">

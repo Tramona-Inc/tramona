@@ -18,7 +18,8 @@ const TabsList = React.forwardRef<
   >
     <>
       {children}
-      <div className={cn(!noBorder && "flex-1 border-b-4")} />
+      {!noBorder && <div className={cn("flex-1 border-b-4")} />}
+      {/* <div className={cn(!noBorder && "flex-1 border-b-4")} /> */}
     </>
   </TabsPrimitive.List>
 ));
