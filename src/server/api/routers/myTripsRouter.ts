@@ -1,3 +1,5 @@
+import { UpcomingTrip } from "@/components/my-trips/UpcomingTrips";
+import { AcceptedBids, AcceptedTrips } from "@/pages/my-trips";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { bids, groupMembers, offers, requests } from "@/server/db/schema";
@@ -37,6 +39,102 @@ const getAllAcceptedOffers = async (userId: string) => {
     requestId: requestId!,
     checkOut: checkOut!,
   }));
+};
+
+const transformBookedTrips = (trip: AcceptedTrips): UpcomingTrip => {
+  return {
+    id: trip.id,
+    request: {
+      checkIn: new Date(trip.request.checkIn),
+      checkOut: new Date(trip.request.checkOut),
+    },
+    property: {
+      name: trip.property.name,
+      imageUrls: trip.property.imageUrls,
+      address: trip.property.address,
+      host: {
+        name: trip.property.host?.name ?? "",
+        image: trip.property.host?.image ?? "",
+      },
+    },
+  };
+};
+
+const transformAcceptedBids = (trip: AcceptedBids): UpcomingTrip => {
+  return {
+    id: trip.property.id,
+    request: {
+      checkIn: new Date(trip.checkIn),
+      checkOut: new Date(trip.checkOut),
+    },
+    property: {
+      name: trip.property.name,
+      imageUrls: trip.property.imageUrls,
+      address: trip.property.address,
+      host: {
+        name: trip.property.host?.name ?? "",
+        image: trip.property.host?.image ?? "",
+      },
+    },
+  };
+};
+
+const getAllAcceptedBids = async (userId: string) => {
+  return await db.query.bids.findMany({
+    where: and(
+      exists(
+        db
+          .select()
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, bids.madeByGroupId),
+              eq(groupMembers.userId, userId),
+            ),
+          ),
+      ),
+      eq(bids.status, "Accepted"),
+      isNotNull(bids.paymentIntentId),
+    ),
+    columns: {
+      id: true,
+      checkIn: true,
+      checkOut: true,
+    },
+    with: {
+      property: {
+        columns: {
+          id: true,
+          imageUrls: true,
+          name: true,
+          address: true,
+          originalNightlyPrice: true,
+        },
+        with: {
+          host: {
+            columns: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+      },
+      madeByGroup: {
+        with: { members: { with: { user: true } }, invites: true },
+      },
+      // Gets the latest counter
+      counters: {
+        orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+        columns: {
+          id: true,
+          counterAmount: true,
+          createdAt: true,
+          status: true,
+          userId: true,
+        },
+      },
+    },
+  });
 };
 
 // Fetch the trips data to display
@@ -171,9 +269,28 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayAllUpcomingTrips = await getDisplayTrips(upcomingTripIds);
+      const allUpcomingAcceptedTrips = await getDisplayTrips(upcomingTripIds);
 
-      return displayAllUpcomingTrips;
+      // ! THIS GETS ONLY ALL (NEED TO GET UPCOMING AND PREVIOUS FOR BIDS)
+      // Get all accepted bids
+      const allAcceptedBids = await getAllAcceptedBids(ctx.user.id);
+
+      // Transform accepted bids and trips
+      const transformedTrips: UpcomingTrip[] = (
+        allUpcomingAcceptedTrips ?? []
+      ).map(transformBookedTrips);
+
+      const transformedAcceptedBids: UpcomingTrip[] = (
+        allAcceptedBids ?? []
+      ).map(transformAcceptedBids);
+
+      // Combine both transformed arrays
+      const combinedTrips: UpcomingTrip[] = [
+        ...transformedTrips,
+        ...transformedAcceptedBids,
+      ];
+
+      return combinedTrips;
     }),
   getPreviousTrips: protectedProcedure
     .input(
@@ -196,61 +313,4 @@ export const myTripsRouter = createTRPCRouter({
 
       return displayAllUpcomingTrips;
     }),
-  getAcceptedBids: protectedProcedure.query(async ({ ctx, input }) => {
-    return await ctx.db.query.bids.findMany({
-      where: and(
-        exists(
-          ctx.db
-            .select()
-            .from(groupMembers)
-            .where(
-              and(
-                eq(groupMembers.groupId, bids.madeByGroupId),
-                eq(groupMembers.userId, ctx.user.id),
-              ),
-            ),
-        ),
-        eq(bids.status, "Accepted"),
-        isNotNull(bids.paymentIntentId),
-      ),
-      columns: {
-        id: true,
-        checkIn: true,
-        checkOut: true,
-      },
-      with: {
-        property: {
-          columns: {
-            id: true,
-            imageUrls: true,
-            name: true,
-            address: true,
-            originalNightlyPrice: true,
-          },
-          with: {
-            host: {
-              columns: {
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-        madeByGroup: {
-          with: { members: { with: { user: true } }, invites: true },
-        },
-        // Gets the latest counter
-        counters: {
-          orderBy: (counters, { desc }) => [desc(counters.createdAt)],
-          columns: {
-            id: true,
-            counterAmount: true,
-            createdAt: true,
-            status: true,
-            userId: true,
-          },
-        },
-      },
-    });
-  }),
 });

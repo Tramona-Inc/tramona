@@ -22,7 +22,7 @@ export type UpcomingTrip = {
     host: {
       name: string | null;
       image: string | null;
-    };
+    } | null;
   };
 };
 
