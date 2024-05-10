@@ -106,7 +106,7 @@ export default function PropertyOfferCard({
           {/* <div className="absolute hidden sm:block">{badge}</div> */}
         </Link>
 
-        <div className="flex w-full flex-col gap-2 p-2">
+        <div className="flex w-full flex-col gap-2 p-3">
           <div className="flex justify-between">
             {/* <div className="sm:hidden">{badge}</div> */}
             <div>{badge}</div>
@@ -121,7 +121,7 @@ export default function PropertyOfferCard({
             </div>
           </div>
 
-          <div>
+          <div className="-mt-4">
             <p className="text-lg font-bold text-black ">
               {offer.property.name}
             </p>
