@@ -37,7 +37,7 @@ export default function UpcomingTrips({
               <EmptyStateValue
                 title={"You have no upcoming trips"}
                 description={
-                  "once you've booked a property, your trips will show up here."
+                  "Once you've booked a property, your trips will show up here."
                 }
                 redirectTitle={"Start Searching"}
                 href={"/"}

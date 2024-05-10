@@ -151,7 +151,18 @@ export const offersRouter = createTRPCRouter({
           id: true,
           acceptedAt: true,
         },
+
         with: {
+          request: {
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+              location: true,
+              id: true,
+            },
+            with: { madeByGroup: { with: { members: true } } },
+          },
           property: {
             with: {
               host: {

@@ -8,7 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency } from "@/utils/utils";
@@ -132,8 +132,6 @@ export default function HomeOfferCard({
   });
 
   const setDate = useBidding((state) => state.setDate);
-  const setStep = useBidding((state) => state.setStep);
-  const step = useBidding((state) => state.step);
   const resetSession = useBidding((state) => state.resetSession);
 
   const [open, setOpen] = useState(false);
@@ -144,6 +142,10 @@ export default function HomeOfferCard({
     setOpen(true);
     setDate(values.date.from, values.date.to);
   }
+
+  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+
+  const alreadyBid = propertyIdBids.includes(property.id);
 
   return (
     <div className="relative">

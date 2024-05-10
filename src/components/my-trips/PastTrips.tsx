@@ -38,7 +38,7 @@ export default function PastTrips({
                 <EmptyStateValue
                   title={"You have no past trips"}
                   description={
-                    "properties you've booked previously will show up here."
+                    "Properties you've booked previously will show up here."
                   }
                   redirectTitle={"Start Searching"}
                   href={"/"}

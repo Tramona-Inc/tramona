@@ -1,16 +1,18 @@
 import {
-  serial,
+  boolean,
+  index,
   integer,
   pgEnum,
   pgTable,
+  serial,
   text,
   timestamp,
   varchar,
-  index,
-  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
+import { z } from "zod";
+import { sql } from "drizzle-orm";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
@@ -62,6 +64,7 @@ export const users = pgTable(
     lastTextAt: timestamp("last_text_at").defaultNow(),
     isWhatsApp: boolean("is_whats_app").default(false).notNull(),
     stripeCustomerId: varchar("stripe_customer_id"),
+    setupIntentId: varchar("setup_intent_id"),
 
     // mode: "string" cuz nextauth doesnt serialize/deserialize dates
     createdAt: timestamp("created_at", { mode: "string" })
@@ -147,7 +150,9 @@ export type ReferralCode = typeof referralCodes.$inferSelect;
 export const referralCodeSelectSchema = createSelectSchema(referralCodes);
 export const referralCodeInsertSchema = createInsertSchema(referralCodes);
 
-export const userInsertSchema = createInsertSchema(users);
+export const userInsertSchema = createInsertSchema(users, {
+  socials: z.string().array(),
+});
 export const userSelectSchema = createSelectSchema(users);
 export const userUpdateSchema = userInsertSchema
   .partial()

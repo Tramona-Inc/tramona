@@ -202,7 +202,7 @@ export function LPLocationInput<
       render={({ field }) => (
         <LPFormItem className={className}>
           <FormLabel
-            className={`ml-[-15px] mt-[-5px] ${classNames.buttonLabel({ isFocused: isOpen })}`}
+            className={`ml-[-15px] mt-[-5px] md:text-xs md:font-bold ${classNames.buttonLabel({ isFocused: isOpen })}`}
           >
             {formLabel}
           </FormLabel>
@@ -261,7 +261,7 @@ export default function LPDateRangePicker<
       render={({ field }) => (
         <LPFormItem className={className}>
           <FormLabel
-            className={`ml-[-15px] mt-[-5px] ${classNames.buttonLabel({ isFocused: isOpen })}`}
+            className={`ml-[-15px] mt-[-5px] md:text-xs md:font-bold ${classNames.buttonLabel({ isFocused: isOpen })}`}
           >
             {formLabel}
           </FormLabel>

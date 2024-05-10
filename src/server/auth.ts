@@ -43,6 +43,10 @@ declare module "next-auth" {
       | "referralTier"
       | "phoneNumber"
       | "createdAt"
+      | "stripeCustomerId"
+      | "setupIntentId"
+      | "isIdentityVerified"
+      | "isWhatsApp"
     >;
   }
 }
@@ -67,6 +71,10 @@ export const authOptions: NextAuthOptions = {
           referralTier: token.referralTier,
           phoneNumber: token.phoneNumber,
           createdAt: token.createdAt,
+          stripeCustomerId: token.stripeCustomerId,
+          setupIntentId: token.setupIntentId,
+          isIdentityVerified: token.isIdentityVerified,
+          isWhatsApp: token.isWhatsApp,
         },
       };
     },
@@ -90,6 +98,10 @@ export const authOptions: NextAuthOptions = {
         newToken.referralTier = user.referralTier;
         newToken.phoneNumber = user.phoneNumber;
         newToken.createdAt = user.createdAt;
+        newToken.stripeCustomerId = user.stripeCustomerId;
+        newToken.setupIntentId = user.setupIntentId;
+        newToken.isIdentityVerified = user.isIdentityVerified;
+        newToken.isWhatsApp = user.isWhatsApp;
       }
 
       return newToken;

@@ -4,6 +4,7 @@ import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
 import { useEffect, useMemo, useRef } from "react";
 import HomeOfferCard from "../HomeOfferCard";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 export default function Listings() {
   const filter = useCitiesFilter((state) => state.filter);
@@ -59,14 +60,21 @@ export default function Listings() {
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
-
+  const divArray = Array.from({ length: 18 }, (_, index) => (
+    <div key={index} className="">
+      <Skeleton className="h-[250px] w-[230px] rounded-xl" />
+      <div className="ml-2 mt-2 flex  flex-col space-y-2">
+        <Skeleton className="  h-5 w-[210px]" />
+        <Skeleton className="h-5 w-[180px]" />
+        <Skeleton className="h-5 w-[180px]" />
+      </div>
+    </div>
+  ));
   return (
     <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
-        <div className="col-span-full flex justify-center overflow-y-hidden">
-          <Spinner />
-        </div>
+        <>{divArray}</>
       ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
@@ -87,14 +95,6 @@ export default function Listings() {
               <Spinner />
             </div>
           )}
-
-          {!isFetchingNextPage &&
-            properties?.pages.length &&
-            !properties.pages[properties.pages.length - 1]?.nextCursor && (
-              <div className="text-center opacity-60">
-                <p className="text-xs md:text-sm">No more properties to load</p>
-              </div>
-            )}
         </>
       ) : (
         // if there are no properties to show, display a message

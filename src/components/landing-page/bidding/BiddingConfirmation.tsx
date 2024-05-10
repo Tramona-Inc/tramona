@@ -6,17 +6,11 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Lightbulb } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { DialogClose } from "@/components/ui/dialog";
 function BiddingConfirmation({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
 
   const resetSession = useBidding((state) => state.resetSession);
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
-  const handlePressNext = () => {
-    setStep(step - step);
-    resetSession();
-  };
+
   return (
     <div className="flex flex-col items-center justify-center ">
       <h1 className=" my-5 text-lg font-semibold text-green-600 md:text-3xl">
@@ -96,7 +90,6 @@ function BiddingConfirmation({ property }: { property: Property }) {
         className="mt-2 md:px-8 md:text-lg"
         onClick={() => {
           resetSession();
-          window.location.reload();
         }}
       >
         <Link href={`/`}>Back to listings</Link>
