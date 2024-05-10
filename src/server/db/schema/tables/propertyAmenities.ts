@@ -258,7 +258,6 @@ export const amenityCategories = [
       "Single level home",
       "Private pool",
       "Private entrance",
-      ,
     ],
   },
   {
