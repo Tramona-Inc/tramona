@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/utils";
 
 export default function CashbackBalanceDetails({
@@ -6,11 +7,25 @@ export default function CashbackBalanceDetails({
   balance: number;
 }) {
   return (
-    <div className="flex flex-col space-y-6 rounded-xl bg-zinc-50 px-5 py-6 shadow-md lg:px-10">
-      <h1 className="text-3xl font-bold lg:text-4xl">
-        Cash Back Balance:{" "}
-        <span className="text-primary">{formatCurrency(balance)}</span>
-      </h1>
+    <div className="flex flex-col space-y-1 rounded-lg border lg:p-4">
+      <div>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-semibold lg:text-lg">Current balance</h1>
+          <Button
+            variant="outline"
+            className="rounded-full border-teal-900 font-bold text-teal-900"
+          >
+            Transfer
+          </Button>
+        </div>
+
+        <p className="text-3xl font-bold">{formatCurrency(balance)}</p>
+      </div>
+      <div>
+        <Button variant="link" className="px-0 text-muted-foreground underline">
+          Manage payout account
+        </Button>
+      </div>
 
       {balance > 0 && (
         <p className="text-md font-semibold lg:text-xl">

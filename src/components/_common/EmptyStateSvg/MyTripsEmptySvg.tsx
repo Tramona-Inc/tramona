@@ -7,7 +7,7 @@ export default function MyTripsEmptySvg() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g clip-path="url(#clip0_4964_17563)">
+      <g clipPath="url(#clip0_4964_17563)">
         <path
           fillRule="evenodd"
           clipRule="evenodd"
@@ -25,7 +25,7 @@ export default function MyTripsEmptySvg() {
           stroke="black"
           strokeWidth="2.5"
           strokeLinecap="round"
-          stroke-linejoin="round"
+          strokeLinejoin="round"
         />
         <path
           fillRule="evenodd"
@@ -42,7 +42,7 @@ export default function MyTripsEmptySvg() {
           stroke="black"
           strokeWidth="2.5"
           strokeLinecap="round"
-          stroke-linejoin="round"
+          strokeLinejoin="round"
         />
         <path
           fillRule="evenodd"
@@ -55,7 +55,7 @@ export default function MyTripsEmptySvg() {
           stroke="black"
           strokeWidth="2.5"
           strokeLinecap="round"
-          stroke-linejoin="round"
+          strokeLinejoin="round"
         />
         <path
           d="M133.717 97.2051C136.048 89.494 139.415 84.1645 143.821 81.2167"
