@@ -235,7 +235,7 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayUpcomingTrips = await getDisplayTrips(upcomingTripIds, 2);
+      const displayUpcomingTrips = await getDisplayTrips(upcomingTripIds);
 
       // Get previous trips
       const previousTripIds = await getCertainTrips(
@@ -244,7 +244,7 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const displayPreviousTrips = await getDisplayTrips(previousTripIds, 2);
+      const displayPreviousTrips = await getDisplayTrips(previousTripIds);
 
       return {
         totalUpcomingTrips: upcomingTripIds.length,

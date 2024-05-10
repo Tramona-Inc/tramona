@@ -102,6 +102,7 @@ export const biddingRouter = createTRPCRouter({
             ),
           ),
       ),
+      orderBy: (counters, { desc }) => [desc(bids.createdAt)],
       with: {
         property: {
           columns: {
