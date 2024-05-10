@@ -3,10 +3,10 @@ import { env } from "@/env";
 
 export default {
   schema: "./src/server/db/schema/*", //separate the schemas
-  driver: "pg",
+  dialect: "postgresql",
   verbose: true,
   dbCredentials: {
-    connectionString: env.DATABASE_URL,
+    url: env.DATABASE_URL,
   },
   out: "./src/server/drizzle",
   // tablesFilter: ["t3-drzl_*"],
