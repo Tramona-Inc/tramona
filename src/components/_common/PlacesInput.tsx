@@ -33,7 +33,7 @@ export default function PlacesInput<
             setOpen={setOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className="w-96 -translate-x-6 -translate-y-12 overflow-clip px-0 pt-0"
+            className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
             trigger={({ value, disabled }) => (
               <Button
                 variant={value ? "filledInput" : "emptyInput"}
