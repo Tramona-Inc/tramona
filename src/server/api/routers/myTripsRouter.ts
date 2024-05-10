@@ -1,5 +1,5 @@
-import { UpcomingTrip } from "@/components/my-trips/UpcomingTrips";
-import { AcceptedBids, AcceptedTrips } from "@/pages/my-trips";
+import { type UpcomingTrip } from "@/components/my-trips/UpcomingTrips";
+import { type AcceptedBids, type AcceptedTrips } from "@/pages/my-trips";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { bids, groupMembers, offers, requests } from "@/server/db/schema";
@@ -41,6 +41,7 @@ const getAllAcceptedOffers = async (userId: string) => {
   }));
 };
 
+// ! NEED TO FIX AS IT IMPORTS RETURN TYPE FROM CLIENT
 const transformBookedTrips = (trip: AcceptedTrips): UpcomingTrip => {
   return {
     id: trip.id,
@@ -269,20 +270,18 @@ export const myTripsRouter = createTRPCRouter({
         input.date,
       );
 
-      const allUpcomingAcceptedTrips = await getDisplayTrips(upcomingTripIds);
+      const displayAllUpcomingTrips = await getDisplayTrips(upcomingTripIds);
 
-      // ! THIS GETS ONLY ALL (NEED TO GET UPCOMING AND PREVIOUS FOR BIDS)
       // Get all accepted bids
       const allAcceptedBids = await getAllAcceptedBids(ctx.user.id);
 
       // Transform accepted bids and trips
-      const transformedTrips: UpcomingTrip[] = (
-        allUpcomingAcceptedTrips ?? []
-      ).map(transformBookedTrips);
-
-      const transformedAcceptedBids: UpcomingTrip[] = (
-        allAcceptedBids ?? []
-      ).map(transformAcceptedBids);
+      const transformedTrips: UpcomingTrip[] = (displayAllUpcomingTrips ?? []).map(
+        transformBookedTrips,
+      );
+      const transformedAcceptedBids: UpcomingTrip[] = (allAcceptedBids ?? []).map(
+        transformAcceptedBids,
+      );
 
       // Combine both transformed arrays
       const combinedTrips: UpcomingTrip[] = [
@@ -313,4 +312,7 @@ export const myTripsRouter = createTRPCRouter({
 
       return displayAllUpcomingTrips;
     }),
+  getAcceptedBids: protectedProcedure.query(async ({ ctx, input }) => {
+    return getAllAcceptedBids(ctx.user.id);
+  }),
 });
