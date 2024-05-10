@@ -16,6 +16,7 @@ import { z } from "zod";
 import Spinner from "../_common/Spinner";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Separator } from "../ui/separator";
 
 const formSchema = z.object({
   counterPrice: zodInteger(),
@@ -25,10 +26,14 @@ export default function CounterForm({
   offerId,
   setOpen,
   counterNightlyPrice,
+  previousOfferNightlyPrice,
+  originalNightlyBiddingOffer,
 }: {
   offerId: number;
-  setOpen: (open: boolean) => void;
+  setOpen: (o: boolean) => void;
   counterNightlyPrice: number;
+  previousOfferNightlyPrice: number;
+  originalNightlyBiddingOffer: number;
 }) {
   const { data: session } = useSession();
 
@@ -65,8 +70,6 @@ export default function CounterForm({
     }
   }
 
-  const originalBidPrice = (data?.amount ?? 0) / daysBetweenDates(data?.checkIn ?? new Date(), data?.checkOut ?? new Date());
-
   return (
     <>
       {isLoading ? (
@@ -74,14 +77,37 @@ export default function CounterForm({
       ) : (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <h1>Original Offer</h1>
-            {data && <p>{counterNightlyPrice !== 0 ? formatCurrency(counterNightlyPrice) : formatCurrency(originalBidPrice)} /night</p>}
+            <div className="flex flex-col gap-5">
+              <h1 className="">
+                <span className="font-bold">Original Bidding offer: </span>
+                {formatCurrency(originalNightlyBiddingOffer)}/night
+              </h1>
+
+              {previousOfferNightlyPrice > 0 && counterNightlyPrice > 0 && (
+                <>
+                  <h1 className="">
+                    <span className="font-bold">
+                      Your Previous Counter offer:{" "}
+                    </span>
+                    {formatCurrency(previousOfferNightlyPrice)}/night
+                  </h1>
+                  <Separator />
+                  <h1>
+                    <span className="font-bold">
+                      {session?.user.role === "guest" ? "Host" : "Traveller"}{" "}
+                      Counter offer:{" "}
+                    </span>
+                    {formatCurrency(counterNightlyPrice)}/night
+                  </h1>
+                </>
+              )}
+            </div>
             <FormField
               control={form.control}
               name="counterPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Counter Price</FormLabel>
+                  <FormLabel>Your Counter Price</FormLabel>
                   <FormControl>
                     <Input {...field} prefix={"$"} />
                   </FormControl>
@@ -89,7 +115,9 @@ export default function CounterForm({
                 </FormItem>
               )}
             />
-            <Button type="submit">Confirm Counter</Button>
+            <Button type="submit" variant={"greenPrimary"}>
+              Confirm Counter
+            </Button>
           </form>
         </Form>
       )}

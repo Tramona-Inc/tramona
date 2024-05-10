@@ -7,11 +7,13 @@ import PropertyDeclineDialog from "./PropertyDeclineDialog";
 
 export default function PropertyCounterOptions({
   offerId,
+  originalNightlyBiddingOffer,
   counterNightlyPrice,
   previousOfferNightlyPrice,
   totalCounterAmount,
 }: {
   offerId: number;
+  originalNightlyBiddingOffer: number;
   counterNightlyPrice: number;
   previousOfferNightlyPrice: number;
   totalCounterAmount: number;
@@ -28,7 +30,7 @@ export default function PropertyCounterOptions({
         {previousOfferNightlyPrice !== 0 && (
           <p className="text-xs">
             <span className="font-bold">Your Previous offer: </span>
-            {formatCurrency(previousOfferNightlyPrice)} /night
+            {formatCurrency(previousOfferNightlyPrice)}/night
           </p>
         )}
         {counterNightlyPrice !== 0 && (
@@ -38,7 +40,7 @@ export default function PropertyCounterOptions({
                 {session?.user.role === "guest" ? "Host" : "Traveller"} Counter
                 offer:{" "}
               </span>
-              {formatCurrency(counterNightlyPrice)} /night
+              {formatCurrency(counterNightlyPrice)}/night
             </p>
           </div>
         )}
@@ -56,6 +58,8 @@ export default function PropertyCounterOptions({
           open={counterOpen}
           setOpen={setCounterOpen}
           counterNightlyPrice={counterNightlyPrice}
+          previousOfferNightlyPrice={previousOfferNightlyPrice}
+          originalNightlyBiddingOffer={originalNightlyBiddingOffer}
         />
         <PropertyDeclineDialog
           offerId={offerId}

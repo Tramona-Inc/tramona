@@ -81,8 +81,6 @@ export default function PropertyOfferCard({
         daysBetweenDates(offer.checkIn, offer.checkOut)
       : 0;
 
-  console.log(offer.property.latitude);
-
   const { data: addressData } = api.offers.getCity.useQuery({
     latitude: offer.property.latitude!,
     longitude: offer.property.longitude!,
@@ -91,6 +89,9 @@ export default function PropertyOfferCard({
   const location = addressData
     ? `${addressData.city || ""}, ${addressData.state || ""}`
     : null;
+
+  const originalNightlyBiddingOffer =
+    offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut);
 
   return (
     <Card className="overflow-clip p-0">
@@ -154,9 +155,7 @@ export default function PropertyOfferCard({
           <div>
             <p className="text-sm">
               <span className="font-bold">Original Bidding Offer: </span>
-              {formatCurrency(
-                offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut),
-              )}
+              {formatCurrency(originalNightlyBiddingOffer)}
               /night
             </p>
           </div>
@@ -171,6 +170,7 @@ export default function PropertyOfferCard({
           {!isGuestDashboard && offer.counters.length === 0 && (
             <PropertyCounterOptions
               offerId={offer.id}
+              originalNightlyBiddingOffer={originalNightlyBiddingOffer}
               counterNightlyPrice={counterNightlyPrice}
               previousOfferNightlyPrice={previousCounterNightlyPrice}
               totalCounterAmount={counter?.counterAmount ?? offer.amount} // If no counter/ original price
@@ -180,6 +180,7 @@ export default function PropertyOfferCard({
           {userCanCounter && (
             <PropertyCounterOptions
               offerId={offer.id}
+              originalNightlyBiddingOffer={originalNightlyBiddingOffer}
               counterNightlyPrice={counterNightlyPrice}
               previousOfferNightlyPrice={previousCounterNightlyPrice}
               totalCounterAmount={counter.counterAmount}
