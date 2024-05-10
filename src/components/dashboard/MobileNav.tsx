@@ -118,7 +118,7 @@ export default function MobileNav({
                   </Button>
                 ) : !isHost ? (
                   <Button asChild variant="darkOutline">
-                    <Link href="/host/onboarding">Become a host</Link>
+                    <Link href="/host-onboarding">Become a host</Link>
                   </Button>
                 ) : (
                   <Button asChild variant="darkOutline">

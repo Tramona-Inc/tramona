@@ -1,6 +1,6 @@
 import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
 import {
@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
 import {
-  cn,
   formatCurrency,
   formatDateMonthDay,
   getDiscountPercentage,
@@ -25,16 +24,13 @@ import {
   CheckIcon,
   ImagesIcon,
   ChevronRight,
-  MapPin,
   UsersRoundIcon,
   CalendarDays,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
 import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
 import {
@@ -43,25 +39,6 @@ import {
 } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
-
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((module) => module.MapContainer),
-  {
-    ssr: false, // Disable server-side rendering for this component
-  },
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((module) => module.TileLayer),
-  {
-    ssr: false,
-  },
-);
-const Circle = dynamic(
-  () => import("react-leaflet").then((module) => module.Circle),
-  {
-    ssr: false,
-  },
-);
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -80,10 +57,6 @@ export default function OfferPage({
   if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
     isBooked = true;
   }
-
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: property.address!,
-  });
 
   const isMobile = useMediaQuery("(max-width: 640px)");
 
@@ -122,35 +95,7 @@ export default function OfferPage({
   const firstImageUrl: string = property.imageUrls?.[0] ?? "";
   return (
     <div className="space-y-4">
-      <Link
-        href={isBooked ? "/requests" : `/requests/${request.id}`}
-        className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
-      >
-        &larr; Back to offers
-      </Link>
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
-        <div className="flex-[2] space-y-2">
-          <h1 className="items-center text-lg font-semibold sm:text-3xl">
-            {property.name}
-          </h1>
-          <div className="text-sm font-medium">
-            <span>{plural(property.maxNumGuests, "Guest")}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBedrooms, "bedroom")}</span>
-            <span className="mx-2">·</span>
-            <span>{property.propertyType}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBeds, "bed")}</span>
-            {property.numBathrooms && (
-              <>
-                <span className="mx-2">·</span>
-                <span>{plural(property.numBathrooms, "bath")}</span>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
+      <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background mt-4">
         <Dialog>
           {isMobile ? (
             // Only render the first image on small screens
@@ -262,6 +207,9 @@ export default function OfferPage({
           </div>
         )}
       </div>
+
+
+
       <div className="flex justify-start space-x-4">
         <a
           href="#overview"
@@ -272,14 +220,34 @@ export default function OfferPage({
         <a href="#amenities" className="text-gray-600 hover:text-gray-800">
           Amenities
         </a>
-        <a href="#location" className="text-gray-600 hover:text-gray-800">
-          Location
-        </a>
         {property.checkInTime && (
           <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
             House rules
           </a>
         )}
+      </div>
+
+      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+        <div className="flex-[2] space-y-2">
+          <h1 className="items-center text-lg font-semibold sm:text-3xl">
+            {property.name}
+          </h1>
+          <div className="text-sm font-medium">
+            <span>{plural(property.maxNumGuests, "Guest")}</span>
+            <span className="mx-2">·</span>
+            <span>{plural(property.numBedrooms, "bedroom")}</span>
+            <span className="mx-2">·</span>
+            <span>{property.propertyType}</span>
+            <span className="mx-2">·</span>
+            <span>{plural(property.numBeds, "bed")}</span>
+            {property.numBathrooms && (
+              <>
+                <span className="mx-2">·</span>
+                <span>{plural(property.numBathrooms, "bath")}</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       <hr className="h-px border-0 bg-gray-300" />
@@ -360,17 +328,17 @@ export default function OfferPage({
               <p className="text-sm font-medium text-black">
                 Original price: {formatCurrency(originalTotal / numNights)}
               </p>
-              <div className="my-6 grid grid-cols-2 gap-1">
+              <div className="my-6 grid gap-1">
                 <div>
-                  <div className="inline-flex items-center justify-start rounded-full border border-gray-300 px-10 py-0 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
+                  <div className="inline-flex w-full items-center justify-start rounded-full border border-gray-300 px-10 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
                     <CalendarDays />
                     <div className="ml-2">
-                      <p className="text-sm text-gray-600">Check in</p>
-                      <p className="text-base font-bold">{checkInDate}</p>
+                      <p className="text-sm text-gray-600">Check in/ Check-out</p>
+                      <p className="text-base font-bold">{checkInDate} - {checkOutDate}</p>
                     </div>
                   </div>
                 </div>
-                <div>
+                {/* <div>
                   <div className="inline-flex items-center justify-start rounded-full border border-gray-300 px-10 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
                     <CalendarDays />
                     <div className="ml-2">
@@ -378,7 +346,7 @@ export default function OfferPage({
                       <p className="font-bold">{checkOutDate}</p>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
               <div className="inline-flex w-full items-center rounded-full border border-gray-300 px-8 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
                 <UsersRoundIcon />
@@ -455,40 +423,6 @@ export default function OfferPage({
           </Card>
         </div>
       </div>
-      <hr className="h-px border-0 bg-gray-300" />
-      <section id="location" className="scroll-mt-36 space-y-1">
-        <h1 className="text-lg font-semibold md:text-xl">Location</h1>
-        <div className="inline-flex items-center justify-center py-2 text-base">
-          <MapPin className="mr-2" />
-          {request.location}
-        </div>
-        {coordinateData && (
-          <div className="relative z-10">
-            <MapContainer
-              center={[
-                coordinateData.coordinates.lat,
-                coordinateData.coordinates.lng,
-              ]}
-              zoom={15}
-              scrollWheelZoom={false}
-              style={{ height: "500px" }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Circle
-                center={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
-                ]}
-                radius={200} // Adjust radius as needed
-                pathOptions={{ color: "black" }} // Customize circle color and other options
-              />
-            </MapContainer>
-          </div>
-        )}
-      </section>
       {property.checkInTime && (
         <div>
           <hr className="h-px border-0 bg-gray-300" />
