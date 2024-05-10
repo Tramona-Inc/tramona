@@ -107,11 +107,15 @@ export default function PropertyOfferCard({
             alt=""
           />
           {/* <div className="absolute hidden sm:block">{badge}</div> */}
+          {userCanCounter && (
+            <div className="absolute hidden sm:block">
+              {<Badge variant={"green"}>Expires 24 hours</Badge>}
+            </div>
+          )}
         </Link>
 
         <div className="flex w-full flex-col gap-2 p-3">
           <div className="flex justify-between">
-            {/* <div className="sm:hidden">{badge}</div> */}
             <div>{badge}</div>
             <div className="ml-auto flex -translate-y-2 translate-x-2 items-center gap-2">
               <RequestGroupAvatars

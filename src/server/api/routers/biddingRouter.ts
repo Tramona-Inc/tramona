@@ -379,15 +379,15 @@ export const biddingRouter = createTRPCRouter({
         });
 
         if (pi.status === "succeeded") {
-          if (!userIsWithBid) {
-            throw new TRPCError({ code: "UNAUTHORIZED" });
-          } else {
-            await updateBidStatus({
-              id: input.bidId,
-              status: "Accepted",
-              paymentIntentId: pi.id,
-            });
-          }
+          // if (!userIsWithBid) {
+          //   throw new TRPCError({ code: "UNAUTHORIZED" });
+          // } else {
+          await updateBidStatus({
+            id: input.bidId,
+            status: "Accepted",
+            paymentIntentId: pi.id,
+          });
+          // }
         }
       }
       // TODO: email travllers

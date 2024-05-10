@@ -9,17 +9,21 @@ export function PropertyAcceptDialog({
   setOpen,
   counterNightlyPrice,
   totalCounterAmount,
+  previousOfferNightlyPrice,
+  originalNightlyBiddingOffer,
 }: {
   offerId: number;
   open: boolean;
   setOpen: (o: boolean) => void;
   counterNightlyPrice: number;
-  totalCounterAmount: number,
+  totalCounterAmount: number;
+  previousOfferNightlyPrice: number;
+  originalNightlyBiddingOffer: number;
 }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Button variant={'greenPrimary'}>Accept</Button>
+        <Button variant={"greenPrimary"}>Accept</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -30,6 +34,8 @@ export function PropertyAcceptDialog({
           setOpen={setOpen}
           counterNightlyPrice={counterNightlyPrice}
           totalCounterAmount={totalCounterAmount}
+          previousOfferNightlyPrice={previousOfferNightlyPrice}
+          originalNightlyBiddingOffer={originalNightlyBiddingOffer}
         />
       </DialogContent>
     </Dialog>

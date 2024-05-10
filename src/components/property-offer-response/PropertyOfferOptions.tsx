@@ -52,6 +52,8 @@ export default function PropertyCounterOptions({
           setOpen={setAcceptOpen}
           counterNightlyPrice={counterNightlyPrice}
           totalCounterAmount={totalCounterAmount}
+          previousOfferNightlyPrice={previousOfferNightlyPrice}
+          originalNightlyBiddingOffer={originalNightlyBiddingOffer}
         />
         <PropertyCounterDialog
           offerId={offerId}
