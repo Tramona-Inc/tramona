@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/utils/api";
-import { daysBetweenDates, formatCurrency } from "@/utils/utils";
+import { formatCurrency, getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -56,9 +56,7 @@ function CounterForm({
         propertyId: data.propertyId,
         userId: session.user.id,
         counterAmount:
-          values.counterPrice *
-          daysBetweenDates(data.checkIn, data.checkOut) *
-          100,
+          values.counterPrice * getNumNights(data.checkIn, data.checkOut) * 100,
       };
 
       await mutateAsync(newCounter);
@@ -76,7 +74,7 @@ function CounterForm({
             {data && (
               <p>
                 {formatCurrency(
-                  data.amount / daysBetweenDates(data.checkIn, data.checkOut),
+                  data.amount / getNumNights(data.checkIn, data.checkOut),
                 )}{" "}
                 /night
               </p>

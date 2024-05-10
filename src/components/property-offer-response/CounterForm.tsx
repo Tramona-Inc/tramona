@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/utils/api";
-import { daysBetweenDates, formatCurrency } from "@/utils/utils";
+import { formatCurrency, getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
@@ -61,9 +61,7 @@ export default function CounterForm({
         propertyId: data.propertyId,
         userId: session.user.id,
         counterAmount:
-          values.counterPrice *
-          daysBetweenDates(data.checkIn, data.checkOut) *
-          100,
+          values.counterPrice * getNumNights(data.checkIn, data.checkOut) * 100,
       };
 
       await mutateAsync(newCounter);

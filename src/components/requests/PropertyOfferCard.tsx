@@ -2,7 +2,7 @@ import { type Bid } from "@/server/db/schema";
 import { api, type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import {
-  daysBetweenDates,
+  getNumNights,
   formatCurrency,
   formatDateRange,
   plural,
@@ -70,7 +70,7 @@ export default function PropertyOfferCard({
 
   // ! clean up
   const counterNightlyPrice = counter
-    ? counter.counterAmount / daysBetweenDates(offer.checkIn, offer.checkOut)
+    ? counter.counterAmount / getNumNights(offer.checkIn, offer.checkOut)
     : 0;
 
   // ! previous counter for host/admin will always be 0 cause it can only gets one counter
@@ -78,7 +78,7 @@ export default function PropertyOfferCard({
   const previousCounterNightlyPrice =
     offer.counters.length > 1 && previousCounter
       ? previousCounter.counterAmount /
-        daysBetweenDates(offer.checkIn, offer.checkOut)
+        getNumNights(offer.checkIn, offer.checkOut)
       : 0;
 
   const { data: addressData } = api.offers.getCity.useQuery({
@@ -91,7 +91,7 @@ export default function PropertyOfferCard({
     : null;
 
   const originalNightlyBiddingOffer =
-    offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut);
+    offer.amount / getNumNights(offer.checkIn, offer.checkOut);
 
   return (
     <Card className="overflow-clip p-0">
