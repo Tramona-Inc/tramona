@@ -18,21 +18,27 @@ export const superhogStatusEnum = pgEnum("superhog_status", [
 
 export const reservations = pgTable("reservations", {
   id: serial("id").primaryKey(),
-  echoToken: uuid("echo_token"),
+  echoToken: varchar("echo_token", { length: 100 }).notNull(),
   propertyId: integer("property_id"), // relation to properties
   userId: integer("user_id"), //relation to users table
-  checkIn: date("check_in"),
-  checkOut: date("check_out"),
-  propertyAddress: varchar("property_address", { length: 100 }),
-  propertyTown: varchar("property_town", { length: 100 }),
-  propertyCountryIso: varchar("property_country_iso", { length: 4 }),
-  superhogVerificicationId: varchar("superhog_verification_id", {
+  checkIn: date("check_in").notNull(),
+  checkOut: date("check_out").notNull(),
+  propertyAddress: varchar("property_address", { length: 100 }).notNull(),
+  propertyTown: varchar("property_town", { length: 100 }).notNull(),
+  propertyCountryIso: varchar("property_country_iso", { length: 4 }).notNull(),
+  superhogVerificationId: varchar("superhog_verification_id", {
     length: 100,
-  }),
+  }).notNull(),
 
   superhogStatus: superhogStatusEnum("superhog_status").default("null"),
+  nameOfVerifiedUser: varchar("name_of_verified_user", {
+    length: 100,
+  }).notNull(),
 });
+//didnt set up relations up yet because we do not have the shema flow yet
 
 export type Reservation = typeof reservations.$inferSelect;
 export const reservationSelectSchema = createSelectSchema(reservations);
 export const reservationInsertSchema = createInsertSchema(reservations);
+
+export const superhogFormSchema = reservationInsertSchema.partial();

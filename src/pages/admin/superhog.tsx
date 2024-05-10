@@ -22,10 +22,10 @@ export default function Page() {
               Create Verification
             </TabsTrigger>
             <TabsTrigger value="Edit Verification">
-              Edit Existing Verification
+              Edit Existing Verifications
             </TabsTrigger>
             <TabsTrigger value="Delete Verification">
-              Delete Existing Verification
+              Delete Existing Verifications
             </TabsTrigger>
           </TabsList>
           <TabsContent value="Create Verification">

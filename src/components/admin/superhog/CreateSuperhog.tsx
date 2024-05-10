@@ -25,20 +25,16 @@ import {
 } from "../../ui/select";
 import { Separator } from "../../ui/separator";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { generateGUID } from "@/utils/utils";
+import { generateTimeStamp } from "@/utils/utils";
+import { v4 as uuidv4 } from "uuid";
+import { useToast } from "@/components/ui/use-toast";
+
 export default function SuperhogForm() {
-  //for current time stamp
-  const date = new Date();
-  const milliseconds = Math.round(date.getMilliseconds() / 10); // Round to 2 decimal places
-  const formattedMilliseconds = milliseconds.toString().padStart(2, "0"); // Ensure 2 digits
-
-  const formattedTimestamp: string =
-    date.toISOString().slice(0, -5) + "." + formattedMilliseconds;
-
+  const { toast } = useToast();
   const defaultRequestValues = {
     metadata: {
-      timeStamp: formattedTimestamp,
-      echoToken: generateGUID(),
+      timeStamp: generateTimeStamp(),
+      echoToken: uuidv4(),
     },
     listing: {
       listingId: "asda3466",
@@ -56,7 +52,7 @@ export default function SuperhogForm() {
       reservationId: "02389ax2547a",
       checkIn: "2024-05-24",
       checkOut: "2024-06-24",
-      channel: "airbnb",
+      channel: "Tramona",
       creationDate: "2023-12-19",
     },
     guest: {
@@ -97,19 +93,33 @@ export default function SuperhogForm() {
       telephoneNumber: z.string(),
     }),
   });
+
   type FormSchema = z.infer<typeof formSchema>;
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultRequestValues,
   });
-  const mutation = (data: FormSchema) => {
-    api.superhog.createSuperhogRequest.useMutation().mutateAsync(data);
-  };
+
+  const { mutateAsync } = api.superhog.createSuperhogRequest.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Superhog verification submitted!",
+        description: "Please wait for 1 minute.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Error submitting a request",
+      });
+    },
+  });
 
   const onSubmit = async (data: FormSchema) => {
     console.log(data);
-    // mutation(data);
+    mutateAsync(data);
   };
 
   return (
@@ -120,8 +130,11 @@ export default function SuperhogForm() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="flex flex-row items-center justify-around gap-x-3">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col items-center justify-center space-y-6"
+            >
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="metadata.timeStamp"
@@ -149,7 +162,7 @@ export default function SuperhogForm() {
                         Echo Token
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled />
                       </FormControl>
                       <FormDescription>
                         random token to identify the request
@@ -159,7 +172,7 @@ export default function SuperhogForm() {
                   )}
                 />
               </div>
-              <div className="flex flex-row items-center justify-around gap-x-3">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="listing.listingName"
@@ -197,7 +210,7 @@ export default function SuperhogForm() {
                   )}
                 />
               </div>
-              <div className="flex flex-row items-center justify-around gap-x-3">
+              <div className="flex flex-row items-center justify-around gap-x-10 ">
                 <FormField
                   control={form.control}
                   name="listing.address.addressLine1"
@@ -231,7 +244,7 @@ export default function SuperhogForm() {
                   )}
                 />
               </div>
-              <div className="flex flex-row items-center justify-around gap-x-3">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="listing.address.town"
@@ -281,7 +294,7 @@ export default function SuperhogForm() {
                   </FormItem>
                 )}
               />
-              <div className="flex flex-row items-center justify-around gap-x-3">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="listing.petsAllowed"
@@ -324,7 +337,7 @@ export default function SuperhogForm() {
                 />
               </div>
               <Separator />
-              <div className="flex flex-row items-center justify-around gap-x-3">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="reservation.reservationId"
@@ -358,7 +371,7 @@ export default function SuperhogForm() {
                   )}
                 />
               </div>
-              <div className="flex flex-row items-center justify-around gap-x-3">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="reservation.checkIn"
@@ -409,7 +422,7 @@ export default function SuperhogForm() {
                 )}
               />
               <Separator />
-              <div className="flex flex-row items-center justify-around gap-x-3">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="guest.firstName"
@@ -443,7 +456,7 @@ export default function SuperhogForm() {
                   )}
                 />
               </div>
-              <div className="flex flex-row items-center justify-around gap-x-3">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="guest.telephoneNumber"

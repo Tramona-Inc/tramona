@@ -240,26 +240,13 @@ export function checkDuplicates(nums: number[]) {
   return false;
 }
 
-export function generateGUID(): string {
-  const randomHex = () =>
-    Math.floor(Math.random() * 0x10000)
-      .toString(16)
-      .padStart(4, "0");
+export const generateTimeStamp = () => {
+  const date = new Date();
+  const milliseconds = Math.round(date.getMilliseconds() / 10); // Round to 2 decimal places
+  const formattedMilliseconds = milliseconds.toString().padStart(2, "0"); // Ensure 2 digits
 
-  return (
-    randomHex() +
-    randomHex() +
-    "-" +
-    randomHex() +
-    "-" +
-    "4" +
-    randomHex().substring(0, 4) + // Ensure 4 characters after the '4'
-    "-" +
-    (8 | (Math.random() * 4)).toString(16).substring(1, 2) +
-    randomHex().substring(0, 3) +
-    "-" +
-    randomHex() +
-    randomHex() +
-    randomHex()
-  ).toLowerCase();
-}
+  const formattedTimestamp: string =
+    date.toISOString().slice(0, -5) + "." + formattedMilliseconds;
+
+  return formattedTimestamp;
+};
