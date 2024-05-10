@@ -13,9 +13,8 @@ type CoordinateDataProps = {
   lng: number | undefined;
 };
 
-function GoogleMap(
-  { lat, lng }: CoordinateDataProps,
-) {
+const GoogleMap: React.FC<CoordinateDataProps> = ({ lat, lng }) => {
+
   // const [markerPosition, setMarkerPosition] = useState({
   // 	lat: lat ?? 37.774929,
   // 	lng: lng ?? -122.419416,
@@ -87,4 +86,5 @@ function GoogleMap(
 
 export default GoogleApiWrapper({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",
+  
 })(GoogleMap);

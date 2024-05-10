@@ -116,12 +116,15 @@ export default function Onboarding4() {
     }
   }, [form.formState]);
   // I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: address,
-  });
+  const {
+    data: coordinateData,
+  } =
+    api.offers.getCoordinates.useQuery({
+      location: address,
+    });
 
-  function handleError() {
-    setError(true);
+  function handleError(): void {
+    throw new Error("Function not implemented.");
   }
 
   return (
@@ -232,7 +235,7 @@ export default function Onboarding4() {
           </Form>
           {coordinateData && (
             <div className="z-0">
-              <LeafletMap
+              <GoogleMap
                 lat={coordinateData.coordinates.lat}
                 lng={coordinateData.coordinates.lng}
               />
