@@ -50,10 +50,6 @@ export default function PropertyOfferCard({
       isGuestDashboard?: false;
       offer: RouterOutputs["biddings"]["getAllPending"][number];
     }) {
-  const badge = (
-    <Badge variant={getBadgeColor(offer.status)}>{offer.status}</Badge>
-  );
-
   const { data: session } = useSession();
 
   const counter = offer.counters[0];
@@ -65,6 +61,12 @@ export default function PropertyOfferCard({
     counter.userId !== session?.user.id &&
     offer.status !== "Rejected" &&
     offer.status !== "Accepted";
+
+  const badge = (
+    <Badge variant={getBadgeColor(offer.status)}>
+      {userCanCounter ? "Counter Offer" : offer.status}
+    </Badge>
+  );
 
   // ! clean up
   const counterNightlyPrice = counter
@@ -95,7 +97,7 @@ export default function PropertyOfferCard({
       <CardContent className="flex">
         <Link
           href={`/property/${offer.propertyId}`}
-          className="relative hidden w-40 shrink-0 bg-accent p-2 sm:block"
+          className="relative hidden w-60 shrink-0 bg-accent p-2 sm:block"
         >
           <Image
             src={offer.property.imageUrls[0]!}
@@ -150,14 +152,15 @@ export default function PropertyOfferCard({
           <Separator />
 
           <div>
-            <p className="text-sm ">
-              <span className="font-semibold">Your Offer: </span>
+            <p className="text-sm">
+              <span className="font-bold">Original Bidding Offer: </span>
               {formatCurrency(
                 offer.amount / daysBetweenDates(offer.checkIn, offer.checkOut),
               )}
               /night
             </p>
           </div>
+
           {/* {!isGuestDashboard && (
             <div className="flex justify-end gap-2">
               <PropertyOfferResponseDD offerId={offer.id} />

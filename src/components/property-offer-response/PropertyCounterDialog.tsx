@@ -17,7 +17,7 @@ export function PropertyCounterDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Button variant={"outline"}>Re-counter</Button>
+        <Button variant={"secondaryLight"}>Re-counter</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

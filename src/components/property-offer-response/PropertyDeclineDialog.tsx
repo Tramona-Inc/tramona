@@ -34,7 +34,7 @@ export default function PropertyDeclineDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger>
-        <Button variant={"outline"}>Decline</Button>
+        <Button variant={"secondaryLight"}>Decline</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogTitle>Are you sure you want to withdraw this offer?</DialogTitle>

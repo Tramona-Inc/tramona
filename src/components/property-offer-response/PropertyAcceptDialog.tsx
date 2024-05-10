@@ -19,7 +19,7 @@ export function PropertyAcceptDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Button>Accept</Button>
+        <Button variant={'greenPrimary'}>Accept</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

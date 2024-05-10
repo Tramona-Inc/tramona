@@ -24,17 +24,23 @@ export default function PropertyCounterOptions({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="mt-5 flex flex-row justify-between">
-        {counterNightlyPrice !== 0 && (
-          <h1>
-            {session?.user.role === "guest" ? "Host" : "Traveller"} Counter
-            Offer: {formatCurrency(counterNightlyPrice)} /night
-          </h1>
-        )}
+      <div className="flex flex-col">
         {previousOfferNightlyPrice !== 0 && (
-          <h1>
-            Your offer: {formatCurrency(previousOfferNightlyPrice)} /night
-          </h1>
+          <p className="text-xs">
+            <span className="font-bold">Your Previous offer: </span>
+            {formatCurrency(previousOfferNightlyPrice)} /night
+          </p>
+        )}
+        {counterNightlyPrice !== 0 && (
+          <div>
+            <p className="rounded-sm text-xs">
+              <span className="font-bold">
+                {session?.user.role === "guest" ? "Host" : "Traveller"} Counter
+                offer:{" "}
+              </span>
+              {formatCurrency(counterNightlyPrice)} /night
+            </p>
+          </div>
         )}
       </div>
       <div className="flex gap-2">
