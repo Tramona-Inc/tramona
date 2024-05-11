@@ -47,6 +47,7 @@ declare module "next-auth" {
       | "setupIntentId"
       | "isIdentityVerified"
       | "isWhatsApp"
+      | "dateOfBirth"
     >;
   }
 }
@@ -75,6 +76,7 @@ export const authOptions: NextAuthOptions = {
           setupIntentId: token.setupIntentId,
           isIdentityVerified: token.isIdentityVerified,
           isWhatsApp: token.isWhatsApp,
+          dateOfBirth: token.dateOfBirth,
         },
       };
     },
@@ -102,6 +104,7 @@ export const authOptions: NextAuthOptions = {
         newToken.setupIntentId = user.setupIntentId;
         newToken.isIdentityVerified = user.isIdentityVerified;
         newToken.isWhatsApp = user.isWhatsApp;
+        newToken.dateOfBirth = user.dateOfBirth;
       }
 
       return newToken;
