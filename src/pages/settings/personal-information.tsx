@@ -1,6 +1,13 @@
 import SettingsLayout from "@/components/_common/Layout/SettingsLayout";
 import Spinner from "@/components/_common/Spinner";
+import ChangePasswordForm from "@/components/settings/ChangePasswordForm";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import {
   Form,
@@ -14,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
 import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogTitle } from "@radix-ui/react-dialog";
 import { type Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -21,14 +29,22 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 export default function PersonalInformation() {
-  const { data: session } = useSession({ required: true });
+  const { data: session, update } = useSession({ required: true });
 
   if (!session) return <Spinner />;
 
-  return <PersonalInformationForm session={session} />;
+  return <PersonalInformationForm session={session} update={update} />;
 }
 
-function PersonalInformationForm({ session }: { session: Session }) {
+type PersonalInformationFormProps = {
+  session: Session;
+  update: (session: Session) => void;
+};
+
+function PersonalInformationForm({
+  session,
+  update,
+}: PersonalInformationFormProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   const formSchema = z.object({
@@ -55,22 +71,24 @@ function PersonalInformationForm({ session }: { session: Session }) {
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
 
   async function onSubmit(values: FormValues) {
-    console.log("got here");
-    const res = await updateProfile({ ...values, id: session.user.id });
+    await updateProfile({ ...values, id: session.user.id });
+    update(session);
     setIsEditing(!isEditing);
-    console.log(res);
   }
 
   return (
     <SettingsLayout>
       <div className="mx-auto my-8 max-w-4xl">
         <div className="space-y-4 rounded-lg border bg-white p-4">
-          {/* {isEditing ? <p>Edit mode on</p> : <p>Edit mode off</p>} */}
           <Form {...form}>
             <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
             {/* {JSON.stringify(form.formState.errors, null, 2)} */}
             <div className="flex items-center justify-between">
-              <h1 className="text-lg font-bold">Personal Information</h1>
+              <h1 className="text-lg font-bold">
+                {isEditing
+                  ? "Edit Personal Information"
+                  : "Personal Information"}
+              </h1>
               {isEditing ? (
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                   <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -175,6 +193,19 @@ function PersonalInformationForm({ session }: { session: Session }) {
               )}
             />
           </Form>
+          <div className="text-end">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="link">Change Password</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader className="border-b pb-4 text-center font-bold">
+                  <DialogTitle>Change Password</DialogTitle>
+                </DialogHeader>
+                <ChangePasswordForm />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
     </SettingsLayout>
