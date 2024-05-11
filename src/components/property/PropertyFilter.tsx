@@ -9,14 +9,13 @@ import {
 import { ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleMinus, CirclePlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Separator } from "../ui/separator";
-import { toast } from "../ui/use-toast";
+import { CounterInput } from "../_common/CounterInput";
 
 export function Total({
   name,
@@ -29,35 +28,8 @@ export function Total({
 }) {
   return (
     <div className="flex flex-row items-center justify-between">
-      <h2 className="text-sm font-semibold">{name}</h2>
-      <div className="grid max-w-[150px] grid-cols-3 place-items-center">
-        <Button
-          variant="ghost"
-          size={"icon"}
-          className="rounded-full"
-          disabled={total === 0}
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
-            if (total - 1 > -1) {
-              setTotal(total - 1);
-            }
-          }}
-        >
-          <CircleMinus color="gray" size={20} />
-        </Button>
-        <div className="font-semibold">{total}</div>
-        <Button
-          variant="ghost"
-          size={"icon"}
-          className="rounded-full"
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
-            setTotal(total + 1);
-          }}
-        >
-          <CirclePlus color="gray" size={20} />
-        </Button>
-      </div>
+      <p className="text-sm font-semibold">{name}</p>
+      <CounterInput value={total} setValue={setTotal} />
     </div>
   );
 }
@@ -109,32 +81,11 @@ export default function PropertyFilter() {
   const setOpen = useCitiesFilter((state) => state.setOpen);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    setRoomType(data.roomType ?? "Other");
+    setRoomType(data.roomType);
     setBeds(data.beds ?? 0);
     setBathrooms(data.bathrooms ?? 0);
     setBedrooms(data.bedrooms ?? 0);
     setHouseRules(data.houseRules ?? []);
-    setOpen(false);
-
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
-
-  function reset(e: { preventDefault: () => void }) {
-    e.preventDefault();
-    // Reset form values
-    setBeds(0);
-    setBathrooms(0);
-    setBedrooms(0);
-    setHouseRules([]);
-    form.reset();
-    // Update state and reset form values after state updates are applied
     setOpen(false);
   }
 
@@ -284,7 +235,14 @@ export default function PropertyFilter() {
           )}
         />
         <div className="flex flex-row justify-between">
-          <Button variant={"ghost"} onClick={reset}>
+          <Button
+            type="button"
+            variant={"ghost"}
+            onClick={() => {
+              form.reset();
+              // setOpen(false);
+            }}
+          >
             Clear
           </Button>
           <Button type="submit">Submit</Button>

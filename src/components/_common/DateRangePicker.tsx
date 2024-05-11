@@ -11,12 +11,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { api, type RouterOutputs } from "@/utils/api";
+import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
 import { CalendarIcon } from "lucide-react";
 import { type FieldPath, type FieldValues } from "react-hook-form";
-
-type BlockedDates = RouterOutputs["properties"]["getBlockedDates"];
 
 export default function DateRangePicker<
   TFieldValues extends FieldValues,
@@ -34,15 +32,12 @@ export default function DateRangePicker<
   className: string;
   formLabel: string;
 }) {
-  let disabledDays: Date[] | undefined;
-
   const { data, refetch } = api.properties.getBlockedDates.useQuery(
     { propertyId: propertyId ?? 0 },
     { enabled: false },
   );
-  disabledDays = data?.map(
-    (date: { date: string | number | Date }) => new Date(date.date),
-  );
+
+  const disabledDays = data?.map((date) => new Date(date.date));
 
   return (
     <FormField
@@ -78,8 +73,11 @@ export default function DateRangePicker<
                   }
                   field.onChange(e);
                 }}
-                disabled={disabledDays}
-                // disabled={(date) => date < new Date()}
+                disabled={(date) =>
+                  disabledDays?.some(
+                    (d) => date.toDateString() === d.toDateString(),
+                  ) ?? date < new Date()
+                }
                 numberOfMonths={1}
                 showOutsideDays={true}
               />

@@ -188,6 +188,7 @@ export const properties = pgTable("properties", {
   mapScreenshot: text("map_screenshot"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  isPrivate: boolean("is_private").notNull().default(false),
 });
 
 export type Property = typeof properties.$inferSelect;
