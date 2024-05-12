@@ -20,7 +20,7 @@ export function SidebarConversation({
   const { participants, messages, id, name } = conversation;
 
   const displayParticipants = participants
-    .map((participant) => participant?.name)
+    .map((participant) => participant.name)
     .filter(Boolean)
     .join(", ");
 
@@ -82,11 +82,11 @@ export function SidebarConversation({
           </span>
           {messages[0]?.message ?? ""}
         </p>
-        {session?.user.role === "admin" && (
+        {/* {session?.user.role === "admin" && (
           <p className="line-clamp-1 text-xs uppercase text-muted-foreground">
             Conversation Id: {id}
           </p>
-        )}
+        )} */}
       </div>
     </button>
   );

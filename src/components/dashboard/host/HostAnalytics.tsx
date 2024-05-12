@@ -29,7 +29,7 @@ export default function HostAnalytics({ className }: { className?: string }) {
       name: "Revenue",
       summary: formatCurrency(totalRevenue),
       data: revenue,
-      tickFormatter: formatCurrency,
+      tickFormatter: (n: number) => formatCurrency(n),
     },
     {
       name: "Nights booked",

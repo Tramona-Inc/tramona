@@ -18,24 +18,13 @@ import {
   requests,
   requestsToProperties,
 } from "@/server/db/schema";
+import { getAddress, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import axios from "axios";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { z } from "zod";
-
-interface AddressComponent {
-  long_name: string;
-  short_name: string;
-  types: string[];
-}
-
-interface GeocodeResult {
-  address_components: AddressComponent[];
-  // Define other properties you need here
-}
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -54,16 +43,12 @@ export const offersRouter = createTRPCRouter({
 
       // request must still exist
       if (!offerDetails?.request) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
+        throw new TRPCError({ code: "NOT_FOUND" });
       }
 
       // only the owner of the group can accept offers
       if (offerDetails.request.madeByGroup.ownerId !== ctx.user.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-        });
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       await ctx.db.transaction(async (tx) => {
@@ -177,18 +162,10 @@ export const offersRouter = createTRPCRouter({
   getCoordinates: protectedProcedure
     .input(z.object({ location: z.string() }))
     .query(async ({ input }) => {
-      const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.location)}&key=${env.GOOGLE_MAPS_KEY}`,
-      );
-
-      const result = {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        coordinates: response.data.results[0].geometry.location as {
-          lat: number;
-          lng: number;
-        },
+      const coords = await getCoordinates(input.location);
+      return {
+        coordinates: coords!,
       };
-      return result;
     }),
 
   getCity: protectedProcedure
@@ -201,50 +178,26 @@ export const offersRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const { latitude, longitude } = input;
 
-      try {
-        const response = await axios.get(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${env.GOOGLE_MAPS_KEY}`,
-        );
+      const addressComponents = await getAddress({
+        lat: latitude,
+        lng: longitude,
+      });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        const results: GeocodeResult[] = response.data.results;
-        // Check if results are available and not empty
-        if (results && results.length > 0) {
-          // Extract city and state from the first result
-          const addressComponents = results[0]?.address_components;
-          let city = "";
-          let state = "";
-
-          if (addressComponents) {
-            // Check if addressComponents is not undefined
-            for (const component of addressComponents) {
-              const types = component.types;
-
-              // Check for city
-              if (types.includes("locality")) {
-                city = component.long_name;
-              }
-
-              // Check for state
-              if (types.includes("administrative_area_level_1")) {
-                state = component.short_name;
-              }
-            }
-          }
-
-          // Return city and state
-          return {
-            city,
-            state,
-          };
-        } else {
-          throw new Error("No results found");
-        }
-      } catch (error) {
-        console.error("Error retrieving city and state:", error);
-        throw new Error("Failed to retrieve city and state");
+      if (!addressComponents) {
+        throw new TRPCError({ code: "NOT_FOUND" });
       }
+
+      const city = addressComponents.find((component) =>
+        component.types.includes("locality"),
+      )?.long_name;
+
+      const state = addressComponents.find((component) =>
+        component.types.includes("administrative_area_level_1"),
+      )?.short_name;
+
+      return { city, state };
     }),
+
   getByIdWithDetails: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {

@@ -13,20 +13,14 @@ import {
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, lte, sql } from "drizzle-orm";
+import { and, asc, eq, gt, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
   properties,
 } from "./../../db/schema/tables/properties";
-import { env } from "@/env";
-
-
-const googleMapsClient = require('@google/maps').createClient({
-  key: env.GOOGLE_MAPS_KEY,
-  Promise: Promise,
-});
+import { getCoordinates } from "@/server/google-maps";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -36,20 +30,18 @@ export const propertiesRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      let lat, lng;
-
-      if (!input.latitude || !input.longitude) {
-        const response = await googleMapsClient.geocode({ address: input.address }).asPromise();
-        lat = response.json.results[0].geometry.location.lat;
-        lng = response.json.results[0].geometry.location.lng;
+      if ((!input.latitude || !input.longitude) && input.address) {
+        const coords = await getCoordinates(input.address);
+        if (coords) {
+          input.latitude = coords.lat;
+          input.longitude = coords.lng;
+        }
       }
 
       return await ctx.db
         .insert(properties)
         .values({
           ...input,
-          latitude: lat,
-          longitude: lng,
           hostId: ctx.user.role === "admin" ? null : ctx.user.id,
         })
         .returning({ id: properties.id })
@@ -149,7 +141,7 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 5;
+      const limit = input.limit ?? 12;
       const { cursor } = input;
 
       const lat = input.lat ?? 0;
@@ -184,12 +176,12 @@ export const propertiesRouter = createTRPCRouter({
             input.city && input.city !== "all"
               ? eq(properties.address, input.city)
               : sql`TRUE`, // Conditionally include eq function for address
-            input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
+            input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
             input.bedrooms
-              ? lte(properties.numBedrooms, input.bedrooms)
+              ? gte(properties.numBedrooms, input.bedrooms)
               : sql`TRUE`, // Conditionally include eq function
             input.bathrooms
-              ? lte(properties.numBathrooms, input.bathrooms)
+              ? gte(properties.numBathrooms, input.bathrooms)
               : sql`TRUE`, // Conditionally include eq function
             input.houseRules?.includes("pets allowed")
               ? eq(properties.petsAllowed, true)
@@ -200,7 +192,7 @@ export const propertiesRouter = createTRPCRouter({
             eq(properties.isPrivate, false),
           ),
         )
-        .limit(limit + 1)
+        .limit(limit)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
@@ -279,10 +271,6 @@ export const propertiesRouter = createTRPCRouter({
   hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-
       return await ctx.db.insert(properties).values({
         ...input,
         hostId: ctx.user.id,

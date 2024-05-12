@@ -10,7 +10,7 @@ import {
   userUpdateSchema,
   users,
 } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -217,9 +217,11 @@ export const usersRouter = createTRPCRouter({
     }),
 
   getMyHostProfile: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.hostProfiles.findFirst({
-      where: eq(hostProfiles.userId, ctx.user.id),
-    });
+    return (
+      (await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+      })) ?? null
+    );
   }),
 
   checkCredentials: publicProcedure

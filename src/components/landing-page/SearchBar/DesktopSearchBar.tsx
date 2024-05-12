@@ -7,7 +7,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -32,27 +32,21 @@ import {
   UsersRoundIcon,
   DollarSignIcon,
   ChevronDown,
-  InfoIcon,
+  NotebookIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Input } from "@/components/ui/input";
 import LPDateRangePicker, {
-  AirbnbLinkDialog,
-  AirbnbLinkPopover,
-  classNames,
-  DesktopGuestsPicker,
   LPFormItem,
   LPFormLabel,
   LPFormMessage,
   LPInput,
   LPLocationInput,
 } from "./components";
-import { SelectIcon } from "@radix-ui/react-select";
-import { Info } from "../../email-templates/EmailComponentsWithoutHost";
+import { CounterInput } from "@/components/_common/CounterInput";
 
 const formSchema = z.object({
   data: z
@@ -68,8 +62,9 @@ const formSchema = z.object({
           numGuests: zodInteger({ min: 1 }),
           airbnbLink: optional(zodString({ maxLen: 500 })),
           roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES, "any"]),
-          minNumBedrooms: optional(zodInteger()),
-          minNumBeds: optional(zodInteger()),
+          minNumBedrooms: z.number(),
+          minNumBeds: z.number(),
+          minNumBathrooms: z.number(),
           note: optional(zodString()),
         })
         .refine((data) => data.date.to > data.date.from, {
@@ -93,6 +88,9 @@ export default function DesktopSearchBar({
 
   const defaultValues: Partial<FormSchema["data"][number]> = {
     roomType: "any",
+    minNumBedrooms: 1,
+    minNumBeds: 1,
+    minNumBathrooms: 1,
   };
 
   const form = useForm<FormSchema>({
@@ -243,15 +241,13 @@ export default function DesktopSearchBar({
   }
 
   return (
-    // <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => onSubmit(data.data))}
-        className="space-y-2"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
         {mode == "request" && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 pb-2">
             {Array.from({ length: numTabs }).map((_, i) => {
               const isSelected = curTab === i;
               const hasErrors = tabsWithErrors.includes(i);
@@ -322,123 +318,105 @@ export default function DesktopSearchBar({
             )}
           </div>
         )}
-        <div className="flex-col rounded-3xl bg-white pb-6 backdrop-blur-md">
-          <div className="flex flex-row items-center gap-x-2">
-            <LPLocationInput
-              control={form.control}
-              name={`data.${curTab}.location`}
-              formLabel="Location"
-              className=" relative h-[66px] rounded-lg border-2 border-border 2xl:pr-24"
-            />
 
-            <LPDateRangePicker
-              control={form.control}
-              name={`data.${curTab}.date`}
-              formLabel="Check in/Check out"
-              className="h-[66px] rounded-lg border-2 border-border pr-2 lg:pr-9 2xl:pr-36"
-            />
+        <div className="flex h-16 gap-2">
+          <LPLocationInput
+            control={form.control}
+            name={`data.${curTab}.location`}
+            formLabel="Location"
+            className="flex-1"
+          />
 
-            <div className=" z-20 flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-5">
-              <UsersRoundIcon className="z-20 mr-[-23px] mt-4 h-5 w-5" />
-              <div className=" z-10 flex flex-row items-center 2xl:mr-20">
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.numGuests`}
-                  render={({ field }) => (
-                    <LPFormItem className=" z-10">
-                      <LPFormLabel className="z-20 mb-10 ml-[-32px] mt-[-5px] whitespace-nowrap text-sm md:text-xs md:font-bold">
-                        Number of guests
-                      </LPFormLabel>
-                      <FormControl>
-                        <LPInput
-                          {...field}
-                          inputMode="numeric"
-                          placeholder="Add guests"
-                          className="z-10 ml-1 h-16 text-xs xl:text-sm "
-                        />
-                      </FormControl>
-                      <LPFormMessage className="mt-2" />
-                    </LPFormItem>
-                  )}
-                />
+          <LPDateRangePicker
+            control={form.control}
+            name={`data.${curTab}.date`}
+            formLabel="Check in/Check out"
+            className="flex-1"
+          />
+
+          <FormField
+            control={form.control}
+            name={`data.${curTab}.numGuests`}
+            render={({ field }) => (
+              <LPFormItem className="flex-1">
+                <LPFormLabel>Number of guests</LPFormLabel>
+                <FormControl>
+                  <LPInput
+                    {...field}
+                    inputMode="numeric"
+                    placeholder="Add guests"
+                    icon={<UsersRoundIcon className="size-4" />}
+                  />
+                </FormControl>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name={`data.${curTab}.maxNightlyPriceUSD`}
+            render={({ field }) => (
+              <LPFormItem className="flex-1">
+                <LPFormLabel>Maximum price</LPFormLabel>
+                <FormControl>
+                  <LPInput
+                    {...field}
+                    inputMode="decimal"
+                    placeholder="Price per night"
+                    icon={<DollarSignIcon className="size-4" />}
+                  />
+                </FormControl>
+                <LPFormMessage />
+              </LPFormItem>
+            )}
+          />
+
+          <Button
+            disabled={form.formState.isSubmitting}
+            type="button"
+            variant="default"
+            onClick={form.handleSubmit((data) =>
+              checkPriceEstimation(data.data),
+            )}
+            size="lg"
+            className="rounded-md bg-teal-900 py-8 font-semibold hover:bg-teal-950"
+          >
+            {mode === "search" ? "Search" : "Submit request"}
+          </Button>
+        </div>
+        {mode === "request" && (
+          <div className="flex flex-col gap-y-4">
+            <div className="flex flex-row justify-between pt-8">
+              <div className="flex items-center text-xs text-muted-foreground 2xl:text-sm">
+                Instead of just seeing listed prices, requesting a deal lets you
+                set your budget, and we&apos;ll match you with hosts who have
+                properties in the city and accept your price. This way, you can
+                find the perfect place to stay within your means!
               </div>
-            </div>
-
-            <div className=" flex h-[66px] flex-row items-center justify-start rounded-md border-2 border-border px-4">
-              <DollarSignIcon className="z-50 mr-[-23px] mt-4 h-5 w-5" />
-              <div className="z-10 flex flex-row items-center 2xl:mr-20">
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.maxNightlyPriceUSD`}
-                  render={({ field }) => (
-                    <LPFormItem className=" z-10">
-                      <LPFormLabel className="z-20 ml-[-28px] mt-[-5px] text-sm md:text-xs md:font-bold">
-                        Price range
-                      </LPFormLabel>
-                      <FormControl>
-                        <LPInput
-                          {...field}
-                          inputMode="decimal"
-                          placeholder="Price per night"
-                          className="z-10 h-16 text-xs xl:text-sm"
-                        />
-                      </FormControl>
-                      <LPFormMessage className="mt-2" />
-                    </LPFormItem>
-                  )}
-                />
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <Button
-                disabled={form.formState.isSubmitting}
+              {/* <Button
                 type="button"
-                variant="default"
-                onClick={form.handleSubmit((data) =>
-                  checkPriceEstimation(data.data),
-                )}
-                size="lg"
-                className="bg-[#004236] rounded-lg py-8 font-semibold"
+                variant="ghost"
+                onClick={() => setIsExpanded((prev) => !prev)}
               >
-                {mode === "search" ? "Search" : "Submit request"}
-              </Button>
+                <Filter size={22} strokeWidth={1.5} />
+                {isExpanded ? "Hide filters" : "Add filters"}
+              </Button> */}
             </div>
-          </div>
-          {mode === "request" && (
-            <div className="flex flex-col gap-y-4">
-              <div className="flex w-11/12 flex-row justify-between">
-                <div className="flex w-10/12 items-center pt-3 text-xs text-[#004236] 2xl:text-sm">
-                  Instead of just seeing listed prices, requesting a deal lets
-                  you set your budget, and we&apos;ll match you with hosts who
-                  have properties in the city and accept your price. This way,
-                  you can find the perfect place to stay within your means!
-                </div>
-                <div className="flex flex-row items-center p-3">
-                  <Filter size={22} strokeWidth={1.5} />
-                  <button
-                    type="button"
-                    onClick={() => setIsExpanded((prev) => !prev)}
-                    className="whitespace-nowrap rounded-full bg-white/10 py-1 pl-1 text-sm font-medium text-primary hover:bg-white/20"
-                  >
-                    {isExpanded ? "Hide filters" : "Add filters"}
-                  </button>
-                </div>
-              </div>
-              <FiltersSection
-                form={form}
-                curTab={curTab}
-                isExpanded={isExpanded}
-              />
-              <div className="flex flex-col">
-                {/* <AirbnbLinkDialog parentForm={form} curTab={curTab} /> */}
-                <AirbnbLinkPopover parentForm={form} curTab={curTab} />
+            <FiltersSection
+              form={form}
+              curTab={curTab}
+              isExpanded={isExpanded}
+            />
+            <div className="flex flex-col">
+              {/* <AirbnbLinkDialog parentForm={form} curTab={curTab} /> */}
+              {/* <AirbnbLinkPopover parentForm={form} curTab={curTab} />
                 <p className="mt-1 text-xs text-muted-foreground">
                   Have a property you are eyeing, input the Airbnb link here.
-                </p>
-              </div>
+                </p> */}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
@@ -471,46 +449,6 @@ export default function DesktopSearchBar({
     </Form>
   );
 }
-{
-  /* <form onSubmit={(event) => handleSubmit(event)} className="mt-4">
-        <input
-          type="text"
-          value={airbnbUrl}
-          onChange={(event) => setAirbnbUrl(event.target.value)}
-          placeholder="Enter Airbnb URL"
-          className="border border-gray-300 rounded-md px-3 py-2 mr-2 focus:outline-none focus:border-indigo-500"
-          disabled={loading} // Disable input field while loading
-        />
-        <button type="submit" className="bg-indigo-500 text-white rounded-md px-4 py-2 focus:outline-none hover:bg-indigo-600" disabled={loading}>
-          {loading ? 'Scraping...' : 'Scrape'}
-        </button>
-        {combinedScrapedData && <div className="ml-4">Scraped Price: {combinedScrapedData}</div>}
-        {error && <div className="text-red-500 mt-2">{error}</div>}
-      </form> */
-}
-{
-  /* </> */
-}
-
-// const FiltersButton = forwardRef<
-//   HTMLButtonElement,
-//   { fmtdFilters: string | undefined }
-// >(({ fmtdFilters, ...props }, ref) => (
-//   <Button
-//     type="button"
-//     variant={fmtdFilters ? "filledInput" : "emptyInput"}
-//     className="pl-3"
-//     {...props}
-//     ref={ref}
-//   >
-//     <p className="overflow-clip text-ellipsis">
-//       {fmtdFilters ?? "Add filters"}
-//     </p>
-//     <FilterIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
-//   </Button>
-// ));
-
-// FiltersButton.displayName = "FiltersButton";
 
 function FiltersSection({
   form,
@@ -526,29 +464,24 @@ function FiltersSection({
 
   return (
     isExpanded && (
-      <div className=" After the flow what elsex-3 grid max-w-fit grid-cols-2 grid-rows-1 justify-start lg:grid-cols-4  lg:justify-start">
+      <div className="flex gap-2">
         <FormField
           control={form.control}
           name={`data.${curTab}.roomType`}
           render={({ field }) => (
-            <LPFormItem className="col-span-1 border-none bg-white text-base">
+            <LPFormItem>
               <Select
                 onValueChange={field.onChange}
                 open={roomTypeDDIsOpen}
                 onOpenChange={setRoomTypeDDIsOpen}
               >
                 <FormControl>
-                  <SelectTrigger className="rounded-xl border-2 border-border bg-white">
-                    <SelectValue
-                      className="SelectValue"
-                      placeholder="Type of place"
-                    />
-                    <SelectIcon>
-                      <ChevronDown className="h-4 w-4" />
-                    </SelectIcon>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Type of place" />
+                    <ChevronDown className="size-4" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent className="bg-white">
+                <SelectContent>
                   {ALL_PROPERTY_ROOM_TYPES.map((roomType) => (
                     <SelectItem key={roomType} value={roomType}>
                       {roomType}
@@ -556,50 +489,38 @@ function FiltersSection({
                   ))}
                 </SelectContent>
               </Select>
-              <LPFormMessage className="mt-2" />
+              <LPFormMessage />
             </LPFormItem>
           )}
         />
-        {/* Beds Bathroom Bedrooms filter */}
+
         <FormField
           control={form.control}
           name={`data.${curTab}.minNumBedrooms`}
           render={({ field }) => (
             <LPFormItem>
+              <LPFormLabel>Bedrooms</LPFormLabel>
               <FormControl>
-                <DesktopGuestsPicker name="numOfBeds" className="text-sm" />
+                <CounterInput value={field.value} setValue={field.onChange} />
               </FormControl>
               <LPFormMessage className="mt-2" />
             </LPFormItem>
           )}
         />
-        {/* <FormField
-              control={form.control}
-              name={`data.${curTab}.minNumBeds`}
-              render={({ field }) => (
-                <LPFormItem>
-                  <LPFormLabel>Beds</LPFormLabel>
-                  <FormControl>
-                    <LPInput {...field} inputMode="numeric" suffix="or more" />
-                  </FormControl>
-                  <LPFormMessage className="mt-2" />
-                </LPFormItem>
-              )}
-            /> */}
 
         <FormField
           control={form.control}
           name={`data.${curTab}.note`}
           render={({ field }) => (
-            <LPFormItem className="relative z-20 col-span-2 h-11 rounded-lg border-2 border-border">
+            <LPFormItem>
               <FormControl>
+                <LPFormLabel>Additional notes</LPFormLabel>
                 <LPInput
                   {...field}
-                  placeholder="Additional notes"
-                  className=" mt-[-3px] h-8 text-sm"
+                  icon={<NotebookIcon className="size-4" />}
                 />
               </FormControl>
-              <LPFormMessage className="z-10 mt-5" />
+              <LPFormMessage />
             </LPFormItem>
           )}
         />

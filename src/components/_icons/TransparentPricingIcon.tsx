@@ -7,7 +7,7 @@ export default function TransparentPricingIcon() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g clip-path="url(#clip0_5409_13891)">
+      <g clipPath="url(#clip0_5409_13891)">
         <rect width="250" height="200" fill="none" />
         <rect x="-36" y="-7" width="308" height="222" fill="none" />
         <path
@@ -39,7 +39,7 @@ export default function TransparentPricingIcon() {
           strokeWidth="2.5"
           strokeLinecap="round"
         />
-        <g clip-path="url(#clip1_5409_13891)">
+        <g clipPath="url(#clip1_5409_13891)">
           <path
             d="M90 72.4375V119.562"
             stroke="#004236"

@@ -52,8 +52,8 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * formatCurrency(2000) => "$20.00"
  * ```
  */
-export function formatCurrency(cents: number) {
-  if (cents % 100 === 0) return `$${cents / 100}`;
+export function formatCurrency(cents: number, { round = false } = {}) {
+  if (cents % 100 === 0 || round) return `$${Math.round(cents / 100)}`;
   return `$${(cents / 100).toFixed(2)}`;
 }
 
