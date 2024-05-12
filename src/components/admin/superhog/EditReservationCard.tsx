@@ -93,20 +93,22 @@ export default function EditReservationCard({
   });
 
   const onSubmit = (data: FormSchema) => {
-    mutateAsync(data).then(() => {
+    mutateAsync(data)
+      .then(() => {
         console.log("success");
         toast({
           title: "Reservation Updated",
           description: "The reservation has been updated successfully",
         });
-  }).catch((error:Error) => {
-    toast({
-      title: "Error",
-      description: "The reservation has not been updated successfully",
-      variant: "destructive",
-    });
-  })
-
+      })
+      .catch((error: Error) => {
+        toast({
+          title: "Error",
+          description: "The reservation has not been updated successfully",
+          variant: "destructive",
+        });
+      });
+  };
   return (
     <Card className="">
       <CardHeader className="flex flex-row items-start justify-between">
