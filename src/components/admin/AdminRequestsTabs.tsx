@@ -22,6 +22,11 @@ const navs = [
     description: "Backdoor form to upload properties for hosts",
     href: "/admin/property-upload",
   },
+  {
+    title: "Admin Superhog Verification",
+    description: "Manually verify Superhog status for users",
+    href: "/admin/superhog",
+  },
 ];
 
 export default function AdminRequestsTabs() {
