@@ -24,6 +24,18 @@ import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
 import { referralCodes, referralEarnings, users } from "./tables/users";
+=======
+import {
+  hostTeamInvites,
+  hostTeamMembers,
+  hostTeams,
+} from "./tables/hostTeams";
+import { bids } from "./tables/bids";
+import {
+  bucketListDestinations,
+  bucketListProperties,
+} from "./tables/bucketList";
+import { reservations } from "./tables/reservations";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -38,6 +50,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   ownedGroups: many(groups),
   requestGroupsCreated: many(requestGroups),
   hostTeams: many(hostTeamMembers),
+  bids: many(bids),
+  reservations: many(reservations),
   bucketListDestinations: many(bucketListDestinations),
   bucketListProperties: many(bucketListProperties),
 }));
@@ -86,6 +100,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   offers: many(offers),
   requestsToProperties: many(requestsToProperties),
   bookedDates: many(bookedDates),
+  reservations: many(reservations),
 }));
 
 export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
@@ -270,6 +285,17 @@ export const hostTeamInviteRelations = relations(
     }),
   }),
 );
+
+export const reservationsRelations = relations(reservations, ({ one }) => ({
+  property: one(properties, {
+    fields: [reservations.propertyId],
+    references: [properties.id],
+  }),
+  user: one(users, {
+    fields: [reservations.userId],
+    references: [users.id],
+  }),
+}));
 
 export const bucketListDestinationsRelations = relations(
   bucketListDestinations,
