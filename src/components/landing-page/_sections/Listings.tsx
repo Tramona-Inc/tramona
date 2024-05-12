@@ -76,7 +76,7 @@ export default function Listings() {
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <>{skeletons}</>
-      ) : !!currentProperties.length ? (
+      ) : currentProperties.length > 0 ? (
         // if there are currentProperties to show, display them
         <>
           {currentProperties.map((property, i) => (
@@ -91,9 +91,10 @@ export default function Listings() {
           {isFetchingNextPage && skeletons}
         </>
       ) : (
-        // if there are no properties to show, display a message
-        <div className="flex justify-center">
-          <p className="text-sm text-white/60">No properties to show</p>
+        <div className="col-span-full flex min-h-80 items-center justify-center">
+          <p className="text-sm text-secondary-foreground">
+            No properties to show
+          </p>
         </div>
       )}
     </section>

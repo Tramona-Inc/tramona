@@ -1,20 +1,11 @@
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-  roleRestrictedProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, roleRestrictedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import { env } from "@/env";
 import axios from "axios";
 import { db } from "@/server/db";
-import { superhogStatusEnum } from "../../db/schema/tables/reservations";
-import {
-  reservations,
-  reservationInsertSchema,
-} from "../../db/schema/tables/reservations";
-import { timeStamp } from "console";
+import { reservations } from "../../db/schema/tables/reservations";
 import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 export interface ReservationInterface {
   id: number;
@@ -97,37 +88,39 @@ export const superhogRouter = createTRPCRouter({
         }),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        const response = await axios.post(
-          "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
-          input,
-          config,
-        );
-        await db.insert(reservations).values({
-          checkIn: input.reservation.checkIn,
-          checkOut: input.reservation.checkOut,
-          echoToken: input.metadata.echoToken,
-          propertyAddress: input.listing.address.addressLine1,
-          propertyTown: input.listing.address.town,
-          propertyCountryIso: input.listing.address.countryIso,
-          superhogStatus: response.data.verification?.status as
-            | "Pending"
-            | "Rejected"
-            | "Approved"
-            | "Flagged"
-            | "null",
-          superhogVerificationId: response.data.verification
-            ?.verificationId as string,
-          superhogReservationId: input.reservation.reservationId,
-          nameOfVerifiedUser: `${input.guest.firstName} ${input.guest.lastName}`,
-        });
-      } catch (error) {
-        if (error instanceof Error) {
-          const axiosError = error as AxiosError;
-          throw new Error(axiosError.response.data.detail);
-        }
+    .mutation(async ({ input }) => {
+      type ResponseType = {
+        data: {
+          verification?: {
+            verificationId: string;
+            status: "Pending" | "Rejected" | "Approved" | "Flagged" | "null";
+          };
+        };
+      };
+
+      const { verification } = await axios
+        .post<
+          unknown,
+          ResponseType
+        >("https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications", input, config)
+        .then((res) => res.data);
+
+      if (!verification) {
+        throw new TRPCError({ code: "NOT_FOUND" });
       }
+
+      await db.insert(reservations).values({
+        checkIn: input.reservation.checkIn,
+        checkOut: input.reservation.checkOut,
+        echoToken: input.metadata.echoToken,
+        propertyAddress: input.listing.address.addressLine1,
+        propertyTown: input.listing.address.town,
+        propertyCountryIso: input.listing.address.countryIso,
+        superhogStatus: verification.status,
+        superhogVerificationId: verification.verificationId,
+        superhogReservationId: input.reservation.reservationId,
+        nameOfVerifiedUser: `${input.guest.firstName} ${input.guest.lastName}`,
+      });
     }),
   getAllVerifications: roleRestrictedProcedure(["admin"]).query(async () => {
     return await db.query.reservations.findMany();
