@@ -111,14 +111,14 @@ export const superhogRouter = createTRPCRouter({
           propertyAddress: input.listing.address.addressLine1,
           propertyTown: input.listing.address.town,
           propertyCountryIso: input.listing.address.countryIso,
-          superhogStatus: response.data.verification.status as
+          superhogStatus: response.data.verification?.status as
             | "Pending"
             | "Rejected"
             | "Approved"
             | "Flagged"
             | "null",
           superhogVerificationId: response.data.verification
-            .verificationId as string,
+            ?.verificationId as string,
           superhogReservationId: input.reservation.reservationId,
           nameOfVerifiedUser: `${input.guest.firstName} ${input.guest.lastName}`,
         });

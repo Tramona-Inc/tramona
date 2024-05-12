@@ -28,7 +28,7 @@ export default function DeleteSuperhog() {
     data,
     isLoading,
   }: { data: ReservationInterface[] | undefined; isLoading: boolean } =
-    api.superhog.getAllVerifications!.useQuery();
+    api.superhog.getAllVerifications.useQuery();
 
   const deleteVerificationMutation =
     api.superhog.deleteVerification.useMutation({
@@ -96,19 +96,23 @@ export default function DeleteSuperhog() {
                     <form
                       onSubmit={(event) => {
                         event.preventDefault();
-                        console.log(reservation.superhogReservationId);
-                        deleteVerificationMutation.mutateAsync({
-                          metadata: {
-                            echoToken: uuidv4(),
-                            timeStamp: generateTimeStamp(),
-                          },
-                          verification: {
-                            verificationId: reservation.superhogVerificationId,
-                          },
-                          reservation: {
-                            reservationId: reservation.superhogReservationId,
-                          },
-                        });
+                        try {
+                          deleteVerificationMutation.mutate({
+                            metadata: {
+                              echoToken: uuidv4(),
+                              timeStamp: generateTimeStamp(),
+                            },
+                            verification: {
+                              verificationId:
+                                reservation.superhogVerificationId,
+                            },
+                            reservation: {
+                              reservationId: reservation.superhogReservationId,
+                            },
+                          });
+                        } catch (error) {
+                          console.log(error);
+                        }
                       }}
                     >
                       {/** some inputs */}

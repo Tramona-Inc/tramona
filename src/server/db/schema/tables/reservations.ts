@@ -5,7 +5,6 @@ import {
   serial,
   varchar,
   pgEnum,
-  uuid,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 export const superhogStatusEnum = pgEnum("superhog_status", [

@@ -93,9 +93,19 @@ export default function EditReservationCard({
   });
 
   const onSubmit = (data: FormSchema) => {
-    console.log(data);
-    mutateAsync(data);
-  };
+    mutateAsync(data).then(() => {
+        console.log("success");
+        toast({
+          title: "Reservation Updated",
+          description: "The reservation has been updated successfully",
+        });
+  }).catch((error:Error) => {
+    toast({
+      title: "Error",
+      description: "The reservation has not been updated successfully",
+      variant: "destructive",
+    });
+  })
 
   return (
     <Card className="">
@@ -124,11 +134,11 @@ export default function EditReservationCard({
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>
-                Edit {reservation.nameOfVerifiedUser}'s check-in dates
+                Edit {reservation.nameOfVerifiedUser}&aposs check-in dates
               </DialogTitle>
               <DialogDescription className="text-sm">
-                Make changes to the request here. Click update when you're done
-                and we will send it to superhog.
+                Make changes to the request here. Click update when you&aposre
+                done and we will send it to superhog.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
