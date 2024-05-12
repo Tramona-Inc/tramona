@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { api } from "@/utils/api";
 import { ReservationInterface } from "@/server/api/routers/superhogRouter";
-import Spinner from "@/components/_common/Spinner";
-import { PencilIcon } from "lucide-react";
+import EditReservationCard from "./EditReservationCard";
 
-export default function DeleteSuperhog() {
+import Spinner from "@/components/_common/Spinner";
+
+export default function EditSuperhogForm() {
   const {
     data,
     isLoading,
@@ -18,40 +19,19 @@ export default function DeleteSuperhog() {
       </p>
     ) : (
       data.map((reservation, index) => {
-        return (
-          <Card className="" key={index}>
-            <CardHeader className="flex flex-row justify-between">
-              {reservation.nameOfVerifiedUser}{" "}
-              <PencilIcon className="hover:scale-105" />
-            </CardHeader>
-            <CardContent className="flex flex-col items-stretch text-sm">
-              <div>{reservation.superhogVerificationId}</div>
-              <div>{}</div>
-              <div>
-                <p>Property Address</p>
-                <div className="flex flex-col gap-y-2">
-                  {reservation.propertyAddress}
-                  {reservation.propertyTown}
-                  {reservation.propertyCountryIso}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <EditReservationCard reservation={reservation} key={index} />;
       })
     )
   ) : null;
 
-  console.log(data);
   return (
     <Card className="m-12 px-10">
       <CardHeader className="my-5 text-3xl font-bold text-primary">
-        Edit Superhog verification
+        Edit Superhog verifications dates
       </CardHeader>
       <CardContent>
         <p className="my-3 font-semibold">
-          {" "}
-          Select a verification report to edit
+          Select the dates of a verification report to edit
         </p>
         <div className=" ">
           {isLoading ? (

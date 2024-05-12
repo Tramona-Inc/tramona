@@ -7,7 +7,7 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Head from "next/head";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DeleteSuperhog from "@/components/admin/superhog/DeleteSuperhog";
-//create function
+//
 
 export default function Page() {
   return (

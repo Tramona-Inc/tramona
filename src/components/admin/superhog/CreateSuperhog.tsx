@@ -29,8 +29,12 @@ import { generateTimeStamp } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/components/ui/use-toast";
 
+//IMPORTANT THERE IS TWO RESERVATION ID. reservationID is a required is a required
+//input for the superhog verification API,howerver reservation.id is the primary key of the reservation table in the database
+//The reservationID is saved
 export default function SuperhogForm() {
   const { toast } = useToast();
+
   const defaultRequestValues = {
     metadata: {
       timeStamp: generateTimeStamp(),
@@ -49,7 +53,7 @@ export default function SuperhogForm() {
       petsAllowed: "True",
     },
     reservation: {
-      reservationId: "02389ax2547a",
+      reservationId: "02389sdfax2547a",
       checkIn: "2024-05-24",
       checkOut: "2024-06-24",
       channel: "Tramona",
@@ -101,25 +105,27 @@ export default function SuperhogForm() {
     defaultValues: defaultRequestValues,
   });
 
-  const { mutateAsync } = api.superhog.createSuperhogRequest.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Superhog verification submitted!",
-        description: "Please wait for 1 minute.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Error submitting a request",
-      });
-    },
-  });
+  const { mutateAsync: CreateSuperhogRequest } =
+    api.superhog.createSuperhogRequest.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Superhog verification submitted!",
+          description: "Please wait for 1 minute.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Error submitting a request",
+        });
+      },
+    });
 
   const onSubmit = async (data: FormSchema) => {
-    console.log(data);
-    mutateAsync(data);
+    if (data) {
+      CreateSuperhogRequest(data);
+    }
   };
 
   return (
@@ -344,12 +350,12 @@ export default function SuperhogForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-bold text-primary">
-                        Reservation Id
+                        Superhog Reservation Id
                       </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
-                      <FormDescription>Required</FormDescription>
+                      <FormDescription>Required/random number</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -469,7 +475,7 @@ export default function SuperhogForm() {
                         <Input {...field} />
                       </FormControl>
                       <FormDescription>
-                        Make sure to the country code ex "+1"{" "}
+                        Make sure to the country code ex: +1
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
