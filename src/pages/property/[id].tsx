@@ -1,14 +1,11 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import Spinner from '@/components/_common/Spinner';
-import PropertyPage from '@/components/property/PropertyPage';
+import Spinner from "@/components/_common/Spinner";
+import PropertyPage from "@/components/property/PropertyPage";
 import { api } from "@/utils/api";
-
-import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 export default function Property() {
-  useSession({ required: true });
   const router = useRouter();
   const propertyId = parseInt(router.query.id as string);
 
@@ -18,8 +15,6 @@ export default function Property() {
       enabled: router.isReady,
     },
   );
-
-  console.log(property);
 
   return (
     <DashboardLayout type="guest">
