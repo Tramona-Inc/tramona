@@ -1,11 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormField, FormItem, FormMessage } from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
@@ -13,8 +7,9 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
-import { CalendarIcon } from "lucide-react";
 import { type FieldPath, type FieldValues } from "react-hook-form";
+import { type InputVariant } from "../ui/input";
+import { InputButton } from "../ui/input-button";
 
 export default function DateRangePicker<
   TFieldValues extends FieldValues,
@@ -23,14 +18,18 @@ export default function DateRangePicker<
   propertyId,
   className,
   formLabel,
+  variant,
+  icon,
   ...props
 }: Omit<
   React.ComponentProps<typeof FormField<TFieldValues, TName>>,
   "render"
 > & {
   propertyId?: number;
-  className: string;
-  formLabel: string;
+  className?: string;
+  formLabel?: string;
+  variant?: InputVariant;
+  icon?: React.FC<{ className?: string }>;
 }) {
   const { data, refetch } = api.properties.getBlockedDates.useQuery(
     { propertyId: propertyId ?? 0 },
@@ -44,20 +43,21 @@ export default function DateRangePicker<
       {...props}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{formLabel}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
-              <Button
+              <InputButton
                 onClick={() => propertyId && refetch()}
                 className={className}
-                variant={field.value ? "filledInput" : "emptyInput"}
-              >
-                {field.value
-                  ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    formatDateRange(field.value.from, field.value.to)
-                  : "Select dates"}
-                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-              </Button>
+                placeholder="Select dates"
+                variant={variant}
+                label={formLabel}
+                icon={icon}
+                value={
+                  field.value &&
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                  formatDateRange(field.value.from, field.value.to)
+                }
+              />
             </PopoverTrigger>
             <PopoverContent
               className="w-auto p-0 backdrop-blur-md"
@@ -74,9 +74,9 @@ export default function DateRangePicker<
                   field.onChange(e);
                 }}
                 disabled={(date) =>
-                  disabledDays?.some(
+                  (disabledDays ?? []).some(
                     (d) => date.toDateString() === d.toDateString(),
-                  ) ?? date < new Date()
+                  ) || date < new Date()
                 }
                 numberOfMonths={1}
                 showOutsideDays={true}
