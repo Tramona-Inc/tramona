@@ -32,7 +32,7 @@ export default function MyTrips() {
         <title>My Trips | Tramona</title>
       </Head>
 
-      <div className="container col-span-10 flex min-h-screen-minus-header flex-col gap-10 py-10 2xl:col-span-11">
+      <div className="container col-span-10 flex flex-col gap-10 py-10 2xl:col-span-11">
         <h1 className="text-4xl font-bold">My Trips</h1>
 
         <Tabs defaultValue="upcoming">

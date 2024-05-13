@@ -22,7 +22,7 @@ export default function MainLayout({
         <Header type="marketing" />
       )}
       <main
-        className={cn("min-h-screen-minus-header bg-white", className)}
+        className={cn("min-h-screen-minus-header-n-footer bg-white", className)}
       >
         {children}
       </main>

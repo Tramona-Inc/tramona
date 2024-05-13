@@ -20,7 +20,7 @@ export default function DashboardLayout({
       <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
       <div className="flex">
         {session && (
-          <aside className="sticky bottom-0 top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
+          <aside className="sticky bottom-0 top-header-height hidden h-screen-minus-header-n-footer bg-zinc-100 lg:block">
             <Sidebar type={type} />
           </aside>
         )}
