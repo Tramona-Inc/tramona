@@ -23,19 +23,8 @@ import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
-import { referralCodes, referralEarnings, users } from "./tables/users";
-=======
-import {
-  hostTeamInvites,
-  hostTeamMembers,
-  hostTeams,
-} from "./tables/hostTeams";
-import { bids } from "./tables/bids";
-import {
-  bucketListDestinations,
-  bucketListProperties,
-} from "./tables/bucketList";
 import { reservations } from "./tables/reservations";
+import { referralCodes, referralEarnings, users } from "./tables/users";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
