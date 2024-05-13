@@ -2,14 +2,24 @@ import NavLink from "../_utils/NavLink";
 
 import { api } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
-import {
-  ArrowLeftRight,
-} from "lucide-react";
+import { ArrowLeftRight, Menu, Settings, Wallet } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
-import { adminNavLinks, guestNavLinks, hostNavLinks } from '@/config/sideNavLinks';
+import {
+  adminNavLinks,
+  guestNavLinks,
+  hostNavLinks,
+} from "@/config/sideNavLinks";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import Link from "next/link";
 
 function SidebarLink({
   href,
@@ -51,7 +61,6 @@ function SidebarLink({
     />
   );
 }
-
 
 export default function Sidebar({
   type,
@@ -131,6 +140,28 @@ export default function Sidebar({
               )}
           </div>
         ))}
+        <div className="text-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Menu />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuGroup>
+                <Link href="/settings/personal-information">
+                  <DropdownMenuItem className="text-primary">
+                    <Settings />
+                    Settings
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/account">
+                  <DropdownMenuItem className="text-primary">
+                    <Wallet /> Refer and earn
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       {/* <button onClick={notifyMe}>NOTIFICATION</button>
       <button onClick={play}>Sound</button>
@@ -138,4 +169,3 @@ export default function Sidebar({
     </div>
   );
 }
-

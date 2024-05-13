@@ -64,7 +64,7 @@ export default function ChangePasswordForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-        {JSON.stringify(form.formState.errors, null, 2)}
+        {/* {JSON.stringify(form.formState.errors, null, 2)} */}
         <FormField
           name="oldPassword"
           control={form.control}
