@@ -2,9 +2,9 @@ import { type Bid } from "@/server/db/schema";
 import { api, type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import {
-  getNumNights,
   formatCurrency,
   formatDateRange,
+  getNumNights,
   plural,
 } from "@/utils/utils";
 import { EllipsisIcon, TrashIcon } from "lucide-react";
@@ -87,7 +87,7 @@ export default function PropertyOfferCard({
   });
 
   const location = addressData
-    ? `${addressData.city || ""}, ${addressData.state || ""}`
+    ? `${addressData.city ?? ""}, ${addressData.state ?? ""}`
     : null;
 
   const originalNightlyBiddingOffer =

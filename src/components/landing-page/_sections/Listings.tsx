@@ -72,7 +72,7 @@ export default function Listings() {
   ));
 
   return (
-    <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+    <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <>{skeletons}</>
@@ -91,10 +91,14 @@ export default function Listings() {
           {isFetchingNextPage && skeletons}
         </>
       ) : (
-        <div className="col-span-full flex min-h-80 items-center justify-center">
+        <div className="col-span-full flex min-h-80 items-center justify-center gap-4">
           <p className="text-sm text-secondary-foreground">
             No properties to show
           </p>
+          {/* <div className="flex gap-2">
+            <Button>Edit filters</Button>
+            <Button variant="secondary">Clear filters</Button>
+          </div> */}
         </div>
       )}
     </section>
