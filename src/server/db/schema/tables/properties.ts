@@ -55,7 +55,6 @@ export const ALL_PROPERTY_TYPES = [
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES = [
-  "Flexible",
   "Entire place",
   "Shared room",
   "Private room",

@@ -1,21 +1,13 @@
-import {
-  Map,
-  Marker,
-  GoogleApiWrapper,
-  InfoWindow,
-  type GoogleAPI,
-  type IMapProps,
-} from "google-maps-react";
-import React, { useState } from "react";
+import { env } from "@/env";
+import { Map, Marker, GoogleApiWrapper } from "google-maps-react";
+import React from "react";
 
 type CoordinateDataProps = {
   lat: number | undefined;
   lng: number | undefined;
 };
 
-function GoogleMap(
-  { lat, lng }: CoordinateDataProps,
-) {
+function GoogleMap({ lat, lng }: CoordinateDataProps) {
   // const [markerPosition, setMarkerPosition] = useState({
   // 	lat: lat ?? 37.774929,
   // 	lng: lng ?? -122.419416,
@@ -57,7 +49,6 @@ function GoogleMap(
             initialCenter={{ lat: lat, lng: lng }}
             // onClick={onMapClick}
             style={{ height: "400px" }}
-
           >
             <Marker
               position={{ lat: lat, lng: lng }}
@@ -86,5 +77,5 @@ function GoogleMap(
 }
 
 export default GoogleApiWrapper({
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",
+  apiKey: env.NEXT_PUBLIC_GOOGLE_PLACES_KEY,
 })(GoogleMap);
