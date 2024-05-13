@@ -32,6 +32,7 @@ export default function AcceptCityBidDialog({
     setLoading(true);
 
     await acceptBid({
+      amount: 0,
       bidId: bid.id,
     })
       .then(() => {
