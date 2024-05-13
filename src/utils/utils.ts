@@ -239,3 +239,14 @@ export function checkDuplicates(nums: number[]) {
 
   return false;
 }
+
+export const generateTimeStamp = () => {
+  const date = new Date();
+  const milliseconds = Math.round(date.getMilliseconds() / 10); // Round to 2 decimal places
+  const formattedMilliseconds = milliseconds.toString().padStart(2, "0"); // Ensure 2 digits
+
+  const formattedTimestamp: string =
+    date.toISOString().slice(0, -5) + "." + formattedMilliseconds;
+
+  return formattedTimestamp;
+};

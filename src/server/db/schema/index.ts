@@ -14,4 +14,5 @@ export * from "./tables/groups";
 export * from "./tables/requestsToProperties";
 export * from "./tables/hostTeams";
 export * from "./tables/bids";
+export * from "./tables/reservations";
 export * from "./tables/bucketList";
