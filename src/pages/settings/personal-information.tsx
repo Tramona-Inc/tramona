@@ -69,6 +69,9 @@ function PersonalInformationForm({
   });
 
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { data } = api.users.getPassword.useQuery();
+
+  const isPasswordNull = data?.password === null;
 
   async function onSubmit(values: FormValues) {
     await updateProfile({ ...values, id: session.user.id });
@@ -135,6 +138,7 @@ function PersonalInformationForm({
                       disabled={!isEditing}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -153,6 +157,7 @@ function PersonalInformationForm({
                       disabled={!isEditing}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -171,6 +176,7 @@ function PersonalInformationForm({
                       disabled={!isEditing}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -189,23 +195,26 @@ function PersonalInformationForm({
                       disabled={!isEditing}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
           </Form>
-          <div className="text-end">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="link">Change Password</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader className="border-b pb-4 text-center font-bold">
-                  <DialogTitle>Change Password</DialogTitle>
-                </DialogHeader>
-                <ChangePasswordForm />
-              </DialogContent>
-            </Dialog>
-          </div>
+          {!isPasswordNull && (
+            <div className="text-end">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="link">Change Password</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader className="border-b pb-4 text-center font-bold">
+                    <DialogTitle>Change Password</DialogTitle>
+                  </DialogHeader>
+                  <ChangePasswordForm />
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
         </div>
       </div>
     </SettingsLayout>
