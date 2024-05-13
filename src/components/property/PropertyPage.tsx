@@ -52,7 +52,7 @@ const Circle = dynamic(
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export default function PropertyPage({ property }: { property: Property }) {
-  let isBooked = false;
+  const isBooked = false;
 
   // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
   //   location: property.address!,
@@ -65,16 +65,14 @@ export default function PropertyPage({ property }: { property: Property }) {
 
   const isMobile = useMediaQuery("(max-width: 640px)");
 
-  const isAirbnb =
-    property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
-
-  // const lisa = false; // temporary until we add payments
-  const hostName = property.hostName;
+  // const isAirbnb =
+  //   property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
 
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
   const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
-  const firstImageUrl: string = property.imageUrls?.[0] ?? "";
+  const firstImageUrl = property.imageUrls[0]!;
+
   return (
     <div className="space-y-4">
       <Link
@@ -258,9 +256,9 @@ export default function PropertyPage({ property }: { property: Property }) {
           </section> */}
 
           <section id="overview" className="scroll-mt-36">
-            <h1 className="text-lg font-semibold md:text-xl">
+            <h2 className="text-lg font-semibold md:text-xl">
               About this property
-            </h1>
+            </h2>
             <div className="z-20 max-w-2xl py-2 text-zinc-700">
               <div className="line-clamp-5 break-words">{property.about}</div>
               <div className="flex justify-start py-2">
@@ -284,7 +282,7 @@ export default function PropertyPage({ property }: { property: Property }) {
           </section>
           <hr className="h-px border-0 bg-gray-300" />
           <section id="amenities" className="scroll-mt-36">
-            <h1 className="text-lg font-semibold md:text-xl">Amenitites</h1>
+            <h2 className="text-lg font-semibold md:text-xl">Amenitites</h2>
             <PropertyAmenities amenities={property.amenities ?? []} />
             {property.amenities && (
               <Dialog>
@@ -317,15 +315,19 @@ export default function PropertyPage({ property }: { property: Property }) {
       </div>
       <hr className="h-px border-0 bg-gray-300" />
       <section id="location" className="scroll-mt-36 space-y-1">
-        <h1 className="text-lg font-semibold md:text-xl">Location</h1>
-        <div className="inline-flex items-center justify-center py-2 text-base">
-          <MapPin className="mr-2" />
-          {addressData?.city}, {addressData?.state}
-        </div>
-        {property.latitude && property.latitude && (
+        <h3 className="text-lg font-semibold md:text-xl">Location</h3>
+        {addressData && (
+          <div className="inline-flex items-center justify-center py-2 text-base">
+            <MapPin className="mr-2" />
+            <p>
+              {addressData.city}, {addressData.state}
+            </p>
+          </div>
+        )}
+        {property.latitude && property.longitude && (
           <div className="relative z-10">
             <MapContainer
-              center={[property.latitude, property.longitude ?? 0]}
+              center={[property.latitude, property.longitude]}
               zoom={15}
               scrollWheelZoom={false}
               style={{ height: "500px" }}
@@ -335,7 +337,7 @@ export default function PropertyPage({ property }: { property: Property }) {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <Circle
-                center={[property.latitude, property.longitude ?? 0]}
+                center={[property.latitude, property.longitude]}
                 radius={200} // Adjust radius as needed
                 pathOptions={{ color: "black" }} // Customize circle color and other options
               />
@@ -347,7 +349,7 @@ export default function PropertyPage({ property }: { property: Property }) {
         <div>
           <hr className="h-px border-0 bg-gray-300" />
           <section id="house-rules" className="mt-4 scroll-mt-36">
-            <h1 className="text-lg font-bold">House rules</h1>
+            <h2 className="text-lg font-bold">House rules</h2>
             {property.checkInTime && property.checkOutTime && (
               <div className="my-2 flex items-center justify-start gap-16">
                 <div className="flex items-center">
@@ -368,7 +370,7 @@ export default function PropertyPage({ property }: { property: Property }) {
             )}
             {property.checkInInfo && (
               <div className="pt-6">
-                <h1 className="text-md font-bold">Additional information</h1>
+                <h2 className="text-md font-bold">Additional information</h2>
                 <p>{property.checkInInfo}</p>
               </div>
             )}
