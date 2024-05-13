@@ -1,9 +1,13 @@
-import { formatCurrency, getNumNights, plural } from "@/utils/utils";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useBidding } from "@/utils/store/bidding";
+import { cn, formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import DateRangePicker from "../_common/DateRangePicker";
+import MakeBid from "../landing-page/bidding/MakeBid";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import ErrorMsg from "../ui/ErrorMsg";
@@ -16,6 +20,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
+import { ChevronLeft } from 'lucide-react';
 
 const formSchema = z.object({
   date: z
@@ -36,6 +41,12 @@ export default function BiddingForm({
   propertyId: number;
   price: number;
 }) {
+  const [open, setOpen] = useState(false);
+
+  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+  const alreadyBid = propertyIdBids.includes(propertyId);
+  const [step, setStep] = useState(alreadyBid ? 1 : 0);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {},
@@ -91,19 +102,45 @@ export default function BiddingForm({
               </FormItem>
             )}
           />
+
+          <div className="flex flex-row justify-between">
+            <p>
+              {formatCurrency(price)} &times; {plural(numNights, "night")}
+            </p>
+            <p>{formatCurrency(totalNightlyPrice)}</p>
+          </div>
+
+          <Separator />
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button
+                type={"submit"}
+                className="w-full rounded-xl"
+                disabled={!form.formState.isValid}
+              >
+                Make Offer
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="flex sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
+              {step !== 0 && (
+                <Button
+                  variant={"ghost"}
+                  className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
+                  onClick={() => {
+                    if (step - 1 > -1) {
+                      setStep(step - 1);
+                    }
+                  }}
+                >
+                  <ChevronLeft />
+                </Button>
+              )}
+              <MakeBid propertyId={propertyId} />
+            </DialogContent>
+          </Dialog>
         </form>
       </Form>
-
-      <div className="flex flex-row justify-between">
-        <p>
-          {formatCurrency(price)} &times; {plural(numNights, "night")}
-        </p>
-        <p>{formatCurrency(totalNightlyPrice)}</p>
-      </div>
-
-      <Separator />
-
-      <Button className="rounded-full">Make Offer</Button>
     </Card>
   );
 }
