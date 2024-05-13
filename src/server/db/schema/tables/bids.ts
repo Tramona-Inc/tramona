@@ -2,11 +2,11 @@ import {
   date,
   index,
   integer,
+  pgEnum,
   pgTable,
   serial,
   timestamp,
   varchar,
-  pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -35,6 +35,7 @@ export const bids = pgTable(
     checkOut: date("check_out", { mode: "date" }).notNull(),
 
     acceptedAt: timestamp("accepted_at"),
+    paymentIntentId: varchar("payment_intent_id"),
     setupIntentId: varchar("setup_intent_id"),
     paymentMethodId: varchar("payment_method_id"),
 

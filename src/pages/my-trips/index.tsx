@@ -2,11 +2,21 @@ import Head from "next/head";
 import { useMemo } from "react";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
 import PastTrips from "@/components/my-trips/PastTrips";
+import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { api } from "@/utils/api";
+import { api, RouterOutputs } from "@/utils/api";
+
+type MyTripsType<T> = T extends (infer U)[] ? U : never;
+
+export type AcceptedBids = MyTripsType<
+  RouterOutputs["myTrips"]["getAcceptedBids"]
+>;
+
+export type AcceptedTrips = MyTripsType<
+  RouterOutputs["myTrips"]["getUpcomingTrips"]
+>;
 
 export default function MyTrips() {
   const date = useMemo(() => new Date(), []); // useMemo from React

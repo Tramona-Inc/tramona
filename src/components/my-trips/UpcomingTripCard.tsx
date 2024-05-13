@@ -1,8 +1,9 @@
-import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
+import { MessageCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button, buttonVariants } from "../ui/button";
 import {
@@ -14,7 +15,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
-import { MessageCircle } from "lucide-react";
 
 import { api } from "@/utils/api";
 import { cn, formatDateRange } from "@/utils/utils";

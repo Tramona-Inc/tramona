@@ -10,25 +10,30 @@ import { api } from "@/utils/api";
 import { formatCurrency, getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogTitle } from "@radix-ui/react-dialog";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Spinner from "../_common/Spinner";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
 import { Input } from "../ui/input";
+import { Separator } from "../ui/separator";
 
 const formSchema = z.object({
   counterPrice: zodInteger(),
 });
 
-function CounterForm({
+export default function CounterForm({
   offerId,
   setOpen,
+  counterNightlyPrice,
+  previousOfferNightlyPrice,
+  originalNightlyBiddingOffer,
 }: {
   offerId: number;
-  setOpen: (open: boolean) => void;
+  setOpen: (o: boolean) => void;
+  counterNightlyPrice: number;
+  previousOfferNightlyPrice: number;
+  originalNightlyBiddingOffer: number;
 }) {
   const { data: session } = useSession();
 
@@ -70,21 +75,40 @@ function CounterForm({
       ) : (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <h1>Original Offer</h1>
-            {data && (
-              <p>
-                {formatCurrency(
-                  data.amount / getNumNights(data.checkIn, data.checkOut),
-                )}{" "}
-                /night
-              </p>
-            )}
+            <div className="flex flex-col gap-5">
+              <h1 className="">
+                <span className="font-bold">Original Bidding offer: </span>
+                {formatCurrency(originalNightlyBiddingOffer)}/night
+              </h1>
+
+              {previousOfferNightlyPrice > 0 && (
+                <h1 className="">
+                  <span className="font-bold">
+                    Your Previous Counter offer:{" "}
+                  </span>
+                  {formatCurrency(previousOfferNightlyPrice)}/night
+                </h1>
+              )}
+
+              {counterNightlyPrice > 0 && (
+                <>
+                  <Separator />
+                  <h1>
+                    <span className="font-bold">
+                      {session?.user.role === "guest" ? "Host" : "Traveller"}{" "}
+                      Counter offer:{" "}
+                    </span>
+                    {formatCurrency(counterNightlyPrice)}/night
+                  </h1>
+                </>
+              )}
+            </div>
             <FormField
               control={form.control}
               name="counterPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Counter Price</FormLabel>
+                  <FormLabel>Your Counter Price</FormLabel>
                   <FormControl>
                     <Input {...field} prefix={"$"} />
                   </FormControl>
@@ -92,31 +116,12 @@ function CounterForm({
                 </FormItem>
               )}
             />
-            <Button type="submit">Confirm Counter</Button>
+            <Button type="submit" variant={"greenPrimary"}>
+              Confirm Counter
+            </Button>
           </form>
         </Form>
       )}
     </>
-  );
-}
-
-export function PropertyOfferCounterDialog({
-  offerId,
-  open,
-  setOpen,
-}: {
-  offerId: number;
-  open: boolean;
-  setOpen: (o: boolean) => void;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-lg font-bold">Counter Offer</DialogTitle>
-        </DialogHeader>
-        <CounterForm offerId={offerId} setOpen={setOpen} />
-      </DialogContent>
-    </Dialog>
   );
 }
