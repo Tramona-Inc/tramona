@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import Spinner from '@/components/_common/Spinner';
-import PropertyPage from '@/components/property/PropertyPage';
+import Spinner from "@/components/_common/Spinner";
+import PropertyPage from "@/components/property/PropertyPage";
 import { api } from "@/utils/api";
 
 import { useSession } from "next-auth/react";
@@ -18,8 +18,6 @@ export default function Property() {
       enabled: router.isReady,
     },
   );
-
-  console.log(property);
 
   return (
     <DashboardLayout type="guest">
