@@ -12,6 +12,7 @@ import {
   propertyUpdateSchema,
   users,
 } from "@/server/db/schema";
+import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, gt, gte, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -20,7 +21,6 @@ import {
   bookedDates,
   properties,
 } from "./../../db/schema/tables/properties";
-import { getCoordinates } from "@/server/google-maps";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
