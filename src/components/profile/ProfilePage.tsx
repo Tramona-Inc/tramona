@@ -47,16 +47,20 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import BucketListHomeOfferCard from "./BucketListHomeOfferCard";
+import { BadgeXIcon } from "lucide-react";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
 
   const { data } = api.users.myReferralCode.useQuery();
-
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
   const code =
-    session?.user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
+    session?.user?.referralCodeUsed && data?.referralCode
+      ? ""
+      : data?.referralCode;
   const url = `https://tramona.com/auth/signup?code=${code}`;
-  
+
   const socials = [
     {
       name: "Twitter",
@@ -92,21 +96,21 @@ export default function ProfilePage() {
 
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
 
-  const {
-    data: bucketListProperties
-  } = api.profile.getAllPropertiesWithDetails.useQuery({
-    lat: filter.lat ?? 0,
-    long: filter.long ?? 0
-  });
+  const { data: bucketListProperties } =
+    api.profile.getAllPropertiesWithDetails.useQuery({
+      lat: filter.lat ?? 0,
+      long: filter.long ?? 0,
+    });
 
-  const [
-    selectedBLDestinationId, 
-    setSelectedBLDestinationId
-  ] = React.useState<number | null>(null);
+  const [selectedBLDestinationId, setSelectedBLDestinationId] = React.useState<
+    number | null
+  >(null);
 
   const selectedBLDestination = React.useMemo(() => {
-    return profileInfo?.bucketListDestinations.find((d) => d.id === selectedBLDestinationId)
-  }, [profileInfo, selectedBLDestinationId])
+    return profileInfo?.bucketListDestinations.find(
+      (d) => d.id === selectedBLDestinationId,
+    );
+  }, [profileInfo, selectedBLDestinationId]);
 
   const editProfileDialogState = useDialogState();
   const editBLDestinationDialogState = useDialogState();
@@ -116,7 +120,6 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto mb-5 max-w-4xl space-y-3">
-
       {/* Profile Header */}
       <section className="rounded-lg border">
         <div className="relative h-40 bg-teal-900 lg:h-52">
@@ -145,18 +148,40 @@ export default function ProfilePage() {
             <Camera />
           </Button>
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:mt-0">
-            <h2 className="text-xl font-bold lg:text-2xl">{profileInfo?.name}</h2>
+            <div className="flex flex-row items-center justify-center gap-x-2">
+              <h2 className="text-xl font-bold lg:text-2xl">
+                {profileInfo?.name}
+              </h2>
+              {verificationStatus?.isIdentityVerified == "true" ? (
+                <div>Verified</div>
+              ) : verificationStatus?.isIdentityVerified == "pending" ? (
+                <div>Pending</div>
+              ) : (
+                <div className="flex flex-row items-center  gap-x-1 text-sm font-semibold tracking-tighter text-red-500">
+                  <BadgeXIcon size={22} className="" /> Not Verified
+                </div>
+              )}
+            </div>
+
             <p className="font-semibold">{profileInfo?.location}</p>
             <div className="mt-2 flex space-x-2">
-              { (profileInfo?.socials?.[0]) && <Facebook href={profileInfo.socials[0]} /> }
-              { (profileInfo?.socials?.[1]) && <Youtube href={profileInfo.socials[1]} /> }
-              { (profileInfo?.socials?.[2]) && <Instagram href={profileInfo.socials[2]} /> }
-              { (profileInfo?.socials?.[3]) && <Twitter href={profileInfo.socials[3]} /> }
+              {profileInfo?.socials?.[0] && (
+                <Facebook href={profileInfo.socials[0]} />
+              )}
+              {profileInfo?.socials?.[1] && (
+                <Youtube href={profileInfo.socials[1]} />
+              )}
+              {profileInfo?.socials?.[2] && (
+                <Instagram href={profileInfo.socials[2]} />
+              )}
+              {profileInfo?.socials?.[3] && (
+                <Twitter href={profileInfo.socials[3]} />
+              )}
             </div>
           </div>
           <div className="flex gap-3 lg:col-start-4 lg:justify-end">
-            <Button 
-              className="w-1/2 bg-[#cfd8d6]/75 text-primary hover:bg-[#cfd8d6] lg:w-auto" 
+            <Button
+              className="w-1/2 bg-[#cfd8d6]/75 text-primary hover:bg-[#cfd8d6] lg:w-auto"
               onClick={() => editProfileDialogState.setState("open")}
             >
               <Edit />
@@ -169,9 +194,7 @@ export default function ProfilePage() {
       {/* About Me */}
       <section className="space-y-2 rounded-lg border p-4">
         <h2 className="font-bold">About Me</h2>
-        <p>
-          {profileInfo?.about ?? ""}
-        </p>
+        <p>{profileInfo?.about ?? ""}</p>
       </section>
 
       <section className="space-y-5 rounded-lg border p-4">
@@ -238,7 +261,7 @@ export default function ProfilePage() {
                 <Link href="/">
                   <DropdownMenuItem>Property</DropdownMenuItem>
                 </Link>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => addBLDestinationDialogState.setState("open")}
                 >
                   Destination
@@ -267,11 +290,14 @@ export default function ProfilePage() {
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
               {bucketListProperties?.map((property) => (
-                <BucketListHomeOfferCard key={property!.id} property={{
-                  ...property!,
-                  propertyId: property!.id,
-                  bucketListPropertyId: property!.bucketListId
-                }} />
+                <BucketListHomeOfferCard
+                  key={property!.id}
+                  property={{
+                    ...property!,
+                    propertyId: property!.id,
+                    bucketListPropertyId: property!.bucketListId,
+                  }}
+                />
               ))}
             </div>
           </TabsContent>
@@ -280,8 +306,8 @@ export default function ProfilePage() {
           <TabsContent value="destinations">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
               {profileInfo?.bucketListDestinations.map((destination) => (
-                <DestinationCard 
-                  key={destination.id} 
+                <DestinationCard
+                  key={destination.id}
                   destination={destination}
                   onEdit={() => {
                     setSelectedBLDestinationId(destination.id);
@@ -298,14 +324,12 @@ export default function ProfilePage() {
         </Tabs>
       </section>
 
-      <AddBucketListDestinationDialog 
-        state={addBLDestinationDialogState}
-      />
-      <EditBucketListDestinationDialog 
+      <AddBucketListDestinationDialog state={addBLDestinationDialogState} />
+      <EditBucketListDestinationDialog
         state={editBLDestinationDialogState}
         destinationData={selectedBLDestination!}
       />
-      <DeleteBucketListDestinationDialog 
+      <DeleteBucketListDestinationDialog
         state={deleteBLDDialogState}
         destinationId={selectedBLDestinationId!}
       />
@@ -320,7 +344,7 @@ export default function ProfilePage() {
             facebook_link: profileInfo.socials![0],
             youtube_link: profileInfo.socials![1],
             instagram_link: profileInfo.socials![2],
-            twitter_link: profileInfo.socials![3]
+            twitter_link: profileInfo.socials![3],
           }}
         />
       )}
