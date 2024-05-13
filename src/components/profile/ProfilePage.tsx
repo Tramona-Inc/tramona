@@ -1,8 +1,10 @@
 import React from "react";
 import {
+  BadgeCheck,
   Bookmark,
   Calendar,
   Camera,
+  Clock2Icon,
   Edit,
   Ellipsis,
   Facebook,
@@ -47,7 +49,9 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import BucketListHomeOfferCard from "./BucketListHomeOfferCard";
-import { BadgeXIcon } from "lucide-react";
+import { BadgeXIcon, InfoIcon } from "lucide-react";
+import IdentityModal from "../_utils/IdentityModal";
+import { VerificationProvider } from "../_utils/VerificationContext";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -147,17 +151,21 @@ export default function ProfilePage() {
           >
             <Camera />
           </Button>
-          <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:mt-0">
-            <div className="flex flex-row items-center justify-center gap-x-2">
+          <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:-ml-4 lg:mt-0">
+            <div className="flex flex-row items-center justify-start gap-x-2">
               <h2 className="text-xl font-bold lg:text-2xl">
                 {profileInfo?.name}
               </h2>
               {verificationStatus?.isIdentityVerified == "true" ? (
-                <div>Verified</div>
+                <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
+                  <BadgeCheck size={22} className="" /> Verified
+                </div>
               ) : verificationStatus?.isIdentityVerified == "pending" ? (
-                <div>Pending</div>
+                <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
+                  <Clock2Icon size={22} className="" /> Pending
+                </div>
               ) : (
-                <div className="flex flex-row items-center  gap-x-1 text-sm font-semibold tracking-tighter text-red-500">
+                <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
                   <BadgeXIcon size={22} className="" /> Not Verified
                 </div>
               )}
@@ -190,6 +198,23 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
+      {/* pop up if no verified */}
+      {verificationStatus?.isIdentityVerified == "false" && (
+        <section className="flex flex-col justify-center gap-x-2 rounded-lg border border-red-200 p-4">
+          <div className="flex flex-row gap-x-1 font-bold ">
+            <InfoIcon size={24} className="text-red-400" /> Verify your Identity
+          </div>
+          <p className="ml-2">
+            Hosts are more likely to accept your bid when they know who you are.
+          </p>
+          <div className="  mt-3 flex w-1/4">
+            <VerificationProvider>
+              <IdentityModal />
+            </VerificationProvider>
+          </div>
+        </section>
+      )}
+      {/* Bucket List */}
 
       {/* About Me */}
       <section className="space-y-2 rounded-lg border p-4">
