@@ -1,11 +1,13 @@
 import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
+  bucketListProperties,
   hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
@@ -14,7 +16,7 @@ import {
 } from "@/server/db/schema";
 import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, gte, sql } from "drizzle-orm";
+import { and, asc, eq, exists, gt, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
@@ -124,7 +126,7 @@ export const propertiesRouter = createTRPCRouter({
     });
   }),
 
-  getAllInfiniteScroll: publicProcedure
+  getAllInfiniteScroll: optionallyAuthedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(50).nullish(),
@@ -158,6 +160,19 @@ export const propertiesRouter = createTRPCRouter({
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
           originalNightlyPrice: properties.originalNightlyPrice,
+          isOnBucketList: ctx.user
+            ? exists(
+                ctx.db
+                  .select()
+                  .from(bucketListProperties)
+                  .where(
+                    and(
+                      eq(bucketListProperties.propertyId, properties.id),
+                      eq(bucketListProperties.userId, ctx.user.id),
+                    ),
+                  ),
+              )
+            : sql`FALSE`,
           distance: sql`
             6371 * ACOS(
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
@@ -170,7 +185,7 @@ export const propertiesRouter = createTRPCRouter({
             input.lat && input.long
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`, // Conditionally include eq function for address
-            input.roomType && input.roomType !== "Flexible"
+            input.roomType
               ? eq(properties.roomType, input.roomType)
               : sql`TRUE`, // Conditionally include place type condition
             input.city && input.city !== "all"
@@ -200,34 +215,25 @@ export const propertiesRouter = createTRPCRouter({
         nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
       };
     }),
-  getCities: publicProcedure.query(async ({ ctx }) => {
-    const lat = 34.1010307;
-    const long = -118.3806008;
-    const radius = 10; // 100km.
+  // getCities: publicProcedure.query(async ({ ctx }) => {
+  //   const lat = 34.1010307;
+  //   const long = -118.3806008;
+  //   const radius = 10; // 100km.
 
-    const data = await ctx.db
-      .select({
-        id: properties.id,
-        distance: sql`
-        6371 * ACOS(
-            SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
-        ) AS distance`,
-      })
-      .from(properties)
-      .orderBy(sql`distance`)
-      .where(
-        sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
-      );
-
-    console.log(data);
-  }),
-  hostInsertProperty: roleRestrictedProcedure(["host"])
-    .input(hostPropertyFormSchema)
-    .mutation(async ({ ctx }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-    }),
+  //   const data = await ctx.db
+  //     .select({
+  //       id: properties.id,
+  //       distance: sql`
+  //       6371 * ACOS(
+  //           SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+  //       ) AS distance`,
+  //     })
+  //     .from(properties)
+  //     .orderBy(sql`distance`)
+  //     .where(
+  //       sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
+  //     );
+  // }),
   getHostProperties: roleRestrictedProcedure(["host"])
     .input(z.object({ limit: z.number().optional() }).optional())
     .query(async ({ ctx, input }) => {
