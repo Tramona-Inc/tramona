@@ -15,9 +15,9 @@ export type CitiesLatLong = {
 type CitiesFilterState = {
   open: boolean;
   filter: CitiesLatLong;
-  roomType: RoomType;
+  roomType: RoomType | undefined;
   setFilter: (filter: CitiesLatLong) => void;
-  setRoomType: (roomType: RoomType) => void;
+  setRoomType: (roomType: RoomType | undefined) => void;
   beds: number;
   bedrooms: number;
   bathrooms: number;
@@ -52,7 +52,7 @@ export const useCitiesFilter = create<CitiesFilterState>()(
     (set) => ({
       open: false,
       filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
-      roomType: "Flexible",
+      roomType: undefined,
       beds: 0,
       bedrooms: 0,
       bathrooms: 0,
@@ -60,7 +60,7 @@ export const useCitiesFilter = create<CitiesFilterState>()(
       setFilter: (filter: CitiesLatLong) => {
         set(() => ({ filter }));
       },
-      setRoomType: (roomType: RoomType) => {
+      setRoomType: (roomType: RoomType | undefined) => {
         set(() => ({ roomType }));
       },
       setBeds: (beds: number) => {

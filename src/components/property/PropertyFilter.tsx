@@ -6,16 +6,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema";
+import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from "@/server/db/schema";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Separator } from "../ui/separator";
 import { CounterInput } from "../_common/CounterInput";
+import { useZodForm } from "@/utils/useZodForm";
 
 export function Total({
   name,
@@ -29,7 +28,7 @@ export function Total({
   return (
     <div className="flex flex-row items-center justify-between">
       <p className="text-sm font-semibold">{name}</p>
-      <CounterInput value={total} setValue={setTotal} />
+      <CounterInput value={total} onChange={setTotal} />
     </div>
   );
 }
@@ -45,10 +44,15 @@ const houseRuleItems = [
   },
 ];
 
+const PROPERTY_TYPE_OPTIONS = [
+  "Flexible",
+  ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
+] as const;
+
 const FormSchema = z.object({
-  roomType: z.enum(ALL_PROPERTY_ROOM_TYPES, {
-    required_error: "You need to select a notification type.",
-  }),
+  roomType: z
+    .enum(PROPERTY_TYPE_OPTIONS)
+    .transform((s) => (s === "Flexible" ? undefined : s)),
   beds: z.number().nullish(),
   bedrooms: z.number().nullish(),
   bathrooms: z.number().nullish(),
@@ -62,10 +66,12 @@ export default function PropertyFilter() {
   const houseRules = useCitiesFilter((state) => state.houseRules);
   const roomType = useCitiesFilter((state) => state.roomType);
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useZodForm({
+    schema: FormSchema,
     defaultValues: {
-      roomType: roomType,
+      roomType:
+        // TODO: augh
+        roomType === "Other" || roomType === undefined ? "Flexible" : roomType,
       beds: beds,
       bedrooms: bedrooms,
       bathrooms: bathrooms,
@@ -106,7 +112,7 @@ export default function PropertyFilter() {
                   defaultValue={field.value}
                   className="flex flex-col space-y-1"
                 >
-                  {ALL_PROPERTY_ROOM_TYPES.map((property) => (
+                  {PROPERTY_TYPE_OPTIONS.map((property) => (
                     <FormItem
                       key={property}
                       className="flex items-center space-x-3 space-y-0"
