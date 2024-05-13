@@ -125,7 +125,7 @@ function BiddingStep2({ property }: { property: Property }) {
   const bid = {
     propertyId: property.id,
     numGuests: guest,
-    amount: totalPrice,
+    amount: totalPrice * 100, //convert to stripe cents
     checkIn: date.from,
     checkOut: date.to,
   };

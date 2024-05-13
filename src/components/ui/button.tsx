@@ -44,6 +44,9 @@ const buttonVariants = cva(
         increment:
           "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
         underline: "hover:bg-accent text-zinc-800 underline",
+        greenPrimary: "bg-[#004236] text-white font-bold",
+        secondaryLight:
+          "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
       },
     },
     defaultVariants: {

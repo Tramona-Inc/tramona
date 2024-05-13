@@ -6,10 +6,6 @@ import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 
-// Define a schema for the request body
-//verification stripe identity
-const CreateVerificationSessionInput = z.object({});
-
 export const config = {
   api: {
     bodyParser: false,

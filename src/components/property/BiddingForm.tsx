@@ -1,30 +1,23 @@
-import { formatCurrency, getNumNights, plural } from "@/utils/utils";
-import { zodInteger } from "@/utils/zod-utils";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
+import { useBidding } from "@/utils/store/bidding";
+import { formatCurrency, getNumNights } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import DateRangePicker from "../_common/DateRangePicker";
+import MakeBid from "../landing-page/bidding/MakeBid";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import ErrorMsg from "../ui/ErrorMsg";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import { Separator } from "../ui/separator";
+import { Form } from "../ui/form";
 
 const formSchema = z.object({
-  date: z
-    .object({
-      from: z.date(),
-      to: z.date(),
-    })
-    .optional(),
-  numGuests: zodInteger({ min: 1 }),
+  date: z.object({
+    from: z.coerce.date(),
+    to: z.coerce.date(),
+  }),
+  // numGuests: zodInteger({ min: 1 }),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -36,6 +29,11 @@ export default function BiddingForm({
   propertyId: number;
   price: number;
 }) {
+  const [open, setOpen] = useState(false);
+
+  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+  const alreadyBid = propertyIdBids.includes(propertyId);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {},
@@ -46,64 +44,71 @@ export default function BiddingForm({
     ? getNumNights(formValues.date.from, formValues.date.to)
     : 0;
   const totalNightlyPrice = price * numNights;
+  const resetSession = useBidding((state) => state.resetSession);
+  const setDate = useBidding((state) => state.setDate);
+  const setGuest = useBidding((state) => state.setGuest);
+  const setStep = useBidding((state) => state.setStep);
 
-  async function onSubmit(data: FormSchema) {
-    let url: string | null = null;
+  async function onSubmit(values: FormSchema) {
+    // Reset session if on new date
+
+    console.log("Called");
+    resetSession();
+    // setGuest(values.numGuests);
+    setDate(values.date.from, values.date.to);
+    setOpen(true);
   }
 
   return (
     <Card>
-      <h2 className="flex items-center text-3xl font-semibold">
+      <h1 className="flex items-center text-3xl font-semibold">
         {formatCurrency(price)}
         <span className="ml-2 py-0 text-sm font-normal text-gray-500">
           per night
         </span>
-      </h2>
+      </h1>
+      <h3 className="font-semibold">
+        Price on Airbnb: {formatCurrency(price * AVG_AIRBNB_MARKUP)}
+      </h3>
       <Form {...form}>
-        <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-2"
         >
           <DateRangePicker
             control={form.control}
             name="date"
             formLabel=""
-            className="rounded-full"
+            className="col-span-full sm:col-span-1"
             propertyId={propertyId}
           />
-
-          <FormField
-            control={form.control}
-            name="numGuests"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    {...field}
-                    autoFocus
-                    className="rounded-full"
-                    suffix={"Guests"}
-                    placeholder="Guests"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <Dialog open={open} onOpenChange={setOpen}>
+            {/* Removed trigger to have control on open and close */}
+            <div>
+              {alreadyBid ? (
+                <Button
+                  type={"submit"}
+                  className={"w-full rounded-xl"}
+                  disabled={alreadyBid}
+                >
+                  Already Bid
+                </Button>
+              ) : (
+                <Button
+                  type={"submit"}
+                  className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
+                  // disabled={!form.formState.isValid}
+                >
+                  Make Offer
+                </Button>
+              )}
+            </div>
+            <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
+              <MakeBid propertyId={propertyId} />
+            </DialogContent>
+          </Dialog>
         </form>
       </Form>
-
-      <div className="flex flex-row justify-between">
-        <p>
-          {formatCurrency(price)} &times; {plural(numNights, "night")}
-        </p>
-        <p>{formatCurrency(totalNightlyPrice)}</p>
-      </div>
-
-      <Separator />
-
-      <Button className="rounded-full">Make Offer</Button>
     </Card>
   );
 }
