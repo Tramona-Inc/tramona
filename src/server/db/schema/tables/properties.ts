@@ -54,10 +54,14 @@ export const ALL_PROPERTY_TYPES = [
   "Alternative",
 ] as const;
 
-export const ALL_PROPERTY_ROOM_TYPES = [
+export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
   "Shared room",
   "Private room",
+] as const;
+
+export const ALL_PROPERTY_ROOM_TYPES = [
+  ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
   "Other",
 ] as const;
 
