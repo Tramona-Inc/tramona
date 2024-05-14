@@ -80,7 +80,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuSeparator />
             </>
           )}
-          {session.user.role === "host" && pathname === "/host" && (
+          {hostProfile && (
             <>
               <HostTeamsDropdownItems
                 hostProfile={hostProfile}

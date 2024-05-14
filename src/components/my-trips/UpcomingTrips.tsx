@@ -1,15 +1,30 @@
-import Spinner from "@/components/_common/Spinner";
-import UpcomingTripCard from "@/components/my-trips/UpcomingTripCard";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
-
-import { RouterOutputs } from "@/utils/api";
+import Spinner from "@/components/_common/Spinner";
+import UpcomingTripCard from "@/components/my-trips/UpcomingTripCard";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
-export type UpcomingTrip = MyTripsType<
-  RouterOutputs["myTrips"]["getUpcomingTrips"]
->;
+// export type UpcomingTrip = MyTripsType<
+//   RouterOutputs["myTrips"]["getUpcomingTrips"]
+// >;
+
+export type UpcomingTrip = {
+  id: string | number;
+  request: {
+    checkIn: Date;
+    checkOut: Date;
+  };
+  property: {
+    name: string;
+    imageUrls: string[];
+    address: string | null;
+    host: {
+      name: string | null;
+      image: string | null;
+    } | null;
+  };
+};
 
 export default function UpcomingTrips({
   trips,

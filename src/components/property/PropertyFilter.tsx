@@ -6,17 +6,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema";
+import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from "@/server/db/schema";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleMinus, CirclePlus } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Separator } from "../ui/separator";
-import { toast } from "../ui/use-toast";
+import { CounterInput } from "../_common/CounterInput";
+import { useZodForm } from "@/utils/useZodForm";
 
 export function Total({
   name,
@@ -29,35 +27,8 @@ export function Total({
 }) {
   return (
     <div className="flex flex-row items-center justify-between">
-      <h2 className="text-sm font-semibold">{name}</h2>
-      <div className="grid max-w-[150px] grid-cols-3 place-items-center">
-        <Button
-          variant="ghost"
-          size={"icon"}
-          className="rounded-full"
-          disabled={total === 0}
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
-            if (total - 1 > -1) {
-              setTotal(total - 1);
-            }
-          }}
-        >
-          <CircleMinus color="gray" size={20} />
-        </Button>
-        <div className="font-semibold">{total}</div>
-        <Button
-          variant="ghost"
-          size={"icon"}
-          className="rounded-full"
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
-            setTotal(total + 1);
-          }}
-        >
-          <CirclePlus color="gray" size={20} />
-        </Button>
-      </div>
+      <p className="text-sm font-semibold">{name}</p>
+      <CounterInput value={total} onChange={setTotal} />
     </div>
   );
 }
@@ -73,10 +44,15 @@ const houseRuleItems = [
   },
 ];
 
+const PROPERTY_TYPE_OPTIONS = [
+  "Flexible",
+  ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
+] as const;
+
 const FormSchema = z.object({
-  roomType: z.enum(ALL_PROPERTY_ROOM_TYPES, {
-    required_error: "You need to select a notification type.",
-  }),
+  roomType: z
+    .enum(PROPERTY_TYPE_OPTIONS)
+    .transform((s) => (s === "Flexible" ? undefined : s)),
   beds: z.number().nullish(),
   bedrooms: z.number().nullish(),
   bathrooms: z.number().nullish(),
@@ -90,10 +66,12 @@ export default function PropertyFilter() {
   const houseRules = useCitiesFilter((state) => state.houseRules);
   const roomType = useCitiesFilter((state) => state.roomType);
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useZodForm({
+    schema: FormSchema,
     defaultValues: {
-      roomType: roomType,
+      roomType:
+        // TODO: augh
+        roomType === "Other" || roomType === undefined ? "Flexible" : roomType,
       beds: beds,
       bedrooms: bedrooms,
       bathrooms: bathrooms,
@@ -109,32 +87,11 @@ export default function PropertyFilter() {
   const setOpen = useCitiesFilter((state) => state.setOpen);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    setRoomType(data.roomType ?? "Other");
+    setRoomType(data.roomType);
     setBeds(data.beds ?? 0);
     setBathrooms(data.bathrooms ?? 0);
     setBedrooms(data.bedrooms ?? 0);
     setHouseRules(data.houseRules ?? []);
-    setOpen(false);
-
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
-
-  function reset(e: { preventDefault: () => void }) {
-    e.preventDefault();
-    // Reset form values
-    setBeds(0);
-    setBathrooms(0);
-    setBedrooms(0);
-    setHouseRules([]);
-    form.reset();
-    // Update state and reset form values after state updates are applied
     setOpen(false);
   }
 
@@ -155,7 +112,7 @@ export default function PropertyFilter() {
                   defaultValue={field.value}
                   className="flex flex-col space-y-1"
                 >
-                  {ALL_PROPERTY_ROOM_TYPES.map((property) => (
+                  {PROPERTY_TYPE_OPTIONS.map((property) => (
                     <FormItem
                       key={property}
                       className="flex items-center space-x-3 space-y-0"
@@ -284,7 +241,14 @@ export default function PropertyFilter() {
           )}
         />
         <div className="flex flex-row justify-between">
-          <Button variant={"ghost"} onClick={reset}>
+          <Button
+            type="button"
+            variant={"ghost"}
+            onClick={() => {
+              form.reset();
+              // setOpen(false);
+            }}
+          >
             Clear
           </Button>
           <Button type="submit">Submit</Button>

@@ -1,12 +1,23 @@
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { cn } from "@/utils/utils";
+import { SearchIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
-import SearchBar, { DesktopSearchLayout, MobileSearchLayout } from "../SearchBar/SearchBar";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
+import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
+import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
+import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
+import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
 
 export default function MastHead() {
-  const isMobile = useMediaQuery("(max-width: 640px)");
-
   return (
-    <section className="relative flex flex-col bg-white">
+    <section className="relative bg-white">
       <div className="w-full">
         <Image
           src="/assets/images/landing-page/main.png"
@@ -15,33 +26,98 @@ export default function MastHead() {
           height={0}
           sizes="100vw"
           priority
-          className="h-[370px] md:h-[450px] w-full object-cover md:w-full"
+          className="h-[370px] w-full object-cover md:h-[450px] md:w-full"
         />
       </div>
 
-      <div className="absolute mx-auto max-w-4xl left-0 right-0 z-10 px-5 md:px-8 pt-24 -top-12 md:top-10">
-        <h1 className="mx-auto max-w-2xl text-center text-3xl font-extrabold text-gray-900 md:text-5xl md:leading-tight">
-          The first perfectly efficient travel marketplace
+      <div className="absolute -top-12 left-0 right-0 z-10 mx-auto max-w-4xl px-5 pt-24 md:top-10 md:px-8">
+        <h1 className="mx-auto max-w-3xl text-center text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl md:leading-tight">
+          Pay what you want by bidding on Airbnb stays
         </h1>
-        <p className="mt-8 text-center text-base md:text-lg text-gray-900 font-semibold">
-          Shop the same properties you see on Airbnb, without the fees and
-          Airbnb markup price
+        <p className="mx-auto mt-8 max-w-lg text-center text-base font-semibold text-gray-900 md:text-lg">
+          Stay at the same properties you see on Airbnb for cheaper. Say goodbye
+          to outrageous fees and markups.
         </p>
-        {isMobile && (
-          <div className="mt-10 mx-auto w-full">
-            <MobileSearchLayout />
-          </div>
-        )}
+        <div className="mx-auto mt-10 w-full md:hidden">
+          <MobileSearchLayout />
+        </div>
       </div>
-
-      <div className="mt-0 w-full px-8 mb-10 md:mb-20 md:absolute md:top-60 md:z-10 md:mt-40">
-        {!isMobile && <DesktopSearchLayout />}
-        {/* <hr className="block md:hidden h-px bg-gray-200 border-0"></hr> */}
-        <p className="mt-14 mx-auto max-w-3xl text-center text-sm md:text-xl md:leading-8 text-gray-800">
-          See a property you like? Make an offer and Tramona will create the deal for you.
-          <br></br>Don&apos;t see a property you like? Request a deal.
-        </p>
+      <div className="hidden -translate-y-16 px-4 md:block">
+        <DesktopSearchLayout />
       </div>
+      <p className="mx-auto max-w-3xl py-12 text-center text-sm text-zinc-600 md:text-lg">
+        See a property you like? Make an offer and Tramona will create the deal
+        for you.
+        <br></br>Don&apos;t see a property you like? Request a deal.
+      </p>
     </section>
+  );
+}
+
+export function DesktopSearchLayout() {
+  return (
+    <Tabs
+      defaultValue={"search"}
+      className="mx-auto max-w-6xl rounded-2xl bg-white px-4 pb-4 shadow-md"
+    >
+      <TabsList noBorder className="flex items-center justify-center">
+        <TabsTrigger
+          value="search"
+          className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
+        >
+          <span className="text-sm">Search Properties</span>
+        </TabsTrigger>
+        <TabsTrigger
+          value="request"
+          className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
+        >
+          <span className="text-sm">Request Deal</span>
+        </TabsTrigger>
+      </TabsList>
+      <div className="mb-5 mt-[-2px] w-full border-b-2 border-border" />
+      <TabsContent value={"search"}>
+        <DesktopSearchTab />
+      </TabsContent>
+      <TabsContent value={"request"}>
+        <DesktopRequestDealTab />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+export function MobileSearchLayout() {
+  const [mode, setMode] = useState<"search" | "request">("search");
+
+  return (
+    <Sheet>
+      <SheetTrigger className="w-full">
+        <div className="z-40 flex flex-row gap-x-3 rounded-lg bg-white px-3 py-5 text-center font-semibold text-muted-foreground shadow-lg">
+          <SearchIcon />
+          Name your price or submit an offer
+        </div>
+      </SheetTrigger>
+      <SheetContent side="top" className="h-full">
+        <SheetHeader>
+          <div className="flex h-full w-full items-center justify-center gap-2 pb-5">
+            <Button
+              variant="link"
+              className={cn(mode === "search" && "underline")}
+              onClick={() => setMode("search")}
+            >
+              Search
+            </Button>
+            <Button
+              variant="link"
+              className={cn(mode === "request" && "underline")}
+              onClick={() => setMode("request")}
+            >
+              Request deal
+            </Button>
+          </div>
+        </SheetHeader>
+        {mode === "search" && <MobileSearchTab />}
+        {mode === "request" && <MobileRequestDealTab />}
+      </SheetContent>
+    </Sheet>
   );
 }

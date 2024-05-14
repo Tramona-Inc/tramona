@@ -1,32 +1,28 @@
 import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
+  bucketListProperties,
   hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
   users,
 } from "@/server/db/schema";
+import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, lte, sql } from "drizzle-orm";
+import { and, asc, eq, exists, gt, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
   properties,
 } from "./../../db/schema/tables/properties";
-import { env } from "@/env";
-
-
-const googleMapsClient = require('@google/maps').createClient({
-  key: env.GOOGLE_MAPS_KEY,
-  Promise: Promise,
-});
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -36,20 +32,18 @@ export const propertiesRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      let lat, lng;
-
-      if (!input.latitude || !input.longitude) {
-        const response = await googleMapsClient.geocode({ address: input.address }).asPromise();
-        lat = response.json.results[0].geometry.location.lat;
-        lng = response.json.results[0].geometry.location.lng;
+      if ((!input.latitude || !input.longitude) && input.address) {
+        const coords = await getCoordinates(input.address);
+        if (coords) {
+          input.latitude = coords.lat;
+          input.longitude = coords.lng;
+        }
       }
 
       return await ctx.db
         .insert(properties)
         .values({
           ...input,
-          latitude: lat,
-          longitude: lng,
           hostId: ctx.user.role === "admin" ? null : ctx.user.id,
         })
         .returning({ id: properties.id })
@@ -132,7 +126,7 @@ export const propertiesRouter = createTRPCRouter({
     });
   }),
 
-  getAllInfiniteScroll: publicProcedure
+  getAllInfiniteScroll: optionallyAuthedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(50).nullish(),
@@ -149,7 +143,7 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 5;
+      const limit = input.limit ?? 12;
       const { cursor } = input;
 
       const lat = input.lat ?? 0;
@@ -166,6 +160,19 @@ export const propertiesRouter = createTRPCRouter({
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
           originalNightlyPrice: properties.originalNightlyPrice,
+          isOnBucketList: ctx.user
+            ? exists(
+                ctx.db
+                  .select()
+                  .from(bucketListProperties)
+                  .where(
+                    and(
+                      eq(bucketListProperties.propertyId, properties.id),
+                      eq(bucketListProperties.userId, ctx.user.id),
+                    ),
+                  ),
+              )
+            : sql`FALSE`,
           distance: sql`
             6371 * ACOS(
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
@@ -178,18 +185,18 @@ export const propertiesRouter = createTRPCRouter({
             input.lat && input.long
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`, // Conditionally include eq function for address
-            input.roomType && input.roomType !== "Flexible"
+            input.roomType
               ? eq(properties.roomType, input.roomType)
               : sql`TRUE`, // Conditionally include place type condition
             input.city && input.city !== "all"
               ? eq(properties.address, input.city)
               : sql`TRUE`, // Conditionally include eq function for address
-            input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
+            input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
             input.bedrooms
-              ? lte(properties.numBedrooms, input.bedrooms)
+              ? gte(properties.numBedrooms, input.bedrooms)
               : sql`TRUE`, // Conditionally include eq function
             input.bathrooms
-              ? lte(properties.numBathrooms, input.bathrooms)
+              ? gte(properties.numBathrooms, input.bathrooms)
               : sql`TRUE`, // Conditionally include eq function
             input.houseRules?.includes("pets allowed")
               ? eq(properties.petsAllowed, true)
@@ -197,9 +204,10 @@ export const propertiesRouter = createTRPCRouter({
             input.houseRules?.includes("smoking allowed")
               ? eq(properties.smokingAllowed, true)
               : sql`TRUE`,
+            eq(properties.isPrivate, false),
           ),
         )
-        .limit(limit + 1)
+        .limit(limit)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
@@ -207,34 +215,25 @@ export const propertiesRouter = createTRPCRouter({
         nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
       };
     }),
-  getCities: publicProcedure.query(async ({ ctx }) => {
-    const lat = 34.1010307;
-    const long = -118.3806008;
-    const radius = 10; // 100km.
+  // getCities: publicProcedure.query(async ({ ctx }) => {
+  //   const lat = 34.1010307;
+  //   const long = -118.3806008;
+  //   const radius = 10; // 100km.
 
-    const data = await ctx.db
-      .select({
-        id: properties.id,
-        distance: sql`
-        6371 * ACOS(
-            SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
-        ) AS distance`,
-      })
-      .from(properties)
-      .orderBy(sql`distance`)
-      .where(
-        sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
-      );
-
-    console.log(data);
-  }),
-  hostInsertProperty: roleRestrictedProcedure(["host"])
-    .input(hostPropertyFormSchema)
-    .mutation(async ({ ctx }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-    }),
+  //   const data = await ctx.db
+  //     .select({
+  //       id: properties.id,
+  //       distance: sql`
+  //       6371 * ACOS(
+  //           SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+  //       ) AS distance`,
+  //     })
+  //     .from(properties)
+  //     .orderBy(sql`distance`)
+  //     .where(
+  //       sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
+  //     );
+  // }),
   getHostProperties: roleRestrictedProcedure(["host"])
     .input(z.object({ limit: z.number().optional() }).optional())
     .query(async ({ ctx, input }) => {
@@ -278,10 +277,6 @@ export const propertiesRouter = createTRPCRouter({
   hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-
       return await ctx.db.insert(properties).values({
         ...input,
         hostId: ctx.user.id,

@@ -134,7 +134,7 @@ function Step2(): JSX.Element {
             <BounceIconMobile />
           </div>
         ) : (
-          <div className="absolute -left-28 bottom-9 rotate-12">
+          <div className="absolute -left-44 bottom-16 rotate-12">
             <BounceIcon />
           </div>
         )}

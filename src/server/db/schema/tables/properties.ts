@@ -54,11 +54,14 @@ export const ALL_PROPERTY_TYPES = [
   "Alternative",
 ] as const;
 
-export const ALL_PROPERTY_ROOM_TYPES = [
-  "Flexible",
+export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
   "Shared room",
   "Private room",
+] as const;
+
+export const ALL_PROPERTY_ROOM_TYPES = [
+  ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
   "Other",
 ] as const;
 
@@ -188,6 +191,7 @@ export const properties = pgTable("properties", {
   mapScreenshot: text("map_screenshot"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  isPrivate: boolean("is_private").notNull().default(false),
 });
 
 export type Property = typeof properties.$inferSelect;

@@ -15,6 +15,8 @@ import { stripeRouter } from "./routers/stripeRouter";
 import { twilioRouter } from "./routers/twilioRouter";
 import { usersRouter } from "./routers/usersRouter";
 import { hostTeamsRouter } from "./routers/hostTeamsRouter";
+import { profileRouter } from "./routers/profileRouter";
+import { superhogRouter } from "./routers/superhogRouter";
 
 /**
  * This is the primary router for your server.
@@ -38,6 +40,8 @@ export const appRouter = createTRPCRouter({
   emails: emailRouter,
   biddings: biddingRouter,
   hostTeams: hostTeamsRouter,
+  profile: profileRouter,
+  superhog: superhogRouter,
 });
 
 // export type definition of API

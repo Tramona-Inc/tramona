@@ -36,7 +36,7 @@ export const adminNavLinks = [
 export const hostMobileNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
   {
-    href: "/host/incoming-request",
+    href: "/host/incoming-requests",
     name: "Requests",
     icon: BadgePercent,
   },
@@ -46,7 +46,7 @@ export const hostMobileNavLinks = [
 export const hostNavLinks = [
   { href: "/host", name: "Overview", icon: LayoutDashboardIcon },
   {
-    href: "/host/incoming-request",
+    href: "/host/incoming-requests",
     name: "Incoming Requests",
     icon: Handshake,
   },

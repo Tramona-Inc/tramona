@@ -202,6 +202,7 @@ export default function AdminOfferForm({
         updatePropertiesMutation.mutateAsync({
           ...newProperty,
           id: offer.property.id,
+          isPrivate: true,
         }),
         updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
       ]);

@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/carousel";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
-import { cn, formatCurrency } from "@/utils/utils";
+import { cn, formatCurrency, plural } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Link from "next/link";
@@ -20,8 +21,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import MakeBid from "./bidding/MakeBid";
-import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { plural } from "@/utils/utils";
 
 function Dot({ isCurrent }: { isCurrent: boolean }) {
   return (

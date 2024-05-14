@@ -33,8 +33,8 @@ export default function CashbackBalance() {
         <title>Cashback Balance | Tramona</title>
       </Head>
       <MainLayout>
-        <div className="min-h-screen-minus-header gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
-          <AccountSidebar />
+        <div className="mx-auto min-h-screen-minus-header max-w-4xl gap-10 space-y-5 px-5 pt-5 lg:flex lg:space-y-0">
+          {/* <AccountSidebar /> */}
           <div className="w-full space-y-5">
             {isLoading ? (
               <Spinner />
@@ -42,7 +42,7 @@ export default function CashbackBalance() {
               <>
                 <CashbackBalanceDetails balance={cashbackBalance} />
 
-                <div className="rounded-xl bg-zinc-50 shadow-md">
+                <div>
                   <ReferralTable data={data ?? []} columns={referralColumns} />
                 </div>
               </>

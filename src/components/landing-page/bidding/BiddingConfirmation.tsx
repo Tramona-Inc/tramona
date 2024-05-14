@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
-import { formatCurrency, formatDateRange } from "@/utils/utils";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Lightbulb } from "lucide-react";
 import Image from "next/image";
@@ -45,15 +45,12 @@ function BiddingConfirmation({ property }: { property: Property }) {
               <p className="text-muted-foreground">
                 {formatDateRange(date.from, date.to)}
               </p>
-              <ul className="my-4 flex flex-row space-x-1 text-nowrap text-xs tracking-tighter text-muted-foreground ">
-                <li className="">{property.maxNumGuests} Guests</li>
-                <li>·</li>
-                <li>{property.numBedrooms} Bedrooms</li>
-                <li>·</li>
-                <li>{property.numBeds} Beds</li>
-                <li>·</li>
-                <li>{property.numBathrooms} Baths</li>
-              </ul>
+              <p className="my-2 text-nowrap text-xs tracking-tighter text-muted-foreground md:my-4 md:text-base">
+                {plural(property.maxNumGuests, "guest")} ·{" "}
+                {plural(property.numBedrooms, "bedroom")} ·{" "}
+                {plural(property.numBeds, "bed")} ·{" "}
+                {property.numBathrooms && plural(property.numBathrooms, "bath")}
+              </p>
             </div>
           </div>
           <div className=" flex-col items-center justify-center gap-y-3 text-sm md:mt-1 md:text-base">
@@ -76,24 +73,20 @@ function BiddingConfirmation({ property }: { property: Property }) {
         </div>
       </div>
 
-      <Button
-        asChild
-        variant="default"
-        className="mt-40 px-5 md:px-10 md:text-lg"
-        onClick={resetSession}
-      >
-        <Link href={`/requests`}>See my Offers</Link>
-      </Button>
-      <Button
-        asChild
-        variant="outline"
-        className="mt-2 md:px-8 md:text-lg"
-        onClick={() => {
-          resetSession();
-        }}
-      >
-        <Link href={`/`}>Back to listings</Link>
-      </Button>
+      <div className="mt-10 flex flex-row gap-5">
+        <Button asChild variant="greenPrimary" onClick={resetSession}>
+          <Link href={`/requests`}>See my Offers</Link>
+        </Button>
+        <Button
+          asChild
+          variant="secondary"
+          onClick={() => {
+            resetSession();
+          }}
+        >
+          <Link href={`/`}>Back to listings</Link>
+        </Button>
+      </div>
     </div>
   );
 }

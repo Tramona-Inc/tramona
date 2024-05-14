@@ -83,6 +83,7 @@ export const users = pgTable(
       .array()
       .default(sql`'{}'`),
     about: text("about"),
+    // destinations: varchar("destinations").array(),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),

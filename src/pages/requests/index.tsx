@@ -1,25 +1,12 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import NewRequestDialog from "@/components/requests/NewRequestDialog";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { HistoryIcon, HomeIcon, MapPinIcon, Plus } from "lucide-react";
+import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
-
-export function NewRequestButton() {
-  return (
-    <NewRequestDialog>
-      <Button className="pl-2">
-        <Plus />
-        New request
-      </Button>
-    </NewRequestDialog>
-  );
-}
 
 // TODO: change to tab links, each with individual fetch
 function RequestsTabs() {

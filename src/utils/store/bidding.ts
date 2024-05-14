@@ -19,7 +19,6 @@ type BiddingState = {
   resetSession: () => void;
 };
 
-
 // export const useBidding = create<BiddingState>((set) => ({
 //   price: 0,
 //   date: {
@@ -62,16 +61,16 @@ export const useBidding = create<BiddingState>()(
         }));
       },
       setPrice: (price: number) => {
-        set(() => ({ price }));
+        set((state) => ({ ...state, price }));
       },
       setGuest: (guest: number) => {
-        set(() => ({ guest }));
+        set((state) => ({ ...state, guest }));
       },
       setDate: (from: Date, to: Date) => {
-        set(() => ({ date: { from, to } }));
+        set((state) => ({ ...state, date: { from, to } }));
       },
       setStep: (step: number) => {
-        set(() => ({ step }));
+        set((state) => ({ ...state, step }));
       },
       resetSession: () => {
         set(() => ({
@@ -91,4 +90,3 @@ export const useBidding = create<BiddingState>()(
     },
   ),
 );
-

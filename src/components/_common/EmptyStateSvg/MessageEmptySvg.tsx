@@ -7,7 +7,6 @@ export default function MessageEmptySvg() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="250" height="200" fill="#FAFAFA" />
       <path
         fillRule="evenodd"
         clipRule="evenodd"
