@@ -51,7 +51,6 @@ export default function BiddingForm({
 
   async function onSubmit(values: FormSchema) {
     // Reset session if on new date
-
     console.log("Called");
     resetSession();
     // setGuest(values.numGuests);
