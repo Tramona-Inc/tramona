@@ -61,15 +61,16 @@ export default function BiddingForm({
 
   return (
     <Card>
+      <h3 className="font-semibold">Price on Airbnb:</h3>
       <h1 className="flex items-center text-3xl font-semibold">
-        {formatCurrency(price)}
+        {formatCurrency(price * AVG_AIRBNB_MARKUP)}
         <span className="ml-2 py-0 text-sm font-normal text-gray-500">
           per night
         </span>
       </h1>
-      <h3 className="font-semibold">
+      {/* <h3 className="font-semibold">
         Price on Airbnb: {formatCurrency(price * AVG_AIRBNB_MARKUP)}
-      </h3>
+      </h3> */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
