@@ -396,17 +396,19 @@ export const biddingRouter = createTRPCRouter({
 
   reject: protectedProcedure
     .input(z.object({ bidId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      const userIsWithBid = await userWithBid({
-        userId: ctx.user.id,
-        bidId: input.bidId,
-      });
+    .mutation(async ({ input }) => {
+      // const userIsWithBid = await userWithBid({
+      //   userId: ctx.user.id,
+      //   bidId: input.bidId,
+      // });
 
-      if (!userIsWithBid) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      } else {
-        await updateBidStatus({ id: input.bidId, status: "Rejected" });
-      }
+      // if (!userIsWithBid) {
+      //   throw new TRPCError({ code: "UNAUTHORIZED" });
+      // } else {
+      // await updateBidStatus({ id: input.bidId, status: "Rejected" });
+      // }
+
+      await updateBidStatus({ id: input.bidId, status: "Rejected" });
 
       // TODO: email travellers
     }),
