@@ -21,6 +21,7 @@ module.exports = {
         "8xl": "4.6rem",
       },
       spacing: {
+        "screen-minus-header-n-footer": "var(--screen-minus-header-n-footer)",
         "screen-minus-header": "var(--screen-minus-header)",
         "header-height": "var(--header-height)",
         "mobile-header-height": "var(--mobile-header-height)",

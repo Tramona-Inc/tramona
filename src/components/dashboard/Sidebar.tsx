@@ -100,7 +100,7 @@ export default function Sidebar({
       // if so, create a notification
       const title = "Tramona Messages";
       const icon = "/assets/images/tramona-logo.jpeg";
-      const body = `You have ${plural(totalUnreadMessages, "unread message")}!`;
+      const body = `You have ${plural(totalUnreadMessages ?? 0, "unread message")}!`;
       new Notification(title, { body, icon });
       const notificationSound = new Audio("/assets/sounds/sound.mp3");
       void notificationSound.play();

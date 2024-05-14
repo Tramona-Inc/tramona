@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   LogOutIcon,
+  User2Icon,
   UserCheck2Icon,
   UserCheckIcon,
-  UserCogIcon,
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -110,8 +110,8 @@ export default function AvatarDropdown({ session }: { session: Session }) {
           )}
           <DropdownMenuItem asChild>
             <Link href="/profile">
-              <UserCogIcon />
-              Profile Settings
+              <User2Icon />
+              Profile
             </Link>
           </DropdownMenuItem>
           {/* <DropdownMenuItem asChild>

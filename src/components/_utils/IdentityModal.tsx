@@ -4,12 +4,11 @@ import { Button } from "../ui/button";
 import { useVerification, VerificationProvider } from "./VerificationContext";
 import { api } from "@/utils/api";
 import { ZodUndefined } from "zod";
-import { useSession } from 'next-auth/react';
-import { useStripe } from '@/utils/stripe-client';
+import { useSession } from "next-auth/react";
+import { useStripe } from "@/utils/stripe-client";
 
 const IdentityModal = () => {
   const stripePromise = useStripe();
-
 
   const [stripe, setStripe] = useState<Stripe | null>(null);
   const { setVerificationStatus, setShowVerificationBanner } =
@@ -17,7 +16,7 @@ const IdentityModal = () => {
   const [verificationAttempted, setVerificationAttempted] = useState(false);
 
   const { data: users } = api.users.myVerificationStatus.useQuery();
-  
+
   const { update } = useSession();
 
   useEffect(() => {
@@ -33,10 +32,7 @@ const IdentityModal = () => {
   }, [stripePromise]);
 
   useEffect(() => {
-    if (
-      verificationAttempted &&
-      users?.isIdentityVerified !== undefined
-    ) {
+    if (verificationAttempted && users?.isIdentityVerified !== undefined) {
       console.log("Fetched verification status:", users?.isIdentityVerified);
       setVerificationStatus(users?.isIdentityVerified);
       setShowVerificationBanner(true);
@@ -72,8 +68,14 @@ const IdentityModal = () => {
 
   return (
     <VerificationProvider>
-      <Button role="link" disabled={!stripe} onClick={handleClick}>
-        Get Verified
+      <Button
+        role="link"
+        variant="secondary"
+        disabled={!stripe}
+        onClick={handleClick}
+        className="font-semibold"
+      >
+        Confirm your identity
       </Button>
     </VerificationProvider>
   );
