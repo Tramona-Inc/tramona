@@ -8,13 +8,13 @@ import {
 } from "@/components/ui/form";
 import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from "@/server/db/schema";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { useZodForm } from "@/utils/useZodForm";
 import { z } from "zod";
+import { CounterInput } from "../_common/CounterInput";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Separator } from "../ui/separator";
-import { CounterInput } from "../_common/CounterInput";
-import { useZodForm } from "@/utils/useZodForm";
 
 export function Total({
   name,
@@ -85,6 +85,7 @@ export default function PropertyFilter() {
   const setHouseRules = useCitiesFilter((state) => state.setHouseRules);
   const setRoomType = useCitiesFilter((state) => state.setRoomType);
   const setOpen = useCitiesFilter((state) => state.setOpen);
+  const clearFilter = useCitiesFilter((state) => state.clearFilter);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     setRoomType(data.roomType);
@@ -92,6 +93,12 @@ export default function PropertyFilter() {
     setBathrooms(data.bathrooms ?? 0);
     setBedrooms(data.bedrooms ?? 0);
     setHouseRules(data.houseRules ?? []);
+    setOpen(false);
+  }
+
+  function handleClearFilter() {
+    clearFilter();
+    form.reset();
     setOpen(false);
   }
 
@@ -241,14 +248,7 @@ export default function PropertyFilter() {
           )}
         />
         <div className="flex flex-row justify-between">
-          <Button
-            type="button"
-            variant={"ghost"}
-            onClick={() => {
-              form.reset();
-              // setOpen(false);
-            }}
-          >
+          <Button type="button" variant={"ghost"} onClick={handleClearFilter}>
             Clear
           </Button>
           <Button type="submit">Submit</Button>
