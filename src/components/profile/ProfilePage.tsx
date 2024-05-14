@@ -1,8 +1,10 @@
 import React from "react";
 import {
+  BadgeCheck,
   Bookmark,
   Calendar,
   Camera,
+  Clock2Icon,
   Edit,
   Ellipsis,
   Facebook,
@@ -47,16 +49,23 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import BucketListHomeOfferCard from "./BucketListHomeOfferCard";
+import { BadgeXIcon, InfoIcon } from "lucide-react";
+import IdentityModal from "../_utils/IdentityModal";
+import { VerificationProvider } from "../_utils/VerificationContext";
+import { sub } from "date-fns";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
 
   const { data } = api.users.myReferralCode.useQuery();
-
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
   const code =
-    session?.user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
+    session?.user?.referralCodeUsed && data?.referralCode
+      ? ""
+      : data?.referralCode;
   const url = `https://tramona.com/auth/signup?code=${code}`;
-  
+
   const socials = [
     {
       name: "Twitter",
@@ -92,21 +101,21 @@ export default function ProfilePage() {
 
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
 
-  const {
-    data: bucketListProperties
-  } = api.profile.getAllPropertiesWithDetails.useQuery({
-    lat: filter.lat ?? 0,
-    long: filter.long ?? 0
-  });
+  const { data: bucketListProperties } =
+    api.profile.getAllPropertiesWithDetails.useQuery({
+      lat: filter.lat ?? 0,
+      long: filter.long ?? 0,
+    });
 
-  const [
-    selectedBLDestinationId, 
-    setSelectedBLDestinationId
-  ] = React.useState<number | null>(null);
+  const [selectedBLDestinationId, setSelectedBLDestinationId] = React.useState<
+    number | null
+  >(null);
 
   const selectedBLDestination = React.useMemo(() => {
-    return profileInfo?.bucketListDestinations.find((d) => d.id === selectedBLDestinationId)
-  }, [profileInfo, selectedBLDestinationId])
+    return profileInfo?.bucketListDestinations.find(
+      (d) => d.id === selectedBLDestinationId,
+    );
+  }, [profileInfo, selectedBLDestinationId]);
 
   const editProfileDialogState = useDialogState();
   const editBLDestinationDialogState = useDialogState();
@@ -116,7 +125,6 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto mb-5 max-w-4xl space-y-3">
-
       {/* Profile Header */}
       <section className="rounded-lg border">
         <div className="relative h-40 bg-teal-900 lg:h-52">
@@ -140,23 +148,49 @@ export default function ProfilePage() {
           />
           <Button
             size="icon"
-            className="absolute left-28 top-0 rounded-full bg-primary/20 lg:hidden"
+            className="absolute bottom-6 left-40 z-30 rounded-full bg-primary/70"
           >
-            <Camera />
+            <Camera size={24} />
           </Button>
-          <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:mt-0">
-            <h2 className="text-xl font-bold lg:text-2xl">{profileInfo?.name}</h2>
+          <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:-ml-4 lg:mt-0">
+            <div className="flex flex-row items-center justify-start gap-x-2">
+              <h2 className="text-xl font-bold lg:text-2xl">
+                {profileInfo?.name}
+              </h2>
+              {verificationStatus?.isIdentityVerified == "true" ? (
+                <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
+                  <BadgeCheck size={22} className="" /> Verified
+                </div>
+              ) : verificationStatus?.isIdentityVerified == "pending" ? (
+                <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
+                  <Clock2Icon size={22} className="" /> Pending
+                </div>
+              ) : (
+                <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
+                  <BadgeXIcon size={22} className="" /> Not Verified
+                </div>
+              )}
+            </div>
+
             <p className="font-semibold">{profileInfo?.location}</p>
             <div className="mt-2 flex space-x-2">
-              { (profileInfo?.socials?.[0]) && <Facebook href={profileInfo.socials[0]} /> }
-              { (profileInfo?.socials?.[1]) && <Youtube href={profileInfo.socials[1]} /> }
-              { (profileInfo?.socials?.[2]) && <Instagram href={profileInfo.socials[2]} /> }
-              { (profileInfo?.socials?.[3]) && <Twitter href={profileInfo.socials[3]} /> }
+              {profileInfo?.socials?.[0] && (
+                <Facebook href={profileInfo.socials[0]} />
+              )}
+              {profileInfo?.socials?.[1] && (
+                <Youtube href={profileInfo.socials[1]} />
+              )}
+              {profileInfo?.socials?.[2] && (
+                <Instagram href={profileInfo.socials[2]} />
+              )}
+              {profileInfo?.socials?.[3] && (
+                <Twitter href={profileInfo.socials[3]} />
+              )}
             </div>
           </div>
           <div className="flex gap-3 lg:col-start-4 lg:justify-end">
-            <Button 
-              className="w-1/2 bg-[#cfd8d6]/75 text-primary hover:bg-[#cfd8d6] lg:w-auto" 
+            <Button
+              className="w-1/2 bg-[#cfd8d6]/75 text-primary hover:bg-[#cfd8d6] lg:w-auto"
               onClick={() => editProfileDialogState.setState("open")}
             >
               <Edit />
@@ -165,12 +199,33 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
+      {/* pop up if no verified */}
+      {verificationStatus?.isIdentityVerified == "false" && (
+        <section className="flex flex-col justify-center gap-x-2 rounded-lg border border-red-200 p-4">
+          <div className="flex flex-row gap-x-1 font-bold ">
+            <InfoIcon size={24} className="text-red-400" /> Verify your Identity
+          </div>
+          <p className="ml-2">
+            Hosts are more likely to accept your bid when they know who you are.
+          </p>
+          <div className="  mt-3 flex w-1/4">
+            <VerificationProvider>
+              <IdentityModal />
+            </VerificationProvider>
+          </div>
+        </section>
+      )}
+      {/* Bucket List */}
 
       {/* About Me */}
       <section className="space-y-2 rounded-lg border p-4">
         <h2 className="font-bold">About Me</h2>
         <p>
-          {profileInfo?.about ?? ""}
+          {profileInfo?.about ??
+            "Joined Tramona " +
+              (session?.user.createdAt
+                ? new Date(session.user.createdAt).toISOString().substring(0, 7)
+                : "")}
         </p>
       </section>
 
@@ -238,7 +293,7 @@ export default function ProfilePage() {
                 <Link href="/">
                   <DropdownMenuItem>Property</DropdownMenuItem>
                 </Link>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => addBLDestinationDialogState.setState("open")}
                 >
                   Destination
@@ -267,11 +322,14 @@ export default function ProfilePage() {
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
               {bucketListProperties?.map((property) => (
-                <BucketListHomeOfferCard key={property!.id} property={{
-                  ...property!,
-                  propertyId: property!.id,
-                  bucketListPropertyId: property!.bucketListId
-                }} />
+                <BucketListHomeOfferCard
+                  key={property!.id}
+                  property={{
+                    ...property!,
+                    propertyId: property!.id,
+                    bucketListPropertyId: property!.bucketListId,
+                  }}
+                />
               ))}
             </div>
           </TabsContent>
@@ -280,8 +338,8 @@ export default function ProfilePage() {
           <TabsContent value="destinations">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
               {profileInfo?.bucketListDestinations.map((destination) => (
-                <DestinationCard 
-                  key={destination.id} 
+                <DestinationCard
+                  key={destination.id}
                   destination={destination}
                   onEdit={() => {
                     setSelectedBLDestinationId(destination.id);
@@ -298,14 +356,12 @@ export default function ProfilePage() {
         </Tabs>
       </section>
 
-      <AddBucketListDestinationDialog 
-        state={addBLDestinationDialogState}
-      />
-      <EditBucketListDestinationDialog 
+      <AddBucketListDestinationDialog state={addBLDestinationDialogState} />
+      <EditBucketListDestinationDialog
         state={editBLDestinationDialogState}
         destinationData={selectedBLDestination!}
       />
-      <DeleteBucketListDestinationDialog 
+      <DeleteBucketListDestinationDialog
         state={deleteBLDDialogState}
         destinationId={selectedBLDestinationId!}
       />
@@ -314,13 +370,20 @@ export default function ProfilePage() {
         <EditProfileDialog
           state={editProfileDialogState}
           profileInfo={{
-            name: profileInfo.name!,
-            about: profileInfo.about!,
-            location: profileInfo.location!,
+            name: profileInfo.name ?? session?.user.username ?? "",
+            about:
+              profileInfo.about ??
+              "Joined Tramona at " +
+                (session?.user.createdAt
+                  ? new Date(session.user.createdAt)
+                      .toISOString()
+                      .substring(0, 10)
+                  : ""),
+            location: profileInfo.location ?? "",
             facebook_link: profileInfo.socials![0],
             youtube_link: profileInfo.socials![1],
             instagram_link: profileInfo.socials![2],
-            twitter_link: profileInfo.socials![3]
+            twitter_link: profileInfo.socials![3],
           }}
         />
       )}

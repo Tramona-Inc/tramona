@@ -2,14 +2,16 @@ import NavLink from "../_utils/NavLink";
 
 import { api } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
-import {
-  ArrowLeftRight,
-} from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
-import { adminNavLinks, guestNavLinks, hostNavLinks } from '@/config/sideNavLinks';
+import {
+  adminNavLinks,
+  guestNavLinks,
+  hostNavLinks,
+} from "@/config/sideNavLinks";
 
 function SidebarLink({
   href,
@@ -51,7 +53,6 @@ function SidebarLink({
     />
   );
 }
-
 
 export default function Sidebar({
   type,
@@ -138,4 +139,3 @@ export default function Sidebar({
     </div>
   );
 }
-
