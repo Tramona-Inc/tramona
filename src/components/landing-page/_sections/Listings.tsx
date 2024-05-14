@@ -6,10 +6,7 @@ import HomeOfferCard from "../HomeOfferCard";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 export default function Listings() {
-  const filter = useCitiesFilter((state) => state.filter);
-  const { beds, bedrooms, bathrooms, roomType, houseRules } = useCitiesFilter(
-    (state) => state,
-  );
+  const filters = useCitiesFilter((state) => state);
 
   const {
     data: properties,
@@ -18,14 +15,17 @@ export default function Listings() {
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {
-      // city: filter.id,
-      roomType: roomType,
-      beds: beds,
-      bathrooms: bathrooms,
-      bedrooms: bedrooms,
-      houseRules: houseRules,
-      lat: filter.lat,
-      long: filter.long,
+      guests: filters.guests,
+      beds: filters.beds,
+      bedrooms: filters.bedrooms,
+      bathrooms: filters.bathrooms,
+      maxNightlyPrice: filters.maxNightlyPrice,
+      lat: filters.filter?.lat,
+      long: filters.filter?.long,
+      houseRules: filters.houseRules,
+      roomType: filters.roomType,
+      checkIn: filters.checkIn,
+      checkOut: filters.checkOut,
       radius: 5,
     },
     {

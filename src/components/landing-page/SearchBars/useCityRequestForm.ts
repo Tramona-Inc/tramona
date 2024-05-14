@@ -13,8 +13,10 @@ import { api } from "@/utils/api";
 
 export function useCityRequestForm({
   setCurTab,
+  afterSubmit,
 }: {
   setCurTab: (val: number) => void;
+  afterSubmit?: () => void;
 }) {
   const form = useZodForm({
     schema: multiCityRequestSchema,
@@ -81,6 +83,7 @@ export function useCityRequestForm({
             defaultSearchOrReqValues as CityRequestDefaultVals,
           ]);
           setCurTab(0);
+          afterSubmit?.();
         })
         .catch(() => errorToast());
     }

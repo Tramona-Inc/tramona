@@ -84,9 +84,7 @@ export function RequestTabsSwitcher({
             setCurTab(numTabs);
             form.setValue("data", [
               ...data,
-              {
-                defaultSearchOrReqValues,
-              } as unknown as CityRequestDefaultVals,
+              defaultSearchOrReqValues as CityRequestDefaultVals,
             ]);
             // form.setFocus(`data.${data.length - 1}.location`);
           }}

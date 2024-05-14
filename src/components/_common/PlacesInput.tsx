@@ -5,6 +5,8 @@ import PlacesPopover from "./PlacesPopover";
 import { useState } from "react";
 import { type InputVariant } from "../ui/input";
 import { InputButton } from "../ui/input-button";
+import { cn } from "@/utils/utils";
+import { XIcon } from "lucide-react";
 
 export default function PlacesInput<
   TFieldValues extends FieldValues,
@@ -32,7 +34,7 @@ export default function PlacesInput<
     <FormField
       {...props}
       render={({ field }) => (
-        <FormItem className={className}>
+        <FormItem className={cn("relative", className)}>
           <PlacesPopover
             open={open}
             setOpen={setOpen}
@@ -41,10 +43,12 @@ export default function PlacesInput<
             className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
             trigger={({ value, disabled }) => (
               <InputButton
+                withClearBtn
                 variant={variant}
                 label={formLabel}
                 placeholder={placeholder}
                 value={value}
+                setValue={field.onChange}
                 type="button"
                 role="combobox"
                 disabled={disabled}
