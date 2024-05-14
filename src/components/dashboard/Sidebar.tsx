@@ -1,17 +1,25 @@
 import NavLink from "../_utils/NavLink";
 
-import { api } from "@/utils/api";
-import { cn, plural } from "@/utils/utils";
-import { ArrowLeftRight } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useCallback, useEffect } from "react";
-import { TramonaLogo } from "../_common/Header/TramonaLogo";
-import { Badge } from "../ui/badge";
 import {
   adminNavLinks,
   guestNavLinks,
   hostNavLinks,
 } from "@/config/sideNavLinks";
+import { api } from "@/utils/api";
+import { cn, plural } from "@/utils/utils";
+import { ArrowLeftRight, Menu, Settings, Wallet } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useCallback, useEffect } from "react";
+import { TramonaLogo } from "../_common/Header/TramonaLogo";
+import { Badge } from "../ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 function SidebarLink({
   href,
@@ -84,8 +92,7 @@ export default function Sidebar({
     });
 
   const notifyMe = useCallback(async () => {
-    // Check if the browser supports notifications
-    if (!("Notification" in window) || !totalUnreadMessages) return;
+    // Check if the browser supports notifications if (!("Notification" in window) || !totalUnreadMessages) return;
 
     // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
     if (Notification.permission === "granted") {
@@ -93,7 +100,7 @@ export default function Sidebar({
       // if so, create a notification
       const title = "Tramona Messages";
       const icon = "/assets/images/tramona-logo.jpeg";
-      const body = `You have ${plural(totalUnreadMessages, "unread message")}!`;
+      const body = `You have ${plural(totalUnreadMessages ?? 0, "unread message")}!`;
       new Notification(title, { body, icon });
       const notificationSound = new Audio("/assets/sounds/sound.mp3");
       void notificationSound.play();
@@ -132,6 +139,28 @@ export default function Sidebar({
               )}
           </div>
         ))}
+        <div className="text-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Menu />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuGroup>
+                <Link href="/settings/personal-information">
+                  <DropdownMenuItem className="text-primary">
+                    <Settings />
+                    Settings
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/account">
+                  <DropdownMenuItem className="text-primary">
+                    <Wallet /> Refer and earn
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       {/* <button onClick={notifyMe}>NOTIFICATION</button>
       <button onClick={play}>Sound</button>
