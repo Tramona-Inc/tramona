@@ -214,7 +214,7 @@ export default function HomeOfferCard({
               )}
             </div>
             <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
-              <MakeBid propertyId={property.id} />
+              <MakeBid propertyId={property.id} setOpen={setOpen}/>
             </DialogContent>
           </Dialog>
         </form>

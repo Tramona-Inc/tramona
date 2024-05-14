@@ -9,13 +9,19 @@ import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import { ChevronLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useState } from "react";
 import BiddingConfirmation from "./BiddingConfirmation";
 import BiddingStep1 from "./BiddingStep1";
 import BiddingStep2 from "./BiddingStep2";
-import Link from 'next/link';
 
-function MakeBid({ propertyId }: { propertyId: number }) {
+function MakeBid({
+  propertyId,
+  setOpen,
+}: {
+  propertyId: number;
+  setOpen: (open: boolean) => void;
+}) {
   const { data: property, isLoading } = api.properties.getById.useQuery({
     id: propertyId,
   });
@@ -125,7 +131,7 @@ function MakeBid({ propertyId }: { propertyId: number }) {
             {step == 1 && (
               <BiddingStep2 property={property} setStep={setStep} />
             )}
-            {step == 2 && <BiddingConfirmation property={property} />}
+            {step == 2 && <BiddingConfirmation property={property} setOpen={setOpen}/>}
           </div>
         )
       )}
