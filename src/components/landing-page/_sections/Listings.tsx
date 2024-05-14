@@ -1,17 +1,33 @@
-import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
+import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
 import { useEffect, useMemo, useRef } from "react";
 import HomeOfferCard from "../HomeOfferCard";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 export default function Listings() {
+  const filters = useCitiesFilter((state) => state);
+
   const {
     data: properties,
     isLoading,
     fetchNextPage,
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
-    {},
+    {
+      guests: filters.guests,
+      beds: filters.beds,
+      bedrooms: filters.bedrooms,
+      bathrooms: filters.bathrooms,
+      maxNightlyPrice: filters.maxNightlyPrice,
+      lat: filters.filter?.lat,
+      long: filters.filter?.long,
+      houseRules: filters.houseRules,
+      roomType: filters.roomType,
+      checkIn: filters.checkIn,
+      checkOut: filters.checkOut,
+      radius: 5,
+    },
     {
       // the cursor from where to start fetching thecurrentProperties
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -20,7 +36,7 @@ export default function Listings() {
 
   // a ref to the viewport
   const viewportRef = useRef<HTMLDivElement>(null);
-  // a ref to the last post element
+  // a ref to the last property element
   const { entry, ref } = useIntersection({
     root: viewportRef.current,
     threshold: 1,
@@ -44,59 +60,41 @@ export default function Listings() {
     [properties],
   );
 
-  // const propertyCards = propertiesArray?.map((property: Property) => (
-  //   <HomeOfferCard key={property.id} property={property} />
-  // ));
+  const skeletons = Array.from({ length: 12 }, (_, index) => (
+    <div key={index}>
+      <Skeleton className="aspect-square rounded-xl" />
+      <div className="flex h-[90px] flex-col justify-center">
+        <SkeletonText />
+        <SkeletonText />
+      </div>
+      <Skeleton className="h-10 rounded-lg" />
+      <Skeleton className="mt-2 h-10 rounded-xl" />
+    </div>
+  ));
 
   return (
-    // <div>
-    //   {propertyCards ? (
-    //     <div className="grid gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-    //       {propertyCards}
-    //     </div>
-    //   ) : (
-    //     <Spinner />
-    //   )}
-    // </div>
-    <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+    <section className="relative grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
-        <div className="col-span-full flex justify-center overflow-y-hidden">
-          <Spinner />
-        </div>
-      ) : !!currentProperties.length ? (
+        <>{skeletons}</>
+      ) : currentProperties.length > 0 ? (
         // if there are currentProperties to show, display them
         <>
-          {currentProperties.map((post, i) =>
-            i === currentProperties.length - 1 ? (
-              <div ref={ref} key={post.id} className="cursor-pointer">
-                <HomeOfferCard key={post.id} property={post} />
-              </div>
-            ) : (
-              <div key={post.id} className="cursor-pointer">
-                <HomeOfferCard property={post} />
-              </div>
-            ),
-          )}
-
-          {isFetchingNextPage && (
-            <div className="flex justify-center overflow-y-hidden">
-              <Spinner />
-            </div>
-          )}
-
-          {!isFetchingNextPage &&
-            properties?.pages.length &&
-            !properties.pages[properties.pages.length - 1]?.nextCursor && (
-              <div className="text-center opacity-60">
-                <p className="text-xs md:text-sm">No more properties to load</p>
-              </div>
-            )}
+          {currentProperties.map((property) => (
+            <HomeOfferCard key={property.id} property={property} />
+          ))}
+          {isFetchingNextPage && skeletons}
+          <div ref={ref} className="absolute bottom-[200vh]"></div>
         </>
       ) : (
-        // if there are no properties to show, display a message
-        <div className="flex justify-center">
-          <p className="text-sm text-white/60">No properties to show</p>
+        <div className="col-span-full flex min-h-80 items-center justify-center gap-4">
+          <p className="text-sm text-secondary-foreground">
+            No properties to show
+          </p>
+          {/* <div className="flex gap-2">
+            <Button>Edit filters</Button>
+            <Button variant="secondary">Clear filters</Button>
+          </div> */}
         </div>
       )}
     </section>

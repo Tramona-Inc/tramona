@@ -1,4 +1,5 @@
 import { zodTime } from "@/utils/zod-utils";
+import { sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -19,7 +20,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { sql } from "drizzle-orm";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -54,10 +54,14 @@ export const ALL_PROPERTY_TYPES = [
   "Alternative",
 ] as const;
 
-export const ALL_PROPERTY_ROOM_TYPES = [
+export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
   "Shared room",
   "Private room",
+] as const;
+
+export const ALL_PROPERTY_ROOM_TYPES = [
+  ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
   "Other",
 ] as const;
 
@@ -67,6 +71,8 @@ export const propertyRoomTypeEnum = pgEnum(
   "property_room_type",
   ALL_PROPERTY_ROOM_TYPES,
 );
+
+export const ALL_HOUSE_RULE_ITEMS = ["Pets allowed", "Smoking Allowed"];
 
 export const propertyAmenitiesEnum = pgEnum(
   "property_amenities",
@@ -185,6 +191,7 @@ export const properties = pgTable("properties", {
   mapScreenshot: text("map_screenshot"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  isPrivate: boolean("is_private").notNull().default(false),
 });
 
 export type Property = typeof properties.$inferSelect;
@@ -212,7 +219,7 @@ export const bookedDates = pgTable(
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id),
-    date: date("date").notNull(),
+    date: date("date", { mode: "date" }).notNull(),
   },
   (t) => ({
     compoundKey: primaryKey({

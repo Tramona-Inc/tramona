@@ -16,13 +16,14 @@ const buttonVariants = cva(
         icon: "h-10 w-10",
       },
       variant: {
-        default: "bg-primary text-white hover:bg-primary/90",
+        default:
+          "bg-primary text-white hover:bg-primary/90 disabled:bg-zinc-400 disabled:text-secondary-foreground",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border-2 border-primary bg-background text-primary hover:bg-primary/10 focus-visible:bg-primary/10",
+          "border border-primary bg-background text-primary hover:bg-zinc-200 focus-visible:bg-zinc-200",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-zinc-100 border border-zinc-300 text-secondary-foreground hover:bg-zinc-200",
         ghost: "hover:bg-accent text-zinc-800",
         link: "text-primary underline-offset-4 hover:underline",
         emptyInput:
@@ -43,6 +44,9 @@ const buttonVariants = cva(
         increment:
           "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
         underline: "hover:bg-accent text-zinc-800 underline",
+        greenPrimary: "bg-[#004236] text-white font-bold",
+        secondaryLight:
+          "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
       },
     },
     defaultVariants: {

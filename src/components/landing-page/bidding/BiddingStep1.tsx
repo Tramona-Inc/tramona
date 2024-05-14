@@ -8,21 +8,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { type Property } from "@/server/db/schema";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency } from "@/utils/utils";
 import { zodNumber } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { ArrowRight, Loader } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { api } from "@/utils/api";
-import IdentityModal from "@/components/_utils/IdentityModal";
-import { env } from "@/env";
-import { loadStripe } from "@stripe/stripe-js";
-import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   price: zodNumber({ min: 1 }),
@@ -31,34 +27,42 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-function BiddingStep1({ property }: { property: Property }) {
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
+function BiddingStep1({ property, setStep }: { property: Property, setStep: (step: number) => void }) {
+  // const setStep = useBidding((state) => state.setStep);
 
   const setPrice = useBidding((state) => state.setPrice);
-  const price = useBidding((state) => state.price);
+  const currentPrice = useBidding((state) => state.price);
 
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
   //determine if user identity is verified
-  const { data: users } = api.users.myVerificationStatus.useQuery();
-  const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  // const { data: users } = api.users.myVerificationStatus.useQuery();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      price: price ?? undefined,
-      guest: guest ?? undefined,
+      price: currentPrice,
+      guest: guest,
     },
   });
 
   function onSubmit(values: FormSchema) {
     setPrice(values.price);
     setGuest(values.guest);
-    if (users?.isIdentityVerified === "true") {
-      setStep(step + 1);
-    }
+    setStep(1);
+
+    // if (users?.isIdentityVerified === "true") {
+    //   setStep(1);
+    // }
   }
+
+  const threshhold = 1.2;
+
+  const reccomendedPrice = property.originalNightlyPrice
+    ? property.originalNightlyPrice / threshhold
+    : 0;
+
+  const { price } = form.watch();
 
   return (
     <div className="flex w-full flex-col items-center justify-center">
@@ -82,12 +86,18 @@ function BiddingStep1({ property }: { property: Property }) {
       <h2 className="mt-2 text-lg font-semibold">{property.name}</h2>
       <p className="my-3 text-sm">
         Airbnb&apos;s Price:{" "}
-        {property.originalNightlyPrice ? formatCurrency(property?.originalNightlyPrice * 1.13868 ) : "Prices unavailable"}
+        {property.originalNightlyPrice
+          ? formatCurrency(property.originalNightlyPrice * AVG_AIRBNB_MARKUP)
+          : "Prices unavailable"}
         /night
       </p>
-      <div className="border-2 border-dashed border-accent px-7 md:px-24 py-2">
+      <div className="border-2 border-dashed border-accent px-7 py-2 md:px-24">
         {/* Change this to reccomended price */}
-        <p>{property.originalNightlyPrice ? formatCurrency(property?.originalNightlyPrice) : "Estimate unavailable"}</p>
+        <p>
+          {property.originalNightlyPrice
+            ? formatCurrency(property.originalNightlyPrice)
+            : "Estimate unavailable"}
+        </p>
       </div>
       <p className="my-2 text-sm">Recommended Price</p>
       <div className=" flex w-5/6 flex-row text-accent">
@@ -114,6 +124,12 @@ function BiddingStep1({ property }: { property: Property }) {
                       />
                     </FormControl>
                     <FormMessage />
+                    {price > 0 && price <= reccomendedPrice / 100 && (
+                      <p className="max-w-[300px] text-destructive">
+                        You are unlikely to get this price, up your price for a
+                        higher chance
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
@@ -132,17 +148,20 @@ function BiddingStep1({ property }: { property: Property }) {
                 )}
               />
             </div>
-            {users?.isIdentityVerified === "pending" ? (
-               <div className="flex flex-col items-center">
-               <p className=" text-xs text-muted-foreground mb-1">
-                 Verification takes about 1-3 minutes.
-               </p>
-               <div className="flex-row gap-x-1">
-              <Button className=" items-center flex flex-row justify-center" disabled>
-                Verification Pending
-                 <Loader2 className="animate-spin"/>
-              </Button>
-               </div>
+            {/* {users?.isIdentityVerified === "pending" ? (
+              <div className="flex flex-col items-center">
+                <p className=" mb-1 text-xs text-muted-foreground">
+                  Verification takes about 1-3 minutes.
+                </p>
+                <div className="flex-row gap-x-1">
+                  <Button
+                    className=" flex flex-row items-center justify-center"
+                    disabled
+                  >
+                    Verification Pending
+                    <Loader2 className="animate-spin" />
+                  </Button>
+                </div>
               </div>
             ) : users?.isIdentityVerified === "true" ? (
               <Button className="mb-1 px-32" type="submit">
@@ -150,12 +169,15 @@ function BiddingStep1({ property }: { property: Property }) {
               </Button>
             ) : (
               <div className="flex flex-col items-center">
-                <p className=" text-xs text-muted-foreground mb-1">
+                <p className=" mb-1 text-xs text-muted-foreground">
                   You must be verified before submitting an offer.
                 </p>
                 <IdentityModal stripePromise={stripePromise} />
               </div>
-            )}
+            )} */}
+            <Button className="mb-1 px-32" type="submit">
+              Review offer
+            </Button>
           </form>
         </Form>
 

@@ -30,7 +30,9 @@
     --radius: 0.5rem;
     --mobile-header-height: 83px;
     --header-height: 56px;
+    --footer-height: 72px;
     --screen-minus-header: calc(100vh - var(--header-height));
+    --screen-minus-header-n-footer: calc(100vh - var(--header-height) - var(--footer-height));
   }
 
   @media (min-width: 640px) {
@@ -69,7 +71,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-foreground;
   }
 }
 

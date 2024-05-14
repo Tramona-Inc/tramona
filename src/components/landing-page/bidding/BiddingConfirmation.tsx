@@ -1,33 +1,25 @@
-
-
 import { Button } from "@/components/ui/button";
 import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
-import { formatCurrency, formatDateRange } from "@/utils/utils";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Lightbulb } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { DialogClose } from "@/components/ui/dialog";
+
 function BiddingConfirmation({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
 
-
   const resetSession = useBidding((state) => state.resetSession);
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
-  const handlePressNext = () => {
-    setStep(step - step);
-    resetSession();
-  };
+
   return (
     <div className="flex flex-col items-center justify-center ">
-      <h1 className=" text-lg font-semibold text-green-600 my-5 md:text-3xl">
+      <h1 className=" my-5 text-lg font-semibold text-green-600 md:text-3xl">
         {" "}
         Offer Sent!
       </h1>
       <div className="flex flex-col">
-        <h1 className=" mb-2 md:mb-6 font-semibold md:text-lg">
+        <h1 className=" mb-2 font-semibold md:mb-6 md:text-lg">
           {/* place bid.amount in here  */}
           Your offer for <span className="font-bold">${100}</span> has been
           submitted!
@@ -54,24 +46,23 @@ function BiddingConfirmation({ property }: { property: Property }) {
               <p className="text-muted-foreground">
                 {formatDateRange(date.from, date.to)}
               </p>
-              <ul className="my-4 flex flex-row text-nowrap text-xs tracking-tighter text-muted-foreground space-x-1 ">
-                <li className="">{property.maxNumGuests} Guests</li>
-                <li>&#8226;</li>
-                <li>{property.numBedrooms} Bedrooms</li>
-                <li>&#8226;</li>
-                <li>{property.numBeds} Beds</li>
-                <li>&#8226;</li>
-                <li>{property.numBathrooms} Baths</li>
-              </ul>
+              <p className="my-2 text-nowrap text-xs tracking-tighter text-muted-foreground md:my-4 md:text-base">
+                {plural(property.maxNumGuests, "guest")} ·{" "}
+                {plural(property.numBedrooms, "bedroom")} ·{" "}
+                {plural(property.numBeds, "bed")} ·{" "}
+                {property.numBathrooms && plural(property.numBathrooms, "bath")}
+              </p>
             </div>
           </div>
-          <div className=" flex-col items-center justify-center gap-y-3 md:mt-1 text-sm md:text-base">
-            <p className="text-center mt-3 mb-6">You will hear back within 24 hours!</p>
+          <div className=" flex-col items-center justify-center gap-y-3 text-sm md:mt-1 md:text-base">
+            <p className="mb-6 mt-3 text-center">
+              You will hear back within 24 hours!
+            </p>
             <div className="flex flex-row space-x-1 ">
               <Lightbulb />
-              <h2 className="text-base md:text-xl font-bold"> Remember</h2>
+              <h2 className="text-base font-bold md:text-xl"> Remember</h2>
             </div>
-            <p className="ml-6 text-xs md:text-sm md:ml-0">
+            <p className="ml-6 text-xs md:ml-0 md:text-sm">
               All offers are binding, if your offer is accepted your card will
               be charged.
             </p>
@@ -83,26 +74,20 @@ function BiddingConfirmation({ property }: { property: Property }) {
         </div>
       </div>
 
-      <Button
-        asChild
-        variant="default"
-        className="mt-40 px-5 md:px-10 md:text-lg"
-        onClick={resetSession }
-      >
-        <Link href={`/requests`}>See my Offers</Link>
-      </Button>
-      <Button
-        asChild
-        variant="outline"
-        className="mt-2 md:px-8 md:text-lg"
-        onClick={()=>{
-          resetSession()
-          window.location.reload();
-        }}
-
-      >
-        <Link href={`/`}>Back to listings</Link>
-      </Button>
+      <div className="mt-10 flex flex-row gap-5">
+        <Button asChild variant="greenPrimary" onClick={resetSession}>
+          <Link href={`/requests`}>See my Offers</Link>
+        </Button>
+        <Button
+          asChild
+          variant="secondary"
+          onClick={() => {
+            resetSession();
+          }}
+        >
+          <Link href={`/`}>Back to listings</Link>
+        </Button>
+      </div>
     </div>
   );
 }

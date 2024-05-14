@@ -89,7 +89,7 @@ function PropertyCard({ property }: { property: Property }) {
         <p className="text-sm text-muted-foreground">
           {[property.roomType, plural(property.maxNumGuests, "guest")]
             .filter(Boolean)
-            .join(" • ")}
+            .join(" · ")}
         </p>
       </div>
       <div className="p-1">

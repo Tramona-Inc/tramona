@@ -10,7 +10,7 @@ import {
   userUpdateSchema,
   users,
 } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -36,16 +36,16 @@ export const usersRouter = createTRPCRouter({
     };
   }),
 
-  myVerificationStatus: protectedProcedure.query(async({ctx})=>{
+  myVerificationStatus: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
-      columns:{
+      columns: {
         isIdentityVerified: true,
       },
-    })
-    return{
-      isIdentityVerified: res?.isIdentityVerified
-    }
+    });
+    return {
+      isIdentityVerified: res?.isIdentityVerified,
+    };
   }),
 
   myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
@@ -217,9 +217,11 @@ export const usersRouter = createTRPCRouter({
     }),
 
   getMyHostProfile: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.hostProfiles.findFirst({
-      where: eq(hostProfiles.userId, ctx.user.id),
-    });
+    return (
+      (await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+      })) ?? null
+    );
   }),
 
   checkCredentials: publicProcedure

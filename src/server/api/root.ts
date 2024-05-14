@@ -1,4 +1,4 @@
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter } from "@/server/api/trpc";
 import { authRouter } from "./routers/authRouter";
 import { biddingRouter } from "./routers/biddingRouter";
 import { emailRouter } from "./routers/emailRouter";
@@ -15,6 +15,8 @@ import { stripeRouter } from "./routers/stripeRouter";
 import { twilioRouter } from "./routers/twilioRouter";
 import { usersRouter } from "./routers/usersRouter";
 import { hostTeamsRouter } from "./routers/hostTeamsRouter";
+import { profileRouter } from "./routers/profileRouter";
+import { superhogRouter } from "./routers/superhogRouter";
 
 /**
  * This is the primary router for your server.
@@ -22,11 +24,6 @@ import { hostTeamsRouter } from "./routers/hostTeamsRouter";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  ping: publicProcedure.query(() => {
-    // eslint-disable-next-line no-console
-    console.log("ping received");
-    return "pong";
-  }),
   users: usersRouter,
   referralCodes: referralCodesRouter,
   requests: requestsRouter,
@@ -43,6 +40,8 @@ export const appRouter = createTRPCRouter({
   emails: emailRouter,
   biddings: biddingRouter,
   hostTeams: hostTeamsRouter,
+  profile: profileRouter,
+  superhog: superhogRouter,
 });
 
 // export type definition of API

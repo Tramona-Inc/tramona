@@ -94,12 +94,18 @@ const config = {
         protocol: "https",
         hostname: "assets.guesty.com",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
     ],
   },
   experimental: {
     scrollRestoration: true,
-    bundlePagesExternals: true,
-    esmExternals: "loose",
   },
 };
 

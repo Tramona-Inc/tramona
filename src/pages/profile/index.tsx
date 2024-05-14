@@ -1,23 +1,26 @@
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
-import MainLayout from "@/components/_common/Layout/MainLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import ProfileForm from "@/components/profile/ProfileForm";
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import ReferralDashboard from "@/components/profile/ReferralDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit2Icon, Share2Icon } from "lucide-react";
+import ProfilePage from "@/components/profile/ProfilePage";
 
 export default function Page() {
   useSession({ required: true });
 
   return (
-    <MainLayout type={"auth"}>
+    <DashboardLayout type={"guest"}>
       <Head>
         <title>Profile | Tramona</title>
       </Head>
+      <ProfilePage />
+      {/* <ReferralDashboard /> */}
 
-      <div className="flex min-h-screen-minus-header">
+      {/* <div className="flex min-h-screen-minus-header">
         <ProfileSidebar />
         <div className="flex-1 overflow-clip">
           <Tabs
@@ -31,23 +34,24 @@ export default function Page() {
               <TabsTrigger value="profile">
                 <Edit2Icon /> Edit Profile
               </TabsTrigger>
-              {/* <TabsTrigger value="editPassword">
+              commented out
+              <TabsTrigger value="editPassword">
                 <SecurityIcon /> Change password
-              </TabsTrigger> */}
+              </TabsTrigger>
             </TabsList>
-
             <TabsContent value="referralDashboard">
               <ReferralDashboard />
             </TabsContent>
             <TabsContent value="profile">
               <ProfileForm />
             </TabsContent>
-            {/* <TabsContent value="editPassword">
+            commented out
+            <TabsContent value="editPassword">
               <PasswordResetForm />
-            </TabsContent> */}
+            </TabsContent>
           </Tabs>
         </div>
-      </div>
-    </MainLayout>
+      </div> */}
+    </DashboardLayout>
   );
 }

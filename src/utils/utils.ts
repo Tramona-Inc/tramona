@@ -52,8 +52,8 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * formatCurrency(2000) => "$20.00"
  * ```
  */
-export function formatCurrency(cents: number) {
-  if (cents % 100 === 0) return `$${cents / 100}`;
+export function formatCurrency(cents: number, { round = false } = {}) {
+  if (cents % 100 === 0 || round) return `$${Math.round(cents / 100)}`;
   return `$${(cents / 100).toFixed(2)}`;
 }
 
@@ -112,6 +112,10 @@ function removeTimezoneFromDate(date: Date) {
 
 export function formatDateMonthDay(date: Date) {
   return formatDate(date, "MMMM d");
+}
+
+export function formatDateWeekMonthDay(date: Date) {
+  return formatDate(date, "EEE MMMM d");
 }
 
 // not used right now and probably will never have to:
@@ -185,8 +189,8 @@ export function getDiscountPercentage(
 
 // https://tailwindcss.com/docs/screens + tailwind.config.ts
 
-export const useScreenWidth = () => useWindowSize()?.width ?? 0;
-export const useIsDesktop = () => useScreenWidth() >= 640;
+export const useScreenWidth = () => useWindowSize().width ?? 0;
+export const useIsSm = () => useScreenWidth() >= 640;
 export const useIsMd = () => useScreenWidth() >= 768;
 export const useIsLg = () => useScreenWidth() >= 1024;
 
@@ -221,3 +225,28 @@ export function convertUTCDateToLocalDate(date: Date) {
 
   return newDate;
 }
+
+export function checkDuplicates(nums: number[]) {
+  const set = new Set();
+
+  for (const num of nums) {
+    if (set.has(num)) {
+      return true;
+    }
+
+    set.add(num);
+  }
+
+  return false;
+}
+
+export const generateTimeStamp = () => {
+  const date = new Date();
+  const milliseconds = Math.round(date.getMilliseconds() / 10); // Round to 2 decimal places
+  const formattedMilliseconds = milliseconds.toString().padStart(2, "0"); // Ensure 2 digits
+
+  const formattedTimestamp: string =
+    date.toISOString().slice(0, -5) + "." + formattedMilliseconds;
+
+  return formattedTimestamp;
+};

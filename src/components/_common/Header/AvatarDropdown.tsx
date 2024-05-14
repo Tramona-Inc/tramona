@@ -8,11 +8,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  LayoutDashboardIcon,
   LogOutIcon,
+  User2Icon,
   UserCheck2Icon,
   UserCheckIcon,
-  UserCogIcon,
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -23,7 +22,7 @@ import { useState } from "react";
 import CreateHostTeamDialog from "./CreateHostTeamDialog";
 import { usePathname } from "next/navigation";
 function DropdownTop({ session }: { session: Session }) {
-  const title = session.user.name ?? session.user.email ?? "Anonymous";
+  const title = session.user.name ?? session.user.email;
   const subtitle = session.user.name ? session.user.email : null;
 
   return (
@@ -54,7 +53,6 @@ export default function AvatarDropdown({ session }: { session: Session }) {
   const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
   const pathname = usePathname();
-  console.log(` this is the ${pathname}`);
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
   return (
@@ -82,7 +80,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuSeparator />
             </>
           )}
-          {session?.user.role === "host" && pathname === "/host" && (
+          {hostProfile && (
             <>
               <HostTeamsDropdownItems
                 hostProfile={hostProfile}
@@ -103,7 +101,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuItem asChild></DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/host/onboarding">
+                <Link href="/host-onboarding">
                   <UserCheck2Icon />
                   Become a Host
                 </Link>
@@ -112,8 +110,8 @@ export default function AvatarDropdown({ session }: { session: Session }) {
           )}
           <DropdownMenuItem asChild>
             <Link href="/profile">
-              <UserCogIcon />
-              Profile Settings
+              <User2Icon />
+              Profile
             </Link>
           </DropdownMenuItem>
           {/* <DropdownMenuItem asChild>

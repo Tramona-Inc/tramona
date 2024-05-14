@@ -34,6 +34,8 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
+import { CaretSortIcon } from "@radix-ui/react-icons";
+import { SelectIcon } from "@radix-ui/react-select";
 
 import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { getS3ImgUrl } from "@/utils/formatters";
@@ -44,7 +46,9 @@ import ErrorMsg from "../ui/ErrorMsg";
 const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
 // custom Zod validator for time
-const zodTime = z.string().regex(timeRegex, { message: "Invalid time format. Time must be in HH:MM format." });
+const zodTime = z.string().regex(timeRegex, {
+  message: "Invalid time format. Time must be in HH:MM format.",
+});
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -65,8 +69,8 @@ const formSchema = z.object({
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
   checkInInfo: optional(zodString()),
-  checkInTime: optional(zodTime), 
-  checkOutTime: optional(zodTime), 
+  checkInTime: optional(zodTime),
+  checkOutTime: optional(zodTime),
   imageUrls: z.object({ value: zodUrl() }).array(),
   // mapScreenshot: optional(zodString()),
 });
@@ -125,7 +129,7 @@ export default function AdminOfferForm({
               ? offer.property.originalNightlyPrice / 100
               : 0,
             checkInInfo: offer.property.checkInInfo ?? undefined,
-            checkInTime: offer.property.checkInTime ?? undefined, 
+            checkInTime: offer.property.checkInTime ?? undefined,
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
           }
@@ -198,6 +202,7 @@ export default function AdminOfferForm({
         updatePropertiesMutation.mutateAsync({
           ...newProperty,
           id: offer.property.id,
+          isPrivate: true,
         }),
         updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
       ]);
@@ -360,6 +365,9 @@ export default function AdminOfferForm({
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a property type" />
+                    <SelectIcon>
+                      <CaretSortIcon className="h-4 w-4 opacity-50" />
+                    </SelectIcon>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -554,7 +562,7 @@ export default function AdminOfferForm({
             <FormItem className="col-span-full">
               <FormLabel>Check In Time (optional)</FormLabel>
               <FormControl>
-                <Input {...field}  />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -567,7 +575,7 @@ export default function AdminOfferForm({
             <FormItem className="col-span-full">
               <FormLabel>Check Out Time (optional)</FormLabel>
               <FormControl>
-                <Input {...field}  />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

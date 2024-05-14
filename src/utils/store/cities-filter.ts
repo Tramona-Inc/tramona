@@ -1,9 +1,40 @@
+import { cities } from "@/components/landing-page/CitiesFilter";
+import { type ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema/tables/properties";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+type RoomType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
+
+export type CitiesLatLong = {
+  id: string;
+  label: string;
+  long: number;
+  lat: number;
+};
+
 type CitiesFilterState = {
-  filter: string;
-  setFilter: (filter: string) => void;
+  open: boolean;
+  filter: CitiesLatLong | undefined;
+  roomType: RoomType | undefined;
+  setFilter: (filter: CitiesLatLong) => void;
+  setRoomType: (roomType: RoomType | undefined) => void;
+  beds: number;
+  bedrooms: number;
+  bathrooms: number;
+  setBeds: (beds: number) => void;
+  setBedrooms: (bedrooms: number) => void;
+  setBathrooms: (bathrooms: number) => void;
+  houseRules: string[];
+  setHouseRules: (houseRules: string[]) => void;
+  setOpen: (open: boolean) => void;
+  guests: number;
+  setGuests: (guests: number) => void;
+  maxNightlyPrice: number | undefined;
+  setMaxNightlyPrice: (maxNightlyPrice: number | undefined) => void;
+  checkIn: Date | undefined;
+  setCheckIn: (checkIn: Date | undefined) => void;
+  checkOut: Date | undefined;
+  setCheckOut: (checkOut: Date | undefined) => void;
 };
 
 // export const useBidding = create<BiddingState>((set) => ({
@@ -27,10 +58,28 @@ type CitiesFilterState = {
 export const useCitiesFilter = create<CitiesFilterState>()(
   persist(
     (set) => ({
-      filter: "All",
-      setFilter: (filter: string) => {
-        set(() => ({ filter }));
-      },
+      open: false,
+      filter: undefined,
+      roomType: undefined,
+      beds: 0,
+      bedrooms: 0,
+      bathrooms: 0,
+      guests: 0,
+      houseRules: [],
+      maxNightlyPrice: 0,
+      checkIn: undefined,
+      checkOut: undefined,
+      setFilter: (filter) => set(() => ({ filter })),
+      setRoomType: (roomType) => set(() => ({ roomType })),
+      setBeds: (beds) => set(() => ({ beds })),
+      setBedrooms: (bedrooms) => set(() => ({ bedrooms })),
+      setBathrooms: (bathrooms) => set(() => ({ bathrooms })),
+      setHouseRules: (houseRules) => set(() => ({ houseRules })),
+      setOpen: (open) => set(() => ({ open })),
+      setGuests: (guests) => set(() => ({ guests })),
+      setMaxNightlyPrice: (maxNightlyPrice) => set(() => ({ maxNightlyPrice })),
+      setCheckIn: (checkIn) => set(() => ({ checkIn })),
+      setCheckOut: (checkOut) => set(() => ({ checkOut })),
     }),
     {
       name: "cities-filter",

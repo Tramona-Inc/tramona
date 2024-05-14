@@ -1,22 +1,39 @@
 import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
+  bucketListProperties,
   hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
   users,
 } from "@/server/db/schema";
+import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
-import { withCursorPagination } from "drizzle-pagination";
+import {
+  and,
+  asc,
+  eq,
+  exists,
+  gt,
+  gte,
+  lte,
+  notExists,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
-import { bookedDates, properties } from "./../../db/schema/tables/properties";
+import {
+  ALL_PROPERTY_ROOM_TYPES,
+  bookedDates,
+  properties,
+} from "./../../db/schema/tables/properties";
+import { db } from "@/server/db";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -24,6 +41,14 @@ export const propertiesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "admin" && !input.hostName) {
         throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      if ((!input.latitude || !input.longitude) && input.address) {
+        const coords = await getCoordinates(input.address);
+        if (coords) {
+          input.latitude = coords.lat;
+          input.longitude = coords.lng;
+        }
       }
 
       return await ctx.db
@@ -112,39 +137,136 @@ export const propertiesRouter = createTRPCRouter({
     });
   }),
 
-  getAllInfiniteScroll: publicProcedure
+  getAllInfiniteScroll: optionallyAuthedProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(100).nullish(),
-        cursor: z.string().nullish(), // <-- "cursor" needs to exist, but can be any type
+        cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
+        city: z.string().optional(),
+        roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
+        beds: z.number().optional(),
+        bedrooms: z.number().optional(),
+        bathrooms: z.number().optional(),
+        houseRules: z.array(z.string()).optional(),
+        guests: z.number().optional(),
+        maxNightlyPrice: z.number().optional(),
+        lat: z.number().optional(),
+        long: z.number().optional(),
+        radius: z.number().optional(),
+        checkIn: z.date().optional(),
+        checkOut: z.date().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 11;
       const { cursor } = input;
 
-      const data = await ctx.db.query.properties.findMany(
-        withCursorPagination({
-          limit: limit + 1,
-          cursors: [[properties.name, "desc", cursor ? cursor : undefined]],
-        }),
-      );
+      const lat = input.lat ?? 0;
+      const long = input.long ?? 0;
+      const radius = input.radius;
+
+      const data = await ctx.db
+        .select({
+          id: properties.id,
+          imageUrls: properties.imageUrls,
+          name: properties.name,
+          maxNumGuests: properties.maxNumGuests,
+          numBedrooms: properties.numBedrooms,
+          numBathrooms: properties.numBathrooms,
+          numBeds: properties.numBeds,
+          originalNightlyPrice: properties.originalNightlyPrice,
+          isOnBucketList: ctx.user
+            ? exists(
+                ctx.db
+                  .select()
+                  .from(bucketListProperties)
+                  .where(
+                    and(
+                      eq(bucketListProperties.propertyId, properties.id),
+                      eq(bucketListProperties.userId, ctx.user.id),
+                    ),
+                  ),
+              )
+            : sql`FALSE`,
+          distance: sql`
+            6371 * ACOS(
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+            ) AS distance`,
+        })
+        .from(properties)
+        .where(
+          and(
+            cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
+            input.lat && input.long
+              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
+              : sql`TRUE`,
+            input.roomType
+              ? eq(properties.roomType, input.roomType)
+              : sql`TRUE`,
+            input.city && input.city !== "all"
+              ? eq(properties.address, input.city)
+              : sql`TRUE`,
+            input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`,
+            input.bedrooms
+              ? gte(properties.numBedrooms, input.bedrooms)
+              : sql`TRUE`,
+            input.bathrooms
+              ? gte(properties.numBathrooms, input.bathrooms)
+              : sql`TRUE`,
+            input.guests
+              ? gte(properties.maxNumGuests, input.guests)
+              : sql`TRUE`,
+            input.maxNightlyPrice
+              ? lte(properties.originalNightlyPrice, input.maxNightlyPrice)
+              : sql`TRUE`,
+            input.checkIn && input.checkOut
+              ? notExists(
+                  db
+                    .select()
+                    .from(bookedDates)
+                    .where(
+                      and(
+                        eq(bookedDates.propertyId, properties.id),
+                        gte(bookedDates.date, input.checkIn),
+                        lte(bookedDates.date, input.checkOut),
+                      ),
+                    ),
+                )
+              : sql`TRUE`,
+            input.houseRules?.includes("pets allowed")
+              ? eq(properties.petsAllowed, true)
+              : sql`TRUE`,
+            input.houseRules?.includes("smoking allowed")
+              ? eq(properties.smokingAllowed, true)
+              : sql`TRUE`,
+            eq(properties.isPrivate, false),
+          ),
+        )
+        .limit(12)
+        .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
         data,
-        nextCursor: data.length
-          ? data[data.length - 1]?.createdAt.toISOString()
-          : null,
+        nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
       };
     }),
+  // getCities: publicProcedure.query(async ({ ctx }) => {
+  //   const lat = 34.1010307;
+  //   const long = -118.3806008;
+  //   const radius = 10; // 100km.
 
-  hostInsertProperty: roleRestrictedProcedure(["host"])
-    .input(hostPropertyFormSchema)
-    .mutation(async ({ ctx }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-    }),
+  //   const data = await ctx.db
+  //     .select({
+  //       id: properties.id,
+  //       distance: sql`
+  //       6371 * ACOS(
+  //           SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+  //       ) AS distance`,
+  //     })
+  //     .from(properties)
+  //     .orderBy(sql`distance`)
+  //     .where(
+  //       sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
+  //     );
+  // }),
   getHostProperties: roleRestrictedProcedure(["host"])
     .input(z.object({ limit: z.number().optional() }).optional())
     .query(async ({ ctx, input }) => {
@@ -188,10 +310,6 @@ export const propertiesRouter = createTRPCRouter({
   hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-
       return await ctx.db.insert(properties).values({
         ...input,
         hostId: ctx.user.id,

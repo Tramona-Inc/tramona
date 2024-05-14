@@ -1,4 +1,3 @@
-import { BookingConfirmationEmail } from "@/components/email-templates/BookingConfirmationEmail";
 import { env } from "@/env";
 import {
   createConversationWithAdmin,
@@ -14,14 +13,10 @@ import {
   requests,
   users,
 } from "@/server/db/schema";
-import { sendEmail } from "@/server/server-utils";
 import { api } from "@/utils/api";
-import { getNumNights, getTramonaFeeTotal } from "@/utils/utils";
-import { formatDate } from "date-fns";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { version } from "os";
 
 // ! Necessary for stripe
 export const config = {
@@ -59,140 +54,157 @@ export default async function webhook(
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
-        await db
-          .update(offers)
-          .set({
-            acceptedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
-            paymentIntentId: paymentIntentSucceeded.id,
-          })
-          .where(
-            eq(
-              offers.id,
-              parseInt(paymentIntentSucceeded.metadata.listing_id!),
-            ),
-          );
 
-        await db
-          .update(requests)
-          .set({
-            resolvedAt: new Date(paymentIntentSucceeded.metadata.confirmed_at!),
-          })
-          .where(
-            eq(
-              requests.id,
-              parseInt(paymentIntentSucceeded.metadata.request_id!),
-            ),
-          );
+        if (!paymentIntentSucceeded.metadata.bid_id) {
+          const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
 
-        const user = await db.query.users.findFirst({
-          where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
-        });
+          // Check if confirmed_at exists and is a valid date string
+          if (confirmedAt && Date.parse(confirmedAt)) {
+            const confirmedDate = new Date(confirmedAt);
 
-        const propertyID = parseInt(
-          paymentIntentSucceeded.metadata.property_id!,
-          10,
-        );
-        const property = await db.query.properties.findFirst({
-          where: eq(properties.id, propertyID),
-        });
-        const requestID = parseInt(paymentIntentSucceeded.metadata.request_id!);
-        const request = await db.query.requests.findFirst({
-          where: eq(requests.id, requestID),
-        });
-        const offer = await db.query.offers.findFirst({
-          where: eq(offers.requestId, requestID),
-        });
+            await db
+              .update(offers)
+              .set({
+                acceptedAt: confirmedDate,
+                paymentIntentId: paymentIntentSucceeded.id,
+              })
+              .where(
+                eq(
+                  offers.id,
+                  parseInt(paymentIntentSucceeded.metadata.listing_id!),
+                ),
+              );
 
-        //send BookingConfirmationEmail
-        //Send user confirmation email
-        //getting num of nights
-        const checkInDate = request?.checkIn ?? new Date(); // Use current date as default
-        const checkOutDate = request?.checkOut ?? new Date(); // Use current date as default
-        const numOfNights = getNumNights(checkInDate, checkOutDate);
-        const originalPrice = property?.originalNightlyPrice ?? 0 * numOfNights;
-        const savings =
-          (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
-        const tramonaServiceFee = getTramonaFeeTotal(savings);
-        const offerIdString = await sendEmail({
-          to: user!.email,
-          subject: `Tramona Booking Confirmation ${property?.name}`,
-          content: BookingConfirmationEmail({
-            userName: user?.name ?? "",
-            placeName: property?.name ?? "",
-            hostName: property?.hostName ?? "",
-            hostImageUrl: "https://via.placeholder.com/150",
-            startDate: formatDate(request!.checkIn, "MM/dd/yyyy") ?? "",
-            endDate: formatDate(request!.checkOut, "MM/dd/yyyy") ?? "",
-            address: property!.address ?? "",
-            propertyImageLink: property!.imageUrls?.[0] ?? "",
-            tripDetailLink: `https://www.tramona.com/offers/${offers.id.name}`,
-            originalPrice: originalPrice,
-            tramonaPrice: offer?.totalPrice ?? 0,
-            offerLink: `https://www.tramona.com/offers/${offer?.id.toString()}`,
-            numOfNights: numOfNights,
-            tramonaServiceFee: tramonaServiceFee ?? 0,
-          }),
-        });
-        const twilioMutation = api.twilio.sendSMS.useMutation();
-        const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+            await db
+              .update(requests)
+              .set({
+                resolvedAt: confirmedDate,
+              })
+              .where(
+                eq(
+                  requests.id,
+                  parseInt(paymentIntentSucceeded.metadata.request_id!),
+                ),
+              );
+          } else {
+            // Handle case where confirmed_at is missing or invalid
+            console.error("Confirmed_at is missing or invalid.");
+          }
 
-        if (user?.isWhatsApp) {
-          await twilioWhatsAppMutation.mutateAsync({
-            templateId: "HXb0989d91e9e67396e9a508519e19a46c",
-            to: paymentIntentSucceeded.metadata.phoneNumber!,
+          const user = await db.query.users.findFirst({
+            where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
           });
-        } else {
-          await twilioMutation.mutateAsync({
-            to: paymentIntentSucceeded.metadata.phoneNumber!,
-            msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
-          });
-        }
 
-        // console.log("PaymentIntent was successful!");
-
-        const referralCode = user?.referralCodeUsed;
-
-        if (referralCode) {
-          const offerId = parseInt(paymentIntentSucceeded.metadata.listing_id!);
-          const refereeId = paymentIntentSucceeded.metadata.user_id!;
-
-          const tramonaFee =
-            parseInt(paymentIntentSucceeded.metadata.total_savings!) * 0.2;
-          const cashbackMultiplier =
-            user.referralTier === "Ambassador" ? 0.5 : 0.3;
-          const cashbackEarned = tramonaFee * cashbackMultiplier;
-
-          await db
-            .insert(referralEarnings)
-            .values({ offerId, cashbackEarned, refereeId, referralCode });
-
-          await db
-            .update(referralCodes)
-            .set({
-              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${cashbackEarned}`,
-              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
-            })
-            .where(eq(referralCodes.referralCode, referralCode));
-        }
-
-        // TODO
-        // Add two two users to conversation
-        // void addTwoUserToConversation(
-        //   paymentIntentSucceeded.metadata.user_id!,
-        //   paymentIntentSucceeded.metadata.host_id!,
-        // );
-
-        // ! For now will add user to admin
-        if (paymentIntentSucceeded.metadata.user_id) {
-          const conversationId = await fetchConversationWithAdmin(
-            paymentIntentSucceeded.metadata.user_id,
+          const propertyID = parseInt(
+            paymentIntentSucceeded.metadata.property_id!,
+            10,
           );
+          const property = await db.query.properties.findFirst({
+            where: eq(properties.id, propertyID),
+          });
+          const requestID = parseInt(
+            paymentIntentSucceeded.metadata.request_id!,
+          );
+          const request = await db.query.requests.findFirst({
+            where: eq(requests.id, requestID),
+          });
+          const offer = await db.query.offers.findFirst({
+            where: eq(offers.requestId, requestID),
+          });
 
-          // Create conversation with admin if it doesn't exist
-          if (!conversationId) {
-            await createConversationWithAdmin(
+          //send BookingConfirmationEmail
+          //Send user confirmation email
+          //getting num of nights
+          // const checkInDate = request?.checkIn ?? new Date(); // Use current date as default
+          // const checkOutDate = request?.checkOut ?? new Date(); // Use current date as default
+          // const numOfNights = getNumNights(checkInDate, checkOutDate);
+          // const originalPrice = property?.originalNightlyPrice ?? 0 * numOfNights;
+          // const savings =
+          //   (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
+          // const tramonaServiceFee = getTramonaFeeTotal(savings);
+          // const offerIdString = await sendEmail({
+          //   to: user!.email,
+          //   subject: `Tramona Booking Confirmation ${property?.name}`,
+          //   content: BookingConfirmationEmail({
+          //     userName: user?.name ?? "",
+          //     placeName: property?.name ?? "",
+          //     hostName: property?.hostName ?? "",
+          //     hostImageUrl: "https://via.placeholder.com/150",
+          //     startDate: formatDate(request!.checkIn, "MM/dd/yyyy") ?? "",
+          //     endDate: formatDate(request!.checkOut, "MM/dd/yyyy") ?? "",
+          //     address: property!.address ?? "",
+          //     propertyImageLink: property!.imageUrls?.[0] ?? "",
+          //     tripDetailLink: `https://www.tramona.com/offers/${offers.id.name}`,
+          //     originalPrice: originalPrice,
+          //     tramonaPrice: offer?.totalPrice ?? 0,
+          //     offerLink: `https://www.tramona.com/offers/${offer?.id.toString()}`,
+          //     numOfNights: numOfNights,
+          //     tramonaServiceFee: tramonaServiceFee ?? 0,
+          //   }),
+          // });
+          const twilioMutation = api.twilio.sendSMS.useMutation();
+          const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+
+          if (user?.isWhatsApp) {
+            await twilioWhatsAppMutation.mutateAsync({
+              templateId: "HXb0989d91e9e67396e9a508519e19a46c",
+              to: paymentIntentSucceeded.metadata.phoneNumber!,
+            });
+          } else {
+            await twilioMutation.mutateAsync({
+              to: paymentIntentSucceeded.metadata.phoneNumber!,
+              msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
+            });
+          }
+
+          // console.log("PaymentIntent was successful!");
+
+          const referralCode = user?.referralCodeUsed;
+
+          if (referralCode) {
+            const offerId = parseInt(
+              paymentIntentSucceeded.metadata.listing_id!,
+            );
+            const refereeId = paymentIntentSucceeded.metadata.user_id!;
+
+            const tramonaFee =
+              parseInt(paymentIntentSucceeded.metadata.total_savings!) * 0.2;
+            const cashbackMultiplier =
+              user.referralTier === "Ambassador" ? 0.5 : 0.3;
+            const cashbackEarned = tramonaFee * cashbackMultiplier;
+
+            await db
+              .insert(referralEarnings)
+              .values({ offerId, cashbackEarned, refereeId, referralCode });
+
+            await db
+              .update(referralCodes)
+              .set({
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${cashbackEarned}`,
+                numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
+              })
+              .where(eq(referralCodes.referralCode, referralCode));
+          }
+
+          // TODO
+          // Add two two users to conversation
+          // void addTwoUserToConversation(
+          //   paymentIntentSucceeded.metadata.user_id!,
+          //   paymentIntentSucceeded.metadata.host_id!,
+          // );
+
+          // ! For now will add user to admin
+          if (paymentIntentSucceeded.metadata.user_id) {
+            const conversationId = await fetchConversationWithAdmin(
               paymentIntentSucceeded.metadata.user_id,
             );
+
+            // Create conversation with admin if it doesn't exist
+            if (!conversationId) {
+              await createConversationWithAdmin(
+                paymentIntentSucceeded.metadata.user_id,
+              );
+            }
           }
         }
 
@@ -200,27 +212,6 @@ export default async function webhook(
 
       case "checkout.session.completed":
         const checkoutSessionCompleted = event.data.object;
-
-        if (checkoutSessionCompleted.metadata?.user_id) {
-          // * Insert Stripe Customer Id after session is completed
-          const stripeCustomerId = await db.query.users
-            .findFirst({
-              columns: {
-                stripeCustomerId: true,
-              },
-              where: eq(users.id, checkoutSessionCompleted.metadata.user_id),
-            })
-            .then((res) => res?.stripeCustomerId);
-
-          if (!stripeCustomerId) {
-            await db
-              .update(users)
-              .set({
-                stripeCustomerId: checkoutSessionCompleted.customer as string,
-              })
-              .where(eq(users.id, checkoutSessionCompleted.metadata.user_id));
-          }
-        }
 
         // * Make sure to check listing_id isnt' null
         if (
@@ -283,13 +274,13 @@ export default async function webhook(
           console.log("is now verified");
           //adding the users.DOB to the db
           if (verificationSession.last_verification_report) {
-
             //verification report has all of the data on the user such DOB/Adress and documents
 
-           
-            const verificationReportId = JSON.parse(JSON.stringify(verificationSession.last_verification_report)) as string;
-              console.log("This is last verification report id");
-              console.log(verificationReportId)
+            const verificationReportId = JSON.parse(
+              JSON.stringify(verificationSession.last_verification_report),
+            ) as string;
+            console.log("This is last verification report id");
+            console.log(verificationReportId);
             const verificationReport =
               await stripe.identity.verificationReports.retrieve(
                 verificationReportId,

@@ -43,7 +43,7 @@ function MessageDisplay() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <div className="grid h-full min-h-screen-minus-header grid-cols-1 max-lg:border-x md:grid-cols-8">
+    <div className="grid h-full grid-cols-1 max-lg:border-x md:grid-cols-8">
       <MessagesSidebar
         selectedConversation={selectedConversation}
         setSelected={selectConversation}

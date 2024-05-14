@@ -16,7 +16,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
-import { useStripe } from "./HowToBookDialog";
+import { useStripe } from '@/utils/stripe-client';
 
 export default function AirbnbBookDialog(
   props: React.PropsWithChildren<{

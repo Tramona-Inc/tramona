@@ -7,8 +7,6 @@ import { Dialog, DialogContent, DialogTrigger } from "./dialog";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
-
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
@@ -32,6 +30,21 @@ const contentClassNames = cn(
   "z-50 min-w-52 overflow-hidden rounded-md border bg-popover py-2 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
 );
 
+const DropdownMenuTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      // "data-[state=open]:bg-accent",
+      className,
+    )}
+    {...props}
+  />
+));
+DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName;
+
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger>
@@ -47,6 +60,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
 ));
 DropdownMenuSubTrigger.displayName =
   DropdownMenuPrimitive.SubTrigger.displayName;
+
 const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
@@ -54,6 +68,7 @@ const DropdownMenuSubContent = React.forwardRef<
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(contentClassNames, className)}
+    collisionPadding={8}
     {...props}
   />
 ));
@@ -70,6 +85,7 @@ const DropdownMenuContent = React.forwardRef<
       sideOffset={sideOffset}
       className={cn(contentClassNames, className)}
       onCloseAutoFocus={(e) => e.preventDefault()}
+      collisionPadding={8}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>

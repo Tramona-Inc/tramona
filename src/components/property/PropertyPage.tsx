@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useState } from "react";
 //import { GoogleMap, Circle } from "@react-google-maps/api";
 import {
@@ -11,9 +11,9 @@ import {
 import { type Property } from "@/server/db/schema";
 import { api, type RouterOutputs } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
-import { StarFilledIcon } from "@radix-ui/react-icons";
 import "leaflet/dist/leaflet.css";
 import {
+  ArrowLeftIcon,
   ArrowLeftToLineIcon,
   ArrowRightToLineIcon,
   ChevronRight,
@@ -26,8 +26,9 @@ import Link from "next/link";
 import { useMediaQuery } from "../_utils/useMediaQuery";
 import OfferPhotos from "../offers/OfferPhotos";
 import { AspectRatio } from "../ui/aspect-ratio";
-import { Badge } from "../ui/badge";
 import BiddingForm from "./BiddingForm";
+import PropertyAmenities from "../offers/PropertyAmenities";
+import AmenitiesComponent from "../offers/CategorizedAmenities";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((module) => module.MapContainer),
@@ -51,7 +52,7 @@ const Circle = dynamic(
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export default function PropertyPage({ property }: { property: Property }) {
-  let isBooked = false;
+  const isBooked = false;
 
   // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
   //   location: property.address!,
@@ -64,23 +65,24 @@ export default function PropertyPage({ property }: { property: Property }) {
 
   const isMobile = useMediaQuery("(max-width: 640px)");
 
-  const isAirbnb =
-    property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
-
-  // const lisa = false; // temporary until we add payments
-  const hostName = property.hostName;
+  // const isAirbnb =
+  //   property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
 
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
   const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
-  const firstImageUrl: string = property.imageUrls?.[0] ?? "";
+  const firstImageUrl = property.imageUrls[0]!;
+
   return (
     <div className="space-y-4">
       <Link
         href={isBooked ? "/requests" : `/`}
-        className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "icon" }),
+          "rounded-full",
+        )}
       >
-        &larr; Back to Home Page
+        <ArrowLeftIcon />
       </Link>
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-2">
@@ -88,7 +90,7 @@ export default function PropertyPage({ property }: { property: Property }) {
             {property.name}
           </h1>
           <div className="text-sm font-medium">
-            <span>{plural(property.maxNumGuests, "Guest")}</span>
+            <span>{plural(property.maxNumGuests, "guest")}</span>
             <span className="mx-2">·</span>
             <span>{plural(property.numBedrooms, "bedroom")}</span>
             <span className="mx-2">·</span>
@@ -239,89 +241,93 @@ export default function PropertyPage({ property }: { property: Property }) {
       <hr className="h-px border-0 bg-gray-300" />
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
-          <h1 className="items-center text-lg font-semibold sm:text-3xl">
-            {property.name}{" "}
-          </h1>
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-1">
-              {property.numRatings > 0 && (
-                <Badge variant="secondary" icon={<StarFilledIcon />}>
-                  {property.avgRating} ({property.numRatings})
-                </Badge>
-              )}
-              <Badge variant="secondary">
-                {plural(property.numBedrooms, "bedroom")}
-              </Badge>
-              <Badge variant="secondary">
-                {plural(property.numBeds, "bed")}
-              </Badge>
-              {property.numBathrooms && (
-                <Badge variant="secondary">
-                  {plural(property.numBathrooms, "bathroom")}
-                </Badge>
-              )}
-              <Badge variant="secondary">{property.roomType}</Badge>
-            </div>
-            <div className="flex flex-wrap items-center gap-1">
-              {property.amenities?.map((amenity) => (
-                <Badge variant="secondary" key={amenity}>
-                  {amenity}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <section>
+          {/* <section>
             <div className="flex items-center gap-2">
-              {/* <UserAvatar
+              <UserAvatar
                 name={hostName}
                 email={property.host?.email}
                 image={property.host?.image}
-              /> */}
+              />
               <div className="-space-y-1.5">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
                 <p className="text-lg font-medium">{hostName}</p>
               </div>
             </div>
-          </section>
-          <section>
-            <div className="z-20 max-w-2xl rounded-lg bg-zinc-200 px-4 py-2 text-zinc-700">
-              <div className="line-clamp-3 break-words">{property.about}</div>
-              <div className="flex justify-end">
+          </section> */}
+
+          <section id="overview" className="scroll-mt-36">
+            <h2 className="text-lg font-semibold md:text-xl">
+              About this property
+            </h2>
+            <div className="z-20 max-w-2xl py-2 text-zinc-700">
+              <div className="line-clamp-5 break-words">{property.about}</div>
+              <div className="flex justify-start py-2">
                 <Dialog>
                   <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
                     Show more
                     <ChevronRight className="ml-2" />
                   </DialogTrigger>
 
-                  <DialogContent className="max-w-3xl p-8">
+                  <DialogContent className="max-h-[80vh] max-w-3xl overflow-auto p-8">
                     <DialogHeader>
                       <DialogTitle>About this property</DialogTitle>
                     </DialogHeader>
-                    <p className="whitespace-break-spaces break-words text-base">
+                    <div className="space-y-4 whitespace-pre-wrap break-words text-base">
                       {property.about}
-                    </p>
+                    </div>
                   </DialogContent>
                 </Dialog>
               </div>
             </div>
           </section>
+          <hr className="h-px border-0 bg-gray-300" />
+          <section id="amenities" className="scroll-mt-36">
+            <h2 className="text-lg font-semibold md:text-xl">Amenitites</h2>
+            <PropertyAmenities amenities={property.amenities ?? []} />
+            {property.amenities && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Show all amenities
+                  </Button>
+                </DialogTrigger>
+
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle className="">Amenities</DialogTitle>
+                  </DialogHeader>
+                  <div className="max-h-96 overflow-y-scroll">
+                    <AmenitiesComponent
+                      propertyAmenities={property.amenities}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </section>
         </div>
         <div className="flex-1">
-          <BiddingForm price={property.originalNightlyPrice ?? 0} />
+          <BiddingForm
+            propertyId={property.id}
+            price={property.originalNightlyPrice ?? 0}
+          />
         </div>
       </div>
       <hr className="h-px border-0 bg-gray-300" />
       <section id="location" className="scroll-mt-36 space-y-1">
-        <h1 className="text-lg font-semibold md:text-xl">Location</h1>
-        <div className="inline-flex items-center justify-center py-2 text-base">
-          <MapPin className="mr-2" />
-          {addressData?.city}, {addressData?.state}
-        </div>
-        {property.latitude && property.latitude && (
+        <h3 className="text-lg font-semibold md:text-xl">Location</h3>
+        {addressData && (
+          <div className="inline-flex items-center justify-center py-2 text-base">
+            <MapPin className="mr-2" />
+            <p>
+              {addressData.city}, {addressData.state}
+            </p>
+          </div>
+        )}
+        {property.latitude && property.longitude && (
           <div className="relative z-10">
             <MapContainer
-              center={[property.latitude, property.longitude ?? 0]}
+              center={[property.latitude, property.longitude]}
               zoom={15}
               scrollWheelZoom={false}
               style={{ height: "500px" }}
@@ -331,7 +337,7 @@ export default function PropertyPage({ property }: { property: Property }) {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <Circle
-                center={[property.latitude, property.longitude ?? 0]}
+                center={[property.latitude, property.longitude]}
                 radius={200} // Adjust radius as needed
                 pathOptions={{ color: "black" }} // Customize circle color and other options
               />
@@ -343,7 +349,7 @@ export default function PropertyPage({ property }: { property: Property }) {
         <div>
           <hr className="h-px border-0 bg-gray-300" />
           <section id="house-rules" className="mt-4 scroll-mt-36">
-            <h1 className="text-lg font-bold">House rules</h1>
+            <h2 className="text-lg font-bold">House rules</h2>
             {property.checkInTime && property.checkOutTime && (
               <div className="my-2 flex items-center justify-start gap-16">
                 <div className="flex items-center">
@@ -364,7 +370,7 @@ export default function PropertyPage({ property }: { property: Property }) {
             )}
             {property.checkInInfo && (
               <div className="pt-6">
-                <h1 className="text-md font-bold">Additional information</h1>
+                <h2 className="text-md font-bold">Additional information</h2>
                 <p>{property.checkInInfo}</p>
               </div>
             )}
