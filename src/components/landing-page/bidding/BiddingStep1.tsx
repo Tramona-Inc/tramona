@@ -27,8 +27,8 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-function BiddingStep1({ property }: { property: Property }) {
-  const setStep = useBidding((state) => state.setStep);
+function BiddingStep1({ property, setStep }: { property: Property, setStep: (step: number) => void }) {
+  // const setStep = useBidding((state) => state.setStep);
 
   const setPrice = useBidding((state) => state.setPrice);
   const currentPrice = useBidding((state) => state.price);
