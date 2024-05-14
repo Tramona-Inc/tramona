@@ -5,32 +5,15 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { StripeError } from "@stripe/stripe-js";
-import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import { type StripeError } from "@stripe/stripe-js";
+import { useState } from "react";
 
-type Bid = {
-  propertyId: number;
-  numGuests: number;
-  amount: number;
-  checkIn: Date;
-  checkOut: Date;
-};
-
-export default function BidPaymentForm({
-  bid,
-  setStep,
-}: {
-  bid: Bid;
-  setStep: (step: number) => void;
-}) {
+export default function PaymentTestForm() {
   const stripe = useStripe();
   const elements = useElements();
 
   const [errorMessage, setErrorMessage] = useState<String | undefined>();
   const [loading, setLoading] = useState(false);
-
-  const { update } = useSession();
 
   const { mutateAsync: confirmSetupIntentMutation } =
     api.stripe.confirmSetupIntent.useMutation();
@@ -38,19 +21,15 @@ export default function BidPaymentForm({
   const { mutateAsync: createSetupIntentMutation } =
     api.stripe.createSetupIntent.useMutation();
 
-  const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
-    onSuccess: () => {
-      console.log("hit");
-      setStep(2);
-    },
-  });
+  const { mutateAsync: createBiddingMutate } =
+    api.biddings.create.useMutation();
 
   const handleError = (error: StripeError) => {
     setLoading(false);
     setErrorMessage(error.message);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: { preventDefault: () => void }) => {
     // We don't want to let default form submission happen here,
     // which would refresh the page.
     event.preventDefault();
@@ -91,23 +70,26 @@ export default function BidPaymentForm({
       });
     }
 
-    await update();
+    console.log("reached");
 
-    // Create bidding after confirming setup intent.
-    void createBiddingMutate({
-      ...bid,
-      setupIntentId: setupIntent?.id,
-      paymentMethodId: paymentMethod.id,
-    });
+    if (error) {
+      // This point is only reached if there's an immediate error when
+      // confirming the payment. Show the error to your customer (for example, payment details incomplete)
+      handleError(error);
+    } else {
+      // Your customer is redirected to your `return_url`. For some payment
+      // methods like iDEAL, your customer is redirected to an intermediate
+      // site first to authorize the payment, then redirected to the `return_url`.
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit}>
       <PaymentElement />
       <Button type="submit" disabled={!stripe || loading}>
-        Save
+        Submit Payment
       </Button>
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
+      {errorMessage && <div>{errorMessage}</div>}
     </form>
   );
 }

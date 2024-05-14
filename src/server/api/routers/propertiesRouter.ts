@@ -158,7 +158,7 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 12;
+      const limit = input.limit ?? 5;
       const { cursor } = input;
 
       const lat = input.lat ?? 0;
