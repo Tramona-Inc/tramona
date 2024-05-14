@@ -85,13 +85,19 @@ function BiddingInfoCard({ property }: { property: Property }) {
   );
 }
 
-function BiddingStep2({ property }: { property: Property }) {
+function BiddingStep2({
+  property,
+  setStep,
+}: {
+  property: Property;
+  setStep: (step: number) => void;
+}) {
   const addPropertyIdBids = useBidding((state) => state.addPropertyIdBids);
 
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: () => {
       addPropertyIdBids(property.id);
-      setStep(step + 1);
+      setStep(2);
     },
     onError: (error) => {
       console.log("error", error.message);
@@ -111,8 +117,7 @@ function BiddingStep2({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
   const price = useBidding((state) => state.price);
   const guest = useBidding((state) => state.guest);
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
+  // const setStep = useBidding((state) => state.setStep);
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
   const totalPrice = totalNightlyPrice;
 
@@ -181,9 +186,11 @@ function BiddingStep2({ property }: { property: Property }) {
             </Button>
           </div>
         ) : (
-          <Elements stripe={stripePromise} options={options}>
-            <BidPaymentForm bid={bid} />
-          </Elements>
+          <>
+            <Elements stripe={stripePromise} options={options}>
+              <BidPaymentForm bid={bid} setStep={setStep} />
+            </Elements>
+          </>
         )}
       </div>
       <p>{error}</p>
