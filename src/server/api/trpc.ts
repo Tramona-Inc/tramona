@@ -135,6 +135,17 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   });
 });
 
+export const optionallyAuthedProcedure = t.procedure.use(({ ctx, next }) => {
+  return next({
+    ctx: {
+      // infers `session` as nullable
+      user: ctx.session?.user,
+      session: ctx.session,
+      db,
+    },
+  });
+});
+
 export const roleRestrictedProcedure = <
   TAllowedRoles extends readonly User["role"][],
 >(

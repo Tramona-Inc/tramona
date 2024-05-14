@@ -1,7 +1,19 @@
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { cn } from "@/utils/utils";
+import { SearchIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
-import MobileSearchBar from "../SearchBar/MobileSearchBar";
-import DesktopSearchBar from "../SearchBar/DesktopSearchBar";
+import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
+import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
+import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
+import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
 
 export default function MastHead() {
   return (
@@ -46,7 +58,7 @@ export function DesktopSearchLayout() {
   return (
     <Tabs
       defaultValue={"search"}
-      className="mx-auto max-w-6xl rounded-3xl bg-white px-8 pb-4 shadow-md"
+      className="mx-auto max-w-6xl rounded-2xl bg-white px-4 pb-4 shadow-md"
     >
       <TabsList noBorder className="flex items-center justify-center">
         <TabsTrigger
@@ -64,15 +76,48 @@ export function DesktopSearchLayout() {
       </TabsList>
       <div className="mb-5 mt-[-2px] w-full border-b-2 border-border" />
       <TabsContent value={"search"}>
-        <DesktopSearchBar mode="search" />
+        <DesktopSearchTab />
       </TabsContent>
       <TabsContent value={"request"}>
-        <DesktopSearchBar mode="request" />
+        <DesktopRequestDealTab />
       </TabsContent>
     </Tabs>
   );
 }
 
 export function MobileSearchLayout() {
-  return <MobileSearchBar />;
+  const [mode, setMode] = useState<"search" | "request">("search");
+
+  return (
+    <Sheet>
+      <SheetTrigger className="w-full">
+        <div className="z-40 flex flex-row gap-x-3 rounded-lg bg-white px-3 py-5 text-center font-semibold text-muted-foreground shadow-lg">
+          <SearchIcon />
+          Name your price or submit an offer
+        </div>
+      </SheetTrigger>
+      <SheetContent side="top" className="h-full">
+        <SheetHeader>
+          <div className="flex h-full w-full items-center justify-center gap-2 pb-5">
+            <Button
+              variant="link"
+              className={cn(mode === "search" && "underline")}
+              onClick={() => setMode("search")}
+            >
+              Search
+            </Button>
+            <Button
+              variant="link"
+              className={cn(mode === "request" && "underline")}
+              onClick={() => setMode("request")}
+            >
+              Request deal
+            </Button>
+          </div>
+        </SheetHeader>
+        {mode === "search" && <MobileSearchTab />}
+        {mode === "request" && <MobileRequestDealTab />}
+      </SheetContent>
+    </Sheet>
+  );
 }

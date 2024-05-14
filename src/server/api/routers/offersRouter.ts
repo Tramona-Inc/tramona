@@ -159,7 +159,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-  getCoordinates: protectedProcedure
+  getCoordinates: publicProcedure
     .input(z.object({ location: z.string() }))
     .query(async ({ input }) => {
       const coords = await getCoordinates(input.location);
@@ -168,7 +168,7 @@ export const offersRouter = createTRPCRouter({
       };
     }),
 
-  getCity: protectedProcedure
+  getCity: publicProcedure
     .input(
       z.object({
         latitude: z.number(),

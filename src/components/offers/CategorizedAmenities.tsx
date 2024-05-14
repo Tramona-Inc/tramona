@@ -13,7 +13,7 @@ import {
   BriefcaseIcon,
   CarIcon,
   BookHeartIcon,
-  StarIcon 
+  StarIcon,
 } from "lucide-react";
 
 // prettier-ignore
@@ -235,18 +235,21 @@ const AmenitiesComponent: React.FC<{ propertyAmenities: string[] }> = ({
       {Object.entries(categorizedAmenities).map(([category, amenities]) => {
         const categoryDetails = categories[
           category as keyof typeof categories
-        ] ?? { icon: BookHeartIcon }; 
+        ] ?? { icon: BookHeartIcon };
 
         return (
           amenities.length > 0 && (
             <div key={category} className="category-section">
-              <h3 className="inline-flex items-center justify-center py-2 text-black">
+              <h3 className="inline-flex items-center justify-center pb-4 pt-10 text-black">
                 {React.createElement(categoryDetails.icon)}
                 <p className="text-md ml-2 font-semibold">{category}</p>
               </h3>
               <div className="flex flex-col gap-2">
                 {amenities.map((amenity) => (
-                  <div key={amenity} className="flex items-center gap-2 border-b border-gray-300 pb-2">
+                  <div
+                    key={amenity}
+                    className="flex items-center gap-2 border-b border-gray-300 pb-2"
+                  >
                     <span>{amenity}</span>
                   </div>
                 ))}

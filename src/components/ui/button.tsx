@@ -16,7 +16,8 @@ const buttonVariants = cva(
         icon: "h-10 w-10",
       },
       variant: {
-        default: "bg-primary text-white hover:bg-primary/90",
+        default:
+          "bg-primary text-white hover:bg-primary/90 disabled:bg-zinc-400 disabled:text-secondary-foreground",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
