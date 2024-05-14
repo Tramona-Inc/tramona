@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
 import { useSearchBarForm } from "./useSearchBarForm";
 
 export function DesktopSearchTab() {
-  const form = useSearchBarForm();
+  const { form, onSubmit } = useSearchBarForm();
 
   return (
     <Form {...form}>
-      <form className="flex h-16 items-stretch gap-2">
+      <form onSubmit={onSubmit} className="flex h-16 items-stretch gap-2">
         <PlacesInput
           control={form.control}
           name="location"
@@ -73,6 +73,7 @@ export function DesktopSearchTab() {
                   {...field}
                   label="Maximum price"
                   placeholder="Price per night"
+                  suffix="/night"
                   icon={DollarSignIcon}
                   variant="lpDesktop"
                 />
@@ -84,6 +85,7 @@ export function DesktopSearchTab() {
         <Button
           type="submit"
           size="lg"
+          disabled={form.formState.isSubmitting}
           className="h-16 bg-teal-900 hover:bg-teal-950"
         >
           Search

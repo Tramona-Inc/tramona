@@ -16,13 +16,24 @@ import {
 } from "@/server/db/schema";
 import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, exists, gt, gte, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  exists,
+  gt,
+  gte,
+  lte,
+  notExists,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
   properties,
 } from "./../../db/schema/tables/properties";
+import { db } from "@/server/db";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -129,7 +140,6 @@ export const propertiesRouter = createTRPCRouter({
   getAllInfiniteScroll: optionallyAuthedProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(50).nullish(),
         cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
         city: z.string().optional(),
         roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
@@ -137,13 +147,16 @@ export const propertiesRouter = createTRPCRouter({
         bedrooms: z.number().optional(),
         bathrooms: z.number().optional(),
         houseRules: z.array(z.string()).optional(),
+        guests: z.number().optional(),
+        maxNightlyPrice: z.number().optional(),
         lat: z.number().optional(),
         long: z.number().optional(),
         radius: z.number().optional(),
+        checkIn: z.date().optional(),
+        checkOut: z.date().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 5;
       const { cursor } = input;
 
       const lat = input.lat ?? 0;
@@ -184,20 +197,40 @@ export const propertiesRouter = createTRPCRouter({
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
             input.lat && input.long
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
-              : sql`TRUE`, // Conditionally include eq function for address
+              : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
-              : sql`TRUE`, // Conditionally include place type condition
+              : sql`TRUE`,
             input.city && input.city !== "all"
               ? eq(properties.address, input.city)
-              : sql`TRUE`, // Conditionally include eq function for address
-            input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
+              : sql`TRUE`,
+            input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`,
             input.bedrooms
               ? gte(properties.numBedrooms, input.bedrooms)
-              : sql`TRUE`, // Conditionally include eq function
+              : sql`TRUE`,
             input.bathrooms
               ? gte(properties.numBathrooms, input.bathrooms)
-              : sql`TRUE`, // Conditionally include eq function
+              : sql`TRUE`,
+            input.guests
+              ? gte(properties.maxNumGuests, input.guests)
+              : sql`TRUE`,
+            input.maxNightlyPrice
+              ? lte(properties.originalNightlyPrice, input.maxNightlyPrice)
+              : sql`TRUE`,
+            input.checkIn && input.checkOut
+              ? notExists(
+                  db
+                    .select()
+                    .from(bookedDates)
+                    .where(
+                      and(
+                        eq(bookedDates.propertyId, properties.id),
+                        gte(bookedDates.date, input.checkIn),
+                        lte(bookedDates.date, input.checkOut),
+                      ),
+                    ),
+                )
+              : sql`TRUE`,
             input.houseRules?.includes("pets allowed")
               ? eq(properties.petsAllowed, true)
               : sql`TRUE`,
@@ -207,7 +240,7 @@ export const propertiesRouter = createTRPCRouter({
             eq(properties.isPrivate, false),
           ),
         )
-        .limit(limit)
+        .limit(12)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {

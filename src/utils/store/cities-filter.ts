@@ -14,7 +14,7 @@ export type CitiesLatLong = {
 
 type CitiesFilterState = {
   open: boolean;
-  filter: CitiesLatLong;
+  filter: CitiesLatLong | undefined;
   roomType: RoomType | undefined;
   setFilter: (filter: CitiesLatLong) => void;
   setRoomType: (roomType: RoomType | undefined) => void;
@@ -28,6 +28,14 @@ type CitiesFilterState = {
   setHouseRules: (houseRules: string[]) => void;
   setOpen: (open: boolean) => void;
   clearFilter: () => void;
+  guests: number;
+  setGuests: (guests: number) => void;
+  maxNightlyPrice: number | undefined;
+  setMaxNightlyPrice: (maxNightlyPrice: number | undefined) => void;
+  checkIn: Date | undefined;
+  setCheckIn: (checkIn: Date | undefined) => void;
+  checkOut: Date | undefined;
+  setCheckOut: (checkOut: Date | undefined) => void;
 };
 
 // export const useBidding = create<BiddingState>((set) => ({
@@ -52,11 +60,12 @@ export const useCitiesFilter = create<CitiesFilterState>()(
   persist(
     (set) => ({
       open: false,
-      filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
+      filter: undefined,
       roomType: undefined,
       beds: 0,
       bedrooms: 0,
       bathrooms: 0,
+      guests: 0,
       houseRules: [],
       setFilter: (filter: CitiesLatLong) => {
         set(() => ({ filter }));
@@ -90,6 +99,13 @@ export const useCitiesFilter = create<CitiesFilterState>()(
           houseRules: [],
         }));
       },
+      maxNightlyPrice: 0,
+      checkIn: undefined,
+      checkOut: undefined,
+      setGuests: (guests) => set(() => ({ guests })),
+      setMaxNightlyPrice: (maxNightlyPrice) => set(() => ({ maxNightlyPrice })),
+      setCheckIn: (checkIn) => set(() => ({ checkIn })),
+      setCheckOut: (checkOut) => set(() => ({ checkOut })),
     }),
     {
       name: "cities-filter",

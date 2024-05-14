@@ -1,29 +1,27 @@
 import { z } from "zod";
-import { optional, zodInteger, zodString } from "@/utils/zod-utils";
+import { optional, zodInteger, zodNumber, zodString } from "@/utils/zod-utils";
 import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from "@/server/db/schema";
 
 export const searchSchema = z.object({
-  location: zodString(),
-  date: z.object({
-    from: z.date(),
-    to: z.date(),
-  }),
-  numGuests: zodInteger({ min: 1 }),
-  maxNightlyPriceUSD: zodInteger({ min: 1 }),
-  roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER]).optional(),
-  minNumBedrooms: z.number().transform((n) => (n <= 1 ? undefined : n)),
-  minNumBeds: z.number().transform((n) => (n <= 1 ? undefined : n)),
-  minNumBathrooms: z.number().transform((n) => (n <= 1 ? undefined : n)),
+  location: optional(zodString()),
+  date: z.object({ from: z.date(), to: z.date() }).optional(),
+  numGuests: optional(zodInteger({ min: 1 })),
+  maxNightlyPriceUSD: optional(zodNumber({ min: 0 })),
 });
 
-export const defaultSearchOrReqValues: Partial<z.input<typeof searchSchema>> = {
-  minNumBathrooms: 1,
-  minNumBeds: 1,
-  minNumBedrooms: 1,
-};
+export const defaultSearchOrReqValues: Partial<z.input<typeof searchSchema>> =
+  {};
 
-const cityRequestSchema = searchSchema
-  .extend({
+const cityRequestSchema = z
+  .object({
+    location: zodString(),
+    date: z.object({ from: z.date(), to: z.date() }),
+    numGuests: zodInteger({ min: 1 }),
+    maxNightlyPriceUSD: zodNumber({ min: 0 }),
+    roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER]).optional(),
+    minNumBedrooms: z.number().transform((n) => (n <= 1 ? undefined : n)),
+    minNumBeds: z.number().transform((n) => (n <= 1 ? undefined : n)),
+    minNumBathrooms: z.number().transform((n) => (n <= 1 ? undefined : n)),
     note: optional(zodString()),
   })
   .refine(({ date }) => date.from < date.to, {

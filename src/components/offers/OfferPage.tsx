@@ -33,10 +33,7 @@ import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
-import {
-  ArrowLeftToLineIcon,
-  ArrowRightToLineIcon,
-} from "lucide-react";
+import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
 
@@ -95,7 +92,7 @@ export default function OfferPage({
   const firstImageUrl: string = property.imageUrls?.[0] ?? "";
   return (
     <div className="space-y-4">
-      <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background mt-4">
+      <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
         <Dialog>
           {isMobile ? (
             // Only render the first image on small screens
@@ -207,8 +204,6 @@ export default function OfferPage({
           </div>
         )}
       </div>
-
-
 
       <div className="flex justify-start space-x-4">
         <a
@@ -333,8 +328,12 @@ export default function OfferPage({
                   <div className="inline-flex w-full items-center justify-start rounded-full border border-gray-300 px-10 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
                     <CalendarDays />
                     <div className="ml-2">
-                      <p className="text-sm text-gray-600">Check in/ Check-out</p>
-                      <p className="text-base font-bold">{checkInDate} - {checkOutDate}</p>
+                      <p className="text-sm text-gray-600">
+                        Check in/ Check-out
+                      </p>
+                      <p className="text-base font-bold">
+                        {checkInDate} - {checkOutDate}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -397,7 +396,7 @@ export default function OfferPage({
                 checkIn={request.checkIn}
                 checkOut={request.checkOut}
                 requestId={request.id}
-                offer={{ property, ...offer }}
+                offer={{ property, request, ...offer }}
                 totalPrice={offer.totalPrice}
                 offerNightlyPrice={offerNightlyPrice}
                 isAirbnb={isAirbnb}
