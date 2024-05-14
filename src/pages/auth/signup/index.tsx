@@ -77,7 +77,7 @@ export default function SignUp({
       </Head>
       <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
         <h1 className="text-center text-5xl font-bold tracking-tight">
-          Sign up to start traveling
+          Sign up to experience more
         </h1>
 
         <section className="flex max-w-sm flex-col items-center justify-center space-y-5">

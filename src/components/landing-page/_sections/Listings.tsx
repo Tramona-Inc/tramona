@@ -59,6 +59,7 @@ export default function Listings() {
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
+
   const skeletons = Array.from({ length: 12 }, (_, index) => (
     <div key={index}>
       <Skeleton className="aspect-square rounded-xl" />
