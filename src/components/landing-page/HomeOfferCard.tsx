@@ -1,4 +1,3 @@
-import DateRangePicker from "@/components/_common/DateRangePicker";
 import { CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -9,7 +8,13 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { cn, formatCurrency, plural } from "@/utils/utils";
@@ -19,8 +24,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import DateRangePicker from "../_common/DateRangePicker";
 import { Button } from "../ui/button";
-import MakeBid from './bidding/MakeBid';
+import MakeBid from "./bidding/MakeBid";
 
 function Dot({ isCurrent }: { isCurrent: boolean }) {
   return (
@@ -170,12 +176,21 @@ export default function HomeOfferCard({
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-2"
         >
-          <DateRangePicker
+          <FormField
             control={form.control}
             name="date"
-            formLabel=""
-            className="col-span-full sm:col-span-1"
-            propertyId={property.id}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <DateRangePicker
+                    {...field}
+                    propertyId={property.id}
+                    disablePast
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
           <Dialog open={open} onOpenChange={setOpen}>
             {/* Removed trigger to have control on open and close */}
