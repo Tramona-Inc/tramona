@@ -147,9 +147,9 @@ export default function ProfilePage() {
           />
           <Button
             size="icon"
-            className="absolute left-28 top-0 rounded-full bg-primary/20 lg:hidden"
+            className="absolute bottom-6 left-40 z-30 rounded-full bg-primary/70"
           >
-            <Camera />
+            <Camera size={24} />
           </Button>
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:-ml-4 lg:mt-0">
             <div className="flex flex-row items-center justify-start gap-x-2">
