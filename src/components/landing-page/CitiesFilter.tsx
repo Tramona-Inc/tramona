@@ -83,7 +83,7 @@ export default function CitiesFilter() {
                     setFilter(city);
                   }}
                   className={cn(
-                    city.id === filter.id && "font-bold",
+                    city.id === filter?.id && "font-bold",
                     "p-1 text-lg",
                   )}
                 >

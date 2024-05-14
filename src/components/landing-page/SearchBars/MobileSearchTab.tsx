@@ -13,12 +13,14 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useSearchBarForm } from "./useSearchBarForm";
 
-export function MobileSearchTab() {
-  const form = useSearchBarForm();
+export function MobileSearchTab({ closeSheet }: { closeSheet: () => void }) {
+  const { form, onSubmit } = useSearchBarForm({
+    afterSubmit: closeSheet,
+  });
 
   return (
     <Form {...form}>
-      <form className="flex  flex-col justify-between">
+      <form onSubmit={onSubmit} className="flex  flex-col justify-between">
         <div className="flex flex-col gap-2">
           <PlacesInput
             control={form.control}
@@ -88,7 +90,9 @@ export function MobileSearchTab() {
           <Button type="button" variant="ghost" onClick={() => form.reset()}>
             Clear all
           </Button>
-          <Button type="submit">Search</Button>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            Search
+          </Button>
         </div>
       </form>
     </Form>

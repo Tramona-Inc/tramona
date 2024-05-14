@@ -48,12 +48,14 @@ export default function DateRangeInput({
     <Popover>
       <PopoverTrigger asChild>
         <InputButton
+          withClearBtn
           className={className}
           placeholder={placeholder}
           variant={variant}
           label={label}
           icon={icon}
           value={value?.from && formatDateRange(value.from, value.to)}
+          setValue={onChange}
         />
       </PopoverTrigger>
       <PopoverContent

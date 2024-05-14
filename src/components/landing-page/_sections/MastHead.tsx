@@ -45,10 +45,9 @@ export default function MastHead() {
       <div className="hidden -translate-y-16 px-4 md:block">
         <DesktopSearchLayout />
       </div>
-      <p className="mx-auto max-w-3xl py-12 text-center text-sm text-zinc-600 md:text-lg">
+      <p className="px-4 pt-4 text-center text-sm text-zinc-600">
         See a property you like? Make an offer and Tramona will create the deal
-        for you.
-        <br></br>Don&apos;t see a property you like? Request a deal.
+        for you. Don&apos;t see a property you like? Request a deal.
       </p>
     </section>
   );
@@ -87,9 +86,10 @@ export function DesktopSearchLayout() {
 
 export function MobileSearchLayout() {
   const [mode, setMode] = useState<"search" | "request">("search");
+  const [open, setOpen] = useState(false);
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger className="w-full">
         <div className="z-40 flex flex-row gap-x-3 rounded-lg bg-white px-3 py-5 text-center font-semibold text-muted-foreground shadow-lg">
           <SearchIcon />
@@ -115,8 +115,12 @@ export function MobileSearchLayout() {
             </Button>
           </div>
         </SheetHeader>
-        {mode === "search" && <MobileSearchTab />}
-        {mode === "request" && <MobileRequestDealTab />}
+        {mode === "search" && (
+          <MobileSearchTab closeSheet={() => setOpen(false)} />
+        )}
+        {mode === "request" && (
+          <MobileRequestDealTab closeSheet={() => setOpen(false)} />
+        )}
       </SheetContent>
     </Sheet>
   );
