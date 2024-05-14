@@ -27,6 +27,7 @@ type CitiesFilterState = {
   houseRules: string[];
   setHouseRules: (houseRules: string[]) => void;
   setOpen: (open: boolean) => void;
+  clearFilter: () => void;
 };
 
 // export const useBidding = create<BiddingState>((set) => ({
@@ -77,6 +78,17 @@ export const useCitiesFilter = create<CitiesFilterState>()(
       },
       setOpen: (open: boolean) => {
         set(() => ({ open }));
+      },
+      clearFilter: () => {
+        set((state) => ({
+          ...state,
+          filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
+          roomType: undefined,
+          beds: 0,
+          bedrooms: 0,
+          bathrooms: 0,
+          houseRules: [],
+        }));
       },
     }),
     {
