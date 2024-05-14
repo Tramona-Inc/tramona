@@ -118,14 +118,16 @@ function BiddingStep2({
       if (traveler?.phoneNumber) {
         if (traveler.isWhatsApp) {
           await twilioWhatsAppMutation.mutateAsync({
-            templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+            templateId: "HX1650cf0e293142a6db2b458167025222",
             to: traveler.phoneNumber,
+            price: price,
+            name: property.name,
+            dates: formatDateRange(date.from, date.to),
           });
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${date.from.toString()} to ${date.to.toString()}.
-            Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
+            msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}. Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
           });
         }
       }

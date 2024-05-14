@@ -17,11 +17,13 @@ export default function PropertyDeclineDialog({
   open,
   onOpenChange,
   originalNightlyBiddingOffer,
+  counterNightlyPrice,
 }: {
   offerId: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   originalNightlyBiddingOffer: number;
+  counterNightlyPrice: number;
 }) {
   const { data: session } = useSession();
   const twilioMutation = api.twilio.sendSMS.useMutation();
@@ -63,15 +65,19 @@ export default function PropertyDeclineDialog({
       } else {
         const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
         if (traveler?.phoneNumber) {
+          const nightlyPrice = counterNightlyPrice > 0 ? formatCurrency(counterNightlyPrice) : formatCurrency(originalNightlyBiddingOffer);
           if (traveler.isWhatsApp) {
             await twilioWhatsAppMutation.mutateAsync({
-              templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+              templateId: "HX74ffb496915d8e4ef39b41e624ca605e",
               to: traveler.phoneNumber,
+              cost: nightlyPrice,
+              name: property?.name,
+              dates: formatDateRange(data?.checkIn, data?.checkOut),
             });
           } else {
             await twilioMutation.mutateAsync({
               to: traveler.phoneNumber,
-              msg: `Tramona: Your ${formatCurrency(originalNightlyBiddingOffer)} offer for ${property?.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been rejected by the host. Please try to send a new offer or send an offer for another property. Your card has not been charged.`,
+              msg: `Tramona: Your ${nightlyPrice}/night offer for ${property?.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been rejected by the host. Please try to send a new offer or send an offer for another property. Your card has not been charged.`,
             });
           }
         }

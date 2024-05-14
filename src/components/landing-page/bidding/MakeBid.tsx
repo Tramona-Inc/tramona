@@ -15,7 +15,7 @@ import BiddingStep1 from "./BiddingStep1";
 import BiddingStep2 from "./BiddingStep2";
 import Link from 'next/link';
 
-function MakeBid({ propertyId }: { propertyId: number }) {
+function MakeBid({ propertyId }: { propertyId: number}) {
   const { data: property, isLoading } = api.properties.getById.useQuery({
     id: propertyId,
   });

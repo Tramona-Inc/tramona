@@ -9,6 +9,7 @@ import Link from "next/link";
 
 function BiddingConfirmation({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
+  const price = useBidding((state) => state.price);
 
   const resetSession = useBidding((state) => state.resetSession);
 
@@ -21,7 +22,7 @@ function BiddingConfirmation({ property }: { property: Property }) {
       <div className="flex flex-col">
         <h1 className=" mb-2 font-semibold md:mb-6 md:text-lg">
           {/* place bid.amount in here  */}
-          Your offer for <span className="font-bold">${100}</span> has been
+          Your offer for <span className="font-bold">${price}</span> has been
           submitted!
         </h1>
         <div className="flex flex-col gap-x-10 md:flex-row">
