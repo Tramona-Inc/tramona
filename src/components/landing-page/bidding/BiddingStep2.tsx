@@ -113,7 +113,7 @@ function BiddingStep2({
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: async () => {
       addPropertyIdBids(property.id);
-      setStep(step + 1);
+      setStep(2);
       const traveler = session?.user;
       if (traveler?.phoneNumber) {
         if (traveler.isWhatsApp) {
