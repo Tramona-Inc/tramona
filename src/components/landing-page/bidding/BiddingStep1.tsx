@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { type Property } from "@/server/db/schema";
-import { api } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency } from "@/utils/utils";
@@ -28,8 +27,8 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-function BiddingStep1({ property }: { property: Property }) {
-  const setStep = useBidding((state) => state.setStep);
+function BiddingStep1({ property, setStep }: { property: Property, setStep: (step: number) => void }) {
+  // const setStep = useBidding((state) => state.setStep);
 
   const setPrice = useBidding((state) => state.setPrice);
   const currentPrice = useBidding((state) => state.price);
@@ -37,7 +36,7 @@ function BiddingStep1({ property }: { property: Property }) {
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
   //determine if user identity is verified
-  const { data: users } = api.users.myVerificationStatus.useQuery();
+  // const { data: users } = api.users.myVerificationStatus.useQuery();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -47,12 +46,9 @@ function BiddingStep1({ property }: { property: Property }) {
     },
   });
 
-  async function onSubmit(values: FormSchema) {
-    console.log("click");
-
+  function onSubmit(values: FormSchema) {
     setPrice(values.price);
     setGuest(values.guest);
-
     setStep(1);
 
     // if (users?.isIdentityVerified === "true") {

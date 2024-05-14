@@ -105,7 +105,7 @@ export default function SuperhogForm() {
     defaultValues: defaultRequestValues,
   });
 
-  const { mutateAsync: CreateSuperhogRequest } =
+  const { mutateAsync: createSuperhogRequest } =
     api.superhog.createSuperhogRequest.useMutation({
       onSuccess: () => {
         toast({
@@ -123,9 +123,7 @@ export default function SuperhogForm() {
     });
 
   const onSubmit = async (data: FormSchema) => {
-    if (data) {
-      CreateSuperhogRequest(data);
-    }
+    await createSuperhogRequest(data);
   };
 
   return (
