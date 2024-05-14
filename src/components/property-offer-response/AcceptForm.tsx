@@ -31,14 +31,59 @@ export default function AcceptForm({
   originalNightlyBiddingOffer: number;
 }) {
   const { mutateAsync } = api.biddings.accept.useMutation();
+  const { data: session } = useSession();
+  const twilioMutation = api.twilio.sendSMS.useMutation();
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+
+  const { data, isLoading } = api.biddings.getBidInfo.useQuery({
+    bidId: offerId,
+  });
+
+  const { data: property } = api.properties.getById.useQuery({
+    id: data?.propertyId,
+  });
+
+
+  const getTraveler = api.groups.getGroupOwner.useMutation();
 
   async function onSubmit() {
     void mutateAsync({ bidId: offerId, amount: totalCounterAmount });
 
+    const guest = session?.user.role === "guest";
+    if (guest) {
+      const traveler = session.user;
+      if (traveler.phoneNumber) {
+        if (traveler.isWhatsApp) {
+          await twilioWhatsAppMutation.mutateAsync({
+            templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+            to: traveler.phoneNumber, //TO DO change to host phone number
+          });
+        } else {
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber, //TO DO change to host phone number
+            msg: `Tramona: Your ${previousOfferNightlyPrice} offer for ${data?.propertyName} from ${data?.checkIn} to ${data?.checkOut} has been counter offered by the host. The host proposed a price of ${counterNightlyPrice}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+          });
+        }
+      }
+    } else {
+      const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
+      if (traveler?.phoneNumber) {
+        if (traveler.isWhatsApp) {
+          await twilioWhatsAppMutation.mutateAsync({
+            templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+            to: traveler.phoneNumber,
+          });
+        } else {
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: `Tramona: Congratulations, your ${totalCounterAmount} offer for  ${property?.name} from ${data?.checkIn ?? ''} to ${data?.checkOut ?? ''} has been accepted by the host. Your trip is now booked and your card will be charged! Please navigate to www.tramona.com to message the host and see more information regarding your stay.`,
+          });
+        }
+      }
+    }
+
     setOpen(false);
   }
-
-  const { data: session } = useSession();
 
   return (
     <>

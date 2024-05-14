@@ -36,14 +36,55 @@ export default function CounterForm({
   originalNightlyBiddingOffer: number;
 }) {
   const { data: session } = useSession();
+  const twilioMutation = api.twilio.sendSMS.useMutation();
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
   const { data, isLoading } = api.biddings.getBidInfo.useQuery({
     bidId: offerId,
   });
 
+  const { data: property } = api.properties.getById.useQuery({
+    id: data?.propertyId,
+  });
+
+  const getTraveler = api.groups.getGroupOwner.useMutation();
+
   const { mutateAsync } = api.biddings.createCounter.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       setOpen(false);
+
+      const guest = session?.user.role === "guest";
+      if (guest) { //send to host
+        const traveler = session.user;
+        if (traveler.phoneNumber) {
+          if (traveler.isWhatsApp) {
+            await twilioWhatsAppMutation.mutateAsync({
+              templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+              to: traveler.phoneNumber,  //TO DO change to host phone number
+            });
+          } else {
+            await twilioMutation.mutateAsync({
+              to: traveler.phoneNumber, //TO DO change to host phone number
+              msg: `Tramona: A traveler has countered your offer. Please go to www.tramona.com and respond to their counter.`,
+            });
+          }
+        }
+      } else { //send to traveler
+        const traveler = await getTraveler.mutateAsync( data?.madeByGroupId );
+        if (traveler?.phoneNumber) {
+          if (traveler.isWhatsApp) {
+            await twilioWhatsAppMutation.mutateAsync({
+              templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+              to: traveler.phoneNumber,
+            });
+          } else {
+            await twilioMutation.mutateAsync({
+              to: traveler.phoneNumber,
+              msg: `Tramona: Your ${previousOfferNightlyPrice} offer for ${property?.name} from ${data?.checkIn} to ${data?.checkOut} has been counter offered by the host. The host proposed a price of ${counterNightlyPrice}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+            });
+          }
+        }
+      }
     },
   });
 

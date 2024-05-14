@@ -46,12 +46,12 @@ function GoogleMap({ lat, lng }: CoordinateDataProps) {
           <Map
             google={google}
             zoom={15}
-            initialCenter={{ lat: lat, lng: lng }}
+            initialCenter={{ lat, lng }}
             // onClick={onMapClick}
             style={{ height: "400px" }}
           >
             <Marker
-              position={{ lat: lat, lng: lng }}
+              position={{ lat, lng }}
               draggable={true}
               // onClick={onMarkerClick}
               // onDragend={(coord: { latLng: { lat: () => number; lng: () => number; }; }) => onMarkerDragend(coord)}
@@ -76,6 +76,4 @@ function GoogleMap({ lat, lng }: CoordinateDataProps) {
   );
 }
 
-export default GoogleApiWrapper({
-  apiKey: env.NEXT_PUBLIC_GOOGLE_PLACES_KEY,
-})(GoogleMap);
+export default GoogleMap;
