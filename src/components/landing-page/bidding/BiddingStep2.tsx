@@ -124,7 +124,7 @@ function BiddingStep2({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `Tramona: Thank you for placing an offer of ${totalPrice} on ${property.name} from ${date.from.toString()} to ${date.to.toString()}.
+            msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${date.from.toString()} to ${date.to.toString()}.
             Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
           });
         }

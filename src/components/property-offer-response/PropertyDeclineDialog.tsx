@@ -10,6 +10,7 @@ import {
 } from "../ui/dialog";
 import { toast } from "../ui/use-toast";
 import { useSession } from "next-auth/react";
+import { formatCurrency, formatDateRange } from "@/utils/utils";
 
 export default function PropertyDeclineDialog({
   offerId,
@@ -55,7 +56,7 @@ export default function PropertyDeclineDialog({
           } else {
             await twilioMutation.mutateAsync({
               to: traveler.phoneNumber, //TO DO change to host phone number
-              msg: `Tramona: Your ${previousOfferNightlyPrice} offer for ${data?.propertyName} from ${data?.checkIn} to ${data?.checkOut} has been counter offered by the host. The host proposed a price of ${counterNightlyPrice}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+              msg: `Tramona: Your ${formatCurrency(originalNightlyBiddingOffer)} offer for ${data?.propertyName} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
             });
           }
         }
@@ -70,7 +71,7 @@ export default function PropertyDeclineDialog({
           } else {
             await twilioMutation.mutateAsync({
               to: traveler.phoneNumber,
-              msg: `Tramona: Your ${originalNightlyBiddingOffer} offer for ${property?.name} from ${data?.checkIn} to ${data?.checkOut} has been rejected by the host. Please try to send a new offer or send an offer for another property. Your card has not been charged.`,
+              msg: `Tramona: Your ${formatCurrency(originalNightlyBiddingOffer)} offer for ${property?.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been rejected by the host. Please try to send a new offer or send an offer for another property. Your card has not been charged.`,
             });
           }
         }

@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/utils/api";
-import { formatCurrency, getNumNights } from "@/utils/utils";
+import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
@@ -53,6 +53,8 @@ export default function CounterForm({
     onSuccess: async () => {
       setOpen(false);
 
+      console.log('Previous Offer Nightly Price:', previousOfferNightlyPrice);
+      console.log('Counter Nightly Price:', counterNightlyPrice);
       const guest = session?.user.role === "guest";
       if (guest) { //send to host
         const traveler = session.user;
@@ -78,10 +80,13 @@ export default function CounterForm({
               to: traveler.phoneNumber,
             });
           } else {
-            await twilioMutation.mutateAsync({
-              to: traveler.phoneNumber,
-              msg: `Tramona: Your ${previousOfferNightlyPrice} offer for ${property?.name} from ${data?.checkIn} to ${data?.checkOut} has been counter offered by the host. The host proposed a price of ${counterNightlyPrice}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
-            });
+            if (!isLoading) {
+              const nightlyPrice = previousOfferNightlyPrice > 0 ? formatCurrency(originalNightlyBiddingOffer) : formatCurrency(previousOfferNightlyPrice);
+              await twilioMutation.mutateAsync({
+                to: traveler.phoneNumber,
+                msg: `Tramona: Your ${nightlyPrice}/night offer for ${property?.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}/night. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+              });
+            }
           }
         }
       }

@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { api } from "@/utils/api";
-import { formatCurrency } from "@/utils/utils";
+import { formatCurrency, formatDateRange } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
@@ -61,7 +61,7 @@ export default function AcceptForm({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber, //TO DO change to host phone number
-            msg: `Tramona: Your ${previousOfferNightlyPrice} offer for ${data?.propertyName} from ${data?.checkIn} to ${data?.checkOut} has been counter offered by the host. The host proposed a price of ${counterNightlyPrice}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+            msg: `Tramona: Your ${formatCurrency(previousOfferNightlyPrice)} offer for ${data?.propertyName} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
           });
         }
       }
@@ -76,7 +76,7 @@ export default function AcceptForm({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `Tramona: Congratulations, your ${totalCounterAmount} offer for  ${property?.name} from ${data?.checkIn ?? ''} to ${data?.checkOut ?? ''} has been accepted by the host. Your trip is now booked and your card will be charged! Please navigate to www.tramona.com to message the host and see more information regarding your stay.`,
+            msg: `Tramona: Congratulations, your ${formatCurrency(totalCounterAmount)} offer for  ${property?.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been accepted by the host. Your trip is now booked and your card will be charged! Please navigate to www.tramona.com to message the host and see more information regarding your stay.`,
           });
         }
       }
