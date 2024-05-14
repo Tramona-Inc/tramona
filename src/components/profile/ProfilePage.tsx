@@ -221,7 +221,7 @@ export default function ProfilePage() {
       <section className="space-y-2 rounded-lg border p-4">
         <h2 className="font-bold">About Me</h2>
         <p>
-          {profileInfo?.about ||
+          {profileInfo?.about ??
             "Joined Tramona " +
               (session?.user.createdAt
                 ? new Date(session.user.createdAt).toISOString().substring(0, 7)
@@ -370,16 +370,16 @@ export default function ProfilePage() {
         <EditProfileDialog
           state={editProfileDialogState}
           profileInfo={{
-            name: profileInfo.name || session?.user.username || "",
+            name: profileInfo.name ?? session?.user.username ?? "",
             about:
-              profileInfo.about ||
+              profileInfo.about ??
               "Joined Tramona at " +
                 (session?.user.createdAt
                   ? new Date(session.user.createdAt)
                       .toISOString()
                       .substring(0, 10)
                   : ""),
-            location: profileInfo.location || "",
+            location: profileInfo.location ?? "",
             facebook_link: profileInfo.socials![0],
             youtube_link: profileInfo.socials![1],
             instagram_link: profileInfo.socials![2],
