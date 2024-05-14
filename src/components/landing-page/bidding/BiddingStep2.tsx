@@ -160,7 +160,7 @@ function BiddingStep2({
       </h1>
       <BiddingInfoCard property={property} />
       <div className="mt-4 w-[300px] md:w-[500px]">
-        {payments && payments.cards.data.length === 0 ? (
+        {payments && payments.cards.data.length > 0 ? (
           <div className="space-y-5">
             <Select
               defaultValue={payments.defaultPaymentMethod as string}
@@ -188,7 +188,7 @@ function BiddingStep2({
         ) : (
           <>
             <Elements stripe={stripePromise} options={options}>
-              <BidPaymentForm bid={bid} setStep={setStep}/>
+              <BidPaymentForm bid={bid} setStep={setStep} />
             </Elements>
           </>
         )}
