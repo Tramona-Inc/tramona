@@ -1,17 +1,18 @@
 import NavLink from "../_utils/NavLink";
 
-import { api } from "@/utils/api";
-import { cn, plural } from "@/utils/utils";
-import { ArrowLeftRight, Menu, Settings, Wallet } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useCallback, useEffect } from "react";
-import { TramonaLogo } from "../_common/Header/TramonaLogo";
-import { Badge } from "../ui/badge";
 import {
   adminNavLinks,
   guestNavLinks,
   hostNavLinks,
 } from "@/config/sideNavLinks";
+import { api } from "@/utils/api";
+import { cn, plural } from "@/utils/utils";
+import { ArrowLeftRight, Menu, Settings, Wallet } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useCallback, useEffect } from "react";
+import { TramonaLogo } from "../_common/Header/TramonaLogo";
+import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +20,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import Link from "next/link";
 
 function SidebarLink({
   href,
@@ -92,8 +92,7 @@ export default function Sidebar({
     });
 
   const notifyMe = useCallback(async () => {
-    // Check if the browser supports notifications
-    if (!("Notification" in window) || !totalUnreadMessages) return;
+    // Check if the browser supports notifications if (!("Notification" in window) || !totalUnreadMessages) return;
 
     // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
     if (Notification.permission === "granted") {
