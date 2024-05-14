@@ -79,7 +79,9 @@ export const users = pgTable(
 
     profileUrl: varchar("profile_url", { length: 1000 }),
     location: varchar("location", { length: 1000 }),
-    socials: varchar("socials").array().default(['','','','']),
+    socials: varchar("socials")
+      .array()
+      .default(sql`'{}'`),
     about: text("about"),
     // destinations: varchar("destinations").array(),
   },

@@ -3,24 +3,24 @@ import { Button } from "../ui/button";
 
 export function CounterInput({
   value,
-  setValue,
+  onChange,
   min = 0,
   max,
 }: {
   value: number;
-  setValue: (value: number) => void;
+  onChange: (value: number) => void;
   min?: number;
   max?: number;
 }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center">
       <Button
         type="button"
         variant="ghost"
         size="icon"
         className="rounded-full"
         disabled={value <= min}
-        onClick={() => setValue(value - 1)}
+        onClick={() => onChange(value - 1)}
       >
         <MinusCircleIcon className="size-3/5 text-muted-foreground" />
       </Button>
@@ -31,7 +31,7 @@ export function CounterInput({
         size="icon"
         className="rounded-full"
         disabled={max !== undefined && value >= max}
-        onClick={() => setValue(value + 1)}
+        onClick={() => onChange(value + 1)}
       >
         <PlusCircleIcon className="size-3/5 text-muted-foreground" />
       </Button>

@@ -7,10 +7,10 @@ export const requestsToProperties = pgTable(
   {
     requestId: integer("request_id")
       .notNull()
-      .references(() => requests.id),
+      .references(() => requests.id, { onDelete: "cascade" }),
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id),
+      .references(() => properties.id, { onDelete: "cascade" }),
   },
   (t) => ({
     compoundKey: primaryKey({ columns: [t.requestId, t.propertyId] }),
