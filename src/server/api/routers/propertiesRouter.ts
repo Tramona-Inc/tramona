@@ -140,7 +140,6 @@ export const propertiesRouter = createTRPCRouter({
   getAllInfiniteScroll: optionallyAuthedProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(50).nullish(),
         cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
         city: z.string().optional(),
         roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
@@ -158,7 +157,6 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 5;
       const { cursor } = input;
 
       const lat = input.lat ?? 0;
@@ -242,7 +240,7 @@ export const propertiesRouter = createTRPCRouter({
             eq(properties.isPrivate, false),
           ),
         )
-        .limit(limit)
+        .limit(12)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
