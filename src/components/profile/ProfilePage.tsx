@@ -52,6 +52,7 @@ import BucketListHomeOfferCard from "./BucketListHomeOfferCard";
 import { BadgeXIcon, InfoIcon } from "lucide-react";
 import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
+import { sub } from "date-fns";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -219,7 +220,13 @@ export default function ProfilePage() {
       {/* About Me */}
       <section className="space-y-2 rounded-lg border p-4">
         <h2 className="font-bold">About Me</h2>
-        <p>{profileInfo?.about ?? ""}</p>
+        <p>
+          {profileInfo?.about ||
+            "Joined Tramona " +
+              (session?.user.createdAt
+                ? new Date(session.user.createdAt).toISOString().substring(0, 7)
+                : "")}
+        </p>
       </section>
 
       <section className="space-y-5 rounded-lg border p-4">
@@ -363,9 +370,16 @@ export default function ProfilePage() {
         <EditProfileDialog
           state={editProfileDialogState}
           profileInfo={{
-            name: profileInfo.name!,
-            about: profileInfo.about!,
-            location: profileInfo.location!,
+            name: profileInfo.name || session?.user.username || "",
+            about:
+              profileInfo.about ||
+              "Joined Tramona at " +
+                (session?.user.createdAt
+                  ? new Date(session.user.createdAt)
+                      .toISOString()
+                      .substring(0, 10)
+                  : ""),
+            location: profileInfo.location || "",
             facebook_link: profileInfo.socials![0],
             youtube_link: profileInfo.socials![1],
             instagram_link: profileInfo.socials![2],
