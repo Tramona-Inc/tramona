@@ -22,19 +22,19 @@ function FooterLink({
   );
 }
 
-const Footer: React.FC = () => {
+const MobileFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-black text-white md:block">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <footer className=" bg-black text-white md:block">
+      <div className="mx-auto px-4 py-2 text-xs  md:max-w-7xl lg:text-base">
         {/* <hr className="my-6 h-px border-none bg-neutral-300" /> */}
-        <div className="flex w-full flex-col items-center justify-between text-center sm:flex-row">
-          <div className="mb-4 text-sm text-nowrap text-zinc-100 sm:mb-0">
+        <div className="flex w-full flex-row items-center justify-between text-center md:flex-col">
+          <div className="mb-4 text-nowrap text-sm text-zinc-100 sm:mb-0">
             © {currentYear} Tramona. All rights reserved.
           </div>
 
-          <div className="flex flex-col w-full items-start gap-2 px-8 sm:flex-row sm:justify-center md:gap-8">
+          <div className="flex w-full flex-row items-start gap-2 px-8 sm:justify-center md:flex-col md:gap-8">
             <FooterLink href="/support">Terms</FooterLink>
             <FooterLink href="/faq">FAQ</FooterLink>
             <FooterLink href="/auth/signup">Sign up</FooterLink>
@@ -44,16 +44,16 @@ const Footer: React.FC = () => {
 
           <div className="flex gap-4">
             <FooterLink external href="https://www.instagram.com/shoptramona/">
-              <Instagram size={20} />
+              <Instagram size={18} strokeWidth={1} />
             </FooterLink>
             <FooterLink external href="https://www.facebook.com/ShopTramona">
-              <Facebook size={20} />
+              <Facebook size={18} strokeWidth={1} />
             </FooterLink>
             <FooterLink
               external
               href="https://www.linkedin.com/company/tramona/"
             >
-              <Linkedin size={20} />
+              <Linkedin size={18} strokeWidth={1} />
             </FooterLink>
           </div>
         </div>
@@ -62,4 +62,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer;
+export default MobileFooter;
