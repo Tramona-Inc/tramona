@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import {
+  AddressElement,
   PaymentElement,
   useElements,
   useStripe,
@@ -103,6 +104,7 @@ export default function BidPaymentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <AddressElement options={{ mode: "billing" }} />
       <PaymentElement />
       <Button type="submit" disabled={!stripe || loading}>
         Save
