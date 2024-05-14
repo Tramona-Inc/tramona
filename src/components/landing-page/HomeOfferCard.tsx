@@ -24,6 +24,7 @@ import MakeBid from "./bidding/MakeBid";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { plural } from "@/utils/utils";
 import { api as apiHelper } from "@/utils/api";
+import { signIn, useSession } from "next-auth/react";
 
 function Dot({ isCurrent }: { isCurrent: boolean }) {
   return (
@@ -61,6 +62,20 @@ type PropertyCard = {
   originalNightlyPrice: number | null;
   distance: unknown;
 };
+
+const formSchema = z
+  .object({
+    date: z.object({
+      from: z.coerce.date(),
+      to: z.coerce.date(),
+    }),
+  })
+  .refine((data) => data.date.to > data.date.from, {
+    message: "Must stay for at least 1 night",
+    path: ["date"],
+  });
+
+type FormSchema = z.infer<typeof formSchema>;
 
 export default function HomeOfferCard({
   property,
@@ -110,23 +125,12 @@ export default function HomeOfferCard({
       },
     });
 
-  const formSchema = z
-    .object({
-      date: z.object({
-        from: z.coerce.date(),
-        to: z.coerce.date(),
-      }),
-    })
-    .refine((data) => data.date.to > data.date.from, {
-      message: "Must stay for at least 1 night",
-      path: ["date"],
-    });
-
-  type FormSchema = z.infer<typeof formSchema>;
-
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
+
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
 
   const setDate = useBidding((state) => state.setDate);
   const resetSession = useBidding((state) => state.resetSession);
@@ -246,10 +250,13 @@ export default function HomeOfferCard({
       <div className="absolute right-2 top-2">
         {!isInBucketList && (
           <Button
+            tooltip={isLoggedIn ? undefined : "Sign in to add to bucket list"}
             onClick={() =>
-              addPropertyToBucketList({
-                propertyId: property.id,
-              })
+              isLoggedIn
+                ? addPropertyToBucketList({
+                    propertyId: property.id,
+                  })
+                : signIn()
             }
             variant="white"
             className="rounded-full"
