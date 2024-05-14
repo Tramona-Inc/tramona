@@ -1,9 +1,9 @@
 import Spinner from "@/components/_common/Spinner";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
-import { useBidding } from "@/utils/store/bidding";
 import { cn } from "@/utils/utils";
 import { ChevronLeft } from "lucide-react";
+import { useState } from "react";
 import BiddingConfirmation from "./BiddingConfirmation";
 import BiddingStep1 from "./BiddingStep1";
 import BiddingStep2 from "./BiddingStep2";
@@ -13,8 +13,10 @@ function MakeBid({ propertyId }: { propertyId: number }) {
     id: propertyId,
   });
 
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
+  // const step = useBidding((state) => state.step);
+  // const setStep = useBidding((state) => state.setStep);
+
+  const [step, setStep] = useState(0);
 
   // ! Later make the verification not skiappable
   // ! Uncomment to display verificaiton
@@ -93,8 +95,12 @@ function MakeBid({ propertyId }: { propertyId: number }) {
                 <ChevronLeft />
               </Button>
             )}
-            {step == 0 && <BiddingStep1 property={property} />}
-            {step == 1 && <BiddingStep2 property={property} />}
+            {step == 0 && (
+              <BiddingStep1 property={property} setStep={setStep} />
+            )}
+            {step == 1 && (
+              <BiddingStep2 property={property} setStep={setStep} />
+            )}
             {step == 2 && <BiddingConfirmation property={property} />}
           </div>
         )

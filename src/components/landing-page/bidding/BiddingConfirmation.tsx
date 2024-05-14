@@ -6,6 +6,7 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Lightbulb } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
 function BiddingConfirmation({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
 

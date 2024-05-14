@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
-import MakeBid from "./bidding/MakeBid";
+import MakeBid from './bidding/MakeBid';
 
 function Dot({ isCurrent }: { isCurrent: boolean }) {
   return (
