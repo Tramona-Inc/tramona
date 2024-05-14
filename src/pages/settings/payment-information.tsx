@@ -3,8 +3,8 @@ import AddPaymentInfoForm from "@/components/settings/AddPaymentInfoForm";
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
 import { Elements } from "@stripe/react-stripe-js";
-import { StripeElementsOptions } from "@stripe/stripe-js";
-import Stripe from "stripe";
+import { type StripeElementsOptions } from "@stripe/stripe-js";
+import type Stripe from "stripe";
 
 function Card({ payment }: { payment: Stripe.PaymentMethod }) {
   return (

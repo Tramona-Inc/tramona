@@ -7,9 +7,12 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { type StripeError } from "@stripe/stripe-js";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 export default function AddPaymentInfoForm() {
+  const { update } = useSession();
+
   const stripe = useStripe();
   const elements = useElements();
 
@@ -21,9 +24,6 @@ export default function AddPaymentInfoForm() {
 
   const { mutateAsync: createSetupIntentMutation } =
     api.stripe.createSetupIntent.useMutation();
-
-  const { mutateAsync: createBiddingMutate } =
-    api.biddings.create.useMutation();
 
   const handleError = (error: StripeError) => {
     setLoading(false);
@@ -71,7 +71,20 @@ export default function AddPaymentInfoForm() {
       });
     }
 
-    console.log("reached");
+    // Clear form fields and error message
+    elements.getElement('address')?.clear();
+    elements.getElement("payment")?.clear();
+    setErrorMessage(undefined);
+
+    // Update session
+    await update();
+
+    // Reset loading state
+    setLoading(false);
+
+    // Clear form fields and error message
+    elements.getElement('address')?.clear();
+    elements.getElement("payment")?.clear();
 
     if (error) {
       // This point is only reached if there's an immediate error when
