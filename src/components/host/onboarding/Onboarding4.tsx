@@ -17,12 +17,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import { api } from "@/utils/api";
-import LeafletMap from "./LeafletMap";
 import SaveAndExit from "./SaveAndExit";
 import { useState, useEffect } from "react";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
-//import GoogleMap from "./GoogleMap";
+// import GoogleMap from "./GoogleMap";
+
 const formSchema = z.object({
   country: zodString(),
   street: zodString(),
@@ -116,12 +116,9 @@ export default function Onboarding4() {
     }
   }, [form.formState]);
   // I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
-  const {
-    data: coordinateData,
-  } =
-    api.offers.getCoordinates.useQuery({
-      location: address,
-    });
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: address,
+  });
 
   function handleError(): void {
     throw new Error("Function not implemented.");
@@ -234,12 +231,12 @@ export default function Onboarding4() {
             </div>
           </Form>
           {coordinateData && (
-            <div className="z-0">
-              <GoogleMap
-                lat={coordinateData.coordinates.lat}
-                lng={coordinateData.coordinates.lng}
-              />
-            </div>
+            // <div className="z-0">
+            //   <GoogleMap
+            //     lat={coordinateData.coordinates.lat}
+            //     lng={coordinateData.coordinates.lng}
+            //   />
+            // </div>
           )}
         </div>
       </div>
