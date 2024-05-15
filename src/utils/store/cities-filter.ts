@@ -1,7 +1,6 @@
 import { cities } from "@/components/landing-page/CitiesFilter";
 import { type ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema/tables/properties";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
 
 type RoomType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
 
