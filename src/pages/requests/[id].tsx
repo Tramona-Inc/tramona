@@ -99,7 +99,7 @@ function Page({ google }: { google: GoogleAPI }) {
                 ))}
               </TabsList>
 
-              <div className="flex space-x-10">
+              <div className="flex flex-col lg:flex-row lg:space-x-10">
                 <div className="flex-1">
                   {offers.map((offer) => (
                     <TabsContent key={offer.id} value={`${offer.id}`}>
@@ -107,8 +107,8 @@ function Page({ google }: { google: GoogleAPI }) {
                     </TabsContent>
                   ))}
                 </div>
-                <div className="sticky top-5 h-screen flex-1">
-                  <div className="h-full">
+                <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
+                  <div className="h-96 lg:h-full">
                     <Map google={google} zoom={15} center={mapCenter}>
                       {/* Child components like Marker, InfoWindow, etc. */}
                       {offers.map(
