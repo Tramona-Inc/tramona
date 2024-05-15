@@ -3,9 +3,9 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import { MessageCircle } from "lucide-react";
+import { HelpCircleIcon, InfoIcon, MessageCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { Button, buttonVariants } from "../ui/button";
+import { Button } from "../ui/button";
 import {
   Sheet,
   SheetClose,
@@ -17,10 +17,11 @@ import {
 } from "../ui/sheet";
 
 import { api } from "@/utils/api";
-import { cn, formatDateRange } from "@/utils/utils";
+import { formatDateRange } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
 import MapPin from "../_icons/MapPin";
 import { type UpcomingTrip } from "./UpcomingTrips";
+import Image from "next/image";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
@@ -41,18 +42,20 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col overflow-clip rounded-lg border lg:flex-row">
-        <div className="relative">
-          <Badge
-            variant="lightGray"
-            className="absolute left-4 top-4 font-bold"
-          >
+      <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
+        <Link href={`/my-trips/${trip.id}`} className="relative w-96">
+          <Image
+            layout="fill"
+            alt=""
+            className="object-cover"
+            src={trip.property.imageUrls[0]!}
+          />
+          <Badge variant="lightGray" className="absolute left-4 top-4">
             Trip {dayjs(trip.request.checkIn).fromNow()}
           </Badge>
-          <img src={trip.property.imageUrls[0]} width={600} height={400} />
-        </div>
+        </Link>
 
-        <div className="flex w-full flex-col gap-5 p-4 lg:gap-8 lg:p-10">
+        <div className="flex w-full flex-col gap-4 p-4 pt-12 lg:pt-4">
           <div className="flex w-full flex-col justify-between gap-3 lg:flex-row lg:gap-6">
             <div className="space-y-2">
               <h2 className="text-2xl font-bold">{trip.property.name}</h2>
@@ -70,14 +73,6 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
                         : "info@tramona"}
                     </p>
                   </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-[170px] text-sm md:w-[200px] lg:hidden"
-                    onClick={() => handleConversation()}
-                  >
-                    <MessageCircle className="w-4 md:w-5" /> Message your host
-                  </Button>
                 </div>
               </div>
             </div>
@@ -104,20 +99,15 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
 
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
-          <div className="flex justify-between gap-4">
-            <Button
-              variant="secondary"
-              className="hidden w-[175px] text-xs lg:flex lg:w-[160px] xl:w-[200px] xl:text-sm"
-              onClick={() => handleConversation()}
-            >
-              <MessageCircle className="w-4 xl:w-5" /> Message your host
+          <div className="flex flex-col justify-end gap-2 sm:flex-row">
+            <Button variant="secondary" onClick={() => handleConversation()}>
+              <MessageCircle className="size-4" />
+              Message your host
             </Button>
             <Sheet>
               <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-[170px] text-xs lg:w-[160px] xl:w-[200px] xl:text-sm"
-                >
+                <Button variant="secondary">
+                  <InfoIcon className="size-5" />
                   Cancelation Policy
                 </Button>
               </SheetTrigger>
@@ -193,15 +183,12 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
               </SheetContent>
             </Sheet>
 
-            <Link
-              href={"/faq"}
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "w-[170px] text-xs lg:w-[160px] xl:w-[200px] xl:text-sm",
-              )}
-            >
-              Help
-            </Link>
+            <Button asChild variant="secondary">
+              <Link href="/faq">
+                <HelpCircleIcon />
+                Help
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

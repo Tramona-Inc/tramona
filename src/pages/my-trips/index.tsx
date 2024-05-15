@@ -6,7 +6,7 @@ import PastTrips from "@/components/my-trips/PastTrips";
 import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { api, RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
@@ -23,6 +23,7 @@ export default function MyTrips() {
 
   const { data: trips, isLoading: loadingTrips } =
     api.myTrips.getUpcomingTrips.useQuery({ date });
+
   const { data: pastTrips, isLoading: loadingPastTrips } =
     api.myTrips.getPreviousTrips.useQuery({ date });
 
@@ -32,7 +33,7 @@ export default function MyTrips() {
         <title>My Trips | Tramona</title>
       </Head>
 
-      <div className="container col-span-10 flex flex-col gap-10 py-10 2xl:col-span-11">
+      <div className="container col-span-10 flex flex-col gap-10 py-10 pb-32 2xl:col-span-11">
         <h1 className="text-4xl font-bold">My Trips</h1>
 
         <Tabs defaultValue="upcoming">
