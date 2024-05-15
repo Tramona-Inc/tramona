@@ -23,6 +23,7 @@ import { random } from "lodash";
 import { z } from "zod";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";
@@ -293,7 +294,9 @@ export const biddingRouter = createTRPCRouter({
     });
   }),
 
-  getAllPropertyBids: protectedProcedure.query(async ({ ctx }) => {
+  getAllPropertyBids: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return [];
+
     const result = await ctx.db.query.bids.findMany({
       where: exists(
         ctx.db

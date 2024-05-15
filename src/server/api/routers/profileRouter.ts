@@ -1,24 +1,31 @@
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
 } from "@/server/api/trpc";
-import { BucketListDestinationSelectSchema, BucketListPropertySchema, ProfileInfoSchema, bucketListDestinations, bucketListProperties, properties, users } from "@/server/db/schema";
+import {
+  BucketListDestinationSelectSchema,
+  BucketListPropertySchema,
+  ProfileInfoSchema,
+  bucketListDestinations,
+  bucketListProperties,
+  properties,
+  users,
+} from "@/server/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
-
 export const profileRouter = createTRPCRouter({
-  getProfileInfo: protectedProcedure
-    .query(async ({ ctx }) => {
-      const res = await ctx.db.query.users.findFirst({
-        with: {
-          bucketListDestinations: true,
-          bucketListProperties: true
-        }
-      })
+  getProfileInfo: protectedProcedure.query(async ({ ctx }) => {
+    const res = await ctx.db.query.users.findFirst({
+      with: {
+        bucketListDestinations: true,
+        bucketListProperties: true,
+      },
+    });
 
-      return res ?? null
-    }),
+    return res ?? null;
+  }),
 
   updateProfileInfo: protectedProcedure
     .input(ProfileInfoSchema)
@@ -30,20 +37,22 @@ export const profileRouter = createTRPCRouter({
           about: input.about,
           location: input.location,
           socials: [
-            input.facebook_link ?? '',
-            input.youtube_link ?? '', 
-            input.instagram_link ?? '',
-            input.twitter_link ?? ''
-          ]
+            input.facebook_link ?? "",
+            input.youtube_link ?? "",
+            input.instagram_link ?? "",
+            input.twitter_link ?? "",
+          ],
         })
-        .where(eq(users.id, ctx.user.id))
+        .where(eq(users.id, ctx.user.id));
     }),
 
   getAllPropertiesWithDetails: protectedProcedure
-    .input(z.object({
-      lat: z.number().optional(),
-      long: z.number().optional()
-    }))
+    .input(
+      z.object({
+        lat: z.number().optional(),
+        long: z.number().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const lat = input.lat ?? 0;
       const long = input.long ?? 0;
@@ -51,7 +60,7 @@ export const profileRouter = createTRPCRouter({
       const myProperties = await ctx.db
         .select()
         .from(bucketListProperties)
-        .where(eq(bucketListProperties.userId, ctx.user.id))
+        .where(eq(bucketListProperties.userId, ctx.user.id));
       const myPropertyIds = myProperties.map((p) => p.propertyId);
 
       const data = await ctx.db
@@ -72,15 +81,19 @@ export const profileRouter = createTRPCRouter({
         .from(properties)
         .where(inArray(properties.id, myPropertyIds));
 
-      const fullBucketListProperties = data.map((property) => {
-        const bucketListProperty = myProperties.find((p) => p.propertyId === property.id);
-        if (bucketListProperty) {
-          return {
-            ...property,
-            bucketListId: bucketListProperty.id,
+      const fullBucketListProperties = data
+        .map((property) => {
+          const bucketListProperty = myProperties.find(
+            (p) => p.propertyId === property.id,
+          );
+          if (bucketListProperty) {
+            return {
+              ...property,
+              bucketListId: bucketListProperty.id,
+            };
           }
-        }
-      }).filter((p) => !!p);
+        })
+        .filter((p) => !!p);
 
       return fullBucketListProperties;
     }),
@@ -88,12 +101,10 @@ export const profileRouter = createTRPCRouter({
   addProperty: protectedProcedure
     .input(BucketListPropertySchema.omit({ id: true, userId: true }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .insert(bucketListProperties)
-        .values({
-          ...input,
-          userId: ctx.user.id
-        })
+      await ctx.db.insert(bucketListProperties).values({
+        ...input,
+        userId: ctx.user.id,
+      });
     }),
 
   // update property timeline
@@ -106,9 +117,9 @@ export const profileRouter = createTRPCRouter({
         .where(
           and(
             eq(bucketListProperties.userId, ctx.user.id),
-            eq(bucketListProperties.id, input.id)
-          )
-        )
+            eq(bucketListProperties.id, input.id),
+          ),
+        );
     }),
 
   removeProperty: protectedProcedure
@@ -119,18 +130,19 @@ export const profileRouter = createTRPCRouter({
         .where(
           and(
             eq(bucketListProperties.userId, ctx.user.id),
-            eq(bucketListProperties.id, propertyId)
-          )
-        )
+            eq(bucketListProperties.id, propertyId),
+          ),
+        );
     }),
 
-  isBucketListProperty: protectedProcedure
+  isBucketListProperty: optionallyAuthedProcedure
     .input(z.object({ blPropertyId: z.number().int() }))
     .query(async ({ ctx, input }) => {
+      if (!ctx.user) return false;
       const properties = await ctx.db
         .select()
         .from(bucketListProperties)
-        .where(eq(bucketListProperties.userId, ctx.user.id))
+        .where(eq(bucketListProperties.userId, ctx.user.id));
 
       const propertyIds = properties.map((p) => p.propertyId);
 
@@ -138,19 +150,26 @@ export const profileRouter = createTRPCRouter({
     }),
 
   createDestination: protectedProcedure
-    .input(z.object({
-      destination: BucketListDestinationSelectSchema.omit({ id: true, userId: true })
-    }))
+    .input(
+      z.object({
+        destination: BucketListDestinationSelectSchema.omit({
+          id: true,
+          userId: true,
+        }),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .insert(bucketListDestinations)
-        .values({ ...input.destination, userId: ctx.user.id })
+        .values({ ...input.destination, userId: ctx.user.id });
     }),
 
   updateDestination: protectedProcedure
-    .input(z.object({
-      destination: BucketListDestinationSelectSchema.omit({ userId: true })
-    }))
+    .input(
+      z.object({
+        destination: BucketListDestinationSelectSchema.omit({ userId: true }),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(bucketListDestinations)
@@ -158,23 +177,25 @@ export const profileRouter = createTRPCRouter({
         .where(
           and(
             eq(bucketListDestinations.userId, ctx.user.id),
-            eq(bucketListDestinations.id, input.destination.id)
-          )
+            eq(bucketListDestinations.id, input.destination.id),
+          ),
         );
     }),
 
   deleteDestination: protectedProcedure
-    .input(z.object({
-      destinationId: z.number().int()
-    }))
+    .input(
+      z.object({
+        destinationId: z.number().int(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .delete(bucketListDestinations)
         .where(
           and(
             eq(bucketListDestinations.userId, ctx.user.id),
-            eq(bucketListDestinations.id, input.destinationId)
-          )
-        )
+            eq(bucketListDestinations.id, input.destinationId),
+          ),
+        );
     }),
-})
+});
