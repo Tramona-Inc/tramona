@@ -1,16 +1,17 @@
-import React from "react";
+import { api } from "@/utils/api";
+import { useDialogState } from "@/utils/dialog";
+import { useCitiesFilter } from "@/utils/store/cities-filter";
 import {
   BadgeCheck,
-  Bookmark,
-  Calendar,
+  BadgeXIcon,
   Camera,
   Clock2Icon,
   Edit,
   Ellipsis,
   Facebook,
+  InfoIcon,
   Instagram,
   Mail,
-  MapPin,
   MessageCircle,
   MessageCircleMore,
   MessagesSquare,
@@ -19,40 +20,34 @@ import {
   Twitter,
   Youtube,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import React from "react";
+import CopyToClipboardBtn from "../_utils/CopyToClipboardBtn";
+import IdentityModal from "../_utils/IdentityModal";
+import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import HomeOfferCard from "../landing-page/HomeOfferCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import Link from "next/link";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 import { Input } from "../ui/input";
-import CopyToClipboardBtn from "../_utils/CopyToClipboardBtn";
-import { useSession } from "next-auth/react";
-import { api } from "@/utils/api";
-import DestinationCard from "./DestinationCard";
-import EditProfileDialog from "./EditProfileDialog";
-import { useDialogState } from "@/utils/dialog";
-import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
-import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
-import { useCitiesFilter } from "@/utils/store/cities-filter";
 import BucketListHomeOfferCard from "./BucketListHomeOfferCard";
-import { BadgeXIcon, InfoIcon } from "lucide-react";
-import IdentityModal from "../_utils/IdentityModal";
-import { VerificationProvider } from "../_utils/VerificationContext";
-import { sub } from "date-fns";
+import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDialog";
+import DestinationCard from "./DestinationCard";
+import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
+import EditProfileDialog from "./EditProfileDialog";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -103,8 +98,8 @@ export default function ProfilePage() {
 
   const { data: bucketListProperties } =
     api.profile.getAllPropertiesWithDetails.useQuery({
-      lat: filter.lat ?? 0,
-      long: filter.long ?? 0,
+      lat: filter?.lat,
+      long: filter?.long,
     });
 
   const [selectedBLDestinationId, setSelectedBLDestinationId] = React.useState<

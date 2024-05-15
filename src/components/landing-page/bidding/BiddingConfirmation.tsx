@@ -7,7 +7,13 @@ import { Lightbulb } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-function BiddingConfirmation({ property }: { property: Property }) {
+function BiddingConfirmation({
+  property,
+  setOpen,
+}: {
+  property: Property;
+  setOpen: (open: boolean) => void;
+}) {
   const date = useBidding((state) => state.date);
 
   const resetSession = useBidding((state) => state.resetSession);
@@ -79,13 +85,13 @@ function BiddingConfirmation({ property }: { property: Property }) {
           <Link href={`/requests`}>See my Offers</Link>
         </Button>
         <Button
-          asChild
           variant="secondary"
           onClick={() => {
+            setOpen(false);
             resetSession();
           }}
         >
-          <Link href={`/`}>Back to listings</Link>
+          Back to listings
         </Button>
       </div>
     </div>
