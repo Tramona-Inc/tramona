@@ -118,7 +118,7 @@ export default function Sidebar({
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-center gap-5">
+      <div className="flex flex-1 flex-col justify-center gap-2">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
             <SidebarLink href={link.href} icon={link.icon}>
@@ -139,28 +139,28 @@ export default function Sidebar({
               )}
           </div>
         ))}
-        <div className="text-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Menu />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuGroup>
-                <Link href="/settings/personal-information">
-                  <DropdownMenuItem className="text-primary">
-                    <Settings />
-                    Settings
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/account">
-                  <DropdownMenuItem className="text-primary">
-                    <Wallet /> Refer and earn
-                  </DropdownMenuItem>
-                </Link>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      </div>
+      <div className="mb-6 text-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Menu />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuGroup>
+              <Link href="/settings/personal-information">
+                <DropdownMenuItem className="text-primary">
+                  <Settings />
+                  Settings
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/account">
+                <DropdownMenuItem className="text-primary">
+                  <Wallet /> Refer and earn
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       {/* <button onClick={notifyMe}>NOTIFICATION</button>
       <button onClick={play}>Sound</button>
