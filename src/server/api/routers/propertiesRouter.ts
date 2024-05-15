@@ -6,8 +6,8 @@ import {
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
+import { db } from "@/server/db";
 import {
-  bucketListProperties,
   hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
@@ -16,14 +16,14 @@ import {
 } from "@/server/db/schema";
 import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, gte, lte, notExists, sql } from "drizzle-orm";
+import { addDays } from "date-fns";
+import { and, asc, desc, eq, gt, gte, lte, notExists, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
   properties,
 } from "./../../db/schema/tables/properties";
-import { db } from "@/server/db";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -180,6 +180,13 @@ export const propertiesRouter = createTRPCRouter({
             6371 * ACOS(
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
             ) AS distance`,
+          vacancyCount: sql`
+            (SELECT COUNT(booked_dates.property_id) 
+            FROM booked_dates 
+            WHERE booked_dates.property_id = properties.id 
+              AND booked_dates.date >= CURRENT_DATE 
+              AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
+          `,
         })
         .from(properties)
         .where(
@@ -207,20 +214,18 @@ export const propertiesRouter = createTRPCRouter({
             input.maxNightlyPrice
               ? lte(properties.originalNightlyPrice, input.maxNightlyPrice)
               : sql`TRUE`,
-            input.checkIn && input.checkOut
-              ? notExists(
-                  db
-                    .select()
-                    .from(bookedDates)
-                    .where(
-                      and(
-                        eq(bookedDates.propertyId, properties.id),
-                        gte(bookedDates.date, input.checkIn),
-                        lte(bookedDates.date, input.checkOut),
-                      ),
-                    ),
-                )
-              : sql`TRUE`,
+            notExists(
+              db
+                .select()
+                .from(bookedDates)
+                .where(
+                  and(
+                    eq(bookedDates.propertyId, properties.id),
+                    gte(bookedDates.date, new Date()), // today or future
+                    lte(bookedDates.date, addDays(new Date(), 30)), // within next 30 days
+                  ),
+                ),
+            ),
             input.houseRules?.includes("pets allowed")
               ? eq(properties.petsAllowed, true)
               : sql`TRUE`,
@@ -231,7 +236,7 @@ export const propertiesRouter = createTRPCRouter({
           ),
         )
         .limit(12)
-        .orderBy(asc(sql`id`), asc(sql`distance`));
+        .orderBy(asc(sql`id`), asc(sql`distance`), desc(sql`vacancyCount`));
 
       return {
         data,
