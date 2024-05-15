@@ -85,7 +85,7 @@ function Page({ google }: { google: GoogleAPI }) {
               &larr; Back to all requests
             </Link>
           </div>
-          <div className="px-4">
+          <div className="px-4 pb-32">
             <Tabs
               defaultValue={`${offers[0]?.id}`}
               value={selectedOfferId}
@@ -108,7 +108,7 @@ function Page({ google }: { google: GoogleAPI }) {
                   ))}
                 </div>
                 <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
-                  <div className="h-96 lg:h-full">
+                  <div className="h-screen lg:h-full relative">
                     <Map google={google} zoom={15} center={mapCenter}>
                       {/* Child components like Marker, InfoWindow, etc. */}
                       {offers.map(
