@@ -321,9 +321,9 @@ export default function OfferPage({
               <p className="text-sm font-medium text-black">
                 Original price: {formatCurrency(originalTotal / numNights)}
               </p>
-              <div className="my-6 grid gap-1">
+              <div className="my-2 grid gap-1">
                 <div>
-                  <div className="inline-flex w-full items-center justify-start rounded-full border border-gray-300 px-10 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
+                  <div className="inline-flex w-full items-center justify-start rounded-full py-2 md:rounded-3xl lg:rounded-full">
                     <CalendarDays />
                     <div className="ml-2">
                       <p className="text-sm text-gray-600">
@@ -345,7 +345,7 @@ export default function OfferPage({
                   </div>
                 </div> */}
               </div>
-              <div className="inline-flex w-full items-center rounded-full border border-gray-300 px-8 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
+              <div className="inline-flex w-full items-center rounded-full py-2 md:rounded-3xl lg:rounded-full">
                 <UsersRoundIcon />
                 <div className="ml-2">
                   <p className="text-sm text-gray-600">Guests</p>
