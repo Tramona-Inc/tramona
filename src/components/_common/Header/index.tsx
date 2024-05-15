@@ -93,7 +93,7 @@ function LargeHeader(props: HeaderProps) {
               variant="outline"
               asChild
             >
-              <Link href="/faq">
+              <Link href="/help-center">
                 <QuestionMarkIcon />
               </Link>
             </Button>

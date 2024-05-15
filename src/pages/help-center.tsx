@@ -1,22 +1,35 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { api } from "@/utils/api";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import router from "next/router";
 
 export default function HelpCenter() {
+  const { mutateAsync: createConverstaionWithAdmin } =
+    api.messages.createConversationWithAdmin.useMutation({
+      onSuccess: (conversationId) => {
+        void router.push(`/messages?conversationId=${conversationId}`);
+      },
+    });
+
+  async function handleChat() {
+    await createConverstaionWithAdmin();
+  }
+
   return (
     <DashboardLayout type="guest">
       <div className="relative h-64">
         <div className="absolute inset-0">
           <Image
-            src="/assets/images/beach.avif"
+            src="/assets/images/beach.png"
             alt="beach"
             fill
             className="object-cover"
           />
         </div>
-        <h1 className="absolute inset-0 flex items-center justify-center bg-opacity-50 text-3xl font-bold">
+        <h1 className="absolute inset-0 flex items-center justify-center bg-opacity-50 text-4xl font-bold">
           How can we help you?
         </h1>
       </div>
@@ -34,9 +47,12 @@ export default function HelpCenter() {
             <h2 className="pt-4 font-bold">Chat</h2>
             <p>
               For any non emergency needs or questions{" "}
-              <Link href="/messages" className=" text-blue-600 underline">
+              <a
+                onClick={handleChat}
+                className="text-blue-500 underline hover:cursor-pointer"
+              >
                 chat with us.
-              </Link>
+              </a>
             </p>
           </div>
           <div>
