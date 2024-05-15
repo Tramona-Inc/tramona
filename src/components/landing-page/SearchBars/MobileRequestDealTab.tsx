@@ -11,7 +11,6 @@ import { DollarSignIcon, MapPinIcon, Users2Icon } from "lucide-react";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Separator } from "@/components/ui/separator";
 import { useCityRequestForm } from "./useCityRequestForm";
 import { RequestTabsSwitcher } from "./RequestTabsSwitcher";
 
@@ -30,10 +29,10 @@ export function MobileRequestDealTab({
     <Form {...form}>
       <form
         onSubmit={onSubmit}
-        className="flex flex-col justify-between gap-y-4"
+        className="flex flex-col gap-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="my-3 items-center text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground">
           Instead of just seeing listed prices, requesting a deal lets you set
           your budget, and we&apos;ll match you with hosts who have properties
           in the city and accept your price. This way, you can find the perfect
@@ -116,7 +115,6 @@ export function MobileRequestDealTab({
           {/* <p className="mt-1 text-xs text-muted-foreground">
                 Have a property you are eyeing, input the Airbnb link here.
               </p> */}
-          <Separator className="my-4" />
           <div className="flex justify-end">
             <Button type="submit" disabled={form.formState.isSubmitting}>
               Submit Request
