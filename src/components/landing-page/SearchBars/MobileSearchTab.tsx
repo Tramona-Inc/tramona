@@ -76,6 +76,7 @@ export function MobileSearchTab({ closeSheet }: { closeSheet: () => void }) {
                     {...field}
                     label="Maximum price"
                     placeholder="Price per night"
+                    suffix="/night"
                     icon={DollarSignIcon}
                     variant="lpMobile"
                   />

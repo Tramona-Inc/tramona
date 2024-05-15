@@ -57,6 +57,7 @@ export default function DateRangePicker({
     <Popover>
       <PopoverTrigger asChild>
         <InputButton
+          onClick={() => refetch()}
           className={className}
           placeholder={placeholder}
           variant={variant}

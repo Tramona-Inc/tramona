@@ -101,6 +101,7 @@ export function MobileRequestDealTab({
                     <Input
                       {...field}
                       label="Maximum price"
+                      suffix="/night"
                       placeholder="Price per night"
                       icon={DollarSignIcon}
                       variant="lpMobile"
