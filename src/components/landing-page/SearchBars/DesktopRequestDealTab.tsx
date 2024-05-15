@@ -93,6 +93,7 @@ export function DesktopRequestDealTab() {
                     {...field}
                     label="Maximum price"
                     placeholder="Price per night"
+                    suffix="/night"
                     icon={DollarSignIcon}
                     variant="lpDesktop"
                   />
