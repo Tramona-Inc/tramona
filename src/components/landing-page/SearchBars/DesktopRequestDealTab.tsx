@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import PlacesInput from "@/components/_common/PlacesInput";
-import { DollarSignIcon, MapPinIcon, Users2Icon } from "lucide-react";
+import { DollarSignIcon, InfoIcon, MapPinIcon, Users2Icon } from "lucide-react";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -105,6 +105,7 @@ export function DesktopRequestDealTab() {
           <Button
             type="submit"
             size="lg"
+            disabled={form.formState.isSubmitting}
             className="h-16 bg-teal-900 hover:bg-teal-950"
           >
             Submit request
