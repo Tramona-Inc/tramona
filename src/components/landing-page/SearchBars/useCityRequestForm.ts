@@ -30,12 +30,7 @@ export function useCityRequestForm({
 
   const onSubmit = form.handleSubmit(async ({ data }) => {
     const newRequests = data.map((request) => {
-      const {
-        date: _date,
-        maxNightlyPriceUSD,
-        roomType,
-        ...restData
-      } = request;
+      const { date: _date, maxNightlyPriceUSD, ...restData } = request;
       const checkIn = request.date.from;
       const checkOut = request.date.to;
       const numNights = getNumNights(checkIn, checkOut);
@@ -44,7 +39,6 @@ export function useCityRequestForm({
         checkIn: checkIn,
         checkOut: checkOut,
         maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
-        roomType: roomType,
         ...restData,
       };
     });
