@@ -27,7 +27,13 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-function BiddingStep1({ property, setStep }: { property: Property, setStep: (step: number) => void }) {
+function BiddingStep1({
+  property,
+  setStep,
+}: {
+  property: Property;
+  setStep: (step: number) => void;
+}) {
   // const setStep = useBidding((state) => state.setStep);
 
   const setPrice = useBidding((state) => state.setPrice);
@@ -125,7 +131,7 @@ function BiddingStep1({ property, setStep }: { property: Property, setStep: (ste
                     </FormControl>
                     <FormMessage />
                     {price > 0 && price <= reccomendedPrice / 100 && (
-                      <p className="max-w-[300px] text-destructive">
+                      <p className="max-w-[300px] text-xs text-destructive">
                         You are unlikely to get this price, up your price for a
                         higher chance
                       </p>
