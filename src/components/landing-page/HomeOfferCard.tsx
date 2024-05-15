@@ -152,8 +152,8 @@ export default function HomeOfferCard({
                   <Link href={`/property/${property.id}`}>
                     <Image
                       src={photo}
-                      height={300}
-                      width={300}
+                      height={500}
+                      width={500}
                       alt=""
                       className="aspect-square w-full rounded-xl object-cover"
                     />
