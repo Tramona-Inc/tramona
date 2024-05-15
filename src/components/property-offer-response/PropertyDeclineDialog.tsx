@@ -33,10 +33,10 @@ export default function PropertyDeclineDialog({
     bidId: offerId,
   });
 
+  // TODO: fix jank fetching on this and the other ones
   const { data: property } = api.properties.getById.useQuery({
-    id: data?.propertyId,
+    id: data?.propertyId ?? 0,
   });
-
 
   const getTraveler = api.groups.getGroupOwner.useMutation();
 
@@ -45,6 +45,8 @@ export default function PropertyDeclineDialog({
       toast({
         title: "Offer successfully rejected/declined",
       });
+
+      if (!data || !property) return;
 
       const guest = session?.user.role === "guest";
       if (guest) {
@@ -58,14 +60,17 @@ export default function PropertyDeclineDialog({
           } else {
             await twilioMutation.mutateAsync({
               to: traveler.phoneNumber, //TO DO change to host phone number
-              msg: `Tramona: Your ${formatCurrency(originalNightlyBiddingOffer)} offer for ${data?.propertyName} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+              msg: `Tramona: Your ${formatCurrency(originalNightlyBiddingOffer)} offer for ${property.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
             });
           }
         }
       } else {
         const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
         if (traveler?.phoneNumber) {
-          const nightlyPrice = counterNightlyPrice > 0 ? formatCurrency(counterNightlyPrice) : formatCurrency(originalNightlyBiddingOffer);
+          const nightlyPrice =
+            counterNightlyPrice > 0
+              ? formatCurrency(counterNightlyPrice)
+              : formatCurrency(originalNightlyBiddingOffer);
           if (traveler.isWhatsApp) {
             await twilioWhatsAppMutation.mutateAsync({
               templateId: "HX74ffb496915d8e4ef39b41e624ca605e",
@@ -82,7 +87,6 @@ export default function PropertyDeclineDialog({
           }
         }
       }
-
     },
   });
 
@@ -111,4 +115,3 @@ export default function PropertyDeclineDialog({
     </Dialog>
   );
 }
-

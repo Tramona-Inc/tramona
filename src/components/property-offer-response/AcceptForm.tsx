@@ -35,18 +35,18 @@ export default function AcceptForm({
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
-  const { data, isLoading } = api.biddings.getBidInfo.useQuery({
+  const { data: offer } = api.biddings.getBidInfo.useQuery({
     bidId: offerId,
   });
 
   const { data: property } = api.properties.getById.useQuery({
-    id: data?.propertyId,
+    id: offer?.propertyId ?? 0,
   });
-
 
   const getTraveler = api.groups.getGroupOwner.useMutation();
 
   async function onSubmit() {
+    if (!offer || !property) return;
     void mutateAsync({ bidId: offerId, amount: totalCounterAmount });
 
     const guest = session?.user.role === "guest";
@@ -61,26 +61,29 @@ export default function AcceptForm({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber, //TO DO change to host phone number
-            msg: `Tramona: Your ${formatCurrency(previousOfferNightlyPrice)} offer for ${data?.propertyName} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+            msg: `Tramona: Your ${formatCurrency(previousOfferNightlyPrice)} offer for ${property.name} from ${formatDateRange(offer.checkIn, offer.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
           });
         }
       }
     } else {
-      const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
+      const traveler = await getTraveler.mutateAsync(offer?.madeByGroupId);
       if (traveler?.phoneNumber) {
-        const nightlyPrice = counterNightlyPrice > 0 ? formatCurrency(counterNightlyPrice) : formatCurrency(originalNightlyBiddingOffer);
+        const nightlyPrice =
+          counterNightlyPrice > 0
+            ? formatCurrency(counterNightlyPrice)
+            : formatCurrency(originalNightlyBiddingOffer);
         if (traveler.isWhatsApp) {
           await twilioWhatsAppMutation.mutateAsync({
             templateId: "HX28c41122cfa312e326a9b5fc5e7bc255",
             to: traveler.phoneNumber,
             cost: nightlyPrice,
             name: property?.name,
-            dates: formatDateRange(data?.checkIn, data?.checkOut),
+            dates: formatDateRange(offer?.checkIn, offer?.checkOut),
           });
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `Tramona: Congratulations, your ${nightlyPrice}/night offer for  ${property?.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been accepted by the host. Your trip is now booked and your card will be charged! Please navigate to www.tramona.com to message the host and see more information regarding your stay.`,
+            msg: `Tramona: Congratulations, your ${nightlyPrice}/night offer for  ${property?.name} from ${formatDateRange(offer?.checkIn, offer?.checkOut)} has been accepted by the host. Your trip is now booked and your card will be charged! Please navigate to www.tramona.com to message the host and see more information regarding your stay.`,
           });
         }
       }
