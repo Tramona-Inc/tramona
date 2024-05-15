@@ -173,19 +173,19 @@ export const propertiesRouter = createTRPCRouter({
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
           originalNightlyPrice: properties.originalNightlyPrice,
-          isOnBucketList: ctx.user
-            ? exists(
-                ctx.db
-                  .select()
-                  .from(bucketListProperties)
-                  .where(
-                    and(
-                      eq(bucketListProperties.propertyId, properties.id),
-                      eq(bucketListProperties.userId, ctx.user.id),
-                    ),
-                  ),
-              )
-            : sql`FALSE`,
+          // isOnBucketList: ctx.user
+          //   ? exists(
+          //       ctx.db
+          //         .select()
+          //         .from(bucketListProperties)
+          //         .where(
+          //           and(
+          //             eq(bucketListProperties.propertyId, properties.id),
+          //             eq(bucketListProperties.userId, ctx.user.id),
+          //           ),
+          //         ),
+          //     )
+          //   : sql`FALSE`,
           distance: sql`
             6371 * ACOS(
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})

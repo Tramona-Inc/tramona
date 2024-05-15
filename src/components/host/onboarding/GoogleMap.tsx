@@ -39,26 +39,26 @@
 //   //   setShowInfoWindow(!showInfoWindow);
 //   // };
 
-//   return (
-//     <div>
-//       {lng && lat && (
-//         <div className="relative z-10">
-//           <Map
-//             google={google}
-//             zoom={15}
-//             initialCenter={{ lat: lat, lng: lng }}
-//             // onClick={onMapClick}
-//             style={{ height: "400px" }}
-//           >
-//             <Marker
-//               position={{ lat: lat, lng: lng }}
-//               draggable={true}
-//               // onClick={onMarkerClick}
-//               // onDragend={(coord: { latLng: { lat: () => number; lng: () => number; }; }) => onMarkerDragend(coord)}
-//             />
+  // return (
+  //   <div>
+  //     {lng && lat && (
+  //       <div className="relative z-10">
+  //         <Map
+  //           google={google}
+  //           zoom={15}
+  //           initialCenter={{ lat, lng }}
+  //           // onClick={onMapClick}
+  //           style={{ height: "400px" }}
+  //         >
+  //           <Marker
+  //             position={{ lat, lng }}
+  //             draggable={true}
+              // onClick={onMarkerClick}
+              // onDragend={(coord: { latLng: { lat: () => number; lng: () => number; }; }) => onMarkerDragend(coord)}
+           // />
 
-//             {/* InfoWindow to display latitude and longitude */}
-//             {/* <InfoWindow
+             {/* InfoWindow to display latitude and longitude */}
+             {/* <InfoWindow
 //               visible={showInfoWindow}
 //               position={markerPosition}
 //               onClose={() => setShowInfoWindow(false)}
@@ -69,13 +69,11 @@
 //                 <p>Longitude: {markerPosition.lng}</p>
 //               </div>
 //             </InfoWindow> */}
-//           </Map>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
+           {/* </Map>
+         </div>
+      )}
+    </div>
+  );
+}
 
-// export default GoogleApiWrapper({
-//   apiKey: env.NEXT_PUBLIC_GOOGLE_PLACES_KEY,
-// })(GoogleMap);
+export default GoogleMap; */}

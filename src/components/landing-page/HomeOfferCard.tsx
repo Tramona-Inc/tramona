@@ -1,4 +1,3 @@
-import DateRangePicker from "@/components/_common/DateRangePicker";
 import { CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -8,47 +7,30 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
-import { cn, formatCurrency } from "@/utils/utils";
+import { cn, formatCurrency, plural } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import DateRangePicker from "../_common/DateRangePicker";
 import { Button } from "../ui/button";
 import MakeBid from "./bidding/MakeBid";
-import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { plural } from "@/utils/utils";
-import { api as apiHelper } from "@/utils/api";
-
-function Dot({ isCurrent }: { isCurrent: boolean }) {
-  return (
-    <div
-      className={cn(
-        "rounded-full transition-all duration-500",
-        isCurrent ? "size-2.5 bg-white" : "size-1.5 bg-white/50",
-      )}
-    ></div>
-  );
-}
-
-function CarouselDots({ count, current }: { count: number; current: number }) {
-  return (
-    <div className="pointer-events-none absolute bottom-2 flex w-full justify-center">
-      <div className="flex h-4 items-center gap-2 rounded-full bg-black/40 p-1">
-        {Array(count)
-          .fill(null)
-          .map((_, idx) => (
-            <Dot key={idx} isCurrent={idx === current - 1} />
-          ))}
-      </div>
-    </div>
-  );
-}
+import { signIn, useSession } from "next-auth/react";
+import { api } from "@/utils/api";
+import { Plus } from "lucide-react";
+import { CarouselDots } from "../_common/carousel-dots";
 
 type PropertyCard = {
   id: number;
@@ -62,71 +44,75 @@ type PropertyCard = {
   distance: unknown;
 };
 
+const formSchema = z
+  .object({
+    date: z.object({
+      from: z.coerce.date(),
+      to: z.coerce.date(),
+    }),
+  })
+  .refine((data) => data.date.to > data.date.from, {
+    message: "Must stay for at least 1 night",
+    path: ["date"],
+  });
+
+type FormSchema = z.infer<typeof formSchema>;
+
 export default function HomeOfferCard({
   property,
 }: {
   property: PropertyCard;
 }) {
-  const [api, setApi] = useState<CarouselApi>();
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!api) {
+    if (!carouselApi) {
       return;
     }
 
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
+    setCount(carouselApi.scrollSnapList().length);
+    setCurrent(carouselApi.selectedScrollSnap() + 1);
 
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1);
+    carouselApi.on("select", () => {
+      setCurrent(carouselApi.selectedScrollSnap() + 1);
     });
-  }, [api]);
+  }, [carouselApi]);
 
   const { data: isBucketListProperty } =
-    apiHelper.profile.isBucketListProperty.useQuery({
+    api.profile.isBucketListProperty.useQuery({
       blPropertyId: property.id,
     });
 
-  const [isInBucketList, setIsInBucketList] = React.useState<boolean>(false);
-  React.useEffect(() => {
+  const [isInBucketList, setIsInBucketList] = useState(false);
+
+  useEffect(() => {
     if (isBucketListProperty) {
       setIsInBucketList(isBucketListProperty);
     }
   }, [isBucketListProperty]);
 
   const { mutate: addPropertyToBucketList } =
-    apiHelper.profile.addProperty.useMutation({
+    api.profile.addProperty.useMutation({
       onSuccess: () => {
         setIsInBucketList(true);
       },
     });
 
   const { mutate: removePropertyFromBucketList } =
-    apiHelper.profile.removeProperty.useMutation({
+    api.profile.removeProperty.useMutation({
       onSuccess: () => {
         setIsInBucketList(false);
       },
     });
 
-  const formSchema = z
-    .object({
-      date: z.object({
-        from: z.coerce.date(),
-        to: z.coerce.date(),
-      }),
-    })
-    .refine((data) => data.date.to > data.date.from, {
-      message: "Must stay for at least 1 night",
-      path: ["date"],
-    });
-
-  type FormSchema = z.infer<typeof formSchema>;
-
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
+
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
 
   const setDate = useBidding((state) => state.setDate);
   const resetSession = useBidding((state) => state.resetSession);
@@ -144,12 +130,10 @@ export default function HomeOfferCard({
 
   const alreadyBid = propertyIdBids.includes(property.id);
 
-  const [step, setStep] = useState(alreadyBid ? 1 : 0);
-
   return (
     <div className="relative">
       <div className="space-y-2">
-        <Carousel setApi={setApi}>
+        <Carousel setApi={setCarouselApi}>
           <CarouselContent>
             {property.imageUrls.slice(0, 5).map((photo, index) => (
               <CarouselItem key={index}>
@@ -186,7 +170,6 @@ export default function HomeOfferCard({
               <span className="text-xs">Airbnb Price: </span>
               {formatCurrency(
                 AVG_AIRBNB_MARKUP * property.originalNightlyPrice,
-                { round: true },
               )}
               <span className="text-xs">/night</span>
             </p>
@@ -205,51 +188,62 @@ export default function HomeOfferCard({
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-2"
           >
-            <DateRangePicker
+            <FormField
               control={form.control}
               name="date"
-              formLabel=""
-              className="col-span-full sm:col-span-1"
-              propertyId={property.id}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <DateRangePicker
+                      {...field}
+                      propertyId={property.id}
+                      disablePast
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  type={"submit"}
-                  className="w-full rounded-xl"
-                  disabled={!form.formState.isValid}
-                >
-                  Make Offer
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="flex sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
-                {step !== 0 && (
+              {/* Removed trigger to have control on open and close */}
+              <div>
+                {alreadyBid ? (
                   <Button
-                    variant={"ghost"}
-                    className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
-                    onClick={() => {
-                      if (step - 1 > -1) {
-                        setStep(step - 1);
-                      }
-                    }}
+                    type={"submit"}
+                    className={"w-full rounded-xl"}
+                    disabled={alreadyBid}
                   >
-                    <ChevronLeft />
+                    Already Bid
+                  </Button>
+                ) : (
+                  <Button
+                    type={"submit"}
+                    className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
+                    // disabled={!form.formState.isValid}
+                  >
+                    Make Offer
                   </Button>
                 )}
-                <MakeBid propertyId={property.id} />
+              </div>
+              <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
+                <MakeBid propertyId={property.id} setOpen={setOpen} />
               </DialogContent>
             </Dialog>
           </form>
         </Form>
       </div>
-
       <div className="absolute right-2 top-2">
         {!isInBucketList && (
           <Button
+            tooltip={
+              isLoggedIn ? undefined : "Please log in to add to bucket list"
+            }
             onClick={() =>
-              addPropertyToBucketList({
-                propertyId: property.id,
-              })
+              isLoggedIn
+                ? addPropertyToBucketList({
+                    propertyId: property.id,
+                  })
+                : signIn()
             }
             variant="white"
             className="rounded-full"
@@ -258,7 +252,6 @@ export default function HomeOfferCard({
             Add to bucket list
           </Button>
         )}
-
         {isInBucketList && (
           <Button
             onClick={() => removePropertyFromBucketList(property.id)}

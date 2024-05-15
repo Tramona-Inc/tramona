@@ -24,7 +24,7 @@ export function PropertyOfferAcceptDialog({
 
   async function acceptOffer() {
     await mutation
-      .mutateAsync({ bidId: offerId })
+      .mutateAsync({ bidId: offerId, amount: 0 })
       .then(() => toast({ title: "Successfully accepted offer" }))
       .catch(() => errorToast());
 

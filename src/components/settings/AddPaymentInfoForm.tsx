@@ -1,14 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import {
+  AddressElement,
   PaymentElement,
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
 import { type StripeError } from "@stripe/stripe-js";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
-export default function PaymentTestForm() {
+export default function AddPaymentInfoForm() {
+  const { update } = useSession();
+
   const stripe = useStripe();
   const elements = useElements();
 
@@ -20,9 +24,6 @@ export default function PaymentTestForm() {
 
   const { mutateAsync: createSetupIntentMutation } =
     api.stripe.createSetupIntent.useMutation();
-
-  const { mutateAsync: createBiddingMutate } =
-    api.biddings.create.useMutation();
 
   const handleError = (error: StripeError) => {
     setLoading(false);
@@ -70,7 +71,20 @@ export default function PaymentTestForm() {
       });
     }
 
-    console.log("reached");
+    // Clear form fields and error message
+    elements.getElement('address')?.clear();
+    elements.getElement("payment")?.clear();
+    setErrorMessage(undefined);
+
+    // Update session
+    await update();
+
+    // Reset loading state
+    setLoading(false);
+
+    // Clear form fields and error message
+    elements.getElement('address')?.clear();
+    elements.getElement("payment")?.clear();
 
     if (error) {
       // This point is only reached if there's an immediate error when
@@ -85,9 +99,10 @@ export default function PaymentTestForm() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <AddressElement options={{ mode: "billing" }} />
       <PaymentElement />
-      <Button type="submit" disabled={!stripe || loading}>
-        Submit Payment
+      <Button className={"mt-5"} type="submit" disabled={!stripe || loading}>
+        Add Payment Method
       </Button>
       {errorMessage && <div>{errorMessage}</div>}
     </form>

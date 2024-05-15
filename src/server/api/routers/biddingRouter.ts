@@ -23,6 +23,7 @@ import { random } from "lodash";
 import { z } from "zod";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";
@@ -293,7 +294,9 @@ export const biddingRouter = createTRPCRouter({
     });
   }),
 
-  getAllPropertyBids: protectedProcedure.query(async ({ ctx }) => {
+  getAllPropertyBids: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return [];
+
     const result = await ctx.db.query.bids.findMany({
       where: exists(
         ctx.db
@@ -396,17 +399,19 @@ export const biddingRouter = createTRPCRouter({
 
   reject: protectedProcedure
     .input(z.object({ bidId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      const userIsWithBid = await userWithBid({
-        userId: ctx.user.id,
-        bidId: input.bidId,
-      });
+    .mutation(async ({ input }) => {
+      // const userIsWithBid = await userWithBid({
+      //   userId: ctx.user.id,
+      //   bidId: input.bidId,
+      // });
 
-      if (!userIsWithBid) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      } else {
-        await updateBidStatus({ id: input.bidId, status: "Rejected" });
-      }
+      // if (!userIsWithBid) {
+      //   throw new TRPCError({ code: "UNAUTHORIZED" });
+      // } else {
+      // await updateBidStatus({ id: input.bidId, status: "Rejected" });
+      // }
+
+      await updateBidStatus({ id: input.bidId, status: "Rejected" });
 
       // TODO: email travellers
     }),

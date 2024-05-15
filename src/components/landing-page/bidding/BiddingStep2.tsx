@@ -93,26 +93,15 @@ function BiddingStep2({
   setStep: (step: number) => void;
 }) {
   const addPropertyIdBids = useBidding((state) => state.addPropertyIdBids);
+  const twilioMutation = api.twilio.sendSMS.useMutation();
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
-  const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
-    onSuccess: () => {
-      addPropertyIdBids(property.id);
-      setStep(2);
-    },
-    onError: (error) => {
-      console.log("error", error.message);
-      setError(error.message);
-    },
-  });
   const { data: payments } = api.stripe.getListOfPayments.useQuery();
   const { data: session } = useSession();
-
   const [currentPaymentMethodId, setCurrentPaymentMethodId] = useState<
     string | undefined
   >(payments?.defaultPaymentMethod as string | undefined);
   const [error, setError] = useState("");
-
-  const stripePromise = useStripe();
 
   const date = useBidding((state) => state.date);
   const price = useBidding((state) => state.price);
@@ -120,6 +109,34 @@ function BiddingStep2({
   // const setStep = useBidding((state) => state.setStep);
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
   const totalPrice = totalNightlyPrice;
+  const stripePromise = useStripe();
+  const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
+    onSuccess: async () => {
+      addPropertyIdBids(property.id);
+      setStep(2);
+      const traveler = session?.user;
+      if (traveler?.phoneNumber) {
+        if (traveler.isWhatsApp) {
+          await twilioWhatsAppMutation.mutateAsync({
+            templateId: "HX1650cf0e293142a6db2b458167025222",
+            to: traveler.phoneNumber,
+            price: price,
+            name: property.name,
+            dates: formatDateRange(date.from, date.to),
+          });
+        } else {
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}. Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
+          });
+        }
+      }
+    },
+    onError: (error) => {
+      console.log("error", error.message);
+      setError(error.message);
+    },
+  });
 
   const options: StripeElementsOptions = {
     mode: "setup",
