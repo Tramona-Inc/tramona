@@ -48,6 +48,7 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
+import UserAvatar from "../_common/UserAvatar";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -123,46 +124,34 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <section className="rounded-lg border">
         <div className="relative h-40 bg-teal-900 lg:h-52">
-          <div className="absolute inset-0 overflow-hidden">
-            <img
-              src="https://t3.ftcdn.net/jpg/05/70/41/84/360_F_570418433_m1DoCjzGbZhDQKs96hMThzUz736s2zhl.jpg"
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <Button className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-primary/20 p-0 lg:w-auto lg:rounded-lg lg:px-3">
+          {/* <Button className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-primary/20 p-0 lg:w-auto lg:rounded-lg lg:px-3">
             <Camera />
             <p className="hidden lg:block">Edit Cover Photo</p>
-          </Button>
+          </Button> */}
         </div>
         <div className="relative grid grid-cols-1 gap-4 p-5 lg:grid-cols-4 lg:gap-0 lg:p-4">
-          <img
-            src="https://images.ctfassets.net/rt5zmd3ipxai/25pHfG94sGlRALOqbRvSxl/9f591d8263607fdf923b962cbfcde2a9/NVA-panda.jpg"
-            alt=""
-            className="absolute bottom-44 left-5 h-36 w-36 rounded-full border border-white object-cover lg:bottom-3 lg:left-10 lg:h-40 lg:w-40"
+          <UserAvatar
+            size="huge"
+            name={profileInfo?.name}
+            email={profileInfo?.email}
+            image={profileInfo?.image}
           />
-          <Button
-            size="icon"
-            className="absolute bottom-6 left-40 z-30 rounded-full bg-primary/70"
-          >
-            <Camera size={24} />
-          </Button>
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:-ml-4 lg:mt-0">
-            <div className="flex flex-row items-center justify-start gap-x-2">
+            <div className="flex flex-row items-center justify-start gap-x-2 lg:-translate-x-20">
               <h2 className="text-xl font-bold lg:text-2xl">
                 {profileInfo?.name}
               </h2>
               {verificationStatus?.isIdentityVerified == "true" ? (
                 <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
-                  <BadgeCheck size={22} className="" /> Verified
+                  <BadgeCheck size={22} /> Verified
                 </div>
               ) : verificationStatus?.isIdentityVerified == "pending" ? (
                 <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
-                  <Clock2Icon size={22} className="" /> Pending
+                  <Clock2Icon size={22} /> Pending
                 </div>
               ) : (
                 <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
-                  <BadgeXIcon size={22} className="" /> Not Verified
+                  <BadgeXIcon size={22} /> Not Verified
                 </div>
               )}
             </div>
@@ -219,7 +208,7 @@ export default function ProfilePage() {
           {profileInfo?.about ??
             "Joined Tramona " +
               (session?.user.createdAt
-                ? new Date(session.user.createdAt).toISOString().substring(0, 7)
+                ? new Date(session.user.createdAt).toLocaleDateString()
                 : "")}
         </p>
       </section>
@@ -228,7 +217,7 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between">
           <h2 className="font-bold">Bucket List</h2>
           <div className="flex items-center">
-            <Dialog>
+            {/* <Dialog>
               <DialogTrigger asChild>
                 <Button
                   variant="ghost"
@@ -275,7 +264,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </DialogContent>
-            </Dialog>
+            </Dialog> */}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -332,20 +321,26 @@ export default function ProfilePage() {
           {/* Destinations Tab */}
           <TabsContent value="destinations">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {profileInfo?.bucketListDestinations.map((destination) => (
-                <DestinationCard
-                  key={destination.id}
-                  destination={destination}
-                  onEdit={() => {
-                    setSelectedBLDestinationId(destination.id);
-                    editBLDestinationDialogState.setState("open");
-                  }}
-                  onDelete={() => {
-                    setSelectedBLDestinationId(destination.id);
-                    deleteBLDDialogState.setState("open");
-                  }}
-                />
-              ))}
+              {profileInfo?.bucketListDestinations?.length ? (
+                profileInfo?.bucketListDestinations.map((destination) => (
+                  <DestinationCard
+                    key={destination.id}
+                    destination={destination}
+                    onEdit={() => {
+                      setSelectedBLDestinationId(destination.id);
+                      editBLDestinationDialogState.setState("open");
+                    }}
+                    onDelete={() => {
+                      setSelectedBLDestinationId(destination.id);
+                      deleteBLDDialogState.setState("open");
+                    }}
+                  />
+                ))
+              ) : (
+                <p className="col-span-full py-8 text-center text-muted-foreground">
+                  No destinations yet
+                </p>
+              )}
             </div>
           </TabsContent>
         </Tabs>
@@ -375,10 +370,10 @@ export default function ProfilePage() {
                       .substring(0, 10)
                   : ""),
             location: profileInfo.location ?? "",
-            facebook_link: profileInfo.socials![0],
-            youtube_link: profileInfo.socials![1],
-            instagram_link: profileInfo.socials![2],
-            twitter_link: profileInfo.socials![3],
+            facebook_link: profileInfo.socials?.[0] ?? "",
+            youtube_link: profileInfo.socials?.[1] ?? "",
+            instagram_link: profileInfo.socials?.[2] ?? "",
+            twitter_link: profileInfo.socials?.[3] ?? "",
           }}
         />
       )}
