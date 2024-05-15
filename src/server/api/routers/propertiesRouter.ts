@@ -214,18 +214,6 @@ export const propertiesRouter = createTRPCRouter({
             input.maxNightlyPrice
               ? lte(properties.originalNightlyPrice, input.maxNightlyPrice)
               : sql`TRUE`,
-            notExists(
-              db
-                .select()
-                .from(bookedDates)
-                .where(
-                  and(
-                    eq(bookedDates.propertyId, properties.id),
-                    gte(bookedDates.date, new Date()), // today or future
-                    lte(bookedDates.date, addDays(new Date(), 30)), // within next 30 days
-                  ),
-                ),
-            ),
             input.houseRules?.includes("pets allowed")
               ? eq(properties.petsAllowed, true)
               : sql`TRUE`,
@@ -233,10 +221,15 @@ export const propertiesRouter = createTRPCRouter({
               ? eq(properties.smokingAllowed, true)
               : sql`TRUE`,
             eq(properties.isPrivate, false),
+            sql`(SELECT COUNT(booked_dates.property_id) 
+            FROM booked_dates 
+            WHERE booked_dates.property_id = properties.id 
+              AND booked_dates.date >= CURRENT_DATE 
+              AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
         .limit(12)
-        .orderBy(asc(sql`id`), asc(sql`distance`), desc(sql`vacancyCount`));
+        .orderBy(asc(sql`distance`));
 
       return {
         data,
