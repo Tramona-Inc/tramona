@@ -15,31 +15,7 @@ import { Button } from "../ui/button";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { plural } from "@/utils/utils";
 import { api as apiHelper } from "@/utils/api";
-
-function Dot({ isCurrent }: { isCurrent: boolean }) {
-  return (
-    <div
-      className={cn(
-        "rounded-full border border-white",
-        isCurrent ? "h-4 w-4 bg-white" : "h-3 w-3 bg-transparent",
-      )}
-    ></div>
-  );
-}
-
-function CarouselDots({ count, current }: { count: number; current: number }) {
-  return (
-    <div className="absolute bottom-10 flex w-full justify-center">
-      <div className=" flex items-center gap-2 rounded-full bg-zinc-300/25 px-3 py-1">
-        {Array(count)
-          .fill(null)
-          .map((_, idx) => (
-            <Dot key={idx} isCurrent={idx === current - 1} />
-          ))}
-      </div>
-    </div>
-  );
-}
+import { CarouselDots } from "../_common/carousel-dots";
 
 type BLPropertyCard = {
   propertyId: number;
@@ -76,9 +52,8 @@ export default function BucketListHomeOfferCard({
     });
   }, [api]);
 
-  const {
-    mutate: removePropertyFromBucketList
-  } = apiHelper.profile.removeProperty.useMutation();
+  const { mutate: removePropertyFromBucketList } =
+    apiHelper.profile.removeProperty.useMutation();
 
   return (
     <div className="relative">
@@ -118,7 +93,9 @@ export default function BucketListHomeOfferCard({
           {property.originalNightlyPrice && (
             <p>
               <span className="text-xs">Airbnb Price: </span>
-              {formatCurrency(AVG_AIRBNB_MARKUP * property.originalNightlyPrice)}
+              {formatCurrency(
+                AVG_AIRBNB_MARKUP * property.originalNightlyPrice,
+              )}
               <span className="text-xs">/night</span>
             </p>
           )}
@@ -134,9 +111,11 @@ export default function BucketListHomeOfferCard({
       </div>
 
       <div className="absolute right-2 top-2">
-        <Button 
-          onClick={() => removePropertyFromBucketList(property.bucketListPropertyId)}
-          className="bg-[#333333]/90 hover:bg-[#333333] rounded-full"
+        <Button
+          onClick={() =>
+            removePropertyFromBucketList(property.bucketListPropertyId)
+          }
+          className="rounded-full bg-[#333333]/90 hover:bg-[#333333]"
         >
           Added to bucket list
         </Button>

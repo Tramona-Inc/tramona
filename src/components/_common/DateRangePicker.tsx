@@ -1,5 +1,4 @@
 import { Calendar } from "@/components/ui/calendar";
-import { FormField, FormItem, FormMessage } from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
@@ -7,85 +6,85 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
-import { type FieldPath, type FieldValues } from "react-hook-form";
+import { isSameDay } from "date-fns";
+import { type DateRange } from "react-day-picker";
 import { type InputVariant } from "../ui/input";
 import { InputButton } from "../ui/input-button";
 
-export default function DateRangePicker<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->({
+export default function DateRangePicker({
   propertyId,
   className,
-  formLabel,
+  label,
+  placeholder = "Select dates",
   variant,
   icon,
-  ...props
-}: Omit<
-  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
-  "render"
-> & {
+  disablePast = false,
+  value,
+  onChange,
+}: {
   propertyId?: number;
   className?: string;
-  formLabel?: string;
+  label?: string;
+  placeholder?: string;
   variant?: InputVariant;
   icon?: React.FC<{ className?: string }>;
+  disablePast?: boolean;
+  value?: DateRange;
+  onChange: (value?: DateRange) => void;
 }) {
   const { data, refetch } = api.properties.getBlockedDates.useQuery(
     { propertyId: propertyId ?? 0 },
     { enabled: false },
   );
 
-  const disabledDays = data?.map((date) => new Date(date.date));
+  const disabledDays: Date[] | undefined = data?.map(
+    (date) => new Date(date.date),
+  );
+
+  function dateIsDisabled(date: Date) {
+    if (date < new Date() && disablePast) return true;
+
+    if (disabledDays?.some((d) => isSameDay(date, d))) return true;
+
+    // date is unreachable (there is a disabled day between it and the selected date)
+    return disabledDays?.some((d) => {
+      if (value?.from === undefined) return false;
+      return (value.from <= d && d <= date) || (date <= d && d <= value.from);
+    });
+  }
 
   return (
-    <FormField
-      {...props}
-      render={({ field }) => (
-        <FormItem>
-          <Popover>
-            <PopoverTrigger asChild>
-              <InputButton
-                onClick={() => propertyId && refetch()}
-                className={className}
-                placeholder="Select dates"
-                variant={variant}
-                label={formLabel}
-                icon={icon}
-                value={
-                  field.value &&
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                  formatDateRange(field.value.from, field.value.to)
-                }
-              />
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto p-0 backdrop-blur-md"
-              align="start"
-              side="top"
-            >
-              <Calendar
-                mode="range"
-                selected={field.value}
-                onSelect={(e) => {
-                  if (e?.from && e.to === undefined) {
-                    e.to = e.from;
-                  }
-                  field.onChange(e);
-                }}
-                disabled={(date) =>
-                  (disabledDays ?? []).some(
-                    (d) => date.toDateString() === d.toDateString(),
-                  ) || date < new Date()
-                }
-                numberOfMonths={1}
-                showOutsideDays={true}
-              />
-            </PopoverContent>
-          </Popover>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    <Popover>
+      <PopoverTrigger asChild>
+        <InputButton
+          onClick={() => refetch()}
+          className={className}
+          placeholder={placeholder}
+          variant={variant}
+          label={label}
+          icon={icon}
+          value={value?.from && formatDateRange(value.from, value.to)}
+        />
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-auto p-0 backdrop-blur-md"
+        align="start"
+        side="top"
+      >
+        <Calendar
+          mode="range"
+          selected={value}
+          onSelect={(e) => {
+            if (e?.from && e.to === undefined) {
+              e.to = e.from;
+            }
+            onChange(e);
+          }}
+          disabled={(date: Date) => !!dateIsDisabled(date)}
+          numberOfMonths={1}
+          showOutsideDays={true}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

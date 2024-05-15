@@ -15,9 +15,17 @@ import { Separator } from "@/components/ui/separator";
 import { useCityRequestForm } from "./useCityRequestForm";
 import { RequestTabsSwitcher } from "./RequestTabsSwitcher";
 
-export function MobileRequestDealTab() {
+export function MobileRequestDealTab({
+  closeSheet,
+}: {
+  closeSheet?: () => void;
+}) {
   const [curTab, setCurTab] = useState(0);
-  const { form, onSubmit } = useCityRequestForm({ setCurTab });
+  const { form, onSubmit } = useCityRequestForm({
+    setCurTab,
+    afterSubmit: closeSheet,
+  });
+
   return (
     <Form {...form}>
       <form
@@ -93,6 +101,7 @@ export function MobileRequestDealTab() {
                     <Input
                       {...field}
                       label="Maximum price"
+                      suffix="/night"
                       placeholder="Price per night"
                       icon={DollarSignIcon}
                       variant="lpMobile"
@@ -108,12 +117,10 @@ export function MobileRequestDealTab() {
                 Have a property you are eyeing, input the Airbnb link here.
               </p> */}
           <Separator className="my-4" />
-          <div className="flex justify-between">
-            <Button variant="ghost" onClick={() => form.reset()}>
-              Clear all
+          <div className="flex justify-end">
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              Submit request
             </Button>
-
-            <Button type="submit">Submit request</Button>
           </div>
         </div>
       </form>

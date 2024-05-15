@@ -1,26 +1,33 @@
 import { Button } from "@/components/ui/button";
 import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
-import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
+import { formatDateRange, plural } from "@/utils/utils";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Lightbulb } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-function BiddingConfirmation({ property }: { property: Property }) {
+
+function BiddingConfirmation({
+  property,
+  setOpen,
+}: {
+  property: Property;
+  setOpen: (open: boolean) => void;
+}) {
   const date = useBidding((state) => state.date);
+  const price = useBidding((state) => state.price);
 
   const resetSession = useBidding((state) => state.resetSession);
 
   return (
     <div className="flex flex-col items-center justify-center ">
       <h1 className=" my-5 text-lg font-semibold text-green-600 md:text-3xl">
-        {" "}
         Offer Sent!
       </h1>
       <div className="flex flex-col">
         <h1 className=" mb-2 font-semibold md:mb-6 md:text-lg">
           {/* place bid.amount in here  */}
-          Your offer for <span className="font-bold">${100}</span> has been
+          Your offer for <span className="font-bold">${price}</span> has been
           submitted!
         </h1>
         <div className="flex flex-col gap-x-10 md:flex-row">
@@ -37,10 +44,12 @@ function BiddingConfirmation({ property }: { property: Property }) {
             </div>
             <div className="flex flex-col text-sm tracking-tight md:text-base md:tracking-tight">
               <h2 className="font-bold ">{property.name}</h2>
-              <p className="text-xs md:text-base">
-                Airbnb price:{" "}
-                {formatCurrency(property?.originalNightlyPrice ?? 0)}/night
-              </p>
+              {property.originalNightlyPrice !== null && (
+                <p className="text-xs md:text-base">
+                  Airbnb price: formatCurrency(property.originalNightlyPrice)
+                  /night
+                </p>
+              )}
               <p className="mt-3">Check-in/Check-out:</p>
               <p className="text-muted-foreground">
                 {formatDateRange(date.from, date.to)}
@@ -66,8 +75,9 @@ function BiddingConfirmation({ property }: { property: Property }) {
               be charged.
             </p>
             <div className="mt-16 text-center text-xs md:mt-8">
-              <span className="text-blue-500 underline">Learn more </span>about
-              the host cancellation policy
+              {/* TODO: link to help center */}
+              {/* <span className="text-blue-500 underline">Learn more</span> about
+              the host cancellation policy */}
             </div>
           </div>
         </div>
@@ -78,13 +88,13 @@ function BiddingConfirmation({ property }: { property: Property }) {
           <Link href={`/requests`}>See my Offers</Link>
         </Button>
         <Button
-          asChild
           variant="secondary"
           onClick={() => {
+            setOpen(false);
             resetSession();
           }}
         >
-          <Link href={`/`}>Back to listings</Link>
+          Back to listings
         </Button>
       </div>
     </div>

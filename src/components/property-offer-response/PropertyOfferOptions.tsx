@@ -67,6 +67,8 @@ export default function PropertyCounterOptions({
           offerId={offerId}
           open={declineOpen}
           onOpenChange={setDeclineOpen}
+          counterNightlyPrice={counterNightlyPrice}
+          originalNightlyBiddingOffer={originalNightlyBiddingOffer}
         />
       </div>
     </div>

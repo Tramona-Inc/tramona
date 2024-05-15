@@ -5,6 +5,7 @@ import { useMeasure } from "@uidotdev/usehooks";
 import { cva, type VariantProps } from "class-variance-authority";
 import { FormLabel } from "./form";
 import { labelVariants, overlayVariants } from "./input";
+import { XIcon } from "lucide-react";
 
 // I customized this inputButton component to support prefixes and suffixes.
 // They can be any ReactNode, including strings or JSX elements.
@@ -19,7 +20,13 @@ export type InputButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     label?: React.ReactNode;
     placeholder?: string;
     value?: string;
-  };
+  } & (
+    | {
+        setValue?: (value: undefined) => void;
+        withClearBtn?: false;
+      }
+    | { setValue: (value: undefined) => void; withClearBtn: true }
+  );
 
 const inputButtonVariants = cva(
   "flex items-center text-left w-full hover:bg-zinc-50 rounded-md border-input appearance-none border outline-transparent outline disabled:opacity-50 text-sm text-foreground focus-visible:border-transparent focus-visible:outline focus-visible:outline-ring disabled:cursor-not-allowed",
@@ -48,6 +55,8 @@ const InputButton = React.forwardRef<HTMLButtonElement, InputButtonProps>(
       placeholder,
       variant,
       label,
+      setValue,
+      withClearBtn = false,
       ...props
     },
     ref,
@@ -113,6 +122,15 @@ const InputButton = React.forwardRef<HTMLButtonElement, InputButtonProps>(
             {suffixEl}
           </div>
         </div>
+        {withClearBtn && value && (
+          <button
+            type="button"
+            className="absolute bottom-4 right-1 rounded-full bg-white p-1 hover:bg-zinc-200"
+            onClick={() => setValue?.(undefined)}
+          >
+            <XIcon className="size-4" />
+          </button>
+        )}
       </div>
     );
   },

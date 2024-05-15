@@ -5,7 +5,7 @@ type CoordinateDataProps =
       lat: number | undefined;
       lng: number | undefined;
     }
- 
+
   function LeafletMap({ lat, lng }: CoordinateDataProps) {
   //for the leaflet map
   const MapContainer = dynamic(

@@ -1,7 +1,6 @@
 import { cities } from "@/components/landing-page/CitiesFilter";
 import { type ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema/tables/properties";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
 
 type RoomType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
 
@@ -14,9 +13,9 @@ export type CitiesLatLong = {
 
 type CitiesFilterState = {
   open: boolean;
-  filter: CitiesLatLong;
+  filter: CitiesLatLong | undefined;
   roomType: RoomType | undefined;
-  setFilter: (filter: CitiesLatLong) => void;
+  setFilter: (filter: CitiesLatLong | undefined) => void;
   setRoomType: (roomType: RoomType | undefined) => void;
   beds: number;
   bedrooms: number;
@@ -27,6 +26,15 @@ type CitiesFilterState = {
   houseRules: string[];
   setHouseRules: (houseRules: string[]) => void;
   setOpen: (open: boolean) => void;
+  clearFilter: () => void;
+  guests: number;
+  setGuests: (guests: number) => void;
+  maxNightlyPrice: number | undefined;
+  setMaxNightlyPrice: (maxNightlyPrice: number | undefined) => void;
+  checkIn: Date | undefined;
+  setCheckIn: (checkIn: Date | undefined) => void;
+  checkOut: Date | undefined;
+  setCheckOut: (checkOut: Date | undefined) => void;
 };
 
 // export const useBidding = create<BiddingState>((set) => ({
@@ -47,41 +55,38 @@ type CitiesFilterState = {
 //   },
 // }));
 
-export const useCitiesFilter = create<CitiesFilterState>()(
-  persist(
-    (set) => ({
-      open: false,
+export const useCitiesFilter = create<CitiesFilterState>((set) => ({
+  open: false,
+  filter: undefined,
+  roomType: undefined,
+  beds: 0,
+  bedrooms: 0,
+  bathrooms: 0,
+  guests: 0,
+  houseRules: [],
+  clearFilter: () => {
+    set((state) => ({
+      ...state,
       filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
       roomType: undefined,
       beds: 0,
       bedrooms: 0,
       bathrooms: 0,
       houseRules: [],
-      setFilter: (filter: CitiesLatLong) => {
-        set(() => ({ filter }));
-      },
-      setRoomType: (roomType: RoomType | undefined) => {
-        set(() => ({ roomType }));
-      },
-      setBeds: (beds: number) => {
-        set(() => ({ beds }));
-      },
-      setBedrooms: (bedrooms: number) => {
-        set(() => ({ bedrooms }));
-      },
-      setBathrooms: (bathrooms: number) => {
-        set(() => ({ bathrooms }));
-      },
-      setHouseRules: (houseRules: string[]) => {
-        set(() => ({ houseRules }));
-      },
-      setOpen: (open: boolean) => {
-        set(() => ({ open }));
-      },
-    }),
-    {
-      name: "cities-filter",
-      storage: createJSONStorage(() => sessionStorage),
-    },
-  ),
-);
+    }));
+  },
+  maxNightlyPrice: 0,
+  checkIn: undefined,
+  checkOut: undefined,
+  setFilter: (filter) => set(() => ({ filter })),
+  setRoomType: (roomType) => set(() => ({ roomType })),
+  setBeds: (beds) => set(() => ({ beds })),
+  setBedrooms: (bedrooms) => set(() => ({ bedrooms })),
+  setBathrooms: (bathrooms) => set(() => ({ bathrooms })),
+  setHouseRules: (houseRules) => set(() => ({ houseRules })),
+  setOpen: (open) => set(() => ({ open })),
+  setGuests: (guests) => set(() => ({ guests })),
+  setMaxNightlyPrice: (maxNightlyPrice) => set(() => ({ maxNightlyPrice })),
+  setCheckIn: (checkIn) => set(() => ({ checkIn })),
+  setCheckOut: (checkOut) => set(() => ({ checkOut })),
+}));

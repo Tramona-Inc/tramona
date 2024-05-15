@@ -10,7 +10,7 @@ import {
   userUpdateSchema,
   users,
 } from "@/server/db/schema";
-import { count, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -251,6 +251,56 @@ export const usersRouter = createTRPCRouter({
       if (!isPasswordValid) {
         return "incorrect password";
       }
+
+      return "success";
+    }),
+
+  getPassword: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        password: true,
+      },
+    });
+  }),
+
+  updatePassword: protectedProcedure
+    .input(
+      z.object({
+        oldPassword: z.string(),
+        newPassword: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { oldPassword, newPassword } = input;
+
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      if (!user.password) {
+        return "user has no password";
+      }
+
+      const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+      if (!isPasswordValid) {
+        return "incorrect old password";
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await ctx.db
+        .update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, ctx.user.id));
 
       return "success";
     }),

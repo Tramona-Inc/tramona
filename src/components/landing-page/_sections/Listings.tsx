@@ -6,10 +6,7 @@ import HomeOfferCard from "../HomeOfferCard";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 export default function Listings() {
-  const filter = useCitiesFilter((state) => state.filter);
-  const { beds, bedrooms, bathrooms, roomType, houseRules } = useCitiesFilter(
-    (state) => state,
-  );
+  const filters = useCitiesFilter((state) => state);
 
   const {
     data: properties,
@@ -18,15 +15,18 @@ export default function Listings() {
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {
-      // city: filter.id,
-      roomType: roomType,
-      beds: beds,
-      bathrooms: bathrooms,
-      bedrooms: bedrooms,
-      houseRules: houseRules,
-      lat: filter.lat,
-      long: filter.long,
-      radius: 5,
+      guests: filters.guests,
+      beds: filters.beds,
+      bedrooms: filters.bedrooms,
+      bathrooms: filters.bathrooms,
+      maxNightlyPrice: filters.maxNightlyPrice,
+      lat: filters.filter?.lat,
+      long: filters.filter?.long,
+      houseRules: filters.houseRules,
+      roomType: filters.roomType,
+      checkIn: filters.checkIn,
+      checkOut: filters.checkOut,
+      radius: 250,
     },
     {
       // the cursor from where to start fetching thecurrentProperties
@@ -59,6 +59,7 @@ export default function Listings() {
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
+
   const skeletons = Array.from({ length: 12 }, (_, index) => (
     <div key={index}>
       <Skeleton className="aspect-square rounded-xl" />
@@ -72,23 +73,18 @@ export default function Listings() {
   ));
 
   return (
-    <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+    <section className="relative grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <>{skeletons}</>
       ) : currentProperties.length > 0 ? (
         // if there are currentProperties to show, display them
         <>
-          {currentProperties.map((property, i) => (
-            <div
-              ref={i === currentProperties.length - 1 ? ref : undefined}
-              key={property.id}
-            >
-              <HomeOfferCard property={property} />
-            </div>
+          {currentProperties.map((property) => (
+            <HomeOfferCard key={property.id} property={property} />
           ))}
-
           {isFetchingNextPage && skeletons}
+          <div ref={ref} className="absolute bottom-[200vh]"></div>
         </>
       ) : (
         <div className="col-span-full flex min-h-80 items-center justify-center gap-4">

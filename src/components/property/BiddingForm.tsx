@@ -1,4 +1,10 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency, getNumNights } from "@/utils/utils";
@@ -51,7 +57,6 @@ export default function BiddingForm({
 
   async function onSubmit(values: FormSchema) {
     // Reset session if on new date
-
     console.log("Called");
     resetSession();
     // setGuest(values.numGuests);
@@ -61,26 +66,38 @@ export default function BiddingForm({
 
   return (
     <Card>
+      <h3 className="font-semibold">Price on Airbnb:</h3>
       <h1 className="flex items-center text-3xl font-semibold">
-        {formatCurrency(price)}
+        {formatCurrency(price * AVG_AIRBNB_MARKUP)}
         <span className="ml-2 py-0 text-sm font-normal text-gray-500">
           per night
         </span>
       </h1>
-      <h3 className="font-semibold">
+      {/* <h3 className="font-semibold">
         Price on Airbnb: {formatCurrency(price * AVG_AIRBNB_MARKUP)}
-      </h3>
+      </h3> */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-2"
         >
-          <DateRangePicker
+          <FormField
             control={form.control}
             name="date"
-            formLabel=""
-            className="col-span-full sm:col-span-1"
-            propertyId={propertyId}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <DateRangePicker
+                    {...field}
+                    label={""}
+                    propertyId={propertyId}
+                    className="col-span-full sm:col-span-1"
+                    disablePast
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
           <Dialog open={open} onOpenChange={setOpen}>
             {/* Removed trigger to have control on open and close */}
@@ -104,7 +121,7 @@ export default function BiddingForm({
               )}
             </div>
             <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
-              <MakeBid propertyId={propertyId} />
+              <MakeBid propertyId={propertyId} setOpen={setOpen} />
             </DialogContent>
           </Dialog>
         </form>

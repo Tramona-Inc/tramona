@@ -67,7 +67,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
   );
 
   return (
-    <div className="container col-span-10 flex min-h-screen-minus-header flex-col gap-5 py-10 2xl:col-span-11">
+    <div className="container col-span-10 flex flex-col gap-5 py-10 2xl:col-span-11">
       <Link
         href={"/my-trips"}
         className={cn(

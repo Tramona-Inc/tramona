@@ -83,10 +83,15 @@ export const twilioRouter = createTRPCRouter({
       checkIn: z.date().optional(),
       checkOut: z.date().optional(),
       numRequests: z.number().optional(),
+      cost: z.string().optional(),
+      price: z.number().optional(),
+      dates: z.string().optional(),
+      name: z.string().optional(),
+      counterCost: z.string().optional(),
     }),
   )
   .mutation(async ({ input }) => {
-    const { templateId, to, propertyName, propertyAddress, url, checkIn, checkOut, numRequests } = input;
+    const { templateId, to, propertyName, propertyAddress, url, checkIn, checkOut, numRequests, cost, price, dates, name, counterCost } = input;
     let contentVariables: Record<number, string | undefined> = {};
 
     // Set content variables based on template ID
@@ -108,6 +113,21 @@ export const twilioRouter = createTRPCRouter({
           2: numRequests > 1 ? `${numRequests} requests` : `${numRequests} request`,
           3: url,
         }
+      }
+    } else if (templateId === "HX28c41122cfa312e326a9b5fc5e7bc255" || templateId === "HX74ffb496915d8e4ef39b41e624ca605e" || templateId === "HXa9200c7721c008928f1a932678727214") {
+      contentVariables = {
+        1: cost,
+        2: name,
+        3: dates,
+      }
+      if (templateId === "HXa9200c7721c008928f1a932678727214") {
+        contentVariables[4] = counterCost;
+      }
+    } else if (templateId === "HX1650cf0e293142a6db2b458167025222") {
+      contentVariables = {
+        1: price?.toString(),
+        2: name,
+        3: dates,
       }
     }
 

@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
-import { useBidding } from "@/utils/store/bidding";
 import {
+  AddressElement,
   PaymentElement,
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
+import { StripeError } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 
@@ -17,11 +18,20 @@ type Bid = {
   checkOut: Date;
 };
 
-export default function BidPaymentForm({ bid }: { bid: Bid }) {
-  const [isLoading, setIsLoading] = useState(false);
+export default function BidPaymentForm({
+  bid,
+  setStep,
+}: {
+  bid: Bid;
+  setStep: (step: number) => void;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
 
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
+  const [errorMessage, setErrorMessage] = useState<String | undefined>();
+  const [loading, setLoading] = useState(false);
+
+  const { update } = useSession();
 
   const { mutateAsync: confirmSetupIntentMutation } =
     api.stripe.confirmSetupIntent.useMutation();
@@ -31,33 +41,33 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
 
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: () => {
-      setIsLoading(false);
-      setStep(step + 1);
+      console.log("hit");
+      setStep(2);
     },
   });
 
-  const stripe = useStripe();
-  const elements = useElements();
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const { update } = useSession();
+  const handleError = (error: StripeError) => {
+    setLoading(false);
+    setErrorMessage(error.message);
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    // We don't want to let default form submission happen here,
+    // which would refresh the page.
     event.preventDefault();
 
-    setIsLoading(true);
-
     if (!stripe || !elements) {
-      // Stripe.js has not yet loaded.
+      // Stripe.js hasn't yet loaded.
+      // Make sure to disable form submission until Stripe.js has loaded.
       return;
     }
 
-    // Submit payment details to Stripe.
-    const { error: submitError } = await elements.submit();
+    setLoading(true);
 
+    // Trigger form validation and wallet collection
+    const { error: submitError } = await elements.submit();
     if (submitError) {
-      setErrorMessage(submitError.message ?? "An error occurred.");
+      handleError(submitError);
       return;
     }
 
@@ -68,11 +78,6 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
 
     if (error) {
       setErrorMessage(error.message ?? "An error occurred.");
-      return;
-    }
-
-    if (!paymentMethod) {
-      setErrorMessage("Failed to create payment method.");
       return;
     }
 
@@ -99,11 +104,12 @@ export default function BidPaymentForm({ bid }: { bid: Bid }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <AddressElement options={{ mode: "billing" }} />
       <PaymentElement />
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-      <Button isLoading={isLoading} type="submit">
+      <Button type="submit" disabled={!stripe || loading}>
         Save
       </Button>
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
     </form>
   );
 }

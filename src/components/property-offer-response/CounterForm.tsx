@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/utils/api";
-import { formatCurrency, getNumNights } from "@/utils/utils";
+import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
@@ -36,13 +36,21 @@ export default function CounterForm({
   originalNightlyBiddingOffer: number;
 }) {
   const { data: session } = useSession();
+  const twilioMutation = api.twilio.sendSMS.useMutation();
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
-  const { data, isLoading } = api.biddings.getBidInfo.useQuery({
+  const { data: offer, isLoading } = api.biddings.getBidInfo.useQuery({
     bidId: offerId,
   });
 
+  const { data: property } = api.properties.getById.useQuery({
+    id: offer?.propertyId ?? 0,
+  });
+
+  const getTraveler = api.groups.getGroupOwner.useMutation();
+
   const { mutateAsync } = api.biddings.createCounter.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       setOpen(false);
     },
   });
@@ -55,16 +63,63 @@ export default function CounterForm({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (data && session) {
+    if (offer && session) {
       const newCounter = {
         bidId: offerId,
-        propertyId: data.propertyId,
+        propertyId: offer.propertyId,
         userId: session.user.id,
         counterAmount:
-          values.counterPrice * getNumNights(data.checkIn, data.checkOut) * 100,
+          values.counterPrice *
+          getNumNights(offer.checkIn, offer.checkOut) *
+          100,
       };
 
       await mutateAsync(newCounter);
+
+      const guest = session.user.role === "guest";
+      if (guest) {
+        //send to host
+        const traveler = session.user;
+        if (traveler.phoneNumber) {
+          if (traveler.isWhatsApp) {
+            await twilioWhatsAppMutation.mutateAsync({
+              templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+              to: traveler.phoneNumber, //TO DO change to host phone number
+            });
+          } else {
+            await twilioMutation.mutateAsync({
+              to: traveler.phoneNumber, //TO DO change to host phone number
+              msg: `Tramona: A traveler has countered your offer. Please go to www.tramona.com and respond to their counter.`,
+            });
+          }
+        }
+      } else {
+        //send to traveler
+        const traveler = await getTraveler.mutateAsync(offer?.madeByGroupId);
+        if (traveler?.phoneNumber) {
+          const nightlyPrice =
+            previousOfferNightlyPrice > 0
+              ? formatCurrency(previousOfferNightlyPrice)
+              : formatCurrency(originalNightlyBiddingOffer);
+          if (traveler.isWhatsApp) {
+            await twilioWhatsAppMutation.mutateAsync({
+              templateId: "HXa9200c7721c008928f1a932678727214",
+              to: traveler.phoneNumber,
+              cost: nightlyPrice,
+              name: property?.name,
+              dates: formatDateRange(offer.checkIn, offer.checkOut),
+              counterCost: formatCurrency(counterNightlyPrice),
+            });
+          } else {
+            if (!isLoading) {
+              await twilioMutation.mutateAsync({
+                to: traveler.phoneNumber,
+                msg: `Tramona: Your ${nightlyPrice}/night offer for ${property?.name} from ${formatDateRange(offer?.checkIn, offer?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}/night. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+              });
+            }
+          }
+        }
+      }
     }
   }
 

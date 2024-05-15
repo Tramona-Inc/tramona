@@ -85,36 +85,58 @@ function BiddingInfoCard({ property }: { property: Property }) {
   );
 }
 
-function BiddingStep2({ property }: { property: Property }) {
+function BiddingStep2({
+  property,
+  setStep,
+}: {
+  property: Property;
+  setStep: (step: number) => void;
+}) {
   const addPropertyIdBids = useBidding((state) => state.addPropertyIdBids);
+  const twilioMutation = api.twilio.sendSMS.useMutation();
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
+  const { data: payments } = api.stripe.getListOfPayments.useQuery();
+  const { data: session } = useSession();
+  const [currentPaymentMethodId, setCurrentPaymentMethodId] = useState<
+    string | undefined
+  >(payments?.defaultPaymentMethod as string | undefined);
+  const [error, setError] = useState("");
+
+  const date = useBidding((state) => state.date);
+  const price = useBidding((state) => state.price);
+  const guest = useBidding((state) => state.guest);
+  // const setStep = useBidding((state) => state.setStep);
+  const totalNightlyPrice = price * getNumNights(date.from, date.to);
+  const totalPrice = totalNightlyPrice;
+  const stripePromise = useStripe();
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       addPropertyIdBids(property.id);
-      setStep(step + 1);
+      setStep(2);
+      const traveler = session?.user;
+      if (traveler?.phoneNumber) {
+        if (traveler.isWhatsApp) {
+          await twilioWhatsAppMutation.mutateAsync({
+            templateId: "HX1650cf0e293142a6db2b458167025222",
+            to: traveler.phoneNumber,
+            price: price,
+            name: property.name,
+            dates: formatDateRange(date.from, date.to),
+          });
+        } else {
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}. Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
+          });
+        }
+      }
     },
     onError: (error) => {
       console.log("error", error.message);
       setError(error.message);
     },
   });
-  const { data: payments } = api.stripe.getListOfPayments.useQuery();
-  const { data: session } = useSession();
-
-  const [currentPaymentMethodId, setCurrentPaymentMethodId] = useState<
-    string | undefined
-  >(payments?.defaultPaymentMethod as string | undefined);
-  const [error, setError] = useState("");
-
-  const stripePromise = useStripe();
-
-  const date = useBidding((state) => state.date);
-  const price = useBidding((state) => state.price);
-  const guest = useBidding((state) => state.guest);
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
-  const totalNightlyPrice = price * getNumNights(date.from, date.to);
-  const totalPrice = totalNightlyPrice;
 
   const options: StripeElementsOptions = {
     mode: "setup",
@@ -181,9 +203,11 @@ function BiddingStep2({ property }: { property: Property }) {
             </Button>
           </div>
         ) : (
-          <Elements stripe={stripePromise} options={options}>
-            <BidPaymentForm bid={bid} />
-          </Elements>
+          <>
+            <Elements stripe={stripePromise} options={options}>
+              <BidPaymentForm bid={bid} setStep={setStep} />
+            </Elements>
+          </>
         )}
       </div>
       <p>{error}</p>

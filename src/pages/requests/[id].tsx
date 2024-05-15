@@ -1,20 +1,22 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
+import {
+  Circle,
+  GoogleApiWrapper,
+  Map,
+  type GoogleAPI,
+} from "google-maps-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState, useEffect } from "react";
-import {
-  Map,
-  GoogleApiWrapper,
-  Circle,
-  type GoogleAPI,
-} from "google-maps-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect, useState } from "react";
 
-function Page({google}:{google: GoogleAPI}) {
+function Page({ google }: { google: GoogleAPI }) {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
   const [selectedOfferId, setSelectedOfferId] = useState("");
@@ -22,7 +24,6 @@ function Page({google}:{google: GoogleAPI}) {
     lat: 37.774929,
     lng: -122.419416,
   }); // Default center
-
 
   const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery(
     { id: requestId },
@@ -32,23 +33,23 @@ function Page({google}:{google: GoogleAPI}) {
   );
 
   useEffect(() => {
-    const offer = offers?.find(o => `${o.id}` === selectedOfferId)
+    const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
     if (offer?.property.longitude && offer.property.latitude) {
       setMapCenter({
         lat: offer.property.latitude,
         lng: offer.property.longitude,
       });
     }
-  }, [selectedOfferId])
+  }, [selectedOfferId]);
 
-const [effectHasRun, setEffectHasRun] = useState(false)
+  const [effectHasRun, setEffectHasRun] = useState(false);
 
   useEffect(() => {
     if (offers?.[0] && !effectHasRun) {
-      setEffectHasRun(true)
-      setSelectedOfferId(`${offers[0].id}`)
+      setEffectHasRun(true);
+      setSelectedOfferId(`${offers[0].id}`);
     }
-  }, [offers, effectHasRun])
+  }, [offers, effectHasRun]);
 
   // ik this seems dumb but its better because it reuses the same
   // getMyRequests query that we (probably) already have cached
@@ -58,14 +59,15 @@ const [effectHasRun, setEffectHasRun] = useState(false)
     .flat(1)
     .find(({ id }) => id === requestId);
 
-  const { mutate: handleConversation } = api.messages.createConversationWithOffer.useMutation({
-    onSuccess: (conversationId) => {
-      void router.push(`/messages?conversationId=${conversationId}`);
-    },
-  });
+  const { mutate: handleConversation } =
+    api.messages.createConversationWithOffer.useMutation({
+      onSuccess: (conversationId) => {
+        void router.push(`/messages?conversationId=${conversationId}`);
+      },
+    });
 
   if (router.isFallback) {
-    return <h2>Loading</h2>;
+    return <Spinner />;
   }
 
   return (
@@ -84,7 +86,11 @@ const [effectHasRun, setEffectHasRun] = useState(false)
             </Link>
           </div>
           <div className="px-4">
-            <Tabs defaultValue={`${offers[0]?.id}`} value={selectedOfferId} onValueChange={setSelectedOfferId}>
+            <Tabs
+              defaultValue={`${offers[0]?.id}`}
+              value={selectedOfferId}
+              onValueChange={setSelectedOfferId}
+            >
               <TabsList className="w-max">
                 {offers.map((offer, i) => (
                   <TabsTrigger key={offer.id} value={`${offer.id}`}>
@@ -112,7 +118,11 @@ const [effectHasRun, setEffectHasRun] = useState(false)
                             <Circle
                               key={i} // Unique key for each Circle
                               radius={200}
-                              fillColor={selectedOfferId === `${offer.id}` ? "#1F362C" : "#CCD9D7"}
+                              fillColor={
+                                selectedOfferId === `${offer.id}`
+                                  ? "#1F362C"
+                                  : "#CCD9D7"
+                              }
                               strokeColor="black"
                               center={{
                                 lat: offer.property.latitude,

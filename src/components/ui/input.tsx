@@ -8,6 +8,7 @@ import VisibleIcon from "../_icons/VisibleIcon";
 import { cva, type VariantProps } from "class-variance-authority";
 import { FormLabel } from "./form";
 import { Slot } from "@radix-ui/react-slot";
+import { XIcon } from "lucide-react";
 
 // I customized this input component to support prefixes and suffixes.
 // They can be any ReactNode, including strings or JSX elements.
@@ -20,6 +21,7 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &
     suffix?: React.ReactNode;
     icon?: React.FC<{ className?: string }>;
     label?: React.ReactNode;
+    withClearBtn?: boolean;
   };
 
 export type InputVariant = NonNullable<InputProps["variant"]>;
@@ -106,7 +108,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {showingPassword ? <VisibleIcon /> : <HiddenIcon />}
       </button>
     );
-
     const prefixEl = (
       <div
         ref={prefixRef}
@@ -128,7 +129,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
 
     const [focused, setFocused] = useState(false);
-    const showingPrefixSuffix = focused || value;
+    const showingPrefixSuffix = (!placeholder && focused) || value;
 
     return (
       <div className="relative">

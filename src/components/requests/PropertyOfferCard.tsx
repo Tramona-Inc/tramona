@@ -12,7 +12,6 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import MapPin from "../_icons/MapPin";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -81,15 +80,6 @@ export default function PropertyOfferCard({
         getNumNights(offer.checkIn, offer.checkOut)
       : 0;
 
-  const { data: addressData } = api.offers.getCity.useQuery({
-    latitude: offer.property.latitude!,
-    longitude: offer.property.longitude!,
-  });
-
-  const location = addressData
-    ? `${addressData.city ?? ""}, ${addressData.state ?? ""}`
-    : null;
-
   const originalNightlyBiddingOffer =
     offer.amount / getNumNights(offer.checkIn, offer.checkOut);
 
@@ -142,11 +132,6 @@ export default function PropertyOfferCard({
               )}
               /night
             </p>
-
-            <div className="flex flex-row items-center">
-              <MapPin />
-              <h2 className="text-md font-semibold">{location}</h2>
-            </div>
 
             <div className="text-md flex items-center gap-1 font-semibold">
               {formatDateRange(offer.checkIn, offer.checkOut)} &middot;{" "}
