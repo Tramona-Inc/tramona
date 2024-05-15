@@ -95,9 +95,9 @@ function MakeBid({
       {!session?.user ? (
         <>
           <DialogHeader>
-            <DialogTitle>Please Login</DialogTitle>
+            <DialogTitle>Please Log in</DialogTitle>
             <DialogDescription>
-              In order to make a bid, please login / sign up.
+              In order to make a bid, please log in or sign up.
             </DialogDescription>
           </DialogHeader>
           <Button asChild variant={"secondary"} className="w-full">
