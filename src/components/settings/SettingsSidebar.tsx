@@ -24,7 +24,7 @@ export default function SettingsSidebar() {
             Payment information
           </div>
         </Link>
-        <Link
+        {/* <Link
           href="/settings/notifications"
           className="rounded-lg hover:bg-zinc-100"
         >
@@ -32,7 +32,7 @@ export default function SettingsSidebar() {
             <Bell />
             Notifications
           </div>
-        </Link>
+        </Link> */}
       </div>
     </div>
   );
