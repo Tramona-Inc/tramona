@@ -221,6 +221,18 @@ export const propertiesRouter = createTRPCRouter({
               ? eq(properties.smokingAllowed, true)
               : sql`TRUE`,
             eq(properties.isPrivate, false),
+            notExists(
+              db
+                .select()
+                .from(bookedDates)
+                .where(
+                  and(
+                    eq(bookedDates.propertyId, properties.id),
+                    gte(bookedDates.date, new Date()), // today or future
+                    lte(bookedDates.date, addDays(new Date(), 30)), // within next 30 days
+                  ),
+                ),
+            ),
             sql`(SELECT COUNT(booked_dates.property_id) 
             FROM booked_dates 
             WHERE booked_dates.property_id = properties.id 
