@@ -97,10 +97,10 @@ function MakeBid({
           <DialogHeader>
             <DialogTitle>Please Login</DialogTitle>
             <DialogDescription>
-              In order to make a bid please login / sign up.{" "}
+              In order to make a bid, please login / sign up.
             </DialogDescription>
           </DialogHeader>
-          <Button asChild variant={"ghost"} className="w-full">
+          <Button asChild variant={"secondary"} className="w-full">
             <Link href={"/auth/signin"}>Login</Link>
           </Button>
           <Button asChild variant={"greenPrimary"} className="w-full">
@@ -131,7 +131,9 @@ function MakeBid({
             {step == 1 && (
               <BiddingStep2 property={property} setStep={setStep} />
             )}
-            {step == 2 && <BiddingConfirmation property={property} setOpen={setOpen}/>}
+            {step == 2 && (
+              <BiddingConfirmation property={property} setOpen={setOpen} />
+            )}
           </div>
         )
       )}
