@@ -15,21 +15,37 @@ import CitiesFilter from "./CitiesFilter";
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
 
-  const { data, error } = api.biddings.getAllPropertyBids.useQuery(undefined, {
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-  });
+  const { data: isPropertyBids, error: propertyBidsError } =
+    api.biddings.getAllPropertyBids.useQuery(undefined, {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    });
+
+  const { data: isBucketListProperty, error: bucketListError } =
+    api.profile.getAllPropertiesInBucketList.useQuery(undefined, {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    });
 
   const setInitialBids = useBidding((state) => state.setInitialBids);
-  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+
+  const setInitialBucketList = useBidding(
+    (state) => state.setInitialBucketList,
+  );
 
   useEffect(() => {
-    if (!error) {
-      setInitialBids(data ?? []);
+    if (!propertyBidsError || !bucketListError) {
+      setInitialBids(isPropertyBids ?? []);
+      setInitialBucketList(isBucketListProperty ?? []);
     }
-  }, [data, error, setInitialBids]);
-
-  console.log("Initial", propertyIdBids);
+  }, [
+    isPropertyBids,
+    propertyBidsError,
+    bucketListError,
+    setInitialBids,
+    isBucketListProperty,
+    setInitialBucketList,
+  ]);
 
   return (
     <VerificationProvider>

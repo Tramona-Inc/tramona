@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 type BiddingState = {
   propertyIdBids: number[];
+  propertyIdBucketList: number[];
   price: number;
   guest: number;
   date: {
@@ -11,7 +12,10 @@ type BiddingState = {
   };
   step: number;
   setInitialBids: (initialBids: number[]) => void; // Add setInitialBids function
+  setInitialBucketList: (initialBucketList: number[]) => void; // Add setInitialBids function
   addPropertyIdBids: (ids: number) => void;
+  addPropertyIdBucketList: (ids: number) => void;
+  removePropertyIdFromBucketList: (ids: number) => void;
   setPrice: (price: number) => void;
   setGuest: (guest: number) => void;
   setDate: (from: Date, to: Date) => void;
@@ -41,6 +45,7 @@ export const useBidding = create<BiddingState>()(
   persist(
     (set) => ({
       propertyIdBids: [],
+      propertyIdBucketList: [],
       price: 0,
       guest: 1,
       date: {
@@ -54,10 +59,30 @@ export const useBidding = create<BiddingState>()(
           propertyIdBids: initialBids,
         }));
       },
+      setInitialBucketList: (initialBucketList: number[]) => {
+        set((state) => ({
+          ...state,
+          propertyIdBucketList: initialBucketList,
+        }));
+      },
       addPropertyIdBids: (id) => {
         set((state) => ({
           ...state,
           propertyIdBids: [...state.propertyIdBids, id],
+        }));
+      },
+      addPropertyIdBucketList: (id) => {
+        set((state) => ({
+          ...state,
+          propertyIdBucketList: [...state.propertyIdBucketList, id],
+        }));
+      },
+      removePropertyIdFromBucketList: (id: number) => {
+        set((state) => ({
+          ...state,
+          propertyIdBucketList: state.propertyIdBucketList.filter(
+            (propertyId) => propertyId !== id,
+          ),
         }));
       },
       setPrice: (price: number) => {

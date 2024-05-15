@@ -58,7 +58,7 @@ export default function Listings() {
   const currentProperties = useMemo(
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
-  );
+  )
 
   const skeletons = Array.from({ length: 12 }, (_, index) => (
     <div key={index}>
