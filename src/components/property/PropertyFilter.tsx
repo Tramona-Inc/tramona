@@ -8,14 +8,12 @@ import {
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
-import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from "@/server/db/schema";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useZodForm } from "@/utils/useZodForm";
 import { z } from "zod";
 import { CounterInput } from "../_common/CounterInput";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 export function Total({
   name,
@@ -45,15 +43,15 @@ const houseRuleItems = [
   },
 ];
 
-const PROPERTY_TYPE_OPTIONS = [
-  "Flexible",
-  ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
-] as const;
+// const PROPERTY_TYPE_OPTIONS = [
+//   "Flexible",
+//   ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
+// ] as const;
 
 const FormSchema = z.object({
-  roomType: z
-    .enum(PROPERTY_TYPE_OPTIONS)
-    .transform((s) => (s === "Flexible" ? undefined : s)),
+  // roomType: z
+  //   .enum(PROPERTY_TYPE_OPTIONS)
+  //   .transform((s) => (s === "Flexible" ? undefined : s)),
   beds: z.number().nullish(),
   bedrooms: z.number().nullish(),
   bathrooms: z.number().nullish(),
@@ -66,15 +64,15 @@ export default function PropertyFilter() {
   const bedrooms = useCitiesFilter((state) => state.bedrooms);
   const bathrooms = useCitiesFilter((state) => state.bathrooms);
   const houseRules = useCitiesFilter((state) => state.houseRules);
-  const roomType = useCitiesFilter((state) => state.roomType);
+  // const roomType = useCitiesFilter((state) => state.roomType);
   const radius = useCitiesFilter((state) => state.radius);
 
   const form = useZodForm({
     schema: FormSchema,
     defaultValues: {
-      roomType:
-        // TODO: augh
-        roomType === "Other" || roomType === undefined ? "Flexible" : roomType,
+      // roomType:
+      //   // TODO: augh
+      //   roomType === "Other" || roomType === undefined ? "Flexible" : roomType,
       beds: beds,
       bedrooms: bedrooms,
       bathrooms: bathrooms,
@@ -87,13 +85,13 @@ export default function PropertyFilter() {
   const setBathrooms = useCitiesFilter((state) => state.setBathrooms);
   const setBedrooms = useCitiesFilter((state) => state.setBedrooms);
   const setHouseRules = useCitiesFilter((state) => state.setHouseRules);
-  const setRoomType = useCitiesFilter((state) => state.setRoomType);
+  // const setRoomType = useCitiesFilter((state) => state.setRoomType);
   const setOpen = useCitiesFilter((state) => state.setOpen);
   const setRadius = useCitiesFilter((state) => state.setRadius);
   const clearFilter = useCitiesFilter((state) => state.clearFilter);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    setRoomType(data.roomType);
+    // setRoomType(data.roomType);
     setBeds(data.beds ?? 0);
     setBathrooms(data.bathrooms ?? 0);
     setBedrooms(data.bedrooms ?? 0);
@@ -105,13 +103,12 @@ export default function PropertyFilter() {
   function handleClearFilter() {
     clearFilter();
     form.reset();
-    setOpen(false);
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
+        {/* <FormField
           control={form.control}
           name="roomType"
           render={({ field }) => (
@@ -143,7 +140,7 @@ export default function PropertyFilter() {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <Separator />
 
