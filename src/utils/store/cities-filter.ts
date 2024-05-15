@@ -12,6 +12,7 @@ export type CitiesLatLong = {
 };
 
 type CitiesFilterState = {
+  radius: number;
   open: boolean;
   filter: CitiesLatLong | undefined;
   roomType: RoomType | undefined;
@@ -20,6 +21,7 @@ type CitiesFilterState = {
   beds: number;
   bedrooms: number;
   bathrooms: number;
+  setRadius: (radius: number) => void;
   setBeds: (beds: number) => void;
   setBedrooms: (bedrooms: number) => void;
   setBathrooms: (bathrooms: number) => void;
@@ -56,6 +58,7 @@ type CitiesFilterState = {
 // }));
 
 export const useCitiesFilter = create<CitiesFilterState>((set) => ({
+  radius: 50,
   open: false,
   filter: undefined,
   roomType: undefined,
@@ -73,11 +76,13 @@ export const useCitiesFilter = create<CitiesFilterState>((set) => ({
       bedrooms: 0,
       bathrooms: 0,
       houseRules: [],
+      radius: 50,
     }));
   },
   maxNightlyPrice: 0,
   checkIn: undefined,
   checkOut: undefined,
+  setRadius: (radius) => set(() => ({ radius })),
   setFilter: (filter) => set(() => ({ filter })),
   setRoomType: (roomType) => set(() => ({ roomType })),
   setBeds: (beds) => set(() => ({ beds })),

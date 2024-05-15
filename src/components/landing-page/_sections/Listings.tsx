@@ -1,9 +1,9 @@
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
 import { useEffect, useMemo, useRef } from "react";
 import HomeOfferCard from "../HomeOfferCard";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 export default function Listings() {
   const filters = useCitiesFilter((state) => state);
@@ -26,7 +26,7 @@ export default function Listings() {
       roomType: filters.roomType,
       checkIn: filters.checkIn,
       checkOut: filters.checkOut,
-      radius: 250,
+      radius: filters.radius,
     },
     {
       // the cursor from where to start fetching thecurrentProperties
@@ -58,7 +58,7 @@ export default function Listings() {
   const currentProperties = useMemo(
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
-  )
+  );
 
   const skeletons = Array.from({ length: 12 }, (_, index) => (
     <div key={index}>
