@@ -67,7 +67,7 @@ function Page({ google }: { google: GoogleAPI }) {
     });
 
   if (router.isFallback) {
-    return <h2>Loading</h2>;
+    return <Spinner />;
   }
 
   return (

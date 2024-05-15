@@ -18,6 +18,7 @@ import { z } from "zod";
 export const profileRouter = createTRPCRouter({
   getProfileInfo: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
       with: {
         bucketListDestinations: true,
         bucketListProperties: true,
