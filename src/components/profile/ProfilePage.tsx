@@ -4,7 +4,6 @@ import { useCitiesFilter } from "@/utils/store/cities-filter";
 import {
   BadgeCheck,
   BadgeXIcon,
-  Camera,
   Clock2Icon,
   Edit,
   Ellipsis,
@@ -16,31 +15,21 @@ import {
   MessageCircleMore,
   MessagesSquare,
   Plus,
-  Share,
   Twitter,
   Youtube,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
-import CopyToClipboardBtn from "../_utils/CopyToClipboardBtn";
 import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
 import BucketListHomeOfferCard from "./BucketListHomeOfferCard";
@@ -120,7 +109,7 @@ export default function ProfilePage() {
   const deleteBLDDialogState = useDialogState();
 
   return (
-    <div className="mx-auto mb-5 max-w-4xl space-y-3">
+    <div className="mx-auto mb-5 min-h-screen-minus-header max-w-4xl space-y-3">
       {/* Profile Header */}
       <section className="rounded-lg border">
         <div className="relative h-40 bg-teal-900 lg:h-52">

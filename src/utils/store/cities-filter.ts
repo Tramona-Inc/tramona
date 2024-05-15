@@ -56,46 +56,38 @@ type CitiesFilterState = {
 //   },
 // }));
 
-export const useCitiesFilter = create<CitiesFilterState>()(
-  persist(
-    (set) => ({
-      open: false,
-      filter: undefined,
+export const useCitiesFilter = create<CitiesFilterState>((set) => ({
+  open: false,
+  filter: undefined,
+  roomType: undefined,
+  beds: 0,
+  bedrooms: 0,
+  bathrooms: 0,
+  guests: 0,
+  houseRules: [],
+  clearFilter: () => {
+    set((state) => ({
+      ...state,
+      filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
       roomType: undefined,
       beds: 0,
       bedrooms: 0,
       bathrooms: 0,
-      guests: 0,
       houseRules: [],
-      clearFilter: () => {
-        set((state) => ({
-          ...state,
-          filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
-          roomType: undefined,
-          beds: 0,
-          bedrooms: 0,
-          bathrooms: 0,
-          houseRules: [],
-        }));
-      },
-      maxNightlyPrice: 0,
-      checkIn: undefined,
-      checkOut: undefined,
-      setFilter: (filter) => set(() => ({ filter })),
-      setRoomType: (roomType) => set(() => ({ roomType })),
-      setBeds: (beds) => set(() => ({ beds })),
-      setBedrooms: (bedrooms) => set(() => ({ bedrooms })),
-      setBathrooms: (bathrooms) => set(() => ({ bathrooms })),
-      setHouseRules: (houseRules) => set(() => ({ houseRules })),
-      setOpen: (open) => set(() => ({ open })),
-      setGuests: (guests) => set(() => ({ guests })),
-      setMaxNightlyPrice: (maxNightlyPrice) => set(() => ({ maxNightlyPrice })),
-      setCheckIn: (checkIn) => set(() => ({ checkIn })),
-      setCheckOut: (checkOut) => set(() => ({ checkOut })),
-    }),
-    {
-      name: "cities-filter",
-      storage: createJSONStorage(() => sessionStorage),
-    },
-  ),
-);
+    }));
+  },
+  maxNightlyPrice: 0,
+  checkIn: undefined,
+  checkOut: undefined,
+  setFilter: (filter) => set(() => ({ filter })),
+  setRoomType: (roomType) => set(() => ({ roomType })),
+  setBeds: (beds) => set(() => ({ beds })),
+  setBedrooms: (bedrooms) => set(() => ({ bedrooms })),
+  setBathrooms: (bathrooms) => set(() => ({ bathrooms })),
+  setHouseRules: (houseRules) => set(() => ({ houseRules })),
+  setOpen: (open) => set(() => ({ open })),
+  setGuests: (guests) => set(() => ({ guests })),
+  setMaxNightlyPrice: (maxNightlyPrice) => set(() => ({ maxNightlyPrice })),
+  setCheckIn: (checkIn) => set(() => ({ checkIn })),
+  setCheckOut: (checkOut) => set(() => ({ checkOut })),
+}));
