@@ -4,13 +4,13 @@ import {
 } from "@/components/_utils/VerificationContext";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
-import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import Head from "next/head";
 import { useEffect } from "react";
 import Listings from "./_sections/Listings";
 import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
 import CitiesFilter from "./CitiesFilter";
+import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
@@ -49,24 +49,12 @@ export default function TravelerPage() {
 
   return (
     <VerificationProvider>
+      <Head>
+        <title>Tramona</title>
+      </Head>
       <div className="relative mb-20 overflow-x-hidden bg-white">
-        <Head>
-          <title>Tramona</title>
-        </Head>
         <VerificationBanner />
-
-        {/* <div className="container">
-          <SimpleMastHead />
-        </div>
-
-        <div className="py-5">
-          <div className="border-[1px]" />
-        </div> */}
-
-        <div>
-          <MastHead />
-        </div>
-
+        <MastHead />
         <div className="space-y-4 p-4">
           <CitiesFilter />
           <Listings />

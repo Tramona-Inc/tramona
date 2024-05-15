@@ -14,10 +14,14 @@ import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
+import { WelcomeBanner } from "../WelcomeBanner";
 
 export default function MastHead() {
   return (
     <section className="relative bg-white">
+      <div className="absolute inset-x-0 top-0">
+        <WelcomeBanner />
+      </div>
       <div className="w-full">
         <Image
           src="/assets/images/landing-page/main.png"
@@ -45,7 +49,7 @@ export default function MastHead() {
       <div className="hidden -translate-y-16 px-4 md:block">
         <DesktopSearchLayout />
       </div>
-      <p className="px-4 pt-4 text-center text-sm text-zinc-600">
+      <p className="px-4 pt-4 text-center text-sm font-medium md:-translate-y-6 md:text-base">
         See a property you like? Make an offer and Tramona will create the deal
         for you. Don&apos;t see a property you like? Request a deal.
       </p>

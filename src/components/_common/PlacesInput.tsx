@@ -6,7 +6,6 @@ import { useState } from "react";
 import { type InputVariant } from "../ui/input";
 import { InputButton } from "../ui/input-button";
 import { cn } from "@/utils/utils";
-import { XIcon } from "lucide-react";
 
 export default function PlacesInput<
   TFieldValues extends FieldValues,

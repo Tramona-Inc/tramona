@@ -119,7 +119,7 @@ export function MobileRequestDealTab({
           <Separator className="my-4" />
           <div className="flex justify-end">
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              Submit request
+              Submit Request
             </Button>
           </div>
         </div>

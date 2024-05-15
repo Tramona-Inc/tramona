@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import PlacesInput from "@/components/_common/PlacesInput";
-import { DollarSignIcon, InfoIcon, MapPinIcon, Users2Icon } from "lucide-react";
+import { DollarSignIcon, MapPinIcon, Users2Icon } from "lucide-react";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -24,7 +24,7 @@ export function DesktopRequestDealTab() {
         className="flex flex-col justify-between gap-y-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="my-3 items-center text-xs text-muted-foreground">
+        <div className="my-3 items-center text-balance text-center text-xs text-muted-foreground">
           Instead of just seeing listed prices, requesting a deal lets you set
           your budget, and we&apos;ll match you with hosts who have properties
           in the city and accept your price. This way, you can find the perfect
@@ -108,7 +108,7 @@ export function DesktopRequestDealTab() {
             disabled={form.formState.isSubmitting}
             className="h-16 bg-teal-900 hover:bg-teal-950"
           >
-            Submit request
+            Submit Request
           </Button>
         </div>
       </form>

@@ -6,7 +6,7 @@ import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
 import { on } from "events";
 import { useState } from "react";
-import { InlineWidget, useCalendlyEventListener } from 'react-calendly';
+import { InlineWidget, useCalendlyEventListener } from "react-calendly";
 
 import {
   Dialog,
@@ -71,7 +71,7 @@ export default function Onboarding1({
         </div>
 
         <div className="flex flex-col items-center justify-center sm:mx-20">
-          <h1 className="mb-16 flex flex-col text-4xl font-semibold">
+          <h1 className="mb-16 flex flex-col pt-8 text-4xl font-semibold">
             It&apos;s easy to list your
             <span>property on Tramona</span>
           </h1>

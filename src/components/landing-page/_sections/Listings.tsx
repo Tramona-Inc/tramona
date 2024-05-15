@@ -4,6 +4,9 @@ import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
 import { useEffect, useMemo, useRef } from "react";
 import HomeOfferCard from "../HomeOfferCard";
+import { Button } from "@/components/ui/button";
+import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
+import { FilterXIcon } from "lucide-react";
 
 export default function Listings() {
   const filters = useCitiesFilter((state) => state);
@@ -87,14 +90,22 @@ export default function Listings() {
           <div ref={ref} className="absolute bottom-[200vh]"></div>
         </>
       ) : (
-        <div className="col-span-full flex min-h-80 items-center justify-center gap-4">
-          <p className="text-sm text-secondary-foreground">
-            No properties to show
+        <div className="col-span-full flex min-h-80 flex-col items-center justify-center gap-4">
+          <ListingsEmptySvg />
+          <p className="text-xl font-semibold">
+            Sorry, we couldn&apos;t find any properties for your search
           </p>
-          {/* <div className="flex gap-2">
-            <Button>Edit filters</Button>
-            <Button variant="secondary">Clear filters</Button>
-          </div> */}
+          <p className="text-balance text-center text-muted-foreground">
+            Clear filters and try again, or <b>request a deal</b> above to have
+            us connect you with our host network!
+          </p>
+
+          <div className="flex w-64 flex-col gap-2">
+            <Button variant="secondary" onClick={() => filters.clearFilter()}>
+              <FilterXIcon className="size-5" />
+              Clear filters
+            </Button>
+          </div>
         </div>
       )}
     </section>

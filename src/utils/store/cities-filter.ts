@@ -1,4 +1,4 @@
-import { cities } from "@/components/landing-page/CitiesFilter";
+import { cities } from "@/components/landing-page/cities";
 import { type ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema/tables/properties";
 import { create } from "zustand";
 
@@ -70,13 +70,16 @@ export const useCitiesFilter = create<CitiesFilterState>((set) => ({
   clearFilter: () => {
     set((state) => ({
       ...state,
-      filter: cities[0] ?? { id: "all", label: "All", long: 0, lat: 0 }, // Provide a default value if cities[0] is undefined
       roomType: undefined,
       beds: 0,
       bedrooms: 0,
       bathrooms: 0,
       houseRules: [],
       radius: 50,
+      checkIn: undefined,
+      checkOut: undefined,
+      guests: 0,
+      maxNightlyPrice: undefined,
     }));
   },
   maxNightlyPrice: 0,

@@ -62,7 +62,7 @@ function LargeHeader(props: HeaderProps) {
         )}
       </div>
 
-      <div className="flex flex-1 justify-end gap-4">
+      <div className="flex flex-1 justify-end gap-2">
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (
@@ -74,16 +74,16 @@ function LargeHeader(props: HeaderProps) {
             )}
           </Button>
         ) : (
-          <Button asChild variant="ghost" className="rounded-full">
+          <Button asChild variant="secondary">
             <Link href="/auth/signin">
               {status === "authenticated" ? "Switch to Dashboard" : "Log in"}
             </Link>
           </Button>
         )}
         {status !== "authenticated" && (
-          <button className="rounded-lg bg-[#004236] px-4 text-sm text-white">
+          <Button variant="greenPrimary">
             <Link href="/auth/signup">Sign Up</Link>
-          </button>
+          </Button>
         )}
         {status == "authenticated" && (
           <>
