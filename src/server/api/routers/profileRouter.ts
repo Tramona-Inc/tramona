@@ -150,6 +150,21 @@ export const profileRouter = createTRPCRouter({
       return propertyIds.includes(input.blPropertyId);
     }),
 
+  getAllPropertiesInBucketList: optionallyAuthedProcedure.query(
+    async ({ ctx }) => {
+      if (!ctx.user) return [];
+
+      const result = await ctx.db.query.bucketListProperties.findMany({
+        where: eq(bucketListProperties.userId, ctx.user.id),
+        columns: {
+          propertyId: true,
+        },
+      });
+
+      return result.map((res) => res.propertyId);
+    },
+  ),
+
   createDestination: protectedProcedure
     .input(
       z.object({

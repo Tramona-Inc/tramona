@@ -6,6 +6,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
 import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from "@/server/db/schema";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useZodForm } from "@/utils/useZodForm";
@@ -14,7 +16,6 @@ import { CounterInput } from "../_common/CounterInput";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Separator } from "../ui/separator";
 
 export function Total({
   name,
@@ -57,6 +58,7 @@ const FormSchema = z.object({
   bedrooms: z.number().nullish(),
   bathrooms: z.number().nullish(),
   houseRules: z.array(z.string()).nullable(),
+  radius: z.array(z.number()),
 });
 
 export default function PropertyFilter() {
@@ -65,6 +67,7 @@ export default function PropertyFilter() {
   const bathrooms = useCitiesFilter((state) => state.bathrooms);
   const houseRules = useCitiesFilter((state) => state.houseRules);
   const roomType = useCitiesFilter((state) => state.roomType);
+  const radius = useCitiesFilter((state) => state.radius);
 
   const form = useZodForm({
     schema: FormSchema,
@@ -76,6 +79,7 @@ export default function PropertyFilter() {
       bedrooms: bedrooms,
       bathrooms: bathrooms,
       houseRules: houseRules,
+      radius: [radius],
     },
   });
 
@@ -85,6 +89,7 @@ export default function PropertyFilter() {
   const setHouseRules = useCitiesFilter((state) => state.setHouseRules);
   const setRoomType = useCitiesFilter((state) => state.setRoomType);
   const setOpen = useCitiesFilter((state) => state.setOpen);
+  const setRadius = useCitiesFilter((state) => state.setRadius);
   const clearFilter = useCitiesFilter((state) => state.clearFilter);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -94,6 +99,7 @@ export default function PropertyFilter() {
     setBedrooms(data.bedrooms ?? 0);
     setHouseRules(data.houseRules ?? []);
     setOpen(false);
+    setRadius(data.radius[0] ?? 50);
   }
 
   function handleClearFilter() {
@@ -247,6 +253,32 @@ export default function PropertyFilter() {
             </FormItem>
           )}
         />
+
+        <Separator />
+
+        <FormField
+          control={form.control}
+          name="radius"
+          render={({ field: { value, onChange } }) => (
+            <FormItem className="">
+              <FormLabel className="font-bold text-primary">
+                Radius - {value} miles
+              </FormLabel>
+              <FormControl>
+                <Slider
+                  min={0}
+                  max={500}
+                  step={1}
+                  defaultValue={value}
+                  onValueChange={onChange}
+                  className="mt-5"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex flex-row justify-between">
           <Button type="button" variant={"ghost"} onClick={handleClearFilter}>
             Clear

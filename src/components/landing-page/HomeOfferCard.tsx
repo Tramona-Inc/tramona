@@ -15,22 +15,22 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { api } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
-import { cn, formatCurrency, plural } from "@/utils/utils";
+import { formatCurrency, plural } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { CarouselDots } from "../_common/carousel-dots";
 import DateRangePicker from "../_common/DateRangePicker";
 import { Button } from "../ui/button";
 import MakeBid from "./bidding/MakeBid";
-import { signIn, useSession } from "next-auth/react";
-import { api } from "@/utils/api";
-import { Plus } from "lucide-react";
-import { CarouselDots } from "../_common/carousel-dots";
 
 type PropertyCard = {
   id: number;
@@ -67,6 +67,20 @@ export default function HomeOfferCard({
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
 
+  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+  const propertyIdBucketList = useBidding(
+    (state) => state.propertyIdBucketList,
+  );
+  const addToBucketListStore = useBidding(
+    (state) => state.addPropertyIdBucketList,
+  );
+  const removeFromBucketListStore = useBidding(
+    (state) => state.removePropertyIdFromBucketList,
+  );
+
+  const alreadyBid = propertyIdBids.includes(property.id);
+  const inBucketList = propertyIdBucketList.includes(property.id);
+
   useEffect(() => {
     if (!carouselApi) {
       return;
@@ -80,18 +94,7 @@ export default function HomeOfferCard({
     });
   }, [carouselApi]);
 
-  const { data: isBucketListProperty } =
-    api.profile.isBucketListProperty.useQuery({
-      blPropertyId: property.id,
-    });
-
-  const [isInBucketList, setIsInBucketList] = useState(false);
-
-  useEffect(() => {
-    if (isBucketListProperty) {
-      setIsInBucketList(isBucketListProperty);
-    }
-  }, [isBucketListProperty]);
+  const [isInBucketList, setIsInBucketList] = useState(inBucketList);
 
   const { mutate: addPropertyToBucketList } =
     api.profile.addProperty.useMutation({
@@ -126,9 +129,17 @@ export default function HomeOfferCard({
     setDate(values.date.from, values.date.to);
   }
 
-  const propertyIdBids = useBidding((state) => state.propertyIdBids);
+  function handleAddToBucketList() {
+    addPropertyToBucketList({
+      propertyId: property.id,
+    });
+    addToBucketListStore(property.id);
+  }
 
-  const alreadyBid = propertyIdBids.includes(property.id);
+  function handleRemoveBucketList() {
+    removePropertyFromBucketList(property.id);
+    removeFromBucketListStore(property.id);
+  }
 
   return (
     <div className="relative">
@@ -238,13 +249,7 @@ export default function HomeOfferCard({
             tooltip={
               isLoggedIn ? undefined : "Please log in to add to bucket list"
             }
-            onClick={() =>
-              isLoggedIn
-                ? addPropertyToBucketList({
-                    propertyId: property.id,
-                  })
-                : signIn()
-            }
+            onClick={() => (isLoggedIn ? handleAddToBucketList() : signIn())}
             variant="white"
             className="rounded-full"
           >
@@ -254,7 +259,7 @@ export default function HomeOfferCard({
         )}
         {isInBucketList && (
           <Button
-            onClick={() => removePropertyFromBucketList(property.id)}
+            onClick={() => handleRemoveBucketList()}
             className="rounded-full bg-[#333333]/90 hover:bg-[#333333]"
           >
             Added to bucket list
