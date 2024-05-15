@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
-import { formatDateRange, plural } from "@/utils/utils";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Lightbulb } from "lucide-react";
 import Image from "next/image";
@@ -46,7 +46,7 @@ function BiddingConfirmation({
               <h2 className="font-bold ">{property.name}</h2>
               {property.originalNightlyPrice !== null && (
                 <p className="text-xs md:text-base">
-                  Airbnb price: formatCurrency(property.originalNightlyPrice)
+                  Airbnb price: {formatCurrency(property.originalNightlyPrice)}
                   /night
                 </p>
               )}
