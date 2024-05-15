@@ -68,16 +68,20 @@ function BiddingConfirmation({
             </p>
             <div className="flex flex-row space-x-1 ">
               <Lightbulb />
-              <h2 className="text-base font-bold md:text-xl"> Remember</h2>
+              <h2 className="text-base font-bold md:text-xl">Remember</h2>
             </div>
             <p className="ml-6 text-xs md:ml-0 md:text-sm">
               All offers are binding, if your offer is accepted your card will
               be charged.
             </p>
             <div className="mt-16 text-center text-xs md:mt-8">
-              {/* TODO: link to help center */}
-              {/* <span className="text-blue-500 underline">Learn more</span> about
-              the host cancellation policy */}
+              <Link
+                href="/help-center"
+                className="text-blue-500 underline-offset-2 hover:underline"
+              >
+                Learn more
+              </Link>{" "}
+              about the host cancellation policy
             </div>
           </div>
         </div>
