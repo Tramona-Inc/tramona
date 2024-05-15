@@ -35,7 +35,7 @@ const MobileFooter: React.FC = () => {
           </div>
 
           <div className="flex w-full flex-row items-start gap-2 px-8 sm:justify-center md:flex-col md:gap-8">
-            <FooterLink href="/support">Terms</FooterLink>
+            <FooterLink href="/tos">Terms</FooterLink>
             <FooterLink href="/faq">FAQ</FooterLink>
             <FooterLink href="/auth/signup">Sign up</FooterLink>
             <FooterLink href="/auth/signin">Sign in</FooterLink>

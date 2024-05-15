@@ -1,5 +1,4 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import SettingsLayout from "@/components/_common/Layout/SettingsLayout";
 import { ChevronRight } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
@@ -32,12 +31,12 @@ export default function Settings() {
               <ChevronRight />
             </div>
           </Link>
-          <Link href="/settings/notifications" className="hover:bg-zinc-100">
+          {/* <Link href="/settings/notifications" className="hover:bg-zinc-100">
             <div className="flex items-center justify-between gap-2 py-2">
               Notifications
               <ChevronRight />
             </div>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </DashboardLayout>

@@ -22,7 +22,6 @@ function BiddingConfirmation({
   return (
     <div className="flex flex-col items-center justify-center ">
       <h1 className=" my-5 text-lg font-semibold text-green-600 md:text-3xl">
-        {" "}
         Offer Sent!
       </h1>
       <div className="flex flex-col">
@@ -76,8 +75,9 @@ function BiddingConfirmation({
               be charged.
             </p>
             <div className="mt-16 text-center text-xs md:mt-8">
-              <span className="text-blue-500 underline">Learn more </span>about
-              the host cancellation policy
+              {/* TODO: link to help center */}
+              {/* <span className="text-blue-500 underline">Learn more</span> about
+              the host cancellation policy */}
             </div>
           </div>
         </div>

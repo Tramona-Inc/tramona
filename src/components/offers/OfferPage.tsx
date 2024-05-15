@@ -13,7 +13,7 @@ import {
 import { api, type RouterOutputs } from "@/utils/api";
 import {
   formatCurrency,
-  formatDateMonthDay,
+  formatDateRange,
   getDiscountPercentage,
   getNumNights,
   getTramonaFeeTotal,
@@ -70,8 +70,6 @@ export default function OfferPage({
     offerNightlyPrice ?? 0,
   );
 
-  const checkInDate = formatDateMonthDay(request.checkIn);
-  const checkOutDate = formatDateMonthDay(request.checkOut);
   const numNights = getNumNights(request.checkIn, request.checkOut);
   if (property.originalNightlyPrice === null) {
     throw new Error("originalNightlyPrice is required but was not provided.");
@@ -329,10 +327,10 @@ export default function OfferPage({
                     <CalendarDays />
                     <div className="ml-2">
                       <p className="text-sm text-gray-600">
-                        Check in/ Check-out
+                        Check in/Check-out
                       </p>
                       <p className="text-base font-bold">
-                        {checkInDate} - {checkOutDate}
+                        {formatDateRange(request.checkIn, request.checkOut)}
                       </p>
                     </div>
                   </div>

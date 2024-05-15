@@ -21,12 +21,12 @@ export default function MastHead() {
       <div className="w-full">
         <Image
           src="/assets/images/landing-page/main.png"
-          alt="Main Background"
+          alt=""
           width={0}
           height={0}
           sizes="100vw"
           priority
-          className="h-[370px] w-full object-cover md:h-[450px] md:w-full"
+          className="h-[370px] w-full select-none object-cover md:h-[450px] md:w-full"
         />
       </div>
 

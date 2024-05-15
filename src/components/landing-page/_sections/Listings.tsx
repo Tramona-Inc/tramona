@@ -26,7 +26,7 @@ export default function Listings() {
       roomType: filters.roomType,
       checkIn: filters.checkIn,
       checkOut: filters.checkOut,
-      radius: 5,
+      radius: 250,
     },
     {
       // the cursor from where to start fetching thecurrentProperties

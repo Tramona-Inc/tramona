@@ -16,17 +16,7 @@ import {
 } from "@/server/db/schema";
 import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
-import {
-  and,
-  asc,
-  eq,
-  exists,
-  gt,
-  gte,
-  lte,
-  notExists,
-  sql,
-} from "drizzle-orm";
+import { and, asc, eq, gt, gte, lte, notExists, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
