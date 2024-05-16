@@ -10,6 +10,7 @@ import Summary2 from "./Summary2";
 import Summary4 from "./Summary4";
 import Summary7 from "./Summary7";
 import Summary8 from "./Summary8";
+import GoogleMap from "./GoogleMap";
 
 function Heading({
   title,
@@ -20,7 +21,6 @@ function Heading({
   editPage?: number;
   children: React.ReactNode;
 }) {
-
   const setProgress = useHostOnboarding((state) => state.setProgress);
   const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
 
@@ -78,12 +78,17 @@ export default function Onboarding10() {
                 <p>{listing.location.country}</p>
               </div>
             </div>
-            {coordinateData &&
-              (<div className="z-0">
-                
-                <LeafletMap lat={coordinateData.coordinates.lat} lng={coordinateData.coordinates.lng}/>
-                </div>)
-              }
+            {coordinateData && (
+              <div className="relative mt-4 h-[400px]">
+                <div className="absolute inset-0 z-0">
+                  <GoogleMap
+                    lat={coordinateData.coordinates.lat}
+                    lng={coordinateData.coordinates.lng}
+                    draggable={false}
+                  />
+                </div>
+              </div>
+            )}
           </Heading>
           <Summary4 />
           <Heading title={"Amenities"} editPage={5}>
