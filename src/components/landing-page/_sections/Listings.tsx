@@ -30,10 +30,10 @@ export default function Listings() {
       checkIn: filters.checkIn,
       checkOut: filters.checkOut,
       radius: filters.radius,
-      northeastLat: filters.filter?.locationBoundingBox.northeastLat,
-      northeastLng: filters.filter?.locationBoundingBox.northeastLng,
-      southwestLat: filters.filter?.locationBoundingBox.southwestLat,
-      southwestLng: filters.filter?.locationBoundingBox.southwestLng,
+      northeastLat: filters.locationBoundingBox.northeastLat,
+      northeastLng: filters.locationBoundingBox.northeastLng,
+      southwestLat: filters.locationBoundingBox.southwestLat,
+      southwestLng: filters.locationBoundingBox.southwestLng,
     },
     {
       // the cursor from where to start fetching thecurrentProperties

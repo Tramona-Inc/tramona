@@ -8,15 +8,17 @@ export type CitiesLatLong = {
   label: string;
   long: number;
   lat: number;
-  locationBoundingBox: {
-    northeastLat: number;
-    northeastLng: number;
-    southwestLat: number;
-    southwestLng: number;
-  };
+};
+
+type LocationBoundingBoxType = {
+  northeastLat: number;
+  northeastLng: number;
+  southwestLat: number;
+  southwestLng: number;
 };
 
 type CitiesFilterState = {
+  locationBoundingBox: LocationBoundingBoxType;
   radius: number;
   open: boolean;
   filter: CitiesLatLong | undefined;
@@ -42,6 +44,9 @@ type CitiesFilterState = {
   setCheckIn: (checkIn: Date | undefined) => void;
   checkOut: Date | undefined;
   setCheckOut: (checkOut: Date | undefined) => void;
+  setLocationBoundingBox: (
+    locationBoundingBox: LocationBoundingBoxType,
+  ) => void;
 };
 
 // export const useBidding = create<BiddingState>((set) => ({
@@ -108,4 +113,6 @@ export const useCitiesFilter = create<CitiesFilterState>((set) => ({
   setMaxNightlyPrice: (maxNightlyPrice) => set(() => ({ maxNightlyPrice })),
   setCheckIn: (checkIn) => set(() => ({ checkIn })),
   setCheckOut: (checkOut) => set(() => ({ checkOut })),
+  setLocationBoundingBox: (locationBoundingBox) =>
+    set(() => ({ locationBoundingBox })),
 }));

@@ -147,7 +147,7 @@ export const propertiesRouter = createTRPCRouter({
         northeastLat: z.number().optional(),
         northeastLng: z.number().optional(),
         southwestLat: z.number().optional(),
-        southwestLng: z.number().optional()      
+        southwestLng: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -156,6 +156,11 @@ export const propertiesRouter = createTRPCRouter({
       const lat = input.lat ?? 0;
       const long = input.long ?? 0;
       const radius = input.radius;
+
+      const northeastLat = input.northeastLat ?? 0;
+      const northeastLng = input.northeastLng ?? 0;
+      const southwestLat = input.southwestLat ?? 0;
+      const southwestLng = input.southwestLng ?? 0;
 
       const data = await ctx.db
         .select({

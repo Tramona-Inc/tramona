@@ -21,6 +21,9 @@ export function useSearchBarForm({
 
   const setGuests = useCitiesFilter((state) => state.setGuests);
   const setFilter = useCitiesFilter((state) => state.setFilter);
+  const setLocationBoundingBox = useCitiesFilter(
+    (state) => state.setLocationBoundingBox,
+  );
   const setMaxNightlyPrice = useCitiesFilter(
     (state) => state.setMaxNightlyPrice,
   );
@@ -54,13 +57,15 @@ export function useSearchBarForm({
           label: "",
           lat,
           long: lng,
-          locationBoundingBox: {
-            northeastLat,
-            northeastLng,
-            southwestLat,
-            southwestLng,
-          },
         });
+
+        setLocationBoundingBox({
+          northeastLat,
+          northeastLng,
+          southwestLat,
+          southwestLng,
+        });
+
       } else {
         setFilter(undefined);
       }
