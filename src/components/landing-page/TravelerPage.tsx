@@ -4,22 +4,22 @@ import {
 } from "@/components/_utils/VerificationContext";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
-import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import Head from "next/head";
 import { useEffect } from "react";
 import Listings from "./_sections/Listings";
 import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
 import CitiesFilter from "./CitiesFilter";
+import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 
 export default function TravelerPage() {
   useMaybeSendUnsentRequests();
 
-  // const { data: isPropertyBids, error: propertyBidsError } =
-  //   api.biddings.getAllPropertyBids.useQuery(undefined, {
-  //     refetchOnReconnect: false,
-  //     refetchOnWindowFocus: false,
-  //   });
+  const { data: isPropertyBids, error: propertyBidsError } =
+    api.biddings.getAllPropertyBids.useQuery(undefined, {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    });
 
   const { data: isBucketListProperty, error: bucketListError } =
     api.profile.getAllPropertiesInBucketList.useQuery(undefined, {
@@ -27,19 +27,25 @@ export default function TravelerPage() {
       refetchOnWindowFocus: false,
     });
 
-  // const setInitialBids = useBidding((state) => state.setInitialBids);
+  const setInitialBids = useBidding((state) => state.setInitialBids);
 
   const setInitialBucketList = useBidding(
     (state) => state.setInitialBucketList,
   );
 
   useEffect(() => {
-    // if (!propertyBidsError || !bucketListError) {
-    if (!bucketListError) {
-      // setInitialBids(isPropertyBids ?? []);
+    if (!propertyBidsError || !bucketListError) {
+      setInitialBids(isPropertyBids ?? []);
       setInitialBucketList(isBucketListProperty ?? []);
     }
-  }, [bucketListError, isBucketListProperty, setInitialBucketList]);
+  }, [
+    isPropertyBids,
+    propertyBidsError,
+    bucketListError,
+    setInitialBids,
+    isBucketListProperty,
+    setInitialBucketList,
+  ]);
 
   return (
     <VerificationProvider>

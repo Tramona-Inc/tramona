@@ -317,6 +317,25 @@ export const biddingRouter = createTRPCRouter({
     return result.map((res) => res.propertyId);
   }),
 
+  getDatesFromBid: protectedProcedure
+    .input(
+      z.object({
+        propertyId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.bids.findMany({
+        columns: {
+          checkIn: true,
+          checkOut: true,
+        },
+        where: and(
+          eq(bids.propertyId, input.propertyId),
+          eq(bids.status, "Pending"),
+        ),
+      });
+    }),
+
   createCounter: protectedProcedure
     .input(counterInsertSchema)
     .mutation(async ({ ctx, input }) => {

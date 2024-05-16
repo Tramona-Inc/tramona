@@ -21,6 +21,7 @@ export default function DateRangePicker({
   disablePast = false,
   value,
   onChange,
+  checkInOut,
 }: {
   propertyId?: number;
   className?: string;
@@ -31,6 +32,7 @@ export default function DateRangePicker({
   disablePast?: boolean;
   value?: DateRange;
   onChange: (value?: DateRange) => void;
+  checkInOut?: Date[];
 }) {
   const { data, refetch } = api.properties.getBlockedDates.useQuery(
     { propertyId: propertyId ?? 0 },

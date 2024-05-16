@@ -67,7 +67,7 @@ export default function HomeOfferCard({
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
 
-  // const propertyIdBids = useBidding((state) => state.propertyIdBids);
+  const propertyIdBids = useBidding((state) => state.propertyIdBids);
   const propertyIdBucketList = useBidding(
     (state) => state.propertyIdBucketList,
   );
@@ -78,7 +78,7 @@ export default function HomeOfferCard({
     (state) => state.removePropertyIdFromBucketList,
   );
 
-  // const alreadyBid = propertyIdBids.includes(property.id);
+  const alreadyBid = propertyIdBids.includes(property.id);
   const inBucketList = propertyIdBucketList.includes(property.id);
 
   useEffect(() => {
@@ -140,6 +140,29 @@ export default function HomeOfferCard({
     removePropertyFromBucketList(property.id);
     removeFromBucketListStore(property.id);
   }
+
+  // const { data: dates, refetch } = api.biddings.getDatesFromBid.useQuery(
+  //   {
+  //     propertyId: property.id,
+  //   },
+  //   {
+  //     enabled: false,
+  //     refetchOnReconnect: false,
+  //     refetchOnWindowFocus: false,
+  //   },
+  // );
+
+  // useEffect(() => {
+  //   if (alreadyBid) {
+  //     void refetch();
+  //   }
+  // }, [alreadyBid, refetch]);
+
+  // const uniqueDates = Array.from(
+  //   new Set((dates ?? []).flatMap((date) => [date.checkIn, date.checkOut])),
+  // );
+
+  // console.log(uniqueDates);
 
   return (
     <div className="relative">
@@ -209,6 +232,7 @@ export default function HomeOfferCard({
                       {...field}
                       propertyId={property.id}
                       disablePast
+                      // checkInOut={uniqueDates}
                     />
                   </FormControl>
                   <FormMessage />
