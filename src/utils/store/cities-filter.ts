@@ -1,4 +1,3 @@
-import { cities } from "@/components/landing-page/cities";
 import { type ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema/tables/properties";
 import { create } from "zustand";
 
@@ -9,6 +8,12 @@ export type CitiesLatLong = {
   label: string;
   long: number;
   lat: number;
+  locationBoundingBox: {
+    northeastLat: number;
+    northeastLng: number;
+    southwestLat: number;
+    southwestLng: number;
+  };
 };
 
 type CitiesFilterState = {
@@ -58,6 +63,12 @@ type CitiesFilterState = {
 // }));
 
 export const useCitiesFilter = create<CitiesFilterState>((set) => ({
+  locationBoundingBox: {
+    northeastLat: 0,
+    northeastLng: 0,
+    southwestLat: 0,
+    southwestLng: 0,
+  },
   radius: 50,
   open: false,
   filter: undefined,

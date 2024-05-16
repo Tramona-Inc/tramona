@@ -1,8 +1,8 @@
-import { useZodForm } from "@/utils/useZodForm";
-import { searchSchema, defaultSearchOrReqValues } from "./schemas";
-import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { api } from "@/utils/api";
+import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { useZodForm } from "@/utils/useZodForm";
 import { useEffect } from "react";
+import { defaultSearchOrReqValues, searchSchema } from "./schemas";
 
 export function useSearchBarForm({
   afterSubmit = undefined,
@@ -39,13 +39,28 @@ export function useSearchBarForm({
   const onSubmit = form.handleSubmit(
     async ({ date, location, maxNightlyPriceUSD, numGuests }) => {
       if (location) {
-        const {
-          coordinates: { lat, lng },
-        } = await utils.offers.getCoordinates.fetch({
+        const { coordinates } = await utils.offers.getCoordinates.fetch({
           location,
         });
 
-        setFilter({ id: "", label: "", lat, long: lng });
+        const { lat, lng } = coordinates.location!;
+        const { northeast, southwest } = coordinates.bounds!;
+
+        const { lat: northeastLat, lng: northeastLng } = northeast;
+        const { lat: southwestLat, lng: southwestLng } = southwest;
+
+        setFilter({
+          id: "",
+          label: "",
+          lat,
+          long: lng,
+          locationBoundingBox: {
+            northeastLat,
+            northeastLng,
+            southwestLat,
+            southwestLng,
+          },
+        });
       } else {
         setFilter(undefined);
       }
