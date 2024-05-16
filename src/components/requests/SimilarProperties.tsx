@@ -1,33 +1,24 @@
 import { api } from "@/utils/api";
-import { useCitiesFilter } from "@/utils/store/cities-filter";
 import HomeOfferCard from "@/components/landing-page/HomeOfferCard";
 import { useMemo } from "react";
 
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
-interface SimilarPropertiesProps {
-  locations: string[] | undefined;
+interface SimilarProperties {
+  location: string | undefined;
+  city: string | undefined;
 }
 
-function SimiliarProperties({ locations }: SimilarPropertiesProps) {
+function SimiliarProperties({ location, city }: SimilarProperties) {
   //convert the cities names in to lat lng
   //create an array of the new citers
-  const coordinatesArray: { lat: number; lng: number }[] = [];
-  if (locations) {
-    locations.forEach(async (location) => {
-      const { data: coordinates } = api.offers.getCoordinates.useQuery({
-        location,
-      });
-      console.log(coordinates?.coordinates);
-      if (coordinates?.coordinates) {
-        const { lat, lng } = coordinates.coordinates;
-        coordinatesArray.push({ lat: Number(lat), lng: Number(lng) });
-      }
-    });
+  //const locationCoordinates : { lat: number; lng: number } = {};
+  if (!location) {
+    return <div>Unavailable properties for this location</div>;
   }
-  console.log(coordinatesArray);
 
-  //filter them out using the filter function
-  //const filters = useCitiesFilter((state) => state);
+  const { data: coordinates } = api.offers.getCoordinates.useQuery({
+    location: location!,
+  });
 
   const {
     data: properties,
@@ -35,32 +26,36 @@ function SimiliarProperties({ locations }: SimilarPropertiesProps) {
     fetchNextPage,
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery({
-    lat: coordinatesArray[0]?.lat,
-    long: coordinatesArray[0]?.lng,
-    radius: 50,
+    lat: coordinates?.coordinates.lat,
+    long: coordinates?.coordinates.lng,
+    radius: 25,
   });
 
   const currentProperties = useMemo(
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
-  console.log(currentProperties);
 
-  const skeletons = Array.from({ length: 12 }, (_, index) => (
-    <div key={index}>
-      <Skeleton className="aspect-square rounded-xl" />
-      <div className="flex h-[90px] flex-col justify-center">
-        <SkeletonText />
-        <SkeletonText />
-      </div>
-      <Skeleton className="h-10 rounded-lg" />
-      <Skeleton className="mt-2 h-10 rounded-xl" />
+  const skeletons = (
+    <div className="relative grid grid-cols-2 gap-6">
+      {" "}
+      {Array.from({ length: 4 }, (_, index) => (
+        <div key={index} className="">
+          <div className=" flex h-[290px] flex-col justify-center gap-y-2 rounded-lg">
+            <Skeleton className="aspect-square h-[200px]  rounded-xl" />
+            <SkeletonText />
+            <SkeletonText />
+          </div>
+        </div>
+      ))}{" "}
     </div>
-  ));
+  );
 
   return (
-    <div className="flex flex-col">
-      <h1 className="text-xl font-bold">See Similar Properties in Blank </h1>
+    <div className="flex flex-col gap-y-4">
+      <h1 className="text-xl font-bold">
+        See similar properties in {city!.split(",")[0]}{" "}
+      </h1>
       <p>
         {" "}
         Submit bids while waiting for your request to increase your chance of
@@ -82,7 +77,10 @@ function SimiliarProperties({ locations }: SimilarPropertiesProps) {
             <div className="absolute bottom-[200vh]"></div>
           </div>
         ) : (
-          <div> Make a request or bid to related properties.</div>
+          <div>
+            There are currently no properties available for bidding, please wait
+            24 hours and we will have properties for your request.
+          </div>
         )}
       </div>
     </div>

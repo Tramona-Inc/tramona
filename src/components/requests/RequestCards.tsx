@@ -8,11 +8,21 @@ import { type RequestGroup } from "@/server/db/schema";
 
 export function RequestCards({
   requestGroups,
+  selectedRequest,
+  setSelectedRequest,
 }: {
   requestGroups: { group: RequestGroup; requests: DetailedRequest[] }[];
+  selectedRequest: DetailedRequest | null;
+  setSelectedRequest: (request: DetailedRequest | null) => void;
 }) {
   const [isWaiting, setIsWaiting] = useState(false);
   const utils = api.useUtils();
+  // const [selectedRequest, setSelectedRequest] =
+  //   useState<DetailedRequest | null>(requestGroups[0]!.requests[0]!);
+  // console.log("This is the first request group");
+  // console.log(selectedRequest);
+  // console.log("This is the selected request");
+  // console.log(selectedRequest);
 
   const previousRequestGroups = usePrevious(requestGroups);
   const newlyApprovedRequestGroups =
@@ -52,6 +62,8 @@ export function RequestCards({
           requests={requests}
           isWaiting={isWaiting}
           startTimer={startTimer}
+          selectedRequest={selectedRequest}
+          setSelectedRequest={setSelectedRequest}
         />
       ))}
     </div>

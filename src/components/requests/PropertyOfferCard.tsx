@@ -84,7 +84,7 @@ export default function PropertyOfferCard({
     offer.amount / getNumNights(offer.checkIn, offer.checkOut);
 
   return (
-    <Card className="overflow-clip p-0">
+    <Card className="cursor-pointer overflow-clip p-0">
       <CardContent className="flex">
         <Link
           href={`/property/${offer.propertyId}`}

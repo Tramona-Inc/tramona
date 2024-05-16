@@ -82,7 +82,9 @@ export default function RequestCard({
         ) : (
           <Tooltip>
             <TooltipTrigger>
-              <Badge variant="gray">Unconfirmed</Badge>
+              <Badge variant="lightGray" className="border tracking-tight">
+                Unconfirmed
+              </Badge>
             </TooltipTrigger>
             <TooltipContent className="max-w-64">
               You haven&apos;t confirmed your request yet. Check your text
@@ -121,15 +123,13 @@ export default function RequestCard({
           </h2>
         </div>
         <div className="text-zinc-500">
-          <p>
-            requested <b className="text-lg text-foreground">{fmtdPrice}</b>
+          <p className="text-base text-foreground">
+            Requested <b className="text-lg text-foreground">{fmtdPrice}</b>
             <span className="text-sm">/night</span>
           </p>
           <div className="flex items-center gap-1">
             <CalendarIcon className="size-4" />
             <p className="mr-3">{fmtdDateRange}</p>
-            <UsersIcon className="size-4" />
-            <p>{fmtdNumGuests}</p>
           </div>
           {fmtdFilters && (
             <div className="flex items-center gap-1">
@@ -144,7 +144,15 @@ export default function RequestCard({
           </div>
         )}
       </CardContent>
-      <CardFooter>{children}</CardFooter>
+      <CardFooter>
+        <div className="flex w-full flex-row justify-between px-3">
+          <div className="flex flex-row items-center space-x-1">
+            <UsersIcon className="size-4" />
+            <p>{fmtdNumGuests}</p>
+          </div>
+          {children}
+        </div>
+      </CardFooter>
     </Card>
   );
 }
