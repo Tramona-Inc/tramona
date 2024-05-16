@@ -12,7 +12,7 @@ import {
   properties,
   users,
 } from "@/server/db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 export const profileRouter = createTRPCRouter({
@@ -47,23 +47,14 @@ export const profileRouter = createTRPCRouter({
         .where(eq(users.id, ctx.user.id));
     }),
 
-  getAllPropertiesWithDetails: protectedProcedure
-    .input(
-      z.object({
-        lat: z.number().optional(),
-        long: z.number().optional(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const lat = input.lat ?? 0;
-      const long = input.long ?? 0;
+  getAllPropertiesWithDetails: protectedProcedure.query(async ({ ctx }) => {
+    const myProperties = await ctx.db
+      .select()
+      .from(bucketListProperties)
+      .where(eq(bucketListProperties.userId, ctx.user.id));
+    const myPropertyIds = myProperties.map((p) => p.propertyId);
 
-      const myProperties = await ctx.db
-        .select()
-        .from(bucketListProperties)
-        .where(eq(bucketListProperties.userId, ctx.user.id));
-      const myPropertyIds = myProperties.map((p) => p.propertyId);
-
+    if (myPropertyIds.length > 0) {
       const data = await ctx.db
         .select({
           id: properties.id,
@@ -74,10 +65,6 @@ export const profileRouter = createTRPCRouter({
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
           originalNightlyPrice: properties.originalNightlyPrice,
-          distance: sql`
-            6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
-            ) AS distance`,
         })
         .from(properties)
         .where(inArray(properties.id, myPropertyIds));
@@ -97,7 +84,10 @@ export const profileRouter = createTRPCRouter({
         .filter((p) => !!p);
 
       return fullBucketListProperties;
-    }),
+    } else {
+      return [];
+    }
+  }),
 
   addProperty: protectedProcedure
     .input(BucketListPropertySchema.omit({ id: true, userId: true }))
