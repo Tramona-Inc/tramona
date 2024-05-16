@@ -5,9 +5,10 @@ import React, { useState } from "react";
 type CoordinateDataProps = {
   lat: number | undefined;
   lng: number | undefined;
+  draggable: boolean;
 };
 
-function GoogleMap({ lat, lng }: CoordinateDataProps) {
+function GoogleMap({ lat, lng, draggable }: CoordinateDataProps) {
   const [markerPosition, setMarkerPosition] = useState({
     lat: lat ?? 37.774929,
     lng: lng ?? -122.419416,
@@ -45,27 +46,20 @@ function GoogleMap({ lat, lng }: CoordinateDataProps) {
     setShowInfoWindow(!showInfoWindow);
   };
 
-  const containerStyle = {
-    width: "100%",
-    height: "400px",
-  };
-
   return (
     <>
       {lng && lat && (
-        <div className="relative z-10">
+        <div className=" relative z-10">
           <Map
             google={google}
             zoom={15}
             initialCenter={{ lat, lng }}
             // onClick={onMapClick}
             style={{ height: "400px" }}
-            mapContainerStyle={containerStyle}
-            center={{ lat, lng }}
           >
             <Marker
               position={{ lat, lng }}
-              draggable={true}
+              draggable={draggable}
               onClick={onMarkerClick}
               onDragend={(coord: {
                 latLng: { lat: () => number; lng: () => number };

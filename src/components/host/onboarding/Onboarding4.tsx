@@ -231,16 +231,15 @@ export default function Onboarding4() {
               />
             </div>
           </Form>
-          {/* <GoogleMap2
-            lat={coordinateData.coordinates.lat}
-            lng={coordinateData.coordinates.lng}
-          /> */}
           {coordinateData && (
-            <div className="block">
-              <GoogleMap
-                lat={coordinateData.coordinates.lat}
-                lng={coordinateData.coordinates.lng}
-              />
+            <div className="relative mb-10 h-[400px]">
+              <div className="absolute inset-0 z-0">
+                <GoogleMap
+                  lat={coordinateData.coordinates.lat}
+                  lng={coordinateData.coordinates.lng}
+                  draggable={false}
+                />
+              </div>
             </div>
           )}
         </div>
