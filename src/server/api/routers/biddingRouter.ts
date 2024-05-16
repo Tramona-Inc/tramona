@@ -168,24 +168,25 @@ export const biddingRouter = createTRPCRouter({
         },
       });
 
-      if (bidExist.length > 0) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      } else {
-        const madeByGroupId = await ctx.db
-          .insert(groups)
-          .values({ ownerId: ctx.user.id })
-          .returning()
-          .then((res) => res[0]!.id);
+      // ! uncomment to prevent duplicate bids
+      // if (bidExist.length > 0) {
+      //   throw new TRPCError({ code: "BAD_REQUEST" });
+      // } else {
+      const madeByGroupId = await ctx.db
+        .insert(groups)
+        .values({ ownerId: ctx.user.id })
+        .returning()
+        .then((res) => res[0]!.id);
 
-        await ctx.db.insert(groupMembers).values({
-          userId: ctx.user.id,
-          groupId: madeByGroupId,
-        });
+      await ctx.db.insert(groupMembers).values({
+        userId: ctx.user.id,
+        groupId: madeByGroupId,
+      });
 
-        await ctx.db
-          .insert(bids)
-          .values({ ...input, madeByGroupId: madeByGroupId });
-      }
+      await ctx.db
+        .insert(bids)
+        .values({ ...input, madeByGroupId: madeByGroupId });
+      // }
     }),
 
   update: protectedProcedure

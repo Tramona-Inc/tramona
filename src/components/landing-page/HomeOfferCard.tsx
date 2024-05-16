@@ -141,29 +141,6 @@ export default function HomeOfferCard({
     removeFromBucketListStore(property.id);
   }
 
-  // const { data: dates, refetch } = api.biddings.getDatesFromBid.useQuery(
-  //   {
-  //     propertyId: property.id,
-  //   },
-  //   {
-  //     enabled: false,
-  //     refetchOnReconnect: false,
-  //     refetchOnWindowFocus: false,
-  //   },
-  // );
-
-  // useEffect(() => {
-  //   if (alreadyBid) {
-  //     void refetch();
-  //   }
-  // }, [alreadyBid, refetch]);
-
-  // const uniqueDates = Array.from(
-  //   new Set((dates ?? []).flatMap((date) => [date.checkIn, date.checkOut])),
-  // );
-
-  // console.log(uniqueDates);
-
   return (
     <div className="relative">
       <div className="space-y-2">
@@ -232,7 +209,7 @@ export default function HomeOfferCard({
                       {...field}
                       propertyId={property.id}
                       disablePast
-                      // checkInOut={uniqueDates}
+                      alreadyBid
                     />
                   </FormControl>
                   <FormMessage />
