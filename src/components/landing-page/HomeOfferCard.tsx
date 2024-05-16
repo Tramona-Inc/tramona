@@ -20,7 +20,7 @@ import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency, plural } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -262,6 +262,7 @@ export default function HomeOfferCard({
             onClick={() => handleRemoveBucketList()}
             className="rounded-full bg-[#333333]/90 hover:bg-[#333333]"
           >
+            <Minus />
             Added to bucket list
           </Button>
         )}
