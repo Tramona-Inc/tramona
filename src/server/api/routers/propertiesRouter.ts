@@ -34,10 +34,10 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       if ((!input.latitude || !input.longitude) && input.address) {
-        const coords = await getCoordinates(input.address);
-        if (coords) {
-          input.latitude = coords.lat;
-          input.longitude = coords.lng;
+        const { location } = await getCoordinates(input.address);
+        if (location) {
+          input.latitude = location.lat;
+          input.longitude = location.lng;
         }
       }
 
