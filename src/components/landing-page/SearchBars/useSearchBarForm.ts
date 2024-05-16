@@ -47,10 +47,8 @@ export function useSearchBarForm({
         });
 
         const { lat, lng } = coordinates.location!;
-        const { northeast, southwest } = coordinates.bounds!;
 
-        const { lat: northeastLat, lng: northeastLng } = northeast;
-        const { lat: southwestLat, lng: southwestLng } = southwest;
+        const bounds = coordinates.bounds;
 
         setFilter({
           id: "",
@@ -59,13 +57,18 @@ export function useSearchBarForm({
           long: lng,
         });
 
-        setLocationBoundingBox({
-          northeastLat,
-          northeastLng,
-          southwestLat,
-          southwestLng,
-        });
+        if (bounds) {
+          const { northeast, southwest } = bounds;
+          const { lat: northeastLat, lng: northeastLng } = northeast;
+          const { lat: southwestLat, lng: southwestLng } = southwest;
 
+          setLocationBoundingBox({
+            northeastLat,
+            northeastLng,
+            southwestLat,
+            southwestLng,
+          });
+        }
       } else {
         setFilter(undefined);
       }
