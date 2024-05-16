@@ -44,7 +44,7 @@ export function RequestCards({
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-4 lg:grid-cols-1">
       {requestGroups.map(({ group: requestGroup, requests }) => (
         <RequestGroupCards
           key={requestGroup.id}
