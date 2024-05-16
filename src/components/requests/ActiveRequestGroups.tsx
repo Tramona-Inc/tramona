@@ -10,7 +10,9 @@ export default function ActiveRequestGroups() {
   if (!requests) return <Spinner />;
 
   return requests.activeRequestGroups.length !== 0 ? (
-    <RequestCards requestGroups={requests.activeRequestGroups} />
+    <div className="grid grid-cols-2">
+      <RequestCards requestGroups={requests.activeRequestGroups} />
+    </div>
   ) : (
     <EmptyStateValue
       title={"No city requests"}
