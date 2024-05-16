@@ -17,6 +17,9 @@ import { cities } from "./cities";
 export default function CitiesFilter() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
+  const setLocationBoundingBox = useCitiesFilter(
+    (state) => state.setLocationBoundingBox,
+  );
 
   const open = useCitiesFilter((state) => state.open);
   const setOpen = useCitiesFilter((state) => state.setOpen);
@@ -37,6 +40,12 @@ export default function CitiesFilter() {
                   variant={"ghost"}
                   onClick={() => {
                     setFilter(city);
+                    setLocationBoundingBox({
+                      northeastLat: 0,
+                      northeastLng: 0,
+                      southwestLat: 0,
+                      southwestLng: 0,
+                    });
                   }}
                   className={cn(
                     "text:sm px-3 py-2 font-semibold sm:text-base lg:text-lg",
