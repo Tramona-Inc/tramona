@@ -1,8 +1,10 @@
 import { api } from "@/utils/api";
 import HomeOfferCard from "@/components/landing-page/HomeOfferCard";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { on } from "events";
 interface SimilarProperties {
   location: string | undefined;
   city: string | undefined;
@@ -35,7 +37,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
-
+  const [displayCount, setDisplayCount] = useState(4);
   const skeletons = (
     <div className="relative grid grid-cols-2 gap-6">
       {" "}
@@ -52,7 +54,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
   );
 
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex h-[1400px] flex-col gap-y-4 overflow-y-auto">
       <h1 className="text-xl font-bold">
         See similar properties in {city!.split(",")[0]}{" "}
       </h1>
@@ -68,11 +70,19 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
         ) : currentProperties.length > 0 ? (
           // if there are currentProperties to show, display them
           <div className="relative grid grid-cols-2 gap-6">
-            {currentProperties.map((property) => (
+            {currentProperties.slice(0, displayCount).map((property) => (
               <div className=" col-span-1">
                 <HomeOfferCard key={property.id} property={property} />
               </div>
             ))}
+            <Button
+              className="roundes col-span-2 font-semibold"
+              variant="secondaryLight"
+              onClick={() => setDisplayCount(displayCount + 4)}
+            >
+              {" "}
+              See more similar properties
+            </Button>
             {isFetchingNextPage && skeletons}
             <div className="absolute bottom-[200vh]"></div>
           </div>
