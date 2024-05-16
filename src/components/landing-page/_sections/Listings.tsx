@@ -1,12 +1,12 @@
+import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
+import { Button } from "@/components/ui/button";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
+import { FilterXIcon } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import HomeOfferCard from "../HomeOfferCard";
-import { Button } from "@/components/ui/button";
-import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
-import { FilterXIcon } from "lucide-react";
 
 export default function Listings() {
   const filters = useCitiesFilter((state) => state);
@@ -30,6 +30,10 @@ export default function Listings() {
       checkIn: filters.checkIn,
       checkOut: filters.checkOut,
       radius: filters.radius,
+      northeastLat: filters.locationBoundingBox.northeastLat,
+      northeastLng: filters.locationBoundingBox.northeastLng,
+      southwestLat: filters.locationBoundingBox.southwestLat,
+      southwestLng: filters.locationBoundingBox.southwestLng,
     },
     {
       // the cursor from where to start fetching thecurrentProperties
