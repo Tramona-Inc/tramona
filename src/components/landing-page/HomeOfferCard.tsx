@@ -209,7 +209,7 @@ export default function HomeOfferCard({
                       {...field}
                       propertyId={property.id}
                       disablePast
-                      alreadyBid
+                      alreadyBid={alreadyBid}
                     />
                   </FormControl>
                   <FormMessage />
