@@ -8,6 +8,7 @@ import {
 } from "../ui/dialog";
 import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 export default function WithdrawRequestDialog({
   requestId,
@@ -18,16 +19,13 @@ export default function WithdrawRequestDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { mutate } = api.requests.delete.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Request successfully withdrawn",
-      });
-    },
-  });
+  const mutation = api.requests.delete.useMutation();
 
-  function handleWithdraw() {
-    mutate({ id: requestId });
+  async function handleWithdraw() {
+    await mutation
+      .mutateAsync({ id: requestId })
+      .then(() => toast({ title: "Request successfully withdrawn" }))
+      .catch(() => errorToast());
   }
 
   return (
@@ -44,7 +42,11 @@ export default function WithdrawRequestDialog({
           <DialogClose asChild>
             <Button variant={"secondary"}>Cancel</Button>
           </DialogClose>
-          <Button variant="destructive" onClick={handleWithdraw}>
+          <Button
+            variant="destructive"
+            onClick={handleWithdraw}
+            disabled={mutation.isLoading}
+          >
             Withdraw Request
           </Button>
         </DialogFooter>

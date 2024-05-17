@@ -1,6 +1,5 @@
 import { api } from "@/utils/api";
 import { useDialogState } from "@/utils/dialog";
-import { useCitiesFilter } from "@/utils/store/cities-filter";
 import {
   BadgeCheck,
   BadgeXIcon,
@@ -21,6 +20,7 @@ import {
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
+import UserAvatar from "../_common/UserAvatar";
 import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
@@ -37,7 +37,6 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
-import UserAvatar from "../_common/UserAvatar";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -82,15 +81,10 @@ export default function ProfilePage() {
     },
   ];
 
-  const filter = useCitiesFilter((state) => state.filter);
-
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
 
   const { data: bucketListProperties } =
-    api.profile.getAllPropertiesWithDetails.useQuery({
-      lat: filter?.lat,
-      long: filter?.long,
-    });
+    api.profile.getAllPropertiesWithDetails.useQuery();
 
   const [selectedBLDestinationId, setSelectedBLDestinationId] = React.useState<
     number | null

@@ -8,8 +8,9 @@ import {
 } from "../ui/dialog";
 import { api } from "@/utils/api";
 import { toast } from "../ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
-export default function WithdrawPropertyOfferDialog({
+export default function WithdrawOfferDialog({
   offerId,
   open,
   onOpenChange,
@@ -18,16 +19,13 @@ export default function WithdrawPropertyOfferDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { mutate } = api.biddings.delete.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Offer successfully withdrawn",
-      });
-    },
-  });
+  const mutation = api.biddings.delete.useMutation();
 
-  function handleWithdraw() {
-    mutate({ id: offerId });
+  async function handleWithdraw() {
+    await mutation
+      .mutateAsync({ id: offerId })
+      .then(() => toast({ title: "Offer successfully withdrawn" }))
+      .catch(() => errorToast());
   }
 
   return (
@@ -42,7 +40,13 @@ export default function WithdrawPropertyOfferDialog({
           <DialogClose asChild>
             <Button variant={"secondary"}>Cancel</Button>
           </DialogClose>
-          <Button onClick={handleWithdraw}>Withdraw Offer</Button>
+          <Button
+            variant="destructive"
+            onClick={handleWithdraw}
+            disabled={mutation.isLoading}
+          >
+            Withdraw Offer
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
