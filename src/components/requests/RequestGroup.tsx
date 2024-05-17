@@ -32,7 +32,7 @@ export default function RequestGroupCards({
   );
   useEffect(() => {
     if (requests.length > 0) {
-      setSelectedRequest(requests[0]! ?? null);
+      setSelectedRequest(requests[0] ?? null);
     }
   }, []);
   const handleCardClick = (request: DetailedRequest) => {
@@ -49,7 +49,8 @@ export default function RequestGroupCards({
         onClick={() => handleCardClick(request)}
         className={`min-w-96 cursor-pointer *:h-full ${isSelected ? "rounded-xl border border-primary" : ""}`}
       >
-        <RequestCard request={request}>
+        {/* The is selected prop going inside of Request card is just for mobile desktop is handles in activeRequestGroup */}
+        <RequestCard request={request} isSelected={isSelected}>
           {requestGroup.hasApproved ? (
             <RequestCardAction request={request} />
           ) : (

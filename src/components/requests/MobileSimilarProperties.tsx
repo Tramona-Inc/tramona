@@ -4,12 +4,13 @@ import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+
 interface SimilarProperties {
   location: string | undefined;
   city: string | undefined;
 }
 
-function SimiliarProperties({ location, city }: SimilarProperties) {
+function MobileSimiliarProperties({ location, city }: SimilarProperties) {
   //convert the cities names in to lat lng
   //create an array of the new citers
   //const locationCoordinates : { lat: number; lng: number } = {};
@@ -58,10 +59,22 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
   );
 
   return (
-    <div className="relative flex h-[1000px] flex-col gap-y-4 overflow-y-auto">
-      <h1 className=" text-xl font-bold">
-        See similar properties in {city!.split(",")[0]}{" "}
-      </h1>
+    <div className="relative flex max-h-[300px] flex-col gap-y-2 overflow-y-auto">
+      <div className="flex flex-row items-center justify-between text-center">
+        <h1 className=" text-nowrap text-center text-sm font-semibold">
+          See similar properties in {city!.split(",")[0]}{" "}
+        </h1>
+        {displayCount < currentProperties!.length && (
+          <Button
+            className="roundes col-span-2 font-semibold"
+            variant="ghost"
+            onClick={() => setDisplayCount(displayCount + 4)}
+          >
+            {" "}
+            See more
+          </Button>
+        )}
+      </div>
       <p className="hidden md:flex">
         {" "}
         Submit bids while waiting for your request to increase your chance of
@@ -79,21 +92,12 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
                 <HomeOfferCard key={property.id} property={property} />
               </div>
             ))}
-            {displayCount < currentProperties!.length && (
-              <Button
-                className="roundes col-span-2 font-semibold"
-                variant="secondaryLight"
-                onClick={() => setDisplayCount(displayCount + 4)}
-              >
-                {" "}
-                See similar properties
-              </Button>
-            )}
+
             {isFetchingNextPage && skeletons}
             <div className="absolute bottom-[200vh]"></div>
           </div>
         ) : (
-          <div>
+          <div className="text-sm md:text-base">
             There are currently no properties available for bidding, please wait
             24 hours and we will have properties for your request.
           </div>
@@ -103,4 +107,4 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
   );
 }
 
-export default SimiliarProperties;
+export default MobileSimiliarProperties;
