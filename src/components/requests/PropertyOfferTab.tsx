@@ -4,14 +4,16 @@ import PropertyOffersEmptySvg from "../_common/EmptyStateSvg/PropertyOffersEmpty
 import Spinner from "../_common/Spinner";
 import PropertyOfferCard from "./PropertyOfferCard";
 import SimiliarProperties from "./SimilarProperties";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 
 export default function PropertyOfferTab() {
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const { data: offers } = api.biddings.getMyBids.useQuery();
 
   if (!offers) return <Spinner />;
 
   return offers.length > 0 ? (
-    <div className="grid grid-cols-2 gap-24">
+    <div className="grid gap-24 md:grid-cols-2">
       <div className=" col-span-1 gap-4 ">
         {offers.map((offer) => (
           <PropertyOfferCard
@@ -22,13 +24,11 @@ export default function PropertyOfferTab() {
         ))}
       </div>
       <div>
-        {offers.length > 0 ? (
+        {offers.length > 0 && !isMobile && (
           <SimiliarProperties
             location={offers[0]!.property.address!}
             city={offers[0]!.property.address!}
           />
-        ) : (
-          <Spinner />
         )}
       </div>
     </div>

@@ -7,26 +7,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import { api } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency, plural } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Minus, Plus } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { CarouselDots } from "@/components/_common/carousel-dots";
 type PropertyCard = {
   id: number;
@@ -40,20 +25,6 @@ type PropertyCard = {
   distance: unknown;
 };
 
-const formSchema = z
-  .object({
-    date: z.object({
-      from: z.coerce.date(),
-      to: z.coerce.date(),
-    }),
-  })
-  .refine((data) => data.date.to > data.date.from, {
-    message: "Must stay for at least 1 night",
-    path: ["date"],
-  });
-
-type FormSchema = z.infer<typeof formSchema>;
-
 export default function OfferCardNoBid({
   property,
 }: {
@@ -62,20 +33,6 @@ export default function OfferCardNoBid({
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
-
-  const propertyIdBids = useBidding((state) => state.propertyIdBids);
-  const propertyIdBucketList = useBidding(
-    (state) => state.propertyIdBucketList,
-  );
-  const addToBucketListStore = useBidding(
-    (state) => state.addPropertyIdBucketList,
-  );
-  const removeFromBucketListStore = useBidding(
-    (state) => state.removePropertyIdFromBucketList,
-  );
-
-  const alreadyBid = propertyIdBids.includes(property.id);
-  const inBucketList = propertyIdBucketList.includes(property.id);
 
   useEffect(() => {
     if (!carouselApi) {

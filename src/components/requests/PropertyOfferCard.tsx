@@ -15,7 +15,7 @@ import { useState } from "react";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent, CardFooter } from "../ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,8 @@ import {
 import { Separator } from "../ui/separator";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
+import MobileSimilarProperties from "./MobileSimilarProperties";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 
 function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
@@ -50,7 +52,7 @@ export default function PropertyOfferCard({
       offer: RouterOutputs["biddings"]["getAllPending"][number];
     }) {
   const { data: session } = useSession();
-
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const counter = offer.counters[0];
   const previousCounter = offer.counters[1];
 
@@ -84,7 +86,7 @@ export default function PropertyOfferCard({
     offer.amount / getNumNights(offer.checkIn, offer.checkOut);
 
   return (
-    <Card className="cursor-pointer overflow-clip p-0">
+    <Card className="cursor-pointer p-0 lg:overflow-clip">
       <CardContent className="flex">
         <Link
           href={`/property/${offer.propertyId}`}
@@ -104,7 +106,7 @@ export default function PropertyOfferCard({
           )}
         </Link>
 
-        <div className="flex w-full flex-col gap-2 p-3">
+        <div className="flex w-full flex-col gap-2 p-3 ">
           <div className="flex justify-between">
             <div>{badge}</div>
             <div className="ml-auto flex -translate-y-2 translate-x-2 items-center gap-2">
@@ -177,6 +179,19 @@ export default function PropertyOfferCard({
           )}
         </div>
       </CardContent>
+      <CardFooter>
+        {isMobile && (
+          <div>
+            <Separator />
+            <div className=" mt-1 max-h-[300px] max-w-[360px] px-5">
+              <MobileSimilarProperties
+                city={offer.property.address!}
+                location={offer.property.address!}
+              />
+            </div>
+          </div>
+        )}
+      </CardFooter>
     </Card>
   );
 }

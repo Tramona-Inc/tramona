@@ -54,7 +54,7 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
 
   return (
     <div>
-      <div className="mb-3 flex flex-row items-center justify-between text-center">
+      <div className="mb-3 flex flex-row items-center justify-between px-1 text-center">
         <h1 className=" text-nowrap text-center text-sm font-semibold">
           Similar properties in {city!.split(",")[0]}{" "}
         </h1>
