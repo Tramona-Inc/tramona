@@ -45,16 +45,6 @@ export default function DateRangePicker({
       },
     );
 
-  // Flatten the array of unique dates from the bid dates
-  const uniqueDates = Array.from(
-    new Set(
-      (dates ?? []).flatMap((date) => [
-        new Date(date.checkIn).toISOString().split("T")[0],
-        new Date(date.checkOut).toISOString().split("T")[0],
-      ]),
-    ),
-  );
-
   const { data, refetch: refetchBlockedDates } =
     api.properties.getBlockedDates.useQuery(
       { propertyId: propertyId ?? 0 },
@@ -84,16 +74,23 @@ export default function DateRangePicker({
       e.to = e.from;
     }
 
+    console.log(dates);
+    console.log({ checkIn: e?.from, checkOut: e?.to });
+
     // Check for exact match of bid dates only if both from and to dates are selected
     if (e?.from && e?.to) {
-      const fromDateStr = e.from.toISOString().split("T")[0];
-      const toDateStr = e.to.toISOString().split("T")[0];
+      const hasExactMatch = (dates ?? []).some(
+        (bid) =>
+          e.to &&
+          e.from &&
+          isSameDay(e.from, new Date(bid.checkIn)) &&
+          isSameDay(e.to, new Date(bid.checkOut)),
+      );
 
-      const hasExactMatch =
-        uniqueDates.includes(fromDateStr) && uniqueDates.includes(toDateStr);
+      console.log(hasExactMatch);
 
       if (hasExactMatch) {
-        setError("Selected dates overlap exactly with an existing bid.");
+        setError("Already bid dates");
         return;
       }
     }
@@ -125,6 +122,9 @@ export default function DateRangePicker({
         align="start"
         side="top"
       >
+        <div className="flex flex-col items-center">
+          {error && <div className="mt-2 text-red-500">{error}</div>}
+        </div>
         <Calendar
           mode="range"
           selected={value}
@@ -133,7 +133,6 @@ export default function DateRangePicker({
           numberOfMonths={1}
           showOutsideDays={true}
         />
-        {error && <div className="mt-2 text-red-500">{error}</div>}
       </PopoverContent>
     </Popover>
   );
