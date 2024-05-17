@@ -33,7 +33,7 @@ export default function DateRangePicker({
   disablePast?: boolean;
   value?: DateRange;
   onChange: (value?: DateRange) => void;
-  alreadyBid: boolean;
+  alreadyBid?: boolean;
 }) {
   const { data: dates, refetch: refetchBidDates } =
     api.biddings.getDatesFromBid.useQuery(
@@ -83,8 +83,6 @@ export default function DateRangePicker({
           isSameDay(convertUTCDateToLocalDate(e.from), new Date(bid.checkIn)) &&
           isSameDay(convertUTCDateToLocalDate(e.to), new Date(bid.checkOut)),
       );
-
-      console.log(hasExactMatch);
 
       if (hasExactMatch) {
         setError("Already bid dates");
