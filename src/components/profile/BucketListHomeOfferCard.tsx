@@ -7,14 +7,22 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { cn, formatCurrency } from "@/utils/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { api as apiHelper } from "@/utils/api";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
+import { useBidding } from "@/utils/store/bidding";
+import { formatCurrency, plural } from "@/utils/utils";
+import { Ellipsis } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { plural } from "@/utils/utils";
-import { api as apiHelper } from "@/utils/api";
+import { useEffect, useState } from "react";
 import { CarouselDots } from "../_common/carousel-dots";
 
 type BLPropertyCard = {
@@ -27,7 +35,6 @@ type BLPropertyCard = {
   numBedrooms: number;
   numBeds: number;
   originalNightlyPrice: number | null;
-  distance: unknown;
 };
 
 export default function BucketListHomeOfferCard({
@@ -54,6 +61,15 @@ export default function BucketListHomeOfferCard({
 
   const { mutate: removePropertyFromBucketList } =
     apiHelper.profile.removeProperty.useMutation();
+
+  const removeFromBucketListStore = useBidding(
+    (state) => state.removePropertyIdFromBucketList,
+  );
+
+  function handleRemoveBucketList() {
+    removePropertyFromBucketList(property.bucketListPropertyId);
+    removeFromBucketListStore(property.bucketListPropertyId);
+  }
 
   return (
     <div className="relative">
@@ -111,14 +127,23 @@ export default function BucketListHomeOfferCard({
       </div>
 
       <div className="absolute right-2 top-2">
-        <Button
-          onClick={() =>
-            removePropertyFromBucketList(property.bucketListPropertyId)
-          }
-          className="rounded-full bg-[#333333]/90 hover:bg-[#333333]"
-        >
-          Added to bucket list
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Ellipsis color={"white"} size={35} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() =>
+                removePropertyFromBucketList(property.bucketListPropertyId)
+              }
+              className="text-red-600"
+            >
+              Remove{" "}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
