@@ -1,9 +1,9 @@
 import { api } from "@/utils/api";
-import HomeOfferCard from "@/components/landing-page/HomeOfferCard";
 import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import OfferCardNoBid from "./property-cards/OfferCardNoBid";
 interface SimilarProperties {
   location: string | undefined;
   city: string | undefined;
@@ -48,8 +48,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
       {Array.from({ length: 4 }, (_, index) => (
         <div key={index} className="">
           <div className=" flex h-[290px] flex-col justify-center gap-y-2 rounded-lg">
-            <Skeleton className="aspect-square h-[200px]  rounded-xl" />
-            <SkeletonText />
+            <Skeleton className="aspect-square h-[220px]  rounded-xl" />
             <SkeletonText />
           </div>
         </div>
@@ -76,7 +75,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
           <div className="relative grid grid-cols-2 gap-6">
             {currentProperties.slice(0, displayCount).map((property) => (
               <div className=" col-span-1">
-                <HomeOfferCard key={property.id} property={property} />
+                <OfferCardNoBid key={property.id} property={property} />
               </div>
             ))}
             {displayCount < currentProperties!.length && (

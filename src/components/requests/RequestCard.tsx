@@ -29,8 +29,8 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestDialog from "./WithdrawRequestDialog";
 import { useMediaQuery } from "../_utils/useMediaQuery";
-import MobileSimiliarProperties from "./MobileSimilarProperties";
-import TestMobileSimilarProperties from "./TestMobileSimilarProperties";
+
+import MobileSimilarProperties from "./MobileSimilarProperties";
 import { Separator } from "../ui/separator";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
@@ -152,14 +152,14 @@ export default function RequestCard({
       </CardContent>
       <CardFooter className="">
         <div className="-mt-3 flex w-full flex-col justify-between gap-y-2 md:mt-0  md:flex-row md:gap-y-0">
-          <div className="flex flex-row items-center space-x-1 font-semibold">
+          <div className="mb-1 flex flex-row items-center space-x-1 font-semibold">
             <p>{fmtdNumGuests}</p>
           </div>
           {children}
           {isMobile && isSelected && (
             <div className="flex flex-col gap-y-2 ">
               <Separator className="mt-3" />
-              <TestMobileSimilarProperties
+              <MobileSimilarProperties
                 location={request.location}
                 city={request.location}
               />

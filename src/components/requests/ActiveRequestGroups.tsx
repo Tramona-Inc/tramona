@@ -5,10 +5,8 @@ import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import RequestEmptySvg from "../_common/EmptyStateSvg/RequestEmptySvg";
 import SimiliarProperties from "./SimilarProperties";
 import { useState } from "react";
-import RequestCard from "./RequestCard";
 import { type DetailedRequest } from "@/components/requests/RequestCard";
 import { useMediaQuery } from "../_utils/useMediaQuery";
-import MobileSimiliarProperties from "./MobileSimilarProperties";
 export default function ActiveRequestGroups() {
   const isMobile = useMediaQuery("(max-width: 640px)");
 
