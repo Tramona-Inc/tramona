@@ -209,6 +209,7 @@ export default function HomeOfferCard({
                       {...field}
                       propertyId={property.id}
                       disablePast
+                      alreadyBid={alreadyBid}
                     />
                   </FormControl>
                   <FormMessage />
@@ -218,7 +219,7 @@ export default function HomeOfferCard({
             <Dialog open={open} onOpenChange={setOpen}>
               {/* Removed trigger to have control on open and close */}
               <div>
-                {alreadyBid ? (
+                {/* {alreadyBid ? (
                   <Button
                     type={"submit"}
                     className={"w-full rounded-xl"}
@@ -226,15 +227,15 @@ export default function HomeOfferCard({
                   >
                     Already Bid
                   </Button>
-                ) : (
-                  <Button
-                    type={"submit"}
-                    className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
-                    // disabled={!form.formState.isValid}
-                  >
-                    Make Offer
-                  </Button>
-                )}
+                ) : ( */}
+                <Button
+                  type={"submit"}
+                  className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
+                  // disabled={!form.formState.isValid}
+                >
+                  Make Offer
+                </Button>
+                {/* )} */}
               </div>
               <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
                 <MakeBid propertyId={property.id} setOpen={setOpen} />
