@@ -1,6 +1,6 @@
 import { api } from "@/utils/api";
 import HomeOfferCard from "@/components/landing-page/HomeOfferCard";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
@@ -38,6 +38,11 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
     [properties],
   );
   const [displayCount, setDisplayCount] = useState(4);
+  //whenever the user switches to a new location we want to reset the display count
+  useEffect(() => {
+    setDisplayCount(4);
+  }, [location, city]);
+
   const skeletons = (
     <div className="relative grid grid-cols-2 gap-6">
       {" "}
@@ -54,8 +59,8 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
   );
 
   return (
-    <div className="flex h-[1400px] flex-col gap-y-4 overflow-y-auto">
-      <h1 className="text-xl font-bold">
+    <div className="relative flex h-[1000px] flex-col gap-y-4 overflow-y-auto">
+      <h1 className=" text-xl font-bold">
         See similar properties in {city!.split(",")[0]}{" "}
       </h1>
       <p>
@@ -75,14 +80,16 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
                 <HomeOfferCard key={property.id} property={property} />
               </div>
             ))}
-            <Button
-              className="roundes col-span-2 font-semibold"
-              variant="secondaryLight"
-              onClick={() => setDisplayCount(displayCount + 4)}
-            >
-              {" "}
-              See more similar properties
-            </Button>
+            {displayCount < currentProperties!.length && (
+              <Button
+                className="roundes col-span-2 font-semibold"
+                variant="secondaryLight"
+                onClick={() => setDisplayCount(displayCount + 4)}
+              >
+                {" "}
+                See more similar properties
+              </Button>
+            )}
             {isFetchingNextPage && skeletons}
             <div className="absolute bottom-[200vh]"></div>
           </div>

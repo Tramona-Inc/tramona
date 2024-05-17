@@ -117,23 +117,21 @@ export default function RequestCard({
           )}
         </div>
         <div className="flex items-start gap-1">
-          <MapPinIcon className="shrink-0 text-zinc-300" />
+          <MapPinIcon className="shrink-0 text-primary" />
           <h2 className="text-lg font-semibold text-zinc-700">
             {request.location}
           </h2>
         </div>
-        <div className="text-zinc-500">
-          <p className="text-base text-foreground">
-            Requested <b className="text-lg text-foreground">{fmtdPrice}</b>
+        <div className="text-primary">
+          <p className="text-base font-semibold text-foreground">
+            Requested <span className=" text-foreground">{fmtdPrice}</span>
             <span className="text-sm">/night</span>
           </p>
           <div className="flex items-center gap-1">
-            <CalendarIcon className="size-4" />
             <p className="mr-3">{fmtdDateRange}</p>
           </div>
           {fmtdFilters && (
             <div className="flex items-center gap-1">
-              <FilterIcon className="size-4" />
               <p>{fmtdFilters}</p>
             </div>
           )}
@@ -145,9 +143,8 @@ export default function RequestCard({
         )}
       </CardContent>
       <CardFooter>
-        <div className="flex w-full flex-row justify-between px-3">
-          <div className="flex flex-row items-center space-x-1">
-            <UsersIcon className="size-4" />
+        <div className="flex w-full flex-row justify-between ">
+          <div className="flex flex-row items-center space-x-1 font-semibold">
             <p>{fmtdNumGuests}</p>
           </div>
           {children}
