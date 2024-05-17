@@ -13,34 +13,31 @@ export default function CashbackBalanceDetails({
   balance: number;
 }) {
   return (
-    <div className="flex flex-col space-y-1 rounded-lg border lg:p-4">
-      <div>
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-semibold lg:text-lg">Current balance</h1>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="rounded-full border-teal-900 font-bold text-teal-900"
-              >
-                Transfer
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader className="border-b pb-2 text-center font-bold">
-                Coming Soon!
-              </DialogHeader>
-              <p>
-                If you need cash now, send a message through the help center and
-                we can manually pay you. If not, we will have this feature up
-                soon!
-              </p>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        <p className="text-3xl font-bold">{formatCurrency(balance)}</p>
+    <div className="rounded-lg border p-4">
+      <div className="flex items-center justify-between">
+        <h1 className="font-semibold">Current balance</h1>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="rounded-full border-teal-900 font-bold text-teal-900"
+            >
+              Setup Cashback Account
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader className="border-b pb-2 text-center font-bold">
+              Coming Soon!
+            </DialogHeader>
+            <p>
+              If you need cash now, send a message through the help center and
+              we can manually pay you. If not, we will have this feature up
+              soon!
+            </p>
+          </DialogContent>
+        </Dialog>
       </div>
+      <p className="text-3xl font-bold">{formatCurrency(balance)}</p>
       <div>
         <Dialog>
           <DialogTrigger asChild>

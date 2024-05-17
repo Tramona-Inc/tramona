@@ -31,7 +31,9 @@ export default function MyAccount() {
         <title>My Account | Tramona</title>
       </Head>
       <DashboardLayout type="guest">
-        <ReferralDashboard />
+        <div className="mx-auto min-h-screen-minus-header max-w-4xl">
+          <ReferralDashboard />
+        </div>
       </DashboardLayout>
     </>
   );
