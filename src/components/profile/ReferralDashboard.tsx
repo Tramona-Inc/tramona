@@ -48,7 +48,7 @@ export default function ReferralDashboard() {
   if (isLoading) return <Spinner />;
 
   return (
-    <div className="mx-auto mb-10 min-h-screen-minus-header max-w-4xl space-y-2 lg:mt-10 lg:space-y-8">
+    <div className="mx-auto mb-20 min-h-screen-minus-header max-w-4xl space-y-2 lg:mb-0 lg:mt-10 lg:space-y-8">
       <div className="space-y-2 border-b p-4 lg:border-0 lg:p-0">
         <h1 className="text-2xl font-bold lg:text-4xl">My Referrals</h1>
         <p className="text-sm lg:text-lg">
