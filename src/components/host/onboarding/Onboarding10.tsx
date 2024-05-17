@@ -3,7 +3,6 @@ import { MapPin } from "lucide-react";
 import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
 import { api } from "@/utils/api";
-import LeafletMap from "./LeafletMap";
 import React from "react";
 import Summary1 from "./Summary1";
 import Summary2 from "./Summary2";
