@@ -1,5 +1,4 @@
-import { env } from "@/env";
-import { Map, Marker, GoogleApiWrapper, InfoWindow } from "google-maps-react";
+import { Map, Marker, InfoWindow, type IMapProps } from "google-maps-react";
 import React, { useState } from "react";
 
 type CoordinateDataProps = {
