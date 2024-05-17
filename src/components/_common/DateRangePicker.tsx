@@ -5,7 +5,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { api } from "@/utils/api";
-import { formatDateRange } from "@/utils/utils";
+import { convertUTCDateToLocalDate, formatDateRange } from "@/utils/utils";
 import { isSameDay } from "date-fns";
 import { useState } from "react";
 import { type DateRange } from "react-day-picker";
@@ -74,17 +74,14 @@ export default function DateRangePicker({
       e.to = e.from;
     }
 
-    console.log(dates);
-    console.log({ checkIn: e?.from, checkOut: e?.to });
-
     // Check for exact match of bid dates only if both from and to dates are selected
-    if (e?.from && e?.to) {
+    if (e) {
       const hasExactMatch = (dates ?? []).some(
         (bid) =>
           e.to &&
           e.from &&
-          isSameDay(e.from, new Date(bid.checkIn)) &&
-          isSameDay(e.to, new Date(bid.checkOut)),
+          isSameDay(convertUTCDateToLocalDate(e.from), new Date(bid.checkIn)) &&
+          isSameDay(convertUTCDateToLocalDate(e.to), new Date(bid.checkOut)),
       );
 
       console.log(hasExactMatch);
