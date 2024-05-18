@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 // Import Swiper styles
 import "swiper/css";
-import { Button } from "../ui/button";
 import Link from "next/link";
 interface SimilarProperties {
   location: string;
