@@ -3,21 +3,34 @@ import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import PropertyOffersEmptySvg from "../_common/EmptyStateSvg/PropertyOffersEmptySvg";
 import Spinner from "../_common/Spinner";
 import PropertyOfferCard from "./PropertyOfferCard";
+import SimiliarProperties from "./SimilarProperties";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 
 export default function PropertyOfferTab() {
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const { data: offers } = api.biddings.getMyBids.useQuery();
 
   if (!offers) return <Spinner />;
 
   return offers.length > 0 ? (
-    <div className="grid gap-4 lg:grid-cols-2">
-      {offers.map((offer) => (
-        <PropertyOfferCard
-          key={offer.id}
-          offer={offer}
-          isGuestDashboard={true}
-        />
-      ))}
+    <div className="grid gap-24 md:grid-cols-2">
+      <div className=" col-span-1 gap-4 ">
+        {offers.map((offer) => (
+          <PropertyOfferCard
+            key={offer.id}
+            offer={offer}
+            isGuestDashboard={true}
+          />
+        ))}
+      </div>
+      <div>
+        {offers.length > 0 && !isMobile && (
+          <SimiliarProperties
+            location={offers[0]!.property.address!}
+            city={offers[0]!.property.address!}
+          />
+        )}
+      </div>
     </div>
   ) : (
     <EmptyStateValue
