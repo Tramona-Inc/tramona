@@ -79,7 +79,7 @@ function BiddingInfoCard({ property }: { property: Property }) {
           accepted.
         </p>{" "}
         <p className="ml-7 text-sm font-semibold">
-          <Link href="/" className="text-blue-500 hover:underline">
+          <Link href="/tos" className="text-blue-500 hover:underline">
             {" "}
             Learn more{" "}
           </Link>{" "}
