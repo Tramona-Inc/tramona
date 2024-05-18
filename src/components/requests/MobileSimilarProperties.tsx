@@ -16,7 +16,7 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
     location: location,
   });
 
-  const { data: properties, isLoading } =
+  const { data: properties, isFetching } =
     api.properties.getAllInfiniteScroll.useInfiniteQuery({
       lat: coordinates?.coordinates.lat,
       long: coordinates?.coordinates.lng,
@@ -64,7 +64,7 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
           </Link>
         )}
       </div>
-      {isLoading ? (
+      {isFetching ? (
         <> {skeletons} </>
       ) : currentProperties.length > 0 ? (
         <Swiper

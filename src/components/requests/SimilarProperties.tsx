@@ -20,7 +20,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
 
   const {
     data: properties,
-    isLoading,
+    isFetching,
     fetchNextPage,
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery({
@@ -67,7 +67,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
         getting a great deal.
       </p>
       <div className="my-4">
-        {isLoading ? (
+        {isFetching ? (
           // if we're still fetching the initial currentProperties, display the loader
           <>{skeletons}</>
         ) : currentProperties.length > 0 ? (
