@@ -105,7 +105,7 @@ export const superhogRouter = createTRPCRouter({
           config,
         )
         .then((res) => res.data)
-        .catch((error) => {
+        .catch((error: AxiosError) => {
           throw new Error(error.response.data.detail);
         });
 

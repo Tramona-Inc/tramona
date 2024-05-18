@@ -8,16 +8,13 @@ import "swiper/css";
 import { Button } from "../ui/button";
 import Link from "next/link";
 interface SimilarProperties {
-  location: string | undefined;
-  city: string | undefined;
+  location: string;
+  city: string;
 }
 
 function MobileSimilarProperties({ location, city }: SimilarProperties) {
-  if (!location) {
-    return <div>Unavailable properties for this location</div>;
-  }
   const { data: coordinates } = api.offers.getCoordinates.useQuery({
-    location: location!,
+    location: location,
   });
 
   const { data: properties, isLoading } =
@@ -30,6 +27,9 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
+  if (!location) {
+    return <div>Unavailable properties for this location</div>;
+  }
   const skeletons = (
     <Swiper
       spaceBetween={8}
@@ -56,7 +56,7 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
     <div>
       <div className="mb-3 flex flex-row items-center justify-between px-1 text-center">
         <h1 className=" text-nowrap text-center text-sm font-semibold">
-          Similar properties in {city!.split(",")[0]}{" "}
+          Similar properties in {city.split(",")[0]}{" "}
         </h1>
         {currentProperties.length > 0 && (
           <Link className="roundes col-span-2 font-bold" href="/">

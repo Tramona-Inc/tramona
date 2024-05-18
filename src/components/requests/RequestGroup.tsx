@@ -21,6 +21,11 @@ export default function RequestGroupCards({
   selectedRequest: DetailedRequest | null;
   setSelectedRequest: (request: DetailedRequest | null) => void;
 }) {
+  useEffect(() => {
+    if (requests.length > 0) {
+      setSelectedRequest(requests[0] ?? null);
+    }
+  }, []);
   if (requests.length === 0) return null;
 
   const requestUnconfirmedBtn = (
@@ -30,11 +35,6 @@ export default function RequestGroupCards({
       onClick={startTimer}
     />
   );
-  useEffect(() => {
-    if (requests.length > 0) {
-      setSelectedRequest(requests[0] ?? null);
-    }
-  }, []);
   const handleCardClick = (request: DetailedRequest) => {
     setSelectedRequest(request);
   };

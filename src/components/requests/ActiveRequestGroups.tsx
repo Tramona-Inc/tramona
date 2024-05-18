@@ -38,8 +38,8 @@ export default function ActiveRequestGroups() {
           {selectedRequest?.location ? (
             !isMobile && (
               <SimiliarProperties
-                location={selectedRequest!.location}
-                city={selectedRequest!.location}
+                location={selectedRequest.location}
+                city={selectedRequest.location}
               />
             )
           ) : (

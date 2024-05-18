@@ -5,20 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import OfferCardNoBid from "./property-cards/OfferCardNoBid";
 interface SimilarProperties {
-  location: string | undefined;
-  city: string | undefined;
+  location: string;
+  city: string;
 }
 
 function SimiliarProperties({ location, city }: SimilarProperties) {
   //convert the cities names in to lat lng
   //create an array of the new citers
   //const locationCoordinates : { lat: number; lng: number } = {};
-  if (!location) {
-    return <div>Unavailable properties for this location</div>;
-  }
 
   const { data: coordinates } = api.offers.getCoordinates.useQuery({
-    location: location!,
+    location: location,
   });
 
   const {
@@ -36,12 +33,15 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
-  const [displayCount, setDisplayCount] = useState(4);
+  const [displayCount, setDisplayCount] = useState<number>(4);
   //whenever the user switches to a new location we want to reset the display count
   useEffect(() => {
     setDisplayCount(4);
   }, [location, city]);
 
+  if (!location) {
+    return <div>Unavailable properties for this location</div>;
+  }
   const skeletons = (
     <div className="relative grid grid-cols-2 gap-6">
       {" "}
@@ -59,7 +59,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
   return (
     <div className="relative flex h-[1000px] flex-col gap-y-4 overflow-y-auto">
       <h1 className=" text-xl font-bold">
-        See similar properties in {city!.split(",")[0]}{" "}
+        See similar properties in {city.split(",")[0]}{" "}
       </h1>
       <p className="hidden md:flex">
         {" "}
@@ -73,12 +73,12 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
         ) : currentProperties.length > 0 ? (
           // if there are currentProperties to show, display them
           <div className="relative grid grid-cols-2 gap-6">
-            {currentProperties.slice(0, displayCount).map((property) => (
-              <div className=" col-span-1">
+            {currentProperties.slice(0, displayCount).map((property, index) => (
+              <div className=" col-span-1" key={index}>
                 <OfferCardNoBid key={property.id} property={property} />
               </div>
             ))}
-            {displayCount < currentProperties!.length && (
+            {displayCount < currentProperties.length && (
               <Button
                 className="roundes col-span-2 font-semibold"
                 variant="secondaryLight"
