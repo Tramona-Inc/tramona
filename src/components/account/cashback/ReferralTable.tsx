@@ -88,7 +88,97 @@ export function ReferralTable<TData, TValue>({
 
   return (
     <>
-      <div className="flex items-center justify-between px-5 py-6">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="lg:flex lg:items-center lg:justify-between">
+          <h1 className="text-xl font-bold lg:text-2xl">
+            Cash Back on Referral
+          </h1>
+          <Button
+            className="hidden lg:block"
+            disabled={table.getSelectedRowModel().rows.length === 0}
+            isLoading={isLoading}
+            onClick={async () => {
+              const selectedRows = table
+                .getSelectedRowModel()
+                .rows.map((row) => row.original) as Referral[];
+
+              mutate({ transactions: selectedRows });
+            }}
+          >
+            Request cashback
+          </Button>
+        </div>
+        <div className="space-y-4 lg:col-span-full">
+          <div className="border">
+            <Table>
+              <TableHeader className="bg-zinc-100">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id} colSpan={header.colSpan}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+        <div className="lg:hidden">
+          <Button
+            className="w-full lg:w-auto"
+            disabled={table.getSelectedRowModel().rows.length === 0}
+            isLoading={isLoading}
+            onClick={async () => {
+              const selectedRows = table
+                .getSelectedRowModel()
+                .rows.map((row) => row.original) as Referral[];
+
+              mutate({ transactions: selectedRows });
+            }}
+          >
+            Request cashback
+          </Button>
+        </div>
+      </div>
+
+      {/* <div className="flex items-center justify-between px-5 py-6">
         <h2 className="text-2xl font-bold lg:text-3xl">
           Cash Back on Referral
         </h2>
@@ -106,9 +196,9 @@ export function ReferralTable<TData, TValue>({
         >
           Request cashback
         </Button>
-      </div>
+      </div> */}
 
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <div className="border">
           <Table>
             <TableHeader className="bg-zinc-100">
@@ -159,7 +249,7 @@ export function ReferralTable<TData, TValue>({
             </TableBody>
           </Table>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

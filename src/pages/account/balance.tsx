@@ -37,10 +37,10 @@ export default function CashbackBalance() {
             {isLoading ? (
               <Spinner />
             ) : (
-              <>
+              <div className="space-y-4">
                 <CashbackBalanceDetails balance={cashbackBalance} />
                 <ReferralTable data={data ?? []} columns={referralColumns} />
-              </>
+              </div>
             )}
           </div>
         </div>
