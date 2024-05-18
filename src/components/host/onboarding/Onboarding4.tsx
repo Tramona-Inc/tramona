@@ -21,7 +21,7 @@ import SaveAndExit from "./SaveAndExit";
 import { useState, useEffect } from "react";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
-// import GoogleMap from "./GoogleMap";
+import GoogleMap from "./GoogleMap";
 
 const formSchema = z.object({
   country: zodString(),
@@ -56,17 +56,17 @@ export default function Onboarding4() {
     );
   };
 
-  // const updateLocation = (
-  //   field: string,
-  //   value: string,
-  //   setLocationInStore: (location: LocationType) => void,
-  // ) => {
-  //   setLocation((prevLocation) => ({
-  //     ...prevLocation,
-  //     [field]: value,
-  //   }));
-  //   setLocationInStore({ ...location, [field]: value });
-  // };
+  const updateLocation = (
+    field: string,
+    value: string,
+    setLocationInStore: (location: LocationType) => void,
+  ) => {
+    setLocation((prevLocation) => ({
+      ...prevLocation,
+      [field]: value,
+    }));
+    setLocationInStore({ ...location, [field]: value });
+  };
 
   const propertyLocation = useHostOnboarding((state) => state.listing.location);
   const setLocationInStore = useHostOnboarding((state) => state.setLocation);
@@ -230,14 +230,17 @@ export default function Onboarding4() {
               />
             </div>
           </Form>
-          {/* {coordinateData && (
-            <div className="z-0">
-              <GoogleMap
-                lat={coordinateData.coordinates.lat}
-                lng={coordinateData.coordinates.lng}
-              />
+          {coordinateData && (
+            <div className="relative mb-10 h-[400px]">
+              <div className="absolute inset-0 z-0">
+                <GoogleMap
+                  lat={coordinateData.coordinates.lat}
+                  lng={coordinateData.coordinates.lng}
+                  draggable={false}
+                />
+              </div>
             </div>
-          )} */}
+          )}
         </div>
       </div>
       <OnboardingFooter
