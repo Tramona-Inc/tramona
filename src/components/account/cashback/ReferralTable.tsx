@@ -108,7 +108,7 @@ export function ReferralTable<TData, TValue>({
             Request cashback
           </Button>
         </div>
-        <div className="hidden space-y-4 lg:col-span-full lg:block">
+        <div className="space-y-4 lg:col-span-full">
           <div className="border">
             <Table>
               <TableHeader className="bg-zinc-100">
@@ -160,14 +160,30 @@ export function ReferralTable<TData, TValue>({
             </Table>
           </div>
         </div>
-        <div className="grid grid-cols-2 rounded-lg border p-4 lg:hidden">
-          <div>
-            <h3 className="text-muted-foreground">Date</h3>
-            <p className="font-semibold">Referee Name</p>
-            <p>Status</p>
-          </div>
-          <div className="text-end text-2xl font-bold">Cash Back</div>
-        </div>
+
+        {/* mobile version of the table */}
+        {/* <div className="space-y-4 lg:hidden">
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <div
+                key={row.id}
+                className="grid grid-cols-2 rounded-lg border p-4"
+              >
+                <div>
+                  <h3 className="text-muted-foreground">{row.original.date}</h3>
+                  <p className="font-semibold">{row.original.refereeName}</p>
+                  <p>{row.original.status}</p>
+                </div>
+                <div className="text-end text-2xl font-bold">
+                  {row.original.cashBack}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="h-24 text-center">No referrals yet.</div>
+          )}
+        </div> */}
+
         <div className="lg:hidden">
           <Button
             className="w-full lg:w-auto"
