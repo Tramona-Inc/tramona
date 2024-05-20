@@ -108,7 +108,7 @@ export function ReferralTable<TData, TValue>({
             Request cashback
           </Button>
         </div>
-        <div className="space-y-4 lg:col-span-full">
+        <div className="hidden space-y-4 lg:col-span-full lg:block">
           <div className="border">
             <Table>
               <TableHeader className="bg-zinc-100">
@@ -160,6 +160,14 @@ export function ReferralTable<TData, TValue>({
             </Table>
           </div>
         </div>
+        <div className="grid grid-cols-2 rounded-lg border p-4 lg:hidden">
+          <div>
+            <h3 className="text-muted-foreground">Date</h3>
+            <p className="font-semibold">Referee Name</p>
+            <p>Status</p>
+          </div>
+          <div className="text-end text-2xl font-bold">Cash Back</div>
+        </div>
         <div className="lg:hidden">
           <Button
             className="w-full lg:w-auto"
@@ -177,79 +185,6 @@ export function ReferralTable<TData, TValue>({
           </Button>
         </div>
       </div>
-
-      {/* <div className="flex items-center justify-between px-5 py-6">
-        <h2 className="text-2xl font-bold lg:text-3xl">
-          Cash Back on Referral
-        </h2>
-
-        <Button
-          disabled={table.getSelectedRowModel().rows.length === 0}
-          isLoading={isLoading}
-          onClick={async () => {
-            const selectedRows = table
-              .getSelectedRowModel()
-              .rows.map((row) => row.original) as Referral[];
-
-            mutate({ transactions: selectedRows });
-          }}
-        >
-          Request cashback
-        </Button>
-      </div> */}
-
-      {/* <div className="space-y-4">
-        <div className="border">
-          <Table>
-            <TableHeader className="bg-zinc-100">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div> */}
     </>
   );
 }
