@@ -24,7 +24,7 @@ export function RequestCardAction({ request }: { request: DetailedRequest }) {
         !isEveryoneInvited &&
         userIsOwner && (
           <GroupDetailsDialog request={request}>
-            <Button className="rounded-full">
+            <Button className="rounded-md">
               <UserPlusIcon />
               Invite people
             </Button>

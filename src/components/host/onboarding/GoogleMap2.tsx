@@ -12,15 +12,10 @@ const containerStyle = {
 };
 
 function GoogleMap({ lat, lng }: CoordinateDataProps) {
-
   return (
     <>
       {lat && lng && (
-        <Map
-          mapContainerStyle={containerStyle}
-          center={{ lat, lng }}
-          zoom={15}
-        >
+        <Map mapContainerStyle={containerStyle} center={{ lat, lng }} zoom={15}>
           <Marker position={{ lat, lng }} draggable={true} />
         </Map>
       )}

@@ -28,6 +28,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestDialog from "./WithdrawRequestDialog";
+import { useMediaQuery } from "../_utils/useMediaQuery";
+
+import MobileSimilarProperties from "./MobileSimilarProperties";
+import { Separator } from "../ui/separator";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -39,18 +43,22 @@ export type RequestWithUser = RouterOutputs["requests"]["getAll"][
 
 export default function RequestCard({
   request,
+  isSelected,
   isAdminDashboard,
   children,
 }: React.PropsWithChildren<
   | {
       request: DetailedRequest;
       isAdminDashboard?: false | undefined;
+      isSelected?: boolean;
     }
   | {
       request: RequestWithUser;
       isAdminDashboard: true;
+      isSelected?: boolean;
     }
 >) {
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
@@ -82,7 +90,9 @@ export default function RequestCard({
         ) : (
           <Tooltip>
             <TooltipTrigger>
-              <Badge variant="gray">Unconfirmed</Badge>
+              <Badge variant="lightGray" className="border tracking-tight">
+                Unconfirmed
+              </Badge>
             </TooltipTrigger>
             <TooltipContent className="max-w-64">
               You haven&apos;t confirmed your request yet. Check your text
@@ -115,25 +125,21 @@ export default function RequestCard({
           )}
         </div>
         <div className="flex items-start gap-1">
-          <MapPinIcon className="shrink-0 text-zinc-300" />
-          <h2 className="text-lg font-semibold text-zinc-700">
+          <MapPinIcon className="shrink-0 text-primary" />
+          <h2 className="text-base font-bold text-primary md:text-lg">
             {request.location}
           </h2>
         </div>
-        <div className="text-zinc-500">
-          <p>
-            requested <b className="text-lg text-foreground">{fmtdPrice}</b>
+        <div className="space-y-1 text-sm text-primary  md:space-y-0 md:text-base">
+          <p className="text-sm font-semibold text-primary md:text-base ">
+            Requested <span className=" text-foreground">{fmtdPrice}</span>
             <span className="text-sm">/night</span>
           </p>
           <div className="flex items-center gap-1">
-            <CalendarIcon className="size-4" />
-            <p className="mr-3">{fmtdDateRange}</p>
-            <UsersIcon className="size-4" />
-            <p>{fmtdNumGuests}</p>
+            <p className="mr-3 font-semibold">{fmtdDateRange}</p>
           </div>
           {fmtdFilters && (
-            <div className="flex items-center gap-1">
-              <FilterIcon className="size-4" />
+            <div className="flex items-center gap-1 font-light">
               <p>{fmtdFilters}</p>
             </div>
           )}
@@ -144,7 +150,23 @@ export default function RequestCard({
           </div>
         )}
       </CardContent>
-      <CardFooter>{children}</CardFooter>
+      <CardFooter className="">
+        <div className="-mt-3 flex w-full flex-col justify-between gap-y-2 md:mt-0  md:flex-row md:gap-y-0">
+          <div className="mb-1 flex flex-row items-center space-x-1 font-semibold">
+            <p>{fmtdNumGuests}</p>
+          </div>
+          {children}
+          {isMobile && isSelected && (
+            <div className="flex flex-col gap-y-2 ">
+              <Separator className="mt-3" />
+              <MobileSimilarProperties
+                location={request.location}
+                city={request.location}
+              />
+            </div>
+          )}
+        </div>
+      </CardFooter>
     </Card>
   );
 }

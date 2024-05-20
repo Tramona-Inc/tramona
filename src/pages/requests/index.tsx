@@ -7,22 +7,23 @@ import Head from "next/head";
 import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
-
+import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 // TODO: change to tab links, each with individual fetch
 function RequestsTabs() {
+  const isMobile = useMediaQuery("(max-width: 640px)");
   return (
     <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
         <TabsTrigger value="cityRequests">
-          <MapPinIcon />
+          {!isMobile && <MapPinIcon />}
           City Requests
         </TabsTrigger>
         <TabsTrigger value="propertyOffers">
-          <HomeIcon />
+          {!isMobile && <HomeIcon />}
           Property Offers
         </TabsTrigger>
         <TabsTrigger value="history">
-          <HistoryIcon />
+          {!isMobile && <HistoryIcon />}
           History
         </TabsTrigger>
       </TabsList>
@@ -53,8 +54,8 @@ export default function Page() {
         <div className="min-h-screen-minus-header px-4 pb-64 pt-5">
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
-              <h1 className="flex-1 py-4 text-4xl font-bold text-black">
-                Requests & Offers
+              <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">
+                Requests & offers
               </h1>
               {/* <NewRequestButton /> */}
             </div>

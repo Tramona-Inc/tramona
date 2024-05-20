@@ -24,7 +24,8 @@ import { type StripeElementsOptions } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import BidPaymentForm from "./BidPaymentForm";
-
+import { LightbulbIcon } from "lucide-react";
+import Link from "next/link";
 function BiddingInfoCard({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
   const price = useBidding((state) => state.price);
@@ -66,6 +67,24 @@ function BiddingInfoCard({ property }: { property: Property }) {
             {property.numBathrooms && plural(property.numBathrooms, "bath")}
           </p>
         </div>
+      </div>
+      <div className="my-4 flex flex-col gap-y-1 rounded-xl bg-zinc-100 px-4 py-2">
+        <div className="flex flex-row items-end gap-x-1 font-bold">
+          <LightbulbIcon strokeWidth={2} />
+          Remember
+        </div>
+        <p className="ml-7 text-sm font-semibold">
+          All offers are binding. If your offer is accepted your card will be
+          charged. <br /> Overlapping bids will get withdrawn if one is
+          accepted.
+        </p>{" "}
+        <p className="ml-7 text-sm font-semibold">
+          <Link href="/tos" className="text-blue-500 hover:underline">
+            {" "}
+            Learn more{" "}
+          </Link>{" "}
+          about the Host&apos;s cancellation policy.
+        </p>
       </div>
       <div className="flex flex-col gap-y-2 text-xs font-semibold md:text-base">
         <div className="mt-8 flex flex-row justify-between ">
