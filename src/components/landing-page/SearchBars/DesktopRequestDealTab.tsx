@@ -24,12 +24,7 @@ export function DesktopRequestDealTab() {
         className="flex flex-col justify-between gap-y-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="my-3 items-center text-balance text-center text-xs text-muted-foreground">
-          Instead of just seeing listed prices, requesting a deal lets you set
-          your budget, and we&apos;ll match you with hosts who have properties
-          in the city and accept your price. This way, you can find the perfect
-          place to stay within your means!
-        </div>
+        <div className="font-bold">Hosts send exclusive matches directly to you</div>
 
         <RequestTabsSwitcher
           curTab={curTab}

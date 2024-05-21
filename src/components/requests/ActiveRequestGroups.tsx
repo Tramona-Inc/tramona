@@ -7,8 +7,24 @@ import SimiliarProperties from "./SimilarProperties";
 import { useState } from "react";
 import { type DetailedRequest } from "@/components/requests/RequestCard";
 import { useMediaQuery } from "../_utils/useMediaQuery";
+import { Button } from "@/components/ui/button";
+import { DesktopRequestDealTab } from "../landing-page/SearchBars/DesktopRequestDealTab";
+import { MobileRequestDealTab } from "../landing-page/SearchBars/MobileRequestDealTab";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 export default function ActiveRequestGroups() {
   const isMobile = useMediaQuery("(max-width: 640px)");
+  const [open, setOpen] = useState(false);
 
   const { data: requests } = api.requests.getMyRequests.useQuery();
   //you can access all of the request details with selectedRequest
@@ -28,6 +44,35 @@ export default function ActiveRequestGroups() {
       )}
       <div className="grid grid-cols-2 gap-24">
         <div className="col-span-1">
+          {isMobile ? (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button className="mb-4 rounded-md pr-3" variant="secondary">
+                  + Create new city offer
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader className="border-b pb-2 font-bold">
+                  Request a deal
+                </DialogHeader>
+                <MobileRequestDealTab closeSheet={() => setOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="mb-4 rounded-md pr-3" variant="secondary">
+                  + Create new city offer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl">
+                <DialogHeader className="border-b pb-2 font-bold">
+                  Request a deal
+                </DialogHeader>
+                <DesktopRequestDealTab />
+              </DialogContent>
+            </Dialog>
+          )}
           <RequestCards
             requestGroups={requests.activeRequestGroups}
             selectedRequest={selectedRequest}
