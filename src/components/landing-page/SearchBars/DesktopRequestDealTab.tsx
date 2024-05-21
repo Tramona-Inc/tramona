@@ -13,14 +13,33 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
 import { RequestTabsSwitcher } from "./RequestTabsSwitcher";
+import MapModal from "@/components/map-modal";
+import { api } from "@/utils/api";
 
-export function DesktopRequestDealTab() {
+export function DesktopRequestDealTab({ openModal, setInitialLocation }) {
   const [curTab, setCurTab] = useState(0);
   const { form, onSubmit } = useCityRequestForm({ setCurTab });
+  const utils = api.useUtils();
+
+  const handleFormSubmit = async (data) => {
+    // Open the modal instead of submitting the form directly
+    const location = form.getValues(`data.${curTab}.location`);
+    const {
+      coordinates: { lat, lng },
+    } = await utils.offers.getCoordinates.fetch({
+      location,
+    });
+    console.log("lat", lat, "lng", lng);
+    setInitialLocation({ lat, lng });
+    openModal();
+  };
+
+
+
   return (
     <Form {...form}>
       <form
-        onSubmit={onSubmit}
+        onSubmit={form.handleSubmit(handleFormSubmit)}
         className="flex flex-col justify-between gap-y-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
@@ -112,6 +131,12 @@ export function DesktopRequestDealTab() {
           </Button>
         </div>
       </form>
+      {/* <MapModal
+        isOpen={isModalOpen}
+        initialLocation={initialLocation}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleModalSave}
+      /> */}
     </Form>
   );
 }

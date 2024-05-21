@@ -15,8 +15,21 @@ import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
 import { WelcomeBanner } from "../WelcomeBanner";
+import MapModal from "@/components/map-modal";
 
 export default function MastHead() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [initialLocation, setInitialLocation] = useState(null);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  const handleModalSave = (location, radius) => {
+
+    // Handle the location save logic here
+    console.log("Location saved:", location, radius);
+    closeModal();
+  };
   return (
     <section className="relative bg-white">
       <div className="absolute inset-x-0 top-0">
@@ -47,44 +60,58 @@ export default function MastHead() {
         </div>
       </div>
       <div className="hidden -translate-y-16 px-4 md:block">
-        <DesktopSearchLayout />
+        <DesktopSearchLayout
+          openModal={openModal}
+          setInitialLocation={setInitialLocation}
+        />
       </div>
       <p className="px-4 pt-4 text-center text-sm font-medium md:-translate-y-6 md:text-base">
         See a property you like? Make an offer and Tramona will create the deal
         for you. Don&apos;t see a property you like? Request a deal.
       </p>
+      <MapModal
+        isOpen={isModalOpen}
+        initialLocation={initialLocation}
+        onClose={closeModal}
+        onSave={handleModalSave}
+      />
     </section>
   );
 }
 
-export function DesktopSearchLayout() {
+export function DesktopSearchLayout({openModal, setInitialLocation}) {
   return (
-    <Tabs
-      defaultValue={"search"}
-      className="mx-auto max-w-6xl rounded-2xl bg-white px-4 pb-4 shadow-md"
-    >
-      <TabsList noBorder className="flex items-center justify-center">
-        <TabsTrigger
-          value="search"
-          className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
-        >
-          <span className="text-sm">Search Properties</span>
-        </TabsTrigger>
-        <TabsTrigger
-          value="request"
-          className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
-        >
-          <span className="text-sm">Request Deal</span>
-        </TabsTrigger>
-      </TabsList>
-      <div className="mb-5 mt-[-2px] w-full border-b-2 border-border" />
-      <TabsContent value={"search"}>
-        <DesktopSearchTab />
-      </TabsContent>
-      <TabsContent value={"request"}>
-        <DesktopRequestDealTab />
-      </TabsContent>
-    </Tabs>
+    <>
+      <Tabs
+        defaultValue={"search"}
+        className="mx-auto max-w-6xl rounded-2xl bg-white px-4 pb-4 shadow-md"
+      >
+        <TabsList noBorder className="flex items-center justify-center">
+          <TabsTrigger
+            value="search"
+            className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
+          >
+            <span className="text-sm">Search Properties</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="request"
+            className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
+          >
+            <span className="text-sm">Request Deal</span>
+          </TabsTrigger>
+        </TabsList>
+        <div className="mb-5 mt-[-2px] w-full border-b-2 border-border" />
+        <TabsContent value={"search"}>
+          <DesktopSearchTab />
+        </TabsContent>
+        <TabsContent value={"request"}>
+          <DesktopRequestDealTab
+            openModal={openModal}
+            setInitialLocation={setInitialLocation}
+          />
+        </TabsContent>
+      </Tabs>
+    </>
   );
 }
 
