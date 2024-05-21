@@ -59,7 +59,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
 
   return (
     <div className="relative flex h-[1000px] flex-col gap-y-4 overflow-y-auto">
-      <h1 className=" text-xl font-bold">
+      <h1 className="text-xl font-bold">
         See similar properties in {city.split(",")[0]}{" "}
       </h1>
       <p className="hidden md:flex">
@@ -73,20 +73,19 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
           <>{skeletons}</>
         ) : currentProperties.length > 0 ? (
           // if there are currentProperties to show, display them
-          <div className="relative grid grid-cols-2 gap-6">
+          <div className="relative grid grid-cols-1 gap-4 lg:grid-cols-2">
             {currentProperties.slice(0, displayCount).map((property, index) => (
-              <div className=" col-span-1" key={index}>
+              <div className="col-span-1" key={index}>
                 <OfferCardNoBid key={property.id} property={property} />
               </div>
             ))}
             {displayCount < currentProperties.length && (
               <Button
-                className="roundes col-span-2 font-semibold"
-                variant="secondaryLight"
+                className="col-span-full"
+                variant="secondary"
                 onClick={() => setDisplayCount(displayCount + 4)}
               >
-                {" "}
-                See similar properties
+                Show more
               </Button>
             )}
             {isFetchingNextPage && skeletons}

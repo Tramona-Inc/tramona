@@ -32,11 +32,8 @@ export function MobileRequestDealTab({
         className="flex flex-col gap-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="text-xs text-muted-foreground">
-          Instead of just seeing listed prices, requesting a deal lets you set
-          your budget, and we&apos;ll match you with hosts who have properties
-          in the city and accept your price. This way, you can find the perfect
-          place to stay within your means!
+        <div className="font-bold text-sm text-center">
+          Hosts send exclusive matches directly to you
         </div>
 
         <RequestTabsSwitcher
