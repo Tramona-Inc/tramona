@@ -1,7 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { referralStatuses } from "@/components/account/cashback/data";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { formatCurrency, formatDateMonthDayYear } from "@/utils/utils";
 import { ChevronLeft } from "lucide-react";
@@ -32,9 +31,6 @@ export default function AllReferrals() {
         <h1 className="text-center text-2xl font-bold">
           Cash Back on Referral
         </h1>
-        <Button variant="secondary" className="w-full text-lg font-bold">
-          Request cash back
-        </Button>
         <div className="divide-y">
           {fetchedRefEarnings?.length ? (
             fetchedRefEarnings.map((row) => (

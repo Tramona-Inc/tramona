@@ -50,8 +50,8 @@ export default function CashbackBalanceDetails({
             <Dialog>
               <DialogTrigger asChild>
                 <Button
-                  variant="outline"
-                  className="w-full rounded-full border-teal-900 font-bold text-teal-900 lg:w-auto"
+                  variant="secondary"
+                  className="w-full font-bold lg:w-auto"
                 >
                   Setup Cashback Account
                 </Button>

@@ -42,7 +42,7 @@ export function ReferralTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({});
+  // const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -56,11 +56,11 @@ export function ReferralTable<TData, TValue>({
     state: {
       sorting,
       columnVisibility,
-      rowSelection,
+      // rowSelection,
       columnFilters,
     },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
+    enableRowSelection: false,
+    // onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -105,6 +105,14 @@ export function ReferralTable<TData, TValue>({
     return <Badge variant={referralStatus.color}>{referralStatus.label}</Badge>;
   }
 
+  function handleRequestCashback() {
+    const allRows = table
+      .getRowModel()
+      .rows.map((row) => row.original) as Referral[];
+
+    mutate({ transactions: allRows });
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 space-y-2">
@@ -122,16 +130,11 @@ export function ReferralTable<TData, TValue>({
           </div>
 
           <Button
-            className="hidden lg:block"
-            disabled={table.getSelectedRowModel().rows.length === 0}
+            className="hidden font-bold lg:block"
+            disabled={table.getRowModel().rows.length === 0}
             isLoading={isLoading}
-            onClick={async () => {
-              const selectedRows = table
-                .getSelectedRowModel()
-                .rows.map((row) => row.original) as Referral[];
-
-              mutate({ transactions: selectedRows });
-            }}
+            onClick={handleRequestCashback}
+            variant="secondary"
           >
             Request cashback
           </Button>
@@ -214,16 +217,11 @@ export function ReferralTable<TData, TValue>({
 
         <div className="lg:hidden">
           <Button
-            className="w-full text-lg font-bold"
-            disabled={table.getSelectedRowModel().rows.length === 0}
+            className="w-full font-bold"
+            disabled={table.getRowModel().rows.length === 0}
             isLoading={isLoading}
-            onClick={async () => {
-              const selectedRows = table
-                .getSelectedRowModel()
-                .rows.map((row) => row.original) as Referral[];
-
-              mutate({ transactions: selectedRows });
-            }}
+            onClick={handleRequestCashback}
+            variant="secondary"
           >
             Request cashback
           </Button>
