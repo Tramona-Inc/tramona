@@ -163,6 +163,7 @@
     "@types/react-dom": "^18.2.23",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
+    "@ubilabs/google-maps-react-hooks": "^2.0.2",
     "autoprefixer": "^10.4.17",
     "chromatic": "^10.3.1",
     "drizzle-kit": "^0.20.17",

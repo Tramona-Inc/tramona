@@ -423,6 +423,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^6.19.1
         version: 6.21.0(eslint@8.57.0)(typescript@5.4.5)
+      '@ubilabs/google-maps-react-hooks':
+        specifier: ^2.0.2
+        version: 2.0.2(react@18.2.0)
       autoprefixer:
         specifier: ^10.4.17
         version: 10.4.19(postcss@8.4.38)
@@ -4138,6 +4141,11 @@ packages:
   '@typescript-eslint/visitor-keys@6.21.0':
     resolution: {integrity: sha512-JJtkDduxLi9bivAB+cYOVMtbkqdPOhZ+ZI5LC47MIRrDV4Yn2o+ZnW10Nkmr28xRpSpdJ6Sm42Hjf2+REYXm0A==}
     engines: {node: ^16.0.0 || >=18.0.0}
+
+  '@ubilabs/google-maps-react-hooks@2.0.2':
+    resolution: {integrity: sha512-rKs2p9+G2r/fKRykltcjyx6CTjC7/yLQWPxeiohbaGMX9CSPeH5HiDNko/WwtNd5HPAf5awyVSL7aKhjyw0aUA==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   '@uidotdev/usehooks@2.4.1':
     resolution: {integrity: sha512-1I+RwWyS+kdv3Mv0Vmc+p0dPYH0DTRAo04HLyXReYBL9AeseDWUJyi4THuksBJcu9F0Pih69Ak150VDnqbVnXg==}
@@ -14920,6 +14928,10 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 6.21.0
       eslint-visitor-keys: 3.4.3
+
+  '@ubilabs/google-maps-react-hooks@2.0.2(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
 
   '@uidotdev/usehooks@2.4.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
