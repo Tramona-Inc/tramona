@@ -1,13 +1,13 @@
-import { env } from "@/env";
-import { Map, Marker, GoogleApiWrapper } from "google-maps-react";
+import { Map, Marker, InfoWindow, type IMapProps } from "google-maps-react";
 import React, { useState } from "react";
 
 type CoordinateDataProps = {
   lat: number | undefined;
   lng: number | undefined;
+  draggable: boolean;
 };
 
-function GoogleMap({ lat, lng }: CoordinateDataProps) {
+function GoogleMap({ lat, lng, draggable }: CoordinateDataProps) {
   const [markerPosition, setMarkerPosition] = useState({
   	lat: lat ?? 37.774929,
   	lng: lng ?? -122.419416,
@@ -54,7 +54,7 @@ function GoogleMap({ lat, lng }: CoordinateDataProps) {
             </Map>
          </div>
       )}
-    </div>
+    </>
   );
 }
 

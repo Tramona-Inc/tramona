@@ -99,11 +99,15 @@ export const superhogRouter = createTRPCRouter({
       };
 
       const { verification } = await axios
-        .post<
-          unknown,
-          ResponseType
-        >("https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications", input, config)
-        .then((res) => res.data);
+        .post<unknown, ResponseType>(
+          "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
+          input,
+          config,
+        )
+        .then((res) => res.data)
+        .catch((error: AxiosError) => {
+          throw new Error(error.response.data.detail);
+        });
 
       if (!verification) {
         throw new TRPCError({ code: "NOT_FOUND" });

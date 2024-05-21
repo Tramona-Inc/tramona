@@ -34,12 +34,12 @@ const DesktopFooter: React.FC = () => {
             © {currentYear} Tramona. All rights reserved.
           </div>
 
-          <div className="flex w-full flex-row justify-center gap-2 px-8 lg:-ml-20 sm:gap-4 lg:gap-8">
+          <div className="flex w-full flex-row justify-center gap-2 px-8 sm:gap-4 lg:-ml-20 lg:gap-8">
             <FooterLink href="/tos">Terms</FooterLink>
             <FooterLink href="/faq">FAQ</FooterLink>
             <FooterLink href="/auth/signup">Sign up</FooterLink>
             <FooterLink href="/auth/signin">Sign in</FooterLink>
-            <FooterLink href="/support">Help</FooterLink>
+            <FooterLink href="/help-center">Help</FooterLink>
           </div>
 
           <div className="flex gap-4">
