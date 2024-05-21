@@ -28,6 +28,9 @@ import type { Referral } from "./referrals";
 import { toast } from "@/components/ui/use-toast";
 
 import { api } from "@/utils/api";
+import { formatCurrency, formatDateMonthDayYear } from "@/utils/utils";
+import { Badge } from "@/components/ui/badge";
+import { referralStatuses } from "./data";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -86,13 +89,34 @@ export function ReferralTable<TData, TValue>({
       },
     });
 
+  const { data: fetchedRefEarnings } =
+    api.referralCodes.getReferralEarnings.useQuery();
+
+  function badgeColor(status: string) {
+    const referralStatus = referralStatuses.find(
+      (badge) => badge.value === status,
+    );
+
+    if (!referralStatus) {
+      return null;
+    }
+
+    return <Badge variant={referralStatus.color}>{referralStatus.label}</Badge>;
+  }
+
   return (
     <>
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1">
         <div className="lg:flex lg:items-center lg:justify-between">
-          <h1 className="text-xl font-bold lg:text-2xl">
-            Cash Back on Referral
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold lg:text-2xl">
+              Cash Back on Referral
+            </h1>
+            <Button variant="link" className="text-primary lg:hidden">
+              See all
+            </Button>
+          </div>
+
           <Button
             className="hidden lg:block"
             disabled={table.getSelectedRowModel().rows.length === 0}
@@ -108,7 +132,7 @@ export function ReferralTable<TData, TValue>({
             Request cashback
           </Button>
         </div>
-        <div className="space-y-4 lg:col-span-full">
+        <div className="hidden space-y-4 lg:col-span-full lg:block">
           <div className="border">
             <Table>
               <TableHeader className="bg-zinc-100">
@@ -160,29 +184,29 @@ export function ReferralTable<TData, TValue>({
             </Table>
           </div>
         </div>
-
         {/* mobile version of the table */}
-        {/* <div className="space-y-4 lg:hidden">
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <div
-                key={row.id}
-                className="grid grid-cols-2 rounded-lg border p-4"
-              >
+        <div className="divide-y lg:hidden">
+          {fetchedRefEarnings?.length ? (
+            fetchedRefEarnings.map((row) => (
+              <div key={row.id} className="grid grid-cols-2 py-2">
                 <div>
-                  <h3 className="text-muted-foreground">{row.original.date}</h3>
-                  <p className="font-semibold">{row.original.refereeName}</p>
-                  <p>{row.original.status}</p>
+                  <div>{badgeColor(row.earningStatus)}</div>
+                  <h3 className="text-muted-foreground">
+                    {formatDateMonthDayYear(row.createdAt)}
+                  </h3>
+                  <p className="font-semibold">{row.referee.name}</p>
                 </div>
-                <div className="text-end text-2xl font-bold">
-                  {row.original.cashBack}
+                <div className="text-end text-xl font-bold">
+                  {formatCurrency(row.cashbackEarned)}
                 </div>
               </div>
             ))
           ) : (
-            <div className="h-24 text-center">No referrals yet.</div>
+            <div className="flex h-24 items-center justify-center">
+              <p>No referrals yet.</p>
+            </div>
           )}
-        </div> */}
+        </div>
 
         <div className="lg:hidden">
           <Button

@@ -69,12 +69,6 @@ export default function CashbackBalanceDetails({
             </Dialog>
           </div>
         </div>
-
-        {balance > 0 && (
-          <p className="text-md font-semibold lg:text-xl">
-            {"You're getting paid!🎉"}
-          </p>
-        )}
         {/*<div>
          <p className="text-md font-medium text-primary lg:text-xl">
           Your next $90 check will be sent by 02/15/2024
