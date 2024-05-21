@@ -31,6 +31,7 @@ import { api } from "@/utils/api";
 import { formatCurrency, formatDateMonthDayYear } from "@/utils/utils";
 import { Badge } from "@/components/ui/badge";
 import { referralStatuses } from "./data";
+import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -106,15 +107,18 @@ export function ReferralTable<TData, TValue>({
 
   return (
     <>
-      <div className="grid grid-cols-1">
+      <div className="grid grid-cols-1 space-y-2">
         <div className="lg:flex lg:items-center lg:justify-between">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold lg:text-2xl">
               Cash Back on Referral
             </h1>
-            <Button variant="link" className="text-primary lg:hidden">
+            <Link
+              href="/account/all-referrals"
+              className="text-primary underline lg:hidden"
+            >
               See all
-            </Button>
+            </Link>
           </div>
 
           <Button
@@ -187,7 +191,7 @@ export function ReferralTable<TData, TValue>({
         {/* mobile version of the table */}
         <div className="divide-y lg:hidden">
           {fetchedRefEarnings?.length ? (
-            fetchedRefEarnings.map((row) => (
+            fetchedRefEarnings.slice(0, 3).map((row) => (
               <div key={row.id} className="grid grid-cols-2 py-2">
                 <div>
                   <div>{badgeColor(row.earningStatus)}</div>
@@ -210,7 +214,7 @@ export function ReferralTable<TData, TValue>({
 
         <div className="lg:hidden">
           <Button
-            className="w-full lg:w-auto"
+            className="w-full text-lg font-bold"
             disabled={table.getSelectedRowModel().rows.length === 0}
             isLoading={isLoading}
             onClick={async () => {
