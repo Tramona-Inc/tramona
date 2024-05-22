@@ -89,10 +89,10 @@ export default function BiddingForm({
                 <FormControl>
                   <DateRangePicker
                     {...field}
-                    label={""}
-                    propertyId={propertyId}
-                    className="col-span-full sm:col-span-1"
                     disablePast
+                    propertyId={propertyId}
+                    alreadyBid={alreadyBid}
+                    className="col-span-full sm:col-span-1"
                   />
                 </FormControl>
                 <FormMessage />
@@ -111,13 +111,13 @@ export default function BiddingForm({
                   Already Bid
                 </Button>
               ) : ( */}
-                <Button
-                  type={"submit"}
-                  className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
-                  // disabled={!form.formState.isValid}
-                >
-                  Make Offer
-                </Button>
+              <Button
+                type={"submit"}
+                className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
+                // disabled={!form.formState.isValid}
+              >
+                Make Offer
+              </Button>
               {/* )} */}
             </div>
             <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
