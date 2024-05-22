@@ -2,12 +2,17 @@ import {
   APIProvider,
   Map,
   MapCameraChangedEvent,
-  Marker,
+  MapCameraProps,
   Pin,
   useMap,
+  AdvancedMarker,
+  useAdvancedMarkerRef,
+  useApiIsLoaded,
 } from "@vis.gl/react-google-maps";
-import { env } from "@/env";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { BsHouseFill } from "react-icons/bs";
+
+import Spinner from "@/components/_common/Spinner";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 
@@ -42,50 +47,72 @@ function TestMap() {
   );
   const [markers, setMarkers] = useState<Poi[] | []>([]);
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
-
+  const [cameraProps, setCameraProps] = useState<MapCameraProps | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const map = useMap("9c8e46d54d7a528b");
+  const apiIsLoaded = useApiIsLoaded();
   //getting the center for the map
   //converting the location name to coordinates
 
-  const location = useMemo(
-    () => ({
-      lat: filters.filter?.lat,
-      lng: filters.filter?.long,
-    }),
-    [filters],
-  );
+  const location = useMemo(() => {
+    if (
+      filters.filter?.lat !== undefined &&
+      filters.filter?.long !== undefined
+    ) {
+      return {
+        lat: filters.filter.lat,
+        lng: filters.filter.long,
+      };
+    }
+    return null;
+  }, [filters]);
 
   useEffect(() => {
-    if (location.lat && location.lng) {
+    if (location?.lat && location?.lng) {
       setCenter(location);
+      if (map) {
+        map.panTo(location);
+        console.log("panning to location");
+      } else {
+        console.log("map not ready");
+      }
     }
-  }, [location]);
+  }, [location, map]);
 
   useEffect(() => {
     if (properties) {
       const propertiesCoordinates = properties.pages.flatMap((page) =>
-        page.data.map((property) => ({
-          key: property.name,
-          location: {
-            lat: property.lat,
-            lng: property.long,
-          },
-        })),
+        page.data
+          .filter((property) => property.lat !== null && property.long !== null)
+
+          .map((property) => ({
+            key: property.name,
+            location: {
+              lat: property.lat,
+              lng: property.long,
+            },
+          })),
       ) as Poi[] | [];
+      console.log(propertiesCoordinates);
       setMarkers(propertiesCoordinates);
       console.log(center);
     }
   }, [properties]);
   return (
-    <div className=" rounded-lg border shadow-md">
-      <APIProvider
-        apiKey={env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}
-        onLoad={() => console.log("Maps API has loaded.")}
-      >
-        {center && (
+    <div className=" max-w-[700px] rounded-lg border shadow-md lg:h-[600px] xl:h-[800px]">
+      {apiIsLoaded ? (
+        center && (
           <Map
-            className="max-w-[700px] rounded-lg border shadow-lg lg:h-[600px] xl:h-[800px]"
+            mapId="9c8e46d54d7a528b"
+            id="9c8e46d54d7a528b"
+            className=""
             defaultZoom={10}
-            center={center}
+            defaultCenter={center}
+            reuseMaps={true}
+            clickableIcons={true}
+            mapTypeControl={false}
+            gestureHandling={"cooperative"}
+            fullscreenControl={true}
             onCameraChanged={(ev: MapCameraChangedEvent) =>
               console.log(
                 "camera changed:",
@@ -97,14 +124,26 @@ function TestMap() {
           >
             <PoiMarkers pois={markers} />
           </Map>
-        )}
-      </APIProvider>
+        )
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <Spinner />
+        </div>
+      )}
     </div>
   );
 }
 
 const PoiMarkers = (props: { pois: Poi[] | [] }) => {
-  const map = useMap();
+  const map = useMap("9c8e46d54d7a528b");
+  const [AdvanceMarkerRef, advanceMarker] = useAdvancedMarkerRef();
+
+  useEffect(() => {
+    if (!advanceMarker) {
+      return;
+    }
+  }, [advanceMarker]);
+
   const handleClick = useCallback(
     (ev: google.maps.MapMouseEvent) => {
       if (!map) return;
@@ -117,12 +156,17 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
   return (
     <>
       {props.pois.map((poi: Poi) => (
-        <Marker
+        <AdvancedMarker
+          ref={AdvanceMarkerRef}
           key={poi.key}
+          title={poi.key}
           position={poi.location}
           onClick={handleClick}
           clickable={true}
-        ></Marker>
+        >
+          {" "}
+          <BsHouseFill size={30} />
+        </AdvancedMarker>
       ))}
     </>
   );
