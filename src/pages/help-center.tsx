@@ -29,7 +29,7 @@ export default function HelpCenter() {
       <Head>
         <title>Help Center | Tramona</title>
       </Head>
-      <div className="relative h-64">
+      <div className="relative h-48 lg:h-64">
         <div className="absolute inset-0">
           <Image
             src="/assets/images/beach.png"
@@ -38,7 +38,7 @@ export default function HelpCenter() {
             className="object-cover"
           />
         </div>
-        <h1 className="absolute inset-0 flex items-center justify-center bg-opacity-50 text-4xl font-bold">
+        <h1 className="absolute inset-0 flex items-center justify-center bg-opacity-50 text-center text-2xl font-bold lg:text-4xl">
           How can we help you?
         </h1>
       </div>
