@@ -1,14 +1,13 @@
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 
-import AccountSidebar from "@/components/account/AccountSidebar";
 import CashbackBalanceDetails from "@/components/account/cashback/CashbackBalanceDetails";
 import { ReferralTable } from "@/components/account/cashback/ReferralTable";
 import { referralColumns } from "@/components/account/cashback/ReferralColumns";
 import Spinner from "@/components/_common/Spinner";
 
 import { type RouterOutputs, api } from "@/utils/api";
-import MainLayout from "@/components/_common/Layout/MainLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 export type ReferralTableData =
   RouterOutputs["referralCodes"]["getReferralEarnings"];
@@ -32,24 +31,20 @@ export default function CashbackBalance() {
       <Head>
         <title>Cashback Balance | Tramona</title>
       </Head>
-      <MainLayout>
-        <div className="mx-auto min-h-screen-minus-header max-w-4xl gap-10 space-y-5 px-5 pt-5 lg:flex lg:space-y-0">
-          {/* <AccountSidebar /> */}
-          <div className="w-full space-y-5">
+      <DashboardLayout type="guest">
+        <div className="mx-auto flex min-h-screen-minus-header-n-footer max-w-4xl flex-col">
+          <div className="mt-6 grid grid-cols-1 px-4 lg:mt-16 lg:px-0">
             {isLoading ? (
               <Spinner />
             ) : (
-              <>
+              <div className="space-y-4">
                 <CashbackBalanceDetails balance={cashbackBalance} />
-
-                <div>
-                  <ReferralTable data={data ?? []} columns={referralColumns} />
-                </div>
-              </>
+                <ReferralTable data={data ?? []} columns={referralColumns} />
+              </div>
             )}
           </div>
         </div>
-      </MainLayout>
+      </DashboardLayout>
     </>
   );
 }

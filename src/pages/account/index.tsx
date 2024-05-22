@@ -6,42 +6,35 @@ import CashbackAccount from "@/components/account/CashbackAccount";
 import ReferFolks from "@/components/account/ReferFolks";
 
 import { api } from "@/utils/api";
-import MainLayout from "@/components/_common/Layout/MainLayout";
+import ReferralDashboard from "@/components/profile/ReferralDashboard";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 export default function MyAccount() {
   useSession({ required: true });
 
-  const { data, isLoading } = api.referralCodes.getReferralEarnings.useQuery();
+  // const { data, isLoading } = api.referralCodes.getReferralEarnings.useQuery();
 
-  const cashbackBalance =
-    data?.reduce((prev, item) => {
-      if (item.earningStatus === "pending") {
-        return prev + item.cashbackEarned;
-      }
+  // const cashbackBalance =
+  //   data?.reduce((prev, item) => {
+  //     if (item.earningStatus === "pending") {
+  //       return prev + item.cashbackEarned;
+  //     }
 
-      return prev;
-    }, 0) ?? 0;
+  //     return prev;
+  //   }, 0) ?? 0;
 
-  const recentEarnings = data?.slice(0, 3);
+  // const recentEarnings = data?.slice(0, 3);
 
   return (
     <>
       <Head>
         <title>My Account | Tramona</title>
       </Head>
-      <MainLayout>
-        <div className="min-h-screen-minus-header gap-10 space-y-5 bg-zinc-100 px-5 pt-5 lg:flex lg:space-y-0">
-          <AccountSidebar />
-          <div className="w-full space-y-5">
-            <CashbackAccount
-              isLoading={isLoading}
-              cashbackBalance={cashbackBalance}
-              recentEarnings={recentEarnings}
-            />
-            <ReferFolks />
-          </div>
+      <DashboardLayout type="guest">
+        <div className="mx-auto min-h-screen-minus-header max-w-4xl">
+          <ReferralDashboard />
         </div>
-      </MainLayout>
+      </DashboardLayout>
     </>
   );
 }
