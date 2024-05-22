@@ -54,13 +54,13 @@ export default async function handler(res: NextApiResponse) {
       for (const user of usersWithUnconfirmedRequests) {
         if (user.isWhatsApp) {
           await sendWhatsApp({
-            templateId: "HXd7858859fbb7fd0b5b4fa4467304bc3c",
+            templateId: "HX5a68298da1bf273a3e5fcb1211b17d0a",
             to: user.phoneNumber!,
           });
         } else {
           await sendText({
             to: user.phoneNumber!,
-            content: `Tramona: You have 3 hours left to respond to a counter offer that the host has sent for a property. Make sure to respond or you will lose out on the exclusive offer.`,
+            content: `Tramona: You have 3 hours left to respond to a counter offer that the host has sent you. Make sure to respond or you will lose out on the exclusive offer.`,
           });
         }
       }
