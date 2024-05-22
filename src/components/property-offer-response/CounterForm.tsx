@@ -89,7 +89,7 @@ export default function CounterForm({
           } else {
             await twilioMutation.mutateAsync({
               to: traveler.phoneNumber, //TO DO change to host phone number
-              msg: `Tramona: A traveler has countered your offer. Please go to www.tramona.com and respond to their counter.`,
+              msg: `Tramona: A host has countered your offer. Please go to www.tramona.com and respond to their counter within 24 hours or the offer will expire.`,
             });
           }
         }
