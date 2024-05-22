@@ -15,7 +15,7 @@ import NavLink from "@/components/_utils/NavLink";
 type HeaderProps =
   | {
       type: "dashboard";
-      sidebarType: "guest" | "host" | "admin";
+      sidebarType: "guest" | "host" | "admin" | "unlogged";
     }
   | { type: "marketing" };
 
