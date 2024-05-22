@@ -116,7 +116,10 @@ export default function PropertyOfferCard({
                 isAdminDashboard={!isGuestDashboard}
               />
               {isGuestDashboard && offer.status === "Pending" && (
-                <PropertyOfferCardDropdown offerId={offer.id} />
+                <PropertyOfferCardDropdown
+                  offerId={offer.id}
+                  propertyId={offer.propertyId}
+                />
               )}
             </div>
           </div>
@@ -197,7 +200,13 @@ export default function PropertyOfferCard({
   );
 }
 
-function PropertyOfferCardDropdown({ offerId }: { offerId: number }) {
+function PropertyOfferCardDropdown({
+  offerId,
+  propertyId,
+}: {
+  offerId: number;
+  propertyId: number;
+}) {
   const [openWithdraw, setOpenWithdraw] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
 
@@ -210,6 +219,7 @@ function PropertyOfferCardDropdown({ offerId }: { offerId: number }) {
       />
       <EditPropertyOfferDialog
         offerId={offerId}
+        propertyId={propertyId}
         open={openEdit}
         onOpenChange={setOpenEdit}
       />

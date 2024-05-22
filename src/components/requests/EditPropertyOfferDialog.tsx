@@ -1,5 +1,6 @@
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
+import EditForm from "../property/EditForm";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -12,10 +13,12 @@ import { toast } from "../ui/use-toast";
 
 export default function EditOfferDialog({
   offerId,
+  propertyId,
   open,
   onOpenChange,
 }: {
   offerId: number;
+  propertyId: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -32,10 +35,7 @@ export default function EditOfferDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogTitle>Edit</DialogTitle>
-        <p>
-          Your offer will be permanently withdrawn. You can not undo this
-          action.
-        </p>
+        <EditForm offerId={offerId} propertyId={propertyId} open onOpenChange={onOpenChange}/>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant={"secondary"}>Cancel</Button>
