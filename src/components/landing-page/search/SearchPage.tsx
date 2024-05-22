@@ -4,6 +4,7 @@ import {
 } from "@/components/_utils/VerificationContext";
 import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
 import SearchMaps from "./SearchMaps";
+import TestMap from "./TestMap";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
@@ -90,7 +91,7 @@ export default function TravelerPage() {
                 <SearchListings />
               </div>
               <div className=" col-span-1 max-h-[1000px]  md:col-span-2 lg:col-span-2">
-                <SearchMaps />
+                <TestMap />
               </div>
             </div>
           </div>

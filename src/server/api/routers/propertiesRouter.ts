@@ -163,6 +163,8 @@ export const propertiesRouter = createTRPCRouter({
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
           originalNightlyPrice: properties.originalNightlyPrice,
+          lat: properties.latitude,
+          long: properties.longitude,
           // isOnBucketList: ctx.user
           //   ? exists(
           //       ctx.db
