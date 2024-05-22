@@ -5,11 +5,12 @@ import HeaderTopRight from "./HeaderTopRight";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useIsLg } from "@/utils/utils";
+import { cn, useIsLg } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
+import NavLink from "@/components/_utils/NavLink";
 
 type HeaderProps =
   | {
@@ -31,6 +32,12 @@ export default function Header(props: HeaderProps) {
   );
 }
 
+const headerLinks = [
+  { name: "How it works", href: "/how-it-works" },
+  { name: "FAQ", href: "/faq" },
+  { name: "Contact", href: "/support" },
+];
+
 function LargeHeader(props: HeaderProps) {
   const { status, data: session } = useSession();
 
@@ -45,19 +52,23 @@ function LargeHeader(props: HeaderProps) {
       <div className="flex items-center justify-center gap-8">
         {props.type === "marketing" && (
           <>
-            {status !== "authenticated" && (
-              <>
-                <Link href="/how-it-works" className="font-semibold">
-                  How it works
-                </Link>
-                <Link href="/faq" className="font-semibold">
-                  FAQ
-                </Link>
-                <Link href="/support" className="font-semibold">
-                  Contact
-                </Link>
-              </>
-            )}
+            {status !== "authenticated" &&
+              headerLinks.map((link) => (
+                <NavLink
+                  key={link.href}
+                  href={link.href}
+                  render={({ selected }) => (
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        selected && "underline underline-offset-2",
+                      )}
+                    >
+                      {link.name}
+                    </span>
+                  )}
+                />
+              ))}
           </>
         )}
       </div>
@@ -81,7 +92,7 @@ function LargeHeader(props: HeaderProps) {
           </Button>
         )}
         {status !== "authenticated" && (
-          <Button variant="greenPrimary">
+          <Button asChild variant="greenPrimary">
             <Link href="/auth/signup">Sign Up</Link>
           </Button>
         )}
