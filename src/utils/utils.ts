@@ -118,6 +118,10 @@ export function formatDateWeekMonthDay(date: Date) {
   return formatDate(date, "EEE MMMM d");
 }
 
+export function formatDateMonthDayYear(date: Date) {
+  return formatDate(date, "MMMM d, yyyy");
+}
+
 // not used right now and probably will never have to:
 
 // export function formatDateRangeFromStrs(from: string, to?: string) {
