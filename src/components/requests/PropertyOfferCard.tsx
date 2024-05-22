@@ -1,5 +1,5 @@
 import { type Bid } from "@/server/db/schema";
-import { api, type RouterOutputs } from "@/utils/api";
+import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import {
   formatCurrency,
@@ -7,11 +7,12 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { EllipsisIcon, TrashIcon } from "lucide-react";
+import { EllipsisIcon, Pencil, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -23,10 +24,10 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Separator } from "../ui/separator";
+import EditPropertyOfferDialog from "./EditPropertyOfferDialog";
+import MobileSimilarProperties from "./MobileSimilarProperties";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
-import MobileSimilarProperties from "./MobileSimilarProperties";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 
 function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
@@ -197,14 +198,20 @@ export default function PropertyOfferCard({
 }
 
 function PropertyOfferCardDropdown({ offerId }: { offerId: number }) {
-  const [open, setOpen] = useState(false);
+  const [openWithdraw, setOpenWithdraw] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
 
   return (
     <>
       <WithdrawPropertyOfferDialog
         offerId={offerId}
-        open={open}
-        onOpenChange={setOpen}
+        open={openWithdraw}
+        onOpenChange={setOpenWithdraw}
+      />
+      <EditPropertyOfferDialog
+        offerId={offerId}
+        open={openEdit}
+        onOpenChange={setOpenEdit}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -213,9 +220,13 @@ function PropertyOfferCardDropdown({ offerId }: { offerId: number }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem red onClick={() => setOpen(true)}>
+          <DropdownMenuItem red onClick={() => setOpenWithdraw(true)}>
             <TrashIcon />
             Withdraw
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setOpenEdit(true)}>
+            <Pencil />
+            Edit
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
