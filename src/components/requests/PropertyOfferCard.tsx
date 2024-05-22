@@ -83,8 +83,9 @@ export default function PropertyOfferCard({
         getNumNights(offer.checkIn, offer.checkOut)
       : 0;
 
-  const originalNightlyBiddingOffer =
-    offer.amount / getNumNights(offer.checkIn, offer.checkOut);
+  const totalNights = getNumNights(offer.checkIn, offer.checkOut);
+
+  const originalNightlyBiddingOffer = offer.amount / totalNights;
 
   return (
     <Card className="cursor-pointer p-0 lg:overflow-clip">
@@ -119,6 +120,11 @@ export default function PropertyOfferCard({
                 <PropertyOfferCardDropdown
                   offerId={offer.id}
                   propertyId={offer.propertyId}
+                  guests={offer.numGuests}
+                  originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+                  totalNights={totalNights}
+                  checkIn={offer.checkIn}
+                  checkOut={offer.checkOut}
                 />
               )}
             </div>
@@ -203,9 +209,18 @@ export default function PropertyOfferCard({
 function PropertyOfferCardDropdown({
   offerId,
   propertyId,
+  guests,
+  originalNightlyBiddingOffer,
+  checkIn,
+  checkOut,
 }: {
   offerId: number;
   propertyId: number;
+  totalNights: number;
+  guests: number;
+  checkIn: Date;
+  checkOut: Date;
+  originalNightlyBiddingOffer: number;
 }) {
   const [openWithdraw, setOpenWithdraw] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -220,6 +235,10 @@ function PropertyOfferCardDropdown({
       <EditPropertyOfferDialog
         offerId={offerId}
         propertyId={propertyId}
+        originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+        guests={guests}
+        checkIn={checkIn}
+        checkn={checkOut}
         open={openEdit}
         onOpenChange={setOpenEdit}
       />

@@ -96,8 +96,7 @@ export default function BiddingForm({
                   />
                 </FormControl>
                 <FormMessage />
-              </FormItem>
-            )}
+              </FormItem>)}
           />
           <Dialog open={open} onOpenChange={setOpen}>
             {/* Removed trigger to have control on open and close */}
