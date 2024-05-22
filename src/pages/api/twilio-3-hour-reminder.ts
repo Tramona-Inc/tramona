@@ -2,19 +2,17 @@ import { type NextApiResponse } from "next";
 
 import { db } from "@/server/db";
 import { users, groups, bids } from "@/server/db/schema";
-import {
-  eq,
-  and,
-  ne,
-  sql,
-} from "drizzle-orm";
+import { eq, and, ne, sql } from "drizzle-orm";
 
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 
 // "request" means request group in this code
 
 export default async function handler(res: NextApiResponse) {
-    const mostRecentCounterPerBid = await db.execute(sql`
+  const mostRecentCounterPerBid = await db.execute<{
+    bid_id: number;
+    user_id: string;
+  }>(sql`
     SELECT DISTINCT ON (user_id) bid_id, user_id, created_at, counter_amount, name
     FROM (
       SELECT
@@ -37,8 +35,6 @@ export default async function handler(res: NextApiResponse) {
   `);
   try {
     for (const bid of mostRecentCounterPerBid) {
-
-
       const usersWithUnconfirmedRequests = await db
         .selectDistinct({
           isWhatsApp: users.isWhatsApp,
@@ -49,7 +45,6 @@ export default async function handler(res: NextApiResponse) {
         .leftJoin(bids, eq(groups.id, bids.madeByGroupId))
         .leftJoin(users, eq(groups.ownerId, users.id))
         .where(and(eq(bids.id, bid.bid_id), ne(groups.ownerId, bid.user_id)));
-
 
       for (const user of usersWithUnconfirmedRequests) {
         if (user.isWhatsApp) {
