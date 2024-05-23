@@ -3,29 +3,23 @@ import {
   MapCameraChangedEvent,
   MapCameraProps,
   useMap,
-  AdvancedMarker,
-  useAdvancedMarkerRef,
   useApiIsLoaded,
-  InfoWindow,
 } from "@vis.gl/react-google-maps";
-import { BsHouseFill } from "react-icons/bs";
-import { formatCurrency } from "@/utils/utils";
-
 import Spinner from "@/components/_common/Spinner";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 
-import { useRouter } from "next/router";
-
-type Poi = {
+import PoiMarkers from "./PoiMarkers";
+export type Poi = {
   key: string;
   location: google.maps.LatLngLiteral;
   originalNightlyPrice: number;
   id: string;
+  image: string;
 };
 
-function TestMap() {
+function SearchPropertiesMap() {
   const filters = useCitiesFilter((state) => state);
 
   const {
@@ -100,6 +94,7 @@ function TestMap() {
             },
             originalNightlyPrice: property.originalNightlyPrice,
             id: property.id,
+            image: property.imageUrls[0]!,
           })),
       ) as Poi[] | [];
       console.log(propertiesCoordinates);
@@ -143,88 +138,4 @@ function TestMap() {
   );
 }
 
-const PoiMarkers = (props: { pois: Poi[] | [] }) => {
-  const [markerRef, marker] = useAdvancedMarkerRef();
-  const [selectedMarker, setSelectedMarker] = useState<Poi | null>(null);
-  const [infoWindowShown, setInfoWindowShown] = useState<{
-    [key: number]: boolean;
-  }>({});
-
-  const map = useMap("9c8e46d54d7a528b");
-  const router = useRouter();
-  const handleMarkerClick = useCallback((poi: Poi) => {
-    console.log(poi);
-    if (!map) return;
-    if (!poi) return;
-    console.log("marker clicked");
-    console.log(poi.location);
-  }, []);
-
-  const toggleShowInfoWindow = (index: number) => {
-    setInfoWindowShown((prevShow) => ({
-      ...prevShow,
-      [index]: !prevShow[index],
-    }));
-  };
-
-  const handleClose = useCallback(() => {
-    setSelectedMarker(null);
-    setInfoWindowShown((prevShow) => {
-      const newShow: Record<number, boolean> = { ...prevShow };
-      Object.keys(newShow).forEach((key) => {
-        const index = parseInt(key);
-        if (!isNaN(index)) {
-          newShow[index] = false;
-        }
-      });
-      return newShow;
-    });
-  }, []);
-
-  // useEffect(() => {
-  //   console.log(selectedMarker);
-  // }, [selectedMarker]);
-
-  return (
-    <div>
-      {props.pois.map((poi: Poi, index) => (
-        <div key={index}>
-          <AdvancedMarker
-            title={poi.key}
-            position={poi.location}
-            onClick={() => {
-              handleMarkerClick(poi);
-              toggleShowInfoWindow(index);
-              setSelectedMarker(poi); // Set the clicked marker as the selected marker
-            }}
-            clickable={true}
-          >
-            <BsHouseFill size={30} />
-          </AdvancedMarker>
-          {infoWindowShown[index] && (
-            <InfoWindow
-              position={poi.location}
-              onCloseClick={handleClose}
-              pixelOffset={[0, -25]}
-            >
-              <div className="">
-                <div
-                  onClick={() => void router.push(`/property/${poi.id}`)}
-                  className=" flex cursor-pointer flex-col gap-y-1 text-center text-xs"
-                >
-                  {poi.key}
-                  <span className="text-sm font-semibold">
-                    {" "}
-                    {formatCurrency(poi.originalNightlyPrice)}/Night{" "}
-                  </span>
-                </div>
-              </div>
-            </InfoWindow>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-export default TestMap;
+export default SearchPropertiesMap;
