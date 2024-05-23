@@ -2,9 +2,9 @@ import { api } from "@/utils/api";
 import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import PropertyOffersEmptySvg from "../_common/EmptyStateSvg/PropertyOffersEmptySvg";
 import Spinner from "../_common/Spinner";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 import PropertyOfferCard from "./PropertyOfferCard";
 import SimiliarProperties from "./SimilarProperties";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 
 export default function PropertyOfferTab() {
   const isMobile = useMediaQuery("(max-width: 640px)");
@@ -25,6 +25,7 @@ export default function PropertyOfferTab() {
       </div>
       <div>
         {offers.length > 0 && !isMobile && (
+          // ! Change to one prop (calls the same)
           <SimiliarProperties
             location={offers[0]!.property.address!}
             city={offers[0]!.property.address!}
