@@ -51,11 +51,13 @@ export default function RequestGroupCards({
       >
         {/* The is selected prop going inside of Request card is just for mobile desktop is handles in activeRequestGroup */}
         <RequestCard request={request} isSelected={isSelected}>
-          {requestGroup.hasApproved ? (
+          <RequestCardAction request={request} />
+
+          {/* {requestGroup.hasApproved ? (
             <RequestCardAction request={request} />
           ) : (
             requestUnconfirmedBtn
-          )}
+          )} */}
         </RequestCard>
       </div>
     );
@@ -84,9 +86,9 @@ export default function RequestGroupCards({
           );
         })}
       </div>
-      <div className="flex justify-end gap-2 px-4 pb-2">
+      {/* <div className="flex justify-end gap-2 px-4 pb-2">
         {!requestGroup.hasApproved && requestUnconfirmedBtn}
-      </div>
+      </div> */}
     </div>
   );
 }

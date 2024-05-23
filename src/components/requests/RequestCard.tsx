@@ -85,7 +85,8 @@ export default function RequestCard({
         {/* <p className="font-mono text-xs uppercase text-muted-foreground">
           Id: {request.id} · Request group Id: {request.requestGroupId}
         </p> */}
-        {request.requestGroup.hasApproved ? (
+        <RequestCardBadge request={request} />
+        {/* {request.requestGroup.hasApproved ? (
           <RequestCardBadge request={request} />
         ) : (
           <Tooltip>
@@ -100,7 +101,7 @@ export default function RequestCard({
               offers.
             </TooltipContent>
           </Tooltip>
-        )}
+        )} */}
         <div className="absolute right-2 top-0 flex items-center gap-2">
           {showAvatars && (
             <RequestGroupAvatars
