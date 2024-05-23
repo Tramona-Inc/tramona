@@ -21,6 +21,7 @@ import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
 import { WelcomeBanner } from "../WelcomeBanner";
+import Typewriter from "typewriter-effect";
 
 const infoCards = [
   {
@@ -147,8 +148,19 @@ export function DesktopSearchLayout() {
   return (
     <div className="space-y-2 px-12">
       <p className="font-bold">
-        Your request will be sent to every host in SEATTLE
+        Your request will be sent to every host in{" "}
+        <span className="text-teal-900">
+          <Typewriter
+            component={"span"}
+            options={{
+              strings: ["SEATTLE", "LOS ANGELES", "LAS VEGAS", "MIAMI"],
+              autoStart: true,
+              loop: true,
+            }}
+          />
+        </span>
       </p>
+
       <DesktopRequestDealTab />
     </div>
 
