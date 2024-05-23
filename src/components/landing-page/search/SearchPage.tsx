@@ -8,7 +8,7 @@ import SearchPropertiesMap from "./SearchPropertiesMap";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
-import { useEffect } from "react";
+import { use, useEffect } from "react";
 import SearchListings from "./SearchListings";
 import Banner from "@/components/landing-page/Banner";
 import CitiesFilter from "@/components/landing-page/CitiesFilter";
@@ -30,7 +30,17 @@ import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
+//check to see if there is no cities filter, if not maps dont exist
+import { useCitiesFilter } from "@/utils/store/cities-filter";
 export default function TravelerPage() {
+  const filter = useCitiesFilter((state) => state.filter);
+  const setFilter = useCitiesFilter((state) => state.setFilter);
+  //onLoad erase all filters
+  useEffect(() => {
+    setFilter(undefined);
+  }, []);
+  const isFilterUndefined = filter === undefined;
+
   useMaybeSendUnsentRequests();
 
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -87,12 +97,16 @@ export default function TravelerPage() {
           <div className="mx-4 space-y-4">
             <CitiesFilter />
             <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
-              <div className=" col-span-1 md:col-span-1 lg:col-span-3">
-                <SearchListings />
+              <div
+                className={`col-span-1 overflow-y-auto md:col-span-3 lg:max-h-[1000px] ${isFilterUndefined ? "lg:col-span-5" : "lg:col-span-3"}`}
+              >
+                <SearchListings isFilterUndefined={isFilterUndefined} />
               </div>
-              <div className=" col-span-1 max-h-[1000px]  md:col-span-2 lg:col-span-2">
-                <SearchPropertiesMap />
-              </div>
+              {!isFilterUndefined && (
+                <div className=" sticky col-span-1  max-h-[1000px] md:col-span-2 lg:col-span-2">
+                  <SearchPropertiesMap />
+                </div>
+              )}
             </div>
           </div>
         </div>

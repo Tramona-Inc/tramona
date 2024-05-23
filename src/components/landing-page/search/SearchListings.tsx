@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
 import { FilterXIcon } from "lucide-react";
 
-export default function Listings() {
+export default function SearchListings({
+  isFilterUndefined,
+}: {
+  isFilterUndefined: boolean;
+}) {
   const filters = useCitiesFilter((state) => state);
 
   const {
@@ -76,7 +80,9 @@ export default function Listings() {
   ));
 
   return (
-    <section className="relative grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3">
+    <section
+      className={`relative grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 ${isFilterUndefined ? "md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"}`}
+    >
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <>{skeletons}</>

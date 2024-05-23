@@ -66,7 +66,12 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
             }}
             clickable={true}
           >
-            <BsHouseFill size={30} />
+            <div className="flex flex-col items-center justify-center">
+              <div className="z-40 rounded-xl bg-zinc-700 p-2 text-white">
+                {formatCurrency(poi.originalNightlyPrice)}/Night
+              </div>
+              <BsHouseFill className="z-10 text-zinc-700" size={30} />
+            </div>
           </AdvancedMarker>
           {infoWindowShown[index] && (
             <InfoWindow

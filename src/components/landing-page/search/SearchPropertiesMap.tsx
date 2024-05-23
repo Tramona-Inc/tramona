@@ -9,9 +9,11 @@ import Spinner from "@/components/_common/Spinner";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { debounce } from "lodash";
 
 import PoiMarkers from "./PoiMarkers";
 import MapBoundary from "./MapBoundary";
+
 export type Poi = {
   key: string;
   location: google.maps.LatLngLiteral;
@@ -19,6 +21,7 @@ export type Poi = {
   id: string;
   image: string;
 };
+
 export type MapBoundary = {
   north: number;
   south: number;
@@ -27,8 +30,11 @@ export type MapBoundary = {
 };
 
 function SearchPropertiesMap() {
+  //zustand
   const filters = useCitiesFilter((state) => state);
-  //Map data after user searches
+  const setFilter = useCitiesFilter((state) => state.setFilter);
+  const setRadius = useCitiesFilter((state) => state.setRadius);
+
   const {
     data: initialProperties,
     isLoading,
@@ -54,7 +60,7 @@ function SearchPropertiesMap() {
     },
   );
 
-  const [markers, setMarkers] = useState<Poi[] | []>([]);
+  const [markers, setMarkers] = useState<Poi[]>([]);
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
   const [cameraProps, setCameraProps] = useState<MapProps | null>({
     mapId: "9c8e46d54d7a528b",
@@ -70,31 +76,32 @@ function SearchPropertiesMap() {
   const map = useMap("9c8e46d54d7a528b");
   const apiIsLoaded = useApiIsLoaded();
 
-  //everthing related to the map camera changing to get new properties with boundaries
   const [mapBoundaries, setMapBoundaries] = useState<MapBoundary | null>(null);
 
-  //data for when the map moves
-  const { data: adjustedProperties } =
-    api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
-      {
-        boundaries: mapBoundaries,
-        guests: filters.guests,
-        beds: filters.beds,
-        bedrooms: filters.bedrooms,
-        bathrooms: filters.bathrooms,
-        maxNightlyPrice: filters.maxNightlyPrice,
-        lat: filters.filter?.lat,
-        long: filters.filter?.long,
-        houseRules: filters.houseRules,
-        roomType: filters.roomType,
-        checkIn: filters.checkIn,
-        checkOut: filters.checkOut,
-        radius: filters.radius,
-      },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-      },
-    );
+  const {
+    data: adjustedProperties,
+    fetchNextPage: fetchNextPageOfAdjustedProperties,
+  } = api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
+    {
+      boundaries: mapBoundaries,
+      guests: filters.guests,
+      beds: filters.beds,
+      bedrooms: filters.bedrooms,
+      bathrooms: filters.bathrooms,
+      maxNightlyPrice: filters.maxNightlyPrice,
+      lat: filters.filter?.lat,
+      long: filters.filter?.long,
+      houseRules: filters.houseRules,
+      roomType: filters.roomType,
+      checkIn: filters.checkIn,
+      checkOut: filters.checkOut,
+      radius: filters.radius,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
   const location = useMemo(() => {
     if (
       filters.filter?.lat !== undefined &&
@@ -108,7 +115,6 @@ function SearchPropertiesMap() {
     return null;
   }, [filters]);
 
-  //moves camera to new seach location
   useEffect(() => {
     if (location?.lat && location?.lng) {
       setCenter(location);
@@ -119,15 +125,13 @@ function SearchPropertiesMap() {
         console.log("map not ready");
       }
     }
-  }, [location, map]);
+  }, [map]);
 
-  //setting markers for new properties
-  useEffect(() => {
+  const propertiesCoordinates = useMemo(() => {
     if (adjustedProperties && mapBoundaries !== null) {
-      const propertiesCoordinates = adjustedProperties.pages.flatMap((page) =>
+      return adjustedProperties.pages.flatMap((page) =>
         page.data
           .filter((property) => property.lat !== null && property.long !== null)
-
           .map((property) => ({
             key: property.name,
             location: {
@@ -139,14 +143,10 @@ function SearchPropertiesMap() {
             image: property.imageUrls[0]!,
           })),
       ) as Poi[] | [];
-      console.log("this is the adjustwed properties");
-      setMarkers(propertiesCoordinates);
-      console.log(center);
     } else if (initialProperties) {
-      const propertiesCoordinates = initialProperties.pages.flatMap((page) =>
+      return initialProperties.pages.flatMap((page) =>
         page.data
           .filter((property) => property.lat !== null && property.long !== null)
-
           .map((property) => ({
             key: property.name,
             location: {
@@ -158,23 +158,29 @@ function SearchPropertiesMap() {
             image: property.imageUrls[0]!,
           })),
       ) as Poi[] | [];
-      // console.log("this is the initial properties");
-      console.log(propertiesCoordinates);
-      setMarkers(propertiesCoordinates);
-      console.log(center);
     }
-  }, [initialProperties, adjustedProperties, mapBoundaries]);
+    return [];
+  }, [adjustedProperties, initialProperties, mapBoundaries]);
 
-  //for when the user moves map
+  useEffect(() => {
+    setMarkers(propertiesCoordinates);
+  }, [propertiesCoordinates]);
+
   const handleCameraChanged = useCallback(
-    (ev: MapCameraChangedEvent) => {
+    debounce((ev: MapCameraChangedEvent) => {
       const newCenter = {
         lat: ev.detail.center.lat,
         lng: ev.detail.center.lng,
       };
       setCenter(newCenter);
+      setFilter({
+        lat: newCenter.lat,
+        long: newCenter.lng,
+        id: "",
+        label: "",
+      });
       console.log(newCenter);
-      console.log("bounderies");
+      console.log("boundaries");
       console.log(ev.detail.bounds);
       setMapBoundaries({
         north: ev.detail.bounds.north,
@@ -182,49 +188,10 @@ function SearchPropertiesMap() {
         east: ev.detail.bounds.east,
         west: ev.detail.bounds.west,
       });
-
-      // if (mapBoundaries) {
-      //   //call the api to get new properties
-      //   properties = fetchBoundaryProperties(mapBoundaries);
-      //   console.log("properties");
-      //   console.log(properties);
-      // }
-    },
-
-    [setCenter],
+      void fetchNextPageOfAdjustedProperties();
+    }, 1100),
+    [setCenter, fetchNextPageOfAdjustedProperties, setFilter],
   );
-
-  //fetch data once map sits
-  // const fetchBoundaryProperties = useCallback(
-  //   (mapBoundaries: MapBoundary) => {
-  //     return api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
-  //       {
-  //         boundaries: {
-  //           north: mapBoundaries.north,
-  //           east: mapBoundaries.east,
-  //           south: mapBoundaries.south,
-  //           west: mapBoundaries.west,
-  //         },
-  //         guests: filters.guests,
-  //         beds: filters.beds,
-  //         bedrooms: filters.bedrooms,
-  //         bathrooms: filters.bathrooms,
-  //         maxNightlyPrice: filters.maxNightlyPrice,
-  //         lat: filters.filter?.lat,
-  //         long: filters.filter?.long,
-  //         houseRules: filters.houseRules,
-  //         roomType: filters.roomType,
-  //         checkIn: filters.checkIn,
-  //         checkOut: filters.checkOut,
-  //         radius: filters.radius,
-  //       },
-  //       {
-  //         getNextPageParam: (lastPage) => lastPage.nextCursor,
-  //       },
-  //     );
-  //   },
-  //   [filters],
-  // );
 
   return (
     <div className=" max-w-[700px] rounded-md border shadow-md lg:h-[600px] xl:h-[800px]">

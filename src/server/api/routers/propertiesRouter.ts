@@ -279,7 +279,7 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { cursor } = input;
+      const { cursor, boundaries } = input;
 
       const lat = input.lat ?? 0;
       const long = input.long ?? 0;
@@ -297,19 +297,6 @@ export const propertiesRouter = createTRPCRouter({
           originalNightlyPrice: properties.originalNightlyPrice,
           lat: properties.latitude,
           long: properties.longitude,
-          // isOnBucketList: ctx.user
-          //   ? exists(
-          //       ctx.db
-          //         .select()
-          //         .from(bucketListProperties)
-          //         .where(
-          //           and(
-          //             eq(bucketListProperties.propertyId, properties.id),
-          //             eq(bucketListProperties.userId, ctx.user.id),
-          //           ),
-          //         ),
-          //     )
-          //   : sql`FALSE`,
           distance: sql`
             6371 * ACOS(
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
@@ -326,15 +313,23 @@ export const propertiesRouter = createTRPCRouter({
         .where(
           and(
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
+            boundaries
+              ? and(
+                  lte(properties.latitude, boundaries.north),
+                  gte(properties.latitude, boundaries.south),
+                  lte(properties.longitude, boundaries.east),
+                  gte(properties.longitude, boundaries.west),
+                )
+              : sql`TRUE`,
             input.lat && input.long
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
               : sql`TRUE`,
-            input.city && input.city !== "all"
-              ? eq(properties.address, input.city)
-              : sql`TRUE`,
+            // input.city && input.city !== "all"
+            //   ? eq(properties.address, input.city)
+            //   : sql`TRUE`,
             input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`,
             input.bedrooms
               ? gte(properties.numBedrooms, input.bedrooms)
@@ -368,10 +363,10 @@ export const propertiesRouter = createTRPCRouter({
                 ),
             ),
             sql`(SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
-              AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
+              FROM booked_dates 
+              WHERE booked_dates.property_id = properties.id 
+                AND booked_dates.date >= CURRENT_DATE 
+                AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
         .limit(12)
@@ -382,6 +377,7 @@ export const propertiesRouter = createTRPCRouter({
         nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
       };
     }),
+
   // getCities: publicProcedure.query(async ({ ctx }) => {
   //   const lat = 34.1010307;
   //   const long = -118.3806008;
