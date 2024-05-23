@@ -3,7 +3,7 @@ import {
   useVerification,
 } from "@/components/_utils/VerificationContext";
 import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
-import SearchMaps from "./SearchMaps";
+
 import TestMap from "./TestMap";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
