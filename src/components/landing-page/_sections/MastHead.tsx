@@ -58,7 +58,7 @@ export default function MastHead() {
       </div>
       <div className="w-full">
         <Image
-          src="/assets/images/landing-page/main.png"
+          src="/assets/images/landing-page.png"
           alt=""
           width={0}
           height={0}

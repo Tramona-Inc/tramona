@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FilterPropertiesBtn } from "./FilterPropertiesBtn";
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
@@ -58,7 +59,6 @@ export function DesktopRequestDealTab() {
             formLabel="Location"
             variant="lpDesktop"
             placeholder="Select a location"
-            className="bg-white"
             icon={MapPinIcon}
           />
 
@@ -119,8 +119,7 @@ export function DesktopRequestDealTab() {
             )}
           />
           <div className="flex items-center gap-2 text-teal-900">
-            <Filter />
-            <p className="font-bold">More filters</p>
+            <FilterPropertiesBtn />
           </div>
 
           <div className="space-y-2">
