@@ -7,7 +7,7 @@ import {
 } from "@/config/sideNavLinks";
 import { api } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
-import { ArrowLeftRight, Menu, Settings, Wallet } from "lucide-react";
+import { ArrowLeftRight, Menu, Settings, Wallet, MessageSquareMore, ShieldQuestion, Contact, MessageCircleQuestion } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useCallback, useEffect } from "react";
@@ -66,7 +66,7 @@ export default function Sidebar({
   type,
   withLogo = false,
 }: {
-  type: "admin" | "guest" | "host";
+  type: "admin" | "guest" | "host" | "unlogged";
   withLogo?: boolean;
 }) {
   //using session to check user's role if the role is == admin "Switch to Admin link will appear"
@@ -84,7 +84,10 @@ export default function Sidebar({
               ...guestNavLinks,
               { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
-          : guestNavLinks;
+          : [
+              ...guestNavLinks, 
+              { href: "/messages", name: "Messages", icon: MessageSquareMore },
+            ];
 
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery(undefined, {
@@ -156,6 +159,24 @@ export default function Sidebar({
               <Link href="/account">
                 <DropdownMenuItem className="text-primary">
                   <Wallet /> Refer and earn
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/how-it-works">
+                <DropdownMenuItem className="text-primary">
+                  <ShieldQuestion/>
+                  How it works
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/faq">
+                <DropdownMenuItem className="text-primary">
+                  <MessageCircleQuestion/>
+                  FAQ
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/support">
+                <DropdownMenuItem className="text-primary">
+                  <Contact/>
+                  Contact
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>

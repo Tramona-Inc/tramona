@@ -1,6 +1,6 @@
-import { api } from "@/utils/api";
-import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { api } from "@/utils/api";
+import { useEffect, useMemo, useState } from "react";
 
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import OfferCardNoBid from "./property-cards/OfferCardNoBid";
@@ -18,14 +18,15 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
     location: location,
   });
 
+  // ! Update later to fix the optional chain
   const {
     data: properties,
     isFetching,
     fetchNextPage,
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery({
-    lat: coordinates?.coordinates.lat,
-    long: coordinates?.coordinates.lng,
+    lat: coordinates?.coordinates?.lat ?? 0,
+    long: coordinates?.coordinates?.lng ?? 0,
     radius: 25,
   });
 
