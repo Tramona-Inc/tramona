@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
+import {
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { api } from "@/utils/api";
+import { cn } from "@/utils/utils";
 import {
   AddressElement,
   PaymentElement,
@@ -8,7 +14,8 @@ import {
 } from "@stripe/react-stripe-js";
 import { StripeError } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
 type Bid = {
   propertyId: number;
@@ -102,14 +109,47 @@ export default function BidPaymentForm({
     });
   };
 
+  const { data: session } = useSession();
+
+  const [isStripeLoading, setIsStripeLoading] = useState(true);
+
+  useEffect(() => {
+    if (elements) {
+      const element = elements.getElement("payment");
+      element?.on("ready", () => {
+        setIsStripeLoading(false);
+      });
+    }
+  }, [elements]);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <AddressElement options={{ mode: "billing" }} />
-      <PaymentElement />
-      <Button type="submit" disabled={!stripe || loading}>
-        Save
-      </Button>
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-    </form>
+    <div className='flex items-center justify-center'>
+      {!session?.user && (
+        <div className="absolute bottom-52 z-10 flex flex-col gap-5 rounded-lg border bg-white p-5">
+          <DialogHeader>
+            <DialogTitle>Please Log in</DialogTitle>
+            <DialogDescription>
+              In order to make a bid, please log in or sign up.
+            </DialogDescription>
+          </DialogHeader>
+          <Button asChild variant={"secondary"} className="w-full">
+            <Link href={"/auth/signin"}>Login</Link>
+          </Button>
+          <Button asChild variant={"greenPrimary"} className="w-full">
+            <Link href={"/auth/signup"}>Sign Up</Link>
+          </Button>
+        </div>
+      )}
+      <div className={cn(!session?.user.id && "blur-sm filter")}>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <AddressElement options={{ mode: "billing" }} />
+          <PaymentElement />
+          <Button type="submit" disabled={!stripe || loading}>
+            Save
+          </Button>
+          {errorMessage && <div className="error-message">{errorMessage}</div>}
+        </form>
+      </div>
+    </div>
   );
 }
