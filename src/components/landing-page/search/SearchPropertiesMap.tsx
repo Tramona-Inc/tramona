@@ -11,6 +11,7 @@ import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 
 import PoiMarkers from "./PoiMarkers";
+import MapBoundary from "./MapBoundary";
 export type Poi = {
   key: string;
   location: google.maps.LatLngLiteral;
@@ -18,12 +19,18 @@ export type Poi = {
   id: string;
   image: string;
 };
+export type MapBoundary = {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+};
 
 function SearchPropertiesMap() {
   const filters = useCitiesFilter((state) => state);
-
+  //Map data after user searches
   const {
-    data: properties,
+    data: initialProperties,
     isLoading,
     fetchNextPage,
     isFetchingNextPage,
@@ -46,6 +53,7 @@ function SearchPropertiesMap() {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
   const [markers, setMarkers] = useState<Poi[] | []>([]);
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
   const [cameraProps, setCameraProps] = useState<MapProps | null>({
@@ -57,12 +65,36 @@ function SearchPropertiesMap() {
     gestureHandling: "cooperative",
     fullscreenControl: true,
   });
+
   const mapRef = useRef<google.maps.Map | null>(null);
   const map = useMap("9c8e46d54d7a528b");
   const apiIsLoaded = useApiIsLoaded();
-  //getting the center for the map
-  //converting the location name to coordinates
 
+  //everthing related to the map camera changing to get new properties with boundaries
+  const [mapBoundaries, setMapBoundaries] = useState<MapBoundary | null>(null);
+
+  //data for when the map moves
+  const { data: adjustedProperties } =
+    api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
+      {
+        boundaries: mapBoundaries,
+        guests: filters.guests,
+        beds: filters.beds,
+        bedrooms: filters.bedrooms,
+        bathrooms: filters.bathrooms,
+        maxNightlyPrice: filters.maxNightlyPrice,
+        lat: filters.filter?.lat,
+        long: filters.filter?.long,
+        houseRules: filters.houseRules,
+        roomType: filters.roomType,
+        checkIn: filters.checkIn,
+        checkOut: filters.checkOut,
+        radius: filters.radius,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
   const location = useMemo(() => {
     if (
       filters.filter?.lat !== undefined &&
@@ -76,6 +108,7 @@ function SearchPropertiesMap() {
     return null;
   }, [filters]);
 
+  //moves camera to new seach location
   useEffect(() => {
     if (location?.lat && location?.lng) {
       setCenter(location);
@@ -88,9 +121,10 @@ function SearchPropertiesMap() {
     }
   }, [location, map]);
 
+  //setting markers for new properties
   useEffect(() => {
-    if (properties) {
-      const propertiesCoordinates = properties.pages.flatMap((page) =>
+    if (adjustedProperties && mapBoundaries !== null) {
+      const propertiesCoordinates = adjustedProperties.pages.flatMap((page) =>
         page.data
           .filter((property) => property.lat !== null && property.long !== null)
 
@@ -105,12 +139,33 @@ function SearchPropertiesMap() {
             image: property.imageUrls[0]!,
           })),
       ) as Poi[] | [];
+      console.log("this is the adjustwed properties");
+      setMarkers(propertiesCoordinates);
+      console.log(center);
+    } else if (initialProperties) {
+      const propertiesCoordinates = initialProperties.pages.flatMap((page) =>
+        page.data
+          .filter((property) => property.lat !== null && property.long !== null)
+
+          .map((property) => ({
+            key: property.name,
+            location: {
+              lat: property.lat,
+              lng: property.long,
+            },
+            originalNightlyPrice: property.originalNightlyPrice,
+            id: property.id,
+            image: property.imageUrls[0]!,
+          })),
+      ) as Poi[] | [];
+      // console.log("this is the initial properties");
       console.log(propertiesCoordinates);
       setMarkers(propertiesCoordinates);
       console.log(center);
     }
-  }, [properties]);
+  }, [initialProperties, adjustedProperties, mapBoundaries]);
 
+  //for when the user moves map
   const handleCameraChanged = useCallback(
     (ev: MapCameraChangedEvent) => {
       const newCenter = {
@@ -119,11 +174,57 @@ function SearchPropertiesMap() {
       };
       setCenter(newCenter);
       console.log(newCenter);
-      console.log("bounders");
+      console.log("bounderies");
       console.log(ev.detail.bounds);
+      setMapBoundaries({
+        north: ev.detail.bounds.north,
+        south: ev.detail.bounds.south,
+        east: ev.detail.bounds.east,
+        west: ev.detail.bounds.west,
+      });
+
+      // if (mapBoundaries) {
+      //   //call the api to get new properties
+      //   properties = fetchBoundaryProperties(mapBoundaries);
+      //   console.log("properties");
+      //   console.log(properties);
+      // }
     },
+
     [setCenter],
   );
+
+  //fetch data once map sits
+  // const fetchBoundaryProperties = useCallback(
+  //   (mapBoundaries: MapBoundary) => {
+  //     return api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
+  //       {
+  //         boundaries: {
+  //           north: mapBoundaries.north,
+  //           east: mapBoundaries.east,
+  //           south: mapBoundaries.south,
+  //           west: mapBoundaries.west,
+  //         },
+  //         guests: filters.guests,
+  //         beds: filters.beds,
+  //         bedrooms: filters.bedrooms,
+  //         bathrooms: filters.bathrooms,
+  //         maxNightlyPrice: filters.maxNightlyPrice,
+  //         lat: filters.filter?.lat,
+  //         long: filters.filter?.long,
+  //         houseRules: filters.houseRules,
+  //         roomType: filters.roomType,
+  //         checkIn: filters.checkIn,
+  //         checkOut: filters.checkOut,
+  //         radius: filters.radius,
+  //       },
+  //       {
+  //         getNextPageParam: (lastPage) => lastPage.nextCursor,
+  //       },
+  //     );
+  //   },
+  //   [filters],
+  // );
 
   return (
     <div className=" max-w-[700px] rounded-md border shadow-md lg:h-[600px] xl:h-[800px]">

@@ -254,6 +254,14 @@ export const propertiesRouter = createTRPCRouter({
   getByBoundaryInfiniteScroll: optionallyAuthedProcedure
     .input(
       z.object({
+        boundaries: z
+          .object({
+            north: z.number(),
+            south: z.number(),
+            east: z.number(),
+            west: z.number(),
+          })
+          .nullable(),
         cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
         city: z.string().optional(),
         roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
