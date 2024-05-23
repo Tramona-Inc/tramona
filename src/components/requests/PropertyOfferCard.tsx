@@ -238,7 +238,7 @@ function PropertyOfferCardDropdown({
         originalNightlyBiddingOffer={originalNightlyBiddingOffer}
         guests={guests}
         checkIn={checkIn}
-        checkn={checkOut}
+        checkOut={checkOut}
         open={openEdit}
         onOpenChange={setOpenEdit}
       />
