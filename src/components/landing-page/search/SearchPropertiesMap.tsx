@@ -103,7 +103,7 @@ function SearchPropertiesMap() {
     }
   }, [properties]);
   return (
-    <div className=" max-w-[700px] rounded-lg border shadow-md lg:h-[600px] xl:h-[800px]">
+    <div className=" max-w-[700px] rounded-md border shadow-md lg:h-[600px] xl:h-[800px]">
       {apiIsLoaded ? (
         center && (
           <Map

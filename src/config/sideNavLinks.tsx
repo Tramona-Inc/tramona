@@ -57,12 +57,12 @@ export const hostNavLinks = [
 
 export const guestNavLinks = [
   { href: "/home", name: "Home", icon: HomeIcon },
-  { href: "/", name: "Explore", icon: Search },
+  { href: "/explore", name: "Explore", icon: Search },
   { href: "/offers", name: "Offers", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
 ];
 
 export const unloggedNavLinks = [
   { href: "/home", name: "Home", icon: HomeIcon },
-  { href: "/", name: "Explore", icon: Search },
+  { href: "/explore", name: "Explore", icon: Search },
 ];
