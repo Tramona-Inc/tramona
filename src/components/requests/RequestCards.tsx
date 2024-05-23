@@ -25,17 +25,25 @@ export function RequestCards({
   // console.log(selectedRequest);
 
   const previousRequestGroups = usePrevious(requestGroups);
+  // const newlyApprovedRequestGroups =
+  //   requestGroups && previousRequestGroups
+  //     ? requestGroups.filter(
+  //         ({ group }) =>
+  //           group.hasApproved &&
+  //           !previousRequestGroups.find(
+  //             ({ group: group2 }) => group2?.id === group.id,
+  //           )?.group.hasApproved,
+  //       )
+  //     : [];
   const newlyApprovedRequestGroups =
     requestGroups && previousRequestGroups
       ? requestGroups.filter(
           ({ group }) =>
-            group.hasApproved &&
             !previousRequestGroups.find(
               ({ group: group2 }) => group2?.id === group.id,
             )?.group.hasApproved,
         )
       : [];
-
   useEffect(() => {
     if (newlyApprovedRequestGroups.length > 0) {
       setIsWaiting(false);

@@ -6,6 +6,7 @@ import {
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
+  bids,
   offers,
   properties,
   referralCodes,
@@ -112,6 +113,13 @@ export default async function webhook(
             where: eq(offers.requestId, requestID),
           });
 
+          const bidID = parseInt(
+            paymentIntentSucceeded.metadata.bid_id!,
+          );
+          const bid = await db.query.bids.findFirst({
+            where: eq(bids.id, bidID),
+          });
+
           //send BookingConfirmationEmail
           //Send user confirmation email
           //getting num of nights
@@ -142,20 +150,20 @@ export default async function webhook(
           //     tramonaServiceFee: tramonaServiceFee ?? 0,
           //   }),
           // });
-          const twilioMutation = api.twilio.sendSMS.useMutation();
-          const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+          // const twilioMutation = api.twilio.sendSMS.useMutation();
+          // const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
-          if (user?.isWhatsApp) {
-            await twilioWhatsAppMutation.mutateAsync({
-              templateId: "HXb0989d91e9e67396e9a508519e19a46c",
-              to: paymentIntentSucceeded.metadata.phoneNumber!,
-            });
-          } else {
-            await twilioMutation.mutateAsync({
-              to: paymentIntentSucceeded.metadata.phoneNumber!,
-              msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
-            });
-          }
+          // if (user?.isWhatsApp) {
+          //   await twilioWhatsAppMutation.mutateAsync({
+          //     templateId: "HXb0989d91e9e67396e9a508519e19a46c",
+          //     to: paymentIntentSucceeded.metadata.phoneNumber!,
+          //   });
+          // } else {
+          //   await twilioMutation.mutateAsync({
+          //     to: paymentIntentSucceeded.metadata.phoneNumber!,
+          //     msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
+          //   });
+          // }
 
           // console.log("PaymentIntent was successful!");
 
