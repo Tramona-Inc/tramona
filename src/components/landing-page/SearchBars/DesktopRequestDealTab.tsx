@@ -11,6 +11,7 @@ import {
   ChevronDown,
   DollarSignIcon,
   Filter,
+  Link2,
   MapPinIcon,
   Plus,
   Users2Icon,
@@ -32,6 +33,12 @@ import { FilterPropertiesBtn } from "./FilterPropertiesBtn";
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
   const { form, onSubmit } = useCityRequestForm({ setCurTab });
+  const [link, setLink] = useState("");
+
+  function handleSelectChange(value: string) {
+    setLink(value);
+  }
+
   return (
     <Form {...form}>
       <form
@@ -127,23 +134,60 @@ export function DesktopRequestDealTab() {
               Have a property you like? We&apos;ll send your request directly to
               the host.
             </p>
-            <Select>
-              <SelectTrigger className="w-[140px] justify-center">
-                <SelectValue
-                  placeholder={
-                    <div className="flex items-center justify-center">
-                      <Plus /> Add link <ChevronDown />
-                    </div>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="airbnb">Airbnb</SelectItem>
-                <SelectItem value="vrbo">Vrbo</SelectItem>
-                <SelectItem value="booking.com">Booking.com</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+            {!link && (
+              <Select onValueChange={handleSelectChange}>
+                <SelectTrigger className="h-[30px] w-[120px] justify-center px-1 py-0">
+                  <SelectValue
+                    placeholder={
+                      <div className="flex items-center justify-center gap-1 font-semibold text-primary">
+                        <Plus />
+                        <p>Add link</p>
+                        <ChevronDown />
+                      </div>
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Airbnb">Airbnb</SelectItem>
+                  <SelectItem value="Vrbo">Vrbo</SelectItem>
+                  <SelectItem value="Booking.com">Booking.com</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+            {link && (
+              <div className="flex">
+                <div className="basis-full">
+                  <FormField
+                    control={form.control}
+                    name={`data.${curTab}.airbnbLink`}
+                    render={({ field }) => (
+                      <FormItem className="">
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder={`${link} link`}
+                            className="w-full"
+                            icon={Link2}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button
+                  variant="link"
+                  onClick={() => {
+                    setLink("");
+                    form.setValue(`data.${curTab}.airbnbLink`, "");
+                  }}
+                  className="font-bold text-teal-900"
+                >
+                  Remove
+                </Button>
+              </div>
+            )}
           </div>
           <div>
             <Button
