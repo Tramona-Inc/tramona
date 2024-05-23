@@ -7,7 +7,7 @@ import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import MobileFooter from "@/components/_common/Layout/MobileFooter";
 type DashboardLayoutProps = {
   children: React.ReactNode;
-  type: "admin" | "host" | "guest";
+  type: "admin" | "host" | "guest" | "unlogged";
 };
 
 export default function DashboardLayout({
@@ -15,6 +15,7 @@ export default function DashboardLayout({
   type,
 }: DashboardLayoutProps) {
   const { data: session } = useSession();
+  console.log("Session data: ", session);
   const isBelowMediumScreen = useMediaQuery("(max-width: 768px)");
   return (
     <>
@@ -27,7 +28,7 @@ export default function DashboardLayout({
         )}
         <main className="flex-1">{children}</main>
       </div>
-      {session && <MobileNav type={type} />}
+      {session ? <MobileNav type={type} /> : <MobileNav  type={"unlogged"}/>}
       {!isBelowMediumScreen && <Footer />}
     </>
   );
