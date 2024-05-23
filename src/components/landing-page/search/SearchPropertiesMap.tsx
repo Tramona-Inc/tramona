@@ -1,7 +1,7 @@
 import {
   Map,
   MapCameraChangedEvent,
-  MapCameraProps,
+  MapProps,
   useMap,
   useApiIsLoaded,
 } from "@vis.gl/react-google-maps";
@@ -48,7 +48,15 @@ function SearchPropertiesMap() {
   );
   const [markers, setMarkers] = useState<Poi[] | []>([]);
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
-  const [cameraProps, setCameraProps] = useState<MapCameraProps | null>(null);
+  const [cameraProps, setCameraProps] = useState<MapProps | null>({
+    mapId: "9c8e46d54d7a528b",
+    id: "9c8e46d54d7a528b",
+    reuseMaps: true,
+    clickableIcons: true,
+    mapTypeControl: false,
+    gestureHandling: "cooperative",
+    fullscreenControl: true,
+  });
   const mapRef = useRef<google.maps.Map | null>(null);
   const map = useMap("9c8e46d54d7a528b");
   const apiIsLoaded = useApiIsLoaded();
@@ -102,28 +110,33 @@ function SearchPropertiesMap() {
       console.log(center);
     }
   }, [properties]);
+
+  const handleCameraChanged = useCallback(
+    (ev: MapCameraChangedEvent) => {
+      const newCenter = {
+        lat: ev.detail.center.lat,
+        lng: ev.detail.center.lng,
+      };
+      setCenter(newCenter);
+      console.log(newCenter);
+      console.log("bounders");
+      console.log(ev.detail.bounds);
+    },
+    [setCenter],
+  );
+
   return (
     <div className=" max-w-[700px] rounded-md border shadow-md lg:h-[600px] xl:h-[800px]">
-      {apiIsLoaded ? (
+      {!filters ? (
+        <div> Search a city</div>
+      ) : apiIsLoaded ? (
         center && (
           <Map
-            mapId="9c8e46d54d7a528b"
-            id="9c8e46d54d7a528b"
-            className=""
+            {...cameraProps}
             defaultZoom={10}
-            defaultCenter={center}
-            reuseMaps={true}
-            clickableIcons={true}
-            mapTypeControl={false}
-            gestureHandling={"cooperative"}
-            fullscreenControl={true}
+            defaultCenter={center!}
             onCameraChanged={(ev: MapCameraChangedEvent) =>
-              console.log(
-                "camera changed:",
-                ev.detail.center,
-                "zoom:",
-                ev.detail.zoom,
-              )
+              handleCameraChanged(ev)
             }
           >
             <PoiMarkers pois={markers} />

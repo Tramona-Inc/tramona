@@ -250,6 +250,130 @@ export const propertiesRouter = createTRPCRouter({
         nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
       };
     }),
+
+  getByBoundaryInfiniteScroll: optionallyAuthedProcedure
+    .input(
+      z.object({
+        cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
+        city: z.string().optional(),
+        roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
+        beds: z.number().optional(),
+        bedrooms: z.number().optional(),
+        bathrooms: z.number().optional(),
+        houseRules: z.array(z.string()).optional(),
+        guests: z.number().optional(),
+        maxNightlyPrice: z.number().optional(),
+        lat: z.number().optional(),
+        long: z.number().optional(),
+        radius: z.number().optional(),
+        checkIn: z.date().optional(),
+        checkOut: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { cursor } = input;
+
+      const lat = input.lat ?? 0;
+      const long = input.long ?? 0;
+      const radius = input.radius;
+
+      const data = await ctx.db
+        .select({
+          id: properties.id,
+          imageUrls: properties.imageUrls,
+          name: properties.name,
+          maxNumGuests: properties.maxNumGuests,
+          numBedrooms: properties.numBedrooms,
+          numBathrooms: properties.numBathrooms,
+          numBeds: properties.numBeds,
+          originalNightlyPrice: properties.originalNightlyPrice,
+          lat: properties.latitude,
+          long: properties.longitude,
+          // isOnBucketList: ctx.user
+          //   ? exists(
+          //       ctx.db
+          //         .select()
+          //         .from(bucketListProperties)
+          //         .where(
+          //           and(
+          //             eq(bucketListProperties.propertyId, properties.id),
+          //             eq(bucketListProperties.userId, ctx.user.id),
+          //           ),
+          //         ),
+          //     )
+          //   : sql`FALSE`,
+          distance: sql`
+            6371 * ACOS(
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+            ) AS distance`,
+          vacancyCount: sql`
+            (SELECT COUNT(booked_dates.property_id) 
+            FROM booked_dates 
+            WHERE booked_dates.property_id = properties.id 
+              AND booked_dates.date >= CURRENT_DATE 
+              AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
+          `,
+        })
+        .from(properties)
+        .where(
+          and(
+            cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
+            input.lat && input.long
+              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
+              : sql`TRUE`,
+            input.roomType
+              ? eq(properties.roomType, input.roomType)
+              : sql`TRUE`,
+            input.city && input.city !== "all"
+              ? eq(properties.address, input.city)
+              : sql`TRUE`,
+            input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`,
+            input.bedrooms
+              ? gte(properties.numBedrooms, input.bedrooms)
+              : sql`TRUE`,
+            input.bathrooms
+              ? gte(properties.numBathrooms, input.bathrooms)
+              : sql`TRUE`,
+            input.guests
+              ? gte(properties.maxNumGuests, input.guests)
+              : sql`TRUE`,
+            input.maxNightlyPrice
+              ? lte(properties.originalNightlyPrice, input.maxNightlyPrice)
+              : sql`TRUE`,
+            input.houseRules?.includes("pets allowed")
+              ? eq(properties.petsAllowed, true)
+              : sql`TRUE`,
+            input.houseRules?.includes("smoking allowed")
+              ? eq(properties.smokingAllowed, true)
+              : sql`TRUE`,
+            eq(properties.isPrivate, false),
+            notExists(
+              db
+                .select()
+                .from(bookedDates)
+                .where(
+                  and(
+                    eq(bookedDates.propertyId, properties.id),
+                    gte(bookedDates.date, new Date()), // today or future
+                    lte(bookedDates.date, addDays(new Date(), 30)), // within next 30 days
+                  ),
+                ),
+            ),
+            sql`(SELECT COUNT(booked_dates.property_id) 
+            FROM booked_dates 
+            WHERE booked_dates.property_id = properties.id 
+              AND booked_dates.date >= CURRENT_DATE 
+              AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
+          ),
+        )
+        .limit(12)
+        .orderBy(asc(sql`id`), asc(sql`distance`));
+
+      return {
+        data,
+        nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
+      };
+    }),
   // getCities: publicProcedure.query(async ({ ctx }) => {
   //   const lat = 34.1010307;
   //   const long = -118.3806008;
