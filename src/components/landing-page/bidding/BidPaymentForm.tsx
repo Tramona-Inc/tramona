@@ -129,7 +129,7 @@ export default function BidPaymentForm({
   const setDisplayUserBid = useBidding((state) => state.setDisplayUserBid);
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex min-h-[600px] items-center justify-center">
       {!session?.user && (
         <div className="absolute bottom-52 z-10 flex flex-col gap-5 rounded-lg border bg-white p-5">
           <DialogHeader>
@@ -159,7 +159,6 @@ export default function BidPaymentForm({
       )}
       <div className={cn(!session?.user.id && "blur-sm filter")}>
         <form onSubmit={handleSubmit} className="space-y-5">
-          {isStripeLoading && <div className="h-[400px]" />}
           <AddressElement options={{ mode: "billing" }} />
           <PaymentElement />
           <Button type="submit" disabled={!stripe || loading}>
