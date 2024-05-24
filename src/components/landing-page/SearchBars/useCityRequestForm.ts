@@ -39,13 +39,15 @@ export function useCityRequestForm({
       const checkOut = request.date.to;
       const numNights = getNumNights(checkIn, checkOut);
 
+      console.log({ bedrooms, beds, bathrooms });
+
       return {
         checkIn: checkIn,
         checkOut: checkOut,
         maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
-        // minNumBathrooms: bathrooms,
-        // minNumBedrooms: bedrooms,
-        // minNumBeds: beds,
+        minNumBathrooms: bathrooms,
+        minNumBedrooms: bedrooms,
+        minNumBeds: beds,
         ...restData,
       };
     });
