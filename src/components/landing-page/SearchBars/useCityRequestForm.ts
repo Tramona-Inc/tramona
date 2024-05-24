@@ -1,15 +1,16 @@
 import { toast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
+import { useRequestMoreFilter } from "@/utils/store/request-more-filter";
 import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { useZodForm } from "@/utils/useZodForm";
 import { getNumNights } from "@/utils/utils";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import {
   type CityRequestDefaultVals,
   defaultSearchOrReqValues,
+  multiCityRequestSchema,
 } from "./schemas";
-import { useZodForm } from "@/utils/useZodForm";
-import { multiCityRequestSchema } from "./schemas";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { api } from "@/utils/api";
 
 export function useCityRequestForm({
   setCurTab,
@@ -28,6 +29,9 @@ export function useCityRequestForm({
   const { mutateAsync: createRequests } =
     api.requests.createMultiple.useMutation();
 
+  const { roomType, houseRules, bedrooms, beds, bathrooms } =
+    useRequestMoreFilter();
+
   const onSubmit = form.handleSubmit(async ({ data }) => {
     const newRequests = data.map((request) => {
       const { date: _date, maxNightlyPriceUSD, ...restData } = request;
@@ -39,6 +43,9 @@ export function useCityRequestForm({
         checkIn: checkIn,
         checkOut: checkOut,
         maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
+        // minNumBathrooms: bathrooms,
+        // minNumBedrooms: bedrooms,
+        // minNumBeds: beds,
         ...restData,
       };
     });

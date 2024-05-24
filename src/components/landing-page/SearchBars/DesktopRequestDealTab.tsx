@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
-import { RequestMoreFilterBtn } from './RequestMoreFilterBtn';
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
@@ -111,9 +110,9 @@ export function DesktopRequestDealTab() {
               </FormItem>
             )}
           />
-          <div className="flex items-center gap-2 text-teal-900">
+          {/* <div className="flex items-center gap-2 text-teal-900">
             <RequestMoreFilterBtn />
-          </div>
+          </div> */}
 
           <div className="space-y-1">
             <p className="text-sm">

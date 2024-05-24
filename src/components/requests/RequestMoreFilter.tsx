@@ -7,13 +7,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
+import { useRequestMoreFilter } from "@/utils/store/request-more-filter";
 import { useZodForm } from "@/utils/useZodForm";
-import { useState } from "react";
 import { z } from "zod";
 import { CounterInput } from "../_common/CounterInput";
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 
 export function Total({
   name,
@@ -60,25 +58,28 @@ const FormSchema = z.object({
 });
 
 export default function RequestMoreFilter() {
-  const [beds, setBeds] = useState<number | null>(null);
-  const [bedrooms, setBedrooms] = useState<number | null>(null);
-  const [bathrooms, setBathrooms] = useState<number | null>(null);
-  const [houseRules, setHouseRules] = useState<string[]>([]);
-  // const roomType = useCitiesFilter((state) => state.roomType);
-  const [radius, setRadius] = useState<number>(50);
-  const [open, setOpen] = useState<boolean>(false);
+  const beds = useRequestMoreFilter((state) => state.beds);
+  const bedrooms = useRequestMoreFilter((state) => state.bedrooms);
+  const bathrooms = useRequestMoreFilter((state) => state.bathrooms);
+  const houseRules = useRequestMoreFilter((state) => state.houseRules);
+  // const roomType = useRequestMoreFilter((state) => state.roomType);
+  const radius = useRequestMoreFilter((state) => state.radius);
 
-  const clearFilter = () => {
-    setBeds(null);
-    setBedrooms(null);
-    setBathrooms(null);
-    setHouseRules([]);
-    setRadius(50);
-  };
+  const setBeds = useRequestMoreFilter((state) => state.setBeds);
+  const setBathrooms = useRequestMoreFilter((state) => state.setBathrooms);
+  const setBedrooms = useRequestMoreFilter((state) => state.setBedrooms);
+  const setHouseRules = useRequestMoreFilter((state) => state.setHouseRules);
+  // const setRoomType = useRequestMoreFilter((state) => state.setRoomType);
+  const setOpen = useRequestMoreFilter((state) => state.setOpen);
+  const setRadius = useRequestMoreFilter((state) => state.setRadius);
+  const clearFilter = useRequestMoreFilter((state) => state.clearFilter);
 
   const form = useZodForm({
     schema: FormSchema,
     defaultValues: {
+      // roomType:
+      //   // TODO: augh
+      //   roomType === "Other" || roomType === undefined ? "Flexible" : roomType,
       beds: beds,
       bedrooms: bedrooms,
       bathrooms: bathrooms,
@@ -88,12 +89,13 @@ export default function RequestMoreFilter() {
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
+    // setRoomType(data.roomType);
     setBeds(data.beds ?? 0);
     setBathrooms(data.bathrooms ?? 0);
     setBedrooms(data.bedrooms ?? 0);
     setHouseRules(data.houseRules ?? []);
-    setOpen(false);
     setRadius(data.radius[0] ?? 50);
+    setOpen(false);
   }
 
   function handleClearFilter() {
@@ -139,6 +141,7 @@ export default function RequestMoreFilter() {
         /> */}
 
         <Separator />
+
         <div>
           <FormField
             control={form.control}
@@ -194,8 +197,10 @@ export default function RequestMoreFilter() {
             )}
           />
         </div>
+
         <Separator />
-        <FormField
+
+        {/* <FormField
           control={form.control}
           name="houseRules"
           render={() => (
@@ -242,8 +247,10 @@ export default function RequestMoreFilter() {
               <FormMessage />
             </FormItem>
           )}
-        />
-        <Separator />
+        /> */}
+
+        {/* <Separator />
+
         <FormField
           control={form.control}
           name="radius"
@@ -265,7 +272,8 @@ export default function RequestMoreFilter() {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
+
         <div className="flex flex-row justify-between">
           <Button type="button" variant={"ghost"} onClick={handleClearFilter}>
             Clear
