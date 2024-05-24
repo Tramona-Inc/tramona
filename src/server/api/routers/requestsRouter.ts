@@ -15,7 +15,6 @@ import {
   requests,
   users,
   requestUpdatedInfo,
-  properties,
   requestsToProperties,
 } from "@/server/db/schema";
 import { sendSlackMessage } from "@/server/slack";

@@ -1,15 +1,7 @@
-import Spinner from "@/components/_common/Spinner";
 import { Button } from "@/components/ui/button";
-import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import { ChevronLeft } from "lucide-react";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { useState } from "react";
 import BiddingConfirmation from "./BiddingConfirmation";
 import BiddingStep1 from "./BiddingStep1";
@@ -88,54 +80,29 @@ function MakeBid({
   //   );
   // }
 
-  const { data: session } = useSession();
-
   return (
     <>
-      {!session?.user ? (
-        <>
-          <DialogHeader>
-            <DialogTitle>Please Log in</DialogTitle>
-            <DialogDescription>
-              In order to make a bid, please log in or sign up.
-            </DialogDescription>
-          </DialogHeader>
-          <Button asChild variant={"secondary"} className="w-full">
-            <Link href={"/auth/signin"}>Login</Link>
+      {property && (
+      <div>
+        {step !== 0 && (
+          <Button
+            variant={"ghost"}
+            className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
+            onClick={() => {
+              if (step - 1 > -1) {
+                setStep(step - 1);
+              }
+            }}
+          >
+            <ChevronLeft />
           </Button>
-          <Button asChild variant={"greenPrimary"} className="w-full">
-            <Link href={"/auth/signup"}>Sign Up</Link>
-          </Button>
-        </>
-      ) : isLoading ? (
-        <Spinner />
-      ) : (
-        property && (
-          <div>
-            {step !== 0 && (
-              <Button
-                variant={"ghost"}
-                className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
-                onClick={() => {
-                  if (step - 1 > -1) {
-                    setStep(step - 1);
-                  }
-                }}
-              >
-                <ChevronLeft />
-              </Button>
-            )}
-            {step == 0 && (
-              <BiddingStep1 property={property} setStep={setStep} />
-            )}
-            {step == 1 && (
-              <BiddingStep2 property={property} setStep={setStep} />
-            )}
-            {step == 2 && (
-              <BiddingConfirmation property={property} setOpen={setOpen} />
-            )}
-          </div>
-        )
+        )}
+        {step == 0 && <BiddingStep1 property={property} setStep={setStep} />}
+        {step == 1 && <BiddingStep2 property={property} setStep={setStep} />}
+        {step == 2 && (
+          <BiddingConfirmation property={property} setOpen={setOpen} />
+        )}
+      </div>
       )}
     </>
   );
