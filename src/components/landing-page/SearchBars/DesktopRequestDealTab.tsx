@@ -8,9 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import PlacesInput from "@/components/_common/PlacesInput";
 import {
-  ChevronDown,
   DollarSignIcon,
-  Filter,
   Link2,
   MapPinIcon,
   Plus,
@@ -21,23 +19,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
 import { RequestTabsSwitcher } from "./RequestTabsSwitcher";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { FilterPropertiesBtn } from "./FilterPropertiesBtn";
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
   const { form, onSubmit } = useCityRequestForm({ setCurTab });
-  const [link, setLink] = useState("");
-
-  function handleSelectChange(value: string) {
-    setLink(value);
-  }
+  const [link, setLink] = useState(false);
 
   return (
     <Form {...form}>
@@ -129,31 +116,21 @@ export function DesktopRequestDealTab() {
             <FilterPropertiesBtn />
           </div>
 
-          <div className="space-y-2">
-            <p className="text-sm font-bold text-teal-900">
+          <div className="space-y-1">
+            <p className="text-sm">
               Have a property you like? We&apos;ll send your request directly to
               the host.
             </p>
             {!link && (
-              <Select onValueChange={handleSelectChange}>
-                <SelectTrigger className="h-[30px] w-[120px] justify-center px-1 py-0">
-                  <SelectValue
-                    placeholder={
-                      <div className="flex items-center justify-center gap-1 font-semibold text-primary">
-                        <Plus />
-                        <p>Add link</p>
-                        <ChevronDown />
-                      </div>
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Airbnb">Airbnb</SelectItem>
-                  <SelectItem value="Vrbo">Vrbo</SelectItem>
-                  <SelectItem value="Booking.com">Booking.com</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setLink(!link)}
+              >
+                <Plus size={20} />
+                Add link
+              </Button>
             )}
             {link && (
               <div className="flex">
@@ -166,7 +143,7 @@ export function DesktopRequestDealTab() {
                         <FormControl>
                           <Input
                             {...field}
-                            placeholder={`${link} link`}
+                            placeholder="Paste property link here (optional)"
                             className="w-full"
                             icon={Link2}
                           />
@@ -179,7 +156,7 @@ export function DesktopRequestDealTab() {
                 <Button
                   variant="link"
                   onClick={() => {
-                    setLink("");
+                    setLink(!link);
                     form.setValue(`data.${curTab}.airbnbLink`, "");
                   }}
                   className="font-bold text-teal-900"
@@ -194,7 +171,7 @@ export function DesktopRequestDealTab() {
               type="submit"
               size="lg"
               disabled={form.formState.isSubmitting}
-              className="h-12 bg-teal-900 hover:bg-teal-950"
+              className="mt-2 h-12 bg-teal-900 hover:bg-teal-950"
             >
               Submit Request
             </Button>
