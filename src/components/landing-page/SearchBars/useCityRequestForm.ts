@@ -29,8 +29,13 @@ export function useCityRequestForm({
   const { mutateAsync: createRequests } =
     api.requests.createMultiple.useMutation();
 
-  const { roomType, houseRules, bedrooms, beds, bathrooms } =
-    useRequestMoreFilter();
+  // const { roomType, houseRules, bedrooms, beds, bathrooms } =
+  //   useRequestMoreFilter();
+
+  const bedrooms = useRequestMoreFilter((state) => state.bedrooms);
+  const bathrooms = useRequestMoreFilter((state) => state.bathrooms);
+  const beds = useRequestMoreFilter((state) => state.beds);
+  const clearFilter = useRequestMoreFilter((state) => state.clearFilter);
 
   const onSubmit = form.handleSubmit(async ({ data }) => {
     const newRequests = data.map((request) => {
@@ -39,7 +44,7 @@ export function useCityRequestForm({
       const checkOut = request.date.to;
       const numNights = getNumNights(checkIn, checkOut);
 
-      console.log({ bedrooms, beds, bathrooms });
+      console.log("HELLO", { bedrooms, beds, bathrooms });
 
       return {
         checkIn: checkIn,
@@ -82,6 +87,9 @@ export function useCityRequestForm({
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
           form.reset();
+
+          clearFilter();
+
           form.setValue("data", [
             defaultSearchOrReqValues as CityRequestDefaultVals,
           ]);
