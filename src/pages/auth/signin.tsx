@@ -79,10 +79,12 @@ export default function SignIn({
   }: z.infer<typeof formSchema>) => {
     // Relies on middleware to redirect to dashbaord
     // onboarding checks if user has a phone number else go to dashboard
+    const { from } = query;
+
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: `${window.location.origin}/auth/onboarding`,
+      callbackUrl: from ?? `${window.location.origin}/auth/onboarding`,
     });
   };
 
@@ -105,7 +107,9 @@ export default function SignIn({
         <title>Log in | Tramona</title>
       </Head>
       <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Log in to Tramona</h1>
+        <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+          Log in to Tramona
+        </h1>
 
         <section className="flex flex-col items-center justify-center space-y-5">
           <div className="w-full space-y-5">

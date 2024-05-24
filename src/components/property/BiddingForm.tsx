@@ -9,7 +9,7 @@ import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency, getNumNights } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import DateRangePicker from "../_common/DateRangePicker";
@@ -36,6 +36,16 @@ export default function BiddingForm({
   price: number;
 }) {
   const [open, setOpen] = useState(false);
+
+  const displayUserBid = useBidding((state) => state.displayUserBid);
+  const setDisplayUserBid = useBidding((state) => state.setDisplayUserBid);
+
+  useEffect(() => {
+    if (displayUserBid) {
+      setOpen(true);
+      setDisplayUserBid(false);
+    }
+  }, [displayUserBid]);
 
   const propertyIdBids = useBidding((state) => state.propertyIdBids);
   const alreadyBid = propertyIdBids.includes(propertyId);
@@ -96,7 +106,8 @@ export default function BiddingForm({
                   />
                 </FormControl>
                 <FormMessage />
-              </FormItem>)}
+              </FormItem>
+            )}
           />
           <Dialog open={open} onOpenChange={setOpen}>
             {/* Removed trigger to have control on open and close */}
