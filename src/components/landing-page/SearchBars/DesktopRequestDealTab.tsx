@@ -32,7 +32,6 @@ export function DesktopRequestDealTab() {
       setOpen(true);
       setShowConfetti(true);
       onSubmit(event);
-      // setTimeout(() => setShowConfetti(false), 2000);
     }
   };
 

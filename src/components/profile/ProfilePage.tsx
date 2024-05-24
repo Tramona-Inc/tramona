@@ -18,6 +18,7 @@ import {
   Youtube,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useRouter } from 'next/router';
 import Link from "next/link";
 import React from "react";
 import UserAvatar from "../_common/UserAvatar";
@@ -39,6 +40,7 @@ import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { data: session } = useSession({ required: true });
 
   const { data } = api.users.myReferralCode.useQuery();
@@ -288,16 +290,38 @@ export default function ProfilePage() {
           {/* Properties Tab */}
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {bucketListProperties?.map((property) => (
-                <BucketListHomeOfferCard
-                  key={property!.id}
-                  property={{
-                    ...property!,
-                    propertyId: property!.id,
-                    bucketListPropertyId: property!.bucketListId,
-                  }}
-                />
-              ))}
+              {bucketListProperties?.length ? (
+                bucketListProperties?.map((property) => (
+                  <BucketListHomeOfferCard
+                    key={property!.id}
+                    property={{
+                      ...property!,
+                      propertyId: property!.id,
+                      bucketListPropertyId: property!.bucketListId,
+                    }}
+                  />
+                ))
+              ) : (
+                <>
+                  <p className="col-span-full py-8 text-center text-muted-foreground">
+                    <div className="flex justify-center items-center">
+                      
+                      <img src="assets/images/profile-page/no-items-cart.png" alt="No items in cart"/>
+                    </div>
+                    Your bucket list is empty! Add a property to view here.
+                    <div className="flex justify-center mt-6">
+                      <Button
+                        onClick={() => router.push('/explore')}
+                        className="bg-teal-900 hover:bg-teal-950 text-white py-2 px-4 rounded-lg cursor-pointer"
+                      >
+                        Explore Properties
+                      </Button>
+                    </div>
+                  </p>
+                </>
+              )
+            }
+
             </div>
           </TabsContent>
 
