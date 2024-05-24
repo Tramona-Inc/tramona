@@ -5,6 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
+import { useBidding } from "@/utils/store/bidding";
 import { cn } from "@/utils/utils";
 import {
   AddressElement,
@@ -125,6 +126,8 @@ export default function BidPaymentForm({
 
   const router = useRouter();
 
+  const setDisplayUserBid = useBidding((state) => state.setDisplayUserBid);
+
   return (
     <div className="relative flex items-center justify-center">
       {!session?.user && (
@@ -138,12 +141,14 @@ export default function BidPaymentForm({
           <Button
             variant={"secondary"}
             className="w-full"
-            onClick={() =>
-              router.push({
+            onClick={() => {
+              setDisplayUserBid(true);
+
+              void router.push({
                 pathname: "/auth/signin",
                 query: { from: `/property/${bid.propertyId}` },
-              })
-            }
+              });
+            }}
           >
             Login
           </Button>

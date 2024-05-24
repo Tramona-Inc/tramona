@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 type BiddingState = {
+  displayUserBid: boolean;
   propertyIdBids: number[];
   propertyIdBucketList: number[];
   price: number;
@@ -11,6 +12,7 @@ type BiddingState = {
     to: Date;
   };
   step: number;
+  setDisplayUserBid: (displayUserBid: boolean) => void;
   setInitialBids: (initialBids: number[]) => void; // Add setInitialBids function
   setInitialBucketList: (initialBucketList: number[]) => void; // Add setInitialBids function
   addPropertyIdBids: (ids: number) => void;
@@ -44,6 +46,7 @@ type BiddingState = {
 export const useBidding = create<BiddingState>()(
   persist(
     (set) => ({
+      displayUserBid: false,
       propertyIdBids: [],
       propertyIdBucketList: [],
       price: 0,
@@ -96,6 +99,9 @@ export const useBidding = create<BiddingState>()(
       },
       setStep: (step: number) => {
         set((state) => ({ ...state, step }));
+      },
+      setDisplayUserBid: (displayUserBid: boolean) => {
+        set((state) => ({ ...state, displayUserBid }));
       },
       resetSession: () => {
         set(() => ({
