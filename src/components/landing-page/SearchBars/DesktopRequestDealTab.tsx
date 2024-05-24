@@ -1,12 +1,14 @@
+import DateRangeInput from "@/components/_common/DateRangeInput";
+import PlacesInput from "@/components/_common/PlacesInput";
+import { Button } from "@/components/ui/button";
 import {
+  Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-  Form,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import PlacesInput from "@/components/_common/PlacesInput";
 import {
   DollarSignIcon,
   Link2,
@@ -14,12 +16,9 @@ import {
   Plus,
   Users2Icon,
 } from "lucide-react";
-import DateRangeInput from "@/components/_common/DateRangeInput";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
-import { RequestTabsSwitcher } from "./RequestTabsSwitcher";
-import { FilterPropertiesBtn } from "./FilterPropertiesBtn";
+import { RequestMoreFilterBtn } from './RequestMoreFilterBtn';
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
@@ -113,7 +112,7 @@ export function DesktopRequestDealTab() {
             )}
           />
           <div className="flex items-center gap-2 text-teal-900">
-            <FilterPropertiesBtn />
+            <RequestMoreFilterBtn />
           </div>
 
           <div className="space-y-1">
