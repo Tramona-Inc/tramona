@@ -302,23 +302,21 @@ export default function ProfilePage() {
                   />
                 ))
               ) : (
-                <>
-                  <p className="col-span-full py-8 text-center text-muted-foreground">
-                    <div className="flex justify-center items-center">
-                      
-                      <img src="assets/images/profile-page/no-items-cart.png" alt="No items in cart"/>
-                    </div>
-                    Your bucket list is empty! Add a property to view here.
-                    <div className="flex justify-center mt-6">
-                      <Button
-                        onClick={() => router.push('/explore')}
-                        className="bg-teal-900 hover:bg-teal-950 text-white py-2 px-4 rounded-lg cursor-pointer"
-                      >
-                        Explore Properties
-                      </Button>
-                    </div>
-                  </p>
-                </>
+                <p className="col-span-full py-8 text-center text-muted-foreground">
+                  <div className="flex justify-center items-center">
+                    
+                    <img src="assets/images/profile-page/no-items-cart.png" alt="No items in cart"/>
+                  </div>
+                  Your bucket list is empty! Add a property to view here.
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      onClick={() => router.push('/explore')}
+                      className="bg-teal-900 hover:bg-teal-950 text-white py-2 px-4 rounded-lg cursor-pointer"
+                    >
+                      Explore Properties
+                    </Button>
+                  </div>
+                </p>
               )
             }
 
