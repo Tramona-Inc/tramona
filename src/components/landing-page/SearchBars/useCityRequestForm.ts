@@ -44,8 +44,6 @@ export function useCityRequestForm({
       const checkOut = request.date.to;
       const numNights = getNumNights(checkIn, checkOut);
 
-      console.log("HELLO", { bedrooms, beds, bathrooms });
-
       return {
         checkIn: checkIn,
         checkOut: checkOut,
