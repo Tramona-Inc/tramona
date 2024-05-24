@@ -15,6 +15,7 @@ import {
 import { StripeError } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 type Bid = {
@@ -122,6 +123,8 @@ export default function BidPaymentForm({
     }
   }, [elements]);
 
+  const router = useRouter();
+
   return (
     <div className="relative flex items-center justify-center">
       {!session?.user && (
@@ -132,8 +135,17 @@ export default function BidPaymentForm({
               In order to make a bid, please log in or sign up.
             </DialogDescription>
           </DialogHeader>
-          <Button asChild variant={"secondary"} className="w-full">
-            <Link href={"/auth/signin"}>Login</Link>
+          <Button
+            variant={"secondary"}
+            className="w-full"
+            onClick={() =>
+              router.push({
+                pathname: "/auth/signin",
+                query: { from: `/property/${bid.propertyId}` },
+              })
+            }
+          >
+            Login
           </Button>
           <Button asChild variant={"greenPrimary"} className="w-full">
             <Link href={"/auth/signup"}>Sign Up</Link>
