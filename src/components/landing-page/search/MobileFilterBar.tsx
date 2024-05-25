@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
+
 import "swiper/css";
 export default function MobileFilterBar() {
   const beds = useCitiesFilter((state) => state.beds);
@@ -20,44 +22,25 @@ export default function MobileFilterBar() {
   };
 
   return (
-    <div className="flex flex-row">
-      <Swiper
-        spaceBetween={0}
-        slidesPerView={3}
-        scrollbar={{ draggable: true }}
-        onSlideChange={() => console.log("slide change")}
-        onSwiper={(swiper) => console.log(swiper)}
-      >
-        <SwiperSlide>
-          <FilterBadge
-            value={bedrooms}
-            setValue={setBedrooms}
-            label="Bedrooms"
-          />
-        </SwiperSlide>
-        <SwiperSlide>
-          <FilterBadge value={beds} setValue={setBeds} label="Beds" />
-        </SwiperSlide>
+    <div className="">
+      <FilterBadge value={bedrooms} setValue={setBedrooms} label="Bedrooms" />
 
-        <SwiperSlide>
-          <FilterBadge
-            value={bathrooms}
-            setValue={setBathrooms}
-            label="Bathrooms"
-          />
-        </SwiperSlide>
+      <FilterBadge
+        value={bathrooms}
+        setValue={setBathrooms}
+        label="Bathrooms"
+      />
 
-        {houseRules.length > 0 &&
-          houseRules.map((rule, index) => (
-            <SwiperSlide key={index}>
-              <HouseRuleBadge
-                key={rule}
-                rule={rule}
-                removeRule={removeHouseRule}
-              />
-            </SwiperSlide>
-          ))}
-      </Swiper>
+      <FilterBadge value={beds} setValue={setBeds} label="Beds" />
+
+      {houseRules.length > 0 &&
+        houseRules.map((rule, index) => (
+          <HouseRuleBadge
+            key={index}
+            rule={rule}
+            removeRule={removeHouseRule}
+          />
+        ))}
     </div>
   );
 }
@@ -71,7 +54,7 @@ interface FilterBadgeProps {
 const FilterBadge = ({ value, setValue, label }: FilterBadgeProps) => {
   return (
     value > 0 && (
-      <Badge variant="primaryGreen" className="mr-4">
+      <Badge variant="primaryGreen" className="mx-2">
         <button
           onClick={() => {
             setValue(0);
@@ -94,7 +77,7 @@ const HouseRuleBadge: React.FC<HouseRuleBadgeProps> = ({
   removeRule,
 }) => {
   return (
-    <Badge variant="primaryGreen" className="mr-4">
+    <Badge variant="primaryGreen" className="mx-2">
       <button
         onClick={() => {
           removeRule(rule);
