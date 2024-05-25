@@ -16,7 +16,6 @@ import {
   Hr,
   Row,
   Column,
-  Container,
 } from "@react-email/components";
 
 interface BookingConfirmationEmailProps {
@@ -126,4 +125,3 @@ export function BookingConfirmationEmail({
   );
 }
 
-export default BookingConfirmationEmail;

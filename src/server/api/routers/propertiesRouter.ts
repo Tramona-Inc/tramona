@@ -18,6 +18,18 @@ import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
 import { and, asc, eq, gt, gte, lte, notExists, sql } from "drizzle-orm";
+import {
+  and,
+  arrayContains,
+  asc,
+  eq,
+  gt,
+  gte,
+  lte,
+  notExists,
+  sql,
+} from "drizzle-orm";
+
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
@@ -326,5 +338,27 @@ export const propertiesRouter = createTRPCRouter({
           date: true,
         },
       });
+    }),
+
+  deleteImage: roleRestrictedProcedure(["admin"])
+    .input(z.string())
+    .mutation(async ({ input: imageUrl }) => {
+      const count = await db.query.properties
+        .findMany({
+          columns: { id: true, imageUrls: true },
+          where: arrayContains(properties.imageUrls, [imageUrl]),
+        })
+        .then((res) =>
+          Promise.all(
+            res.map((p) =>
+              db
+                .update(properties)
+                .set({ imageUrls: p.imageUrls.filter((i) => i !== imageUrl) })
+                .where(eq(properties.id, p.id)),
+            ),
+          ).then((res) => res.length),
+        );
+
+      return { count };
     }),
 });
