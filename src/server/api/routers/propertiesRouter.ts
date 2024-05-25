@@ -17,7 +17,7 @@ import {
 import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
-import { and, asc, desc, eq, gt, gte, lte, notExists, sql } from "drizzle-orm";
+import { and, asc, eq, gt, gte, lte, notExists, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
