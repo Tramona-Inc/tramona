@@ -273,7 +273,7 @@ export const propertiesRouter = createTRPCRouter({
             west: z.number(),
           })
           .nullable(),
-        cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
+        cursor: z.number().nullish(),
         city: z.string().optional(),
         roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
         beds: z.number().optional(),
@@ -295,6 +295,9 @@ export const propertiesRouter = createTRPCRouter({
       const lat = input.lat ?? 0;
       const long = input.long ?? 0;
       const radius = input.radius;
+
+      console.log("Input boundaries:", boundaries);
+      console.log("Cursor:", cursor);
 
       const data = await ctx.db
         .select({
@@ -323,7 +326,7 @@ export const propertiesRouter = createTRPCRouter({
         .from(properties)
         .where(
           and(
-            cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
+            cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
                   lte(properties.latitude, boundaries.north),
@@ -332,15 +335,12 @@ export const propertiesRouter = createTRPCRouter({
                   gte(properties.longitude, boundaries.west),
                 )
               : sql`TRUE`,
-            input.lat && input.long
+            input.lat && input.long && !boundaries
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
               : sql`TRUE`,
-            // input.city && input.city !== "all"
-            //   ? eq(properties.address, input.city)
-            //   : sql`TRUE`,
             input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`,
             input.bedrooms
               ? gte(properties.numBedrooms, input.bedrooms)
@@ -368,8 +368,8 @@ export const propertiesRouter = createTRPCRouter({
                 .where(
                   and(
                     eq(bookedDates.propertyId, properties.id),
-                    gte(bookedDates.date, new Date()), // today or future
-                    lte(bookedDates.date, addDays(new Date(), 30)), // within next 30 days
+                    gte(bookedDates.date, new Date()),
+                    lte(bookedDates.date, addDays(new Date(), 30)),
                   ),
                 ),
             ),
@@ -380,12 +380,14 @@ export const propertiesRouter = createTRPCRouter({
                 AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
-        .limit(30)
+        .limit(400)
         .orderBy(asc(sql`id`), asc(sql`distance`));
+
+      console.log("Fetched properties count:", data.length);
 
       return {
         data,
-        nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
+        nextCursor: data.length ? data[data.length - 1]?.id : null,
       };
     }),
 

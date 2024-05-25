@@ -12,7 +12,7 @@ import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { debounce } from "lodash";
 
 import PoiMarkers from "./PoiMarkers";
-import MapBoundary from "./MapBoundary";
+import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 
 export type Poi = {
   key: string;
@@ -38,6 +38,7 @@ function SearchPropertiesMap({
   const filters = useCitiesFilter((state) => state);
   const setFilter = useCitiesFilter((state) => state.setFilter);
   const setRadius = useCitiesFilter((state) => state.setRadius);
+  const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
 
   const {
     data: initialProperties,
@@ -87,7 +88,7 @@ function SearchPropertiesMap({
 
   //this is for when the user moves the camera
   const {
-    data: adjustedProperties,
+    data: fetchedAdjustedProperties,
     fetchNextPage: fetchNextPageOfAdjustedProperties,
   } = api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
     {
@@ -111,6 +112,13 @@ function SearchPropertiesMap({
   );
   //when the user presses search
   //saving search as the new location
+
+  useEffect(() => {
+    if (fetchedAdjustedProperties) {
+      setAdjustedProperties(fetchedAdjustedProperties);
+    }
+  }, [fetchedAdjustedProperties, setAdjustedProperties]);
+
   const location = useMemo(() => {
     if (
       filters.filter?.lat !== undefined &&
@@ -207,13 +215,13 @@ function SearchPropertiesMap({
         west: ev.detail.bounds.west,
       });
       void fetchNextPageOfAdjustedProperties();
-    }, 1000),
+    }, 700),
     [setCenter, fetchNextPageOfAdjustedProperties, setFilter],
   );
 
   return (
     <div
-      className={`max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[795px]`}`}
+      className={`max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[705px]`}`}
     >
       {isFilterUndefined ? (
         <div className="flex h-full items-center justify-center">

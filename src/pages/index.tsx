@@ -1,10 +1,10 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import TravelerPage from "@/components/landing-page/TravelerPage";
+import SearchPage from "@/components/landing-page/search/SearchPage";
 
 export default function Home() {
   return (
     <DashboardLayout type={"guest"}>
-      <TravelerPage />
+      <SearchPage />
     </DashboardLayout>
   );
 }

@@ -2,40 +2,37 @@ import {
   VerificationProvider,
   useVerification,
 } from "@/components/_utils/VerificationContext";
-import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
 
 import SearchPropertiesMap from "./SearchPropertiesMap";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
-import { use, useEffect } from "react";
+import { useState, useEffect } from "react";
 import SearchListings from "./SearchListings";
 import Banner from "@/components/landing-page/Banner";
 import CitiesFilter from "@/components/landing-page/CitiesFilter";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
 import { SearchIcon } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import DynamicDesktopSearchBar from "./DynamicDesktopSearchBar";
 
 import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
-import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
-//check to see if there is no cities filter, if not maps dont exist
+//check to see if there is no cities filter and clear it on, if no maps dont exist
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import MobileSearchListings from "./MobileSearchListings";
-import MobilePropertyFilter from "./MobilePropertyFilter";
 import MobileFilterBar from "./MobileFilterBar";
-export default function TravelerPage() {
+import { AdjustedPropertiesProvider } from "./AdjustedPropertiesContext";
+
+export default function SearchPage() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
   //onLoad erase all filters
@@ -82,49 +79,49 @@ export default function TravelerPage() {
 
   return (
     <VerificationProvider>
-      <Head>
-        <title>Tramona</title>
-      </Head>
-      <div className="relative mb-20 overflow-x-hidden bg-white">
-        <VerificationBanner />
-        {!isMobile ? (
-          <div className="mx-12 flex flex-col items-center justify-center gap-y-8">
-            <Card className="mt-6 w-5/6">
-              <CardContent>
-                <DesktopSearchTab />
-              </CardContent>
-            </Card>
-            <div className="mx-4 space-y-4">
-              <CitiesFilter />
-              <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
-                <div
-                  className={`col-span-1 overflow-y-auto lg:max-h-[1000px] ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
-                >
-                  <SearchListings isFilterUndefined={isFilterUndefined} />
-                </div>
-                {!isFilterUndefined && (
-                  <div className="sticky col-span-1  max-h-[1000px] md:col-span-1 lg:col-span-2">
-                    <SearchPropertiesMap
-                      isFilterUndefined={isFilterUndefined}
-                    />
+      <AdjustedPropertiesProvider>
+        <Head>
+          <title>Tramona</title>
+        </Head>
+        <div className="relative mb-20 overflow-x-hidden bg-white">
+          <VerificationBanner />
+          {!isMobile ? (
+            <div className="mx-12 mt-32 flex flex-col items-center justify-center gap-y-8">
+              <DynamicDesktopSearchBar />
+              <div className="mx-4 space-y-4">
+                <CitiesFilter />
+                <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
+                  <div
+                    className={`col-span-1  ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
+                  >
+                    <SearchListings isFilterUndefined={isFilterUndefined} />
                   </div>
-                )}
+                  {!isFilterUndefined && (
+                    <div className="col-span-1 max-h-[1000px] md:col-span-1 lg:col-span-2">
+                      <div className="sticky top-16">
+                        <SearchPropertiesMap
+                          isFilterUndefined={isFilterUndefined}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="relative flex w-screen flex-col ">
-            <MobileJustSearch />
-            <div className="my-1 mt-16">
-              <MobileFilterBar />
+          ) : (
+            <div className="relative flex w-screen flex-col ">
+              <MobileJustSearch />
+              <div className="my-1 mt-16">
+                <MobileFilterBar />
+              </div>
+              <div>
+                <SearchPropertiesMap isFilterUndefined={isFilterUndefined} />
+              </div>
+              <MobileSearchListings isFilterUndefined={isFilterUndefined} />
             </div>
-            <div>
-              <SearchPropertiesMap isFilterUndefined={isFilterUndefined} />
-            </div>
-            <MobileSearchListings isFilterUndefined={isFilterUndefined} />
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </AdjustedPropertiesProvider>
     </VerificationProvider>
   );
 }

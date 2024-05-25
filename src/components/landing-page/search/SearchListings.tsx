@@ -7,6 +7,7 @@ import HomeOfferCard from "../HomeOfferCard";
 import { Button } from "@/components/ui/button";
 import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
 import { FilterXIcon } from "lucide-react";
+import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 
 export default function SearchListings({
   isFilterUndefined,
@@ -14,6 +15,9 @@ export default function SearchListings({
   isFilterUndefined: boolean;
 }) {
   const filters = useCitiesFilter((state) => state);
+
+  // The properties that the map is currently displaying
+  const { adjustedProperties } = useAdjustedProperties();
 
   const {
     data: properties,
@@ -36,21 +40,19 @@ export default function SearchListings({
       radius: filters.radius,
     },
     {
-      // the cursor from where to start fetching thecurrentProperties
+      // the cursor from where to start fetching the current properties
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
 
-  // a ref to the viewport
-  const viewportRef = useRef<HTMLDivElement>(null);
   // a ref to the last property element
   const { entry, ref } = useIntersection({
-    root: viewportRef.current,
+    root: null, // null means observing in the context of the viewport
     threshold: 1,
   });
 
   useEffect(() => {
-    // if the user reaches the bottom of the page, and there are more currentProperties to fetch, fetch them
+    // if the user reaches the bottom of the page, and there are more properties to fetch, fetch them
     if (
       entry?.isIntersecting &&
       properties?.pages.length &&
@@ -61,11 +63,13 @@ export default function SearchListings({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry]);
 
-  // memoize the currentProperties, so that they don't get re-rendered on every re-render
-  const currentProperties = useMemo(
-    () => properties?.pages.flatMap((page) => page.data) ?? [],
-    [properties],
-  );
+  // memoize the properties, so that they don't get re-rendered on every re-render
+  const currentProperties = useMemo(() => {
+    if (adjustedProperties !== null) {
+      return adjustedProperties.pages.flatMap((page) => page.data) ?? [];
+    }
+    return properties?.pages.flatMap((page) => page.data) ?? [];
+  }, [adjustedProperties, properties]);
 
   const skeletons = Array.from({ length: 12 }, (_, index) => (
     <div key={index}>
@@ -81,19 +85,19 @@ export default function SearchListings({
 
   return (
     <section
-      className={`relative grid h-full grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:h-[100%] ${isFilterUndefined ? "md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"}`}
+      className={`relative grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 ${isFilterUndefined ? "md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"}`}
     >
       {isLoading ? (
-        // if we're still fetching the initial currentProperties, display the loader
+        // if we're still fetching the initial properties, display the loader
         <>{skeletons}</>
       ) : currentProperties.length > 0 ? (
-        // if there are currentProperties to show, display them
+        // if there are properties to show, display them
         <>
           {currentProperties.map((property) => (
             <HomeOfferCard key={property.id} property={property} />
           ))}
           {isFetchingNextPage && skeletons}
-          <div ref={ref} className="absolute bottom-[200vh]"></div>
+          <div ref={ref} className="h-1 w-full"></div>
         </>
       ) : (
         <div className="col-span-full flex min-h-80 flex-col items-center justify-center gap-4">

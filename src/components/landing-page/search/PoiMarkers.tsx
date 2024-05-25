@@ -5,7 +5,6 @@ import {
   useAdvancedMarkerRef,
   InfoWindow,
 } from "@vis.gl/react-google-maps";
-import { BsHouseFill } from "react-icons/bs";
 import { formatCurrency } from "@/utils/utils";
 import { Poi } from "./SearchPropertiesMap";
 import { useCallback, useState } from "react";
@@ -82,7 +81,7 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
               <div className="flex items-center justify-center overscroll-x-none rounded-xl">
                 <div
                   onClick={() => void router.push(`/property/${poi.id}`)}
-                  className="flex max-w-72 cursor-pointer flex-col items-center justify-center gap-y-1 text-left text-sm font-medium"
+                  className="ml-2 mr-1 flex max-w-72 cursor-pointer flex-col items-center justify-center gap-y-1 text-left text-sm  font-medium"
                 >
                   <img
                     src={poi.image}

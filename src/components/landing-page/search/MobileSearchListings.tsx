@@ -25,6 +25,7 @@ export default function MobileSearchListings({
         <DrawerTrigger>
           <Button
             variant="default"
+            size="lg"
             onClick={() => {
               setIsDrawerOpen(true);
             }}
