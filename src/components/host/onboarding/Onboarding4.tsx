@@ -21,7 +21,7 @@ import SaveAndExit from "./SaveAndExit";
 import { useState, useEffect } from "react";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
-import GoogleMap from "./GoogleMap";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 
 const formSchema = z.object({
   country: zodString(),
@@ -233,10 +233,9 @@ export default function Onboarding4() {
           {coordinateData && (
             <div className="relative mb-10 h-[400px]">
               <div className="absolute inset-0 z-0">
-                <GoogleMap
+                <SingleLocationMap
                   lat={coordinateData.coordinates.lat}
                   lng={coordinateData.coordinates.lng}
-                  draggable={false}
                 />
               </div>
             </div>
