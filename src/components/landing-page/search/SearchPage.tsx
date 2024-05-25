@@ -115,7 +115,7 @@ export default function TravelerPage() {
         ) : (
           <div className="relative flex w-screen flex-col ">
             <MobileJustSearch />
-            <div className="my-1 mt-16 self-end">
+            <div className="my-1 mt-16 w-full">
               <MobileFilterBar />
             </div>
             <div>
