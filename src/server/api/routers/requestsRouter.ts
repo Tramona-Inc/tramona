@@ -2,6 +2,7 @@ import { env } from "@/env";
 import {
   createTRPCRouter,
   protectedProcedure,
+  publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
@@ -12,11 +13,12 @@ import {
   requestGroups,
   requestInsertSchema,
   requestSelectSchema,
-  requests,
-  users,
   requestUpdatedInfo,
+  requests,
   requestsToProperties,
+  users,
 } from "@/server/db/schema";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import {
@@ -26,10 +28,9 @@ import {
   plural,
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
-import { and, count, eq, exists } from "drizzle-orm";
-import { z } from "zod";
-import { sendText, sendWhatsApp } from "@/server/server-utils";
+import { count, eq, exists } from "drizzle-orm";
 import { groupBy } from "lodash";
+import { z } from "zod";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -41,19 +42,18 @@ const updateRequestInputSchema = z.object({
 });
 
 export const requestsRouter = createTRPCRouter({
-  getMyRequests: protectedProcedure.query(async ({ ctx }) => {
+  getMyRequests: publicProcedure
+  .query(async ({ ctx }) => {
     const groupedRequests = await ctx.db.query.requests
       .findMany({
         where: exists(
-          db
-            .select()
-            .from(groupMembers)
-            .where(
-              and(
-                eq(groupMembers.groupId, requests.madeByGroupId),
-                eq(groupMembers.userId, ctx.user.id),
-              ),
-            ),
+          db.select().from(groupMembers),
+          // .where(
+          //   and(
+          //     eq(groupMembers.groupId, requests.madeByGroupId),
+          //     eq(groupMembers.userId, ctx.user.id),
+          //   ),
+          // ),
         ),
         with: {
           offers: { columns: { id: true } },
