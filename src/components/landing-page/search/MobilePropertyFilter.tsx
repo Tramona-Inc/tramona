@@ -124,20 +124,20 @@ export default function MobilePropertyFilter() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className=" flex flex-row "
+            className="mx-2 flex flex-col gap-y-1"
           >
-            <div>
+            <div className="flex flex-col ">
               <FormField
                 control={form.control}
                 name="beds"
                 render={({ field }) => (
-                  <FormItem className="">
-                    <FormLabel className="font-bold text-primary">
+                  <FormItem>
+                    <FormLabel className="text-sm font-bold text-primary">
                       Rooms and spaces
                     </FormLabel>
                     <FormControl>
                       <Total
-                        name={"Beds"}
+                        name="Beds"
                         total={field.value ?? 0}
                         setTotal={field.onChange}
                       />
@@ -151,10 +151,10 @@ export default function MobilePropertyFilter() {
                 control={form.control}
                 name="bedrooms"
                 render={({ field }) => (
-                  <FormItem className="">
+                  <FormItem>
                     <FormControl>
                       <Total
-                        name={"Bedrooms"}
+                        name="Bedrooms"
                         total={field.value ?? 0}
                         setTotal={field.onChange}
                       />
@@ -168,10 +168,10 @@ export default function MobilePropertyFilter() {
                 control={form.control}
                 name="bathrooms"
                 render={({ field }) => (
-                  <FormItem className="">
+                  <FormItem>
                     <FormControl>
                       <Total
-                        name={"Bathrooms"}
+                        name="Bathrooms"
                         total={field.value ?? 0}
                         setTotal={field.onChange}
                       />
@@ -188,8 +188,8 @@ export default function MobilePropertyFilter() {
               control={form.control}
               name="houseRules"
               render={() => (
-                <FormItem>
-                  <FormLabel className="font-bold text-primary">
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-sm font-bold text-primary">
                     House rules
                   </FormLabel>
                   {houseRuleItems.map((item) => (
@@ -197,35 +197,30 @@ export default function MobilePropertyFilter() {
                       key={item.value}
                       control={form.control}
                       name="houseRules"
-                      render={({ field }) => {
-                        return (
-                          <FormItem
-                            key={item.value}
-                            className="flex flex-row items-center space-x-3 py-3"
-                          >
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(item.value)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([
-                                        ...(field.value ?? []),
-                                        item.value,
-                                      ])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.value,
-                                        ),
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="text-sm font-bold text-primary">
-                              {item.title}
-                            </FormLabel>
-                          </FormItem>
-                        );
-                      }}
+                      render={({ field }) => (
+                        <FormItem key={item.value}>
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(item.value)}
+                              onCheckedChange={(checked) =>
+                                checked
+                                  ? field.onChange([
+                                      ...(field.value ?? []),
+                                      item.value,
+                                    ])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        (value) => value !== item.value,
+                                      ),
+                                    )
+                              }
+                            />
+                          </FormControl>
+                          <FormLabel className="ml-2 text-sm font-bold text-primary">
+                            {item.title}
+                          </FormLabel>
+                        </FormItem>
+                      )}
                     />
                   ))}
                   <FormMessage />
@@ -239,8 +234,8 @@ export default function MobilePropertyFilter() {
               control={form.control}
               name="radius"
               render={({ field: { value, onChange } }) => (
-                <FormItem className="">
-                  <FormLabel className="font-bold text-primary">
+                <FormItem className="space-y-3 ">
+                  <FormLabel className="text-sm font-bold text-primary">
                     Radius - {value} miles
                   </FormLabel>
                   <FormControl>
@@ -250,7 +245,6 @@ export default function MobilePropertyFilter() {
                       step={1}
                       defaultValue={value}
                       onValueChange={onChange}
-                      className="mt-5"
                     />
                   </FormControl>
                   <FormMessage />
@@ -258,15 +252,15 @@ export default function MobilePropertyFilter() {
               )}
             />
 
-            <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-around">
               <Button
                 type="button"
-                variant={"ghost"}
+                variant="secondary"
                 onClick={handleClearFilter}
               >
                 Clear
               </Button>
-              <Button type="submit">Submit</Button>
+              <Button type="submit">Add</Button>
             </div>
           </form>
         </Form>

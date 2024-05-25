@@ -46,4 +46,6 @@ const DynamicDesktopSearchBar = React.memo(() => {
   );
 });
 
+DynamicDesktopSearchBar.displayName = "DynamicDesktopSearchBar";
+
 export default DynamicDesktopSearchBar;
