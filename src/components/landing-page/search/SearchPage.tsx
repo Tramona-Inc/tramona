@@ -33,6 +33,7 @@ import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 //check to see if there is no cities filter, if not maps dont exist
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import MobileSearchListings from "./MobileSearchListings";
+import MobilePropertyFilter from "./MobilePropertyFilter";
 export default function TravelerPage() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
@@ -111,9 +112,14 @@ export default function TravelerPage() {
             </div>
           </div>
         ) : (
-          <div className="relative">
+          <div className="relative flex w-screen flex-col ">
             <MobileJustSearch />
-            <SearchPropertiesMap isFilterUndefined={isFilterUndefined} />
+            <div className="my-1 mt-16 self-end">
+              <MobilePropertyFilter />
+            </div>
+            <div>
+              <SearchPropertiesMap isFilterUndefined={isFilterUndefined} />
+            </div>
             <MobileSearchListings isFilterUndefined={isFilterUndefined} />
           </div>
         )}
@@ -139,7 +145,7 @@ function MobileJustSearch() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger className="fixed top-14 z-30 w-full">
-        <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg bg-white px-3 py-4  text-center font-semibold text-muted-foreground shadow-lg">
+        <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg bg-white px-3 py-4  text-center font-semibold text-muted-foreground shadow-md">
           <SearchIcon />
           Search
         </div>

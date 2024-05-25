@@ -199,10 +199,13 @@ function SearchPropertiesMap({
 
   return (
     <div
-      className={`  max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[800px]`}`}
+      className={`  max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[795px]`}`}
     >
       {isFilterUndefined ? (
-        <div> Search a city</div>
+        <div className="flex h-full items-center justify-center">
+          {" "}
+          Search for a city...
+        </div>
       ) : apiIsLoaded ? (
         center && (
           <Map
