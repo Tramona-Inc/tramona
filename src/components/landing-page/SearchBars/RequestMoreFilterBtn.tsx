@@ -1,4 +1,4 @@
-import PropertyFilter from "@/components/property/PropertyFilter";
+import RequestMoreFilter from "@/components/requests/RequestMoreFilter";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,11 +7,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useRequestMoreFilter } from "@/utils/store/request-more-filter";
 import { FilterIcon } from "lucide-react";
 
-export function FilterPropertiesBtn() {
+export function RequestMoreFilterBtn() {
+  const open = useRequestMoreFilter((state) => state.open);
+  const setOpen = useRequestMoreFilter((state) => state.setOpen);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
         <Button
           asChild
@@ -29,7 +33,7 @@ export function FilterPropertiesBtn() {
         <DialogHeader>
           <DialogTitle>Filters</DialogTitle>
         </DialogHeader>
-        <PropertyFilter />
+        <RequestMoreFilter />
       </DialogContent>
     </Dialog>
   );

@@ -52,6 +52,7 @@ export default function PlacesInput<
                 role="combobox"
                 disabled={disabled}
                 icon={icon}
+                className="bg-white"
               >
                 {value ? value : "Select a location"}
               </InputButton>
