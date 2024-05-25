@@ -21,11 +21,12 @@ import {
 } from "@/utils/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
+import { LightbulbIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import BidPaymentForm from "./BidPaymentForm";
-import { LightbulbIcon } from "lucide-react";
-import Link from "next/link";
+
 function BiddingInfoCard({ property }: { property: Property }) {
   const date = useBidding((state) => state.date);
   const price = useBidding((state) => state.price);
@@ -222,11 +223,9 @@ function BiddingStep2({
             </Button>
           </div>
         ) : (
-          <>
-            <Elements stripe={stripePromise} options={options}>
-              <BidPaymentForm bid={bid} setStep={setStep} />
-            </Elements>
-          </>
+          <Elements stripe={stripePromise} options={options}>
+            <BidPaymentForm bid={bid} setStep={setStep} />
+          </Elements>
         )}
       </div>
       <p>{error}</p>
