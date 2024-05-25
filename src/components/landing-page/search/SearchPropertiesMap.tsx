@@ -29,7 +29,11 @@ export type MapBoundary = {
   west: number;
 };
 
-function SearchPropertiesMap() {
+function SearchPropertiesMap({
+  isFilterUndefined,
+}: {
+  isFilterUndefined: boolean;
+}) {
   //zustand
   const filters = useCitiesFilter((state) => state);
   const setFilter = useCitiesFilter((state) => state.setFilter);
@@ -194,8 +198,10 @@ function SearchPropertiesMap() {
   );
 
   return (
-    <div className=" max-w-[700px] rounded-md border shadow-md lg:h-[600px] xl:h-[800px]">
-      {!filters ? (
+    <div
+      className={`  max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[800px]`}`}
+    >
+      {isFilterUndefined ? (
         <div> Search a city</div>
       ) : apiIsLoaded ? (
         center && (

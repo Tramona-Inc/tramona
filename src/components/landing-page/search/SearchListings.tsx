@@ -81,7 +81,7 @@ export default function SearchListings({
 
   return (
     <section
-      className={`relative grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 ${isFilterUndefined ? "md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"}`}
+      className={`relative grid h-full grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:h-[100%] ${isFilterUndefined ? "md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"}`}
     >
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader

@@ -32,6 +32,7 @@ import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 //check to see if there is no cities filter, if not maps dont exist
 import { useCitiesFilter } from "@/utils/store/cities-filter";
+import MobileSearchListings from "./MobileSearchListings";
 export default function TravelerPage() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
@@ -84,32 +85,38 @@ export default function TravelerPage() {
       </Head>
       <div className="relative mb-20 overflow-x-hidden bg-white">
         <VerificationBanner />
-        <div className="mx-12 flex flex-col items-center justify-center gap-y-8">
-          {!isMobile ? (
+        {!isMobile ? (
+          <div className="mx-12 flex flex-col items-center justify-center gap-y-8">
             <Card className="mt-6 w-5/6">
               <CardContent>
                 <DesktopSearchTab />
               </CardContent>
             </Card>
-          ) : (
-            <MobileJustSearch />
-          )}
-          <div className="mx-4 space-y-4">
-            <CitiesFilter />
-            <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
-              <div
-                className={`col-span-1 overflow-y-auto md:col-span-3 lg:max-h-[1000px] ${isFilterUndefined ? "lg:col-span-5" : "lg:col-span-3"}`}
-              >
-                <SearchListings isFilterUndefined={isFilterUndefined} />
-              </div>
-              {!isFilterUndefined && (
-                <div className=" sticky col-span-1  max-h-[1000px] md:col-span-2 lg:col-span-2">
-                  <SearchPropertiesMap />
+            <div className="mx-4 space-y-4">
+              <CitiesFilter />
+              <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
+                <div
+                  className={`col-span-1 overflow-y-auto lg:max-h-[1000px] ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
+                >
+                  <SearchListings isFilterUndefined={isFilterUndefined} />
                 </div>
-              )}
+                {!isFilterUndefined && (
+                  <div className="sticky col-span-1  max-h-[1000px] md:col-span-1 lg:col-span-2">
+                    <SearchPropertiesMap
+                      isFilterUndefined={isFilterUndefined}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="relative">
+            <MobileJustSearch />
+            <SearchPropertiesMap isFilterUndefined={isFilterUndefined} />
+            <MobileSearchListings isFilterUndefined={isFilterUndefined} />
+          </div>
+        )}
       </div>
     </VerificationProvider>
   );
@@ -131,10 +138,10 @@ function MobileJustSearch() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="fixed top-12 z-30 w-full">
-        <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg bg-white px-3 py-4 pt-6 text-center font-semibold text-muted-foreground shadow-lg">
+      <SheetTrigger className="fixed top-14 z-30 w-full">
+        <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg bg-white px-3 py-4  text-center font-semibold text-muted-foreground shadow-lg">
           <SearchIcon />
-          Name your price or submit an offer
+          Search
         </div>
       </SheetTrigger>
       <SheetContent side="top" className="h-full">
