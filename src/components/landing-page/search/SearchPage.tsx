@@ -34,6 +34,7 @@ import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import MobileSearchListings from "./MobileSearchListings";
 import MobilePropertyFilter from "./MobilePropertyFilter";
+import MobileFilterBar from "./MobileFilterBar";
 export default function TravelerPage() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
@@ -115,7 +116,7 @@ export default function TravelerPage() {
           <div className="relative flex w-screen flex-col ">
             <MobileJustSearch />
             <div className="my-1 mt-16 self-end">
-              <MobilePropertyFilter />
+              <MobileFilterBar />
             </div>
             <div>
               <SearchPropertiesMap isFilterUndefined={isFilterUndefined} />

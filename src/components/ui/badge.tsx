@@ -18,6 +18,7 @@ const badgeVariants = cva(
         lightGray: "bg-white text-[#4D535F]",
         solidRed: "bg-red-600 text-white",
         skeleton: "bg-accent animate-pulse",
+        primaryGreen: "bg-teal-900 hover:bg-teal-950 text-white",
       },
       size: {
         sm: "text-xs px-1.5 h-5 gap-0.5 font-medium",
