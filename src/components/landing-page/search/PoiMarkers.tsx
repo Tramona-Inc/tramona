@@ -12,9 +12,9 @@ import { useCallback, useState } from "react";
 const PoiMarkers = (props: { pois: Poi[] | [] }) => {
   const [markerRef, marker] = useAdvancedMarkerRef();
   const [selectedMarker, setSelectedMarker] = useState<Poi | null>(null);
-  const [infoWindowShown, setInfoWindowShown] = useState<
-    Record<number, boolean>
-  >({});
+  const [infoWindowShownIndex, setInfoWindowShownIndex] = useState<
+    number | null
+  >(null);
 
   const map = useMap("9c8e46d54d7a528b");
   const router = useRouter();
@@ -23,21 +23,16 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
     (poi: Poi, index: number) => {
       if (!map) return;
       setSelectedMarker(poi);
-      toggleShowInfoWindow(index);
+      setInfoWindowShownIndex((prevIndex) =>
+        prevIndex === index ? null : index,
+      );
     },
     [map],
   );
 
-  const toggleShowInfoWindow = (index: number) => {
-    setInfoWindowShown((prevShow) => ({
-      ...prevShow,
-      [index]: !prevShow[index],
-    }));
-  };
-
   const handleClose = useCallback(() => {
     setSelectedMarker(null);
-    setInfoWindowShown({});
+    setInfoWindowShownIndex(null);
   }, []);
 
   return (
@@ -56,7 +51,7 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
               </div>
             </div>
           </AdvancedMarker>
-          {infoWindowShown[index] && (
+          {infoWindowShownIndex === index && (
             <InfoWindow
               position={poi.location}
               onCloseClick={handleClose}
