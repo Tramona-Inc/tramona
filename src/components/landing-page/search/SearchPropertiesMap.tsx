@@ -233,7 +233,7 @@ function SearchPropertiesMap({
           <Map
             {...cameraProps}
             defaultZoom={10}
-            defaultCenter={center!}
+            defaultCenter={center}
             onCameraChanged={(ev: MapCameraChangedEvent) =>
               handleCameraChanged(ev)
             }

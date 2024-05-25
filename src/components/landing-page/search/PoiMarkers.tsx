@@ -12,19 +12,21 @@ import { useCallback, useState } from "react";
 const PoiMarkers = (props: { pois: Poi[] | [] }) => {
   const [markerRef, marker] = useAdvancedMarkerRef();
   const [selectedMarker, setSelectedMarker] = useState<Poi | null>(null);
-  const [infoWindowShown, setInfoWindowShown] = useState<{
-    [key: number]: boolean;
-  }>({});
+  const [infoWindowShown, setInfoWindowShown] = useState<
+    Record<number, boolean>
+  >({});
 
   const map = useMap("9c8e46d54d7a528b");
   const router = useRouter();
-  const handleMarkerClick = useCallback((poi: Poi) => {
-    console.log(poi);
-    if (!map) return;
-    if (!poi) return;
-    console.log("marker clicked");
-    console.log(poi.location);
-  }, []);
+
+  const handleMarkerClick = useCallback(
+    (poi: Poi, index: number) => {
+      if (!map) return;
+      setSelectedMarker(poi);
+      toggleShowInfoWindow(index);
+    },
+    [map],
+  );
 
   const toggleShowInfoWindow = (index: number) => {
     setInfoWindowShown((prevShow) => ({
@@ -35,21 +37,8 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
 
   const handleClose = useCallback(() => {
     setSelectedMarker(null);
-    setInfoWindowShown((prevShow) => {
-      const newShow: Record<number, boolean> = { ...prevShow };
-      Object.keys(newShow).forEach((key) => {
-        const index = parseInt(key);
-        if (!isNaN(index)) {
-          newShow[index] = false;
-        }
-      });
-      return newShow;
-    });
+    setInfoWindowShown({});
   }, []);
-
-  // useEffect(() => {
-  //   console.log(selectedMarker);
-  // }, [selectedMarker]);
 
   return (
     <div>
@@ -58,18 +47,13 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
           <AdvancedMarker
             title={poi.key}
             position={poi.location}
-            onClick={() => {
-              handleMarkerClick(poi);
-              toggleShowInfoWindow(index);
-              setSelectedMarker(poi); // Set the clicked marker as the selected marker
-            }}
+            onClick={() => handleMarkerClick(poi, index)}
             clickable={true}
           >
             <div className="flex flex-col items-center justify-center">
               <div className="z-40 rounded-xl bg-zinc-700 p-2 text-white">
                 {formatCurrency(poi.originalNightlyPrice).trim()}/Night
               </div>
-              {/* <BsHouseFill className="z-10 text-zinc-700" size={30} /> */}
             </div>
           </AdvancedMarker>
           {infoWindowShown[index] && (
