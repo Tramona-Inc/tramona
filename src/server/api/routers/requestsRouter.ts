@@ -28,7 +28,7 @@ import {
   plural,
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
-import { count, eq, exists } from "drizzle-orm";
+import { and, count, eq, exists } from "drizzle-orm";
 import { groupBy } from "lodash";
 import { z } from "zod";
 
@@ -42,18 +42,88 @@ const updateRequestInputSchema = z.object({
 });
 
 export const requestsRouter = createTRPCRouter({
-  getMyRequests: publicProcedure
+  getMyRequestsPublic: publicProcedure
   .query(async ({ ctx }) => {
     const groupedRequests = await ctx.db.query.requests
       .findMany({
         where: exists(
-          db.select().from(groupMembers),
-          // .where(
-          //   and(
-          //     eq(groupMembers.groupId, requests.madeByGroupId),
-          //     eq(groupMembers.userId, ctx.user.id),
-          //   ),
-          // ),
+          db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.groupId, requests.madeByGroupId),
+                // eq(groupMembers.userId, ctx.user.id),
+              ),
+            ),
+        ),
+        with: {
+          offers: { columns: { id: true } },
+          requestGroup: true,
+          madeByGroup: {
+            with: {
+              invites: true,
+              members: {
+                with: {
+                  user: {
+                    columns: { name: true, email: true, image: true, id: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      // 1. extract offer count & sort
+      .then((requests) =>
+        requests
+          .map(({ offers, ...request }) => ({
+            ...request,
+            numOffers: offers.length,
+          }))
+          .sort(
+            (a, b) =>
+              b.numOffers - a.numOffers ||
+              b.createdAt.getTime() - a.createdAt.getTime(),
+          ),
+      )
+
+      // 2. group by requestGroupId
+      .then((requests) => {
+        const groups = groupBy(requests, (req) => req.requestGroupId);
+        return Object.entries(groups).map(([_, requests]) => ({
+          group: requests[0]!.requestGroup,
+          requests,
+        }));
+      });
+
+    // 3. group by active/inactive (and put partially-active groups on active)
+    const activeRequestGroups = groupedRequests.filter((group) =>
+      group.requests.some((request) => request.resolvedAt === null),
+    );
+
+    const inactiveRequestGroups = groupedRequests.filter(
+      (group) => !activeRequestGroups.includes(group),
+    );
+
+    return {
+      activeRequestGroups,
+      inactiveRequestGroups,
+    };
+  }),
+  getMyRequests: protectedProcedure.query(async ({ ctx }) => {
+    const groupedRequests = await ctx.db.query.requests
+      .findMany({
+        where: exists(
+          db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.groupId, requests.madeByGroupId),
+                eq(groupMembers.userId, ctx.user.id),
+              ),
+            ),
         ),
         with: {
           offers: { columns: { id: true } },

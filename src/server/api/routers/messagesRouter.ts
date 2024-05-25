@@ -260,7 +260,7 @@ export const messagesRouter = createTRPCRouter({
     return conversationId;
   }),
 
-  createConversationWithOffer: publicProcedure
+  createConversationWithOffer: protectedProcedure
     .input(
       z.object({
         offerId: z.string(),
