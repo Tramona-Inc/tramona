@@ -209,7 +209,7 @@ export default function AdminOfferForm({
       // ...otherwise its a "create offer" form so make a new property and offer
     } else {
       const propertyId = await createPropertiesMutation
-        .mutateAsync(newProperty)
+        .mutateAsync({ ...newProperty, isPrivate: true })
         .catch(() => errorToast());
 
       if (!propertyId) {
