@@ -39,7 +39,7 @@ export default function MobileSearchListings({
               <DrawerDescription>Places within the map area</DrawerDescription>
             )}
           </DrawerHeader>
-          <div className={isFilterUndefined ? `h-[750px]` : `h-[480px]`}>
+          <div className={isFilterUndefined ? `h-[740px]` : `h-[480px]`}>
             <SearchListings isFilterUndefined={isFilterUndefined} />
           </div>
         </DrawerContent>

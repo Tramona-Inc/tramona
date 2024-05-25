@@ -66,6 +66,9 @@ function SearchPropertiesMap({
 
   const [markers, setMarkers] = useState<Poi[]>([]);
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
+  //this is so the map doesnt rerender whe nthe filter changes
+  const [centerSetbyCameraChange, setCenterSetbyCameraChange] = useState(false);
+
   const [cameraProps, setCameraProps] = useState<MapProps | null>({
     mapId: "9c8e46d54d7a528b",
     id: "9c8e46d54d7a528b",
@@ -82,6 +85,7 @@ function SearchPropertiesMap({
 
   const [mapBoundaries, setMapBoundaries] = useState<MapBoundary | null>(null);
 
+  //this is for when the user moves the camera
   const {
     data: adjustedProperties,
     fetchNextPage: fetchNextPageOfAdjustedProperties,
@@ -105,7 +109,8 @@ function SearchPropertiesMap({
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-
+  //when the user presses search
+  //saving search as the new location
   const location = useMemo(() => {
     if (
       filters.filter?.lat !== undefined &&
@@ -116,10 +121,17 @@ function SearchPropertiesMap({
         lng: filters.filter.long,
       };
     }
+
     return null;
   }, [filters]);
 
+  // When the filter changes the location, this use effect will pan the map to the new location
   useEffect(() => {
+    //I dont wnat this to run if the center was set by the camera change
+    if (centerSetbyCameraChange) {
+      setCenterSetbyCameraChange(false);
+      return;
+    }
     if (location?.lat && location?.lng) {
       setCenter(location);
       if (map) {
@@ -129,7 +141,7 @@ function SearchPropertiesMap({
         console.log("map not ready");
       }
     }
-  }, [map]);
+  }, [location]); //use to be map but is now location // my goal is to make this only run if the
 
   const propertiesCoordinates = useMemo(() => {
     if (adjustedProperties && mapBoundaries !== null) {
@@ -177,6 +189,8 @@ function SearchPropertiesMap({
         lng: ev.detail.center.lng,
       };
       setCenter(newCenter);
+      //this is so the useEffect can determine if the center was set by the camera change
+      setCenterSetbyCameraChange(true);
       setFilter({
         lat: newCenter.lat,
         long: newCenter.lng,
@@ -193,13 +207,13 @@ function SearchPropertiesMap({
         west: ev.detail.bounds.west,
       });
       void fetchNextPageOfAdjustedProperties();
-    }, 1100),
+    }, 1000),
     [setCenter, fetchNextPageOfAdjustedProperties, setFilter],
   );
 
   return (
     <div
-      className={`  max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[795px]`}`}
+      className={`max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[795px]`}`}
     >
       {isFilterUndefined ? (
         <div className="flex h-full items-center justify-center">
