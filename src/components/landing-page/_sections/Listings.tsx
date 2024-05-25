@@ -87,7 +87,7 @@ export default function Listings() {
             <HomeOfferCard key={property.id} property={property} />
           ))}
           {isFetchingNextPage && skeletons}
-          <div ref={ref} className="absolute bottom-[200vh]"></div>
+          <div ref={ref} className="absolute bottom-[calc(100vh-12rem)]"></div>
         </>
       ) : (
         <div className="col-span-full flex min-h-80 flex-col items-center justify-center gap-4">
