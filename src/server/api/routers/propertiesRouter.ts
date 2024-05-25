@@ -17,21 +17,7 @@ import {
 import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
-<<<<<<< HEAD
 import { and, arrayContains, asc, eq, gt, gte, lte, notExists, sql } from "drizzle-orm";
-=======
-import {
-  and,
-  arrayContains,
-  asc,
-  eq,
-  gt,
-  gte,
-  lte,
-  notExists,
-  sql,
-} from "drizzle-orm";
->>>>>>> refs/remotes/origin/dev
 
 import { z } from "zod";
 import {
