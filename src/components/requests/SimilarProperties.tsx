@@ -90,7 +90,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
               </Button>
             )}
             {isFetchingNextPage && skeletons}
-            <div className="absolute bottom-[200vh]"></div>
+            <div className="absolute bottom-[calc(100vh-12rem)]"></div>
           </div>
         ) : (
           <div>

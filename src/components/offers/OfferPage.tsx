@@ -2,7 +2,7 @@ import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-//import { GoogleMap, Circle } from "@react-google-maps/api";
+import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import {
   Dialog,
   DialogContent,
@@ -147,9 +147,11 @@ export default function OfferPage({
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 left-2">
             <Dialog>
-              <DialogTrigger className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
-                <ImagesIcon className="mr-2" />
-                See all {property.imageUrls.length} photos
+              <DialogTrigger asChild>
+                <Button variant="white" className="rounded-full">
+                  <ImagesIcon />
+                  See all {property.imageUrls.length} photos
+                </Button>
               </DialogTrigger>
 
               <DialogContent className="max-w-4xl">

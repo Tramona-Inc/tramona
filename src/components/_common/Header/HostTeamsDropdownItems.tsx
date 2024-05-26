@@ -11,6 +11,7 @@ import { api } from "@/utils/api";
 import UserAvatar from "../UserAvatar";
 import { type HostTeam, type HostProfile } from "@/server/db/schema";
 import { PlusCircleIcon } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 export default function HostTeamsDropdownItems({
   hostProfile,
@@ -46,7 +47,13 @@ export default function HostTeamsDropdownItems({
               key={team.id}
               checked={hostProfile?.curTeamId === team.id}
               disabled={setCurHostTeam.isLoading}
-              onSelect={() => setCurHostTeam.mutate({ hostTeamId: team.id })}
+              onSelect={() =>
+                setCurHostTeam
+                  .mutateAsync({ hostTeamId: team.id })
+                  .then(({ hostTeamName }) => {
+                    toast({ title: `Switched to team: ${hostTeamName}` });
+                  })
+              }
               className="gap-2 px-1"
             >
               <UserAvatar size="sm" name={team.name} />

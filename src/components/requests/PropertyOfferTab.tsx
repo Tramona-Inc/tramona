@@ -14,7 +14,7 @@ export default function PropertyOfferTab() {
 
   return offers.length > 0 ? (
     <div className="grid gap-24 md:grid-cols-2">
-      <div className=" col-span-1 gap-4 ">
+      <div className=" col-span-1 space-y-4">
         {offers.map((offer) => (
           <PropertyOfferCard
             key={offer.id}

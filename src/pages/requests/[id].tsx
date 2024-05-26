@@ -11,6 +11,7 @@ import {
   Map,
   type GoogleAPI,
 } from "google-maps-react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -53,7 +54,7 @@ function Page({ google }: { google: GoogleAPI }) {
 
   // ik this seems dumb but its better because it reuses the same
   // getMyRequests query that we (probably) already have cached
-  const { data: requests } = api.requests.getMyRequests.useQuery();
+  const { data: requests } = api.requests.getMyRequestsPublic.useQuery();
   const request = requests?.activeRequestGroups
     .map((group) => group.requests)
     .flat(1)
@@ -69,6 +70,7 @@ function Page({ google }: { google: GoogleAPI }) {
   if (router.isFallback) {
     return <Spinner />;
   }
+
 
   return (
     <DashboadLayout type="guest">
@@ -108,7 +110,7 @@ function Page({ google }: { google: GoogleAPI }) {
                   ))}
                 </div>
                 <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
-                  <div className="h-screen lg:h-full relative">
+                  <div className="relative h-screen lg:h-full">
                     <Map google={google} zoom={15} center={mapCenter}>
                       {/* Child components like Marker, InfoWindow, etc. */}
                       {offers.map(

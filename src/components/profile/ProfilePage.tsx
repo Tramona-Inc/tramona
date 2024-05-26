@@ -37,7 +37,7 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
-import Image from "next/image";
+import EmptyBagSvg from "../_common/EmptyStateSvg/EmptyBagSVG";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -301,12 +301,9 @@ export default function ProfilePage() {
                   />
                 ))
               ) : (
-                <p className="col-span-full py-8 text-center text-muted-foreground">
+                <div className="col-span-full py-8 text-center text-muted-foreground">
                   <div className="flex items-center justify-center">
-                    <Image
-                      src="assets/images/profile-page/no-items-cart.png"
-                      alt=""
-                    />
+                    <EmptyBagSvg />
                   </div>
                   Your bucket list is empty! Add a property to view here.
                   <div className="mt-6 flex justify-center">
@@ -317,7 +314,7 @@ export default function ProfilePage() {
                       <Link href="/explore">Explore Properties</Link>
                     </Button>
                   </div>
-                </p>
+                </div>
               )}
             </div>
           </TabsContent>

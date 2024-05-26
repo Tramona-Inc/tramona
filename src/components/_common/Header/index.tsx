@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
+import { SupportBtn } from "./SupportBtn";
 
 type HeaderProps =
   | {
@@ -74,6 +75,7 @@ function LargeHeader(props: HeaderProps) {
       </div>
 
       <div className="flex flex-1 justify-end gap-2">
+        <SupportBtn />
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (

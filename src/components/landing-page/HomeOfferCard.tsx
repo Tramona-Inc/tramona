@@ -1,4 +1,3 @@
-import { CardContent } from "@/components/ui/card";
 import {
   Carousel,
   type CarouselApi,
@@ -148,17 +147,18 @@ export default function HomeOfferCard({
           <CarouselContent>
             {property.imageUrls.slice(0, 5).map((photo, index) => (
               <CarouselItem key={index}>
-                <CardContent>
-                  <Link href={`/property/${property.id}`}>
-                    <Image
-                      src={photo}
-                      height={500}
-                      width={500}
-                      alt=""
-                      className="aspect-square w-full rounded-xl object-cover"
-                    />
-                  </Link>
-                </CardContent>
+                <Link
+                  href={`/property/${property.id}`}
+                  className="relative block aspect-square overflow-clip rounded-xl"
+                >
+                  <Image
+                    src={photo}
+                    layout="fill"
+                    sizes="100vh, (min-width: 640px) 50vh, (min-width: 768px) 33vh, (min-width: 1280px) 25vh, (min-width: 1536px) 20vh"
+                    alt=""
+                    className="object-cover"
+                  />
+                </Link>
               </CarouselItem>
             ))}
           </CarouselContent>
