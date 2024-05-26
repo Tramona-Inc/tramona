@@ -18,7 +18,6 @@ import {
   Youtube,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from 'next/router';
 import Link from "next/link";
 import React from "react";
 import UserAvatar from "../_common/UserAvatar";
@@ -38,9 +37,9 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
+import Image from "next/image";
 
 export default function ProfilePage() {
-  const router = useRouter();
   const { data: session } = useSession({ required: true });
 
   const { data } = api.users.myReferralCode.useQuery();
@@ -291,35 +290,35 @@ export default function ProfilePage() {
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
               {bucketListProperties?.length ? (
-                bucketListProperties?.map((property) => (
+                bucketListProperties.map((property) => (
                   <BucketListHomeOfferCard
-                    key={property!.id}
+                    key={property.id}
                     property={{
-                      ...property!,
-                      propertyId: property!.id,
-                      bucketListPropertyId: property!.bucketListId,
+                      ...property,
+                      propertyId: property.id,
+                      bucketListPropertyId: property.bucketListId,
                     }}
                   />
                 ))
               ) : (
                 <p className="col-span-full py-8 text-center text-muted-foreground">
-                  <div className="flex justify-center items-center">
-                    
-                    <img src="assets/images/profile-page/no-items-cart.png" alt="No items in cart"/>
+                  <div className="flex items-center justify-center">
+                    <Image
+                      src="assets/images/profile-page/no-items-cart.png"
+                      alt=""
+                    />
                   </div>
                   Your bucket list is empty! Add a property to view here.
-                  <div className="flex justify-center mt-6">
+                  <div className="mt-6 flex justify-center">
                     <Button
-                      onClick={() => router.push('/explore')}
-                      className="bg-teal-900 hover:bg-teal-950 text-white py-2 px-4 rounded-lg cursor-pointer"
+                      asChild
+                      className="cursor-pointer rounded-lg bg-teal-900 px-4 py-2 text-white hover:bg-teal-950"
                     >
-                      Explore Properties
+                      <Link href="/explore">Explore Properties</Link>
                     </Button>
                   </div>
                 </p>
-              )
-            }
-
+              )}
             </div>
           </TabsContent>
 

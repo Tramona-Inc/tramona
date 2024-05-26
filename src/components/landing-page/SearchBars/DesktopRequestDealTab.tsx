@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   FormControl,
   FormField,
@@ -13,41 +13,35 @@ import { DollarSignIcon, MapPinIcon, Users2Icon } from "lucide-react";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
 import { useCityRequestForm } from "./useCityRequestForm";
-import { useRouter } from 'next/router';
 import { RequestTabsSwitcher } from "./RequestTabsSwitcher";
 import Link from "next/link";
-import Confetti from 'react-confetti';
+import Confetti from "react-confetti";
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
   const [open, setOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const { form, onSubmit } = useCityRequestForm({ setCurTab });
-  const router = useRouter();
 
-  const handleSubmit = async (event: any) => {
-    event.preventDefault();
-    const isValid = await form.trigger();
-    if (isValid) {
-      setOpen(true);
-      setShowConfetti(true);
-      onSubmit(event);
-    }
-  };
+  function afterSubmit() {
+    setOpen(true);
+    setShowConfetti(true);
+  }
+
+  const { form, onSubmit } = useCityRequestForm({ setCurTab, afterSubmit });
 
   return (
     <>
       <Form {...form}>
         <form
-          onSubmit={handleSubmit}
+          onSubmit={onSubmit}
           className="flex flex-col justify-between gap-y-4"
           key={curTab} // rerender on tab changes (idk why i have to do this myself)
         >
           <div className="my-3 items-center text-balance text-center text-xs text-muted-foreground">
             Instead of just seeing listed prices, requesting a deal lets you set
             your budget, and we&apos;ll match you with hosts who have properties
-            in the city and accept your price. This way, you can find the perfect
-            place to stay within your means!
+            in the city and accept your price. This way, you can find the
+            perfect place to stay within your means!
           </div>
 
           <RequestTabsSwitcher
@@ -131,33 +125,42 @@ export function DesktopRequestDealTab() {
             </Button>
           </div>
 
-          <Dialog open={open} onOpenChange={setOpen}>              
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="flex flex-col sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
-              <h1 className="text-2xl font-bold text-center mb-4">
+              <h1 className="mb-4 text-center text-2xl font-bold">
                 Congrats on submitting a request!
               </h1>
               <p className="mb-4">
-                We have sent it out to every host in {form.getValues(`data.${curTab}.location`)}.
+                We have sent it out to every host in{" "}
+                {form.getValues(`data.${curTab}.location`)}.
               </p>
               <p className="mb-4">
-                In the next 24 hours, hosts will send you properties that match your requirements. 
-                To check out matches <Link href="/requests" className="text-teal-700 font-semibold underline cursor-pointer">click here</Link>.
+                In the next 24 hours, hosts will send you properties that match
+                your requirements. To check out matches{" "}
+                <Link
+                  href="/requests"
+                  className="cursor-pointer font-semibold text-teal-700 underline"
+                >
+                  click here
+                </Link>
+                .
               </p>
               <p className="mb-6">
-                In the meantime, check out some other properties we have on Tramona and make more offers.
+                In the meantime, check out some other properties we have on
+                Tramona and make more offers.
               </p>
               <div className="flex justify-center">
                 <Button
-                  onClick={() => router.push('/explore')}
-                  className="bg-teal-900 hover:bg-teal-950 text-white py-2 px-4 rounded-lg cursor-pointer"
+                  asChild
+                  className="cursor-pointer rounded-lg bg-teal-900 px-4 py-2 text-white hover:bg-teal-950"
                 >
                   Explore more properties
                 </Button>
               </div>
-              
+
               {showConfetti && (
-                <div className="fixed inset-0 z-100 pointer-events-none">
-                  <Confetti width={window.innerWidth} recycle={false}/>
+                <div className="z-100 pointer-events-none fixed inset-0">
+                  <Confetti width={window.innerWidth} recycle={false} />
                 </div>
               )}
             </DialogContent>
