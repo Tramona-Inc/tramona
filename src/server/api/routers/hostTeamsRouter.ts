@@ -204,13 +204,24 @@ export const hostTeamsRouter = createTRPCRouter({
   setCurHostTeam: protectedProcedure
     .input(z.object({ hostTeamId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db
+      const hostTeamNamePromise = ctx.db.query.hostTeams
+        .findFirst({
+          where: eq(hostTeams.id, input.hostTeamId),
+          columns: { name: true },
+        })
+        .then((res) => res?.name);
+
+      const mutation = ctx.db
         .update(hostProfiles)
         .set({ curTeamId: input.hostTeamId })
         .where(eq(hostProfiles.userId, ctx.user.id));
+
+      const [hostTeamName] = await Promise.all([hostTeamNamePromise, mutation]);
+
+      return { hostTeamName };
     }),
 
-  createHostTeam: roleRestrictedProcedure(["host"])
+  createHostTeam: roleRestrictedProcedure(["host", "admin"])
     .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const hostTeamId = await ctx.db

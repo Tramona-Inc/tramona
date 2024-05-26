@@ -145,11 +145,12 @@ export default function PropertyPage({ property }: { property: Property }) {
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 left-2">
             <Dialog>
-              <DialogTrigger className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
-                <ImagesIcon className="mr-2" />
-                See all {property.imageUrls.length} photos
+              <DialogTrigger asChild>
+                <Button variant="white" className="rounded-full">
+                  <ImagesIcon />
+                  See all {property.imageUrls.length} photos
+                </Button>
               </DialogTrigger>
-
               <DialogContent className="max-w-4xl">
                 <DialogHeader>
                   <DialogTitle>More Photos</DialogTitle>
