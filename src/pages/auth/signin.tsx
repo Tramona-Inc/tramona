@@ -79,7 +79,7 @@ export default function SignIn({
   }: z.infer<typeof formSchema>) => {
     // Relies on middleware to redirect to dashbaord
     // onboarding checks if user has a phone number else go to dashboard
-    const { from } = query;
+    const from = query.from as string | undefined;
 
     await signIn("credentials", {
       email: email,

@@ -78,7 +78,7 @@ export default function MobileNav({
   const pathname = usePathname();
   const isAdmin = session && session.user.role === "admin";
   const isHost = session && session.user.role === "host";
-  console.log("Session: ", session);
+
   const navLinks =
     type === "admin"
       ? adminNavLinks

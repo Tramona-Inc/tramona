@@ -37,7 +37,7 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
-import EmptyBagSvg from "../_common/EmptyStateSvg/EmptyBagSVG";
+import EmptyBagSvg from "../_common/EmptyStateSvg/EmptyBagSvg";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -292,11 +292,11 @@ export default function ProfilePage() {
               {bucketListProperties?.length ? (
                 bucketListProperties.map((property) => (
                   <BucketListHomeOfferCard
-                    key={property.id}
+                    key={property!.id}
                     property={{
-                      ...property,
-                      propertyId: property.id,
-                      bucketListPropertyId: property.bucketListId,
+                      ...property!,
+                      propertyId: property!.id,
+                      bucketListPropertyId: property!.bucketListId,
                     }}
                   />
                 ))

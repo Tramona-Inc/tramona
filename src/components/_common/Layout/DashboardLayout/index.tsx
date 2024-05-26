@@ -14,7 +14,6 @@ export default function DashboardLayout({
   type,
 }: DashboardLayoutProps) {
   const { data: session } = useSession();
-  console.log("Session data: ", session);
   const isBelowMediumScreen = useMediaQuery("(max-width: 768px)");
   return (
     <>
