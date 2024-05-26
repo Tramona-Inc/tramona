@@ -1,6 +1,6 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useState } from "react";
-//import { GoogleMap, Circle } from "@react-google-maps/api";
+
 import {
   Dialog,
   DialogContent,
@@ -29,7 +29,7 @@ import { AspectRatio } from "../ui/aspect-ratio";
 import BiddingForm from "./BiddingForm";
 import PropertyAmenities from "../offers/PropertyAmenities";
 import AmenitiesComponent from "../offers/CategorizedAmenities";
-import GoogleMap from "../host/onboarding/GoogleMap";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -310,10 +310,9 @@ export default function PropertyPage({ property }: { property: Property }) {
         {property.latitude && property.longitude && (
           <div className="relative mt-4 h-[400px]">
             <div className="absolute inset-0 z-0">
-              <GoogleMap
+              <SingleLocationMap
                 lat={property.latitude}
                 lng={property.longitude}
-                draggable={false}
               />
             </div>
           </div>

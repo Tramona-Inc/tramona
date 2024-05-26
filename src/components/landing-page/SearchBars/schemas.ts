@@ -1,5 +1,12 @@
+import {
+  optional,
+  zodInteger,
+  zodNumber,
+  zodString,
+  zodUrl,
+} from "@/utils/zod-utils";
 import { z } from "zod";
-import { optional, zodInteger, zodNumber, zodString } from "@/utils/zod-utils";
+// import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from '@/server/db/schema';
 
 export const searchSchema = z.object({
   location: optional(zodString()),
@@ -21,6 +28,7 @@ const cityRequestSchema = z
     // minNumBedrooms: z.number().transform((n) => (n <= 1 ? undefined : n)),
     // minNumBeds: z.number().transform((n) => (n <= 1 ? undefined : n)),
     // minNumBathrooms: z.number().transform((n) => (n <= 1 ? undefined : n)),
+    airbnbLink: optional(zodUrl()),
     note: optional(zodString()),
   })
   .refine(({ date }) => date.from < date.to, {

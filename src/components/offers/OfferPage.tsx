@@ -2,7 +2,7 @@ import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-//import { GoogleMap, Circle } from "@react-google-maps/api";
+import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import {
   Dialog,
   DialogContent,
