@@ -59,6 +59,7 @@ export const guestNavLinks = [
   { href: "/explore", name: "Explore", icon: Search },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
+  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
 export const unloggedNavLinks = [

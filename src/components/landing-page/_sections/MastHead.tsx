@@ -14,15 +14,12 @@ import {
   MapPin,
   SearchIcon,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
-import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
 import { WelcomeBanner } from "../WelcomeBanner";
 import Typewriter from "typewriter-effect";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const infoCards = [
   {
@@ -65,12 +62,12 @@ export default function MastHead() {
           height={0}
           sizes="100vw"
           priority
-          className="h-[900px] w-full select-none object-cover md:h-[750px] md:w-full"
+          className="h-[900px] w-full select-none object-cover md:w-full lg:h-[750px]"
         />
       </div>
-      <div className="absolute -top-12 left-0 right-0 z-10 mx-auto max-w-7xl px-5 pt-14 md:top-10">
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:mt-0 lg:grid-cols-2 lg:gap-20">
-          <div className="space-y-4 lg:space-y-8">
+      <div className="absolute inset-x-0 top-0 z-10 mx-auto max-w-6xl px-4 md:top-10">
+        <div className="mt-6 flex flex-col gap-4 lg:mt-0 lg:flex-row lg:gap-20">
+          <div className="w-96 flex-none space-y-4 lg:space-y-8">
             <h1 className="text-3xl font-bold leading-tight lg:text-5xl lg:leading-tight">
               Book the same properties you see on Airbnb for less
             </h1>
@@ -79,42 +76,25 @@ export default function MastHead() {
               matches you with hosts who are willing to meet your price.
             </p>
           </div>
-          <div>
+          <div className="flex-1">
             <DesktopSearchLayout />
           </div>
         </div>
       </div>
-      <div className="hidden -translate-y-20 px-4 md:block">
-        <div className="grid grid-cols-4 gap-4">
-          {infoCards.map((card, index) => (
-            <div
-              key={index}
-              className="space-y-2 rounded-lg border bg-white p-4"
-            >
-              <card.icon />
-              <h3 className="text-xl font-bold">{card.title}</h3>
-              <p className="text-sm">{card.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="-translate-y-20 px-4 md:hidden">
-        <div className="flex justify-center">
-          <ScrollArea className="w-80">
-            <div className="flex gap-4">
-              {infoCards.map((card, index) => (
-                <div
-                  key={index}
-                  className="w-80 shrink-0 space-y-2 rounded-lg border bg-white p-4"
-                >
-                  <card.icon />
-                  <h3 className="text-xl font-bold">{card.title}</h3>
-                  <p className="text-sm">{card.description}</p>
-                </div>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+      <div className="relative h-64 -translate-y-20">
+        <div className="absolute inset-0 overflow-x-auto">
+          <div className="flex gap-4 px-4">
+            {infoCards.map((card, index) => (
+              <div
+                key={index}
+                className="min-w-64 space-y-2 rounded-lg border bg-white p-4 md:flex-1"
+              >
+                <card.icon />
+                <h3 className="text-xl font-bold">{card.title}</h3>
+                <p className="text-sm">{card.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -162,9 +142,9 @@ export default function MastHead() {
 
 export function DesktopSearchLayout() {
   return (
-    <div className="space-y-2 lg:px-12">
-      <p className="text-xs font-bold lg:text-base">
-        Your request will be sent to every host in{" "}
+    <div className="space-y-2">
+      <p className="text-sm font-semibold lg:text-base">
+        Send a request to every host in{" "}
         <span className="text-teal-900">
           <Typewriter
             component={"span"}

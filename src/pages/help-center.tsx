@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { api } from "@/utils/api";
+import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import {
   BugIcon,
   ChevronRight,
@@ -10,19 +10,9 @@ import {
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import router from "next/router";
 
 export default function HelpCenter() {
-  const { mutateAsync: createConverstaionWithAdmin } =
-    api.messages.createConversationWithAdmin.useMutation({
-      onSuccess: (conversationId) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
-      },
-    });
-
-  async function handleChat() {
-    await createConverstaionWithAdmin();
-  }
+  const chatWithAdmin = useChatWithAdmin();
 
   return (
     <DashboardLayout type="guest">
@@ -58,7 +48,7 @@ export default function HelpCenter() {
               <p>
                 For any non emergency needs or questions,{" "}
                 <button
-                  onClick={handleChat}
+                  onClick={() => chatWithAdmin()}
                   className="text-blue-600 underline underline-offset-2"
                 >
                   chat with us.

@@ -7,7 +7,16 @@ import {
 } from "@/config/sideNavLinks";
 import { api } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
-import { ArrowLeftRight, Menu, Settings, Wallet, MessageSquareMore, ShieldQuestion, Contact, MessageCircleQuestion } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Menu,
+  Settings,
+  Wallet,
+  MessageSquareMore,
+  ShieldQuestion,
+  Contact,
+  MessageCircleQuestion,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useCallback, useEffect } from "react";
@@ -40,14 +49,6 @@ function SidebarLink({
             selected ? "text-[#2F5BF6]" : "text-[#5B616D",
           )}
         >
-          {/* {selected && (
-            <motion.div
-              layoutId="sidebar-indicator"
-              transition={{ duration: 0.1, ease: "circOut" }}
-              className="absolute inset-y-0 right-0 border-[3px] border-transparent border-r-black"
-            />
-          )} */}
-
           <Icon
             className={cn(
               "size-6 lg:size-8",
@@ -85,7 +86,7 @@ export default function Sidebar({
               { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
           : [
-              ...guestNavLinks, 
+              ...guestNavLinks,
               { href: "/messages", name: "Messages", icon: MessageSquareMore },
             ];
 
@@ -163,19 +164,19 @@ export default function Sidebar({
               </Link>
               <Link href="/how-it-works">
                 <DropdownMenuItem className="text-primary">
-                  <ShieldQuestion/>
+                  <ShieldQuestion />
                   How it works
                 </DropdownMenuItem>
               </Link>
               <Link href="/faq">
                 <DropdownMenuItem className="text-primary">
-                  <MessageCircleQuestion/>
+                  <MessageCircleQuestion />
                   FAQ
                 </DropdownMenuItem>
               </Link>
               <Link href="/support">
                 <DropdownMenuItem className="text-primary">
-                  <Contact/>
+                  <Contact />
                   Contact
                 </DropdownMenuItem>
               </Link>

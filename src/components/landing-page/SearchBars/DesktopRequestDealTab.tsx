@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
-import { RequestMoreFilterBtn } from './RequestMoreFilterBtn';
+import { RequestMoreFilterBtn } from "./RequestMoreFilterBtn";
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
@@ -59,7 +59,7 @@ export function DesktopRequestDealTab() {
             control={form.control}
             name={`data.${curTab}.date`}
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormControl>
                   <DateRangeInput
                     {...field}
@@ -78,7 +78,7 @@ export function DesktopRequestDealTab() {
             control={form.control}
             name={`data.${curTab}.numGuests`}
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormControl>
                   <Input
                     {...field}
@@ -96,7 +96,7 @@ export function DesktopRequestDealTab() {
             control={form.control}
             name={`data.${curTab}.maxNightlyPriceUSD`}
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormControl>
                   <Input
                     {...field}
@@ -139,7 +139,7 @@ export function DesktopRequestDealTab() {
                     control={form.control}
                     name={`data.${curTab}.airbnbLink`}
                     render={({ field }) => (
-                      <FormItem className="">
+                      <FormItem>
                         <FormControl>
                           <Input
                             {...field}
@@ -155,13 +155,14 @@ export function DesktopRequestDealTab() {
                 </div>
                 <Button
                   variant="link"
+                  type="button"
                   onClick={() => {
                     setLink(!link);
                     form.setValue(`data.${curTab}.airbnbLink`, "");
                   }}
                   className="font-bold text-teal-900"
                 >
-                  Remove
+                  Cancel
                 </Button>
               </div>
             )}
