@@ -3,7 +3,7 @@ import {
   adminNavLinks,
   guestNavLinks,
   hostMobileNavLinks,
-  unloggedNavLinks
+  unloggedNavLinks,
 } from "@/config/sideNavLinks";
 import { cn } from "@/utils/utils";
 import {
@@ -13,10 +13,9 @@ import {
   ChevronUpIcon,
   NotepadTextIcon,
   MessageSquareMore,
-  Menu, 
-  ShieldQuestion, 
-  Contact, 
-  MessageCircleQuestion
+  ShieldQuestion,
+  Contact,
+  MessageCircleQuestion,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -92,12 +91,17 @@ export default function MobileNav({
             ]
           : type == "unlogged"
             ? unloggedNavLinks
-              : guestNavLinks;
+            : guestNavLinks;
 
   return (
     <header className="fixed bottom-0 z-50 flex h-mobile-header-height w-full items-center bg-white lg:hidden">
       {/* <div className="grid w-full grid-cols-5"> */}
-      <div className={cn("grid w-full", type === "unlogged" ? "grid-cols-3" : "grid-cols-5")}>
+      <div
+        className={cn(
+          "grid w-full",
+          type === "unlogged" ? "grid-cols-3" : "grid-cols-5",
+        )}
+      >
         {navLinks.map((link, index) => (
           <BottomNavLink key={index} href={link.href} icon={link.icon}>
             {link.name}
@@ -105,8 +109,7 @@ export default function MobileNav({
         ))}
 
         {/* Menu items */}
-        {
-          session ?
+        {session ? (
           <div className="flex flex-col items-center justify-center">
             <Sheet>
               <SheetTrigger>
@@ -122,25 +125,27 @@ export default function MobileNav({
               <SheetContent side={"top"} className="flex flex-col space-y-5">
                 <h2 className="text-2xl font-bold">Menu</h2>
                 <div>
-                  <div className="flex flex-col space-y-6 mb-4">
-                      <div className="flex flex-row gap-x-4">
-                        <MessageSquareMore/>
-                        <Link href="/messages" className="font-light">
-                          {"Messages"}
-                        </Link>
-                      </div>
+                  <div className="mb-4 flex flex-col space-y-6">
+                    <div className="flex flex-row gap-x-4">
+                      <MessageSquareMore />
+                      <Link href="/messages" className="font-light">
+                        {"Messages"}
+                      </Link>
+                    </div>
                   </div>
                   <h3 className="mb-5 text-sm font-semibold uppercase tracking-tight">
                     Account
                   </h3>
-                  <div className="flex flex-col space-y-6">
-                    {guestMenuNavLinks.map((link, index) => (
-                      <div className="flex flex-row gap-x-4" key={index}>
+                  <div className="flex flex-col">
+                    {guestMenuNavLinks.map((link) => (
+                      <Link
+                        href={link.href}
+                        key={link.href}
+                        className="flex gap-4 py-3 font-light"
+                      >
                         {link.icon}
-                        <Link href={link.href} key={index} className="font-light">
-                          {link.name}
-                        </Link>
-                      </div>
+                        {link.name}
+                      </Link>
                     ))}
                     <div className="flex flex-col gap-y-4 ">
                       <div
@@ -193,14 +198,16 @@ export default function MobileNav({
                 </div>
               </SheetContent>
             </Sheet>
-          </div> :
+          </div>
+        ) : (
           <div className="text-center">
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <div
-                    className={cn(
-                      "relative flex flex-col items-center justify-center text-center text-xs font-medium text-[#5B616D]",
-                    )}>
+                  className={cn(
+                    "relative flex flex-col items-center justify-center text-center text-xs font-medium text-[#5B616D]",
+                  )}
+                >
                   <LucideMenu className="size-8" />
                   <p>Menu</p>
                 </div>
@@ -209,19 +216,19 @@ export default function MobileNav({
                 <DropdownMenuGroup>
                   <Link href="/how-it-works">
                     <DropdownMenuItem className="text-primary">
-                      <ShieldQuestion/>
+                      <ShieldQuestion />
                       How it works
                     </DropdownMenuItem>
                   </Link>
                   <Link href="/faq">
                     <DropdownMenuItem className="text-primary">
-                      <MessageCircleQuestion/>
+                      <MessageCircleQuestion />
                       FAQ
                     </DropdownMenuItem>
                   </Link>
                   <Link href="/support">
                     <DropdownMenuItem className="text-primary">
-                      <Contact/>
+                      <Contact />
                       Contact
                     </DropdownMenuItem>
                   </Link>
@@ -229,7 +236,7 @@ export default function MobileNav({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        }
+        )}
       </div>
     </header>
   );
