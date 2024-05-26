@@ -1,6 +1,6 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useState } from "react";
-//import { GoogleMap, Circle } from "@react-google-maps/api";
+
 import {
   Dialog,
   DialogContent,
@@ -29,7 +29,7 @@ import { AspectRatio } from "../ui/aspect-ratio";
 import BiddingForm from "./BiddingForm";
 import PropertyAmenities from "../offers/PropertyAmenities";
 import AmenitiesComponent from "../offers/CategorizedAmenities";
-import GoogleMap from "../host/onboarding/GoogleMap";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -145,11 +145,12 @@ export default function PropertyPage({ property }: { property: Property }) {
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 left-2">
             <Dialog>
-              <DialogTrigger className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
-                <ImagesIcon className="mr-2" />
-                See all {property.imageUrls.length} photos
+              <DialogTrigger asChild>
+                <Button variant="white" className="rounded-full">
+                  <ImagesIcon />
+                  See all {property.imageUrls.length} photos
+                </Button>
               </DialogTrigger>
-
               <DialogContent className="max-w-4xl">
                 <DialogHeader>
                   <DialogTitle>More Photos</DialogTitle>
@@ -309,10 +310,9 @@ export default function PropertyPage({ property }: { property: Property }) {
         {property.latitude && property.longitude && (
           <div className="relative mt-4 h-[400px]">
             <div className="absolute inset-0 z-0">
-              <GoogleMap
+              <SingleLocationMap
                 lat={property.latitude}
                 lng={property.longitude}
-                draggable={false}
               />
             </div>
           </div>

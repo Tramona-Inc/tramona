@@ -13,9 +13,16 @@ export function FilterPropertiesBtn() {
   return (
     <Dialog>
       <DialogTrigger>
-        <Button variant="secondary" type="button">
-          <FilterIcon />
-          Filter
+        <Button
+          asChild
+          variant="ghost"
+          type="button"
+          className="p-0 font-bold text-teal-900 hover:bg-transparent"
+        >
+          <div>
+            <FilterIcon />
+            More filters
+          </div>
         </Button>
       </DialogTrigger>
       <DialogContent>

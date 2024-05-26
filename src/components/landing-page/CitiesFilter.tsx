@@ -1,77 +1,117 @@
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { cn } from "@/utils/utils";
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { LucideListFilter } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, FilterIcon } from "lucide-react";
 import PropertyFilter from "../property/PropertyFilter";
 import { Button } from "../ui/button";
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "../ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import { cities } from "./cities";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { useRef } from "react";
+
+function FiltersBtn() {
+  const open = useCitiesFilter((state) => state.open);
+  const setOpen = useCitiesFilter((state) => state.setOpen);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="secondary">
+          <FilterIcon />
+          Filter
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-center font-bold">Filters</DialogTitle>
+        </DialogHeader>
+        <PropertyFilter />
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function CitiesFilter() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
 
-  const open = useCitiesFilter((state) => state.open);
-  const setOpen = useCitiesFilter((state) => state.setOpen);
+  const ref = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  // const [scrollX, setScrollX] = useState(0);
+
+  // useEffect(() => {
+  //   const el = ref.current;
+  //   if (!el) return;
+  //   const onScroll = () => setScrollX(el.scrollLeft);
+
+  //   addEventListener("scroll", onScroll);
+
+  //   return () => {
+  //     removeEventListener("scroll", onScroll);
+  //   };
+  // }, []);
+
+  function scrollLeft() {
+    if (viewportRef.current) {
+      viewportRef.current.scrollBy({ left: -200, behavior: "smooth" });
+    }
+  }
+
+  function scrollRight() {
+    if (viewportRef.current) {
+      viewportRef.current.scrollBy({ left: 200, behavior: "smooth" });
+    }
+  }
 
   return (
-    <div className="grid grid-cols-8">
-      <div className="col-span-5 flex w-full items-center justify-center md:col-span-7">
-        <Carousel
-          opts={{
-            align: "start",
-          }}
-          className="w-full md:px-10"
-        >
-          <CarouselContent>
-            {cities.map((city, index) => (
-              <CarouselItem key={index} className={"basis-1/10"}>
-                <Button
-                  variant={"ghost"}
-                  onClick={() => {
-                    setFilter(city);
-                  }}
-                  className={cn(
-                    "text:sm px-3 py-2 font-semibold sm:text-base lg:text-lg",
-                    city.id === filter?.id && "bg-zinc-300",
-                  )}
-                >
-                  {city.label}
-                </Button>
-              </CarouselItem>
+    <div className="relative h-12">
+      <div className="absolute inset-0">
+        <ScrollArea ref={ref} viewportRef={viewportRef}>
+          <div className="flex gap-1 pb-2 pl-12 pr-40">
+            {cities.map((city) => (
+              <Button
+                key={city.id}
+                variant={"ghost"}
+                onClick={() => setFilter(city)}
+                className={cn(
+                  "px-3 text-xs font-semibold sm:text-sm",
+                  city.id === filter?.id && "bg-zinc-300 hover:bg-zinc-300",
+                )}
+              >
+                {city.label}
+              </Button>
             ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-0" />
-          <CarouselNext className="right-0" />
-        </Carousel>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant={"outlineLight"}
-            className="col-span-3 ml-5 border-[1px] p-3 py-6 font-bold md:col-span-1 "
-          >
-            <div className="grid grid-cols-2 place-items-center gap-1 md:gap-5">
-              <LucideListFilter />
-              <p>Filter</p>
-            </div>
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogTitle className="flex items-center justify-center font-bold">
-            Filters
-          </DialogTitle>
-          <PropertyFilter />
-        </DialogContent>
-      </Dialog>
+      <div className="relative left-0 top-0 inline-block bg-gradient-to-r from-white via-white via-50% to-transparent pr-5">
+        {/* TODO: fix scrollX and only show when scrollX > somethin */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={scrollLeft}
+        >
+          <ChevronLeftIcon />
+        </Button>
+      </div>
+      <div className="absolute right-0 top-0 flex gap-2 bg-gradient-to-l from-white via-white via-80% to-transparent pl-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={scrollRight}
+        >
+          <ChevronRightIcon />
+        </Button>
+        <FiltersBtn />
+      </div>
     </div>
   );
 }

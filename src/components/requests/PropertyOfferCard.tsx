@@ -16,7 +16,7 @@ import { useMediaQuery } from "../_utils/useMediaQuery";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardFooter } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +53,7 @@ export default function PropertyOfferCard({
       offer: RouterOutputs["biddings"]["getAllPending"][number];
     }) {
   const { data: session } = useSession();
-  const isMobile = useMediaQuery("(max-width: 640px)");
+
   const counter = offer.counters[0];
   const previousCounter = offer.counters[1];
 
@@ -189,19 +189,15 @@ export default function PropertyOfferCard({
           )}
         </div>
       </CardContent>
-      <CardFooter>
-        {isMobile && (
-          <div>
-            <Separator />
-            <div className=" mt-1 max-h-[300px] max-w-[360px] px-5">
-              <MobileSimilarProperties
-                city={offer.property.address!}
-                location={offer.property.address!}
-              />
-            </div>
-          </div>
-        )}
-      </CardFooter>
+      <div className="lg:hidden">
+        <Separator />
+        <div className=" mt-1 max-h-[300px] max-w-[360px] px-5">
+          <MobileSimilarProperties
+            city={offer.property.address!}
+            location={offer.property.address!}
+          />
+        </div>
+      </div>
     </Card>
   );
 }
@@ -249,13 +245,13 @@ function PropertyOfferCardDropdown({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem red onClick={() => setOpenWithdraw(true)}>
-            <TrashIcon />
-            Withdraw
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpenEdit(true)}>
             <Pencil />
             Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem red onClick={() => setOpenWithdraw(true)}>
+            <TrashIcon />
+            Withdraw
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

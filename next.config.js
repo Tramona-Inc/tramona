@@ -98,6 +98,10 @@ const config = {
         protocol: "http",
         hostname: "localhost",
       },
+      {
+        protocol: "https",
+        hostname: "tramona-images.s3.amazonaws.com",
+      },
     ],
   },
   experimental: {
