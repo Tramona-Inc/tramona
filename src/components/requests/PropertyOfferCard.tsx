@@ -37,6 +37,8 @@ function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
       return "green";
     case "Rejected":
       return "red";
+    case "Cancelled":
+      return "red";
   }
 }
 
@@ -62,7 +64,8 @@ export default function PropertyOfferCard({
     counter?.status === "Pending" &&
     counter.userId !== session?.user.id &&
     offer.status !== "Rejected" &&
-    offer.status !== "Accepted";
+    offer.status !== "Accepted" &&
+    offer.status !== "Cancelled";
 
   const badge = (
     <Badge variant={getBadgeColor(offer.status)}>
