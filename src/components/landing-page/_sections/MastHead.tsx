@@ -62,18 +62,21 @@ export default function MastHead() {
           height={0}
           sizes="100vw"
           priority
-          className="h-[900px] w-full select-none object-cover md:w-full lg:h-[750px]"
+          className="pointer-events-none h-[900px] w-full select-none object-cover md:w-full lg:h-[750px]"
         />
       </div>
       <div className="absolute inset-x-0 top-0 z-10 mx-auto max-w-6xl px-4 md:top-10">
-        <div className="mt-6 flex flex-col gap-4 lg:mt-0 lg:flex-row lg:gap-20">
-          <div className="w-96 flex-none space-y-4 lg:space-y-8">
-            <h1 className="text-3xl font-bold leading-tight lg:text-5xl lg:leading-tight">
+        <div className="flex flex-col gap-4 pt-12 lg:mt-0 lg:flex-row lg:gap-20 lg:pt-6">
+          <div className="w-96 flex-none ">
+            <p className="text-xs font-bold uppercase tracking-wide text-black/50 sm:text-sm">
+              $250,000+ saved so far
+            </p>
+            <h1 className="text-balance text-2xl font-bold leading-tight lg:text-[40px] lg:leading-tight">
               Book the same properties you see on Airbnb for less
             </h1>
-            <p className="text-sm leading-tight lg:text-xl">
-              With Airbnb hosts averaging 60% vacancy rates year-round, Tramona
-              matches you with hosts who are willing to meet your price.
+            <p className="text-balance pt-4 text-sm leading-tight lg:pt-8 lg:text-xl">
+              Hosts average 60% vacancy year round. Submit requests and{" "}
+              <b>let hosts send you matches.</b>
             </p>
           </div>
           <div className="flex-1">
@@ -98,58 +101,19 @@ export default function MastHead() {
         </div>
       </div>
     </section>
-
-    // ORIGINAL LANDING PAGE
-
-    // <section className="relative bg-white">
-    //   <div className="absolute inset-x-0 top-0">
-    //     <WelcomeBanner />
-    //   </div>
-    //   <div className="w-full">
-    //     <Image
-    //       src="/assets/images/landing-page/main.png"
-    //       alt=""
-    //       width={0}
-    //       height={0}
-    //       sizes="100vw"
-    //       priority
-    //       className="h-[370px] w-full select-none object-cover md:h-[450px] md:w-full"
-    //     />
-    //   </div>
-
-    //   <div className="absolute -top-12 left-0 right-0 z-10 mx-auto max-w-4xl px-5 pt-24 md:top-10 md:px-8">
-    //     <h1 className="mx-auto max-w-3xl text-center text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl md:leading-tight">
-    //       Book the same properties on Airbnb for less
-    //     </h1>
-    //     <p className="mx-auto mt-8 max-w-lg text-center text-base font-semibold text-gray-900 md:text-lg">
-    //       Airbnb hosts average 60% vacancy rates year round. We match your
-    //       travel request with hosts who accept your price.
-    //     </p>
-    //     <div className="mx-auto mt-10 w-full md:hidden">
-    //       <MobileSearchLayout />
-    //     </div>
-    //   </div>
-    //   <div className="hidden -translate-y-16 px-4 md:block">
-    //     <DesktopSearchLayout />
-    //   </div>
-    //   <p className="px-4 pt-4 text-center text-sm font-medium md:-translate-y-6 md:text-base">
-    //     See a property you like? Make an offer and Tramona will create the deal
-    //     for you. Don&apos;t see a property you like? Request a deal.
-    //   </p>
-    // </section>
   );
 }
 
 export function DesktopSearchLayout() {
   return (
     <div className="space-y-2">
-      <p className="text-sm font-semibold lg:text-base">
+      <p className="hidden text-sm font-semibold lg:block">
         Send a request to every host in{" "}
-        <span className="text-teal-900">
+        <span className="text-teal-700">
           <Typewriter
             component={"span"}
             options={{
-              strings: ["SEATTLE", "LOS ANGELES", "LAS VEGAS", "MIAMI"],
+              strings: ["LOS ANGELES", "PARIS", "MIAMI", "ANY CITY"],
               autoStart: true,
               loop: true,
             }}

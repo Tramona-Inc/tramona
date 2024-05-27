@@ -252,7 +252,7 @@ export default function HomeOfferCard({
             }
             onClick={() => (isLoggedIn ? handleAddToBucketList() : signIn())}
             variant="white"
-            className="rounded-full"
+            className="rounded-full shadow"
           >
             <Plus />
             Add to bucket list
@@ -261,7 +261,7 @@ export default function HomeOfferCard({
         {isInBucketList && (
           <Button
             onClick={() => handleRemoveBucketList()}
-            className="rounded-full bg-[#333333]/90 hover:bg-[#333333]"
+            className="rounded-full bg-zinc-800/90 shadow hover:bg-zinc-800"
           >
             <Minus />
             Added to bucket list

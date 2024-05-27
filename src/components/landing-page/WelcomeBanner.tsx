@@ -12,10 +12,7 @@ export function WelcomeBanner() {
 
   return (
     <div className="flex items-center gap-2 bg-teal-900 px-4 py-2 text-center text-xs font-medium text-teal-50 sm:text-sm">
-      <p className="flex-1">
-        Welcome to Tramona! Enjoy 25% off the same properties you see on Airbnb,
-        Booking.com, and Vrbo!
-      </p>
+      <p className="flex-1">$27,000+ saved so far</p>
       <button
         onClick={() => {
           setHasSeenBanner(true);
