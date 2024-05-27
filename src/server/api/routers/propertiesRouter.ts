@@ -253,7 +253,7 @@ export const propertiesRouter = createTRPCRouter({
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
-        .limit(5)
+        .limit(11)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {

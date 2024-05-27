@@ -67,7 +67,7 @@ export default function Listings() {
   // a ref to the last property element
   const { entry, ref } = useIntersection({
     root: viewportRef.current,
-    threshold: 1,
+    threshold: 0.5,
   });
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function Listings() {
     [properties],
   );
 
-  const skeletons = Array.from({ length: 5 }, (_, index) => (
+  const skeletons = Array.from({ length: 11 }, (_, index) => (
     <div key={index}>
       <Skeleton className="aspect-square rounded-xl" />
       <div className="flex h-[90px] flex-col justify-center">
