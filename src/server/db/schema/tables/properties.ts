@@ -189,6 +189,7 @@ export const properties = pgTable("properties", {
   originalNightlyPrice: integer("original_nightly_price"), // in cents
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),
+  cancellationPolicy: text("cancellation_policy"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
