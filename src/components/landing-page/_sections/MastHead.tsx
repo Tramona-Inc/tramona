@@ -51,9 +51,6 @@ const infoCards = [
 export default function MastHead() {
   return (
     <section className="relative bg-white">
-      <div className="absolute inset-x-0 top-0">
-        <WelcomeBanner />
-      </div>
       <div className="w-full">
         <Image
           src="/assets/images/landing-page.png"
