@@ -1,7 +1,7 @@
 import { Layout, CustomButton } from "./EmailComponents";
 import { Text } from "@react-email/components";
 
-export function PasswordResetEmailLink({
+export default function PasswordResetEmailLink({
   name,
   url,
 }: {

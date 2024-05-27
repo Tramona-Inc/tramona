@@ -1,25 +1,23 @@
 import { Text } from "@react-email/components";
 import { Layout } from "./EmailComponents";
 
-export function GroupInviteEmail({
+export default function SupportEmail({
   email,
   name,
+  message,
 }: {
   email: string;
   name: string | null;
+  message: string;
 }) {
   return (
-    <Layout title_preview="Tramona group invitation">
+    <Layout title_preview="Support Email">
       <div className="pt-2" style={{ textAlign: "center" }}>
         <div className="text-brand px-6 text-left text-base">
           <Text className="text-brand text-left text-2xl font-bold">
-            {name ? `Hi ${name},` : ""}
+            {email ? `Request from ${email},` : ""} {name}
           </Text>
-          <Text className="text-brand text-left">
-            {name ?? email} invited you to their request on Tramona! Sign up at
-            https://tramona.com/auth/signup with this email to be added to the
-            group.
-          </Text>
+          <Text className="text-brand text-left">{message}</Text>
         </div>
       </div>
     </Layout>

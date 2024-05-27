@@ -1,5 +1,5 @@
-import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
-import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
+import PasswordResetEmailLink from "packages/transactional/emails/PasswordResetEmailLink";
+import VerifyEmailLink from "packages/transactional/emails/VerifyEmail";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { db } from "@/server/db";

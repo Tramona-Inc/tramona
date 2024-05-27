@@ -1,7 +1,7 @@
 import { Text } from "@react-email/components";
 import { Layout } from "./EmailComponents";
 
-export function HostTeamInviteEmail({
+export default function HostTeamInviteEmail({
   email,
   name,
 }: {

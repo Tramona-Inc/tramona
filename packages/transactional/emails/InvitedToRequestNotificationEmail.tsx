@@ -6,7 +6,7 @@ interface InvitedToRequestNotificationEmailProps {
   signUpLink: string;
 }
 
-export function InvitedToRequestNotificationEmail({
+export default function InvitedToRequestNotificationEmail({
   userName,
   signUpLink,
 }: InvitedToRequestNotificationEmailProps) {
