@@ -15,7 +15,7 @@ import {
   counterInsertSchema,
   counters,
 } from "@/server/db/schema/tables/counters";
-import { getNumNights } from '@/utils/utils';
+import { getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
@@ -189,7 +189,7 @@ export const biddingRouter = createTRPCRouter({
         .values({ ...input, madeByGroupId: madeByGroupId });
       // }
     }),
-update: protectedProcedure
+  update: protectedProcedure
     .input(bidInsertSchema)
     .mutation(async ({ ctx, input }) => {
       const bid = await ctx.db.query.bids.findFirst({
@@ -223,11 +223,11 @@ update: protectedProcedure
 
       await ctx.db
         .update(bids)
-        .set({ 
+        .set({
           checkIn: input.date.from,
           checkOut: input.date.to,
-          amount: (input.nightlyPrice * 100) * totalNights,
-          statusUpdatedAt: new Date() 
+          amount: input.nightlyPrice * 100 * totalNights,
+          statusUpdatedAt: new Date(),
         })
         .where(eq(bids.id, input.offerId));
     }),
@@ -476,6 +476,40 @@ update: protectedProcedure
       madeByGroupId: groupId,
       propertyId: random(3000, 6000),
       numGuests: random(1, 5),
+    });
+  }),
+
+  getAllPendingHost: roleRestrictedProcedure(["admin"]).query(async () => {
+    return await db.query.bids.findMany({
+      with: {
+        madeByGroup: {
+          with: { members: { with: { user: true } }, invites: true },
+        },
+        property: {
+          columns: {
+            id: true,
+            name: true,
+            address: true,
+            imageUrls: true,
+            originalNightlyPrice: true,
+            longitude: true,
+            latitude: true,
+          },
+        },
+        counters: {
+          orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+          limit: 1,
+          columns: {
+            id: true,
+            counterAmount: true,
+            createdAt: true,
+            status: true,
+            userId: true,
+          },
+        },
+      },
+      where: eq(bids.status, "Pending"),
+      orderBy: desc(bids.createdAt),
     });
   }),
 });
