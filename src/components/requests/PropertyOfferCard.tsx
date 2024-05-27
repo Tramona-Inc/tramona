@@ -190,13 +190,11 @@ export default function PropertyOfferCard({
         </div>
       </CardContent>
       <div className="lg:hidden">
-        <Separator />
-        <div className=" mt-1 max-h-[300px] max-w-[360px] px-5">
-          <MobileSimilarProperties
-            city={offer.property.address!}
-            location={offer.property.address!}
-          />
-        </div>
+        <Separator className="my-1" />
+        <MobileSimilarProperties
+          city={offer.property.address!}
+          location={offer.property.address!}
+        />
       </div>
     </Card>
   );

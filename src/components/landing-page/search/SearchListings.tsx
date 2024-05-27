@@ -67,7 +67,7 @@ export default function SearchListings({
   // memoize the properties, so that they don't get re-rendered on every re-render
   const currentProperties = useMemo(() => {
     if (adjustedProperties !== null) {
-      return adjustedProperties.pages.flatMap((page) => page.data) ?? [];
+      return adjustedProperties.pages.flatMap((page) => page.data);
     }
     return properties?.pages.flatMap((page) => page.data) ?? [];
   }, [adjustedProperties, properties]);
@@ -86,7 +86,7 @@ export default function SearchListings({
 
   return (
     <section
-      className={`relative grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 ${isFilterUndefined ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"}`}
+      className={`relative grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 ${isFilterUndefined ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"}`}
     >
       {isLoading ? (
         // if we're still fetching the initial properties, display the loader

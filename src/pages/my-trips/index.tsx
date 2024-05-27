@@ -7,6 +7,7 @@ import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { api, type RouterOutputs } from "@/utils/api";
+import { BriefcaseIcon, HistoryIcon } from "lucide-react";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
@@ -38,16 +39,12 @@ export default function MyTrips() {
 
         <Tabs defaultValue="upcoming">
           <TabsList>
-            <TabsTrigger
-              value="upcoming"
-              className="px-4 text-lg data-[state=active]:border-b-4 data-[state=active]:border-b-black data-[state=active]:font-bold"
-            >
+            <TabsTrigger value="upcoming">
+              <BriefcaseIcon />
               Upcoming
             </TabsTrigger>
-            <TabsTrigger
-              value="history"
-              className="px-4 text-lg data-[state=active]:border-b-4 data-[state=active]:border-b-black data-[state=active]:font-bold"
-            >
+            <TabsTrigger value="history">
+              <HistoryIcon />
               History
             </TabsTrigger>
           </TabsList>

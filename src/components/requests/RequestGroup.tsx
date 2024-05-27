@@ -47,7 +47,7 @@ export default function RequestGroupCards({
       <div
         key={request.id}
         onClick={() => handleCardClick(request)}
-        className={`cursor-pointer rounded-xl *:h-full ${isSelected ? "outline outline-2 outline-foreground" : ""}`}
+        className={`cursor-pointer rounded-xl border-2 border-transparent *:h-full ${isSelected ? "border-foreground" : ""}`}
       >
         {/* The is selected prop going inside of Request card is just for mobile desktop is handles in activeRequestGroup */}
         <RequestCard request={request} isSelected={isSelected}>

@@ -83,7 +83,7 @@ export default function SearchPage() {
         <Head>
           <title>Tramona</title>
         </Head>
-        <div className="relative mb-20 overflow-x-hidden bg-white">
+        <div className="relative mb-20 bg-white">
           <VerificationBanner />
           {!isMobile ? (
             <div className="mt-32 space-y-8 px-4">
@@ -97,7 +97,7 @@ export default function SearchPage() {
                     <SearchListings isFilterUndefined={isFilterUndefined} />
                   </div>
                   {!isFilterUndefined && (
-                    <div className="col-span-1 max-h-[1000px] md:col-span-1 lg:col-span-2">
+                    <div className="col-span-1 md:col-span-1 lg:col-span-2">
                       <div className="sticky top-16">
                         <SearchPropertiesMap
                           isFilterUndefined={isFilterUndefined}
@@ -142,8 +142,8 @@ function MobileJustSearch() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="fixed top-14 z-30 w-full">
-        <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg bg-white px-3 py-4  text-center font-semibold text-muted-foreground shadow-md">
+      <SheetTrigger className="fixed top-[58px] z-30 w-full">
+        <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg border bg-white px-3 py-4 text-center font-semibold text-muted-foreground shadow-md">
           <SearchIcon />
           Search
         </div>

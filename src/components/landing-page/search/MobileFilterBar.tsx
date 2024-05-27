@@ -1,11 +1,9 @@
 import { useCitiesFilter } from "@/utils/store/cities-filter";
-import { Badge } from "@/components/ui/badge";
+import { Badge, badgeVariants } from "@/components/ui/badge";
 import { XIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
 
 import "swiper/css";
+import { cn } from "@/utils/utils";
 export default function MobileFilterBar() {
   const beds = useCitiesFilter((state) => state.beds);
   const setBeds = useCitiesFilter((state) => state.setBeds);
@@ -22,7 +20,7 @@ export default function MobileFilterBar() {
   };
 
   return (
-    <div className="">
+    <div>
       <FilterBadge value={bedrooms} setValue={setBedrooms} label="Bedrooms" />
 
       <FilterBadge
@@ -54,16 +52,13 @@ interface FilterBadgeProps {
 const FilterBadge = ({ value, setValue, label }: FilterBadgeProps) => {
   return (
     value > 0 && (
-      <Badge variant="primaryGreen" className="mx-2">
-        <button
-          onClick={() => {
-            setValue(0);
-          }}
-        >
-          <XIcon size={15} strokeWidth={2.8} />
-        </button>
+      <button
+        className={cn(badgeVariants({ variant: "primaryGreen" }), "px-2")}
+        onClick={() => setValue(0)}
+      >
+        <XIcon size={15} strokeWidth={2.8} />
         {value} {label}
-      </Badge>
+      </button>
     )
   );
 };

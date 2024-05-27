@@ -2,12 +2,12 @@ import {
   createContext,
   useContext,
   useState,
-  ReactNode,
-  Dispatch,
-  SetStateAction,
+  type ReactNode,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
-import { InfiniteData } from "@tanstack/react-query";
-import { RouterOutputs } from "@/utils/api";
+import { type InfiniteData } from "@tanstack/react-query";
+import { type RouterOutputs } from "@/utils/api";
 // Define the Property type based on your structure
 
 export type AdjustedPropertiesType = InfiniteData<

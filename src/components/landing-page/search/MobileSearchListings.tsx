@@ -7,8 +7,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import SearchListings from "./SearchListings";
 import { useState } from "react";
+import Listings from "../_sections/Listings";
 
 export default function MobileSearchListings({
   isFilterUndefined,
@@ -21,7 +21,8 @@ export default function MobileSearchListings({
       <DrawerTrigger>
         <Button
           size="lg"
-          className="absolute inset-x-0 bottom-32 z-20 mx-auto rounded-full"
+          variant="white"
+          className="fixed inset-x-0 bottom-32 z-20 mx-auto w-max rounded-full px-4 shadow-[2px_2px_15px_#000a]"
           onClick={() => {
             setIsDrawerOpen(true);
           }}
@@ -38,7 +39,7 @@ export default function MobileSearchListings({
             <DrawerDescription>Places within the map area</DrawerDescription>
           )}
         </DrawerHeader>
-        <SearchListings isFilterUndefined={isFilterUndefined} />
+        <Listings />
       </DrawerContent>
     </Drawer>
   );

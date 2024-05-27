@@ -7,10 +7,10 @@ import Head from "next/head";
 import CityRequestsTab from "../../components/requests/CityRequestsTab";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
+import { useIsSm } from "@/utils/utils";
 
 function RequestsTabs() {
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = !useIsSm();
   return (
     <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>

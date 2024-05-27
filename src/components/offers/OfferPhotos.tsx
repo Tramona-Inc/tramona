@@ -26,12 +26,12 @@ export default function OfferPhotos({
       }}
       className="w-full md:h-[700px] md:w-[600px] lg:h-[750px] lg:w-[800px] "
     >
-      <CarouselContent className="">
+      <CarouselContent>
         {propertyImages.map((image, index) => (
           <CarouselItem key={index}>
             <div className="p-1">
               <Card className="flex min-h-[700px] items-center border-none bg-transparent shadow-none">
-                <CardContent className="">
+                <CardContent>
                   <div className="flex items-center">
                     <Image
                       src={image}

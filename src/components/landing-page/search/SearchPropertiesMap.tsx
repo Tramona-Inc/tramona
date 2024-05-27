@@ -122,10 +122,7 @@ function SearchPropertiesMap({
   }, [fetchedAdjustedProperties, setAdjustedProperties]);
 
   const location = useMemo(() => {
-    if (
-      filters.filter?.lat !== undefined &&
-      filters.filter?.long !== undefined
-    ) {
+    if (filters.filter) {
       return {
         lat: filters.filter.lat,
         lng: filters.filter.long,
@@ -165,10 +162,10 @@ function SearchPropertiesMap({
               lng: property.long,
             },
             originalNightlyPrice: property.originalNightlyPrice,
-            id: property.id,
+            id: `${property.id}`,
             image: property.imageUrls[0]!,
           })),
-      ) as Poi[] | [];
+      );
     } else if (initialProperties) {
       return initialProperties.pages.flatMap((page) =>
         page.data
@@ -180,16 +177,16 @@ function SearchPropertiesMap({
               lng: property.long,
             },
             originalNightlyPrice: property.originalNightlyPrice,
-            id: property.id,
+            id: `${property.id}`,
             image: property.imageUrls[0]!,
           })),
-      ) as Poi[] | [];
+      );
     }
     return [];
   }, [adjustedProperties, initialProperties, mapBoundaries]);
 
   useEffect(() => {
-    setMarkers(propertiesCoordinates);
+    setMarkers(propertiesCoordinates as Poi[]);
   }, [propertiesCoordinates]);
 
   const handleCameraChanged = useCallback(
@@ -225,7 +222,7 @@ function SearchPropertiesMap({
     <div
       className={`max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[705px]`}`}
     >
-      {/* {isFilterUndefined ? (
+      {isFilterUndefined ? (
         <div className="flex h-full items-center justify-center">
           Search for a city...
         </div>
@@ -235,9 +232,7 @@ function SearchPropertiesMap({
             {...cameraProps}
             defaultZoom={10}
             defaultCenter={center}
-            onCameraChanged={(ev: MapCameraChangedEvent) =>
-              handleCameraChanged(ev)
-            }
+            onCameraChanged={handleCameraChanged}
           >
             <PoiMarkers pois={markers} />
           </Map>
@@ -246,7 +241,7 @@ function SearchPropertiesMap({
         <div className="flex h-full w-full items-center justify-center">
           <Spinner />
         </div>
-      )} */}
+      )}
     </div>
   );
 }
