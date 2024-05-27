@@ -19,7 +19,7 @@ import { getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
-import { and, desc, eq, exists } from "drizzle-orm";
+import { and, desc, eq, exists, inArray } from "drizzle-orm";
 import { random } from "lodash";
 import { z } from "zod";
 import {
@@ -479,37 +479,53 @@ export const biddingRouter = createTRPCRouter({
     });
   }),
 
-  getAllPendingHost: roleRestrictedProcedure(["admin"]).query(async () => {
-    return await db.query.bids.findMany({
-      with: {
-        madeByGroup: {
-          with: { members: { with: { user: true } }, invites: true },
-        },
-        property: {
+  getAllHostPending: roleRestrictedProcedure(["host"]).query(
+    async ({ ctx }) => {
+      const allHostProperties = (
+        await db.query.properties.findMany({
+          where: eq(properties.hostId, ctx.user.id),
           columns: {
             id: true,
-            name: true,
-            address: true,
-            imageUrls: true,
-            originalNightlyPrice: true,
-            longitude: true,
-            latitude: true,
+          },
+        })
+      ).map((property) => property.id);
+
+      const allActiveBids = await db.query.bids.findMany({
+        with: {
+          madeByGroup: {
+            with: { members: { with: { user: true } }, invites: true },
+          },
+          property: {
+            columns: {
+              id: true,
+              name: true,
+              address: true,
+              imageUrls: true,
+              originalNightlyPrice: true,
+              longitude: true,
+              latitude: true,
+            },
+          },
+          counters: {
+            orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+            limit: 1,
+            columns: {
+              id: true,
+              counterAmount: true,
+              createdAt: true,
+              status: true,
+              userId: true,
+            },
           },
         },
-        counters: {
-          orderBy: (counters, { desc }) => [desc(counters.createdAt)],
-          limit: 1,
-          columns: {
-            id: true,
-            counterAmount: true,
-            createdAt: true,
-            status: true,
-            userId: true,
-          },
-        },
-      },
-      where: eq(bids.status, "Pending"),
-      orderBy: desc(bids.createdAt),
-    });
-  }),
+        where: and(
+          eq(bids.status, "Pending"),
+          inArray(bids.propertyId, allHostProperties),
+        ),
+        orderBy: desc(bids.createdAt),
+      });
+
+      return allActiveBids;
+    },
+  ),
 });
