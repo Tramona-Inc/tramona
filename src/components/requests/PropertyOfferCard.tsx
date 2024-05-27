@@ -192,8 +192,8 @@ export default function PropertyOfferCard({
       <div className="lg:hidden">
         <Separator className="my-1" />
         <MobileSimilarProperties
-          city={offer.property.address!}
-          location={offer.property.address!}
+          city={offer.property.address}
+          location={offer.property.address}
         />
       </div>
     </Card>
