@@ -86,7 +86,7 @@ export default function SearchPage() {
         <div className="relative mb-20 overflow-x-hidden bg-white">
           <VerificationBanner />
           {!isMobile ? (
-            <div className="mt-32 flex flex-col items-center justify-center gap-y-8 px-4">
+            <div className="mt-32 space-y-8 px-4">
               <DynamicDesktopSearchBar />
               <div className="space-y-4">
                 <CitiesFilter />

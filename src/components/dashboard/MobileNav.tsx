@@ -1,7 +1,7 @@
 import { guestMenuNavLinks } from "@/config/menuNavLinks";
 import {
   adminNavLinks,
-  guestNavLinks,
+  guestMobileNavLinks,
   hostMobileNavLinks,
   unloggedNavLinks,
 } from "@/config/sideNavLinks";
@@ -49,13 +49,13 @@ function BottomNavLink({
         <div
           className={cn(
             "relative flex flex-col items-center text-center text-xs font-medium",
-            selected ? "text-[#2F5BF6]" : "text-[#5B616D]",
+            selected ? "text-teal-700" : "text-muted-foreground",
           )}
         >
           <Icon
             className={cn(
               "size-8",
-              selected ? "text-[#2F5BF6]" : "text-[#5B616D]",
+              selected ? "text-teal-700" : "text-muted-foreground",
             )}
           />
           {children}
@@ -86,12 +86,12 @@ export default function MobileNav({
         ? hostMobileNavLinks
         : isAdmin
           ? [
-              ...guestNavLinks,
+              ...guestMobileNavLinks,
               { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
           : type == "unlogged"
             ? unloggedNavLinks
-            : guestNavLinks;
+            : guestMobileNavLinks;
 
   return (
     <header className="fixed bottom-0 z-50 flex h-mobile-header-height w-full items-center bg-white lg:hidden">
@@ -115,7 +115,7 @@ export default function MobileNav({
               <SheetTrigger>
                 <div
                   className={cn(
-                    "relative flex flex-col items-center justify-center text-center text-xs font-medium text-[#5B616D]",
+                    "relative flex flex-col items-center justify-center text-center text-xs font-medium text-muted-foreground",
                   )}
                 >
                   <LucideMenu className="size-8" />
@@ -124,52 +124,46 @@ export default function MobileNav({
               </SheetTrigger>
               <SheetContent side={"top"} className="flex flex-col space-y-5">
                 <h2 className="text-2xl font-bold">Menu</h2>
+                <Link href="/messages" className="flex gap-4 py-3 font-light">
+                  <MessageSquareMore />
+                  Messages
+                </Link>
                 <div>
-                  <div className="mb-4 flex flex-col space-y-6">
-                    <div className="flex flex-row gap-x-4">
-                      <MessageSquareMore />
-                      <Link href="/messages" className="font-light">
-                        {"Messages"}
-                      </Link>
-                    </div>
-                  </div>
-                  <h3 className="mb-5 text-sm font-semibold uppercase tracking-tight">
+                  <h3 className="text-sm font-semibold uppercase tracking-tight">
                     Account
                   </h3>
-                  <div className="flex flex-col">
-                    {guestMenuNavLinks.map((link) => (
-                      <Link
-                        href={link.href}
-                        key={link.href}
-                        className="flex gap-4 py-3 font-light"
-                      >
-                        {link.icon}
-                        {link.name}
-                      </Link>
-                    ))}
-                    <div className="flex flex-col gap-y-4 ">
-                      <div
-                        className="flex cursor-pointer flex-row gap-x-4"
-                        onClick={() => setIsExpanded(!isExpanded)}
-                      >
-                        {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                        <div className="font-light">More</div>
-                      </div>
-                      {isExpanded && (
-                        <div className="flex flex-col gap-y-2">
-                          <Separator />
-                          <div className="flex flex-row gap-x-4">
-                            <NotepadTextIcon />
-                            <Link href="/support" className="font-light">
-                              Terms
-                            </Link>
-                          </div>
-                          <div className="mt-4 w-full text-center text-xs text-muted-foreground">
-                            © {currentYear} Tramona. All rights reserved.
-                          </div>
+                  {guestMenuNavLinks.map((link) => (
+                    <Link
+                      href={link.href}
+                      key={link.href}
+                      className="flex gap-4 py-3 font-light"
+                    >
+                      {link.icon}
+                      {link.name}
+                    </Link>
+                  ))}
+                  <div className="flex flex-col gap-y-4">
+                    <button
+                      className="flex gap-4 py-3"
+                      onClick={() => setIsExpanded(!isExpanded)}
+                    >
+                      {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                      <div className="font-light">More</div>
+                    </button>
+                    {isExpanded && (
+                      <div className="flex flex-col gap-y-2">
+                        <Separator />
+                        <div className="flex flex-row gap-x-4">
+                          <NotepadTextIcon />
+                          <Link href="/support" className="font-light">
+                            Terms
+                          </Link>
                         </div>
-                      )}
-                    </div>
+                        <div className="mt-4 w-full text-center text-xs text-muted-foreground">
+                          © {currentYear} Tramona. All rights reserved.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -205,7 +199,7 @@ export default function MobileNav({
               <DropdownMenuTrigger>
                 <div
                   className={cn(
-                    "relative flex flex-col items-center justify-center text-center text-xs font-medium text-[#5B616D]",
+                    "relative flex flex-col items-center justify-center text-center text-xs font-medium text-muted-foreground",
                   )}
                 >
                   <LucideMenu className="size-8" />

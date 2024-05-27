@@ -12,7 +12,6 @@ import {
   Menu,
   Settings,
   Wallet,
-  MessageSquareMore,
   ShieldQuestion,
   Contact,
   MessageCircleQuestion,
@@ -46,13 +45,13 @@ function SidebarLink({
         <div
           className={cn(
             "relative flex transform items-center gap-4 p-4 text-center font-medium transition-all hover:translate-x-1 lg:flex-col lg:gap-1 lg:px-2 lg:py-3 lg:text-xs",
-            selected ? "text-[#2F5BF6]" : "text-[#5B616D",
+            selected ? "text-teal-700" : "text-muted-foreground",
           )}
         >
           <Icon
             className={cn(
               "size-6 lg:size-8",
-              selected ? "text-[#2F5BF6]" : "text-[#5B616D]",
+              selected ? "text-teal-700" : "text-muted-foreground",
             )}
           />
 
