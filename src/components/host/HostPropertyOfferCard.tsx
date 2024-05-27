@@ -13,6 +13,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
+import EditPropertyOfferDialog from "../requests/EditPropertyOfferDialog";
+import RequestGroupAvatars from "../requests/RequestGroupAvatars";
+import WithdrawPropertyOfferDialog from "../requests/WithdrawPropertyOfferDialog";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -23,10 +26,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Separator } from "../ui/separator";
-import WithdrawPropertyOfferDialog from '../requests/WithdrawPropertyOfferDialog';
-import RequestGroupAvatars from '../requests/RequestGroupAvatars';
-import MobileSimilarProperties from '../requests/MobileSimilarProperties';
-import EditPropertyOfferDialog from '../requests/EditPropertyOfferDialog';
 function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
     case "Pending":
@@ -86,7 +85,7 @@ export default function HostPropertyOfferCard({
   const originalNightlyBiddingOffer = offer.amount / totalNights;
 
   return (
-    <Card className="cursor-pointer p-0 lg:overflow-clip">
+    <Card className="w-full cursor-pointer p-0 lg:overflow-clip">
       <CardContent className="flex">
         <Link
           href={`/property/${offer.propertyId}`}
@@ -187,13 +186,13 @@ export default function HostPropertyOfferCard({
           )}
         </div>
       </CardContent>
-      <div className="lg:hidden">
+      {/* <div className="lg:hidden">
         <Separator className="my-1" />
         <MobileSimilarProperties
-          city={offer.property.address!}
-          location={offer.property.address!}
+          city={offer.property.address}
+          location={offer.property.address}
         />
-      </div>
+      </div> */}
     </Card>
   );
 }
