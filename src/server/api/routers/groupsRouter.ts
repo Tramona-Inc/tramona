@@ -1,4 +1,4 @@
-import { GroupInviteEmail } from "@/components/email-templates/GroupInviteEmail";
+import GroupInviteEmail from "packages/transactional/emails/GroupInviteEmail";
 import { groupInvites, groupMembers, groups, users } from "@/server/db/schema";
 import { getGroupOwnerId, sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
