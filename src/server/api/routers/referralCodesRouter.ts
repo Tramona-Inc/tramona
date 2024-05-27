@@ -1,4 +1,4 @@
-import { RequestCashback } from "@/components/email-templates/RequestCashback";
+import RequestCashback from "packages/transactional/emails/RequestCashback";
 import {
   createTRPCRouter,
   protectedProcedure,

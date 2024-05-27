@@ -22,13 +22,13 @@ export default function CityRequestsTab() {
   return requests.activeRequestGroups.length !== 0 ? (
     <div>
       {isMobile && (
-        <p className="my-5 flex w-11/12 px-4 text-sm md:hidden">
+        <p className="my-5 w-11/12 px-4 text-sm md:hidden">
           Submit bids while waiting for your request to increase your chance of
           getting a great deal.
         </p>
       )}
       <div className="flex h-screen-minus-header gap-8">
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1">
           <NewCityRequestBtn />
           <RequestCards
             requestGroups={requests.activeRequestGroups}

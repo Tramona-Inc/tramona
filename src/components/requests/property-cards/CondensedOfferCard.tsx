@@ -8,8 +8,11 @@ export default function CondensedOfferCard({
   property: Pick<Property, "id" | "imageUrls" | "name">;
 }) {
   return (
-    <div className="space-y-2">
-      <Link href={`/property/${property.id}`} className="relative size-40">
+    <div className="w-40 space-y-2">
+      <Link
+        href={`/property/${property.id}`}
+        className="relative block h-40 w-full overflow-clip rounded-md"
+      >
         <Image
           src={property.imageUrls[0]!}
           alt=""

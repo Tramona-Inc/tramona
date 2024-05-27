@@ -69,8 +69,8 @@ export default function CitiesFilter() {
   }
 
   return (
-    <div className="relative h-12">
-      <div className="absolute inset-0">
+    <div className="sticky top-header-height z-10 h-14 border-b bg-white">
+      <div className="absolute inset-2">
         <ScrollArea ref={ref} viewportRef={viewportRef}>
           <div className="flex gap-1 pb-2 pl-12 pr-40">
             {cities.map((city) => (
@@ -90,7 +90,7 @@ export default function CitiesFilter() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
-      <div className="pointer-events-none relative left-0 top-0 inline-block bg-gradient-to-r from-white via-white via-50% to-transparent pr-5">
+      <div className="pointer-events-none relative left-0 top-2 inline-block bg-gradient-to-r from-white via-white via-50% to-transparent pr-5">
         {/* TODO: fix scrollX and only show when scrollX > somethin */}
         <Button
           variant="ghost"
@@ -101,7 +101,7 @@ export default function CitiesFilter() {
           <ChevronLeftIcon />
         </Button>
       </div>
-      <div className="pointer-events-none absolute right-0 top-0 flex gap-2 bg-gradient-to-l from-white via-white via-80% to-transparent pl-4">
+      <div className="pointer-events-none absolute right-0 top-2 flex gap-2 bg-gradient-to-l from-white via-white via-80% to-transparent pl-4">
         <Button
           variant="ghost"
           size="icon"

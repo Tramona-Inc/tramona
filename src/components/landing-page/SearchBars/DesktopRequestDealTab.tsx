@@ -124,7 +124,7 @@ export function DesktopRequestDealTab() {
                 <Button
                   variant="ghost"
                   type="button"
-                  className="p-0 font-bold text-teal-900 hover:bg-transparent"
+                  className="px-2 text-teal-900 hover:bg-teal-900/15"
                 >
                   <FilterIcon />
                   More filters

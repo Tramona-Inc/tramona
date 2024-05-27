@@ -12,7 +12,7 @@ interface BookingAddedNotificationEmailProps {
   tripDetailLink: string;
 }
 
-export function BookingAddedNotificationEmail({
+export default function BookingAddedNotificationEmail({
   userName = "User",
   checkIn = "January 24",
   checkOut = "January 29",

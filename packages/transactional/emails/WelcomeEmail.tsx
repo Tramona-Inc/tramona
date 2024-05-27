@@ -2,7 +2,7 @@ import { Img, Text } from "@react-email/components";
 
 import { Layout, CustomButton } from "./EmailComponents";
 
-export function WelcomeEmail() {
+export default function WelcomeEmail() {
   return (
     <Layout title_preview="Welcome to Tramona">
       <div className="pb-4 pt-2" style={{ textAlign: "center" }}>

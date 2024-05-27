@@ -127,7 +127,7 @@ export default function MobileNav({
                           Terms
                         </Link>
                       </div>
-                      <div className="mt-4 w-full text-center text-xs text-muted-foreground">
+                      <div className="mb-2 mt-4 w-full text-center text-xs text-muted-foreground">
                         © {currentYear} Tramona. All rights reserved.
                       </div>
                     </div>
@@ -141,8 +141,7 @@ export default function MobileNav({
                     <Button asChild variant="darkOutline">
                       <Link href="/">Switch to Traveler</Link>
                     </Button>
-                  ) : !isHost ? // <Button asChild variant="darkOutline">
-                  //   <Link href="/host-onboarding">Become a host</Link>
+                  ) : !isHost ? //   <Link href="/host-onboarding">Become a host</Link> // <Button asChild variant="darkOutline">
                   // </Button>
                   null : (
                     <Button asChild variant="darkOutline">

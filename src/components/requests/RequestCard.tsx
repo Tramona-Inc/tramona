@@ -12,23 +12,13 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import {
-  CalendarIcon,
-  EllipsisIcon,
-  FilterIcon,
-  MapPinIcon,
-  TrashIcon,
-  UsersIcon,
-} from "lucide-react";
-import { Badge } from "../ui/badge";
-import { Card, CardContent, CardFooter } from "../ui/card";
+import { EllipsisIcon, MapPinIcon, TrashIcon } from "lucide-react";
+import { Card, CardContent } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import RequestCardBadge from "./RequestCardBadge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestDialog from "./WithdrawRequestDialog";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 
 import MobileSimilarProperties from "./MobileSimilarProperties";
 import { Separator } from "../ui/separator";
@@ -58,7 +48,6 @@ export default function RequestCard({
       isSelected?: boolean;
     }
 >) {
-  const isMobile = useMediaQuery("(max-width: 640px)");
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
@@ -131,43 +120,24 @@ export default function RequestCard({
             {request.location}
           </h2>
         </div>
-        <div className="space-y-1 text-sm text-primary  md:space-y-0 md:text-base">
-          <p className="text-sm font-semibold text-primary md:text-base ">
-            Requested <span className=" text-foreground">{fmtdPrice}</span>
-            <span className="text-sm">/night</span>
-          </p>
-          <div className="flex items-center gap-1">
-            <p className="mr-3 font-semibold">{fmtdDateRange}</p>
-          </div>
-          {fmtdFilters && (
-            <div className="flex items-center gap-1 font-light">
-              <p>{fmtdFilters}</p>
-            </div>
-          )}
+        <div>
+          <p>Requested {fmtdPrice}/night</p>
+          <p>{fmtdDateRange}</p>
+          {fmtdFilters && <p>{fmtdFilters}</p>}
+          {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
+          <p>{fmtdNumGuests}</p>
         </div>
-        {request.note && (
-          <div className="rounded-md bg-muted p-2 text-sm text-muted-foreground">
-            <p>&ldquo;{request.note}&rdquo;</p>
+        <div className="flex justify-end">{children}</div>
+        {isSelected && (
+          <div className="lg:hidden">
+            <Separator className="my-1" />
+            <MobileSimilarProperties
+              location={request.location}
+              city={request.location}
+            />
           </div>
         )}
       </CardContent>
-      <CardFooter className="">
-        <div className="-mt-3 flex w-full flex-col justify-between gap-y-2 md:mt-0  md:flex-row md:gap-y-0">
-          <div className="mb-1 flex flex-row items-center space-x-1 font-semibold">
-            <p>{fmtdNumGuests}</p>
-          </div>
-          {children}
-          {isMobile && isSelected && (
-            <div className="flex flex-col gap-y-2">
-              <Separator className="mt-3" />
-              <MobileSimilarProperties
-                location={request.location}
-                city={request.location}
-              />
-            </div>
-          )}
-        </div>
-      </CardFooter>
     </Card>
   );
 }

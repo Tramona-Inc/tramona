@@ -16,10 +16,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ListFilterIcon } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function Total({
   name,
@@ -112,13 +112,14 @@ export default function MobilePropertyFilter() {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button variant="secondary">
-          <ListFilterIcon /> Filters
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="secondary" type="button">
+          <ListFilterIcon />
+          Filters
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="h-[500px]">
+      </PopoverTrigger>
+      <PopoverContent className="bg-white">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -250,7 +251,7 @@ export default function MobilePropertyFilter() {
               )}
             />
 
-            <div className="flex flex-row justify-around">
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="secondary"
@@ -262,7 +263,7 @@ export default function MobilePropertyFilter() {
             </div>
           </form>
         </Form>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverContent>
+    </Popover>
   );
 }

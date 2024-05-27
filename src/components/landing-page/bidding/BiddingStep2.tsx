@@ -51,7 +51,7 @@ function BiddingInfoCard({ property }: { property: Property }) {
         </div>
         <div className="flex flex-col text-sm tracking-tight md:text-base">
           <h2 className="font-bold ">{property.name}</h2>
-          {property.originalNightlyPrice && (
+          {property.originalNightlyPrice !== null && (
             <p className="text-xs md:text-base">
               Airbnb price: {formatCurrency(property.originalNightlyPrice)}
               /night
