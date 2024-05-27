@@ -121,26 +121,29 @@ export default function ProfilePage() {
             image={profileInfo?.image}
           />
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:-ml-4 lg:mt-0">
-            <div className="flex flex-row items-center justify-start gap-x-2 lg:-translate-x-20">
-              <h2 className="text-xl font-bold lg:text-2xl">
-                {profileInfo?.name}
-              </h2>
-              {verificationStatus?.isIdentityVerified == "true" ? (
-                <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
-                  <BadgeCheck size={22} /> Verified
-                </div>
-              ) : verificationStatus?.isIdentityVerified == "pending" ? (
-                <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
-                  <Clock2Icon size={22} /> Pending
-                </div>
-              ) : (
-                <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
-                  <BadgeXIcon size={22} /> Not Verified
-                </div>
-              )}
+            <div className="lg:-translate-x-20">
+              <div className="flex items-center gap-x-2">
+                <h2 className="text-xl font-bold lg:text-2xl">
+                  {profileInfo?.name}
+                </h2>
+                {verificationStatus?.isIdentityVerified == "true" ? (
+                  <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
+                    <BadgeCheck size={22} /> Verified
+                  </div>
+                ) : verificationStatus?.isIdentityVerified == "pending" ? (
+                  <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
+                    <Clock2Icon size={22} /> Pending
+                  </div>
+                ) : (
+                  <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
+                    <BadgeXIcon size={22} /> Not Verified
+                  </div>
+                )}
+              </div>
+
+              <p className="font-semibold">{profileInfo?.location}</p>
             </div>
 
-            <p className="font-semibold">{profileInfo?.location}</p>
             <div className="mt-2 flex space-x-2">
               {profileInfo?.socials?.[0] && (
                 <Facebook href={profileInfo.socials[0]} />
