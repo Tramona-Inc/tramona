@@ -1,12 +1,10 @@
-import NavLink from "../_utils/NavLink";
-
 import {
   adminNavLinks,
   guestNavLinks,
   hostNavLinks,
 } from "@/config/sideNavLinks";
 import { api } from "@/utils/api";
-import { cn, plural } from "@/utils/utils";
+import { plural } from "@/utils/utils";
 import {
   ArrowLeftRight,
   Menu,
@@ -28,39 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-
-function SidebarLink({
-  href,
-  children,
-  icon: Icon,
-}: {
-  href: string;
-  children: React.ReactNode;
-  icon: React.FC<{ className?: string }>;
-}) {
-  return (
-    <NavLink
-      href={href}
-      render={({ selected }) => (
-        <div
-          className={cn(
-            "relative flex transform items-center gap-4 p-4 text-center font-medium transition-all hover:translate-x-1 lg:flex-col lg:gap-1 lg:px-2 lg:py-3 lg:text-xs",
-            selected ? "text-teal-700" : "text-muted-foreground",
-          )}
-        >
-          <Icon
-            className={cn(
-              "size-6 lg:size-8",
-              selected ? "text-teal-700" : "text-muted-foreground",
-            )}
-          />
-
-          {children}
-        </div>
-      )}
-    />
-  );
-}
+import { NavBarLink } from "./NavBarLink";
 
 export default function Sidebar({
   type,
@@ -118,12 +84,12 @@ export default function Sidebar({
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-center gap-2">
+      <div className="flex flex-1 flex-col gap-2 pt-8">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
-            <SidebarLink href={link.href} icon={link.icon}>
+            <NavBarLink href={link.href} icon={link.icon}>
               {link.name}
-            </SidebarLink>
+            </NavBarLink>
             {totalUnreadMessages !== undefined &&
               totalUnreadMessages > 0 &&
               link.name === "Messages" && (

@@ -65,9 +65,9 @@ export default function MastHead() {
           className="pointer-events-none h-[900px] w-full select-none object-cover md:w-full lg:h-[750px]"
         />
       </div>
-      <div className="absolute inset-x-0 top-0 z-10 mx-auto max-w-6xl px-4 md:top-10">
-        <div className="flex flex-col gap-4 pt-12 lg:mt-0 lg:flex-row lg:gap-20 lg:pt-6">
-          <div className="w-96 flex-none ">
+      <div className="absolute inset-x-0 top-0 z-10 mx-auto max-w-6xl px-4">
+        <div className="flex flex-col gap-4 pt-6 lg:flex-row lg:gap-20 lg:pt-11">
+          <div className="w-96 flex-none">
             <p className="text-xs font-bold uppercase tracking-wide text-black/50 sm:text-sm">
               $250,000+ saved so far
             </p>

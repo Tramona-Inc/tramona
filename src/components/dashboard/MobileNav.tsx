@@ -25,45 +25,13 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useSession, signOut } from "next-auth/react";
-import NavLink from "../_utils/NavLink";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
-function BottomNavLink({
-  href,
-  children,
-  icon: Icon,
-}: {
-  href: string;
-  children: React.ReactNode;
-  icon: React.FC<{ className?: string }>;
-}) {
-  return (
-    <NavLink
-      href={href}
-      render={({ selected }) => (
-        <div
-          className={cn(
-            "relative flex flex-col items-center text-center text-xs font-medium",
-            selected ? "text-teal-700" : "text-muted-foreground",
-          )}
-        >
-          <Icon
-            className={cn(
-              "size-8",
-              selected ? "text-teal-700" : "text-muted-foreground",
-            )}
-          />
-          {children}
-        </div>
-      )}
-    />
-  );
-}
+import { NavBarLink } from "./NavBarLink";
 
 export default function MobileNav({
   type,
@@ -94,7 +62,7 @@ export default function MobileNav({
             : guestMobileNavLinks;
 
   return (
-    <header className="fixed bottom-0 z-50 flex h-mobile-header-height w-full items-center bg-white lg:hidden">
+    <header className="fixed bottom-0 z-50 flex h-mobile-header-height w-full items-center bg-zinc-100 shadow-md lg:hidden">
       {/* <div className="grid w-full grid-cols-5"> */}
       <div
         className={cn(
@@ -103,9 +71,9 @@ export default function MobileNav({
         )}
       >
         {navLinks.map((link, index) => (
-          <BottomNavLink key={index} href={link.href} icon={link.icon}>
+          <NavBarLink key={index} href={link.href} icon={link.icon}>
             {link.name}
-          </BottomNavLink>
+          </NavBarLink>
         ))}
 
         {/* Menu items */}
@@ -122,49 +90,48 @@ export default function MobileNav({
                   <p>Menu</p>
                 </div>
               </SheetTrigger>
-              <SheetContent side={"top"} className="flex flex-col space-y-5">
+              <SheetContent side={"top"}>
                 <h2 className="text-2xl font-bold">Menu</h2>
                 <Link href="/messages" className="flex gap-4 py-3 font-light">
                   <MessageSquareMore />
                   Messages
                 </Link>
-                <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-tight">
-                    Account
-                  </h3>
-                  {guestMenuNavLinks.map((link) => (
-                    <Link
-                      href={link.href}
-                      key={link.href}
-                      className="flex gap-4 py-3 font-light"
-                    >
-                      {link.icon}
-                      {link.name}
-                    </Link>
-                  ))}
-                  <div className="flex flex-col gap-y-4">
-                    <button
-                      className="flex gap-4 py-3"
-                      onClick={() => setIsExpanded(!isExpanded)}
-                    >
-                      {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                      <div className="font-light">More</div>
-                    </button>
-                    {isExpanded && (
-                      <div className="flex flex-col gap-y-2">
-                        <Separator />
-                        <div className="flex flex-row gap-x-4">
-                          <NotepadTextIcon />
-                          <Link href="/support" className="font-light">
-                            Terms
-                          </Link>
-                        </div>
-                        <div className="mt-4 w-full text-center text-xs text-muted-foreground">
-                          © {currentYear} Tramona. All rights reserved.
-                        </div>
+
+                <h3 className="pt-2 text-sm font-semibold uppercase tracking-tight">
+                  Account
+                </h3>
+                {guestMenuNavLinks.map((link) => (
+                  <Link
+                    href={link.href}
+                    key={link.href}
+                    className="flex gap-4 py-3 font-light"
+                  >
+                    {link.icon}
+                    {link.name}
+                  </Link>
+                ))}
+                <div className="flex flex-col">
+                  <button
+                    className="flex gap-4 py-3"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                  >
+                    {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                    <div className="font-light">More</div>
+                  </button>
+                  {isExpanded && (
+                    <div className="flex flex-col gap-y-2">
+                      <Separator />
+                      <div className="flex flex-row gap-x-4">
+                        <NotepadTextIcon />
+                        <Link href="/support" className="font-light">
+                          Terms
+                        </Link>
                       </div>
-                    )}
-                  </div>
+                      <div className="mt-4 w-full text-center text-xs text-muted-foreground">
+                        © {currentYear} Tramona. All rights reserved.
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />

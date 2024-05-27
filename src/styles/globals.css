@@ -30,7 +30,7 @@
     --radius: 0.5rem;
     --mobile-header-height: 83px;
     --header-height: 56px;
-    --footer-height: 72px;
+    --footer-height: var(--mobile-header-height);
     --screen-minus-header: calc(100vh - var(--header-height));
     --screen-minus-header-n-footer: calc(
       100vh - var(--header-height) - var(--footer-height)
@@ -40,6 +40,12 @@
   @media (min-width: 640px) {
     :root {
       --header-height: 72px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --footer-height: 0px;
     }
   }
 

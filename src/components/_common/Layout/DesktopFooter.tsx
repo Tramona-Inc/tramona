@@ -26,7 +26,7 @@ const DesktopFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bottom-0 z-50 bg-black text-white md:block">
+    <footer className="z-50 bg-black text-white md:block">
       <div className=" mx-auto flex w-11/12  justify-center px-4 py-2 text-xs lg:text-base">
         {/* <hr className="my-6 h-px border-none bg-neutral-300" /> */}
         <div className="flex w-full flex-col items-center justify-center gap-2 text-center md:flex-row md:justify-between">
