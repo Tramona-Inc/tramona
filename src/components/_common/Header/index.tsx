@@ -78,7 +78,7 @@ function LargeHeader(props: HeaderProps) {
         <SupportBtn />
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
-            {session?.user.role === "host" && pathname === "/host" ? (
+            {session?.user.role === "host" && pathname.includes("/host") ? (
               <Link href="/">Switch to Traveler</Link>
             ) : session?.user.role !==
               "host" ? // <Link href="/host-onboarding">Become a host</Link>
