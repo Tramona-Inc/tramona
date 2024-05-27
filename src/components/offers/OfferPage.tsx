@@ -215,6 +215,9 @@ export default function OfferPage({
         <a href="#amenities" className="text-gray-600 hover:text-gray-800">
           Amenities
         </a>
+        <a href="#cancellation" className="text-gray-600 hover:text-gray-800">
+          Cancellation Policy
+        </a>
         {property.checkInTime && (
           <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
             House rules
@@ -309,6 +312,19 @@ export default function OfferPage({
                 </DialogContent>
               </Dialog>
             )}
+          </section>
+          <section id="cancellation" className="scroll-mt-36">
+            <h1 className="text-lg font-semibold md:text-xl">
+              Cancellation Policy
+            </h1>
+            <div className="py-2">
+              <p className="text-sm font-medium text-black">
+                {property.cancellationPolicy ||
+                property.cancellationPolicy?.toLowerCase() === "n/a"
+                  ? property.cancellationPolicy
+                  : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+              </p>
+            </div>
           </section>
         </div>
         <div className="flex-1">

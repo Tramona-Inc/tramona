@@ -141,12 +141,14 @@ export default function RequestCard({
           {fmtdFilters && (
             <div className="flex items-center gap-1 font-light">
               <p>{fmtdFilters}</p>
+              <div> hj</div>
             </div>
           )}
         </div>
         {request.note && (
           <div className="rounded-md bg-muted p-2 text-sm text-muted-foreground">
             <p>&ldquo;{request.note}&rdquo;</p>
+            <div>hi</div>
           </div>
         )}
       </CardContent>
