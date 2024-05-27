@@ -1,12 +1,36 @@
+import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
+import { Button } from "@/components/ui/button";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
+import { FilterXIcon } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import HomeOfferCard from "../HomeOfferCard";
-import { Button } from "@/components/ui/button";
-import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
-import { FilterXIcon } from "lucide-react";
+
+function NoProperties() {
+  const filters = useCitiesFilter((state) => state);
+
+  return (
+    <div className="col-span-full flex min-h-80 flex-col items-center justify-center gap-4">
+      <ListingsEmptySvg />
+      <p className="text-xl font-semibold">
+        Sorry, we couldn&apos;t find any properties for your search
+      </p>
+      <p className="text-balance text-center text-muted-foreground">
+        Clear filters and try again, or <b>request a deal</b> above to have us
+        connect you with our host network!
+      </p>
+
+      <div className="flex w-64 flex-col gap-2">
+        <Button variant="secondary" onClick={() => filters.clearFilter()}>
+          <FilterXIcon className="size-5" />
+          Clear filters
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function Listings() {
   const filters = useCitiesFilter((state) => state);
@@ -63,7 +87,7 @@ export default function Listings() {
     [properties],
   );
 
-  const skeletons = Array.from({ length: 12 }, (_, index) => (
+  const skeletons = Array.from({ length: 5 }, (_, index) => (
     <div key={index}>
       <Skeleton className="aspect-square rounded-xl" />
       <div className="flex h-[90px] flex-col justify-center">
@@ -80,33 +104,31 @@ export default function Listings() {
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
         <>{skeletons}</>
-      ) : currentProperties.length > 0 ? (
+      ) : !!currentProperties.length ? (
         // if there are currentProperties to show, display them
         <>
-          {currentProperties.map((property) => (
-            <HomeOfferCard key={property.id} property={property} />
+          {currentProperties.map((property, i) => (
+            <>
+              {i === currentProperties.length - 1 ? (
+                <div ref={ref} key={property.id}>
+                  <HomeOfferCard key={property.id} property={property} />
+                </div>
+              ) : (
+                <div key={property.id}>
+                  <HomeOfferCard key={property.id} property={property} />
+                </div>
+              )}
+            </>
           ))}
-          {isFetchingNextPage && skeletons}
-          <div ref={ref} className="absolute bottom-[calc(100vh-12rem)]"></div>
+          {isFetchingNextPage && <>{skeletons}</>}
+          {!isFetchingNextPage &&
+            properties?.pages.length &&
+            !properties.pages[properties.pages.length - 1]?.nextCursor && (
+              <NoProperties />
+            )}
         </>
       ) : (
-        <div className="col-span-full flex min-h-80 flex-col items-center justify-center gap-4">
-          <ListingsEmptySvg />
-          <p className="text-xl font-semibold">
-            Sorry, we couldn&apos;t find any properties for your search
-          </p>
-          <p className="text-balance text-center text-muted-foreground">
-            Clear filters and try again, or <b>request a deal</b> above to have
-            us connect you with our host network!
-          </p>
-
-          <div className="flex w-64 flex-col gap-2">
-            <Button variant="secondary" onClick={() => filters.clearFilter()}>
-              <FilterXIcon className="size-5" />
-              Clear filters
-            </Button>
-          </div>
-        </div>
+        <NoProperties />
       )}
     </section>
   );
