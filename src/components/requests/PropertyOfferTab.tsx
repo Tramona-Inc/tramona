@@ -27,8 +27,8 @@ export default function PropertyOfferTab() {
         {offers.length > 0 && !isMobile && (
           // ! Change to one prop (calls the same)
           <SimiliarProperties
-            location={offers[0]!.property.address!}
-            city={offers[0]!.property.address!}
+            location={offers[0]!.property.address}
+            city={offers[0]!.property.address}
           />
         )}
       </div>
