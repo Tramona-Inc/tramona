@@ -28,6 +28,7 @@ import { plural } from "@/utils/utils";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { EditIcon, EyeOffIcon, FenceIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Page() {
@@ -76,12 +77,14 @@ function PropertyCard({ property }: { property: Property }) {
   return (
     <div className="flex overflow-clip rounded-xl border-zinc-100 bg-card shadow-md">
       <div className="relative w-32">
-        <Image
-          src={property.imageUrls[0]!}
-          fill
-          className="object-cover object-center"
-          alt=""
-        />
+        <Link href={`/property/${property.id}`}>
+          <Image
+            src={property.imageUrls[0]!}
+            fill
+            className="object-cover object-center"
+            alt=""
+          />
+        </Link>
       </div>
       <div className="flex-1 p-4">
         <p className="font-medium">{property.name}</p>
