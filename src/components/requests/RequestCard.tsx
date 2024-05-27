@@ -158,7 +158,7 @@ export default function RequestCard({
           </div>
           {children}
           {isMobile && isSelected && (
-            <div className="flex flex-col gap-y-2 ">
+            <div className="flex flex-col gap-y-2">
               <Separator className="mt-3" />
               <MobileSimilarProperties
                 location={request.location}

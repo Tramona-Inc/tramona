@@ -1,7 +1,7 @@
 import {
   Map,
-  MapCameraChangedEvent,
-  MapProps,
+  type MapCameraChangedEvent,
+  type MapProps,
   useMap,
   useApiIsLoaded,
 } from "@vis.gl/react-google-maps";
@@ -62,6 +62,7 @@ function SearchPropertiesMap({
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnWindowFocus: false,
     },
   );
 
@@ -108,6 +109,7 @@ function SearchPropertiesMap({
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnWindowFocus: false,
     },
   );
   //when the user presses search
@@ -205,9 +207,9 @@ function SearchPropertiesMap({
         id: "",
         label: "",
       });
-      console.log(newCenter);
-      console.log("boundaries");
-      console.log(ev.detail.bounds);
+      // console.log(newCenter);
+      // console.log("boundaries");
+      // console.log(ev.detail.bounds);
       setMapBoundaries({
         north: ev.detail.bounds.north,
         south: ev.detail.bounds.south,
@@ -223,9 +225,8 @@ function SearchPropertiesMap({
     <div
       className={`max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[705px]`}`}
     >
-      {isFilterUndefined ? (
+      {/* {isFilterUndefined ? (
         <div className="flex h-full items-center justify-center">
-          {" "}
           Search for a city...
         </div>
       ) : apiIsLoaded ? (
@@ -245,7 +246,7 @@ function SearchPropertiesMap({
         <div className="flex h-full w-full items-center justify-center">
           <Spinner />
         </div>
-      )}
+      )} */}
     </div>
   );
 }

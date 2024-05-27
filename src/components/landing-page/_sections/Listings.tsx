@@ -34,6 +34,7 @@ export default function Listings() {
     {
       // the cursor from where to start fetching thecurrentProperties
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnWindowFocus: false,
     },
   );
 
