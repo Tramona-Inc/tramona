@@ -58,7 +58,7 @@ export default function PropertyDeleteDialog({
             : formatCurrency(originalNightlyBiddingOffer);
         if (traveler.isWhatsApp) {
           await twilioWhatsAppMutation.mutateAsync({
-            templateId: "HX74ffb496915d8e4ef39b41e624ca605e",     //fix this template id
+            templateId: "HXd7d55b299c2170bd5af4cef76e058d78",
             to: traveler.phoneNumber,
             cost: nightlyPrice,
             name: property?.name,

@@ -510,18 +510,17 @@ export const biddingRouter = createTRPCRouter({
       // } else {
       // await updateBidStatus({ id: input.bidId, status: "Rejected" });
       // }
-      // const paymentIntent = await db.select({ paymentIntentId: bids.paymentIntentId }).from(bids).where(eq(bids.id, input.bidId));
-      // let refund;
-      // if (paymentIntent !== null) {
-      //   refund = await stripe.refunds.create({
-      //     payment_intent: paymentIntent,
-      //   })
-      // }
+      const paymentIntent = await db.select({ paymentIntentId: bids.paymentIntentId }).from(bids).where(eq(bids.id, input.bidId));
+      let refund;
+      if (paymentIntent !== null) {
+        refund = await stripe.refunds.create({
+          payment_intent: paymentIntent,
+        })
+      }
 
-      // if (refund?.status === "succeeded") {
-      //   await updateBidStatus({ id: input.bidId, status: "Cancelled" });
-      // }
-      await updateBidStatus({ id: input.bidId, status: "Cancelled" });
+      if (refund?.status === "succeeded") {
+        await updateBidStatus({ id: input.bidId, status: "Cancelled" });
+      }
 
       // TODO: email travellers
     }),
