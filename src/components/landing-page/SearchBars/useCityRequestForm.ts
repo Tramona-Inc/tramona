@@ -1,7 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
-import { useRequestMoreFilter } from "@/utils/store/request-more-filter";
-import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { errorToast } from "@/utils/toasts";
 import { useZodForm } from "@/utils/useZodForm";
 import { getNumNights } from "@/utils/utils";
 import { useSession } from "next-auth/react";
@@ -29,14 +28,6 @@ export function useCityRequestForm({
   const { mutateAsync: createRequests } =
     api.requests.createMultiple.useMutation();
 
-  // const { roomType, houseRules, bedrooms, beds, bathrooms } =
-  //   useRequestMoreFilter();
-
-  const bedrooms = useRequestMoreFilter((state) => state.bedrooms);
-  const bathrooms = useRequestMoreFilter((state) => state.bathrooms);
-  const beds = useRequestMoreFilter((state) => state.beds);
-  const clearFilter = useRequestMoreFilter((state) => state.clearFilter);
-
   const onSubmit = form.handleSubmit(async ({ data }) => {
     const newRequests = data.map((request) => {
       const { date: _date, maxNightlyPriceUSD, ...restData } = request;
@@ -48,9 +39,6 @@ export function useCityRequestForm({
         checkIn: checkIn,
         checkOut: checkOut,
         maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
-        minNumBathrooms: bathrooms,
-        minNumBedrooms: bedrooms,
-        minNumBeds: beds,
         ...restData,
       };
     });
@@ -76,8 +64,6 @@ export function useCityRequestForm({
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
           form.reset();
-
-          clearFilter();
 
           form.setValue("data", [
             defaultSearchOrReqValues as CityRequestDefaultVals,
