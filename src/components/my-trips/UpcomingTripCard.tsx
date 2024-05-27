@@ -33,7 +33,7 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
         <Link href={`/my-trips/${trip.id}`} className="relative w-96">
           <Image
-            layout="fill"
+            fill
             alt=""
             className="object-cover"
             src={trip.property.imageUrls[0]!}

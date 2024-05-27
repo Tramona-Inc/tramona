@@ -140,7 +140,7 @@ export default function FeedCard({ offer }: Props) {
                   alt={`${0}`}
                   // width={2000}
                   // height={2000}
-                  // layout="fill"
+                  // fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   fill
                   priority

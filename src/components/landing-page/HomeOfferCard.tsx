@@ -153,7 +153,7 @@ export default function HomeOfferCard({
                 >
                   <Image
                     src={photo}
-                    layout="fill"
+                    fill
                     sizes="100vh, (min-width: 640px) 50vh, (min-width: 768px) 33vh, (min-width: 1280px) 25vh, (min-width: 1536px) 20vh"
                     alt=""
                     className="object-cover"
