@@ -125,6 +125,7 @@ function BiddingStep1({
                       <Input
                         {...field}
                         inputMode="decimal"
+                        autoFocus
                         prefix="$"
                         suffix="/night"
                       />

@@ -1,4 +1,3 @@
-import { CardContent } from "@/components/ui/card";
 import {
   Carousel,
   type CarouselApi,
@@ -148,17 +147,18 @@ export default function HomeOfferCard({
           <CarouselContent>
             {property.imageUrls.slice(0, 5).map((photo, index) => (
               <CarouselItem key={index}>
-                <CardContent>
-                  <Link href={`/property/${property.id}`}>
-                    <Image
-                      src={photo}
-                      height={500}
-                      width={500}
-                      alt=""
-                      className="aspect-square w-full rounded-xl object-cover"
-                    />
-                  </Link>
-                </CardContent>
+                <Link
+                  href={`/property/${property.id}`}
+                  className="relative block aspect-square overflow-clip rounded-xl"
+                >
+                  <Image
+                    src={photo}
+                    fill
+                    sizes="100vh, (min-width: 640px) 50vh, (min-width: 768px) 33vh, (min-width: 1280px) 25vh, (min-width: 1536px) 20vh"
+                    alt=""
+                    className="object-cover"
+                  />
+                </Link>
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -176,7 +176,7 @@ export default function HomeOfferCard({
           <p className="max-w-full overflow-hidden text-ellipsis text-nowrap font-semibold">
             {property.name}
           </p>
-          {property.originalNightlyPrice && (
+          {property.originalNightlyPrice !== null && (
             <p>
               <span className="text-xs">Airbnb Price: </span>
               {formatCurrency(
@@ -252,7 +252,7 @@ export default function HomeOfferCard({
             }
             onClick={() => (isLoggedIn ? handleAddToBucketList() : signIn())}
             variant="white"
-            className="rounded-full"
+            className="rounded-full shadow"
           >
             <Plus />
             Add to bucket list
@@ -261,7 +261,7 @@ export default function HomeOfferCard({
         {isInBucketList && (
           <Button
             onClick={() => handleRemoveBucketList()}
-            className="rounded-full bg-[#333333]/90 hover:bg-[#333333]"
+            className="rounded-full bg-zinc-800/90 shadow hover:bg-zinc-800"
           >
             <Minus />
             Added to bucket list

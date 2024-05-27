@@ -12,7 +12,6 @@ import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
-import { RequestTabsSwitcher } from "./RequestTabsSwitcher";
 
 export function MobileRequestDealTab({
   closeSheet,
@@ -32,18 +31,11 @@ export function MobileRequestDealTab({
         className="flex flex-col gap-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="text-xs text-muted-foreground">
-          Instead of just seeing listed prices, requesting a deal lets you set
-          your budget, and we&apos;ll match you with hosts who have properties
-          in the city and accept your price. This way, you can find the perfect
-          place to stay within your means!
-        </div>
-
-        <RequestTabsSwitcher
+        {/* <RequestTabsSwitcher
           curTab={curTab}
           setCurTab={setCurTab}
           form={form}
-        />
+        /> */}
 
         <div className="flex flex-col gap-4">
           <div className="grid gap-1">

@@ -6,6 +6,7 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Lightbulb } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import Confetti from 'react-confetti';
 
 function BiddingConfirmation({
   property,
@@ -100,6 +101,9 @@ function BiddingConfirmation({
         >
           Back to listings
         </Button>
+        <div className="fixed inset-0 z-100 pointer-events-none">
+          <Confetti width={window.innerWidth} recycle={false}/>
+        </div>
       </div>
     </div>
   );

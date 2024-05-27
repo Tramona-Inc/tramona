@@ -90,7 +90,7 @@ export default function OfferCardNoBid({
               <>, {plural(property.numBathrooms, "bath")}</>
             )}
           </p>
-          {property.originalNightlyPrice && (
+          {property.originalNightlyPrice !== null && (
             <p>
               <span className="text-xs">Airbnb Price: </span>
               {formatCurrency(

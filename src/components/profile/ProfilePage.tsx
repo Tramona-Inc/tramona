@@ -37,6 +37,7 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
+import EmptyBagSvg from "../_common/EmptyStateSvg/EmptyBagSvg";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -288,16 +289,33 @@ export default function ProfilePage() {
           {/* Properties Tab */}
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {bucketListProperties?.map((property) => (
-                <BucketListHomeOfferCard
-                  key={property!.id}
-                  property={{
-                    ...property!,
-                    propertyId: property!.id,
-                    bucketListPropertyId: property!.bucketListId,
-                  }}
-                />
-              ))}
+              {bucketListProperties?.length ? (
+                bucketListProperties.map((property) => (
+                  <BucketListHomeOfferCard
+                    key={property!.id}
+                    property={{
+                      ...property!,
+                      propertyId: property!.id,
+                      bucketListPropertyId: property!.bucketListId,
+                    }}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full py-8 text-center text-muted-foreground">
+                  <div className="flex items-center justify-center">
+                    <EmptyBagSvg />
+                  </div>
+                  Your bucket list is empty! Add a property to view here.
+                  <div className="mt-6 flex justify-center">
+                    <Button
+                      asChild
+                      className="cursor-pointer rounded-lg bg-teal-900 px-4 py-2 text-white hover:bg-teal-950"
+                    >
+                      <Link href="/explore">Explore Properties</Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
 

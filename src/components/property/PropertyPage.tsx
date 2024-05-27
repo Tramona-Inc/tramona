@@ -1,6 +1,6 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
-//import { GoogleMap, Circle } from "@react-google-maps/api";
+
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { type Property } from "@/server/db/schema";
 import { api, type RouterOutputs } from "@/utils/api";
-import { cn, plural } from "@/utils/utils";
+import { plural } from "@/utils/utils";
 import "leaflet/dist/leaflet.css";
 import {
   ArrowLeftIcon,
@@ -20,21 +20,20 @@ import {
   ImagesIcon,
   MapPin,
 } from "lucide-react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
-import Link from "next/link";
 import { useMediaQuery } from "../_utils/useMediaQuery";
 import OfferPhotos from "../offers/OfferPhotos";
 import { AspectRatio } from "../ui/aspect-ratio";
 import BiddingForm from "./BiddingForm";
 import PropertyAmenities from "../offers/PropertyAmenities";
 import AmenitiesComponent from "../offers/CategorizedAmenities";
-import GoogleMap from "../host/onboarding/GoogleMap";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import { useRouter } from "next/router";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export default function PropertyPage({ property }: { property: Property }) {
-  const isBooked = false;
+  // const isBooked = false;
 
   // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
   //   location: property.address!,
@@ -55,17 +54,18 @@ export default function PropertyPage({ property }: { property: Property }) {
   const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
 
+  const router = useRouter();
+
   return (
     <div className="space-y-4">
-      <Link
-        href={isBooked ? "/requests" : `/`}
-        className={cn(
-          buttonVariants({ variant: "ghost", size: "icon" }),
-          "rounded-full",
-        )}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-full"
+        onClick={() => router.back()}
       >
         <ArrowLeftIcon />
-      </Link>
+      </Button>
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-2">
           <h1 className="items-center text-lg font-semibold sm:text-3xl">
@@ -92,19 +92,13 @@ export default function PropertyPage({ property }: { property: Property }) {
         <Dialog>
           {isMobile ? (
             // Only render the first image on small screens
-            <div className="">
+            <div>
               <DialogTrigger
                 key={0}
                 onClick={() => setIndexOfSelectedImage(0)}
                 className="hover:opacity-90"
               >
-                <Image
-                  src={firstImageUrl}
-                  alt=""
-                  fill
-                  objectFit="cover"
-                  className=""
-                />
+                <Image src={firstImageUrl} alt="" fill objectFit="cover" />
               </DialogTrigger>
             </div>
           ) : (
@@ -120,19 +114,13 @@ export default function PropertyPage({ property }: { property: Property }) {
                   onClick={() => setIndexOfSelectedImage(index)}
                   className="hover:opacity-90"
                 >
-                  <Image
-                    src={imageUrl}
-                    alt=""
-                    fill
-                    objectFit="cover"
-                    className=""
-                  />
+                  <Image src={imageUrl} alt="" fill objectFit="cover" />
                 </DialogTrigger>
               </div>
             ))
           )}
-          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
-            <div className="  screen-full flex justify-center">
+          <DialogContent className="flex items-center justify-center bg-transparent">
+            <div className="flex justify-center">
               <OfferPhotos
                 propertyImages={property.imageUrls}
                 indexOfSelectedImage={indexOfSelectedImage}
@@ -145,11 +133,12 @@ export default function PropertyPage({ property }: { property: Property }) {
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 left-2">
             <Dialog>
-              <DialogTrigger className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
-                <ImagesIcon className="mr-2" />
-                See all {property.imageUrls.length} photos
+              <DialogTrigger asChild>
+                <Button variant="white" className="rounded-full">
+                  <ImagesIcon />
+                  See all {property.imageUrls.length} photos
+                </Button>
               </DialogTrigger>
-
               <DialogContent className="max-w-4xl">
                 <DialogHeader>
                   <DialogTitle>More Photos</DialogTitle>
@@ -212,6 +201,9 @@ export default function PropertyPage({ property }: { property: Property }) {
         </a>
         <a href="#location" className="text-gray-600 hover:text-gray-800">
           Location
+        </a>
+        <a href="#cancellation" className="text-gray-600 hover:text-gray-800">
+          Cancellation Policy
         </a>
         {property.checkInTime && (
           <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
@@ -309,14 +301,26 @@ export default function PropertyPage({ property }: { property: Property }) {
         {property.latitude && property.longitude && (
           <div className="relative mt-4 h-[400px]">
             <div className="absolute inset-0 z-0">
-              <GoogleMap
+              <SingleLocationMap
                 lat={property.latitude}
                 lng={property.longitude}
-                draggable={false}
               />
             </div>
           </div>
         )}
+      </section>
+      <section id="cancellation" className="scroll-mt-36">
+        <h1 className="text-lg font-semibold md:text-xl">
+          Cancellation Policy
+        </h1>
+        <div className="py-2">
+          <p className="text-sm font-medium text-black">
+            {property.cancellationPolicy ||
+            property.cancellationPolicy?.toLowerCase() === "n/a"
+              ? property.cancellationPolicy
+              : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+          </p>
+        </div>
       </section>
       {property.checkInTime && (
         <div>

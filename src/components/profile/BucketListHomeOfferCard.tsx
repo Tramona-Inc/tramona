@@ -106,7 +106,7 @@ export default function BucketListHomeOfferCard({
           <p className="max-w-full overflow-hidden text-ellipsis text-nowrap font-semibold">
             {property.name}
           </p>
-          {property.originalNightlyPrice && (
+          {property.originalNightlyPrice !== null && (
             <p>
               <span className="text-xs">Airbnb Price: </span>
               {formatCurrency(

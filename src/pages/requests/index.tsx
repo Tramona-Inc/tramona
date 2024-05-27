@@ -4,13 +4,13 @@ import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
+import CityRequestsTab from "../../components/requests/CityRequestsTab";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
-// TODO: change to tab links, each with individual fetch
+import { useIsSm } from "@/utils/utils";
+
 function RequestsTabs() {
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = !useIsSm();
   return (
     <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
@@ -28,7 +28,7 @@ function RequestsTabs() {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="cityRequests">
-        <ActiveRequestGroups />
+        <CityRequestsTab />
       </TabsContent>
       <TabsContent value="propertyOffers">
         <PropertyOfferTab />

@@ -9,7 +9,7 @@ import Summary2 from "./Summary2";
 import Summary4 from "./Summary4";
 import Summary7 from "./Summary7";
 import Summary8 from "./Summary8";
-import GoogleMap from "./GoogleMap";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 
 function Heading({
   title,
@@ -80,10 +80,9 @@ export default function Onboarding10() {
             {coordinateData && (
               <div className="relative mt-4 h-[400px]">
                 <div className="absolute inset-0 z-0">
-                  <GoogleMap
+                  <SingleLocationMap
                     lat={coordinateData.coordinates.lat}
                     lng={coordinateData.coordinates.lng}
-                    draggable={false}
                   />
                 </div>
               </div>
