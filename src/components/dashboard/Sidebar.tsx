@@ -85,10 +85,7 @@ export default function Sidebar({
               ...guestNavLinks,
               { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
-          : [
-              ...guestNavLinks,
-              { href: "/messages", name: "Messages", icon: MessageSquareMore },
-            ];
+          : guestNavLinks;
 
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery(undefined, {

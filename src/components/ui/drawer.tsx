@@ -51,7 +51,10 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       <div className="mx-auto h-1.5 w-20 rounded-full bg-accent" />
-      <ScrollArea data-asdf className="max-h-screen-minus-header px-2">
+      <ScrollArea
+        data-asdf
+        className="max-h-[calc(var(--screen-minus-header)-64px)] px-2"
+      >
         {children}
       </ScrollArea>
     </DrawerPrimitive.Content>
