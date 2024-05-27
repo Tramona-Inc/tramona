@@ -35,8 +35,8 @@ const DynamicDesktopSearchBar = React.memo(() => {
 
   return (
     <Card
-      className={`fixed top-14 z-30 w-5/6 transition-transform duration-300 ${
-        show ? "mt-5" : "-translate-y-full"
+      className={`fixed inset-x-4 top-14 z-30 mx-auto max-w-6xl transition-transform duration-300 ${
+        show ? "translate-y-6" : "-translate-y-full"
       }`}
     >
       <CardContent>

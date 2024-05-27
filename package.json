@@ -94,7 +94,6 @@
     "embla-carousel-autoplay": "8.0.4",
     "embla-carousel-react": "8.0.4",
     "framer-motion": "^11.0.15",
-    "fs": "0.0.1-security",
     "google-map-react": "^2.2.1",
     "google-maps-react": "^2.0.6",
     "input-otp": "^1.2.0",

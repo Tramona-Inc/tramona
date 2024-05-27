@@ -37,6 +37,8 @@ export default function PropertyDeclineDialog({
   const { data: property } = api.properties.getById.useQuery({
     id: data?.propertyId ?? 0,
   });
+  const slackMutation = api.twilio.sendSlack.useMutation();
+
 
   const getTraveler = api.groups.getGroupOwner.useMutation();
 
@@ -50,20 +52,25 @@ export default function PropertyDeclineDialog({
 
       const guest = session?.user.role === "guest";
       if (guest) {
-        const traveler = session.user;
-        if (traveler.phoneNumber) {
-          if (traveler.isWhatsApp) {
-            await twilioWhatsAppMutation.mutateAsync({
-              templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
-              to: traveler.phoneNumber, //TO DO change to host phone number
-            });
-          } else {
-            await twilioMutation.mutateAsync({
-              to: traveler.phoneNumber, //TO DO change to host phone number
-              msg: `Tramona: Your ${formatCurrency(originalNightlyBiddingOffer)} offer for ${property.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
-            });
-          }
-        }
+        //admin temp message
+        await slackMutation.mutateAsync({
+          message: `Tramona: A traveler has declined your offer for ${property.name} from ${formatDateRange(data.checkIn, data.checkOut)}.`,
+        });
+
+        // const traveler = session.user;
+        // if (traveler.phoneNumber) {
+        //   if (traveler.isWhatsApp) {
+        //     await twilioWhatsAppMutation.mutateAsync({
+        //       templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+        //       to: traveler.phoneNumber, //TO DO change to host phone number
+        //     });
+        //   } else {
+        //     await twilioMutation.mutateAsync({
+        //       to: traveler.phoneNumber, //TO DO change to host phone number
+        //       msg: `Tramona: Your ${formatCurrency(originalNightlyBiddingOffer)} offer for ${property.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+        //     });
+        //   }
+        // }
       } else {
         const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
         if (traveler?.phoneNumber) {
@@ -82,7 +89,7 @@ export default function PropertyDeclineDialog({
           } else {
             await twilioMutation.mutateAsync({
               to: traveler.phoneNumber,
-              msg: `Tramona: Your ${nightlyPrice}/night offer for ${property?.name} from ${formatDateRange(data?.checkIn, data?.checkOut)} has been rejected by the host. Please try to send a new offer or send an offer for another property. Your card has not been charged.`,
+              msg: `Tramona: Your ${nightlyPrice}/night offer for ${property.name} from ${formatDateRange(data.checkIn, data.checkOut)} has been rejected by the host, visit Tramona.com to submit a new offer. Your card has not been charged.`,
             });
           }
         }

@@ -21,7 +21,7 @@ function FiltersBtn() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary">
+        <Button variant="secondary" className="pointer-events-auto">
           <FilterIcon />
           Filter
         </Button>
@@ -90,22 +90,22 @@ export default function CitiesFilter() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
-      <div className="relative left-0 top-0 inline-block bg-gradient-to-r from-white via-white via-50% to-transparent pr-5">
+      <div className="pointer-events-none relative left-0 top-0 inline-block bg-gradient-to-r from-white via-white via-50% to-transparent pr-5">
         {/* TODO: fix scrollX and only show when scrollX > somethin */}
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full"
+          className="pointer-events-auto rounded-full"
           onClick={scrollLeft}
         >
           <ChevronLeftIcon />
         </Button>
       </div>
-      <div className="absolute right-0 top-0 flex gap-2 bg-gradient-to-l from-white via-white via-80% to-transparent pl-4">
+      <div className="pointer-events-none absolute right-0 top-0 flex gap-2 bg-gradient-to-l from-white via-white via-80% to-transparent pl-4">
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full"
+          className="pointer-events-auto rounded-full"
           onClick={scrollRight}
         >
           <ChevronRightIcon />

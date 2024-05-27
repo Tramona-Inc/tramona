@@ -12,7 +12,6 @@ import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
-import { RequestTabsSwitcher } from "./RequestTabsSwitcher";
 
 export function MobileRequestDealTab({
   closeSheet,
@@ -32,15 +31,11 @@ export function MobileRequestDealTab({
         className="flex flex-col gap-4"
         key={curTab} // rerender on tab changes (idk why i have to do this myself)
       >
-        <div className="font-bold text-sm text-center">
-          Hosts send exclusive matches directly to you
-        </div>
-
-        <RequestTabsSwitcher
+        {/* <RequestTabsSwitcher
           curTab={curTab}
           setCurTab={setCurTab}
           form={form}
-        />
+        /> */}
 
         <div className="flex flex-col gap-4">
           <div className="grid gap-1">

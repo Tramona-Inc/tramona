@@ -13,15 +13,16 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   DollarSignIcon,
+  FilterIcon,
   Link2,
   MapPinIcon,
   Plus,
   Users2Icon,
 } from "lucide-react";
 import { useCityRequestForm } from "./useCityRequestForm";
-import { RequestMoreFilterBtn } from "./RequestMoreFilterBtn";
 import Link from "next/link";
 import Confetti from "react-confetti";
+import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
@@ -45,10 +46,6 @@ export function DesktopRequestDealTab() {
           className="flex flex-col justify-between gap-y-4"
           key={curTab} // rerender on tab changes (idk why i have to do this myself)
         >
-          <div className="font-bold">
-            Hosts send exclusive matches directly to you
-          </div>
-
           {/* <RequestTabsSwitcher
             curTab={curTab}
             setCurTab={setCurTab}
@@ -123,7 +120,16 @@ export function DesktopRequestDealTab() {
             />
 
             <div className="flex items-center gap-2 text-teal-900">
-              <RequestMoreFilterBtn />
+              <CityRequestFiltersDialog form={form} curTab={curTab}>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="p-0 font-bold text-teal-900 hover:bg-transparent"
+                >
+                  <FilterIcon />
+                  More filters
+                </Button>
+              </CityRequestFiltersDialog>
             </div>
 
             <div className="space-y-1">
@@ -177,7 +183,7 @@ export function DesktopRequestDealTab() {
                 </div>
               )}
             </div>
-            <div>
+            <div className="flex justify-end sm:justify-start">
               <Button
                 type="submit"
                 size="lg"
@@ -190,13 +196,13 @@ export function DesktopRequestDealTab() {
           </div>
 
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="flex flex-col sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
+            <DialogContent>
               <h1 className="mb-4 text-center text-2xl font-bold">
                 Congrats on submitting a request!
               </h1>
               <p className="mb-4">
                 We have sent it out to every host in{" "}
-                {form.getValues(`data.${curTab}.location`)}.
+                <b>{form.getValues(`data.${curTab}.location`)}</b>.
               </p>
               <p className="mb-4">
                 In the next 24 hours, hosts will send you properties that match
@@ -213,14 +219,12 @@ export function DesktopRequestDealTab() {
                 In the meantime, check out some other properties we have on
                 Tramona and make more offers.
               </p>
-              <div className="flex justify-center">
-                <Button
-                  asChild
-                  className="cursor-pointer rounded-lg bg-teal-900 px-4 py-2 text-white hover:bg-teal-950"
-                >
-                  Explore more properties
-                </Button>
-              </div>
+              <Button
+                asChild
+                className="rounded-lg bg-teal-900 px-4 py-2 text-white hover:bg-teal-950"
+              >
+                Explore more properties
+              </Button>
 
               {showConfetti && (
                 <div className="z-100 pointer-events-none fixed inset-0">

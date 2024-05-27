@@ -17,11 +17,14 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
   });
 
   const { data: properties, isFetching } =
-    api.properties.getAllInfiniteScroll.useInfiniteQuery({
-      lat: coordinates?.coordinates.lat,
-      long: coordinates?.coordinates.lng,
-      radius: 25,
-    });
+    api.properties.getAllInfiniteScroll.useInfiniteQuery(
+      {
+        lat: coordinates?.coordinates.lat,
+        long: coordinates?.coordinates.lng,
+        radius: 25,
+      },
+      { refetchOnWindowFocus: false },
+    );
   const currentProperties = useMemo(
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
@@ -54,25 +57,19 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
   return (
     <div>
       <div className="mb-3 flex flex-row items-center justify-between px-1 text-center">
-        <h1 className=" text-nowrap text-center text-sm font-semibold">
+        <h1 className="text-nowrap text-center text-sm font-semibold">
           Similar properties in {city.split(",")[0]}{" "}
         </h1>
         {currentProperties.length > 0 && (
-          <Link className="roundes col-span-2 font-bold" href="/">
-            {" "}
+          <Link className="col-span-full font-bold" href="/">
             See more
           </Link>
         )}
       </div>
       {isFetching ? (
-        <> {skeletons} </>
+        skeletons
       ) : currentProperties.length > 0 ? (
-        <Swiper
-          spaceBetween={8}
-          slidesPerView={3}
-          onSlideChange={() => console.log("slide change")}
-          onSwiper={(swiper) => console.log(swiper)}
-        >
+        <Swiper spaceBetween={8} slidesPerView={3}>
           {currentProperties.slice(0, 12).map((property, index) => (
             <SwiperSlide key={index}>
               <CondensedOfferCard key={property.id} property={property} />

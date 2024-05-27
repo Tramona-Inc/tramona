@@ -8,6 +8,7 @@ import {
 import { formatCurrency } from "@/utils/utils";
 import { Poi } from "./SearchPropertiesMap";
 import { useCallback, useState } from "react";
+import Image from "next/image";
 
 const PoiMarkers = (props: { pois: Poi[] | [] }) => {
   const [markerRef, marker] = useAdvancedMarkerRef();
@@ -47,7 +48,7 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
           >
             <div className="flex flex-col items-center justify-center">
               <div className="z-40 rounded-xl bg-zinc-700 p-2 text-white">
-                {formatCurrency(poi.originalNightlyPrice).trim()}/Night
+                {formatCurrency(poi.originalNightlyPrice).trim()}/night
               </div>
             </div>
           </AdvancedMarker>
@@ -62,18 +63,17 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
                   onClick={() => void router.push(`/property/${poi.id}`)}
                   className="ml-2 mr-1 flex max-w-72 cursor-pointer flex-col items-center justify-center gap-y-1 text-left text-sm  font-medium"
                 >
-                  <img
+                  <Image
                     src={poi.image}
-                    className=" w-full rounded-lg border object-fill shadow-md"
+                    className="w-full rounded-lg border object-fill shadow-md"
                     width={260}
                     height={200}
+                    alt=""
                   />
-
                   {poi.key}
-
                   <span className="text-center text-sm font-semibold ">
                     {" "}
-                    {formatCurrency(poi.originalNightlyPrice)}/Night{" "}
+                    {formatCurrency(poi.originalNightlyPrice)}/night{" "}
                   </span>
                 </div>
               </div>

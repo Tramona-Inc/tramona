@@ -96,7 +96,7 @@ export default function PropertyOfferCard({
         >
           <Image
             src={offer.property.imageUrls[0]!}
-            layout="fill"
+            fill
             className="object-cover"
             alt=""
           />

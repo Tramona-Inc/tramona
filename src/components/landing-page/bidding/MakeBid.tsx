@@ -63,7 +63,7 @@ function MakeBid({
   //           <Image
   //             src="/assets/images/welcome/identity.png"
   //             alt="Identity Verification"
-  //             layout="fill"
+  //             fill
   //             quality={100}
   //             className="object-cover object-center"
   //           />
@@ -83,26 +83,26 @@ function MakeBid({
   return (
     <>
       {property && (
-      <div>
-        {step !== 0 && (
-          <Button
-            variant={"ghost"}
-            className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
-            onClick={() => {
-              if (step - 1 > -1) {
-                setStep(step - 1);
-              }
-            }}
-          >
-            <ChevronLeft />
-          </Button>
-        )}
-        {step == 0 && <BiddingStep1 property={property} setStep={setStep} />}
-        {step == 1 && <BiddingStep2 property={property} setStep={setStep} />}
-        {step == 2 && (
-          <BiddingConfirmation property={property} setOpen={setOpen} />
-        )}
-      </div>
+        <div>
+          {step !== 0 && (
+            <Button
+              variant={"ghost"}
+              className={cn("absolute left-1 top-0 md:left-4 md:top-4")}
+              onClick={() => {
+                if (step - 1 > -1) {
+                  setStep(step - 1);
+                }
+              }}
+            >
+              <ChevronLeft />
+            </Button>
+          )}
+          {step == 0 && <BiddingStep1 property={property} setStep={setStep} />}
+          {step == 1 && <BiddingStep2 property={property} setStep={setStep} />}
+          {step == 2 && (
+            <BiddingConfirmation property={property} setOpen={setOpen} />
+          )}
+        </div>
       )}
     </>
   );

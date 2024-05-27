@@ -269,18 +269,18 @@ export const requestsRouter = createTRPCRouter({
         });
       });
 
-      if (ctx.user.isWhatsApp) {
-        void sendWhatsApp({
-          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
-          to: ctx.user.phoneNumber!,
-        });
-      } else {
-        void sendText({
-          to: ctx.user.phoneNumber!,
-          content:
-            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-        });
-      }
+      // if (ctx.user.isWhatsApp) {
+      //   void sendWhatsApp({
+      //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+      //     to: ctx.user.phoneNumber!,
+      //   });
+      // } else {
+      //   void sendText({
+      //     to: ctx.user.phoneNumber!,
+      //     content:
+      //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      //   });
+      // }
 
       if (env.NODE_ENV !== "production") return;
 
@@ -376,7 +376,7 @@ export const requestsRouter = createTRPCRouter({
         } else {
           void sendText({
             to: owner.phoneNumber!,
-            content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
+            content: `Your request to ${request.location} has been rejected, please submit another request with different requirements.`,
           });
         }
       }

@@ -154,13 +154,19 @@ function SmallHeader(props: HeaderProps) {
 
       <TramonaLogo />
 
-      <div className="flex flex-1 justify-end gap-2">
+      <div className="flex flex-1 items-center justify-end gap-2">
+        <SupportBtn />
         {props.type === "marketing" && (
-          <Button asChild variant="darkOutline">
-            <Link href="/auth/signin">
-              {status === "authenticated" ? "Dashboard" : "Log in"}
-            </Link>
-          </Button>
+          <>
+            {status === "authenticated" && (
+              <Button size="sm" asChild variant="secondary">
+                <Link href="/auth/signin">Dashboard</Link>
+              </Button>
+            )}
+            <Button size="sm" asChild variant="greenPrimary">
+              <Link href="/auth/signup">Sign up</Link>
+            </Button>
+          </>
         )}
 
         {/* <HeaderTopRight /> */}

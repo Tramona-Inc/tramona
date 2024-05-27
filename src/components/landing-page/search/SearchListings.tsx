@@ -2,7 +2,7 @@ import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import HomeOfferCard from "../HomeOfferCard";
 import { Button } from "@/components/ui/button";
 import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
@@ -42,6 +42,7 @@ export default function SearchListings({
     {
       // the cursor from where to start fetching the current properties
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnWindowFocus: false,
     },
   );
 
@@ -97,7 +98,7 @@ export default function SearchListings({
             <HomeOfferCard key={property.id} property={property} />
           ))}
           {isFetchingNextPage && skeletons}
-          <div ref={ref} className="h-1 w-full"></div>
+          <div ref={ref} className="absolute bottom-[calc(100vh-12rem)]"></div>
         </>
       ) : (
         <div className="col-span-full flex min-h-80 flex-col items-center justify-center gap-4">

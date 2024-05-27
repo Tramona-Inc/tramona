@@ -130,27 +130,32 @@ function BiddingStep2({
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
   const totalPrice = totalNightlyPrice;
   const stripePromise = useStripe();
+  const slackMutation = api.twilio.sendSlack.useMutation();
+
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: async () => {
       addPropertyIdBids(property.id);
       setStep(2);
       const traveler = session?.user;
-      if (traveler?.phoneNumber) {
-        if (traveler.isWhatsApp) {
-          await twilioWhatsAppMutation.mutateAsync({
-            templateId: "HX1650cf0e293142a6db2b458167025222",
-            to: traveler.phoneNumber,
-            price: price,
-            name: property.name,
-            dates: formatDateRange(date.from, date.to),
-          });
-        } else {
-          await twilioMutation.mutateAsync({
-            to: traveler.phoneNumber,
-            msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}. Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
-          });
-        }
-      }
+      await slackMutation.mutateAsync({
+        message: `Tramona: A traveler submitted an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}.`,
+      });
+      // if (traveler?.phoneNumber) {
+      //   if (traveler.isWhatsApp) {
+      //     await twilioWhatsAppMutation.mutateAsync({
+      //       templateId: "HX1650cf0e293142a6db2b458167025222",
+      //       to: traveler.phoneNumber,
+      //       price: price,
+      //       name: property.name,
+      //       dates: formatDateRange(date.from, date.to),
+      //     });
+      //   } else {
+      //     await twilioMutation.mutateAsync({
+      //       to: traveler.phoneNumber,
+      //       msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}. Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
+      //     });
+      //   }
+      // }
     },
     onError: (error) => {
       console.log("error", error.message);

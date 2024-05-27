@@ -33,7 +33,7 @@ export function GroupMember({
         image={member.image}
       />
       <div className="flex-1 -space-y-1 font-medium">
-        <div>
+        <div className="min-w-0 truncate">
           {member.name ?? member.email ?? ""}{" "}
           {!isAdminDashboard && isYou && (
             <span className="text-muted-foreground">(You)</span>
@@ -44,7 +44,7 @@ export function GroupMember({
           {member.name ? member.email : ""}
         </p>
       </div>
-      {children}
+      <div className="flex-none">{children}</div>
     </div>
   );
 }
