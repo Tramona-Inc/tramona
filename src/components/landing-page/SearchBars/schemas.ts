@@ -25,9 +25,9 @@ const cityRequestSchema = z
     numGuests: zodInteger({ min: 1 }),
     maxNightlyPriceUSD: zodNumber({ min: 0 }),
     // roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER]).optional(),
-    // minNumBedrooms: z.number().transform((n) => (n <= 1 ? undefined : n)),
-    // minNumBeds: z.number().transform((n) => (n <= 1 ? undefined : n)),
-    // minNumBathrooms: z.number().transform((n) => (n <= 1 ? undefined : n)),
+    minNumBedrooms: z.number().optional(),
+    minNumBeds: z.number().optional(),
+    minNumBathrooms: z.number().optional(),
     airbnbLink: optional(zodUrl()),
     note: optional(zodString()),
   })

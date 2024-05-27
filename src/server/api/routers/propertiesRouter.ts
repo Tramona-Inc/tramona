@@ -17,7 +17,17 @@ import {
 import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
-import { and, arrayContains, asc, eq, gt, gte, lte, notExists, sql } from "drizzle-orm";
+import {
+  and,
+  arrayContains,
+  asc,
+  eq,
+  gt,
+  gte,
+  lte,
+  notExists,
+  sql,
+} from "drizzle-orm";
 
 import { z } from "zod";
 import {
@@ -370,7 +380,7 @@ export const propertiesRouter = createTRPCRouter({
                 AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
-        .limit(400)
+        .limit(12)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       console.log("Fetched properties count:", data.length);

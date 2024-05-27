@@ -1,22 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { cn } from "@/utils/utils";
-import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export function SupportBtn() {
-  const { status } = useSession();
-  const chatWithAdmin = useChatWithAdmin();
-
   return (
-    <Button
-      variant="ghost"
-      className={cn(
-        "rounded-full",
-        status !== "authenticated" && "pointer-events-none",
-      )}
-      onClick={() => chatWithAdmin()}
-    >
-      24/7 Support
-    </Button>
+    <>
+      <div className="sm:hidden">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/help-center">24/7 Support</Link>
+        </Button>
+      </div>
+      <div className="hidden sm:block">
+        <Button variant="ghost" asChild>
+          <Link href="/help-center">24/7 Support</Link>
+        </Button>
+      </div>
+    </>
   );
 }

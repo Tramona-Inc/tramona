@@ -153,7 +153,7 @@ export default function HomeOfferCard({
                 >
                   <Image
                     src={photo}
-                    layout="fill"
+                    fill
                     sizes="100vh, (min-width: 640px) 50vh, (min-width: 768px) 33vh, (min-width: 1280px) 25vh, (min-width: 1536px) 20vh"
                     alt=""
                     className="object-cover"
@@ -252,7 +252,7 @@ export default function HomeOfferCard({
             }
             onClick={() => (isLoggedIn ? handleAddToBucketList() : signIn())}
             variant="white"
-            className="rounded-full"
+            className="rounded-full shadow"
           >
             <Plus />
             Add to bucket list
@@ -261,7 +261,7 @@ export default function HomeOfferCard({
         {isInBucketList && (
           <Button
             onClick={() => handleRemoveBucketList()}
-            className="rounded-full bg-[#333333]/90 hover:bg-[#333333]"
+            className="rounded-full bg-zinc-800/90 shadow hover:bg-zinc-800"
           >
             <Minus />
             Added to bucket list

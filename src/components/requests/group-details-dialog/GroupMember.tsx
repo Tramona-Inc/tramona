@@ -32,15 +32,15 @@ export function GroupMember({
         email={member.email}
         image={member.image}
       />
-      <div className="flex-1 -space-y-1 font-medium">
-        <div>
+      <div className="min-w-0 flex-1 -space-y-1 font-medium">
+        <div className="truncate">
           {member.name ?? member.email ?? ""}{" "}
           {!isAdminDashboard && isYou && (
             <span className="text-muted-foreground">(You)</span>
           )}{" "}
           {isOwner && !isSingleUser && <GroupOwnerIcon />}
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="truncate text-sm text-muted-foreground">
           {member.name ? member.email : ""}
         </p>
       </div>

@@ -4,6 +4,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { sendSlackMessage } from "@/server/slack";
 import { zodString } from "@/utils/zod-utils";
 import { MailService } from "@sendgrid/mail";
 import { TRPCError } from "@trpc/server";
@@ -109,7 +110,7 @@ export const twilioRouter = createTRPCRouter({
     } else if (templateId === "HX82b075be3d74f02e45957a453fd48cef") {
       if (numRequests) {
         contentVariables = {
-          1: numRequests > 1 ? `${numRequests} unconfrimed requests` : `${numRequests} unconfirmed request`,
+          1: numRequests > 1 ? `${numRequests} unconfirmed requests` : `${numRequests} unconfirmed request`,
           2: numRequests > 1 ? `${numRequests} requests` : `${numRequests} request`,
           3: url,
         }
@@ -185,6 +186,16 @@ export const twilioRouter = createTRPCRouter({
         });
 
       return verification;
+    }),
+
+    sendSlack: protectedProcedure
+    .input(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      const { message } = input;
+
+      sendSlackMessage(message);
+
+      return "Slack message sent";
     }),
 
   verifyOTP: publicProcedure

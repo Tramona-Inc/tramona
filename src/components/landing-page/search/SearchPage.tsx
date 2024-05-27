@@ -86,9 +86,9 @@ export default function SearchPage() {
         <div className="relative mb-20 overflow-x-hidden bg-white">
           <VerificationBanner />
           {!isMobile ? (
-            <div className="mx-12 mt-32 flex flex-col items-center justify-center gap-y-8">
+            <div className="mt-32 space-y-8 px-4">
               <DynamicDesktopSearchBar />
-              <div className="mx-4 space-y-4">
+              <div className="space-y-4">
                 <CitiesFilter />
                 <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
                   <div
@@ -109,7 +109,7 @@ export default function SearchPage() {
               </div>
             </div>
           ) : (
-            <div className="relative flex w-screen flex-col ">
+            <div className="relative flex flex-col">
               <MobileJustSearch />
               <div className="my-1 mt-16">
                 <MobileFilterBar />

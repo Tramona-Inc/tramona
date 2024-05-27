@@ -19,10 +19,8 @@ export function FilterPropertiesBtn() {
           type="button"
           className="p-0 font-bold text-teal-900 hover:bg-transparent"
         >
-          <div>
-            <FilterIcon />
-            More filters
-          </div>
+          <FilterIcon />
+          More filters
         </Button>
       </DialogTrigger>
       <DialogContent>

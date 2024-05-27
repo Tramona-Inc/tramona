@@ -18,6 +18,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 
+
 const formSchema = z.object({
   counterPrice: zodInteger(),
 });
@@ -38,6 +39,7 @@ export default function CounterForm({
   const { data: session } = useSession();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+  const slackMutation = api.twilio.sendSlack.useMutation();
 
   const { data: offer, isLoading } = api.biddings.getBidInfo.useQuery({
     bidId: offerId,
@@ -78,24 +80,28 @@ export default function CounterForm({
 
       const guest = session.user.role === "guest";
       if (guest) {
+        //admin temp message
+        await slackMutation.mutateAsync({
+          message: `Tramona: A traveler has countered your offer for ${property?.name} from ${formatDateRange(offer.checkIn, offer.checkOut)}.`,
+        });
         //send to host
-        const traveler = session.user;
-        if (traveler.phoneNumber) {
-          if (traveler.isWhatsApp) {
-            await twilioWhatsAppMutation.mutateAsync({
-              templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
-              to: traveler.phoneNumber, //TO DO change to host phone number
-            });
-          } else {
-            await twilioMutation.mutateAsync({
-              to: traveler.phoneNumber, //TO DO change to host phone number
-              msg: `Tramona: A traveler has countered your offer. Please go to www.tramona.com and respond to their counter.`,
-            });
-          }
-        }
+        // const traveler = session.user;
+        // if (traveler.phoneNumber) {
+        //   if (traveler.isWhatsApp) {
+        //     await twilioWhatsAppMutation.mutateAsync({
+        //       templateId: "HXfeb90955f0801d551e95a6170a5cc015", //TO DO change template id - sasha
+        //       to: traveler.phoneNumber, //TO DO change to host phone number
+        //     });
+        //   } else {
+        //     await twilioMutation.mutateAsync({
+        //       to: traveler.phoneNumber, //TO DO change to host phone number
+        //       msg: `Tramona: A traveler has countered your offer. Please go to www.tramona.com and respond to their counter.`,
+        //     });
+        //   }
+        // }
       } else {
         //send to traveler
-        const traveler = await getTraveler.mutateAsync(offer?.madeByGroupId);
+        const traveler = await getTraveler.mutateAsync(offer.madeByGroupId);
         if (traveler?.phoneNumber) {
           const nightlyPrice =
             previousOfferNightlyPrice > 0
@@ -114,7 +120,7 @@ export default function CounterForm({
             if (!isLoading) {
               await twilioMutation.mutateAsync({
                 to: traveler.phoneNumber,
-                msg: `Tramona: Your ${nightlyPrice}/night offer for ${property?.name} from ${formatDateRange(offer?.checkIn, offer?.checkOut)} has been counter offered by the host. The host proposed a price of ${formatCurrency(counterNightlyPrice)}/night. Please go to www.tramona.com and accept, reject or counter offer the host. You have 24 hours to respond.`,
+                msg: `Tramona: Your ${nightlyPrice}/night offer for ${property?.name} from ${formatDateRange(offer.checkIn, offer.checkOut)} has been counter offered by the host. You have 24 hours to respond before the offer expires, visit Tramona.com to view.`,
               });
             }
           }

@@ -25,7 +25,7 @@ export default function HostRequests() {
               src={property.imageUrls[0]!}
               className="object-cover object-center"
               alt=""
-              layout="fill"
+              fill
             />
           )}
         </div>
