@@ -69,7 +69,6 @@ function SearchPropertiesMap({
   const [markers, setMarkers] = useState<Poi[]>([]);
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
   //this is so the map doesnt rerender whe nthe filter changes
-  const [centerSetbyCameraChange, setCenterSetbyCameraChange] = useState(false);
 
   const [cameraProps, setCameraProps] = useState<MapProps | null>({
     mapId: "9c8e46d54d7a528b",
@@ -135,10 +134,6 @@ function SearchPropertiesMap({
   // When the filter changes the location, this use effect will pan the map to the new location
   useEffect(() => {
     //I dont wnat this to run if the center was set by the camera change
-    if (centerSetbyCameraChange) {
-      setCenterSetbyCameraChange(false);
-      return;
-    }
     if (location?.lat && location?.lng) {
       setCenter(location);
       if (map) {
@@ -196,12 +191,7 @@ function SearchPropertiesMap({
         lng: ev.detail.center.lng,
       };
       setCenter(newCenter);
-      //this is so the useEffect can determine if the center was set by the camera change
-      setCenterSetbyCameraChange(true);
 
-      // console.log(newCenter);
-      // console.log("boundaries");
-      // console.log(ev.detail.bounds);
       setMapBoundaries({
         north: ev.detail.bounds.north,
         south: ev.detail.bounds.south,
