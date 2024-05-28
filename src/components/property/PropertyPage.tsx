@@ -21,7 +21,6 @@ import {
   MapPin,
 } from "lucide-react";
 import Image from "next/image";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 import OfferPhotos from "../offers/OfferPhotos";
 import { AspectRatio } from "../ui/aspect-ratio";
 import BiddingForm from "./BiddingForm";
@@ -29,6 +28,7 @@ import PropertyAmenities from "../offers/PropertyAmenities";
 import AmenitiesComponent from "../offers/CategorizedAmenities";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -43,8 +43,6 @@ export default function PropertyPage({ property }: { property: Property }) {
     latitude: property.latitude!,
     longitude: property.longitude!,
   });
-
-  const isMobile = useMediaQuery("(max-width: 640px)");
 
   // const isAirbnb =
   //   property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
@@ -90,19 +88,17 @@ export default function PropertyPage({ property }: { property: Property }) {
       </div>
       <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
         <Dialog>
-          {isMobile ? (
-            // Only render the first image on small screens
-            <div>
-              <DialogTrigger
-                key={0}
-                onClick={() => setIndexOfSelectedImage(0)}
-                className="hover:opacity-90"
-              >
-                <Image src={firstImageUrl} alt="" fill objectFit="cover" />
-              </DialogTrigger>
-            </div>
-          ) : (
-            property.imageUrls.slice(0, 5).map((imageUrl, index) => (
+          {/* Only render the first image on small screens */}
+          <div className="contents sm:hidden">
+            <DialogTrigger
+              onClick={() => setIndexOfSelectedImage(0)}
+              className="hover:opacity-90"
+            >
+              <Image src={firstImageUrl} alt="" fill objectFit="cover" />
+            </DialogTrigger>
+          </div>
+          <div className="hidden sm:contents">
+            {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
               <div
                 key={index}
                 className={`relative col-span-1 row-span-1 ${
@@ -117,8 +113,8 @@ export default function PropertyPage({ property }: { property: Property }) {
                   <Image src={imageUrl} alt="" fill objectFit="cover" />
                 </DialogTrigger>
               </div>
-            ))
-          )}
+            ))}
+          </div>
           <DialogContent className="flex items-center justify-center bg-transparent">
             <div className="flex justify-center">
               <OfferPhotos
@@ -190,29 +186,39 @@ export default function PropertyPage({ property }: { property: Property }) {
         )}
       </div>
       <div className="flex justify-start space-x-4">
-        <a
+        <Link
+          replace
           href="#overview"
-          className="font-medium text-black hover:text-gray-800"
+          className="text-gray-600 hover:text-gray-800"
         >
           Overview
-        </a>
-        <a href="#amenities" className="text-gray-600 hover:text-gray-800">
+        </Link>
+        <Link
+          replace
+          href="#amenities"
+          className="text-gray-600 hover:text-gray-800"
+        >
           Amenities
-        </a>
-        <a href="#location" className="text-gray-600 hover:text-gray-800">
-          Location
-        </a>
-        <a href="#cancellation" className="text-gray-600 hover:text-gray-800">
+        </Link>
+        <Link
+          replace
+          href="#cancellation"
+          className="text-gray-600 hover:text-gray-800"
+        >
           Cancellation Policy
-        </a>
+        </Link>
         {property.checkInTime && (
-          <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
+          <Link
+            replace
+            href="#house-rules"
+            className="text-gray-600 hover:text-gray-800"
+          >
             House rules
-          </a>
+          </Link>
         )}
       </div>
 
-      <hr className="h-px border-0 bg-gray-300" />
+      <hr className="h-px border-0 bg-zinc-300" />
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
           {/* <section>
@@ -254,7 +260,7 @@ export default function PropertyPage({ property }: { property: Property }) {
               </div>
             </div>
           </section>
-          <hr className="h-px border-0 bg-gray-300" />
+          <hr className="h-px border-0 bg-zinc-300" />
           <section id="amenities" className="scroll-mt-36">
             <h2 className="text-lg font-semibold md:text-xl">Amenitites</h2>
             <PropertyAmenities amenities={property.amenities ?? []} />
@@ -287,7 +293,7 @@ export default function PropertyPage({ property }: { property: Property }) {
           />
         </div>
       </div>
-      <hr className="h-px border-0 bg-gray-300" />
+      <hr className="h-px border-0 bg-zinc-300" />
       <section id="location" className="scroll-mt-36 space-y-1">
         <h3 className="text-lg font-semibold md:text-xl">Location</h3>
         {addressData && (
@@ -315,7 +321,7 @@ export default function PropertyPage({ property }: { property: Property }) {
         </h1>
         <div className="py-2">
           <p className="text-sm font-medium text-black">
-            {property.cancellationPolicy ||
+            {!!property.cancellationPolicy ||
             property.cancellationPolicy?.toLowerCase() === "n/a"
               ? property.cancellationPolicy
               : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
@@ -324,7 +330,7 @@ export default function PropertyPage({ property }: { property: Property }) {
       </section>
       {property.checkInTime && (
         <div>
-          <hr className="h-px border-0 bg-gray-300" />
+          <hr className="h-px border-0 bg-zinc-300" />
           <section id="house-rules" className="mt-4 scroll-mt-36">
             <h2 className="text-lg font-bold">House rules</h2>
             {property.checkInTime && property.checkOutTime && (

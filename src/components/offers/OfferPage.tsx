@@ -36,6 +36,7 @@ import { useMediaQuery } from "../_utils/useMediaQuery";
 import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
+import Link from "next/link";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -206,22 +207,35 @@ export default function OfferPage({
       </div>
 
       <div className="flex justify-start space-x-4">
-        <a
+        <Link
+          replace
           href="#overview"
-          className="font-medium text-black hover:text-gray-800"
+          className="text-gray-600 hover:text-gray-800"
         >
           Overview
-        </a>
-        <a href="#amenities" className="text-gray-600 hover:text-gray-800">
+        </Link>
+        <Link
+          replace
+          href="#amenities"
+          className="text-gray-600 hover:text-gray-800"
+        >
           Amenities
-        </a>
-        <a href="#cancellation" className="text-gray-600 hover:text-gray-800">
+        </Link>
+        <Link
+          replace
+          href="#cancellation"
+          className="text-gray-600 hover:text-gray-800"
+        >
           Cancellation Policy
-        </a>
+        </Link>
         {property.checkInTime && (
-          <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
+          <Link
+            replace
+            href="#house-rules"
+            className="text-gray-600 hover:text-gray-800"
+          >
             House rules
-          </a>
+          </Link>
         )}
       </div>
 
