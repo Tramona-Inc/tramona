@@ -127,7 +127,7 @@ export default function RequestCard({
           {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
           <p>{fmtdNumGuests}</p>
         </div>
-        <div className="flex justify-end">{children}</div>
+        <div className="flex justify-end gap-2">{children}</div>
         {isSelected && (
           <div className="md:hidden">
             <Separator className="my-1" />
