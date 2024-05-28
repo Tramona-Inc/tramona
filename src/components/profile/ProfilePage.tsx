@@ -142,21 +142,29 @@ export default function ProfilePage() {
               </div>
 
               <p className="font-semibold">{profileInfo?.location}</p>
-            </div>
 
-            <div className="mt-2 flex space-x-2">
-              {profileInfo?.socials?.[0] && (
-                <Facebook href={profileInfo.socials[0]} />
-              )}
-              {profileInfo?.socials?.[1] && (
-                <Youtube href={profileInfo.socials[1]} />
-              )}
-              {profileInfo?.socials?.[2] && (
-                <Instagram href={profileInfo.socials[2]} />
-              )}
-              {profileInfo?.socials?.[3] && (
-                <Twitter href={profileInfo.socials[3]} />
-              )}
+              <div className="mt-2 flex space-x-2">
+                {profileInfo?.socials?.[0] && (
+                  <Link href={profileInfo.socials[0]} target="_blank">
+                    <Facebook />
+                  </Link>
+                )}
+                {profileInfo?.socials?.[1] && (
+                  <Link href={profileInfo.socials[1]} target="_blank">
+                    <Youtube />
+                  </Link>
+                )}
+                {profileInfo?.socials?.[2] && (
+                  <Link href={profileInfo.socials[2]} target="_blank">
+                    <Instagram />
+                  </Link>
+                )}
+                {profileInfo?.socials?.[3] && (
+                  <Link href={profileInfo.socials[3]} target="_blank">
+                    <Twitter />
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex gap-3 lg:col-start-4 lg:justify-end">
