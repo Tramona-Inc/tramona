@@ -17,7 +17,7 @@ interface PendingOfferEmailProps {
   offerLink: string;
 }
 
-export function PendingOfferEmail({
+export default function NewOfferEmail({
   originalPrice = 220,
   tramonaPrice = 110,
   offerDescription = "Private Cozy Clean, close to EVERYTHING",

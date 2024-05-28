@@ -1,4 +1,4 @@
-import { SupportEmail } from "@/components/email-templates/SupportEmail";
+import SupportEmail from "packages/transactional/emails/SupportEmail";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { sendEmail } from "@/server/server-utils";
 import { zodEmail, zodString } from "@/utils/zod-utils";

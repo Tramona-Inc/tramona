@@ -28,13 +28,14 @@ export default function RequestGroupCards({
   }, []);
   if (requests.length === 0) return null;
 
-  const requestUnconfirmedBtn = (
-    <RequestUnconfirmedButton
-      requestGroupId={requestGroup.id}
-      isWaiting={isWaiting}
-      onClick={startTimer}
-    />
-  );
+  // const requestUnconfirmedBtn = (
+  //   <RequestUnconfirmedButton
+  //     requestGroupId={requestGroup.id}
+  //     isWaiting={isWaiting}
+  //     onClick={startTimer}
+  //   />
+  // );
+
   const handleCardClick = (request: DetailedRequest) => {
     setSelectedRequest(request);
   };
@@ -47,7 +48,7 @@ export default function RequestGroupCards({
       <div
         key={request.id}
         onClick={() => handleCardClick(request)}
-        className={`cursor-pointer rounded-xl border-2 border-transparent *:h-full ${isSelected ? "border-foreground" : ""}`}
+        className={`cursor-pointer rounded-xl border-2 *:h-full ${isSelected ? "border-foreground" : "border-transparent"}`}
       >
         {/* The is selected prop going inside of Request card is just for mobile desktop is handles in activeRequestGroup */}
         <RequestCard request={request} isSelected={isSelected}>

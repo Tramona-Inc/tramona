@@ -44,7 +44,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
   const chatWithAdmin = useChatWithAdmin();
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: trip.property.address!,
+    location: trip.property.address,
   });
 
   const tripDuration = dayjs(trip.request.checkOut).diff(

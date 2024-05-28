@@ -1,11 +1,11 @@
 import { Heading, Hr, Section, Text, Link } from "@react-email/components";
-import TramonaIcon from "../_icons/TramonaIcon";
-import { type ReferralCashback } from "../account/cashback/referrals";
+import TramonaIcon from "@/components/_icons/TramonaIcon";
+import { type ReferralCashback } from "@/components/account/cashback/referrals";
 import { formatCurrency } from "@/utils/utils";
 import { formatDate } from "date-fns";
 import { Layout } from "./EmailComponents";
 
-export function RequestCashback({
+export default function RequestCashback({
   name,
   email,
   phoneNumber,

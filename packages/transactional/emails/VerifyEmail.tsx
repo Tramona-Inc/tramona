@@ -1,7 +1,7 @@
 import { Layout, CustomButton } from "./EmailComponents";
 import { Text } from "@react-email/components";
 
-export function VerifyEmailLink({
+export default function VerifyEmailLink({
   name,
   url,
 }: {

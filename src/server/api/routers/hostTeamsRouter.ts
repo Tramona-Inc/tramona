@@ -1,4 +1,4 @@
-import { HostTeamInviteEmail } from "@/components/email-templates/HostTeamInviteEmail";
+import HostTeamInviteEmail from "packages/transactional/emails/HostTeamInviteEmail";
 import {
   hostProfiles,
   hostTeamInvites,

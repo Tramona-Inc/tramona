@@ -64,7 +64,7 @@ export default function RequestCard({
   const [open, setOpen] = useState(false);
 
   return (
-    <Card key={request.id}>
+    <Card className="block">
       <WithdrawRequestDialog
         requestId={request.id}
         open={open}
@@ -129,7 +129,7 @@ export default function RequestCard({
         </div>
         <div className="flex justify-end">{children}</div>
         {isSelected && (
-          <div className="lg:hidden">
+          <div className="md:hidden">
             <Separator className="my-1" />
             <MobileSimilarProperties
               location={request.location}
