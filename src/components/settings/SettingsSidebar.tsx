@@ -1,4 +1,4 @@
-import { Bell, CreditCard, User } from "lucide-react";
+import { CreditCard, User } from "lucide-react";
 import Link from "next/link";
 
 export default function SettingsSidebar() {

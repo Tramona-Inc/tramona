@@ -75,6 +75,7 @@ export function DesktopRequestDealTab() {
                       icon={CalendarIcon}
                       variant="lpDesktop"
                       disablePast
+                      className="bg-white"
                     />
                   </FormControl>
                   <FormMessage />
