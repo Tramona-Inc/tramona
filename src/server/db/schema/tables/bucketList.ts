@@ -47,25 +47,25 @@ export const ProfileInfoSchema = z.object({
   facebook_link: z
     .string()
     .url()
-    .startsWith("https://facebook.com/", "Must be a Facebook link")
+    .startsWith("https://www.facebook.com/", "Must be a Facebook link")
     .optional()
     .or(z.literal("")),
   youtube_link: z
     .string()
     .url()
-    .startsWith("https://youtube.com/", "Must be a YouTube link")
+    .startsWith("https://www.youtube.com/", "Must be a YouTube link")
     .optional()
     .or(z.literal("")),
   instagram_link: z
     .string()
     .url()
-    .startsWith("https://instagram.com/", "Must be a Instagram link")
+    .startsWith("https://www.instagram.com/", "Must be a Instagram link")
     .optional()
     .or(z.literal("")),
   twitter_link: z
     .string()
     .url()
-    .startsWith("https://twitter.com/", "Must be a Twitter link")
+    .startsWith("https://x.com/", "Must be a Twitter link")
     .optional()
     .or(z.literal("")),
 });
