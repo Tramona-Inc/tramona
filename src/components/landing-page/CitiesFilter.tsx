@@ -13,6 +13,7 @@ import {
 import { cities } from "./cities";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { useRef } from "react";
+import { useRouter } from "next/router";
 
 function FiltersBtn() {
   const open = useCitiesFilter((state) => state.open);
@@ -36,7 +37,11 @@ function FiltersBtn() {
   );
 }
 
-export default function CitiesFilter() {
+export default function CitiesFilter({
+  isLandingPage = false,
+}: {
+  isLandingPage?: boolean;
+}) {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
 
@@ -68,6 +73,8 @@ export default function CitiesFilter() {
     }
   }
 
+  const router = useRouter();
+
   return (
     <div className="sticky top-header-height z-10 h-14 border-b bg-white">
       <div className="absolute inset-2">
@@ -76,11 +83,22 @@ export default function CitiesFilter() {
             {cities.map((city) => (
               <Button
                 key={city.id}
-                variant={"ghost"}
-                onClick={() => setFilter(city)}
+                variant="ghost"
+                onClick={async () => {
+                  if (isLandingPage) {
+                    void router.push({
+                      pathname: "/explore",
+                      query: { city: city.id },
+                    });
+                  } else {
+                    setFilter(city);
+                  }
+                }}
                 className={cn(
                   "px-3 text-xs font-semibold sm:text-sm",
-                  city.id === filter?.id && "bg-zinc-300 hover:bg-zinc-300",
+                  city.id === filter?.id && !isLandingPage
+                    ? "bg-zinc-300 hover:bg-zinc-300"
+                    : "text-muted-foreground",
                 )}
               >
                 {city.label}
@@ -110,7 +128,7 @@ export default function CitiesFilter() {
         >
           <ChevronRightIcon />
         </Button>
-        <FiltersBtn />
+        {!isLandingPage && <FiltersBtn />}
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-import { cities } from "@/components/landing-page/cities";
 import { type ALL_PROPERTY_ROOM_TYPES } from "@/server/db/schema/tables/properties";
 import { create } from "zustand";
 
@@ -38,24 +37,6 @@ type CitiesFilterState = {
   checkOut: Date | undefined;
   setCheckOut: (checkOut: Date | undefined) => void;
 };
-
-// export const useBidding = create<BiddingState>((set) => ({
-//   price: 0,
-//   date: {
-//     from: new Date(),
-//     to: new Date(),
-//   },
-//   step: 0,
-//   setPrice: (price: number) => {
-//     set(() => ({ price }));
-//   },
-//   setDate: (from: Date, to: Date) => {
-//     set(() => ({ date: { from, to } }));
-//   },
-//   setStep: (step: number) => {
-//     set(() => ({ step }));
-//   },
-// }));
 
 export const useCitiesFilter = create<CitiesFilterState>((set) => ({
   radius: 50,

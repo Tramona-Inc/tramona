@@ -198,12 +198,7 @@ function SearchPropertiesMap({
       setCenter(newCenter);
       //this is so the useEffect can determine if the center was set by the camera change
       setCenterSetbyCameraChange(true);
-      setFilter({
-        lat: newCenter.lat,
-        long: newCenter.lng,
-        id: "",
-        label: "",
-      });
+
       // console.log(newCenter);
       // console.log("boundaries");
       // console.log(ev.detail.bounds);
@@ -233,6 +228,9 @@ function SearchPropertiesMap({
             defaultZoom={10}
             defaultCenter={center}
             onCameraChanged={handleCameraChanged}
+            disableDefaultUI={true}
+            zoomControl={true}
+            fullscreenControl={false}
           >
             <PoiMarkers pois={markers} />
           </Map>

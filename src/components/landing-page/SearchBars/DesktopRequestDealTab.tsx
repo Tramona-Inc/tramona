@@ -12,6 +12,7 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
+  CalendarIcon,
   DollarSignIcon,
   FilterIcon,
   Link2,
@@ -71,10 +72,9 @@ export function DesktopRequestDealTab() {
                     <DateRangeInput
                       {...field}
                       label="Check in/out"
-                      icon={Users2Icon}
+                      icon={CalendarIcon}
                       variant="lpDesktop"
                       disablePast
-                      className="bg-white"
                     />
                   </FormControl>
                   <FormMessage />
@@ -188,7 +188,7 @@ export function DesktopRequestDealTab() {
                 type="submit"
                 size="lg"
                 disabled={form.formState.isSubmitting}
-                className="mt-2 h-12 bg-teal-900 hover:bg-teal-950"
+                className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
               >
                 Submit Request
               </Button>
