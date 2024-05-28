@@ -8,24 +8,42 @@ import { type RequestGroup } from "@/server/db/schema";
 
 export function RequestCards({
   requestGroups,
+  selectedRequest,
+  setSelectedRequest,
 }: {
   requestGroups: { group: RequestGroup; requests: DetailedRequest[] }[];
+  selectedRequest: DetailedRequest | null;
+  setSelectedRequest: (request: DetailedRequest | null) => void;
 }) {
   const [isWaiting, setIsWaiting] = useState(false);
   const utils = api.useUtils();
+  // const [selectedRequest, setSelectedRequest] =
+  //   useState<DetailedRequest | null>(requestGroups[0]!.requests[0]!);
+  // console.log("This is the first request group");
+  // console.log(selectedRequest);
+  // console.log("This is the selected request");
+  // console.log(selectedRequest);
 
   const previousRequestGroups = usePrevious(requestGroups);
+  // const newlyApprovedRequestGroups =
+  //   requestGroups && previousRequestGroups
+  //     ? requestGroups.filter(
+  //         ({ group }) =>
+  //           group.hasApproved &&
+  //           !previousRequestGroups.find(
+  //             ({ group: group2 }) => group2?.id === group.id,
+  //           )?.group.hasApproved,
+  //       )
+  //     : [];
   const newlyApprovedRequestGroups =
     requestGroups && previousRequestGroups
       ? requestGroups.filter(
           ({ group }) =>
-            group.hasApproved &&
             !previousRequestGroups.find(
-              ({ group: group2 }) => group2?.id === group.id,
+              ({ group: group2 }) => group2.id === group.id,
             )?.group.hasApproved,
         )
       : [];
-
   useEffect(() => {
     if (newlyApprovedRequestGroups.length > 0) {
       setIsWaiting(false);
@@ -44,7 +62,7 @@ export function RequestCards({
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="space-y-4">
       {requestGroups.map(({ group: requestGroup, requests }) => (
         <RequestGroupCards
           key={requestGroup.id}
@@ -52,6 +70,8 @@ export function RequestCards({
           requests={requests}
           isWaiting={isWaiting}
           startTimer={startTimer}
+          selectedRequest={selectedRequest}
+          setSelectedRequest={setSelectedRequest}
         />
       ))}
     </div>

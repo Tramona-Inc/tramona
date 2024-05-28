@@ -9,7 +9,7 @@ import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency, getNumNights } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import DateRangePicker from "../_common/DateRangePicker";
@@ -36,6 +36,16 @@ export default function BiddingForm({
   price: number;
 }) {
   const [open, setOpen] = useState(false);
+
+  const displayUserBid = useBidding((state) => state.displayUserBid);
+  const setDisplayUserBid = useBidding((state) => state.setDisplayUserBid);
+
+  useEffect(() => {
+    if (displayUserBid) {
+      setOpen(true);
+      setDisplayUserBid(false);
+    }
+  }, [displayUserBid]);
 
   const propertyIdBids = useBidding((state) => state.propertyIdBids);
   const alreadyBid = propertyIdBids.includes(propertyId);
@@ -89,10 +99,10 @@ export default function BiddingForm({
                 <FormControl>
                   <DateRangePicker
                     {...field}
-                    label={""}
-                    propertyId={propertyId}
-                    className="col-span-full sm:col-span-1"
                     disablePast
+                    propertyId={propertyId}
+                    alreadyBid={alreadyBid}
+                    className="col-span-full sm:col-span-1"
                   />
                 </FormControl>
                 <FormMessage />
@@ -102,7 +112,7 @@ export default function BiddingForm({
           <Dialog open={open} onOpenChange={setOpen}>
             {/* Removed trigger to have control on open and close */}
             <div>
-              {alreadyBid ? (
+              {/* {alreadyBid ? (
                 <Button
                   type={"submit"}
                   className={"w-full rounded-xl"}
@@ -110,15 +120,15 @@ export default function BiddingForm({
                 >
                   Already Bid
                 </Button>
-              ) : (
-                <Button
-                  type={"submit"}
-                  className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
-                  // disabled={!form.formState.isValid}
-                >
-                  Make Offer
-                </Button>
-              )}
+              ) : ( */}
+              <Button
+                type={"submit"}
+                className={`w-full rounded-xl ${!form.formState.isValid && "bg-black"}`}
+                // disabled={!form.formState.isValid}
+              >
+                Make Offer
+              </Button>
+              {/* )} */}
             </div>
             <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
               <MakeBid propertyId={propertyId} setOpen={setOpen} />

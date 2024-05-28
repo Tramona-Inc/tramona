@@ -2,7 +2,7 @@ import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-//import { GoogleMap, Circle } from "@react-google-maps/api";
+import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import {
   Dialog,
   DialogContent,
@@ -147,9 +147,11 @@ export default function OfferPage({
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 left-2">
             <Dialog>
-              <DialogTrigger className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
-                <ImagesIcon className="mr-2" />
-                See all {property.imageUrls.length} photos
+              <DialogTrigger asChild>
+                <Button variant="white" className="rounded-full">
+                  <ImagesIcon />
+                  See all {property.imageUrls.length} photos
+                </Button>
               </DialogTrigger>
 
               <DialogContent className="max-w-4xl">
@@ -212,6 +214,9 @@ export default function OfferPage({
         </a>
         <a href="#amenities" className="text-gray-600 hover:text-gray-800">
           Amenities
+        </a>
+        <a href="#cancellation" className="text-gray-600 hover:text-gray-800">
+          Cancellation Policy
         </a>
         {property.checkInTime && (
           <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
@@ -291,8 +296,10 @@ export default function OfferPage({
             <PropertyAmenities amenities={property.amenities ?? []} />
             {property.amenities && (
               <Dialog>
-                <DialogTrigger className="inline-flex w-full items-center justify-center rounded-lg border border-black px-2.5 py-2 text-foreground md:w-1/4">
-                  Show all amenities
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Show all amenities
+                  </Button>
                 </DialogTrigger>
 
                 <DialogContent className="max-w-4xl">
@@ -307,6 +314,19 @@ export default function OfferPage({
                 </DialogContent>
               </Dialog>
             )}
+          </section>
+          <section id="cancellation" className="scroll-mt-36">
+            <h1 className="text-lg font-semibold md:text-xl">
+              Cancellation Policy
+            </h1>
+            <div className="py-2">
+              <p className="text-sm font-medium text-black">
+                {property.cancellationPolicy === null ||
+                property.cancellationPolicy.toLowerCase() === "n/a"
+                  ? property.cancellationPolicy
+                  : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+              </p>
+            </div>
           </section>
         </div>
         <div className="flex-1">
@@ -452,6 +472,11 @@ export default function OfferPage({
           </section>
         </div>
       )}
+      <div className="bg-accent px-4 py-1">
+        this is the house link
+        <span className="mx-3 ">This is the house link</span>
+        Share with your friends
+      </div>
     </div>
   );
 }

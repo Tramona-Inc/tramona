@@ -118,6 +118,10 @@ export function formatDateWeekMonthDay(date: Date) {
   return formatDate(date, "EEE MMMM d");
 }
 
+export function formatDateMonthDayYear(date: Date) {
+  return formatDate(date, "MMMM d, yyyy");
+}
+
 // not used right now and probably will never have to:
 
 // export function formatDateRangeFromStrs(from: string, to?: string) {
@@ -187,12 +191,30 @@ export function getDiscountPercentage(
 // use these as a last resort cuz it can cause jank with ssr (unless the element isnt
 // visible on the first render in which case it doesnt matter for ssr)
 
-// https://tailwindcss.com/docs/screens + tailwind.config.ts
+// these will need to be kept in sync with
+// https://tailwindcss.com/docs/screens and ./tailwind.config.ts
 
 export const useScreenWidth = () => useWindowSize().width ?? 0;
+
+/**
+ * screen width >= 640 (same as tailwind `sm:`)
+ */
 export const useIsSm = () => useScreenWidth() >= 640;
+
+/**
+ * screen width >= 768 (same as tailwind `md:`)
+ */
 export const useIsMd = () => useScreenWidth() >= 768;
+
+/**
+ * screen width >= 1024 (same as tailwind `lg:`))
+ */
 export const useIsLg = () => useScreenWidth() >= 1024;
+
+/**
+ * screen width >= 1850 (same as tailwind `lg:`))
+ */
+export const useIsXl = () => useScreenWidth() >= 1850;
 
 export function getTramonaFeeTotal(totalSavings: number) {
   const fee = 0.2 * totalSavings;

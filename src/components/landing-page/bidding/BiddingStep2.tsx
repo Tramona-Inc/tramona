@@ -21,7 +21,9 @@ import {
 } from "@/utils/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
+import { LightbulbIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import BidPaymentForm from "./BidPaymentForm";
 
@@ -49,7 +51,7 @@ function BiddingInfoCard({ property }: { property: Property }) {
         </div>
         <div className="flex flex-col text-sm tracking-tight md:text-base">
           <h2 className="font-bold ">{property.name}</h2>
-          {property.originalNightlyPrice && (
+          {property.originalNightlyPrice !== null && (
             <p className="text-xs md:text-base">
               Airbnb price: {formatCurrency(property.originalNightlyPrice)}
               /night
@@ -67,6 +69,23 @@ function BiddingInfoCard({ property }: { property: Property }) {
           </p>
         </div>
       </div>
+      <div className="my-4 flex flex-col gap-y-1 rounded-xl bg-zinc-100 px-4 py-2">
+        <div className="flex flex-row items-end gap-x-1 font-bold">
+          <LightbulbIcon strokeWidth={2} />
+          Remember
+        </div>
+        <p className="ml-7 text-sm font-semibold">
+          All offers are binding. If your offer is accepted your card will be
+          charged. <br /> Overlapping bids will get withdrawn if one is
+          accepted.
+        </p>{" "}
+        <p className="ml-7 text-sm font-semibold">
+          <Link href="/tos" className="text-blue-500 hover:underline">
+            Learn more
+          </Link>{" "}
+          about the Host&apos;s cancellation policy.
+        </p>
+      </div>
       <div className="flex flex-col gap-y-2 text-xs font-semibold md:text-base">
         <div className="mt-8 flex flex-row justify-between ">
           <p>
@@ -78,7 +97,7 @@ function BiddingInfoCard({ property }: { property: Property }) {
         <hr />
         <div className="my-2 flex flex-row justify-between">
           <p>Offer Total</p>
-          <p>${totalPrice} </p>
+          <p>${totalPrice}</p>
         </div>
       </div>
     </div>
@@ -93,9 +112,6 @@ function BiddingStep2({
   setStep: (step: number) => void;
 }) {
   const addPropertyIdBids = useBidding((state) => state.addPropertyIdBids);
-  const twilioMutation = api.twilio.sendSMS.useMutation();
-  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
-
   const { data: payments } = api.stripe.getListOfPayments.useQuery();
   const { data: session } = useSession();
   const [currentPaymentMethodId, setCurrentPaymentMethodId] = useState<
@@ -110,27 +126,32 @@ function BiddingStep2({
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
   const totalPrice = totalNightlyPrice;
   const stripePromise = useStripe();
+  const slackMutation = api.twilio.sendSlack.useMutation();
+
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: async () => {
       addPropertyIdBids(property.id);
       setStep(2);
       const traveler = session?.user;
-      if (traveler?.phoneNumber) {
-        if (traveler.isWhatsApp) {
-          await twilioWhatsAppMutation.mutateAsync({
-            templateId: "HX1650cf0e293142a6db2b458167025222",
-            to: traveler.phoneNumber,
-            price: price,
-            name: property.name,
-            dates: formatDateRange(date.from, date.to),
-          });
-        } else {
-          await twilioMutation.mutateAsync({
-            to: traveler.phoneNumber,
-            msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}. Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
-          });
-        }
-      }
+      await slackMutation.mutateAsync({
+        message: `Tramona: A traveler submitted an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}.`,
+      });
+      // if (traveler?.phoneNumber) {
+      //   if (traveler.isWhatsApp) {
+      //     await twilioWhatsAppMutation.mutateAsync({
+      //       templateId: "HX1650cf0e293142a6db2b458167025222",
+      //       to: traveler.phoneNumber,
+      //       price: price,
+      //       name: property.name,
+      //       dates: formatDateRange(date.from, date.to),
+      //     });
+      //   } else {
+      //     await twilioMutation.mutateAsync({
+      //       to: traveler.phoneNumber,
+      //       msg: `Tramona: Thank you for placing an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}. Your offer has been sent to the host and they will respond within 24 hours. We will text you if they accept, deny or counter your offer!`,
+      //     });
+      //   }
+      // }
     },
     onError: (error) => {
       console.log("error", error.message);
@@ -203,11 +224,9 @@ function BiddingStep2({
             </Button>
           </div>
         ) : (
-          <>
-            <Elements stripe={stripePromise} options={options}>
-              <BidPaymentForm bid={bid} setStep={setStep} />
-            </Elements>
-          </>
+          <Elements stripe={stripePromise} options={options}>
+            <BidPaymentForm bid={bid} setStep={setStep} />
+          </Elements>
         )}
       </div>
       <p>{error}</p>

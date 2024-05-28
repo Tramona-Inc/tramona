@@ -85,7 +85,7 @@ export default function RequestRefreshForm({
   const { watch } = form;
 
   const onSubmit = async (data: FormSchema) => {
-    let submissionData = {
+    const submissionData = {
       preferences: data.preferences,
       updatedPriceNightlyUSD: data.price * 100,
       propertyLinks: data.propertyLinks

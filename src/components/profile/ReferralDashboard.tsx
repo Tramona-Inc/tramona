@@ -48,7 +48,7 @@ export default function ReferralDashboard() {
   if (isLoading) return <Spinner />;
 
   return (
-    <div className="mx-auto mb-10 min-h-screen-minus-header max-w-4xl space-y-2 lg:mt-10 lg:space-y-8">
+    <div className="space-y-8 pb-20 lg:pt-16">
       <div className="space-y-2 border-b p-4 lg:border-0 lg:p-0">
         <h1 className="text-2xl font-bold lg:text-4xl">My Referrals</h1>
         <p className="text-sm lg:text-lg">
@@ -103,24 +103,23 @@ export default function ReferralDashboard() {
             <ChevronRight size={16} />
           </div>
         </section>
-        <div className="col-span-2 space-y-10 rounded-lg border p-4">
+        <div className="col-span-2 space-y-10 rounded-lg p-4">
           <section className="space-y-2">
             <h3 className="text-xl font-bold">Share your referral link</h3>
             <p className="text-sm">
               Share your referral link by copying and sending it or sharing it
               on your social media.
             </p>
-
-            <div className="space-y-2 lg:flex lg:items-center lg:justify-between lg:space-y-0">
-              <div className="basis-full lg:basis-5/6">
-                <Input value={url} className="text-base" disabled />
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex-1">
+                <Input value={url} readOnly />
               </div>
               <CopyToClipboardBtn
                 message={url}
                 render={({ justCopied, copyMessage }) => (
                   <Button
                     onClick={copyMessage}
-                    className="w-full bg-teal-900 px-6 lg:w-auto"
+                    className="bg-teal-900 px-0 lg:w-20"
                   >
                     {justCopied ? "Copied!" : "Copy"}
                   </Button>

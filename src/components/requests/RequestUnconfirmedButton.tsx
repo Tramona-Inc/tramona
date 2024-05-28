@@ -35,8 +35,8 @@ export function RequestUnconfirmedButton({
 
   return (
     <Button
-      className="rounded-full pr-3"
-      variant="outline"
+      className="rounded-md pr-3"
+      variant="secondary"
       onClick={handleClick}
       disabled={isSending || isWaiting}
     >

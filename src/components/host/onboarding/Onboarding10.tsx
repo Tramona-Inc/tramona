@@ -1,28 +1,27 @@
-// import { useHostOnboarding } from "@/utils/store/host-onboarding";
-// import { MapPin } from "lucide-react";
-// import Image from "next/image";
-// import OnboardingFooter from "./OnboardingFooter";
-// import { api } from "@/utils/api";
-// import LeafletMap from "./LeafletMap";
-// import React from "react";
-// import Summary1 from "./Summary1";
-// import Summary2 from "./Summary2";
-// import Summary4 from "./Summary4";
-// import Summary7 from "./Summary7";
-// import Summary8 from "./Summary8";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { MapPin } from "lucide-react";
+import Image from "next/image";
+import OnboardingFooter from "./OnboardingFooter";
+import { api } from "@/utils/api";
+import React from "react";
+import Summary1 from "./Summary1";
+import Summary2 from "./Summary2";
+import Summary4 from "./Summary4";
+import Summary7 from "./Summary7";
+import Summary8 from "./Summary8";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 
-// function Heading({
-//   title,
-//   editPage,
-//   children,
-// }: {
-//   title: string;
-//   editPage?: number;
-//   children: React.ReactNode;
-// }) {
-
-//   const setProgress = useHostOnboarding((state) => state.setProgress);
-//   const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
+function Heading({
+  title,
+  editPage,
+  children,
+}: {
+  title: string;
+  editPage?: number;
+  children: React.ReactNode;
+}) {
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+  const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
 
 //   return (
 //     <div className="flex flex-col gap-3 py-5">
@@ -68,83 +67,87 @@
 //             <div className="flex flex-row gap-5">
 //               <MapPin />
 
-//               <div>
-//                 <p> {listing.location.street}</p>
-//                 {listing.location.apt && <p>{listing.location.apt}</p>}
-//                 <p>
-//                   {listing.location.city}, {listing.location.state}{" "}
-//                   {listing.location.zipcode}
-//                 </p>
-//                 <p>{listing.location.country}</p>
-//               </div>
-//             </div>
-//             {coordinateData &&
-//               (<div className="z-0">
-
-//                 <LeafletMap lat={coordinateData.coordinates.lat} lng={coordinateData.coordinates.lng}/>
-//                 </div>)
-//               }
-//           </Heading>
-//           <Summary4 />
-//           <Heading title={"Amenities"} editPage={5}>
-//             <div className="grid grid-cols-2 gap-5">
-//               {listing.amenities.map((amenity, index) => (
-//                 <p key={index} className="flex items-center">
-//                   {amenity}
-//                 </p>
-//               ))}
-//             </div>
-//           </Heading>
-//           <Heading title={"Photos"} editPage={6}>
-//             <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
-//               <div className="relative col-span-2 row-span-2 bg-accent">
-//                 <Image
-//                   src={listing.imageUrls[0]!}
-//                   alt=""
-//                   fill
-//                   objectFit="cover"
-//                   priority
-//                 />
-//               </div>
-//               <div className="relative col-span-1 row-span-1 bg-accent">
-//                 <Image
-//                   src={listing.imageUrls[1]!}
-//                   alt=""
-//                   fill
-//                   objectFit="cover"
-//                 />
-//               </div>
-//               <div className="relative col-span-1 row-span-1 bg-accent">
-//                 <Image
-//                   src={listing.imageUrls[2]!}
-//                   alt=""
-//                   fill
-//                   objectFit="cover"
-//                 />
-//               </div>
-//               <div className="relative col-span-1 row-span-1 bg-accent">
-//                 <Image
-//                   src={listing.imageUrls[3]!}
-//                   alt=""
-//                   fill
-//                   objectFit="cover"
-//                 />
-//               </div>
-//               <div className="relative col-span-1 row-span-1 bg-accent">
-//                 <Image
-//                   src={listing.imageUrls[4]!}
-//                   alt=""
-//                   fill
-//                   objectFit="cover"
-//                 />
-//               </div>
-//             </div>
-//           </Heading>
-//           <Summary7 />
-//           <Summary8 />
-//         </div>
-//       </div>
-//       <OnboardingFooter isForm={false} />
-//     </>
-//   );
-// }
+              <div>
+                <p> {listing.location.street}</p>
+                {listing.location.apt && <p>{listing.location.apt}</p>}
+                <p>
+                  {listing.location.city}, {listing.location.state}{" "}
+                  {listing.location.zipcode}
+                </p>
+                <p>{listing.location.country}</p>
+              </div>
+            </div>
+            {coordinateData && (
+              <div className="relative mt-4 h-[400px]">
+                <div className="absolute inset-0 z-0">
+                  <SingleLocationMap
+                    lat={coordinateData.coordinates.lat}
+                    lng={coordinateData.coordinates.lng}
+                  />
+                </div>
+              </div>
+            )}
+          </Heading>
+          <Summary4 />
+          <Heading title={"Amenities"} editPage={5}>
+            <div className="grid grid-cols-2 gap-5">
+              {listing.amenities.map((amenity, index) => (
+                <p key={index} className="flex items-center">
+                  {amenity}
+                </p>
+              ))}
+            </div>
+          </Heading>
+          <Heading title={"Photos"} editPage={6}>
+            <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
+              <div className="relative col-span-2 row-span-2 bg-accent">
+                <Image
+                  src={listing.imageUrls[0]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                  priority
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[1]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[2]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[3]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[4]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+            </div>
+          </Heading>
+          <Summary7 />
+          <Summary8 />
+        </div>
+      </div>
+      <OnboardingFooter isForm={false} />
+    </>
+  );
+}

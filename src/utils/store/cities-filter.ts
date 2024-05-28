@@ -49,24 +49,6 @@ type CitiesFilterState = {
   ) => void;
 };
 
-// export const useBidding = create<BiddingState>((set) => ({
-//   price: 0,
-//   date: {
-//     from: new Date(),
-//     to: new Date(),
-//   },
-//   step: 0,
-//   setPrice: (price: number) => {
-//     set(() => ({ price }));
-//   },
-//   setDate: (from: Date, to: Date) => {
-//     set(() => ({ date: { from, to } }));
-//   },
-//   setStep: (step: number) => {
-//     set(() => ({ step }));
-//   },
-// }));
-
 export const useCitiesFilter = create<CitiesFilterState>((set) => ({
   locationBoundingBox: {
     northeastLat: 0,

@@ -113,7 +113,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-  getByRequestIdWithProperty: protectedProcedure
+  getByRequestIdWithProperty: publicProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
@@ -338,7 +338,7 @@ export const offersRouter = createTRPCRouter({
   // });
   // }),
 
-  getStripePaymentIntentAndCheckoutSessionId: protectedProcedure
+  getStripePaymentIntentAndCheckoutSessionId: publicProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.offers.findFirst({

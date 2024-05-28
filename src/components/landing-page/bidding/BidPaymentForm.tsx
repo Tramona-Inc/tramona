@@ -1,14 +1,23 @@
 import { Button } from "@/components/ui/button";
+import {
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { api } from "@/utils/api";
+import { useBidding } from "@/utils/store/bidding";
+import { cn } from "@/utils/utils";
 import {
   AddressElement,
   PaymentElement,
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { StripeError } from "@stripe/stripe-js";
+import { type StripeError } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
 
 type Bid = {
   propertyId: number;
@@ -28,7 +37,7 @@ export default function BidPaymentForm({
   const stripe = useStripe();
   const elements = useElements();
 
-  const [errorMessage, setErrorMessage] = useState<String | undefined>();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
 
   const { update } = useSession();
@@ -41,7 +50,6 @@ export default function BidPaymentForm({
 
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: () => {
-      console.log("hit");
       setStep(2);
     },
   });
@@ -102,14 +110,62 @@ export default function BidPaymentForm({
     });
   };
 
+  const { data: session } = useSession();
+
+  const [isStripeLoading, setIsStripeLoading] = useState(true);
+
+  useEffect(() => {
+    if (elements) {
+      const element = elements.getElement("payment");
+      element?.on("ready", () => {
+        setIsStripeLoading(false);
+      });
+    }
+  }, [elements]);
+
+  const router = useRouter();
+
+  const setDisplayUserBid = useBidding((state) => state.setDisplayUserBid);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <AddressElement options={{ mode: "billing" }} />
-      <PaymentElement />
-      <Button type="submit" disabled={!stripe || loading}>
-        Save
-      </Button>
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-    </form>
+    <div className="relative flex min-h-[600px] items-center justify-center">
+      {!session?.user && (
+        <div className="absolute bottom-52 z-10 flex flex-col gap-5 rounded-lg border bg-white p-5">
+          <DialogHeader>
+            <DialogTitle>Please Log in</DialogTitle>
+            <DialogDescription>
+              In order to make a bid, please log in or sign up.
+            </DialogDescription>
+          </DialogHeader>
+          <Button
+            variant={"secondary"}
+            className="w-full"
+            onClick={() => {
+              setDisplayUserBid(true);
+
+              void router.push({
+                pathname: "/auth/signin",
+                query: { from: `/property/${bid.propertyId}` },
+              });
+            }}
+          >
+            Log in
+          </Button>
+          <Button asChild variant={"greenPrimary"} className="w-full">
+            <Link href={"/auth/signup"}>Sign Up</Link>
+          </Button>
+        </div>
+      )}
+      <div className={cn(!session?.user.id && "blur-sm filter")}>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <AddressElement options={{ mode: "billing" }} />
+          <PaymentElement />
+          <Button type="submit" disabled={!stripe || loading}>
+            Save
+          </Button>
+          {errorMessage && <div className="error-message">{errorMessage}</div>}
+        </form>
+      </div>
+    </div>
   );
 }

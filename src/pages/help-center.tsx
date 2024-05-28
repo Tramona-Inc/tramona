@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { api } from "@/utils/api";
+import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import {
   BugIcon,
   ChevronRight,
@@ -10,26 +10,16 @@ import {
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import router from "next/router";
 
 export default function HelpCenter() {
-  const { mutateAsync: createConverstaionWithAdmin } =
-    api.messages.createConversationWithAdmin.useMutation({
-      onSuccess: (conversationId) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
-      },
-    });
-
-  async function handleChat() {
-    await createConverstaionWithAdmin();
-  }
+  const chatWithAdmin = useChatWithAdmin();
 
   return (
     <DashboardLayout type="guest">
       <Head>
         <title>Help Center | Tramona</title>
       </Head>
-      <div className="relative h-64">
+      <div className="relative h-48 lg:h-64">
         <div className="absolute inset-0">
           <Image
             src="/assets/images/beach.png"
@@ -38,7 +28,7 @@ export default function HelpCenter() {
             className="object-cover"
           />
         </div>
-        <h1 className="absolute inset-0 flex items-center justify-center bg-opacity-50 text-4xl font-bold">
+        <h1 className="absolute inset-0 flex items-center justify-center bg-opacity-50 text-center text-2xl font-extrabold lg:text-4xl">
           How can we help you?
         </h1>
       </div>
@@ -58,7 +48,7 @@ export default function HelpCenter() {
               <p>
                 For any non emergency needs or questions,{" "}
                 <button
-                  onClick={handleChat}
+                  onClick={() => chatWithAdmin()}
                   className="text-blue-600 underline underline-offset-2"
                 >
                   chat with us.

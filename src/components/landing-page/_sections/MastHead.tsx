@@ -1,3 +1,4 @@
+import landingBg from "public/assets/images/landing-bg.jpg";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import {
@@ -7,84 +8,134 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/utils/utils";
-import { SearchIcon } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image";
+import {
+  CircleDollarSign,
+  Handshake,
+  Home,
+  MapPin,
+  SearchIcon,
+} from "lucide-react";
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
-import { DesktopSearchTab } from "../SearchBars/DesktopSearchTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
-import { WelcomeBanner } from "../WelcomeBanner";
+import Typewriter from "typewriter-effect";
+import Image from "next/image";
+
+const infoCards = [
+  {
+    icon: MapPin,
+    title: "City Requests",
+    description:
+      "Send your travel details to all hosts in your destination city. They'll respond by offering you properties within your budget.",
+  },
+  {
+    icon: Home,
+    title: "Property Offers",
+    description:
+      "Browse through 10,000+ properties and send an offer. Hosts will respond in 24 hours and a deal will be created.",
+  },
+  {
+    icon: Handshake,
+    title: "Negotiation",
+    description:
+      "Hosts either accept, deny, or counter offer your request, to make a unique deal every time.",
+  },
+  {
+    icon: CircleDollarSign,
+    title: "Lowest Fees",
+    description:
+      "Lowest fees on the market, 80% lower fees than any other booking platform.",
+  },
+];
 
 export default function MastHead() {
   return (
-    <section className="relative bg-white">
-      <div className="absolute inset-x-0 top-0">
-        <WelcomeBanner />
-      </div>
-      <div className="w-full">
+    <section className="relative min-h-screen-minus-header bg-white p-4">
+      <div className="relative overflow-clip rounded-3xl border">
         <Image
-          src="/assets/images/landing-page/main.png"
+          src={landingBg}
           alt=""
-          width={0}
-          height={0}
-          sizes="100vw"
-          priority
-          className="h-[370px] w-full select-none object-cover md:h-[450px] md:w-full"
+          layout="fill"
+          objectFit="cover"
+          placeholder="blur"
+          className="select-none"
         />
-      </div>
-
-      <div className="absolute -top-12 left-0 right-0 z-10 mx-auto max-w-4xl px-5 pt-24 md:top-10 md:px-8">
-        <h1 className="mx-auto max-w-3xl text-center text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl md:leading-tight">
-          Pay what you want by bidding on Airbnb stays
-        </h1>
-        <p className="mx-auto mt-8 max-w-lg text-center text-base font-semibold text-gray-900 md:text-lg">
-          Stay at the same properties you see on Airbnb for cheaper. Say goodbye
-          to outrageous fees and markups.
-        </p>
-        <div className="mx-auto mt-10 w-full md:hidden">
-          <MobileSearchLayout />
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black"></div>
+        <div className="relative grid grid-cols-1 p-4 lg:grid-cols-2">
+          <div className="flex flex-col justify-end">
+            <div className="relative pt-32 lg:text-balance">
+              {/* <div className="relative inline-block rounded-full border-t border-white/20 bg-teal-900  px-3 font-extrabold uppercase tracking-wide text-white shadow-[1px_1px_10px] shadow-teal-100/60">
+                $250k+ saved so far
+              </div> */}
+              <div className="relative inline-flex items-center gap-1 rounded-full border-t border-white/30 bg-teal-50 px-3 text-sm font-extrabold uppercase tracking-wide text-teal-900 sm:text-base">
+                $250k+ saved so far
+              </div>
+              <h1 className="text-3xl font-extrabold text-white lg:text-6xl">
+                Book the same properties you see on Airbnb for less
+              </h1>
+              <p className="text-xs text-white lg:pt-4 lg:text-base">
+                With Airbnb hosts averaging 60% vacancy rates year-round,
+                Tramona matches you with hosts who are willing to meet your
+                price.
+              </p>
+            </div>
+          </div>
+          <div className="ps-16">
+            <div className="hidden flex-1 rounded-2xl border bg-white p-4 lg:block">
+              <DesktopSearchLayout />
+            </div>
+          </div>
         </div>
       </div>
-      <div className="hidden -translate-y-16 px-4 md:block">
+      <div className="mt-4 flex-1 rounded-2xl border bg-secondary p-4 lg:hidden">
         <DesktopSearchLayout />
       </div>
-      <p className="px-4 pt-4 text-center text-sm font-medium md:-translate-y-6 md:text-base">
-        See a property you like? Make an offer and Tramona will create the deal
-        for you. Don&apos;t see a property you like? Request a deal.
-      </p>
+      <div className="mt-8 space-y-4 lg:mt-14 lg:space-y-8">
+        <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
+          How Tramona Works
+        </h2>
+        <div className="relative h-56">
+          <div className="absolute inset-0 overflow-x-auto">
+            <div className="flex gap-4">
+              {infoCards.map((card, index) => (
+                <div
+                  key={index}
+                  className="flex min-w-64 flex-col items-start gap-2 rounded-2xl bg-teal-700/15 p-4 md:flex-1"
+                >
+                  <div className="rounded-lg bg-white p-2">
+                    <card.icon />
+                  </div>
+                  <h3 className="text-xl font-bold">{card.title}</h3>
+                  <p className="text-sm">{card.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
 
 export function DesktopSearchLayout() {
   return (
-    <Tabs
-      defaultValue={"search"}
-      className="mx-auto max-w-6xl rounded-2xl bg-white px-4 pb-4 shadow-md"
-    >
-      <TabsList noBorder className="flex items-center justify-center">
-        <TabsTrigger
-          value="search"
-          className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
-        >
-          <span className="text-sm">Search Properties</span>
-        </TabsTrigger>
-        <TabsTrigger
-          value="request"
-          className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
-        >
-          <span className="text-sm">Request Deal</span>
-        </TabsTrigger>
-      </TabsList>
-      <div className="mb-5 mt-[-2px] w-full border-b-2 border-border" />
-      <TabsContent value={"search"}>
-        <DesktopSearchTab />
-      </TabsContent>
-      <TabsContent value={"request"}>
-        <DesktopRequestDealTab />
-      </TabsContent>
-    </Tabs>
+    <div className="space-y-2">
+      <p className="hidden  font-semibold  text-muted-foreground lg:block">
+        Send a request to every host in{" "}
+        <span className="font-bold text-teal-900">
+          <Typewriter
+            component={"span"}
+            options={{
+              strings: ["LOS ANGELES", "PARIS", "MIAMI", "ANY CITY"],
+              autoStart: true,
+              loop: true,
+            }}
+          />
+        </span>
+      </p>
+
+      <DesktopRequestDealTab />
+    </div>
   );
 }
 

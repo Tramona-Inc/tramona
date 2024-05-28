@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
 import { HelpCircleIcon, InfoIcon, MessageCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
@@ -16,36 +15,25 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 
-import { api } from "@/utils/api";
 import { formatDateRange } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
 import MapPin from "../_icons/MapPin";
 import { type UpcomingTrip } from "./UpcomingTrips";
 import Image from "next/image";
+import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
 export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
-  const router = useRouter();
-
-  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
-    onSuccess: (conversationId) => {
-      void router.push(`/messages?conversationId=${conversationId}`);
-    },
-  });
-
-  function handleConversation() {
-    // TODO: only messages admin for now
-    mutate();
-  }
+  const chatWithAdmin = useChatWithAdmin();
 
   return (
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
         <Link href={`/my-trips/${trip.id}`} className="relative w-96">
           <Image
-            layout="fill"
+            fill
             alt=""
             className="object-cover"
             src={trip.property.imageUrls[0]!}
@@ -100,7 +88,7 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
           <div className="flex flex-col justify-end gap-2 sm:flex-row">
-            <Button variant="secondary" onClick={() => handleConversation()}>
+            <Button variant="secondary" onClick={() => chatWithAdmin()}>
               <MessageCircle className="size-4" />
               Message your host
             </Button>

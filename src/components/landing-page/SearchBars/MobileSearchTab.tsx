@@ -12,6 +12,7 @@ import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useSearchBarForm } from "./useSearchBarForm";
+import MobilePropertyFilter from "../search/MobilePropertyFilter";
 
 export function MobileSearchTab({ closeSheet }: { closeSheet: () => void }) {
   const { form, onSubmit } = useSearchBarForm({
@@ -85,7 +86,11 @@ export function MobileSearchTab({ closeSheet }: { closeSheet: () => void }) {
               </FormItem>
             )}
           />
+          <div className="self-start">
+            <MobilePropertyFilter />
+          </div>
         </div>
+
         <Separator className="my-4" />
         <div className="flex justify-between">
           <Button type="button" variant="ghost" onClick={() => form.reset()}>

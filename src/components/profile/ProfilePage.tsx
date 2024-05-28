@@ -1,6 +1,5 @@
 import { api } from "@/utils/api";
 import { useDialogState } from "@/utils/dialog";
-import { useCitiesFilter } from "@/utils/store/cities-filter";
 import {
   BadgeCheck,
   BadgeXIcon,
@@ -21,6 +20,7 @@ import {
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
+import UserAvatar from "../_common/UserAvatar";
 import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
@@ -37,7 +37,7 @@ import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDial
 import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
-import UserAvatar from "../_common/UserAvatar";
+import EmptyBagSvg from "../_common/EmptyStateSvg/EmptyBagSvg";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -82,15 +82,10 @@ export default function ProfilePage() {
     },
   ];
 
-  const filter = useCitiesFilter((state) => state.filter);
-
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
 
   const { data: bucketListProperties } =
-    api.profile.getAllPropertiesWithDetails.useQuery({
-      lat: filter?.lat,
-      long: filter?.long,
-    });
+    api.profile.getAllPropertiesWithDetails.useQuery();
 
   const [selectedBLDestinationId, setSelectedBLDestinationId] = React.useState<
     number | null
@@ -126,39 +121,50 @@ export default function ProfilePage() {
             image={profileInfo?.image}
           />
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:-ml-4 lg:mt-0">
-            <div className="flex flex-row items-center justify-start gap-x-2 lg:-translate-x-20">
-              <h2 className="text-xl font-bold lg:text-2xl">
-                {profileInfo?.name}
-              </h2>
-              {verificationStatus?.isIdentityVerified == "true" ? (
-                <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
-                  <BadgeCheck size={22} /> Verified
-                </div>
-              ) : verificationStatus?.isIdentityVerified == "pending" ? (
-                <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
-                  <Clock2Icon size={22} /> Pending
-                </div>
-              ) : (
-                <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
-                  <BadgeXIcon size={22} /> Not Verified
-                </div>
-              )}
-            </div>
+            <div className="lg:-translate-x-20">
+              <div className="flex items-center gap-x-2">
+                <h2 className="text-xl font-bold lg:text-2xl">
+                  {profileInfo?.name}
+                </h2>
+                {verificationStatus?.isIdentityVerified == "true" ? (
+                  <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
+                    <BadgeCheck size={22} /> Verified
+                  </div>
+                ) : verificationStatus?.isIdentityVerified == "pending" ? (
+                  <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
+                    <Clock2Icon size={22} /> Pending
+                  </div>
+                ) : (
+                  <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
+                    <BadgeXIcon size={22} /> Not Verified
+                  </div>
+                )}
+              </div>
 
-            <p className="font-semibold">{profileInfo?.location}</p>
-            <div className="mt-2 flex space-x-2">
-              {profileInfo?.socials?.[0] && (
-                <Facebook href={profileInfo.socials[0]} />
-              )}
-              {profileInfo?.socials?.[1] && (
-                <Youtube href={profileInfo.socials[1]} />
-              )}
-              {profileInfo?.socials?.[2] && (
-                <Instagram href={profileInfo.socials[2]} />
-              )}
-              {profileInfo?.socials?.[3] && (
-                <Twitter href={profileInfo.socials[3]} />
-              )}
+              <p className="font-semibold">{profileInfo?.location}</p>
+
+              <div className="mt-2 flex space-x-2">
+                {profileInfo?.socials?.[0] && (
+                  <Link href={profileInfo.socials[0]} target="_blank">
+                    <Facebook />
+                  </Link>
+                )}
+                {profileInfo?.socials?.[1] && (
+                  <Link href={profileInfo.socials[1]} target="_blank">
+                    <Youtube />
+                  </Link>
+                )}
+                {profileInfo?.socials?.[2] && (
+                  <Link href={profileInfo.socials[2]} target="_blank">
+                    <Instagram />
+                  </Link>
+                )}
+                {profileInfo?.socials?.[3] && (
+                  <Link href={profileInfo.socials[3]} target="_blank">
+                    <Twitter />
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex gap-3 lg:col-start-4 lg:justify-end">
@@ -294,16 +300,33 @@ export default function ProfilePage() {
           {/* Properties Tab */}
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {bucketListProperties?.map((property) => (
-                <BucketListHomeOfferCard
-                  key={property!.id}
-                  property={{
-                    ...property!,
-                    propertyId: property!.id,
-                    bucketListPropertyId: property!.bucketListId,
-                  }}
-                />
-              ))}
+              {bucketListProperties?.length ? (
+                bucketListProperties.map((property) => (
+                  <BucketListHomeOfferCard
+                    key={property!.id}
+                    property={{
+                      ...property!,
+                      propertyId: property!.id,
+                      bucketListPropertyId: property!.bucketListId,
+                    }}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full py-8 text-center text-muted-foreground">
+                  <div className="flex items-center justify-center">
+                    <EmptyBagSvg />
+                  </div>
+                  Your bucket list is empty! Add a property to view here.
+                  <div className="mt-6 flex justify-center">
+                    <Button
+                      asChild
+                      className="cursor-pointer rounded-lg bg-teal-900 px-4 py-2 text-white hover:bg-teal-950"
+                    >
+                      <Link href="/explore">Explore Properties</Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
 

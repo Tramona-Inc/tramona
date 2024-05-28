@@ -15,6 +15,7 @@ import {
   counterInsertSchema,
   counters,
 } from "@/server/db/schema/tables/counters";
+import { getNumNights } from '@/utils/utils';
 import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
@@ -168,27 +169,27 @@ export const biddingRouter = createTRPCRouter({
         },
       });
 
-      if (bidExist.length > 0) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      } else {
-        const madeByGroupId = await ctx.db
-          .insert(groups)
-          .values({ ownerId: ctx.user.id })
-          .returning()
-          .then((res) => res[0]!.id);
+      // ! uncomment to prevent duplicate bids
+      // if (bidExist.length > 0) {
+      //   throw new TRPCError({ code: "BAD_REQUEST" });
+      // } else {
+      const madeByGroupId = await ctx.db
+        .insert(groups)
+        .values({ ownerId: ctx.user.id })
+        .returning()
+        .then((res) => res[0]!.id);
 
-        await ctx.db.insert(groupMembers).values({
-          userId: ctx.user.id,
-          groupId: madeByGroupId,
-        });
+      await ctx.db.insert(groupMembers).values({
+        userId: ctx.user.id,
+        groupId: madeByGroupId,
+      });
 
-        await ctx.db
-          .insert(bids)
-          .values({ ...input, madeByGroupId: madeByGroupId });
-      }
+      await ctx.db
+        .insert(bids)
+        .values({ ...input, madeByGroupId: madeByGroupId });
+      // }
     }),
-
-  update: protectedProcedure
+update: protectedProcedure
     .input(bidInsertSchema)
     .mutation(async ({ ctx, input }) => {
       const bid = await ctx.db.query.bids.findFirst({
@@ -203,6 +204,32 @@ export const biddingRouter = createTRPCRouter({
         .update(bids)
         .set({ updatedAt: new Date(), amount: input.amount })
         .where(eq(bids.id, input.id!));
+    }),
+
+  edit: protectedProcedure
+    .input(
+      z.object({
+        nightlyPrice: z.number(),
+        guests: z.number(),
+        offerId: z.number(),
+        date: z.object({
+          from: z.coerce.date(),
+          to: z.coerce.date(),
+        }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const totalNights = getNumNights(input.date.from, input.date.to);
+
+      await ctx.db
+        .update(bids)
+        .set({ 
+          checkIn: input.date.from,
+          checkOut: input.date.to,
+          amount: (input.nightlyPrice * 100) * totalNights,
+          statusUpdatedAt: new Date() 
+        })
+        .where(eq(bids.id, input.offerId));
     }),
 
   delete: protectedProcedure
@@ -316,6 +343,25 @@ export const biddingRouter = createTRPCRouter({
 
     return result.map((res) => res.propertyId);
   }),
+
+  getDatesFromBid: protectedProcedure
+    .input(
+      z.object({
+        propertyId: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.bids.findMany({
+        columns: {
+          checkIn: true,
+          checkOut: true,
+        },
+        where: and(
+          eq(bids.propertyId, input.propertyId),
+          eq(bids.status, "Pending"),
+        ),
+      });
+    }),
 
   createCounter: protectedProcedure
     .input(counterInsertSchema)

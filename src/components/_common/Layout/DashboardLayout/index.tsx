@@ -3,11 +3,11 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import { useSession } from "next-auth/react";
 import Header from "../../Header";
 import Footer from "../DesktopFooter";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
-import MobileFooter from "@/components/_common/Layout/MobileFooter";
+import { useIsMd } from "@/utils/utils";
+
 type DashboardLayoutProps = {
   children: React.ReactNode;
-  type: "admin" | "host" | "guest";
+  type: "admin" | "host" | "guest" | "unlogged";
 };
 
 export default function DashboardLayout({
@@ -15,20 +15,26 @@ export default function DashboardLayout({
   type,
 }: DashboardLayoutProps) {
   const { data: session } = useSession();
-  const isBelowMediumScreen = useMediaQuery("(max-width: 768px)");
+  const isMd = useIsMd();
   return (
     <>
       <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
-      <div className="flex ">
+      <div className="relative min-h-screen-minus-header lg:flex">
         {session && (
-          <aside className="sticky bottom-0 top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
+          <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
             <Sidebar type={type} />
           </aside>
         )}
-        <main className="flex-1">{children}</main>
+        <div className="lg:flex-1">
+          <main className="relative min-h-screen-minus-header">{children}</main>
+          {session ? (
+            <MobileNav type={type} />
+          ) : (
+            <MobileNav type={"unlogged"} />
+          )}
+          {isMd && <Footer />}
+        </div>
       </div>
-      {session && <MobileNav type={type} />}
-      {!isBelowMediumScreen && <Footer />}
     </>
   );
 }

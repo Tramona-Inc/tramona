@@ -33,6 +33,7 @@ export const requests = pgTable(
     numGuests: smallint("num_guests").notNull().default(1),
     minNumBeds: smallint("min_num_beds").default(1),
     minNumBedrooms: smallint("min_num_bedrooms").default(1),
+    minNumBathrooms: smallint("min_num_bathrooms").default(1),
     propertyType: propertyTypeEnum("property_type"),
     note: varchar("note", { length: 255 }),
     airbnbLink: varchar("airbnb_link", { length: 512 }),

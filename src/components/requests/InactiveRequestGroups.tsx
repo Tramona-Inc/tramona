@@ -2,14 +2,22 @@ import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue"
 import Spinner from "@/components/_common/Spinner";
 import { RequestCards } from "@/components/requests/RequestCards";
 import { api } from "@/utils/api";
+import { type DetailedRequest } from "./RequestCard";
+import { useState } from "react";
 
 export default function InactiveRequestGroups() {
+  const [selectedRequest, setSelectedRequest] =
+    useState<DetailedRequest | null>(null);
   const { data: requests } = api.requests.getMyRequests.useQuery();
 
   if (!requests) return <Spinner />;
 
   return requests.inactiveRequestGroups.length !== 0 ? (
-    <RequestCards requestGroups={requests.inactiveRequestGroups} />
+    <RequestCards
+      requestGroups={requests.inactiveRequestGroups}
+      setSelectedRequest={setSelectedRequest}
+      selectedRequest={selectedRequest}
+    />
   ) : (
     <div className="flex flex-col items-center gap-4">
       <p className="text-center">

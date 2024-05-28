@@ -64,7 +64,6 @@ export default function OTPDialog({
   const verifyOTPMutation = api.twilio.verifyOTP.useMutation();
   const { mutateAsync: mutateVerifyOTP } = api.twilio.verifyOTP.useMutation();
 
-
   // const handleInputChange = (index: number, value: string) => {
   //   // Focus the next input field when a digit is entered into the current input field
   //   setCode((prevCode) => {
@@ -232,7 +231,7 @@ export default function OTPDialog({
         Send verification code
       </Button>
 
-      <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center gap-4">
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center gap-4">
         <h1 className="text-center text-5xl font-bold tracking-tight">
           Please verify your phone number
         </h1>

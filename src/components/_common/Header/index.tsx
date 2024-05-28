@@ -5,16 +5,18 @@ import HeaderTopRight from "./HeaderTopRight";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useIsLg } from "@/utils/utils";
+import { cn, useIsLg } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
+import NavLink from "@/components/_utils/NavLink";
+import { SupportBtn } from "./SupportBtn";
 
 type HeaderProps =
   | {
       type: "dashboard";
-      sidebarType: "guest" | "host" | "admin";
+      sidebarType: "guest" | "host" | "admin" | "unlogged";
     }
   | { type: "marketing" };
 
@@ -31,6 +33,12 @@ export default function Header(props: HeaderProps) {
   );
 }
 
+const headerLinks = [
+  { name: "How it works", href: "/how-it-works" },
+  { name: "FAQ", href: "/faq" },
+  { name: "Contact", href: "/support" },
+];
+
 function LargeHeader(props: HeaderProps) {
   const { status, data: session } = useSession();
 
@@ -45,31 +53,36 @@ function LargeHeader(props: HeaderProps) {
       <div className="flex items-center justify-center gap-8">
         {props.type === "marketing" && (
           <>
-            {status !== "authenticated" && (
-              <>
-                <Link href="/how-it-works" className="font-semibold">
-                  How it works
-                </Link>
-                <Link href="/faq" className="font-semibold">
-                  FAQ
-                </Link>
-                <Link href="/support" className="font-semibold">
-                  Contact
-                </Link>
-              </>
-            )}
+            {status !== "authenticated" &&
+              headerLinks.map((link) => (
+                <NavLink
+                  key={link.href}
+                  href={link.href}
+                  render={({ selected }) => (
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        selected && "underline underline-offset-2",
+                      )}
+                    >
+                      {link.name}
+                    </span>
+                  )}
+                />
+              ))}
           </>
         )}
       </div>
 
       <div className="flex flex-1 justify-end gap-2">
+        <SupportBtn />
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (
               <Link href="/">Switch to Traveler</Link>
-            ) : session?.user.role !== "host" ? (
-              <Link href="/host-onboarding">Become a host</Link>
-            ) : (
+            ) : session?.user.role !==
+              "host" ? // <Link href="/host-onboarding">Become a host</Link>
+            null : (
               <Link href="/host">Switch to Host</Link>
             )}
           </Button>
@@ -81,7 +94,7 @@ function LargeHeader(props: HeaderProps) {
           </Button>
         )}
         {status !== "authenticated" && (
-          <Button variant="greenPrimary">
+          <Button asChild variant="greenPrimary">
             <Link href="/auth/signup">Sign Up</Link>
           </Button>
         )}
@@ -141,13 +154,19 @@ function SmallHeader(props: HeaderProps) {
 
       <TramonaLogo />
 
-      <div className="flex flex-1 justify-end gap-2">
+      <div className="flex flex-1 items-center justify-end gap-2">
+        <SupportBtn />
         {props.type === "marketing" && (
-          <Button asChild variant="darkOutline">
-            <Link href="/auth/signin">
-              {status === "authenticated" ? "Dashboard" : "Log in"}
-            </Link>
-          </Button>
+          <>
+            {status === "authenticated" && (
+              <Button size="sm" asChild variant="secondary">
+                <Link href="/auth/signin">Dashboard</Link>
+              </Button>
+            )}
+            <Button size="sm" asChild variant="greenPrimary">
+              <Link href="/auth/signup">Sign up</Link>
+            </Button>
+          </>
         )}
 
         {/* <HeaderTopRight /> */}
