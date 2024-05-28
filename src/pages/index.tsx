@@ -3,7 +3,6 @@ import TravelerPage from "@/components/landing-page/TravelerPage";
 import { db } from "@/server/db";
 import { properties } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
-import { type InferGetStaticPropsType } from "next";
 
 export async function getStaticProps() {
   // ironic naming

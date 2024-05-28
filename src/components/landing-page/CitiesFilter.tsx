@@ -80,30 +80,34 @@ export default function CitiesFilter({
       <div className="absolute inset-2">
         <ScrollArea ref={ref} viewportRef={viewportRef}>
           <div className="flex gap-1 pb-2 pl-12 pr-40">
-            {cities.map((city) => (
-              <Button
-                key={city.id}
-                variant="ghost"
-                onClick={async () => {
-                  if (isLandingPage) {
-                    void router.push({
-                      pathname: "/explore",
-                      query: { city: city.id },
-                    });
-                  } else {
-                    setFilter(city);
-                  }
-                }}
-                className={cn(
-                  "px-3 text-xs font-semibold sm:text-sm",
-                  city.id === filter?.id && !isLandingPage
-                    ? "bg-zinc-300 hover:bg-zinc-300"
-                    : "text-muted-foreground",
-                )}
-              >
-                {city.label}
-              </Button>
-            ))}
+            {cities.map((city) => {
+              if (city.id === "all" && isLandingPage) return null;
+              const isSelected = city.id === filter?.id && !isLandingPage;
+              return (
+                <Button
+                  key={city.id}
+                  variant="ghost"
+                  onClick={async () => {
+                    if (isLandingPage) {
+                      void router.push({
+                        pathname: "/explore",
+                        query: { city: city.id },
+                      });
+                    } else {
+                      setFilter(city);
+                    }
+                  }}
+                  className={cn(
+                    "px-3 text-xs font-semibold sm:text-sm",
+                    isSelected
+                      ? "bg-zinc-300 hover:bg-zinc-300"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {city.label}
+                </Button>
+              );
+            })}
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
