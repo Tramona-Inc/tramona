@@ -4,6 +4,8 @@ import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import type Stripe from "stripe";
 
 function Card({ payment }: { payment: Stripe.PaymentMethod }) {
@@ -29,8 +31,11 @@ export default function PaymentInformation() {
 
   return (
     <SettingsLayout>
-      <div className="mx-auto my-8 max-w-4xl space-y-5">
+      <div className="mx-auto min-h-screen max-w-4xl space-y-5 lg:my-8 lg:min-h-screen-minus-header-n-footer">
         <div className="space-y-4 rounded-lg border bg-white p-4">
+          <Link href="/settings" className="inline-block lg:hidden">
+            <ChevronLeft />
+          </Link>
           <h1 className="text-lg font-bold">Payment Method</h1>
 
           <Elements stripe={stripePromise} options={options}>
