@@ -2,19 +2,17 @@ import { api } from "@/utils/api";
 import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import PropertyOffersEmptySvg from "../_common/EmptyStateSvg/PropertyOffersEmptySvg";
 import Spinner from "../_common/Spinner";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 import PropertyOfferCard from "./PropertyOfferCard";
 import SimiliarProperties from "./SimilarProperties";
 
 export default function PropertyOfferTab() {
-  const isMobile = useMediaQuery("(max-width: 640px)");
   const { data: offers } = api.biddings.getMyBids.useQuery();
 
   if (!offers) return <Spinner />;
 
   return offers.length > 0 ? (
-    <div className="grid gap-24 md:grid-cols-2">
-      <div className=" col-span-1 space-y-4">
+    <div className="grid grid-cols-3 gap-8 md:grid-cols-5">
+      <div className="col-span-3 space-y-4 pb-64">
         {offers.map((offer) => (
           <PropertyOfferCard
             key={offer.id}
@@ -23,8 +21,8 @@ export default function PropertyOfferTab() {
           />
         ))}
       </div>
-      <div>
-        {offers.length > 0 && !isMobile && (
+      <div className="hidden md:col-span-2 md:block">
+        {offers.length > 0 && (
           // ! Change to one prop (calls the same)
           <SimiliarProperties
             location={offers[0]!.property.address}

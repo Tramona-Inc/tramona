@@ -12,7 +12,6 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -189,7 +188,7 @@ export default function PropertyOfferCard({
           )}
         </div>
       </CardContent>
-      <div className="lg:hidden">
+      <div className="md:hidden">
         <Separator className="my-1" />
         <MobileSimilarProperties
           city={offer.property.address}

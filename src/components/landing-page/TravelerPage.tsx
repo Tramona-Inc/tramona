@@ -58,7 +58,9 @@ export default function TravelerPage() {
         <div className="space-y-4 p-4">
           <h2 className="text-2xl font-bold">Explore popular destinations</h2>
           <p className="font-bold">See one you like? Place an offer</p>
-          <CitiesFilter />
+          <div className="sticky top-header-height">
+            <CitiesFilter />
+          </div>
           <Listings />
         </div>
       </div>
