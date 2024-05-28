@@ -296,8 +296,10 @@ export default function OfferPage({
             <PropertyAmenities amenities={property.amenities ?? []} />
             {property.amenities && (
               <Dialog>
-                <DialogTrigger className="inline-flex w-full items-center justify-center rounded-lg border border-black px-2.5 py-2 text-foreground md:w-1/4">
-                  Show all amenities
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Show all amenities
+                  </Button>
                 </DialogTrigger>
 
                 <DialogContent className="max-w-4xl">
