@@ -7,12 +7,12 @@ import { api } from "@/utils/api";
 import { plural } from "@/utils/utils";
 import {
   ArrowLeftRight,
-  Menu,
-  Settings,
-  Wallet,
-  ShieldQuestion,
   Contact,
+  Menu,
   MessageCircleQuestion,
+  Settings,
+  ShieldQuestion,
+  Wallet,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -54,7 +54,7 @@ export default function Sidebar({
 
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery(undefined, {
-      refetchInterval: 10000,
+      // refetchInterval: 10000,
     });
 
   const notifyMe = useCallback(async () => {

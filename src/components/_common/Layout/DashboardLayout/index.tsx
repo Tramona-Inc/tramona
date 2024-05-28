@@ -19,13 +19,13 @@ export default function DashboardLayout({
   return (
     <>
       <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
-      <div className="relative flex min-h-screen-minus-header">
+      <div className="relative min-h-screen-minus-header lg:flex">
         {session && (
           <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
             <Sidebar type={type} />
           </aside>
         )}
-        <div className="flex-1">
+        <div className="lg:flex-1">
           <main className="relative min-h-screen-minus-header">{children}</main>
           {session ? (
             <MobileNav type={type} />

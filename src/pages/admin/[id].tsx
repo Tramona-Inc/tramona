@@ -70,7 +70,7 @@ export default function Page() {
                     requestCheckIn={request.checkIn}
                     requestCheckOut={request.checkOut}
                     offerId={offer.id}
-                    propertyAddress={offer.property.address!}
+                    propertyAddress={offer.property.address}
                     propertyName={offer.property.name}
                     offerCount={offerCount!}
                   >

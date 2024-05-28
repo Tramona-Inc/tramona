@@ -36,7 +36,7 @@ export default function PropertyPage({ property }: { property: Property }) {
   // const isBooked = false;
 
   // const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-  //   location: property.address!,
+  //   location: property.address,
   // });
 
   const { data: addressData } = api.offers.getCity.useQuery({
