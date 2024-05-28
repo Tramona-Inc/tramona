@@ -234,8 +234,8 @@ export default function Onboarding4() {
             <div className="relative mb-10 h-[400px]">
               <div className="absolute inset-0 z-0">
                 <SingleLocationMap
-                  lat={coordinateData.coordinates.lat}
-                  lng={coordinateData.coordinates.lng}
+                  lat={coordinateData.coordinates.location!.lat}
+                  lng={coordinateData.coordinates.location!.lng}
                 />
               </div>
             </div>

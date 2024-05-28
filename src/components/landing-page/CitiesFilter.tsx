@@ -44,6 +44,9 @@ export default function CitiesFilter({
 }) {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
+  const setLocationBoundingBox = useCitiesFilter(
+    (state) => state.setLocationBoundingBox,
+  );
 
   const ref = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -95,6 +98,12 @@ export default function CitiesFilter({
                       });
                     } else {
                       setFilter(city);
+                      setLocationBoundingBox({
+                        northeastLat: 0,
+                        northeastLng: 0,
+                        southwestLat: 0,
+                        southwestLng: 0,
+                      });
                     }
                   }}
                   className={cn(
