@@ -24,10 +24,21 @@ export default function HostRequestsLayout({
 }: React.PropsWithChildren) {
   const { data: properties } = api.properties.getHostRequestsSidebar.useQuery();
 
+  const citiesTotal = 0;
+  const propertiesTotal = 0;
+
   return (
     <div className="flex">
       <ScrollArea className="sticky inset-y-0 h-screen-minus-header w-96 border-r px-4 py-8">
         <h1 className="text-2xl font-bold">Offers & Requests</h1>
+        <div className="flex flex-row gap-2">
+          <Button variant={"secondaryLight"} className="rounded-full">
+            Cities {citiesTotal}
+          </Button>
+          <Button variant={"greenPrimaryOutline"} className="rounded-full">
+            Properties {propertiesTotal}
+          </Button>
+        </div>
         <div className="pt-4">
           {properties ? (
             properties.length > 0 ? (
