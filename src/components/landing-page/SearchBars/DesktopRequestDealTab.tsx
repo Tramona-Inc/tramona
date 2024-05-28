@@ -183,12 +183,12 @@ export function DesktopRequestDealTab() {
                 </div>
               )}
             </div>
-            <div className="flex justify-end sm:justify-start">
+            <div className="flex justify-center lg:justify-start">
               <Button
                 type="submit"
                 size="lg"
                 disabled={form.formState.isSubmitting}
-                className="mt-2 h-12 bg-teal-900 hover:bg-teal-950"
+                className="mt-2 h-12 rounded-full bg-teal-900 hover:bg-teal-950"
               >
                 Submit Request
               </Button>
