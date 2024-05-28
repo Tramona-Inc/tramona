@@ -10,13 +10,7 @@ import {
   CustomButton,
   EmailConfirmationCard,
 } from "./EmailComponentsWithoutHost";
-import {
-  Text,
-  Section,
-  Hr,
-  Row,
-  Column,
-} from "@react-email/components";
+import { Text, Section, Hr, Row, Column } from "@react-email/components";
 
 interface BookingConfirmationEmailProps {
   userName: string;
@@ -32,10 +26,10 @@ interface BookingConfirmationEmailProps {
   tramonaPrice: number;
   offerLink: string;
   numOfNights: number;
-  tramonaServiceFee: number
+  tramonaServiceFee: number;
 }
 
-export function BookingConfirmationEmail({
+export default function BookingConfirmationEmail({
   userName = "User",
   placeName = "Tropical getaway in Mexico",
   startDate = "Nov 6",
@@ -52,7 +46,7 @@ export function BookingConfirmationEmail({
   return (
     <Layout title_preview="Booking confirmation/Payment received">
       <Header title="Booking confirmation/Payment received" />
-      <Text className="text-left text-base px-6 text-brand">
+      <Text className="text-brand px-6 text-left text-base">
         Hello, {userName}. Your booking to {placeName} has been confirmed.
         Congrats and enjoy!
       </Text>
@@ -71,32 +65,38 @@ export function BookingConfirmationEmail({
       </Section>
       <CustomButton link={offerLink} title="View trip detail" />
       <Section
-        className="flex flex-col justify-center items-center px-6 pb-6 pt-6"
+        className="flex flex-col items-center justify-center px-6 pb-6 pt-6"
         style={{ width: "100%" }}
       >
         <Row className="">
           <Column>
-            <Text className="text-xs whitespace-no-wrap">Original Price</Text>
+            <Text className="whitespace-no-wrap text-xs">Original Price</Text>
           </Column>
           <Column
-            className="text-xs text-[#606060] whitespace-no-wrap"
+            className="whitespace-no-wrap text-xs text-[#606060]"
             style={{ paddingLeft: "5px" }}
           >
             x{numOfNights} nights
           </Column>
-          <Column className="text-right" style={{ paddingLeft: "150px" }}>{formatCurrency(originalPrice)}</Column>
+          <Column className="text-right" style={{ paddingLeft: "150px" }}>
+            {formatCurrency(originalPrice)}
+          </Column>
         </Row>
         <Row className="">
           <Column>
-            <Text className="text-xs whitespace-no-wrap">Tramona&apos;s Price</Text>
+            <Text className="whitespace-no-wrap text-xs">
+              Tramona&apos;s Price
+            </Text>
           </Column>
           <Column
-            className="text-xs text-[#606060] whitespace-no-wrap"
+            className="whitespace-no-wrap text-xs text-[#606060]"
             style={{ paddingLeft: "5px" }}
           >
             x{numOfNights} nights
           </Column>
-          <Column style={{ paddingLeft: "150px" }}>{formatCurrency(tramonaPrice)}</Column>
+          <Column style={{ paddingLeft: "150px" }}>
+            {formatCurrency(tramonaPrice)}
+          </Column>
         </Row>
         <Row className="">
           <Column>
@@ -105,15 +105,19 @@ export function BookingConfirmationEmail({
           <Column className="text-xs text-white" style={{ paddingLeft: "5px" }}>
             x{numOfNights} nights
           </Column>
-          <Column className="text-end" style={{ paddingLeft: "150px" }}>{formatCurrency(tramonaServiceFee)}</Column>
+          <Column className="text-end" style={{ paddingLeft: "150px" }}>
+            {formatCurrency(tramonaServiceFee)}
+          </Column>
         </Row>
         <Hr className="pt-5" />
         <Row className="font-bold">
           <Column>Total (USD)</Column>
-          <Column className="text-right">{formatCurrency(tramonaPrice+tramonaServiceFee)}</Column>
+          <Column className="text-right">
+            {formatCurrency(tramonaPrice + tramonaServiceFee)}
+          </Column>
         </Row>
       </Section>
-      <Text className="text-left text-base px-6 text-brand">
+      <Text className="text-brand px-6 text-left text-base">
         If there are any questions, send us an email at info@tramona.com or send
         the host a message directly.
       </Text>
@@ -124,4 +128,3 @@ export function BookingConfirmationEmail({
     </Layout>
   );
 }
-

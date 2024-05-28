@@ -1,5 +1,5 @@
 import { Section, Text } from "@react-email/components";
-import { Layout, CustomButton } from "./EmailComponents"
+import { Layout, CustomButton } from "./EmailComponents";
 
 interface EarnedReferralEmailProps {
   userName: string;
@@ -9,7 +9,7 @@ interface EarnedReferralEmailProps {
   dealLink: string;
 }
 
-export function EarnedReferralEmail({
+export default function EarnedReferralEmail({
   userName = "User",
   earnedAmount = 50,
   totalEarnedAmount = 500,
