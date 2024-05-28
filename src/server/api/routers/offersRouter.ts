@@ -164,7 +164,7 @@ export const offersRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const coords = await getCoordinates(input.location);
       return {
-        coordinates: coords!,
+        coordinates: coords,
       };
     }),
 
