@@ -84,7 +84,7 @@ export default function Sidebar({
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col gap-2 pt-8">
+      <div className="flex flex-1 flex-col gap-2 pt-4">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
             <NavBarLink href={link.href} icon={link.icon}>
