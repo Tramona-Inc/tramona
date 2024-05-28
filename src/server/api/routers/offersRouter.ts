@@ -135,6 +135,7 @@ export const offersRouter = createTRPCRouter({
           totalPrice: true,
           id: true,
           acceptedAt: true,
+          tramonaFee: true,
         },
 
         with: {
@@ -208,6 +209,7 @@ export const offersRouter = createTRPCRouter({
           totalPrice: true,
           acceptedAt: true,
           id: true,
+          tramonaFee: true,
         },
         with: {
           request: {
