@@ -15,7 +15,7 @@ import {
   counterInsertSchema,
   counters,
 } from "@/server/db/schema/tables/counters";
-import { getNumNights } from '@/utils/utils';
+import { getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
@@ -189,7 +189,7 @@ export const biddingRouter = createTRPCRouter({
         .values({ ...input, madeByGroupId: madeByGroupId });
       // }
     }),
-update: protectedProcedure
+  update: protectedProcedure
     .input(bidInsertSchema)
     .mutation(async ({ ctx, input }) => {
       const bid = await ctx.db.query.bids.findFirst({
@@ -223,11 +223,11 @@ update: protectedProcedure
 
       await ctx.db
         .update(bids)
-        .set({ 
+        .set({
           checkIn: input.date.from,
           checkOut: input.date.to,
-          amount: (input.nightlyPrice * 100) * totalNights,
-          statusUpdatedAt: new Date() 
+          amount: input.nightlyPrice * 100 * totalNights,
+          statusUpdatedAt: new Date(),
         })
         .where(eq(bids.id, input.offerId));
     }),
@@ -302,6 +302,7 @@ update: protectedProcedure
             originalNightlyPrice: true,
             longitude: true,
             latitude: true,
+            originalListingUrl: true,
           },
         },
         counters: {
@@ -382,12 +383,7 @@ update: protectedProcedure
 
   accept: protectedProcedure
     .input(z.object({ bidId: z.number(), amount: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      const userIsWithBid = await userWithBid({
-        userId: ctx.user.id,
-        bidId: input.bidId,
-      });
-
+    .mutation(async ({ input }) => {
       const bidInfo = await db.query.bids.findFirst({
         where: eq(bids.id, input.bidId),
         with: {
