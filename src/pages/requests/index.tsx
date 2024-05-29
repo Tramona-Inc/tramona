@@ -4,31 +4,29 @@ import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import ActiveRequestGroups from "../../components/requests/ActiveRequestGroups";
+import CityRequestsTab from "../../components/requests/CityRequestsTab";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
-// TODO: change to tab links, each with individual fetch
+
 function RequestsTabs() {
-  const isMobile = useMediaQuery("(max-width: 640px)");
   return (
     <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
         <TabsTrigger value="cityRequests">
-          {!isMobile && <MapPinIcon />}
+          <MapPinIcon className="hidden sm:block" />
           City Requests
         </TabsTrigger>
         <TabsTrigger value="propertyOffers">
-          {!isMobile && <HomeIcon />}
+          <HomeIcon className="hidden sm:block" />
           Property Offers
         </TabsTrigger>
         <TabsTrigger value="history">
-          {!isMobile && <HistoryIcon />}
+          <HistoryIcon className="hidden sm:block" />
           History
         </TabsTrigger>
       </TabsList>
       <TabsContent value="cityRequests">
-        <ActiveRequestGroups />
+        <CityRequestsTab />
       </TabsContent>
       <TabsContent value="propertyOffers">
         <PropertyOfferTab />
@@ -51,7 +49,7 @@ export default function Page() {
       </Head>
 
       <DashboardLayout type="guest">
-        <div className="min-h-screen-minus-header px-4 pb-64 pt-5">
+        <div className="pb-footer-height min-h-screen-minus-header px-4 pt-5">
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">

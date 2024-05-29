@@ -6,18 +6,13 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  ArrowRight,
-  ChevronRight,
-  Clock,
-  Images,
-  MessageCircle,
-} from "lucide-react";
+import { ArrowRight, ChevronRight, Clock, MessageCircle } from "lucide-react";
 import UserAvatar from "@/components/_common/UserAvatar";
 
 import { cn, formatCurrency, plural } from "@/utils/utils";
 import { api, type RouterOutputs } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
+import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
@@ -46,19 +41,10 @@ type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export default function TripPage({ trip }: { trip: OfferWithDetails }) {
   const router = useRouter();
 
-  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
-    onSuccess: (conversationId) => {
-      void router.push(`/messages?conversationId=${conversationId}`);
-    },
-  });
-
-  function handleConversation() {
-    // TODO: only messages admin for now
-    mutate();
-  }
+  const chatWithAdmin = useChatWithAdmin();
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: trip.property.address!,
+    location: trip.property.address,
   });
 
   const tripDuration = dayjs(trip.request.checkOut).diff(
@@ -121,7 +107,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                   variant="secondary"
                   size="sm"
                   className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
-                  onClick={() => handleConversation()}
+                  onClick={() => chatWithAdmin()}
                 >
                   <MessageCircle className="w-4 lg:w-5" /> Message your host
                 </Button>
@@ -178,8 +164,8 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                   <div className="relative z-10 my-3 overflow-clip rounded-lg">
                     <MapContainer
                       center={[
-                        coordinateData.coordinates.lat,
-                        coordinateData.coordinates.lng,
+                        coordinateData.coordinates.location!.lat,
+                        coordinateData.coordinates.location!.lng,
                       ]}
                       zoom={14}
                       scrollWheelZoom={false}
@@ -191,8 +177,8 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                       />
                       <Marker
                         position={[
-                          coordinateData.coordinates.lat,
-                          coordinateData.coordinates.lng,
+                          coordinateData.coordinates.location!.lat,
+                          coordinateData.coordinates.location!.lng,
                         ]}
                       />
                     </MapContainer>
@@ -299,8 +285,8 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
           {coordinateData && (
             <MapContainer
               center={[
-                coordinateData.coordinates.lat,
-                coordinateData.coordinates.lng,
+                coordinateData.coordinates.location!.lat,
+                coordinateData.coordinates.location!.lng,
               ]}
               zoom={14}
               scrollWheelZoom={false}
@@ -312,8 +298,8 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
               />
               <Marker
                 position={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
+                  coordinateData.coordinates.location!.lat,
+                  coordinateData.coordinates.location!.lng,
                 ]}
               />
             </MapContainer>

@@ -8,8 +8,6 @@ export default function PropertyOffersEmptySvg() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <g clipPath="url(#clip0_4964_17413)">
-        <rect width="250" height="200" fill="white" />
-        <rect width="250" height="200" fill="#FAFAFA" />
         <path
           fillRule="evenodd"
           clipRule="evenodd"

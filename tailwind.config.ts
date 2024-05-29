@@ -24,6 +24,7 @@ module.exports = {
         "screen-minus-header-n-footer": "var(--screen-minus-header-n-footer)",
         "screen-minus-header": "var(--screen-minus-header)",
         "header-height": "var(--header-height)",
+        "footer-height": "var(--footer-height)",
         "mobile-header-height": "var(--mobile-header-height)",
       },
       colors: {

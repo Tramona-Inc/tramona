@@ -96,10 +96,8 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuSeparator />
             </>
           )}
-          {session.user.role === "guest" && (
+          {/* {session.user.role === "guest" && (
             <>
-              <DropdownMenuItem asChild></DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/host-onboarding">
                   <UserCheck2Icon />
@@ -107,7 +105,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
                 </Link>
               </DropdownMenuItem>
             </>
-          )}
+          )} */}
           <DropdownMenuItem asChild>
             <Link href="/profile">
               <User2Icon />

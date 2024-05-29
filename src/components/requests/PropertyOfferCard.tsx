@@ -1,5 +1,5 @@
 import { type Bid } from "@/server/db/schema";
-import { api, type RouterOutputs } from "@/utils/api";
+import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import {
   formatCurrency,
@@ -7,7 +7,7 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { EllipsisIcon, TrashIcon } from "lucide-react";
+import { EllipsisIcon, Pencil, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +15,7 @@ import { useState } from "react";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardFooter } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,10 +23,10 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Separator } from "../ui/separator";
+import EditPropertyOfferDialog from "./EditPropertyOfferDialog";
+import MobileSimilarProperties from "./MobileSimilarProperties";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
-import MobileSimilarProperties from "./MobileSimilarProperties";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 
 function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
@@ -35,6 +35,8 @@ function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
     case "Accepted":
       return "green";
     case "Rejected":
+      return "red";
+    case "Cancelled":
       return "red";
   }
 }
@@ -52,7 +54,7 @@ export default function PropertyOfferCard({
       offer: RouterOutputs["biddings"]["getAllPending"][number];
     }) {
   const { data: session } = useSession();
-  const isMobile = useMediaQuery("(max-width: 640px)");
+
   const counter = offer.counters[0];
   const previousCounter = offer.counters[1];
 
@@ -61,7 +63,8 @@ export default function PropertyOfferCard({
     counter?.status === "Pending" &&
     counter.userId !== session?.user.id &&
     offer.status !== "Rejected" &&
-    offer.status !== "Accepted";
+    offer.status !== "Accepted" &&
+    offer.status !== "Cancelled";
 
   const badge = (
     <Badge variant={getBadgeColor(offer.status)}>
@@ -82,8 +85,9 @@ export default function PropertyOfferCard({
         getNumNights(offer.checkIn, offer.checkOut)
       : 0;
 
-  const originalNightlyBiddingOffer =
-    offer.amount / getNumNights(offer.checkIn, offer.checkOut);
+  const totalNights = getNumNights(offer.checkIn, offer.checkOut);
+
+  const originalNightlyBiddingOffer = offer.amount / totalNights;
 
   return (
     <Card className="cursor-pointer p-0 lg:overflow-clip">
@@ -94,7 +98,7 @@ export default function PropertyOfferCard({
         >
           <Image
             src={offer.property.imageUrls[0]!}
-            layout="fill"
+            fill
             className="object-cover"
             alt=""
           />
@@ -115,7 +119,15 @@ export default function PropertyOfferCard({
                 isAdminDashboard={!isGuestDashboard}
               />
               {isGuestDashboard && offer.status === "Pending" && (
-                <PropertyOfferCardDropdown offerId={offer.id} />
+                <PropertyOfferCardDropdown
+                  offerId={offer.id}
+                  propertyId={offer.propertyId}
+                  guests={offer.numGuests}
+                  originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+                  totalNights={totalNights}
+                  checkIn={offer.checkIn}
+                  checkOut={offer.checkOut}
+                />
               )}
             </div>
           </div>
@@ -179,32 +191,52 @@ export default function PropertyOfferCard({
           )}
         </div>
       </CardContent>
-      <CardFooter>
-        {isMobile && (
-          <div>
-            <Separator />
-            <div className=" mt-1 max-h-[300px] max-w-[360px] px-5">
-              <MobileSimilarProperties
-                city={offer.property.address!}
-                location={offer.property.address!}
-              />
-            </div>
-          </div>
-        )}
-      </CardFooter>
+      <div className="md:hidden">
+        <Separator className="my-1" />
+        <MobileSimilarProperties
+          city={offer.property.address}
+          location={offer.property.address}
+        />
+      </div>
     </Card>
   );
 }
 
-function PropertyOfferCardDropdown({ offerId }: { offerId: number }) {
-  const [open, setOpen] = useState(false);
+function PropertyOfferCardDropdown({
+  offerId,
+  propertyId,
+  guests,
+  originalNightlyBiddingOffer,
+  checkIn,
+  checkOut,
+}: {
+  offerId: number;
+  propertyId: number;
+  totalNights: number;
+  guests: number;
+  checkIn: Date;
+  checkOut: Date;
+  originalNightlyBiddingOffer: number;
+}) {
+  const [openWithdraw, setOpenWithdraw] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
 
   return (
     <>
       <WithdrawPropertyOfferDialog
         offerId={offerId}
-        open={open}
-        onOpenChange={setOpen}
+        open={openWithdraw}
+        onOpenChange={setOpenWithdraw}
+      />
+      <EditPropertyOfferDialog
+        offerId={offerId}
+        propertyId={propertyId}
+        originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+        guests={guests}
+        checkIn={checkIn}
+        checkOut={checkOut}
+        open={openEdit}
+        onOpenChange={setOpenEdit}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -213,7 +245,11 @@ function PropertyOfferCardDropdown({ offerId }: { offerId: number }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem red onClick={() => setOpen(true)}>
+          <DropdownMenuItem onClick={() => setOpenEdit(true)}>
+            <Pencil />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem red onClick={() => setOpenWithdraw(true)}>
             <TrashIcon />
             Withdraw
           </DropdownMenuItem>

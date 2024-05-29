@@ -1,6 +1,7 @@
+import howItWorksPic from "public/assets/images/landing-page/how_it_works.jpeg";
 import React from "react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 interface StepProps {
   number: number;
@@ -36,24 +37,25 @@ const HowItWorks: React.FC = () => {
   return (
     <section className="relative bg-white md:px-2">
       <div className="m-12 flex items-center justify-center">
-        <h1 className="md:text-5xl text-3xl font-bold">How it works</h1>
+        <h1 className="text-3xl font-bold md:text-5xl">How it works</h1>
       </div>
       <div className="flex flex-col md:flex-row">
-        <div className="relative flex w-full flex-col justify-between  text-left md:mb-0 md:w-5/12 mb-8 md:mb-0">
+        <div className="relative mb-8 flex w-full flex-col  justify-between text-left md:mb-0 md:w-5/12">
           <div className="relative z-0 h-full min-h-[200px]">
             <Image
-              src="/assets/images/landing-page/how_it_works.jpeg"
+              src={howItWorksPic}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority
               className="object-cover object-center md:rounded-lg"
+              placeholder="blur"
             />
           </div>
         </div>
         <div
           ref={divRef}
-          className="relative flex w-full px-4 md:px-10 md:ml-4 md:w-7/12 "
+          className="relative flex w-full px-4 md:ml-4 md:w-7/12 md:px-10 "
         >
           <div className="flex h-full flex-col justify-between">
             <Step

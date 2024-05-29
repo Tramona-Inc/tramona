@@ -1,15 +1,15 @@
 import { toast } from "@/components/ui/use-toast";
-import { errorToast, successfulRequestToast } from "@/utils/toasts";
+import { api } from "@/utils/api";
+import { errorToast } from "@/utils/toasts";
+import { useZodForm } from "@/utils/useZodForm";
 import { getNumNights } from "@/utils/utils";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import {
   type CityRequestDefaultVals,
   defaultSearchOrReqValues,
+  multiCityRequestSchema,
 } from "./schemas";
-import { useZodForm } from "@/utils/useZodForm";
-import { multiCityRequestSchema } from "./schemas";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { api } from "@/utils/api";
 
 export function useCityRequestForm({
   setCurTab,
@@ -61,18 +61,10 @@ export function useCityRequestForm({
     } else {
       await createRequests(newRequests)
         .then(() => {
-          if (newRequests.length === 1) {
-            successfulRequestToast(newRequests[0]!);
-          } else {
-            toast({
-              title: `Successfully submitted ${newRequests.length} requests!`,
-              description: "Please check your phone for a confirmation text",
-            });
-          }
-
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
           form.reset();
+
           form.setValue("data", [
             defaultSearchOrReqValues as CityRequestDefaultVals,
           ]);

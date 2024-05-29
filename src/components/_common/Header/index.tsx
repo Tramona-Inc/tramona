@@ -11,11 +11,12 @@ import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
+import { SupportBtn } from "./SupportBtn";
 
 type HeaderProps =
   | {
       type: "dashboard";
-      sidebarType: "guest" | "host" | "admin";
+      sidebarType: "guest" | "host" | "admin" | "unlogged";
     }
   | { type: "marketing" };
 
@@ -74,13 +75,14 @@ function LargeHeader(props: HeaderProps) {
       </div>
 
       <div className="flex flex-1 justify-end gap-2">
+        <SupportBtn />
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (
               <Link href="/">Switch to Traveler</Link>
-            ) : session?.user.role !== "host" ? (
-              <Link href="/host-onboarding">Become a host</Link>
-            ) : (
+            ) : session?.user.role !==
+              "host" ? // <Link href="/host-onboarding">Become a host</Link>
+            null : (
               <Link href="/host">Switch to Host</Link>
             )}
           </Button>
@@ -152,13 +154,19 @@ function SmallHeader(props: HeaderProps) {
 
       <TramonaLogo />
 
-      <div className="flex flex-1 justify-end gap-2">
+      <div className="flex flex-1 items-center justify-end gap-2">
+        <SupportBtn />
         {props.type === "marketing" && (
-          <Button asChild variant="darkOutline">
-            <Link href="/auth/signin">
-              {status === "authenticated" ? "Dashboard" : "Log in"}
-            </Link>
-          </Button>
+          <>
+            {status === "authenticated" && (
+              <Button size="sm" asChild variant="secondary">
+                <Link href="/auth/signin">Dashboard</Link>
+              </Button>
+            )}
+            <Button size="sm" asChild variant="greenPrimary">
+              <Link href="/auth/signup">Sign up</Link>
+            </Button>
+          </>
         )}
 
         {/* <HeaderTopRight /> */}

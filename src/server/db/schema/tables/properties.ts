@@ -155,7 +155,7 @@ export const properties = pgTable("properties", {
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
 
-  address: varchar("address", { length: 1000 }),
+  address: varchar("address", { length: 1000 }).notNull(),
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
 
@@ -189,6 +189,7 @@ export const properties = pgTable("properties", {
   originalNightlyPrice: integer("original_nightly_price"), // in cents
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),
+  cancellationPolicy: text("cancellation_policy"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),

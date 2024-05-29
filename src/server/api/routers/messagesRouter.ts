@@ -72,15 +72,15 @@ export async function fetchConversationWithAdmin(userId: string) {
 
   // Check if conversation contains two participants
   // and check if admin id is in there
-  const conversationWithAdmin = result?.conversations?.find(
+  const conversationWithAdmin = result?.conversations.find(
     (conv) =>
-      conv.conversation?.participants?.length === 2 &&
+      conv.conversation.participants.length === 2 &&
       conv.conversation.participants.some(
-        (participant) => participant.user?.id === ADMIN_ID,
+        (participant) => participant.user.id === ADMIN_ID,
       ),
   );
 
-  return conversationWithAdmin?.conversation?.id ?? null;
+  return conversationWithAdmin?.conversation.id ?? null;
 }
 
 export async function fetchConversationWithOffer(
@@ -209,7 +209,7 @@ export const messagesRouter = createTRPCRouter({
         ({ conversation }) => ({
           ...conversation,
           participants: conversation.participants
-            .filter((p) => p.user?.id !== ctx.user.id)
+            .filter((p) => p.user.id !== ctx.user.id)
             .map((p) => p.user)
             .filter(Boolean),
         }),

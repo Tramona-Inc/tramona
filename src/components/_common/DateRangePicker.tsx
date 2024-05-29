@@ -94,6 +94,8 @@ export default function DateRangePicker({
     onChange(e);
   };
 
+  //console.log(value);
+
   return (
     <Popover>
       <PopoverTrigger asChild>

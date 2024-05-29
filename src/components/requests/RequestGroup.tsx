@@ -28,13 +28,14 @@ export default function RequestGroupCards({
   }, []);
   if (requests.length === 0) return null;
 
-  const requestUnconfirmedBtn = (
-    <RequestUnconfirmedButton
-      requestGroupId={requestGroup.id}
-      isWaiting={isWaiting}
-      onClick={startTimer}
-    />
-  );
+  // const requestUnconfirmedBtn = (
+  //   <RequestUnconfirmedButton
+  //     requestGroupId={requestGroup.id}
+  //     isWaiting={isWaiting}
+  //     onClick={startTimer}
+  //   />
+  // );
+
   const handleCardClick = (request: DetailedRequest) => {
     setSelectedRequest(request);
   };
@@ -42,20 +43,22 @@ export default function RequestGroupCards({
   if (requests.length === 1) {
     const request = requests[0]!;
 
-    const isSelected = selectedRequest?.id === request.id;
+    const isSelected = !!selectedRequest && selectedRequest.id === request.id;
     return (
       <div
         key={request.id}
         onClick={() => handleCardClick(request)}
-        className={`min-w-96 cursor-pointer *:h-full ${isSelected ? "rounded-xl border border-primary" : ""}`}
+        className={`cursor-pointer rounded-xl border-2 *:h-full ${isSelected ? "border-foreground" : "border-transparent"}`}
       >
         {/* The is selected prop going inside of Request card is just for mobile desktop is handles in activeRequestGroup */}
         <RequestCard request={request} isSelected={isSelected}>
-          {requestGroup.hasApproved ? (
+          <RequestCardAction request={request} />
+
+          {/* {requestGroup.hasApproved ? (
             <RequestCardAction request={request} />
           ) : (
             requestUnconfirmedBtn
-          )}
+          )} */}
         </RequestCard>
       </div>
     );
@@ -84,9 +87,9 @@ export default function RequestGroupCards({
           );
         })}
       </div>
-      <div className="flex justify-end gap-2 px-4 pb-2">
+      {/* <div className="flex justify-end gap-2 px-4 pb-2">
         {!requestGroup.hasApproved && requestUnconfirmedBtn}
-      </div>
+      </div> */}
     </div>
   );
 }
