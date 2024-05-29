@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
 import { FilterXIcon } from "lucide-react";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
-
 export default function SearchListings({
   isFilterUndefined,
   callSiblingFunction,
@@ -62,10 +61,16 @@ export default function SearchListings({
       properties?.pages.length &&
       properties.pages[properties.pages.length - 1]?.nextCursor
     ) {
-      console.log("fetching next page");
-      void fetchNextPage();
-      console.log("fetched next page of adjusted from listing ");
-      callSiblingFunction();
+      if (
+        filters.locationBoundingBox.northeastLat === 0 &&
+        filters.guests === 0
+      ) {
+        console.log("fetching next page for initial properties");
+        void fetchNextPage();
+      } else {
+        console.log("fetched next page of adjusted from listing ");
+        callSiblingFunction();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry]);
@@ -108,7 +113,13 @@ export default function SearchListings({
         // if there are properties to show, display them
         <>
           {currentProperties.map((property) => (
-            <HomeOfferCard key={property.id} property={property} />
+            <HomeOfferCard
+              key={
+                //we were getting duplicate keys so we added this random number
+                property.id * 11134 * Math.random()
+              }
+              property={property}
+            />
           ))}
           {isFetchingNextPage && skeletons}
           <div ref={ref} className="absolute bottom-[calc(100vh-12rem)]"></div>
