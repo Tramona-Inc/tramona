@@ -86,43 +86,81 @@ export default function CitiesFilter({
           <div
             className={cn(
               "flex gap-1 pb-2",
-              isLandingPage ? "justify-center px-10" : "pl-12 pr-40",
+              isLandingPage ? "justify-center px-9" : "pl-12 pr-40",
             )}
           >
-            {cities.map((city) => {
-              if (city.id === "all" && isLandingPage) return null;
-              const isSelected = city.id === filter?.id && !isLandingPage;
-              return (
-                <Button
-                  key={city.id}
-                  variant="ghost"
-                  onClick={async () => {
-                    if (isLandingPage) {
-                      void router.push({
-                        pathname: "/explore",
-                        query: { city: city.id },
-                      });
-                    } else {
-                      setFilter(city);
-                      setLocationBoundingBox({
-                        northeastLat: 0,
-                        northeastLng: 0,
-                        southwestLat: 0,
-                        southwestLng: 0,
-                      });
-                    }
-                  }}
-                  className={cn(
-                    "px-3 text-xs font-bold sm:text-base",
-                    isSelected
-                      ? "bg-zinc-300 hover:bg-zinc-300"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  {city.label}
-                </Button>
-              );
-            })}
+            <div className="hidden md:flex">
+              {cities.map((city) => {
+                if (city.id === "all" && isLandingPage) return null;
+                const isSelected = city.id === filter?.id && !isLandingPage;
+                return (
+                  <Button
+                    key={city.id}
+                    variant="ghost"
+                    onClick={async () => {
+                      if (isLandingPage) {
+                        void router.push({
+                          pathname: "/explore",
+                          query: { city: city.id },
+                        });
+                      } else {
+                        setFilter(city);
+                        setLocationBoundingBox({
+                          northeastLat: 0,
+                          northeastLng: 0,
+                          southwestLat: 0,
+                          southwestLng: 0,
+                        });
+                      }
+                    }}
+                    className={cn(
+                      "px-3 text-xs font-bold sm:text-base",
+                      isSelected
+                        ? "bg-zinc-300 hover:bg-zinc-300"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {city.label}
+                  </Button>
+                );
+              })}
+            </div>
+            <div className="flex md:hidden">
+              {cities.slice(0, 4).map((city) => {
+                if (city.id === "all" && isLandingPage) return null;
+                const isSelected = city.id === filter?.id && !isLandingPage;
+                return (
+                  <Button
+                    key={city.id}
+                    variant="ghost"
+                    onClick={async () => {
+                      if (isLandingPage) {
+                        void router.push({
+                          pathname: "/explore",
+                          query: { city: city.id },
+                        });
+                      } else {
+                        setFilter(city);
+                        setLocationBoundingBox({
+                          northeastLat: 0,
+                          northeastLng: 0,
+                          southwestLat: 0,
+                          southwestLng: 0,
+                        });
+                      }
+                    }}
+                    className={cn(
+                      "px-3 text-xs font-bold sm:text-base",
+                      isSelected
+                        ? "bg-zinc-300 hover:bg-zinc-300"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {city.label}
+                  </Button>
+                );
+              })}
+            </div>
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
