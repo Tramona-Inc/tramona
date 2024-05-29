@@ -1,11 +1,8 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import PropertyOfferCard from "@/components/requests/PropertyOfferCard";
 import PropertyOfferAcceptedCard from "@/components/requests/PropertyOfferAcceptedCard";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { api, type RouterOutputs } from "@/utils/api";
-import { errorToast } from "@/utils/toasts";
 import Head from "next/head";
 
 function PastPropertyOfferCards({
