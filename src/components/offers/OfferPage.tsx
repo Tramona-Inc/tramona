@@ -76,9 +76,7 @@ export default function OfferPage({
   }
   const originalTotal = property.originalNightlyPrice * numNights;
 
-  const tramonaServiceFee = getTramonaFeeTotal(
-    originalTotal - offer.totalPrice,
-  );
+  const tramonaServiceFee = offer.tramonaFee;
 
   // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
