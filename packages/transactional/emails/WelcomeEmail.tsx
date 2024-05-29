@@ -1,6 +1,5 @@
 import { Text, Button } from "@react-email/components";
 import { Layout } from "./EmailComponents";
-import { MapPin, CircleDollarSign, Users, SquarePlay, Instagram, Facebook, Linkedin } from 'lucide-react';
 
 export default function WelcomeEmail({ name }: { name: string }) {
   return (
