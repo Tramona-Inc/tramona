@@ -31,14 +31,22 @@ import { useCitiesFilter } from "@/utils/store/cities-filter";
 import MobileSearchListings from "./MobileSearchListings";
 import MobileFilterBar from "./MobileFilterBar";
 import { AdjustedPropertiesProvider } from "./AdjustedPropertiesContext";
+import { useRouter } from "next/router";
+import { cities } from "../cities";
 
 export default function SearchPage() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
-  //onLoad erase all filters
+  const router = useRouter();
+
   useEffect(() => {
-    setFilter(undefined);
-  }, []);
+    const city =
+      typeof router.query.city === "string"
+        ? cities.find((c) => c.id === router.query.city)
+        : undefined;
+
+    setFilter(city);
+  }, [router.query.city, setFilter]);
   const isFilterUndefined = filter === undefined;
 
   useMaybeSendUnsentRequests();
@@ -142,7 +150,7 @@ function MobileJustSearch() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="fixed top-[58px] z-30 w-full">
+      <SheetTrigger className="fixed inset-x-1 top-[calc(var(--header-height)+4px)] z-30">
         <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg border bg-white px-3 py-4 text-center font-semibold text-muted-foreground shadow-md">
           <SearchIcon />
           Search

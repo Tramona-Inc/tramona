@@ -135,6 +135,7 @@ export const offersRouter = createTRPCRouter({
           totalPrice: true,
           id: true,
           acceptedAt: true,
+          tramonaFee: true,
         },
 
         with: {
@@ -164,7 +165,7 @@ export const offersRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const coords = await getCoordinates(input.location);
       return {
-        coordinates: coords!,
+        coordinates: coords,
       };
     }),
 
@@ -208,6 +209,7 @@ export const offersRouter = createTRPCRouter({
           totalPrice: true,
           acceptedAt: true,
           id: true,
+          tramonaFee: true,
         },
         with: {
           request: {

@@ -1,3 +1,4 @@
+import landingBg from "public/assets/images/landing-bg.jpg";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import {
@@ -14,12 +15,11 @@ import {
   MapPin,
   SearchIcon,
 } from "lucide-react";
-import Image from "next/image";
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
-import { WelcomeBanner } from "../WelcomeBanner";
 import Typewriter from "typewriter-effect";
+import Image from "next/image";
 
 const infoCards = [
   {
@@ -50,53 +50,66 @@ const infoCards = [
 
 export default function MastHead() {
   return (
-    <section className="relative bg-white">
-      <div className="absolute inset-x-0 top-0">
-        <WelcomeBanner />
-      </div>
-      <div className="w-full">
+    <section className="relative min-h-screen-minus-header bg-white p-4">
+      <div className="relative overflow-clip rounded-3xl border">
         <Image
-          src="/assets/images/landing-page.png"
+          src={landingBg}
           alt=""
-          width={0}
-          height={0}
-          sizes="100vw"
-          priority
-          className="pointer-events-none h-[900px] w-full select-none object-cover md:w-full lg:h-[750px]"
+          layout="fill"
+          objectFit="cover"
+          placeholder="blur"
+          className="select-none"
         />
-      </div>
-      <div className="absolute inset-x-0 top-0 z-10 mx-auto max-w-6xl px-4">
-        <div className="flex flex-col gap-4 pt-6 lg:flex-row lg:gap-20 lg:pt-11">
-          <div className="w-96 flex-none">
-            <p className="text-xs font-bold uppercase tracking-wide text-black/50 sm:text-sm">
-              $250,000+ saved so far
-            </p>
-            <h1 className="text-balance text-2xl font-bold leading-tight lg:text-[40px] lg:leading-tight">
-              Book the same properties you see on Airbnb for less
-            </h1>
-            <p className="text-balance pt-4 text-sm leading-tight lg:pt-8 lg:text-xl">
-              Hosts average 60% vacancy year round. Submit requests and{" "}
-              <b>let hosts send you matches.</b>
-            </p>
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black"></div>
+        <div className="relative grid grid-cols-1 p-4 lg:grid-cols-2">
+          <div className="flex flex-col justify-end">
+            <div className="relative pt-32 lg:text-balance">
+              {/* <div className="relative inline-block rounded-full border-t border-white/20 bg-teal-900  px-3 font-extrabold uppercase tracking-wide text-white shadow-[1px_1px_10px] shadow-teal-100/60">
+                $250k+ saved so far
+              </div> */}
+              <div className="relative inline-flex items-center gap-1 rounded-full border-t border-white/30 bg-teal-50 px-3 text-sm font-extrabold uppercase tracking-wide text-teal-900 sm:text-base">
+                $250k+ saved so far
+              </div>
+              <h1 className="text-3xl font-extrabold text-white lg:text-6xl">
+                Book the same properties you see on Airbnb for less
+              </h1>
+              <p className="text-xs text-white lg:pt-4 lg:text-base">
+                With Airbnb hosts averaging 60% vacancy rates year-round,
+                Tramona matches you with hosts who are willing to meet your
+                price.
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <DesktopSearchLayout />
+          <div className="ps-16">
+            <div className="hidden flex-1 rounded-2xl border bg-white p-4 lg:block">
+              <DesktopSearchLayout />
+            </div>
           </div>
         </div>
       </div>
-      <div className="relative h-64 -translate-y-20">
-        <div className="absolute inset-0 overflow-x-auto">
-          <div className="flex gap-4 px-4">
-            {infoCards.map((card, index) => (
-              <div
-                key={index}
-                className="min-w-64 space-y-2 rounded-lg border bg-white p-4 md:flex-1"
-              >
-                <card.icon />
-                <h3 className="text-xl font-bold">{card.title}</h3>
-                <p className="text-sm">{card.description}</p>
-              </div>
-            ))}
+      <div className="mt-4 flex-1 rounded-2xl border bg-secondary p-4 lg:hidden">
+        <DesktopSearchLayout />
+      </div>
+      <div className="mt-8 space-y-4 lg:mt-14 lg:space-y-8">
+        <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
+          How Tramona Works
+        </h2>
+        <div className="relative h-56">
+          <div className="absolute inset-0 overflow-x-auto">
+            <div className="flex gap-4">
+              {infoCards.map((card, index) => (
+                <div
+                  key={index}
+                  className="flex min-w-64 flex-col items-start gap-2 rounded-2xl bg-teal-700/15 p-4 md:flex-1"
+                >
+                  <div className="rounded-lg bg-white p-2">
+                    <card.icon />
+                  </div>
+                  <h3 className="text-xl font-bold">{card.title}</h3>
+                  <p className="text-sm">{card.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -107,9 +120,9 @@ export default function MastHead() {
 export function DesktopSearchLayout() {
   return (
     <div className="space-y-2">
-      <p className="hidden text-sm font-semibold lg:block">
+      <p className="hidden  font-semibold  text-muted-foreground lg:block">
         Send a request to every host in{" "}
-        <span className="text-teal-700">
+        <span className="font-bold text-teal-900">
           <Typewriter
             component={"span"}
             options={{
@@ -123,35 +136,6 @@ export function DesktopSearchLayout() {
 
       <DesktopRequestDealTab />
     </div>
-
-    // ORIGINAL LANDING PAGE
-
-    // <Tabs
-    //   defaultValue={"search"}
-    //   className="mx-auto max-w-6xl rounded-2xl bg-white px-4 pb-4 shadow-md"
-    // >
-    //   <TabsList noBorder className="flex items-center justify-center">
-    //     <TabsTrigger
-    //       value="search"
-    //       className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
-    //     >
-    //       <span className="text-sm">Search Properties</span>
-    //     </TabsTrigger>
-    //     <TabsTrigger
-    //       value="request"
-    //       className="border-b-2 font-bold data-[state=active]:border-[#004236] data-[state=active]:text-[#004236]"
-    //     >
-    //       <span className="text-sm">Request Deal</span>
-    //     </TabsTrigger>
-    //   </TabsList>
-    //   <div className="mb-5 mt-[-2px] w-full border-b-2 border-border" />
-    //   <TabsContent value={"search"}>
-    //     <DesktopSearchTab />
-    //   </TabsContent>
-    //   <TabsContent value={"request"}>
-    //     <DesktopRequestDealTab />
-    //   </TabsContent>
-    // </Tabs>
   );
 }
 

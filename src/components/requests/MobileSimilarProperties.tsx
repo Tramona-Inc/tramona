@@ -19,8 +19,8 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
   const { data: properties, isFetching } =
     api.properties.getAllInfiniteScroll.useInfiniteQuery(
       {
-        lat: coordinates?.coordinates.lat,
-        long: coordinates?.coordinates.lng,
+        lat: coordinates?.coordinates.location?.lat,
+        long: coordinates?.coordinates.location?.lng,
         radius: 25,
       },
       { refetchOnWindowFocus: false },
@@ -35,15 +35,15 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
   const skeletons = (
     <>
       <div>
-        <Skeleton className="mb-2 h-[80px] rounded-md" />
+        <Skeleton className="mb-2 h-20 rounded-md" />
         <SkeletonText />
       </div>
       <div>
-        <Skeleton className="mb-2 h-[80px] rounded-md" />
+        <Skeleton className="mb-2 h-20 rounded-md" />
         <SkeletonText />
       </div>
       <div>
-        <Skeleton className="mb-2 h-[80px] rounded-md" />
+        <Skeleton className="mb-2 h-20 rounded-md" />
         <SkeletonText />
       </div>
     </>
@@ -52,7 +52,7 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
   return (
     <div>
       <div className="mb-3 flex flex-row items-center gap-2 px-1">
-        <h3 className="text-nowrap text-center text-sm font-semibold">
+        <h3 className="text-nowrap text-sm font-semibold">
           Similar properties in {city.split(",")[0]}{" "}
         </h3>
         {currentProperties.length > 0 && (
@@ -62,8 +62,8 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
         )}
       </div>
       <div>
-        <ScrollArea>
-          <div className="flex gap-2">
+        <ScrollArea className="p-2">
+          <div className="flex w-max gap-2">
             {isFetching ? (
               skeletons
             ) : currentProperties.length > 0 ? (

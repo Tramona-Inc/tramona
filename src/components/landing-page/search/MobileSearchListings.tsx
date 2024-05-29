@@ -15,7 +15,7 @@ export default function MobileSearchListings({
 }: {
   isFilterUndefined: boolean;
 }) {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger>

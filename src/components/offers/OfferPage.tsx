@@ -76,9 +76,7 @@ export default function OfferPage({
   }
   const originalTotal = property.originalNightlyPrice * numNights;
 
-  const tramonaServiceFee = getTramonaFeeTotal(
-    originalTotal - offer.totalPrice,
-  );
+  const tramonaServiceFee = offer.tramonaFee;
 
   // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
@@ -296,8 +294,10 @@ export default function OfferPage({
             <PropertyAmenities amenities={property.amenities ?? []} />
             {property.amenities && (
               <Dialog>
-                <DialogTrigger className="inline-flex w-full items-center justify-center rounded-lg border border-black px-2.5 py-2 text-foreground md:w-1/4">
-                  Show all amenities
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Show all amenities
+                  </Button>
                 </DialogTrigger>
 
                 <DialogContent className="max-w-4xl">
@@ -319,8 +319,8 @@ export default function OfferPage({
             </h1>
             <div className="py-2">
               <p className="text-sm font-medium text-black">
-                {!!property.cancellationPolicy ||
-                property.cancellationPolicy?.toLowerCase() === "n/a"
+                {property.cancellationPolicy === null ||
+                property.cancellationPolicy.toLowerCase() === "n/a"
                   ? property.cancellationPolicy
                   : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
               </p>
@@ -470,11 +470,6 @@ export default function OfferPage({
           </section>
         </div>
       )}
-      <div className="bg-accent px-4 py-1">
-        this is the house link
-        <span className="mx-3 ">This is the house link</span>
-        Share with your friends
-      </div>
     </div>
   );
 }

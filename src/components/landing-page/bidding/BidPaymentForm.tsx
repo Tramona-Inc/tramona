@@ -13,7 +13,7 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { StripeError } from "@stripe/stripe-js";
+import { type StripeError } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -37,7 +37,7 @@ export default function BidPaymentForm({
   const stripe = useStripe();
   const elements = useElements();
 
-  const [errorMessage, setErrorMessage] = useState<String | undefined>();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
 
   const { update } = useSession();
@@ -50,7 +50,6 @@ export default function BidPaymentForm({
 
   const { mutateAsync: createBiddingMutate } = api.biddings.create.useMutation({
     onSuccess: () => {
-      console.log("hit");
       setStep(2);
     },
   });
@@ -150,7 +149,7 @@ export default function BidPaymentForm({
               });
             }}
           >
-            Login
+            Log in
           </Button>
           <Button asChild variant={"greenPrimary"} className="w-full">
             <Link href={"/auth/signup"}>Sign Up</Link>

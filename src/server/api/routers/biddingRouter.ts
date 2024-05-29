@@ -15,7 +15,7 @@ import {
   counterInsertSchema,
   counters,
 } from "@/server/db/schema/tables/counters";
-import { getNumNights } from '@/utils/utils';
+import { getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
@@ -226,8 +226,8 @@ export const biddingRouter = createTRPCRouter({
         .set({
           checkIn: input.date.from,
           checkOut: input.date.to,
-          amount: (input.nightlyPrice * 100) * totalNights,
-          statusUpdatedAt: new Date()
+          amount: input.nightlyPrice * 100 * totalNights,
+          statusUpdatedAt: new Date(),
         })
         .where(eq(bids.id, input.offerId));
     }),
@@ -302,6 +302,7 @@ export const biddingRouter = createTRPCRouter({
             originalNightlyPrice: true,
             longitude: true,
             latitude: true,
+            originalListingUrl: true,
           },
         },
         counters: {
@@ -416,12 +417,7 @@ export const biddingRouter = createTRPCRouter({
 
   accept: protectedProcedure
     .input(z.object({ bidId: z.number(), amount: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      const userIsWithBid = await userWithBid({
-        userId: ctx.user.id,
-        bidId: input.bidId,
-      });
-
+    .mutation(async ({ input }) => {
       const bidInfo = await db.query.bids.findFirst({
         where: eq(bids.id, input.bidId),
         with: {
@@ -493,7 +489,6 @@ export const biddingRouter = createTRPCRouter({
       // await updateBidStatus({ id: input.bidId, status: "Rejected" });
       // }
 
-
       // TODO: email travellers
     }),
 
@@ -510,12 +505,15 @@ export const biddingRouter = createTRPCRouter({
       // } else {
       // await updateBidStatus({ id: input.bidId, status: "Rejected" });
       // }
-      const paymentIntent = await db.select({ paymentIntentId: bids.paymentIntentId }).from(bids).where(eq(bids.id, input.bidId));
+      const paymentIntent = await db
+        .select({ paymentIntentId: bids.paymentIntentId })
+        .from(bids)
+        .where(eq(bids.id, input.bidId));
       let refund;
       if (paymentIntent !== null) {
         refund = await stripe.refunds.create({
           payment_intent: paymentIntent,
-        })
+        });
       }
 
       if (refund?.status === "succeeded") {

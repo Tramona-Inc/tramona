@@ -6,12 +6,9 @@ import RequestEmptySvg from "../_common/EmptyStateSvg/RequestEmptySvg";
 import SimiliarProperties from "./SimilarProperties";
 import { useState } from "react";
 import { type DetailedRequest } from "@/components/requests/RequestCard";
-import { useIsMd } from "@/utils/utils";
 import { NewCityRequestBtn } from "./NewCityRequestBtn";
 
 export default function CityRequestsTab() {
-  const isMobile = !useIsMd();
-
   const { data: requests } = api.requests.getMyRequests.useQuery();
   //you can access all of the request details with selectedRequest
   const [selectedRequest, setSelectedRequest] =
@@ -21,14 +18,12 @@ export default function CityRequestsTab() {
 
   return requests.activeRequestGroups.length !== 0 ? (
     <div>
-      {isMobile && (
-        <p className="my-5 w-11/12 px-4 text-sm md:hidden">
-          Submit bids while waiting for your request to increase your chance of
-          getting a great deal.
-        </p>
-      )}
-      <div className="flex h-screen-minus-header gap-8">
-        <div className="flex-1">
+      <p className="my-5 w-11/12 px-4 text-sm md:hidden">
+        Submit bids while waiting for your request to increase your chance of
+        getting a great deal.
+      </p>
+      <div className="md:flex md:gap-8">
+        <div className="pb-64 md:w-[450px]">
           <NewCityRequestBtn />
           <RequestCards
             requestGroups={requests.activeRequestGroups}
@@ -36,18 +31,16 @@ export default function CityRequestsTab() {
             setSelectedRequest={setSelectedRequest}
           />
         </div>
-        {!isMobile && (
-          <div className="flex-1">
-            {selectedRequest?.location ? (
-              <SimiliarProperties
-                location={selectedRequest.location}
-                city={selectedRequest.location}
-              />
-            ) : (
-              <Spinner />
-            )}
-          </div>
-        )}
+        <div className="hidden md:block md:flex-1">
+          {selectedRequest?.location ? (
+            <SimiliarProperties
+              location={selectedRequest.location}
+              city={selectedRequest.location}
+            />
+          ) : (
+            <Spinner />
+          )}
+        </div>
       </div>
     </div>
   ) : (
