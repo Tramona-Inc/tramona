@@ -322,6 +322,40 @@ export const biddingRouter = createTRPCRouter({
     });
   }),
 
+  getAllAccepted: roleRestrictedProcedure(["admin"]).query(async () => {
+    return await db.query.bids.findMany({
+      with: {
+        madeByGroup: {
+          with: { members: { with: { user: true } }, invites: true },
+        },
+        property: {
+          columns: {
+            id: true,
+            name: true,
+            address: true,
+            imageUrls: true,
+            originalNightlyPrice: true,
+            longitude: true,
+            latitude: true,
+          },
+        },
+        counters: {
+          orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+          limit: 1,
+          columns: {
+            id: true,
+            counterAmount: true,
+            createdAt: true,
+            status: true,
+            userId: true,
+          },
+        },
+      },
+      where: eq(bids.status, "Accepted"),
+      orderBy: desc(bids.createdAt),
+    });
+  }),
+
   getAllPropertyBids: optionallyAuthedProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return [];
 
@@ -447,13 +481,44 @@ export const biddingRouter = createTRPCRouter({
       //   bidId: input.bidId,
       // });
 
+      await updateBidStatus({ id: input.bidId, status: "Rejected" });
+
       // if (!userIsWithBid) {
       //   throw new TRPCError({ code: "UNAUTHORIZED" });
       // } else {
       // await updateBidStatus({ id: input.bidId, status: "Rejected" });
       // }
 
-      await updateBidStatus({ id: input.bidId, status: "Rejected" });
+      // TODO: email travellers
+    }),
+
+  cancel: protectedProcedure
+    .input(z.object({ bidId: z.number() }))
+    .mutation(async ({ input }) => {
+      // const userIsWithBid = await userWithBid({
+      //   userId: ctx.user.id,
+      //   bidId: input.bidId,
+      // });
+
+      // if (!userIsWithBid) {
+      //   throw new TRPCError({ code: "UNAUTHORIZED" });
+      // } else {
+      // await updateBidStatus({ id: input.bidId, status: "Rejected" });
+      // }
+      const paymentIntent = await db
+        .select({ paymentIntentId: bids.paymentIntentId })
+        .from(bids)
+        .where(eq(bids.id, input.bidId));
+      let refund;
+      if (paymentIntent !== null) {
+        refund = await stripe.refunds.create({
+          payment_intent: paymentIntent,
+        });
+      }
+
+      if (refund?.status === "succeeded") {
+        await updateBidStatus({ id: input.bidId, status: "Cancelled" });
+      }
 
       // TODO: email travellers
     }),

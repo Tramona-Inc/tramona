@@ -16,6 +16,7 @@ export const bidStatusEnum = pgEnum("bid_status", [
   "Pending",
   "Accepted",
   "Rejected",
+  "Cancelled",
 ]);
 
 export const bids = pgTable(

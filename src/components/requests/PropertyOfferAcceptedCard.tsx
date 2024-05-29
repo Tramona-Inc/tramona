@@ -7,26 +7,16 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { EllipsisIcon, Pencil, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
-import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+
 import { Separator } from "../ui/separator";
-import EditPropertyOfferDialog from "./EditPropertyOfferDialog";
-import MobileSimilarProperties from "./MobileSimilarProperties";
 import RequestGroupAvatars from "./RequestGroupAvatars";
-import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
+import PropertyDeleteDialog from "../property-offer-response/PropertyDeleteDialog";
 
 function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
@@ -41,7 +31,7 @@ function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   }
 }
 
-export default function PropertyOfferCard({
+export default function PropertyOfferAcceptedCard({
   offer,
   isGuestDashboard,
 }:
@@ -56,7 +46,6 @@ export default function PropertyOfferCard({
   const { data: session } = useSession();
 
   const counter = offer.counters[0];
-  const previousCounter = offer.counters[1];
 
   const userCanCounter =
     offer.counters.length > 0 &&
@@ -79,15 +68,11 @@ export default function PropertyOfferCard({
 
   // ! previous counter for host/admin will always be 0 cause it can only gets one counter
   // ! update query so host can see all counters
-  const previousCounterNightlyPrice =
-    offer.counters.length > 1 && previousCounter
-      ? previousCounter.counterAmount /
-        getNumNights(offer.checkIn, offer.checkOut)
-      : 0;
 
   const totalNights = getNumNights(offer.checkIn, offer.checkOut);
 
   const originalNightlyBiddingOffer = offer.amount / totalNights;
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
     <Card className="cursor-pointer p-0 lg:overflow-clip">
@@ -118,17 +103,6 @@ export default function PropertyOfferCard({
                 request={offer}
                 isAdminDashboard={!isGuestDashboard}
               />
-              {isGuestDashboard && offer.status === "Pending" && (
-                <PropertyOfferCardDropdown
-                  offerId={offer.id}
-                  propertyId={offer.propertyId}
-                  guests={offer.numGuests}
-                  originalNightlyBiddingOffer={originalNightlyBiddingOffer}
-                  totalNights={totalNights}
-                  checkIn={offer.checkIn}
-                  checkOut={offer.checkOut}
-                />
-              )}
             </div>
           </div>
 
@@ -163,98 +137,15 @@ export default function PropertyOfferCard({
             </p>
           </div>
 
-          {/* {!isGuestDashboard && (
-            <div className="flex justify-end gap-2">
-              <PropertyOfferResponseDD offerId={offer.id} />
-            </div>
-          )} */}
-
-          {/* Display for host initially */}
-          {!isGuestDashboard && offer.counters.length === 0 && (
-            <PropertyCounterOptions
-              offerId={offer.id}
-              originalNightlyBiddingOffer={originalNightlyBiddingOffer}
-              counterNightlyPrice={counterNightlyPrice}
-              previousOfferNightlyPrice={previousCounterNightlyPrice}
-              totalCounterAmount={counter?.counterAmount ?? offer.amount} // If no counter/ original price
-            />
-          )}
-
-          {userCanCounter && (
-            <PropertyCounterOptions
-              offerId={offer.id}
-              originalNightlyBiddingOffer={originalNightlyBiddingOffer}
-              counterNightlyPrice={counterNightlyPrice}
-              previousOfferNightlyPrice={previousCounterNightlyPrice}
-              totalCounterAmount={counter.counterAmount}
-            />
-          )}
+          <PropertyDeleteDialog
+            offerId={offer.id}
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+            originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+            counterNightlyPrice={counterNightlyPrice}
+          />
         </div>
       </CardContent>
-      <div className="md:hidden">
-        <Separator className="my-1" />
-        <MobileSimilarProperties
-          city={offer.property.address}
-          location={offer.property.address}
-        />
-      </div>
     </Card>
-  );
-}
-
-function PropertyOfferCardDropdown({
-  offerId,
-  propertyId,
-  guests,
-  originalNightlyBiddingOffer,
-  checkIn,
-  checkOut,
-}: {
-  offerId: number;
-  propertyId: number;
-  totalNights: number;
-  guests: number;
-  checkIn: Date;
-  checkOut: Date;
-  originalNightlyBiddingOffer: number;
-}) {
-  const [openWithdraw, setOpenWithdraw] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-
-  return (
-    <>
-      <WithdrawPropertyOfferDialog
-        offerId={offerId}
-        open={openWithdraw}
-        onOpenChange={setOpenWithdraw}
-      />
-      <EditPropertyOfferDialog
-        offerId={offerId}
-        propertyId={propertyId}
-        originalNightlyBiddingOffer={originalNightlyBiddingOffer}
-        guests={guests}
-        checkIn={checkIn}
-        checkOut={checkOut}
-        open={openEdit}
-        onOpenChange={setOpenEdit}
-      />
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <EllipsisIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setOpenEdit(true)}>
-            <Pencil />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem red onClick={() => setOpenWithdraw(true)}>
-            <TrashIcon />
-            Withdraw
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </>
   );
 }
