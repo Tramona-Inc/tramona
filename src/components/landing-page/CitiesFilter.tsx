@@ -82,7 +82,6 @@ export default function CitiesFilter({
     <div className="sticky top-header-height z-10 h-14 border-b bg-white">
       <div className="absolute inset-2">
         <ScrollArea ref={ref} viewportRef={viewportRef}>
-          {/* <div className="flex gap-1 pb-2 pl-12 pr-40"> */}
           <div
             className={cn(
               "flex gap-1 pb-2",
