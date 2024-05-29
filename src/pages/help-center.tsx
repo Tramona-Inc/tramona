@@ -28,7 +28,7 @@ export default function HelpCenter() {
             className="object-cover"
           />
         </div>
-        <h1 className="absolute inset-0 flex items-center justify-center bg-opacity-50 text-center text-2xl font-bold lg:text-4xl">
+        <h1 className="absolute inset-0 flex items-center justify-center bg-opacity-50 text-center text-2xl font-extrabold lg:text-4xl">
           How can we help you?
         </h1>
       </div>

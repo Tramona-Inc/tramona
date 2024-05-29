@@ -30,6 +30,7 @@ import { CarouselDots } from "../_common/carousel-dots";
 import DateRangePicker from "../_common/DateRangePicker";
 import { Button } from "../ui/button";
 import MakeBid from "./bidding/MakeBid";
+import { Skeleton, SkeletonText } from "../ui/skeleton";
 
 type PropertyCard = {
   id: number;
@@ -40,7 +41,6 @@ type PropertyCard = {
   numBedrooms: number;
   numBeds: number;
   originalNightlyPrice: number | null;
-  distance: unknown;
 };
 
 const formSchema = z
@@ -268,6 +268,20 @@ export default function HomeOfferCard({
           </Button>
         )}
       </div>
+    </div>
+  );
+}
+
+export function HomeOfferCardSkeleton() {
+  return (
+    <div>
+      <Skeleton className="aspect-square rounded-xl" />
+      <div className="flex h-[90px] flex-col justify-center">
+        <SkeletonText />
+        <SkeletonText />
+      </div>
+      <Skeleton className="h-10 rounded-lg" />
+      <Skeleton className="mt-2 h-10 rounded-xl" />
     </div>
   );
 }

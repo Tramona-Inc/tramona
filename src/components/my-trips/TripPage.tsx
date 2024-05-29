@@ -44,7 +44,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
   const chatWithAdmin = useChatWithAdmin();
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: trip.property.address!,
+    location: trip.property.address,
   });
 
   const tripDuration = dayjs(trip.request.checkOut).diff(
@@ -164,8 +164,8 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                   <div className="relative z-10 my-3 overflow-clip rounded-lg">
                     <MapContainer
                       center={[
-                        coordinateData.coordinates.lat,
-                        coordinateData.coordinates.lng,
+                        coordinateData.coordinates.location!.lat,
+                        coordinateData.coordinates.location!.lng,
                       ]}
                       zoom={14}
                       scrollWheelZoom={false}
@@ -177,8 +177,8 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                       />
                       <Marker
                         position={[
-                          coordinateData.coordinates.lat,
-                          coordinateData.coordinates.lng,
+                          coordinateData.coordinates.location!.lat,
+                          coordinateData.coordinates.location!.lng,
                         ]}
                       />
                     </MapContainer>
@@ -285,8 +285,8 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
           {coordinateData && (
             <MapContainer
               center={[
-                coordinateData.coordinates.lat,
-                coordinateData.coordinates.lng,
+                coordinateData.coordinates.location!.lat,
+                coordinateData.coordinates.location!.lng,
               ]}
               zoom={14}
               scrollWheelZoom={false}
@@ -298,8 +298,8 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
               />
               <Marker
                 position={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
+                  coordinateData.coordinates.location!.lat,
+                  coordinateData.coordinates.location!.lng,
                 ]}
               />
             </MapContainer>

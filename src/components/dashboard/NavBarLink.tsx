@@ -13,10 +13,11 @@ export function NavBarLink({
   return (
     <NavLink
       href={href}
+      noChildren={["/", "/admin"].includes(href)}
       render={({ selected }) => (
         <div
           className={cn(
-            "relative flex flex-col items-center gap-1 py-3 text-center text-xs font-medium transition-all",
+            "relative flex flex-col items-center gap-1 px-1 py-3 text-center text-xs font-medium",
             selected ? "text-teal-700" : "text-muted-foreground",
           )}
         >

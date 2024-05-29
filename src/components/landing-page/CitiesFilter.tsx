@@ -13,6 +13,7 @@ import {
 import { cities } from "./cities";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { useRef } from "react";
+import { useRouter } from "next/router";
 
 function FiltersBtn() {
   const open = useCitiesFilter((state) => state.open);
@@ -36,9 +37,16 @@ function FiltersBtn() {
   );
 }
 
-export default function CitiesFilter() {
+export default function CitiesFilter({
+  isLandingPage = false,
+}: {
+  isLandingPage?: boolean;
+}) {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
+  const setLocationBoundingBox = useCitiesFilter(
+    (state) => state.setLocationBoundingBox,
+  );
 
   const ref = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -68,24 +76,47 @@ export default function CitiesFilter() {
     }
   }
 
+  const router = useRouter();
+
   return (
     <div className="sticky top-header-height z-10 h-14 border-b bg-white">
       <div className="absolute inset-2">
         <ScrollArea ref={ref} viewportRef={viewportRef}>
           <div className="flex gap-1 pb-2 pl-12 pr-40">
-            {cities.map((city) => (
-              <Button
-                key={city.id}
-                variant={"ghost"}
-                onClick={() => setFilter(city)}
-                className={cn(
-                  "px-3 text-xs font-semibold sm:text-sm",
-                  city.id === filter?.id && "bg-zinc-300 hover:bg-zinc-300",
-                )}
-              >
-                {city.label}
-              </Button>
-            ))}
+            {cities.map((city) => {
+              if (city.id === "all" && isLandingPage) return null;
+              const isSelected = city.id === filter?.id && !isLandingPage;
+              return (
+                <Button
+                  key={city.id}
+                  variant="ghost"
+                  onClick={async () => {
+                    if (isLandingPage) {
+                      void router.push({
+                        pathname: "/explore",
+                        query: { city: city.id },
+                      });
+                    } else {
+                      setFilter(city);
+                      setLocationBoundingBox({
+                        northeastLat: 0,
+                        northeastLng: 0,
+                        southwestLat: 0,
+                        southwestLng: 0,
+                      });
+                    }
+                  }}
+                  className={cn(
+                    "px-3 text-xs font-semibold sm:text-sm",
+                    isSelected
+                      ? "bg-zinc-300 hover:bg-zinc-300"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {city.label}
+                </Button>
+              );
+            })}
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
@@ -110,7 +141,7 @@ export default function CitiesFilter() {
         >
           <ChevronRightIcon />
         </Button>
-        <FiltersBtn />
+        {!isLandingPage && <FiltersBtn />}
       </div>
     </div>
   );

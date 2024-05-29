@@ -81,8 +81,7 @@ function BiddingInfoCard({ property }: { property: Property }) {
         </p>{" "}
         <p className="ml-7 text-sm font-semibold">
           <Link href="/tos" className="text-blue-500 hover:underline">
-            {" "}
-            Learn more{" "}
+            Learn more
           </Link>{" "}
           about the Host&apos;s cancellation policy.
         </p>
@@ -98,7 +97,7 @@ function BiddingInfoCard({ property }: { property: Property }) {
         <hr />
         <div className="my-2 flex flex-row justify-between">
           <p>Offer Total</p>
-          <p>${totalPrice} </p>
+          <p>${totalPrice}</p>
         </div>
       </div>
     </div>
@@ -113,9 +112,6 @@ function BiddingStep2({
   setStep: (step: number) => void;
 }) {
   const addPropertyIdBids = useBidding((state) => state.addPropertyIdBids);
-  const twilioMutation = api.twilio.sendSMS.useMutation();
-  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
-
   const { data: payments } = api.stripe.getListOfPayments.useQuery();
   const { data: session } = useSession();
   const [currentPaymentMethodId, setCurrentPaymentMethodId] = useState<

@@ -211,6 +211,11 @@ export const useIsMd = () => useScreenWidth() >= 768;
  */
 export const useIsLg = () => useScreenWidth() >= 1024;
 
+/**
+ * screen width >= 1850 (same as tailwind `lg:`))
+ */
+export const useIsXl = () => useScreenWidth() >= 1850;
+
 export function getTramonaFeeTotal(totalSavings: number) {
   const fee = 0.2 * totalSavings;
 
