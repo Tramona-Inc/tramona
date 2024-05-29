@@ -11,24 +11,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { env } from "@/env";
 import useTimeout from "@/utils/useTimeout";
 import { cn } from "@/utils/utils";
 import { Check } from "lucide-react";
 import Script from "next/script";
-import React from "react";
-import usePlacesAutocomplete from "use-places-autocomplete";
+import usePlaceAutocomplete from "use-places-autocomplete";
 import { FormControl } from "../ui/form";
-import { env } from '@/env';
-
-interface PlacesPopoverProps extends React.ComponentProps<typeof Popover> {
-  value: string;
-  onValueChange: (value: string) => void;
-  autoFocus?: boolean;
-  open: boolean;
-  setOpen: (value: boolean) => void;
-  className: string;
-  trigger: (props: { disabled: boolean; value: string }) => React.ReactNode;
-}
 
 export default function PlacesPopover({
   value,
@@ -39,7 +28,15 @@ export default function PlacesPopover({
   open,
   setOpen,
   ...props
-}: PlacesPopoverProps) {
+}: React.ComponentProps<typeof Popover> & {
+  value: string;
+  onValueChange: (value: string) => void;
+  autoFocus?: boolean;
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  className: string;
+  trigger: (props: { disabled: boolean; value: string }) => React.ReactNode;
+}) {
   const {
     ready,
     value: input,
@@ -47,10 +44,15 @@ export default function PlacesPopover({
     suggestions: { status: suggestionsLoading, data },
     clearSuggestions,
     init,
-  } = usePlacesAutocomplete({
-    initOnMount: false,
+  } = usePlaceAutocomplete({
+    callbackName: "PlacesAutocomplete",
+    debounce: 300,
+    // initOnMount: false,
   });
 
+  // const [open, setOpen] = useState(false);
+
+  // useEffect(() => ..., []) was offsetting the popover a lil, idk why this works
   useTimeout(() => setOpen(autoFocus), 0);
 
   return (
@@ -59,6 +61,7 @@ export default function PlacesPopover({
         src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places`}
         onLoad={init}
       />
+
       <Popover open={open} onOpenChange={setOpen} {...props}>
         <PopoverTrigger asChild>
           <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
@@ -69,11 +72,15 @@ export default function PlacesPopover({
               value={input}
               onValueChange={(value) => {
                 setInput(value);
+
                 if (value === "" || data.length === 0) clearSuggestions();
               }}
               required
               placeholder="Search locations..."
             />
+            {/* {suggestionsLoading && (
+                    <CommandGroup>Loading suggestions...</CommandGroup>
+                  )} */}
             {suggestionsLoading === "OK" && (
               <CommandList>
                 {data.map((suggestion) => (
