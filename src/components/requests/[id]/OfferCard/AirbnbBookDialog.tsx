@@ -92,9 +92,9 @@ export default function AirbnbBookDialog(
       const sesh = await getSession.mutateAsync({
         sessionId: response.id,
       });
-
+      console.log("sesh metadata", sesh.metadata);
       const intent = await getSetupIntent.mutateAsync({
-        setupIntent: sesh.metadata.setupIntent as string,
+        setupIntent: sesh.metadata.setupIntent.id,
       });
       console.log(intent);
       await stripe.redirectToCheckout({
