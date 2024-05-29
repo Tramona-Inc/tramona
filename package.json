@@ -63,7 +63,7 @@
     "@sendgrid/mail": "^8.1.0",
     "@slack/web-api": "^7.0.2",
     "@stripe/react-stripe-js": "^2.4.0",
-    "@stripe/stripe-js": "^2.4.0",
+    "@stripe/stripe-js": "^3.0.0",
     "@supabase/supabase-js": "^2.39.7",
     "@t3-oss/env-nextjs": "^0.10.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",

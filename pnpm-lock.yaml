@@ -124,10 +124,10 @@ importers:
         version: 7.0.4
       '@stripe/react-stripe-js':
         specifier: ^2.4.0
-        version: 2.6.2(@stripe/stripe-js@2.4.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 2.6.2(@stripe/stripe-js@3.4.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@stripe/stripe-js':
-        specifier: ^2.4.0
-        version: 2.4.0
+        specifier: ^3.0.0
+        version: 3.4.1
       '@supabase/supabase-js':
         specifier: ^2.39.7
         version: 2.41.1
@@ -4114,8 +4114,9 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  '@stripe/stripe-js@2.4.0':
-    resolution: {integrity: sha512-WFkQx1mbs2b5+7looI9IV1BLa3bIApuN3ehp9FP58xGg7KL9hCHDECgW3BwO9l9L+xBPVAD7Yjn1EhGe6EDTeA==}
+  '@stripe/stripe-js@3.4.1':
+    resolution: {integrity: sha512-6vFTA7+MzoQyhZDn/D3wWZrUE8M8OSUFJE2Y3O1okfBWr4eCLvMeSoZuYN2xb1KJ3J0bBw96YfKxY75M/H0JZw==}
+    engines: {node: '>=12.16'}
 
   '@supabase/auth-js@2.63.0':
     resolution: {integrity: sha512-yIgcHnlgv24GxHtVGUhwGqAFDyJkPIC/xjx7HostN08A8yCy8HIfl4JEkTKyBqD1v1L05jNEJOUke4Lf4O1+Qg==}
@@ -15456,14 +15457,14 @@ snapshots:
       '@types/express': 4.17.21
       file-system-cache: 2.3.0
 
-  '@stripe/react-stripe-js@2.6.2(@stripe/stripe-js@2.4.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@stripe/react-stripe-js@2.6.2(@stripe/stripe-js@3.4.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@stripe/stripe-js': 2.4.0
+      '@stripe/stripe-js': 3.4.1
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@stripe/stripe-js@2.4.0': {}
+  '@stripe/stripe-js@3.4.1': {}
 
   '@supabase/auth-js@2.63.0':
     dependencies:
