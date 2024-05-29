@@ -89,7 +89,7 @@ export default function SearchPage() {
     <VerificationProvider>
       <AdjustedPropertiesProvider>
         <Head>
-          <title>Tramona</title>
+          <title>Explore | Tramona</title>
         </Head>
         <div className="relative mb-20 bg-white">
           <VerificationBanner />

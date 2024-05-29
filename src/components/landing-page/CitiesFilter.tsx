@@ -82,7 +82,13 @@ export default function CitiesFilter({
     <div className="sticky top-header-height z-10 h-14 border-b bg-white">
       <div className="absolute inset-2">
         <ScrollArea ref={ref} viewportRef={viewportRef}>
-          <div className="flex gap-1 pb-2 pl-12 pr-40">
+          {/* <div className="flex gap-1 pb-2 pl-12 pr-40"> */}
+          <div
+            className={cn(
+              "flex gap-1 pb-2",
+              isLandingPage ? "justify-center px-10" : "pl-12 pr-40",
+            )}
+          >
             {cities.map((city) => {
               if (city.id === "all" && isLandingPage) return null;
               const isSelected = city.id === filter?.id && !isLandingPage;
@@ -107,7 +113,7 @@ export default function CitiesFilter({
                     }
                   }}
                   className={cn(
-                    "px-3 text-xs font-semibold sm:text-sm",
+                    "px-3 text-xs font-bold sm:text-base",
                     isSelected
                       ? "bg-zinc-300 hover:bg-zinc-300"
                       : "text-muted-foreground",
