@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import useTimeout from "@/utils/useTimeout";
 import { cn } from "@/utils/utils";
 import { Check } from "lucide-react";
 import usePlaceAutocomplete from "use-places-autocomplete";
@@ -40,18 +41,25 @@ export default function PlacesPopover({
     setValue: setInput,
     suggestions: { status: suggestionsLoading, data },
     clearSuggestions,
+    // init,
   } = usePlaceAutocomplete({
     callbackName: "PlacesAutocomplete",
     debounce: 300,
+    // initOnMount: false,
   });
 
   // const [open, setOpen] = useState(false);
 
   // useEffect(() => ..., []) was offsetting the popover a lil, idk why this works
-  // useTimeout(() => setOpen(autoFocus), 0);
+  useTimeout(() => setOpen(autoFocus), 0);
 
   return (
     <>
+      {/* <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback="PlacesAutocomplete"`}
+        onLoad={init}
+      /> */}
+
       <Popover open={open} onOpenChange={setOpen} {...props}>
         <PopoverTrigger asChild>
           <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
