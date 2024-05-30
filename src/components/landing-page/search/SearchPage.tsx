@@ -10,7 +10,9 @@ import Head from "next/head";
 import { useState, useEffect, useRef } from "react";
 import SearchListings from "./SearchListings";
 import Banner from "@/components/landing-page/Banner";
-import CitiesFilter from "@/components/landing-page/CitiesFilter";
+import CitiesFilter, {
+  FiltersBtn,
+} from "@/components/landing-page/CitiesFilter";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
@@ -102,7 +104,7 @@ export default function SearchPage() {
     <VerificationProvider>
       <AdjustedPropertiesProvider>
         <Head>
-          <title>Tramona</title>
+          <title>Explore | Tramona</title>
         </Head>
         <div className="relative mb-20 bg-white">
           <VerificationBanner />
@@ -110,7 +112,13 @@ export default function SearchPage() {
             <div className="mt-32 space-y-8 px-4">
               <DynamicDesktopSearchBar />
               <div className="space-y-4">
-                <CitiesFilter />
+                <div className="flex items-center gap-2 border-b">
+                  <div className="w-full">
+                    <CitiesFilter />
+                  </div>
+                  <FiltersBtn />
+                </div>
+
                 <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
                   <div
                     className={`col-span-1  ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
