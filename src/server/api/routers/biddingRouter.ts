@@ -11,6 +11,7 @@ import {
   properties,
   users,
 } from "@/server/db/schema";
+import { bidsToProperties } from "@/server/db/schema/tables/bidsToProperties";
 import {
   counterInsertSchema,
   counters,
@@ -151,28 +152,29 @@ export const biddingRouter = createTRPCRouter({
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
     .mutation(async ({ ctx, input }) => {
       // Check if already exists
-      const bidExist = await ctx.db.query.bids.findMany({
-        where: exists(
-          ctx.db
-            .select()
-            .from(groupMembers)
-            .where(
-              and(
-                eq(groupMembers.groupId, bids.madeByGroupId),
-                eq(groupMembers.userId, ctx.user.id),
-                eq(bids.propertyId, input.propertyId),
-              ),
-            ),
-        ),
-        columns: {
-          propertyId: true,
-        },
-      });
+      // const bidExist = await ctx.db.query.bids.findMany({
+      //   where: exists(
+      //     ctx.db
+      //       .select()
+      //       .from(groupMembers)
+      //       .where(
+      //         and(
+      //           eq(groupMembers.groupId, bids.madeByGroupId),
+      //           eq(groupMembers.userId, ctx.user.id),
+      //           eq(bids.propertyId, input.propertyId),
+      //         ),
+      //       ),
+      //   ),
+      //   columns: {
+      //     propertyId: true,
+      //   },
+      // });
 
       // ! uncomment to prevent duplicate bids
       // if (bidExist.length > 0) {
       //   throw new TRPCError({ code: "BAD_REQUEST" });
       // } else {
+
       const madeByGroupId = await ctx.db
         .insert(groups)
         .values({ ownerId: ctx.user.id })
@@ -184,10 +186,16 @@ export const biddingRouter = createTRPCRouter({
         groupId: madeByGroupId,
       });
 
-      await ctx.db
+      const bid = await ctx.db
         .insert(bids)
-        .values({ ...input, madeByGroupId: madeByGroupId });
-      // }
+        .values({ ...input, madeByGroupId: madeByGroupId })
+        .returning({ id: bids.id });
+
+      if (bid[0]) {
+        await ctx.db
+          .insert(bidsToProperties)
+          .values({ bidId: bid[0].id, propertyId: input.propertyId });
+      }
     }),
   update: protectedProcedure
     .input(bidInsertSchema)

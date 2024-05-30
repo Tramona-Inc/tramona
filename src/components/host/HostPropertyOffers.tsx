@@ -6,7 +6,7 @@ import { useMediaQuery } from "../_utils/useMediaQuery";
 import HostPropertyOfferCard from "./HostPropertyOfferCard";
 
 export default function HostPropertyOffers() {
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  // const isMobile = useMediaQuery("(max-width: 640px)");
   const { data: offers } = api.biddings.getAllHostPending.useQuery();
 
   if (!offers) return <Spinner />;
