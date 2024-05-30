@@ -54,11 +54,14 @@ export const ALL_PROPERTY_TYPES = [
   "Alternative",
 ] as const;
 
-export const ALL_PROPERTY_ROOM_TYPES = [
-  "Flexible",
+export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
   "Shared room",
   "Private room",
+] as const;
+
+export const ALL_PROPERTY_ROOM_TYPES = [
+  ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
   "Other",
 ] as const;
 
@@ -152,7 +155,7 @@ export const properties = pgTable("properties", {
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
 
-  address: varchar("address", { length: 1000 }),
+  address: varchar("address", { length: 1000 }).notNull(),
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
 
@@ -186,8 +189,10 @@ export const properties = pgTable("properties", {
   originalNightlyPrice: integer("original_nightly_price"), // in cents
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),
+  cancellationPolicy: text("cancellation_policy"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  isPrivate: boolean("is_private").notNull().default(false),
 });
 
 export type Property = typeof properties.$inferSelect;
@@ -214,7 +219,7 @@ export const bookedDates = pgTable(
   {
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id),
+      .references(() => properties.id, { onDelete: "cascade" }),
     date: date("date", { mode: "date" }).notNull(),
   },
   (t) => ({

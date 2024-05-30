@@ -19,13 +19,14 @@ export const offers = pgTable(
       .references(() => requests.id, { onDelete: "cascade" }),
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id, { onDelete: "set null" }),
+      .references(() => properties.id, { onDelete: "cascade" }),
     totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
     madePublicAt: timestamp("made_public_at"),
     acceptedAt: timestamp("accepted_at"),
     paymentIntentId: varchar("payment_intent_id"),
     checkoutSessionId: varchar("checkout_session_id"),
+    tramonaFee: integer("tramona_fee").notNull().default(0), // in cents
   },
   (t) => ({
     madePublicAtIndex: index().on(t.madePublicAt),

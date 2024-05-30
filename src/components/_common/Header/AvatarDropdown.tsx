@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   LogOutIcon,
+  User2Icon,
   UserCheck2Icon,
   UserCheckIcon,
-  UserCogIcon,
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -80,7 +80,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuSeparator />
             </>
           )}
-          {session.user.role === "host" && pathname === "/host" && (
+          {hostProfile && (
             <>
               <HostTeamsDropdownItems
                 hostProfile={hostProfile}
@@ -96,22 +96,20 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuSeparator />
             </>
           )}
-          {session.user.role === "guest" && (
+          {/* {session.user.role === "guest" && (
             <>
-              <DropdownMenuItem asChild></DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/host/onboarding">
+                <Link href="/host-onboarding">
                   <UserCheck2Icon />
                   Become a Host
                 </Link>
               </DropdownMenuItem>
             </>
-          )}
+          )} */}
           <DropdownMenuItem asChild>
             <Link href="/profile">
-              <UserCogIcon />
-              Profile Settings
+              <User2Icon />
+              Profile
             </Link>
           </DropdownMenuItem>
           {/* <DropdownMenuItem asChild>

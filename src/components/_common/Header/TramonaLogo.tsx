@@ -5,10 +5,10 @@ export function TramonaLogo() {
   return (
     <Link
       href="/"
-      className="flex items-center gap-2 text-2xl font-bold 2xl:text-3xl"
+      className="flex items-center gap-2 text-2xl font-bold text-teal-900 2xl:text-3xl"
     >
       <TramonaIcon />
-      Tramona
+      <span className="hidden sm:inline">Tramona</span>
     </Link>
   );
 }

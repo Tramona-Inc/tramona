@@ -1,32 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { type Property } from "@/server/db/schema";
 import { useBidding } from "@/utils/store/bidding";
-import { formatCurrency, formatDateRange } from "@/utils/utils";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Lightbulb } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { DialogClose } from "@/components/ui/dialog";
-function BiddingConfirmation({ property }: { property: Property }) {
+import Confetti from 'react-confetti';
+
+function BiddingConfirmation({
+  property,
+  setOpen,
+}: {
+  property: Property;
+  setOpen: (open: boolean) => void;
+}) {
   const date = useBidding((state) => state.date);
+  const price = useBidding((state) => state.price);
 
   const resetSession = useBidding((state) => state.resetSession);
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
-  const handlePressNext = () => {
-    setStep(step - step);
-    resetSession();
-  };
+
   return (
     <div className="flex flex-col items-center justify-center ">
       <h1 className=" my-5 text-lg font-semibold text-green-600 md:text-3xl">
-        {" "}
         Offer Sent!
       </h1>
       <div className="flex flex-col">
         <h1 className=" mb-2 font-semibold md:mb-6 md:text-lg">
           {/* place bid.amount in here  */}
-          Your offer for <span className="font-bold">${100}</span> has been
+          Your offer for <span className="font-bold">${price}</span> has been
           submitted!
         </h1>
         <div className="flex flex-col gap-x-10 md:flex-row">
@@ -43,23 +45,22 @@ function BiddingConfirmation({ property }: { property: Property }) {
             </div>
             <div className="flex flex-col text-sm tracking-tight md:text-base md:tracking-tight">
               <h2 className="font-bold ">{property.name}</h2>
-              <p className="text-xs md:text-base">
-                Airbnb price:{" "}
-                {formatCurrency(property?.originalNightlyPrice ?? 0)}/night
-              </p>
+              {property.originalNightlyPrice !== null && (
+                <p className="text-xs md:text-base">
+                  Airbnb price: {formatCurrency(property.originalNightlyPrice)}
+                  /night
+                </p>
+              )}
               <p className="mt-3">Check-in/Check-out:</p>
               <p className="text-muted-foreground">
                 {formatDateRange(date.from, date.to)}
               </p>
-              <ul className="my-4 flex flex-row space-x-1 text-nowrap text-xs tracking-tighter text-muted-foreground ">
-                <li className="">{property.maxNumGuests} Guests</li>
-                <li>·</li>
-                <li>{property.numBedrooms} Bedrooms</li>
-                <li>·</li>
-                <li>{property.numBeds} Beds</li>
-                <li>·</li>
-                <li>{property.numBathrooms} Baths</li>
-              </ul>
+              <p className="my-2 text-nowrap text-xs tracking-tighter text-muted-foreground md:my-4 md:text-base">
+                {plural(property.maxNumGuests, "guest")} ·{" "}
+                {plural(property.numBedrooms, "bedroom")} ·{" "}
+                {plural(property.numBeds, "bed")} ·{" "}
+                {property.numBathrooms && plural(property.numBathrooms, "bath")}
+              </p>
             </div>
           </div>
           <div className=" flex-col items-center justify-center gap-y-3 text-sm md:mt-1 md:text-base">
@@ -68,39 +69,42 @@ function BiddingConfirmation({ property }: { property: Property }) {
             </p>
             <div className="flex flex-row space-x-1 ">
               <Lightbulb />
-              <h2 className="text-base font-bold md:text-xl"> Remember</h2>
+              <h2 className="text-base font-bold md:text-xl">Remember</h2>
             </div>
             <p className="ml-6 text-xs md:ml-0 md:text-sm">
               All offers are binding, if your offer is accepted your card will
               be charged.
             </p>
             <div className="mt-16 text-center text-xs md:mt-8">
-              <span className="text-blue-500 underline">Learn more </span>about
-              the host cancellation policy
+              <Link
+                href="/help-center"
+                className="text-blue-500 underline-offset-2 hover:underline"
+              >
+                Learn more
+              </Link>{" "}
+              about the host cancellation policy
             </div>
           </div>
         </div>
       </div>
 
-      <Button
-        asChild
-        variant="default"
-        className="mt-40 px-5 md:px-10 md:text-lg"
-        onClick={resetSession}
-      >
-        <Link href={`/requests`}>See my Offers</Link>
-      </Button>
-      <Button
-        asChild
-        variant="outline"
-        className="mt-2 md:px-8 md:text-lg"
-        onClick={() => {
-          resetSession();
-          window.location.reload();
-        }}
-      >
-        <Link href={`/`}>Back to listings</Link>
-      </Button>
+      <div className="mt-10 flex flex-row gap-5">
+        <Button asChild variant="greenPrimary" onClick={resetSession}>
+          <Link href={`/requests`}>See my Offers</Link>
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setOpen(false);
+            resetSession();
+          }}
+        >
+          Back to listings
+        </Button>
+        <div className="fixed inset-0 z-100 pointer-events-none">
+          <Confetti width={window.innerWidth} recycle={false}/>
+        </div>
+      </div>
     </div>
   );
 }

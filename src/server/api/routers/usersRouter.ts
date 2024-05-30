@@ -36,16 +36,16 @@ export const usersRouter = createTRPCRouter({
     };
   }),
 
-  myVerificationStatus: protectedProcedure.query(async({ctx})=>{
+  myVerificationStatus: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
-      columns:{
+      columns: {
         isIdentityVerified: true,
       },
-    })
-    return{
-      isIdentityVerified: res?.isIdentityVerified
-    }
+    });
+    return {
+      isIdentityVerified: res?.isIdentityVerified,
+    };
   }),
 
   myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
@@ -217,9 +217,11 @@ export const usersRouter = createTRPCRouter({
     }),
 
   getMyHostProfile: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.hostProfiles.findFirst({
-      where: eq(hostProfiles.userId, ctx.user.id),
-    });
+    return (
+      (await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+      })) ?? null
+    );
   }),
 
   checkCredentials: publicProcedure
@@ -249,6 +251,56 @@ export const usersRouter = createTRPCRouter({
       if (!isPasswordValid) {
         return "incorrect password";
       }
+
+      return "success";
+    }),
+
+  getPassword: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        password: true,
+      },
+    });
+  }),
+
+  updatePassword: protectedProcedure
+    .input(
+      z.object({
+        oldPassword: z.string(),
+        newPassword: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { oldPassword, newPassword } = input;
+
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      if (!user.password) {
+        return "user has no password";
+      }
+
+      const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+      if (!isPasswordValid) {
+        return "incorrect old password";
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await ctx.db
+        .update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, ctx.user.id));
 
       return "success";
     }),

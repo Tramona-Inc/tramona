@@ -1,18 +1,38 @@
+import {
+  adminNavLinks,
+  guestNavLinks,
+  hostNavLinks,
+} from "@/config/sideNavLinks";
 import { api } from "@/utils/api";
 import { plural } from "@/utils/utils";
-import { ArrowLeftRight } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Contact,
+  Menu,
+  MessageCircleQuestion,
+  Settings,
+  ShieldQuestion,
+  Wallet,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
-import { adminNavLinks, hostNavLinks, guestNavLinks } from "./navLinks";
-import { SidebarLink } from "./SidebarLink";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { NavBarLink } from "./NavBarLink";
 
 export default function Sidebar({
   type,
   withLogo = false,
 }: {
-  type: "admin" | "guest" | "host";
+  type: "admin" | "guest" | "host" | "unlogged";
   withLogo?: boolean;
 }) {
   //using session to check user's role if the role is == admin "Switch to Admin link will appear"
@@ -28,23 +48,17 @@ export default function Sidebar({
         : isAdmin
           ? [
               ...guestNavLinks,
-              {
-                href: "/admin",
-                name: "Switch To Admin",
-                icon: ArrowLeftRight,
-                noChildren: false,
-              },
+              { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
           : guestNavLinks;
 
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery(undefined, {
-      refetchInterval: 10000,
+      // refetchInterval: 10000,
     });
 
   const notifyMe = useCallback(async () => {
-    // Check if the browser supports notifications
-    if (!("Notification" in window) || !totalUnreadMessages) return;
+    // Check if the browser supports notifications if (!("Notification" in window) || !totalUnreadMessages) return;
 
     // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
     if (Notification.permission === "granted") {
@@ -52,7 +66,7 @@ export default function Sidebar({
       // if so, create a notification
       const title = "Tramona Messages";
       const icon = "/assets/images/tramona-logo.jpeg";
-      const body = `You have ${plural(totalUnreadMessages, "unread message")}!`;
+      const body = `You have ${plural(totalUnreadMessages ?? 0, "unread message")}!`;
       new Notification(title, { body, icon });
       const notificationSound = new Audio("/assets/sounds/sound.mp3");
       void notificationSound.play();
@@ -70,15 +84,12 @@ export default function Sidebar({
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col pt-8">
+      <div className="flex flex-1 flex-col gap-2 pt-4">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
-            <SidebarLink
-              href={link.href}
-              icon={link.icon}
-              name={link.name}
-              noChildren={link.noChildren}
-            />
+            <NavBarLink href={link.href} icon={link.icon}>
+              {link.name}
+            </NavBarLink>
             {totalUnreadMessages !== undefined &&
               totalUnreadMessages > 0 &&
               link.name === "Messages" && (
@@ -94,6 +105,46 @@ export default function Sidebar({
               )}
           </div>
         ))}
+      </div>
+      <div className="mb-6 text-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Menu />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuGroup>
+              <Link href="/settings/personal-information">
+                <DropdownMenuItem className="text-primary">
+                  <Settings />
+                  Settings
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/account">
+                <DropdownMenuItem className="text-primary">
+                  <Wallet /> Refer and earn
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/how-it-works">
+                <DropdownMenuItem className="text-primary">
+                  <ShieldQuestion />
+                  How it works
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/faq">
+                <DropdownMenuItem className="text-primary">
+                  <MessageCircleQuestion />
+                  FAQ
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/support">
+                <DropdownMenuItem className="text-primary">
+                  <Contact />
+                  Contact
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       {/* <button onClick={notifyMe}>NOTIFICATION</button>
       <button onClick={play}>Sound</button>

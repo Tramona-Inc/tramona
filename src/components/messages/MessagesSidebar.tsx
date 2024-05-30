@@ -197,7 +197,7 @@ export default function MessagesSidebar({
   return (
     <div
       className={cn(
-        "col-span-1 block h-screen-minus-header md:col-span-4 md:border-r lg:col-span-3 2xl:col-span-2",
+        "col-span-1 block md:col-span-4 md:border-r lg:col-span-3 2xl:col-span-2",
         selectedConversation && "hidden md:block",
       )}
     >
@@ -226,7 +226,7 @@ export default function MessagesSidebar({
             </div>
           )
         ) : (
-          <div className="grid h-screen-minus-header place-items-center text-muted-foreground">
+          <div className="grid place-items-center text-muted-foreground">
             <Spinner />
           </div>
         )}

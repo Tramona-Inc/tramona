@@ -1,8 +1,7 @@
 import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-//import { GoogleMap, Circle } from "@react-google-maps/api";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
 import {
-  cn,
   formatCurrency,
-  formatDateMonthDay,
-  getDiscountPercentage,
+  formatDateRange,
   getNumNights,
-  getTramonaFeeTotal,
   plural,
 } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
@@ -25,43 +21,18 @@ import {
   CheckIcon,
   ImagesIcon,
   ChevronRight,
-  MapPin,
   UsersRoundIcon,
   CalendarDays,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
 import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
-import {
-  ArrowLeftToLineIcon,
-  ArrowRightToLineIcon,
-} from "lucide-react";
+import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
-
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((module) => module.MapContainer),
-  {
-    ssr: false, // Disable server-side rendering for this component
-  },
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((module) => module.TileLayer),
-  {
-    ssr: false,
-  },
-);
-const Circle = dynamic(
-  () => import("react-leaflet").then((module) => module.Circle),
-  {
-    ssr: false,
-  },
-);
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -81,10 +52,6 @@ export default function OfferPage({
     isBooked = true;
   }
 
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: property.address!,
-  });
-
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const isAirbnb =
@@ -95,22 +62,18 @@ export default function OfferPage({
   const offerNightlyPrice =
     offer.totalPrice / getNumNights(request.checkIn, request.checkOut);
 
-  const discountPercentage = getDiscountPercentage(
-    property.originalNightlyPrice ?? 0,
-    offerNightlyPrice ?? 0,
-  );
+  // const discountPercentage = getDiscountPercentage(
+  //   property.originalNightlyPrice ?? 0,
+  //   offerNightlyPrice ?? 0,
+  // );
 
-  const checkInDate = formatDateMonthDay(request.checkIn);
-  const checkOutDate = formatDateMonthDay(request.checkOut);
   const numNights = getNumNights(request.checkIn, request.checkOut);
   if (property.originalNightlyPrice === null) {
     throw new Error("originalNightlyPrice is required but was not provided.");
   }
   const originalTotal = property.originalNightlyPrice * numNights;
 
-  const tramonaServiceFee = getTramonaFeeTotal(
-    originalTotal - offer.totalPrice,
-  );
+  const tramonaServiceFee = offer.tramonaFee;
 
   // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
@@ -119,54 +82,20 @@ export default function OfferPage({
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
   const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
-  const firstImageUrl: string = property.imageUrls?.[0] ?? "";
+  const firstImageUrl = property.imageUrls[0]!;
   return (
     <div className="space-y-4">
-      <Link
-        href={isBooked ? "/requests" : `/requests/${request.id}`}
-        className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
-      >
-        &larr; Back to offers
-      </Link>
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
-        <div className="flex-[2] space-y-2">
-          <h1 className="items-center text-lg font-semibold sm:text-3xl">
-            {property.name}
-          </h1>
-          <div className="text-sm font-medium">
-            <span>{plural(property.maxNumGuests, "Guest")}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBedrooms, "bedroom")}</span>
-            <span className="mx-2">·</span>
-            <span>{property.propertyType}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBeds, "bed")}</span>
-            {property.numBathrooms && (
-              <>
-                <span className="mx-2">·</span>
-                <span>{plural(property.numBathrooms, "bath")}</span>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
+      <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
         <Dialog>
           {isMobile ? (
             // Only render the first image on small screens
-            <div className="">
+            <div>
               <DialogTrigger
                 key={0}
                 onClick={() => setIndexOfSelectedImage(0)}
                 className="hover:opacity-90"
               >
-                <Image
-                  src={firstImageUrl}
-                  alt=""
-                  fill
-                  objectFit="cover"
-                  className=""
-                />
+                <Image src={firstImageUrl} alt="" fill objectFit="cover" />
               </DialogTrigger>
             </div>
           ) : (
@@ -182,13 +111,7 @@ export default function OfferPage({
                   onClick={() => setIndexOfSelectedImage(index)}
                   className="hover:opacity-90"
                 >
-                  <Image
-                    src={imageUrl}
-                    alt=""
-                    fill
-                    objectFit="cover"
-                    className=""
-                  />
+                  <Image src={imageUrl} alt="" fill objectFit="cover" />
                 </DialogTrigger>
               </div>
             ))
@@ -207,9 +130,11 @@ export default function OfferPage({
         {renderSeeMoreButton && (
           <div className="absolute bottom-2 left-2">
             <Dialog>
-              <DialogTrigger className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-black shadow-md hover:bg-gray-100">
-                <ImagesIcon className="mr-2" />
-                See all {property.imageUrls.length} photos
+              <DialogTrigger asChild>
+                <Button variant="white" className="rounded-full">
+                  <ImagesIcon />
+                  See all {property.imageUrls.length} photos
+                </Button>
               </DialogTrigger>
 
               <DialogContent className="max-w-4xl">
@@ -262,6 +187,7 @@ export default function OfferPage({
           </div>
         )}
       </div>
+
       <div className="flex justify-start space-x-4">
         <a
           href="#overview"
@@ -272,14 +198,37 @@ export default function OfferPage({
         <a href="#amenities" className="text-gray-600 hover:text-gray-800">
           Amenities
         </a>
-        <a href="#location" className="text-gray-600 hover:text-gray-800">
-          Location
+        <a href="#cancellation" className="text-gray-600 hover:text-gray-800">
+          Cancellation Policy
         </a>
         {property.checkInTime && (
           <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
             House rules
           </a>
         )}
+      </div>
+
+      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+        <div className="flex-[2] space-y-2">
+          <h1 className="items-center text-lg font-semibold sm:text-3xl">
+            {property.name}
+          </h1>
+          <div className="text-sm font-medium">
+            <span>{plural(property.maxNumGuests, "Guest")}</span>
+            <span className="mx-2">·</span>
+            <span>{plural(property.numBedrooms, "bedroom")}</span>
+            <span className="mx-2">·</span>
+            <span>{property.propertyType}</span>
+            <span className="mx-2">·</span>
+            <span>{plural(property.numBeds, "bed")}</span>
+            {property.numBathrooms && (
+              <>
+                <span className="mx-2">·</span>
+                <span>{plural(property.numBathrooms, "bath")}</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       <hr className="h-px border-0 bg-gray-300" />
@@ -330,13 +279,15 @@ export default function OfferPage({
             <PropertyAmenities amenities={property.amenities ?? []} />
             {property.amenities && (
               <Dialog>
-                <DialogTrigger className="inline-flex w-full items-center justify-center rounded-lg border border-black px-2.5 py-2 text-foreground md:w-1/4">
-                  Show all amenities
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Show all amenities
+                  </Button>
                 </DialogTrigger>
 
                 <DialogContent className="max-w-4xl">
                   <DialogHeader>
-                    <DialogTitle className="">Amenities</DialogTitle>
+                    <DialogTitle>Amenities</DialogTitle>
                   </DialogHeader>
                   <div className="max-h-96 overflow-y-scroll">
                     <AmenitiesComponent
@@ -347,9 +298,20 @@ export default function OfferPage({
               </Dialog>
             )}
           </section>
+          <section id="cancellation" className="scroll-mt-36">
+            <h1 className="text-lg font-semibold md:text-xl">
+              Cancellation Policy
+            </h1>
+            <div className="py-2">
+              <p className="text-sm font-medium text-black">
+                {property.cancellationPolicy ??
+                  "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+              </p>
+            </div>
+          </section>
         </div>
         <div className="flex-1">
-          <Card className="">
+          <Card>
             <div>
               <h2 className="flex items-center text-3xl font-semibold">
                 {formatCurrency(offerNightlyPrice)}
@@ -360,17 +322,21 @@ export default function OfferPage({
               <p className="text-sm font-medium text-black">
                 Original price: {formatCurrency(originalTotal / numNights)}
               </p>
-              <div className="my-6 grid grid-cols-2 gap-1">
+              <div className="my-2 grid gap-1">
                 <div>
-                  <div className="inline-flex items-center justify-start rounded-full border border-gray-300 px-10 py-0 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
+                  <div className="inline-flex w-full items-center justify-start rounded-full py-2 md:rounded-3xl lg:rounded-full">
                     <CalendarDays />
                     <div className="ml-2">
-                      <p className="text-sm text-gray-600">Check in</p>
-                      <p className="text-base font-bold">{checkInDate}</p>
+                      <p className="text-sm text-gray-600">
+                        Check in/Check-out
+                      </p>
+                      <p className="text-base font-bold">
+                        {formatDateRange(request.checkIn, request.checkOut)}
+                      </p>
                     </div>
                   </div>
                 </div>
-                <div>
+                {/* <div>
                   <div className="inline-flex items-center justify-start rounded-full border border-gray-300 px-10 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
                     <CalendarDays />
                     <div className="ml-2">
@@ -378,9 +344,9 @@ export default function OfferPage({
                       <p className="font-bold">{checkOutDate}</p>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
-              <div className="inline-flex w-full items-center rounded-full border border-gray-300 px-8 py-2 md:rounded-3xl md:px-4 lg:rounded-full lg:px-6">
+              <div className="inline-flex w-full items-center rounded-full py-2 md:rounded-3xl lg:rounded-full">
                 <UsersRoundIcon />
                 <div className="ml-2">
                   <p className="text-sm text-gray-600">Guests</p>
@@ -429,7 +395,7 @@ export default function OfferPage({
                 checkIn={request.checkIn}
                 checkOut={request.checkOut}
                 requestId={request.id}
-                offer={{ property, ...offer }}
+                offer={{ property, request, ...offer }}
                 totalPrice={offer.totalPrice}
                 offerNightlyPrice={offerNightlyPrice}
                 isAirbnb={isAirbnb}
@@ -455,40 +421,6 @@ export default function OfferPage({
           </Card>
         </div>
       </div>
-      <hr className="h-px border-0 bg-gray-300" />
-      <section id="location" className="scroll-mt-36 space-y-1">
-        <h1 className="text-lg font-semibold md:text-xl">Location</h1>
-        <div className="inline-flex items-center justify-center py-2 text-base">
-          <MapPin className="mr-2" />
-          {request.location}
-        </div>
-        {coordinateData && (
-          <div className="relative z-10">
-            <MapContainer
-              center={[
-                coordinateData.coordinates.lat,
-                coordinateData.coordinates.lng,
-              ]}
-              zoom={15}
-              scrollWheelZoom={false}
-              style={{ height: "500px" }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Circle
-                center={[
-                  coordinateData.coordinates.lat,
-                  coordinateData.coordinates.lng,
-                ]}
-                radius={200} // Adjust radius as needed
-                pathOptions={{ color: "black" }} // Customize circle color and other options
-              />
-            </MapContainer>
-          </div>
-        )}
-      </section>
       {property.checkInTime && (
         <div>
           <hr className="h-px border-0 bg-gray-300" />

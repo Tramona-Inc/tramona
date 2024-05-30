@@ -21,25 +21,25 @@ export const options = [
     id: "Apartment" as PropertyType,
     icon: <ApartmentIcon />,
     title: "Apartment",
-    text: "Furnished and self-catering accommodations where guests rent the entire place",
+    text: "A specific and discrete space that is available for guests to rent",
   },
   {
     id: "Home" as PropertyType,
     icon: <Home />,
     title: "Home",
-    text: "Furnished and self-catering accommodations where guests rent the entire place",
+    text: "Furnished and self-catering accommodations where guests rent the entire home",
   },
   {
     id: "Hotels" as PropertyType,
     icon: <Hotels />,
     title: "Hotels, B&Bs, & More",
-    text: "Furnished and self-catering accommodations where guests rent the entire place",
+    text: "Hotel or traditional bed and breakfast",
   },
   {
     id: "Alternative" as PropertyType,
     icon: <Alternative />,
     title: "Alternative Places",
-    text: "Furnished and self-catering accommodations where guests rent the entire place",
+    text: "If your property doesn't fit into any of the above categories, choose this option",
   },
 ];
 

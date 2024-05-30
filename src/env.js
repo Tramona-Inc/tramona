@@ -50,6 +50,8 @@ export const env = createEnv({
     RAPIDAPI_KEY: z.string(),
     RAPIDAPI_HOST: z.string(),
     GOOGLE_MAPS_KEY: z.string(),
+    OCP_APIM_SUBSCRIPTION_KEY: z.string(),
+    X_ENVIRONMENT: z.string(),
   },
 
   /**
@@ -105,6 +107,8 @@ export const env = createEnv({
     RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
     RAPIDAPI_HOST: process.env.RAPIDAPI_HOST,
     GOOGLE_MAPS_KEY: process.env.GOOGLE_MAPS_KEY,
+    OCP_APIM_SUBSCRIPTION_KEY: process.env.OCP_APIM_SUBSCRIPTION_KEY,
+    X_ENVIRONMENT: process.env.X_ENVIRONMENT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

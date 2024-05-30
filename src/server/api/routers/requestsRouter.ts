@@ -2,6 +2,7 @@ import { env } from "@/env";
 import {
   createTRPCRouter,
   protectedProcedure,
+  publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
@@ -12,12 +13,12 @@ import {
   requestGroups,
   requestInsertSchema,
   requestSelectSchema,
-  requests,
-  users,
   requestUpdatedInfo,
-  properties,
+  requests,
   requestsToProperties,
+  users,
 } from "@/server/db/schema";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import {
@@ -28,9 +29,8 @@ import {
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, count, eq, exists } from "drizzle-orm";
-import { z } from "zod";
-import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { groupBy } from "lodash";
+import { z } from "zod";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -42,6 +42,74 @@ const updateRequestInputSchema = z.object({
 });
 
 export const requestsRouter = createTRPCRouter({
+  getMyRequestsPublic: publicProcedure.query(async ({ ctx }) => {
+    const groupedRequests = await ctx.db.query.requests
+      .findMany({
+        where: exists(
+          db
+            .select()
+            .from(groupMembers)
+            .where(
+              and(
+                eq(groupMembers.groupId, requests.madeByGroupId),
+                // eq(groupMembers.userId, ctx.user.id),
+              ),
+            ),
+        ),
+        with: {
+          offers: { columns: { id: true } },
+          requestGroup: true,
+          madeByGroup: {
+            with: {
+              invites: true,
+              members: {
+                with: {
+                  user: {
+                    columns: { name: true, email: true, image: true, id: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      // 1. extract offer count & sort
+      .then((requests) =>
+        requests
+          .map(({ offers, ...request }) => ({
+            ...request,
+            numOffers: offers.length,
+          }))
+          .sort(
+            (a, b) =>
+              b.numOffers - a.numOffers ||
+              b.createdAt.getTime() - a.createdAt.getTime(),
+          ),
+      )
+
+      // 2. group by requestGroupId
+      .then((requests) => {
+        const groups = groupBy(requests, (req) => req.requestGroupId);
+        return Object.entries(groups).map(([_, requests]) => ({
+          group: requests[0]!.requestGroup,
+          requests,
+        }));
+      });
+
+    // 3. group by active/inactive (and put partially-active groups on active)
+    const activeRequestGroups = groupedRequests.filter((group) =>
+      group.requests.some((request) => request.resolvedAt === null),
+    );
+
+    const inactiveRequestGroups = groupedRequests.filter(
+      (group) => !activeRequestGroups.includes(group),
+    );
+
+    return {
+      activeRequestGroups,
+      inactiveRequestGroups,
+    };
+  }),
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
     const groupedRequests = await ctx.db.query.requests
       .findMany({
@@ -112,7 +180,7 @@ export const requestsRouter = createTRPCRouter({
   }),
 
   getAll: roleRestrictedProcedure(["admin"]).query(async () => {
-z
+    z;
     return await db.query.requests
       .findMany({
         with: {
@@ -200,22 +268,22 @@ z
         });
       });
 
-      if (ctx.user.isWhatsApp) {
-        void sendWhatsApp({
-          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
-          to: ctx.user.phoneNumber!,
-        });
-      } else {
-        void sendText({
-          to: ctx.user.phoneNumber!,
-          content:
-            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-        });
-      }
+      // if (ctx.user.isWhatsApp) {
+      //   void sendWhatsApp({
+      //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+      //     to: ctx.user.phoneNumber!,
+      //   });
+      // } else {
+      //   void sendText({
+      //     to: ctx.user.phoneNumber!,
+      //     content:
+      //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      //   });
+      // }
 
       if (env.NODE_ENV !== "production") return;
 
-      const name = ctx.user.name ?? ctx.user.email ?? "Someone";
+      const name = ctx.user.name ?? ctx.user.email;
 
       if (input.length > 1) {
         sendSlackMessage(
@@ -307,7 +375,7 @@ z
         } else {
           void sendText({
             to: owner.phoneNumber!,
-            content: `Your request to ${request.location} has been rejected, please submit another request with looser requirements.`,
+            content: `Your request to ${request.location} has been rejected, please submit another request with different requirements.`,
           });
         }
       }
@@ -355,7 +423,7 @@ z
     }),
 
   // update request
-  // todo: slack message 
+  // todo: slack message
   updateRequest: protectedProcedure
     .input(updateRequestInputSchema)
     .mutation(async ({ ctx, input }) => {

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { type Property } from "@/server/db/schema";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
 import { formatCurrency } from "@/utils/utils";
 import { zodNumber } from "@/utils/zod-utils";
@@ -18,12 +19,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { api } from "@/utils/api";
-import IdentityModal from "@/components/_utils/IdentityModal";
-import { env } from "@/env";
-import { loadStripe } from "@stripe/stripe-js";
-import { Loader2 } from "lucide-react";
-import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 
 const formSchema = z.object({
   price: zodNumber({ min: 1 }),
@@ -32,34 +27,48 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-function BiddingStep1({ property }: { property: Property }) {
-  const step = useBidding((state) => state.step);
-  const setStep = useBidding((state) => state.setStep);
+function BiddingStep1({
+  property,
+  setStep,
+}: {
+  property: Property;
+  setStep: (step: number) => void;
+}) {
+  // const setStep = useBidding((state) => state.setStep);
 
   const setPrice = useBidding((state) => state.setPrice);
-  const price = useBidding((state) => state.price);
+  const currentPrice = useBidding((state) => state.price);
 
   const setGuest = useBidding((state) => state.setGuest);
   const guest = useBidding((state) => state.guest);
   //determine if user identity is verified
-  const { data: users } = api.users.myVerificationStatus.useQuery();
-  const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  // const { data: users } = api.users.myVerificationStatus.useQuery();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      price,
-      guest,
+      price: currentPrice,
+      guest: guest,
     },
   });
 
   function onSubmit(values: FormSchema) {
     setPrice(values.price);
     setGuest(values.guest);
-    if (users?.isIdentityVerified === "true") {
-      setStep(step + 1);
-    }
+    setStep(1);
+
+    // if (users?.isIdentityVerified === "true") {
+    //   setStep(1);
+    // }
   }
+
+  const threshhold = 1.2;
+
+  const reccomendedPrice = property.originalNightlyPrice
+    ? property.originalNightlyPrice / threshhold
+    : 0;
+
+  const { price } = form.watch();
 
   return (
     <div className="flex w-full flex-col items-center justify-center">
@@ -116,11 +125,18 @@ function BiddingStep1({ property }: { property: Property }) {
                       <Input
                         {...field}
                         inputMode="decimal"
+                        autoFocus
                         prefix="$"
                         suffix="/night"
                       />
                     </FormControl>
                     <FormMessage />
+                    {price > 0 && price <= reccomendedPrice / 100 && (
+                      <p className="max-w-[300px] text-xs text-destructive">
+                        You are unlikely to get this price, up your price for a
+                        higher chance
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
@@ -139,7 +155,7 @@ function BiddingStep1({ property }: { property: Property }) {
                 )}
               />
             </div>
-            {users?.isIdentityVerified === "pending" ? (
+            {/* {users?.isIdentityVerified === "pending" ? (
               <div className="flex flex-col items-center">
                 <p className=" mb-1 text-xs text-muted-foreground">
                   Verification takes about 1-3 minutes.
@@ -165,7 +181,10 @@ function BiddingStep1({ property }: { property: Property }) {
                 </p>
                 <IdentityModal stripePromise={stripePromise} />
               </div>
-            )}
+            )} */}
+            <Button className="mb-1 px-32" type="submit">
+              Review offer
+            </Button>
           </form>
         </Form>
 

@@ -1,16 +1,18 @@
 import {
-  serial,
+  boolean,
+  index,
   integer,
   pgEnum,
   pgTable,
+  serial,
   text,
   timestamp,
   varchar,
-  index,
-  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
+import { z } from "zod";
+import { sql } from "drizzle-orm";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
@@ -62,6 +64,7 @@ export const users = pgTable(
     lastTextAt: timestamp("last_text_at").defaultNow(),
     isWhatsApp: boolean("is_whats_app").default(false).notNull(),
     stripeCustomerId: varchar("stripe_customer_id"),
+    setupIntentId: varchar("setup_intent_id"),
 
     // mode: "string" cuz nextauth doesnt serialize/deserialize dates
     createdAt: timestamp("created_at", { mode: "string" })
@@ -76,9 +79,11 @@ export const users = pgTable(
 
     profileUrl: varchar("profile_url", { length: 1000 }),
     location: varchar("location", { length: 1000 }),
-    socials: varchar("socials").array(),
+    socials: varchar("socials")
+      .array()
+      .default(sql`'{}'`),
     about: text("about"),
-    destinations: varchar("destinations").array(),
+    // destinations: varchar("destinations").array(),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),
@@ -117,10 +122,10 @@ export const referralEarnings = pgTable(
     id: serial("id").primaryKey(),
     referralCode: text("referral_code")
       .notNull()
-      .references(() => referralCodes.referralCode, { onDelete: "set null" }),
+      .references(() => referralCodes.referralCode, { onDelete: "cascade" }),
     refereeId: text("referee_id")
       .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     offerId: integer("offer_id")
       .notNull()
       .references(() => offers.id, { onDelete: "cascade" }),
@@ -147,7 +152,9 @@ export type ReferralCode = typeof referralCodes.$inferSelect;
 export const referralCodeSelectSchema = createSelectSchema(referralCodes);
 export const referralCodeInsertSchema = createInsertSchema(referralCodes);
 
-export const userInsertSchema = createInsertSchema(users);
+export const userInsertSchema = createInsertSchema(users, {
+  socials: z.string().array(),
+});
 export const userSelectSchema = createSelectSchema(users);
 export const userUpdateSchema = userInsertSchema
   .partial()

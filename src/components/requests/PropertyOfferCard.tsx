@@ -1,96 +1,279 @@
-import { EllipsisIcon, TrashIcon } from "lucide-react";
+import { type Bid } from "@/server/db/schema";
+import { type RouterOutputs } from "@/utils/api";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
+import {
+  formatCurrency,
+  formatDateRange,
+  getNumNights,
+  plural,
+} from "@/utils/utils";
+import {
+  EllipsisIcon,
+  ExternalLinkIcon,
+  Pencil,
+  TrashIcon,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
+import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { type RouterOutputs } from "@/utils/api";
-import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
-import Image from "next/image";
-import Link from "next/link";
-import MapPin from "../_icons/MapPin";
-import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
+import EditPropertyOfferDialog from "./EditPropertyOfferDialog";
+import MobileSimilarProperties from "./MobileSimilarProperties";
+import RequestGroupAvatars from "./RequestGroupAvatars";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
-import { useState } from "react";
+
+function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
+  switch (status) {
+    case "Pending":
+      return "yellow";
+    case "Accepted":
+      return "green";
+    case "Rejected":
+      return "red";
+    case "Cancelled":
+      return "red";
+  }
+}
 
 export default function PropertyOfferCard({
   offer,
-}: {
-  offer: RouterOutputs["biddings"]["getMyBids"][number];
-}) {
-  const isAccepted = !!offer.resolvedAt;
+  isGuestDashboard,
+}:
+  | {
+      isGuestDashboard: true;
+      offer: RouterOutputs["biddings"]["getMyBids"][number];
+    }
+  | {
+      isGuestDashboard?: false;
+      offer: RouterOutputs["biddings"]["getAllPending"][number];
+    }) {
+  const { data: session } = useSession();
 
-  const [open, setOpen] = useState(false);
+  const counter = offer.counters[0];
+  const previousCounter = offer.counters[1];
+
+  const userCanCounter =
+    offer.counters.length > 0 &&
+    counter?.status === "Pending" &&
+    counter.userId !== session?.user.id &&
+    offer.status !== "Rejected" &&
+    offer.status !== "Accepted" &&
+    offer.status !== "Cancelled";
+
+  const badge = (
+    <Badge variant={getBadgeColor(offer.status)}>
+      {userCanCounter ? "Counter Offer" : offer.status}
+    </Badge>
+  );
+
+  // ! clean up
+  const counterNightlyPrice = counter
+    ? counter.counterAmount / getNumNights(offer.checkIn, offer.checkOut)
+    : 0;
+
+  // ! previous counter for host/admin will always be 0 cause it can only gets one counter
+  // ! update query so host can see all counters
+  const previousCounterNightlyPrice =
+    offer.counters.length > 1 && previousCounter
+      ? previousCounter.counterAmount /
+        getNumNights(offer.checkIn, offer.checkOut)
+      : 0;
+
+  const totalNights = getNumNights(offer.checkIn, offer.checkOut);
+
+  const originalNightlyBiddingOffer = offer.amount / totalNights;
 
   return (
-    <div className="border-2xl flex flex-row rounded-lg border shadow-md md:flex-row">
-      <WithdrawPropertyOfferDialog
-        offerId={offer.id}
-        open={open}
-        onOpenChange={setOpen}
-      />
-      <Link
-        href={`/property/${offer.propertyId}`}
-        className="relative flex items-center justify-center max-md:ml-5 md:h-[200px] md:w-1/3"
-      >
-        <Badge
-          variant={offer.resolvedAt ? "green" : "lightGray"}
-          className="xs:top-5 absolute left-2 top-7 z-40 md:left-2 md:top-2"
+    <Card className="p-0 lg:overflow-clip">
+      <CardContent className="flex">
+        <Link
+          href={`/property/${offer.propertyId}`}
+          className="relative hidden w-60 shrink-0 bg-accent p-2 sm:block"
         >
-          {isAccepted ? "Accepted" : "Pending"}
-        </Badge>
-        <Image
-          alt=""
-          className="max-md absolute hidden rounded-lg md:block md:rounded-r-none"
-          src={offer.property.imageUrls[0]!}
-          fill
-          objectFit="cover"
-        />
-        <Image
-          alt=""
-          className="aspect-square rounded-md object-cover"
-          src={offer.property.imageUrls[0]!}
-          height={200}
-          width={200}
-        />
-      </Link>
-      <div className="flex w-full flex-col space-y-3 p-5">
-        <div className="flex flex-row justify-between">
-          <p className="flex flex-row items-center font-bold md:text-xl">
-            <MapPin />
-            {offer.property.name}
-          </p>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <EllipsisIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem red onClick={() => setOpen(true)}>
-                <TrashIcon />
-                Withdraw
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <p>Offered {formatCurrency(offer.amount)}/night</p>
-        <p>{formatDateRange(offer.checkIn, offer.checkOut)}</p>
+          <Image
+            src={offer.property.imageUrls[0]!}
+            fill
+            className="object-cover"
+            alt=""
+          />
+          {/* <div className="absolute hidden sm:block">{badge}</div> */}
+          {userCanCounter && (
+            <div className="absolute hidden sm:block">
+              {<Badge variant={"green"}>Expires 24 hours</Badge>}
+            </div>
+          )}
+        </Link>
 
-        <div className="flex flex-row justify-between">
-          <p>{plural(offer.numGuests, "guest")}</p>
-          <div className="hidden flex-row font-semibold md:block">
-            {/* <Button variant={"secondary"} className="font-semibold">
-              Resend Confirmation
-            </Button>
-            <Button variant={"underline"} className="font-semibold">
-              Update request
-            </Button> */}
+        <div className="flex w-full flex-col gap-2 p-3 ">
+          <div className="flex justify-between">
+            <div>{badge}</div>
+            <div className="ml-auto flex -translate-y-2 translate-x-2 items-center gap-2">
+              <RequestGroupAvatars
+                request={offer}
+                isAdminDashboard={!isGuestDashboard}
+              />
+              {isGuestDashboard && offer.status === "Pending" && (
+                <PropertyOfferCardDropdown
+                  offerId={offer.id}
+                  propertyId={offer.propertyId}
+                  guests={offer.numGuests}
+                  originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+                  totalNights={totalNights}
+                  checkIn={offer.checkIn}
+                  checkOut={offer.checkOut}
+                />
+              )}
+            </div>
           </div>
+
+          <div className="-mt-4">
+            <p className="text-lg font-bold text-black ">
+              {offer.property.name}
+            </p>
+
+            {!isGuestDashboard && offer.property.originalListingUrl && (
+              <a
+                href={offer.property.originalListingUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-teal-900 underline underline-offset-4"
+              >
+                View original listing{" "}
+                <ExternalLinkIcon className="inline size-[1em]" />
+              </a>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              Airbnb Price:{" "}
+              {formatCurrency(
+                offer.property.originalNightlyPrice
+                  ? offer.property.originalNightlyPrice * AVG_AIRBNB_MARKUP
+                  : 0,
+              )}
+              /night
+            </p>
+
+            <div className="text-md flex items-center gap-1 font-semibold">
+              {formatDateRange(offer.checkIn, offer.checkOut)} &middot;{" "}
+              {plural(offer.numGuests, "guest")}
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-sm">
+              <span className="font-bold">Original Bidding Offer: </span>
+              {formatCurrency(originalNightlyBiddingOffer)}
+              /night
+            </p>
+          </div>
+
+          {/* {!isGuestDashboard && (
+            <div className="flex justify-end gap-2">
+              <PropertyOfferResponseDD offerId={offer.id} />
+            </div>
+          )} */}
+
+          {/* Display for host initially */}
+          {!isGuestDashboard && offer.counters.length === 0 && (
+            <PropertyCounterOptions
+              offerId={offer.id}
+              originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+              counterNightlyPrice={counterNightlyPrice}
+              previousOfferNightlyPrice={previousCounterNightlyPrice}
+              totalCounterAmount={counter?.counterAmount ?? offer.amount} // If no counter/ original price
+            />
+          )}
+
+          {userCanCounter && (
+            <PropertyCounterOptions
+              offerId={offer.id}
+              originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+              counterNightlyPrice={counterNightlyPrice}
+              previousOfferNightlyPrice={previousCounterNightlyPrice}
+              totalCounterAmount={counter.counterAmount}
+            />
+          )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+      {isGuestDashboard && (
+        <div className="md:hidden">
+          <Separator className="my-1" />
+          <MobileSimilarProperties
+            city={offer.property.address}
+            location={offer.property.address}
+          />
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function PropertyOfferCardDropdown({
+  offerId,
+  propertyId,
+  guests,
+  originalNightlyBiddingOffer,
+  checkIn,
+  checkOut,
+}: {
+  offerId: number;
+  propertyId: number;
+  totalNights: number;
+  guests: number;
+  checkIn: Date;
+  checkOut: Date;
+  originalNightlyBiddingOffer: number;
+}) {
+  const [openWithdraw, setOpenWithdraw] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+
+  return (
+    <>
+      <WithdrawPropertyOfferDialog
+        offerId={offerId}
+        open={openWithdraw}
+        onOpenChange={setOpenWithdraw}
+      />
+      <EditPropertyOfferDialog
+        offerId={offerId}
+        propertyId={propertyId}
+        originalNightlyBiddingOffer={originalNightlyBiddingOffer}
+        guests={guests}
+        checkIn={checkIn}
+        checkOut={checkOut}
+        open={openEdit}
+        onOpenChange={setOpenEdit}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <EllipsisIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setOpenEdit(true)}>
+            <Pencil />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem red onClick={() => setOpenWithdraw(true)}>
+            <TrashIcon />
+            Withdraw
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

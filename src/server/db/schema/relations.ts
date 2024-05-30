@@ -1,7 +1,19 @@
 import { relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
+import { bids } from "./tables/bids";
+import {
+  bucketListDestinations,
+  bucketListProperties,
+} from "./tables/bucketList";
+import { counters } from "./tables/counters";
+import { groupInvites, groupMembers, groups } from "./tables/groups";
 import { hostProfiles } from "./tables/hostProfiles";
+import {
+  hostTeamInvites,
+  hostTeamMembers,
+  hostTeams,
+} from "./tables/hostTeams";
 import {
   conversationParticipants,
   conversations,
@@ -10,19 +22,9 @@ import {
 import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
-import { referralCodes, referralEarnings, users } from "./tables/users";
-import { groupInvites, groupMembers, groups } from "./tables/groups";
 import { requestsToProperties } from "./tables/requestsToProperties";
-import {
-  hostTeamInvites,
-  hostTeamMembers,
-  hostTeams,
-} from "./tables/hostTeams";
-import { bids } from "./tables/bids";
-import {
-  bucketListDestinations,
-  bucketListProperties,
-} from "./tables/bucketList";
+import { reservations } from "./tables/reservations";
+import { referralCodes, referralEarnings, users } from "./tables/users";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -38,6 +40,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   requestGroupsCreated: many(requestGroups),
   hostTeams: many(hostTeamMembers),
   bids: many(bids),
+  reservations: many(reservations),
   bucketListDestinations: many(bucketListDestinations),
   bucketListProperties: many(bucketListProperties),
 }));
@@ -86,6 +89,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   offers: many(offers),
   requestsToProperties: many(requestsToProperties),
   bookedDates: many(bookedDates),
+  reservations: many(reservations),
 }));
 
 export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
@@ -108,13 +112,25 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   requestsToProperties: many(requestsToProperties),
 }));
 
-export const bidsRelations = relations(bids, ({ one }) => ({
+export const bidsRelations = relations(bids, ({ one, many }) => ({
   madeByGroup: one(groups, {
     fields: [bids.madeByGroupId],
     references: [groups.id],
   }),
   property: one(properties, {
     fields: [bids.propertyId],
+    references: [properties.id],
+  }),
+  counters: many(counters),
+}));
+
+export const countersRelations = relations(counters, ({ one }) => ({
+  bid: one(bids, {
+    fields: [counters.bidId],
+    references: [bids.id],
+  }),
+  property: one(properties, {
+    fields: [counters.propertyId],
     references: [properties.id],
   }),
 }));
@@ -204,6 +220,7 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   members: many(groupMembers),
   invites: many(groupInvites),
   requests: many(requests),
+  bids: many(bids),
 }));
 
 export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
@@ -257,6 +274,17 @@ export const hostTeamInviteRelations = relations(
     }),
   }),
 );
+
+export const reservationsRelations = relations(reservations, ({ one }) => ({
+  property: one(properties, {
+    fields: [reservations.propertyId],
+    references: [properties.id],
+  }),
+  user: one(users, {
+    fields: [reservations.userId],
+    references: [users.id],
+  }),
+}));
 
 export const bucketListDestinationsRelations = relations(
   bucketListDestinations,

@@ -1,5 +1,5 @@
-import { useRouter } from "next/router";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 
 export default function NavLink({
@@ -12,6 +12,8 @@ export default function NavLink({
   noChildren?: boolean;
 }) {
   const { asPath } = useRouter();
+
   const isCurrentPage = noChildren ? asPath === href : asPath.startsWith(href);
+
   return <Link href={href}>{render({ selected: isCurrentPage })}</Link>;
 }

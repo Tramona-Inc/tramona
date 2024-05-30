@@ -16,9 +16,10 @@ const buttonVariants = cva(
         icon: "h-10 w-10",
       },
       variant: {
-        default: "bg-primary text-white hover:bg-primary/90",
+        default:
+          "bg-primary text-white hover:bg-primary/90 disabled:bg-zinc-400 disabled:text-secondary-foreground",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:bg-zinc-400 disabled:text-secondary-foreground",
         outline:
           "border border-primary bg-background text-primary hover:bg-zinc-200 focus-visible:bg-zinc-200",
         secondary:
@@ -43,6 +44,9 @@ const buttonVariants = cva(
         increment:
           "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
         underline: "hover:bg-accent text-zinc-800 underline",
+        greenPrimary: "bg-teal-900 hover:bg-teal-950 text-white",
+        secondaryLight:
+          "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
       },
     },
     defaultVariants: {

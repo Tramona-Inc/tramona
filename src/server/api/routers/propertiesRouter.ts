@@ -1,10 +1,12 @@
 import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
+import { db } from "@/server/db";
 import {
   hostProfiles,
   propertyInsertSchema,
@@ -12,8 +14,21 @@ import {
   propertyUpdateSchema,
   users,
 } from "@/server/db/schema";
+import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, lte, sql } from "drizzle-orm";
+import { addDays } from "date-fns";
+import {
+  and,
+  arrayContains,
+  asc,
+  eq,
+  gt,
+  gte,
+  lte,
+  notExists,
+  sql,
+} from "drizzle-orm";
+
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
@@ -27,6 +42,14 @@ export const propertiesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "admin" && !input.hostName) {
         throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      if ((!input.latitude || !input.longitude) && input.address) {
+        const { location } = await getCoordinates(input.address);
+        if (location) {
+          input.latitude = location.lat;
+          input.longitude = location.lng;
+        }
       }
 
       return await ctx.db
@@ -115,10 +138,9 @@ export const propertiesRouter = createTRPCRouter({
     });
   }),
 
-  getAllInfiniteScroll: publicProcedure
+  getAllInfiniteScroll: optionallyAuthedProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(50).nullish(),
         cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
         city: z.string().optional(),
         roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
@@ -126,18 +148,30 @@ export const propertiesRouter = createTRPCRouter({
         bedrooms: z.number().optional(),
         bathrooms: z.number().optional(),
         houseRules: z.array(z.string()).optional(),
+        guests: z.number().optional(),
+        maxNightlyPrice: z.number().optional(),
         lat: z.number().optional(),
         long: z.number().optional(),
         radius: z.number().optional(),
+        checkIn: z.date().optional(),
+        checkOut: z.date().optional(),
+        northeastLat: z.number().optional(),
+        northeastLng: z.number().optional(),
+        southwestLat: z.number().optional(),
+        southwestLng: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 5;
       const { cursor } = input;
 
       const lat = input.lat ?? 0;
       const long = input.long ?? 0;
       const radius = input.radius;
+
+      const northeastLat = input.northeastLat ?? 0;
+      const northeastLng = input.northeastLng ?? 0;
+      const southwestLat = input.southwestLat ?? 0;
+      const southwestLng = input.southwestLng ?? 0;
 
       const data = await ctx.db
         .select({
@@ -149,40 +183,98 @@ export const propertiesRouter = createTRPCRouter({
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
           originalNightlyPrice: properties.originalNightlyPrice,
+          lat: properties.latitude,
+          long: properties.longitude,
+          // isOnBucketList: ctx.user
+          //   ? exists(
+          //       ctx.db
+          //         .select()
+          //         .from(bucketListProperties)
+          //         .where(
+          //           and(
+          //             eq(bucketListProperties.propertyId, properties.id),
+          //             eq(bucketListProperties.userId, ctx.user.id),
+          //           ),
+          //         ),
+          //     )
+          //   : sql`FALSE`,
           distance: sql`
             6371 * ACOS(
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
             ) AS distance`,
+          vacancyCount: sql`
+            (SELECT COUNT(booked_dates.property_id) 
+            FROM booked_dates 
+            WHERE booked_dates.property_id = properties.id 
+              AND booked_dates.date >= CURRENT_DATE 
+              AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
+          `,
         })
         .from(properties)
         .where(
           and(
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
-            input.lat && input.long
+            input.lat &&
+              input.long &&
+              !northeastLat &&
+              !northeastLng &&
+              !southwestLat &&
+              !southwestLng
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
-              : sql`TRUE`, // Conditionally include eq function for address
-            input.roomType && input.roomType !== "Flexible"
+              : sql`TRUE`,
+            input.roomType
               ? eq(properties.roomType, input.roomType)
-              : sql`TRUE`, // Conditionally include place type condition
+              : sql`TRUE`,
             input.city && input.city !== "all"
               ? eq(properties.address, input.city)
-              : sql`TRUE`, // Conditionally include eq function for address
-            input.beds ? lte(properties.numBeds, input.beds) : sql`TRUE`, // Conditionally include eq function
+              : sql`TRUE`,
+            input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`,
             input.bedrooms
-              ? lte(properties.numBedrooms, input.bedrooms)
-              : sql`TRUE`, // Conditionally include eq function
+              ? gte(properties.numBedrooms, input.bedrooms)
+              : sql`TRUE`,
             input.bathrooms
-              ? lte(properties.numBathrooms, input.bathrooms)
-              : sql`TRUE`, // Conditionally include eq function
+              ? gte(properties.numBathrooms, input.bathrooms)
+              : sql`TRUE`,
+            input.guests
+              ? gte(properties.maxNumGuests, input.guests)
+              : sql`TRUE`,
+            input.maxNightlyPrice
+              ? lte(properties.originalNightlyPrice, input.maxNightlyPrice)
+              : sql`TRUE`,
             input.houseRules?.includes("pets allowed")
               ? eq(properties.petsAllowed, true)
               : sql`TRUE`,
             input.houseRules?.includes("smoking allowed")
               ? eq(properties.smokingAllowed, true)
               : sql`TRUE`,
+            eq(properties.isPrivate, false),
+            notExists(
+              db
+                .select()
+                .from(bookedDates)
+                .where(
+                  and(
+                    eq(bookedDates.propertyId, properties.id),
+                    gte(bookedDates.date, new Date()), // today or future
+                    lte(bookedDates.date, addDays(new Date(), 30)), // within next 30 days
+                  ),
+                ),
+            ),
+            sql`(SELECT COUNT(booked_dates.property_id) 
+            FROM booked_dates 
+            WHERE booked_dates.property_id = properties.id 
+              AND booked_dates.date >= CURRENT_DATE 
+              AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
+
+            northeastLat && northeastLng && southwestLat && southwestLng
+              ? sql`
+              latitude BETWEEN ${southwestLat} AND ${northeastLat}
+              AND longitude BETWEEN ${southwestLng} AND ${northeastLng}
+            `
+              : sql`true`,
           ),
         )
-        .limit(limit + 1)
+        .limit(15)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
@@ -190,34 +282,155 @@ export const propertiesRouter = createTRPCRouter({
         nextCursor: data.length ? data[data.length - 1]?.id : null, // Use last property ID as next cursor
       };
     }),
-  getCities: publicProcedure.query(async ({ ctx }) => {
-    const lat = 34.1010307;
-    const long = -118.3806008;
-    const radius = 10; // 100km.
 
-    const data = await ctx.db
-      .select({
-        id: properties.id,
-        distance: sql`
-        6371 * ACOS(
-            SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
-        ) AS distance`,
-      })
-      .from(properties)
-      .orderBy(sql`distance`)
-      .where(
-        sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
-      );
+  getByBoundaryInfiniteScroll: optionallyAuthedProcedure
+    .input(
+      z.object({
+        boundaries: z
+          .object({
+            north: z.number(),
+            south: z.number(),
+            east: z.number(),
+            west: z.number(),
+          })
+          .nullable(),
+        cursor: z.number().nullish(),
+        city: z.string().optional(),
+        roomType: z.enum(ALL_PROPERTY_ROOM_TYPES).optional(),
+        beds: z.number().optional(),
+        bedrooms: z.number().optional(),
+        bathrooms: z.number().optional(),
+        houseRules: z.array(z.string()).optional(),
+        guests: z.number().optional(),
+        maxNightlyPrice: z.number().optional(),
+        lat: z.number().optional(),
+        long: z.number().optional(),
+        radius: z.number().optional(),
+        checkIn: z.date().optional(),
+        checkOut: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { cursor, boundaries } = input;
 
-    console.log(data);
-  }),
-  hostInsertProperty: roleRestrictedProcedure(["host"])
-    .input(hostPropertyFormSchema)
-    .mutation(async ({ ctx }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+      const lat = input.lat ?? 0;
+      const long = input.long ?? 0;
+      const radius = input.radius;
+
+      console.log("Input boundaries:", boundaries);
+      console.log("Cursor:", cursor);
+
+      const data = await ctx.db
+        .select({
+          id: properties.id,
+          imageUrls: properties.imageUrls,
+          name: properties.name,
+          maxNumGuests: properties.maxNumGuests,
+          numBedrooms: properties.numBedrooms,
+          numBathrooms: properties.numBathrooms,
+          numBeds: properties.numBeds,
+          originalNightlyPrice: properties.originalNightlyPrice,
+          lat: properties.latitude,
+          long: properties.longitude,
+          distance: sql`
+            6371 * ACOS(
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+            ) AS distance`,
+          vacancyCount: sql`
+            (SELECT COUNT(booked_dates.property_id) 
+            FROM booked_dates 
+            WHERE booked_dates.property_id = properties.id 
+              AND booked_dates.date >= CURRENT_DATE 
+              AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
+          `,
+        })
+        .from(properties)
+        .where(
+          and(
+            cursor ? gt(properties.id, cursor) : undefined,
+            boundaries
+              ? and(
+                  lte(properties.latitude, boundaries.north),
+                  gte(properties.latitude, boundaries.south),
+                  lte(properties.longitude, boundaries.east),
+                  gte(properties.longitude, boundaries.west),
+                )
+              : sql`TRUE`,
+            input.lat && input.long && !boundaries
+              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
+              : sql`TRUE`,
+            input.roomType
+              ? eq(properties.roomType, input.roomType)
+              : sql`TRUE`,
+            input.beds ? gte(properties.numBeds, input.beds) : sql`TRUE`,
+            input.bedrooms
+              ? gte(properties.numBedrooms, input.bedrooms)
+              : sql`TRUE`,
+            input.bathrooms
+              ? gte(properties.numBathrooms, input.bathrooms)
+              : sql`TRUE`,
+            input.guests
+              ? gte(properties.maxNumGuests, input.guests)
+              : sql`TRUE`,
+            input.maxNightlyPrice
+              ? lte(properties.originalNightlyPrice, input.maxNightlyPrice)
+              : sql`TRUE`,
+            input.houseRules?.includes("pets allowed")
+              ? eq(properties.petsAllowed, true)
+              : sql`TRUE`,
+            input.houseRules?.includes("smoking allowed")
+              ? eq(properties.smokingAllowed, true)
+              : sql`TRUE`,
+            eq(properties.isPrivate, false),
+            notExists(
+              db
+                .select()
+                .from(bookedDates)
+                .where(
+                  and(
+                    eq(bookedDates.propertyId, properties.id),
+                    gte(bookedDates.date, new Date()),
+                    lte(bookedDates.date, addDays(new Date(), 30)),
+                  ),
+                ),
+            ),
+            sql`(SELECT COUNT(booked_dates.property_id) 
+              FROM booked_dates 
+              WHERE booked_dates.property_id = properties.id 
+                AND booked_dates.date >= CURRENT_DATE 
+                AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
+          ),
+        )
+        .limit(12)
+        .orderBy(asc(sql`id`), asc(sql`distance`));
+
+      console.log("Fetched properties count:", data.length);
+
+      return {
+        data,
+        nextCursor: data.length ? data[data.length - 1]?.id : null,
+      };
     }),
+
+  // getCities: publicProcedure.query(async ({ ctx }) => {
+  //   const lat = 34.1010307;
+  //   const long = -118.3806008;
+  //   const radius = 10; // 100km.
+
+  //   const data = await ctx.db
+  //     .select({
+  //       id: properties.id,
+  //       distance: sql`
+  //       6371 * ACOS(
+  //           SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+  //       ) AS distance`,
+  //     })
+  //     .from(properties)
+  //     .orderBy(sql`distance`)
+  //     .where(
+  //       sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
+  //     );
+  // }),
   getHostProperties: roleRestrictedProcedure(["host"])
     .input(z.object({ limit: z.number().optional() }).optional())
     .query(async ({ ctx, input }) => {
@@ -261,10 +474,6 @@ export const propertiesRouter = createTRPCRouter({
   hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "host") {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-
       return await ctx.db.insert(properties).values({
         ...input,
         hostId: ctx.user.id,
@@ -281,5 +490,27 @@ export const propertiesRouter = createTRPCRouter({
           date: true,
         },
       });
+    }),
+
+  deleteImage: roleRestrictedProcedure(["admin"])
+    .input(z.string())
+    .mutation(async ({ input: imageUrl }) => {
+      const count = await db.query.properties
+        .findMany({
+          columns: { id: true, imageUrls: true },
+          where: arrayContains(properties.imageUrls, [imageUrl]),
+        })
+        .then((res) =>
+          Promise.all(
+            res.map((p) =>
+              db
+                .update(properties)
+                .set({ imageUrls: p.imageUrls.filter((i) => i !== imageUrl) })
+                .where(eq(properties.id, p.id)),
+            ),
+          ).then((res) => res.length),
+        );
+
+      return { count };
     }),
 });

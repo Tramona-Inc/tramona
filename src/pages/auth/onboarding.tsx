@@ -91,9 +91,9 @@ export default function Onboarding() {
           id: session?.user.id,
           isWhatsApp: true,
         });
-      };
-    };
-    
+      }
+    }
+
     if (await phoneNumberIsTaken({ phoneNumber })) {
       form.setError("phoneNumber", {
         message: "Phone number already in use, please try again",
@@ -133,7 +133,7 @@ export default function Onboarding() {
             void update();
 
             void router.push({
-              pathname: "/auth/welcome",
+              pathname: "/auth/referral",
             });
           }
         }

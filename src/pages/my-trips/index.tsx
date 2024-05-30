@@ -2,17 +2,29 @@ import Head from "next/head";
 import { useMemo } from "react";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
 import PastTrips from "@/components/my-trips/PastTrips";
+import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { api } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
+import { BriefcaseIcon, HistoryIcon } from "lucide-react";
+
+type MyTripsType<T> = T extends (infer U)[] ? U : never;
+
+export type AcceptedBids = MyTripsType<
+  RouterOutputs["myTrips"]["getAcceptedBids"]
+>;
+
+export type AcceptedTrips = MyTripsType<
+  RouterOutputs["myTrips"]["getUpcomingTrips"]
+>;
 
 export default function MyTrips() {
   const date = useMemo(() => new Date(), []); // useMemo from React
 
   const { data: trips, isLoading: loadingTrips } =
     api.myTrips.getUpcomingTrips.useQuery({ date });
+
   const { data: pastTrips, isLoading: loadingPastTrips } =
     api.myTrips.getPreviousTrips.useQuery({ date });
 
@@ -22,21 +34,17 @@ export default function MyTrips() {
         <title>My Trips | Tramona</title>
       </Head>
 
-      <div className="container col-span-10 flex min-h-screen-minus-header flex-col gap-10 py-10 2xl:col-span-11">
+      <div className="container col-span-10 flex flex-col gap-10 py-10 pb-32 2xl:col-span-11">
         <h1 className="text-4xl font-bold">My Trips</h1>
 
         <Tabs defaultValue="upcoming">
           <TabsList>
-            <TabsTrigger
-              value="upcoming"
-              className="px-4 text-lg data-[state=active]:border-b-4 data-[state=active]:border-b-black data-[state=active]:font-bold"
-            >
+            <TabsTrigger value="upcoming">
+              <BriefcaseIcon />
               Upcoming
             </TabsTrigger>
-            <TabsTrigger
-              value="history"
-              className="px-4 text-lg data-[state=active]:border-b-4 data-[state=active]:border-b-black data-[state=active]:font-bold"
-            >
+            <TabsTrigger value="history">
+              <HistoryIcon />
               History
             </TabsTrigger>
           </TabsList>

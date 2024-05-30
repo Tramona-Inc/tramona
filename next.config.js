@@ -92,11 +92,15 @@ const config = {
       },
       {
         protocol: "https",
-        hostname: "assets.guesty.com",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
       },
       {
         protocol: "https",
-        hostname: "res.cloudinary.com",
+        hostname: "tramona-images.s3.amazonaws.com",
       },
     ],
   },

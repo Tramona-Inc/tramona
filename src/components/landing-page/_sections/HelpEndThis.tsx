@@ -15,17 +15,18 @@ const HelpEndThis = () => {
         />
       </div>
 
-      <div className="relative flex flex-col items-center justify-center rounded-3xl p-6 text-center md:py-16 z-10">
-        <h1 className="mb-4 text-4xl font-bold text-white md:text-6xl">
+      <div className="relative z-10 flex flex-col items-center justify-center rounded-3xl p-6 text-center md:py-16">
+        <h2 className="mb-4 text-4xl font-bold text-white md:text-6xl">
           3,200,000
-        </h1>
+        </h2>
         <p className="mb-4 text-base text-white md:text-xl">
           The number of empty units on Airbnb per night
         </p>
-        <Link href="/auth/signup">
-          <button className="rounded-lg border border-white px-6 py-2 text-white font-semibold hover:bg-[#e5e5e5]">
-            Book now
-          </button>
+        <Link
+          href="/auth/signup"
+          className="rounded-lg border border-white px-6 py-2 font-semibold text-white hover:bg-white hover:text-foreground"
+        >
+          Book now
         </Link>
       </div>
     </section>
@@ -33,4 +34,3 @@ const HelpEndThis = () => {
 };
 
 export default HelpEndThis;
-

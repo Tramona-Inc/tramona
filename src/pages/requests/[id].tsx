@@ -1,24 +1,30 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
-import OfferCard from "@/components/requests/[id]/OfferCard";
-import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
-import PaywallDialog from "@/components/requests/[id]/PaywallDialog";
-import { Button } from "@/components/ui/button";
+import OfferPage from "@/components/offers/OfferPage";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
-import { getNumNights } from "@/utils/utils";
-import { TagIcon } from "lucide-react";
+import {
+  Circle,
+  GoogleApiWrapper,
+  Map,
+  type GoogleAPI,
+} from "google-maps-react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
-export default function Page() {
+function Page({ google }: { google: GoogleAPI }) {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
-
-  if (router.isFallback) {
-    return <h2>Loading</h2>;
-  }
+  const [selectedOfferId, setSelectedOfferId] = useState("");
+  const [mapCenter, setMapCenter] = useState({
+    lat: 37.774929,
+    lng: -122.419416,
+  }); // Default center
 
   const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery(
     { id: requestId },
@@ -27,121 +33,122 @@ export default function Page() {
     },
   );
 
+  useEffect(() => {
+    const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
+    if (offer?.property.longitude && offer.property.latitude) {
+      setMapCenter({
+        lat: offer.property.latitude,
+        lng: offer.property.longitude,
+      });
+    }
+  }, [selectedOfferId]);
+
+  const [effectHasRun, setEffectHasRun] = useState(false);
+
+  useEffect(() => {
+    if (offers?.[0] && !effectHasRun) {
+      setEffectHasRun(true);
+      setSelectedOfferId(`${offers[0].id}`);
+    }
+  }, [offers, effectHasRun]);
+
   // ik this seems dumb but its better because it reuses the same
   // getMyRequests query that we (probably) already have cached
-  const { data: requests } = api.requests.getMyRequests.useQuery();
+  const { data: requests } = api.requests.getMyRequestsPublic.useQuery();
   const request = requests?.activeRequestGroups
     .map((group) => group.requests)
     .flat(1)
     .find(({ id }) => id === requestId);
 
-  const { mutate } = api.messages.createConversationWithOffer.useMutation({
-    onSuccess: (conversationId) => {
-      void router.push(`/messages?conversationId=${conversationId}`);
-    },
-  });
+  const { mutate: handleConversation } =
+    api.messages.createConversationWithOffer.useMutation({
+      onSuccess: (conversationId) => {
+        void router.push(`/messages?conversationId=${conversationId}`);
+      },
+    });
 
-  function handleConversation({
-    offerId,
-    offerUserId,
-    offerPropertyName,
-  }: {
-    offerId: string;
-    offerUserId: string;
-    offerPropertyName: string;
-  }) {
-    mutate({ offerId, offerUserId, offerPropertyName });
+  if (router.isFallback) {
+    return <Spinner />;
   }
+
 
   return (
     <DashboadLayout type="guest">
       <Head>
         <title>Offers for you | Tramona</title>
       </Head>
-      <div className="relative">
-        <div className="absolute inset-0 bg-primary">
-          <div className="relative top-1/2 h-1/2 bg-background sm:rounded-t-3xl"></div>
-        </div>
-        <div className="px-4 py-16">
-          <div className="mx-auto max-w-xl">
-            <LargeRequestCard request={request} />
+      {request && offers ? (
+        <div>
+          <div className="py-4">
+            <Link
+              href="/requests"
+              className="rounded-full px-4 py-2 font-medium text-black hover:bg-white/10"
+            >
+              &larr; Back to all requests
+            </Link>
+          </div>
+          <div className="px-4 pb-32">
+            <Tabs
+              defaultValue={`${offers[0]?.id}`}
+              value={selectedOfferId}
+              onValueChange={setSelectedOfferId}
+            >
+              <TabsList className="w-max">
+                {offers.map((offer, i) => (
+                  <TabsTrigger key={offer.id} value={`${offer.id}`}>
+                    Offer {i + 1}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              <div className="flex flex-col lg:flex-row lg:space-x-10">
+                <div className="flex-1">
+                  {offers.map((offer) => (
+                    <TabsContent key={offer.id} value={`${offer.id}`}>
+                      <OfferPage offer={offer} />
+                    </TabsContent>
+                  ))}
+                </div>
+                <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
+                  <div className="relative h-screen lg:h-full">
+                    <Map google={google} zoom={15} center={mapCenter}>
+                      {/* Child components like Marker, InfoWindow, etc. */}
+                      {offers.map(
+                        (offer, i) =>
+                          offer.property.latitude &&
+                          offer.property.longitude && (
+                            <Circle
+                              key={i} // Unique key for each Circle
+                              radius={200}
+                              fillColor={
+                                selectedOfferId === `${offer.id}`
+                                  ? "#1F362C"
+                                  : "#CCD9D7"
+                              }
+                              strokeColor="black"
+                              center={{
+                                lat: offer.property.latitude,
+                                lng: offer.property.longitude,
+                              }}
+                              onClick={() => setSelectedOfferId(`${offer.id}`)}
+                              label={`Offer ${i + 1}`}
+                            ></Circle>
+                          ),
+                      )}
+                    </Map>
+                  </div>
+                </div>
+              </div>
+            </Tabs>
           </div>
         </div>
-        <Link
-          href="/requests"
-          className="absolute left-4 top-4 rounded-full px-4 py-2 font-medium text-white hover:bg-white/10"
-        >
-          &larr; Back to all requests
-        </Link>
-      </div>
-      <div className="px-4 pb-64">
-        <div className="mx-auto max-w-5xl">
-          <h1 className="flex flex-1 items-center gap-2 py-4 text-3xl font-bold text-black">
-            <TagIcon /> Offers for you{" "}
-          </h1>
-          {request && offers ? (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {offers.map((offer) => (
-                <OfferCard
-                  key={offer.id}
-                  offer={offer}
-                  requestId={requestId}
-                  checkIn={request.checkIn}
-                  checkOut={request.checkOut}
-                >
-                  <Button
-                    onClick={() =>
-                      handleConversation({
-                        offerId: String(offer.id),
-                        offerUserId: offer.property.hostId ?? "",
-                        offerPropertyName: offer.property.name,
-                      })
-                    }
-                    variant="outline"
-                    className="rounded-full"
-                  >
-                    Message host
-                  </Button>
-                  <Button variant="outline" className="rounded-full" asChild>
-                    <Link href={`/offers/${offer.id}`}>More details</Link>
-                  </Button>
-                  {false /* offer.isPremium */ ? (
-                    <PaywallDialog>
-                      <Button variant="gold" className="rounded-lg">
-                        Join Tramona Lisa
-                      </Button>
-                    </PaywallDialog>
-                  ) : (
-                    <HowToBookDialog
-                      isBooked={false} // default will always be false in request page
-                      listingId={offer.id}
-                      propertyName={offer.property.name}
-                      offerNightlyPrice={
-                        offer.totalPrice /
-                        getNumNights(request.checkIn, request.checkOut)
-                      }
-                      totalPrice={offer.totalPrice}
-                      originalNightlyPrice={
-                        offer.property.originalNightlyPrice ?? 0
-                      }
-                      airbnbUrl={offer.property.airbnbUrl ?? ""}
-                      checkIn={request.checkIn}
-                      checkOut={request.checkOut}
-                      requestId={requestId}
-                      offer={offer}
-                      isAirbnb={offer.property.airbnbUrl !== null}
-                    >
-                      <Button className="min-w-20 rounded-full">Book</Button>
-                    </HowToBookDialog>
-                  )}
-                </OfferCard>
-              ))}
-            </div>
-          ) : (
-            <Spinner />
-          )}
-        </div>
-      </div>
+      ) : (
+        <Spinner />
+      )}
     </DashboadLayout>
   );
 }
+
+export default GoogleApiWrapper({
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",
+})(Page);

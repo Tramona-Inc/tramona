@@ -17,11 +17,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import { api } from "@/utils/api";
-import LeafletMap from "./LeafletMap";
 import SaveAndExit from "./SaveAndExit";
 import { useState, useEffect } from "react";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+
 const formSchema = z.object({
   country: zodString(),
   street: zodString(),
@@ -119,8 +120,8 @@ export default function Onboarding4() {
     location: address,
   });
 
-  function handleError() {
-    setError(true);
+  function handleError(): void {
+    throw new Error("Function not implemented.");
   }
 
   return (
@@ -230,11 +231,13 @@ export default function Onboarding4() {
             </div>
           </Form>
           {coordinateData && (
-            <div className="z-0">
-              <LeafletMap
-                lat={coordinateData.coordinates.lat}
-                lng={coordinateData.coordinates.lng}
-              />
+            <div className="relative mb-10 h-[400px]">
+              <div className="absolute inset-0 z-0">
+                <SingleLocationMap
+                  lat={coordinateData.coordinates.location!.lat}
+                  lng={coordinateData.coordinates.location!.lng}
+                />
+              </div>
             </div>
           )}
         </div>

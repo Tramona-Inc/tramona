@@ -1,16 +1,15 @@
-import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
+import { FilterXIcon } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
-import HomeOfferCard from "../HomeOfferCard";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import HomeOfferCard, { HomeOfferCardSkeleton } from "../HomeOfferCard";
+import { Button } from "@/components/ui/button";
+import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
+import { range } from "lodash";
 
 export default function Listings() {
-  const filter = useCitiesFilter((state) => state.filter);
-  const { beds, bedrooms, bathrooms, roomType, houseRules } = useCitiesFilter(
-    (state) => state,
-  );
+  const filters = useCitiesFilter((state) => state);
 
   const {
     data: properties,
@@ -19,19 +18,27 @@ export default function Listings() {
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {
-      // city: filter.id,
-      roomType: roomType,
-      beds: beds,
-      bathrooms: bathrooms,
-      bedrooms: bedrooms,
-      houseRules: houseRules,
-      lat: filter.lat ?? 0,
-      long: filter.long ?? 0,
-      radius: 5,
+      guests: filters.guests,
+      beds: filters.beds,
+      bedrooms: filters.bedrooms,
+      bathrooms: filters.bathrooms,
+      maxNightlyPrice: filters.maxNightlyPrice,
+      lat: filters.filter?.lat,
+      long: filters.filter?.long,
+      houseRules: filters.houseRules,
+      roomType: filters.roomType,
+      checkIn: filters.checkIn,
+      checkOut: filters.checkOut,
+      radius: filters.radius,
+      northeastLat: filters.locationBoundingBox.northeastLat,
+      northeastLng: filters.locationBoundingBox.northeastLng,
+      southwestLat: filters.locationBoundingBox.southwestLat,
+      southwestLng: filters.locationBoundingBox.southwestLng,
     },
     {
       // the cursor from where to start fetching thecurrentProperties
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnWindowFocus: false,
     },
   );
 
@@ -60,54 +67,39 @@ export default function Listings() {
     () => properties?.pages.flatMap((page) => page.data) ?? [],
     [properties],
   );
-  const divArray = Array.from({ length: 18 }, (_, index) => (
-    <div key={index} className="">
-      <Skeleton className="h-[250px] w-[230px] rounded-xl" />
-      <div className="ml-2 mt-2 flex  flex-col space-y-2">
-        <Skeleton className="  h-5 w-[210px]" />
-        <Skeleton className="h-5 w-[180px]" />
-        <Skeleton className="h-5 w-[180px]" />
-      </div>
-    </div>
-  ));
+
+  const skeletons = range(12).map((i) => <HomeOfferCardSkeleton key={i} />);
   return (
-    <section className="grid grid-cols-1 gap-10 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+    <section className="relative grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {isLoading ? (
         // if we're still fetching the initial currentProperties, display the loader
-        <>{divArray}</>
-      ) : !!currentProperties.length ? (
+        <>{skeletons}</>
+      ) : currentProperties.length > 0 ? (
         // if there are currentProperties to show, display them
         <>
-          {currentProperties.map((property, i) =>
-            i === currentProperties.length - 1 ? (
-              <div ref={ref} key={property.id} className="cursor-pointer">
-                <HomeOfferCard key={property.id} property={property} />
-              </div>
-            ) : (
-              <div key={property.id} className="cursor-pointer">
-                <HomeOfferCard property={property} />
-              </div>
-            ),
-          )}
-
-          {isFetchingNextPage && (
-            <div className="flex justify-center overflow-y-hidden">
-              <Spinner />
-            </div>
-          )}
-
-          {!isFetchingNextPage &&
-            properties?.pages.length &&
-            !properties.pages[properties.pages.length - 1]?.nextCursor && (
-              <div className="text-center opacity-60">
-                <p className="text-xs md:text-sm">No more properties to load</p>
-              </div>
-            )}
+          {currentProperties.map((property) => (
+            <HomeOfferCard key={property.id} property={property} />
+          ))}
+          {isFetchingNextPage && skeletons}
+          <div ref={ref} className="absolute bottom-[calc(100vh-12rem)]"></div>
         </>
       ) : (
-        // if there are no properties to show, display a message
-        <div className="flex justify-center">
-          <p className="text-sm text-white/60">No properties to show</p>
+        <div className="col-span-full flex min-h-80 flex-col items-center justify-center gap-4">
+          <ListingsEmptySvg />
+          <p className="text-xl font-semibold">
+            Sorry, we couldn&apos;t find any properties for your search
+          </p>
+          <p className="text-balance text-center text-muted-foreground">
+            Clear filters and try again, or <b>request a deal</b> above to have
+            us connect you with our host network!
+          </p>
+
+          <div className="flex w-64 flex-col gap-2">
+            <Button variant="secondary" onClick={() => filters.clearFilter()}>
+              <FilterXIcon className="size-5" />
+              Clear filters
+            </Button>
+          </div>
         </div>
       )}
     </section>

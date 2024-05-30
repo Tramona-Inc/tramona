@@ -1,118 +1,177 @@
-import { type CitiesLatLong, useCitiesFilter } from "@/utils/store/cities-filter";
-import { cn } from "@/utils/utils";
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { LucideListFilter } from "lucide-react";
+import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { cn, useOverflow } from "@/utils/utils";
+import { ChevronLeftIcon, ChevronRightIcon, FilterIcon } from "lucide-react";
 import PropertyFilter from "../property/PropertyFilter";
 import { Button } from "../ui/button";
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "../ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { cities } from "./cities";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { type RefObject, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 
-export const cities: CitiesLatLong[] = [
-  { id: "all", label: "All", long: 0, lat: 0 },
-  {
-    id: "los_angeles",
-    label: "Los Angeles",
-    long: -118.3806008,
-    lat: 34.1010307,
-  },
-  {
-    id: "san_diego",
-    label: "San Diego",
-    long: -117.1611,
-    lat: 32.7157,
-  },
-  {
-    id: "nashville",
-    label: "Nashville",
-    long: -86.7816,
-    lat: 36.1627,
-  },
-  { id: "orlando", label: "Orlando", long: -81.3792, lat: 28.5383 },
-  {
-    id: "washington_dc",
-    label: "Washington DC",
-    long: -77.0369,
-    lat: 38.9072,
-  },
-  { id: "seattle", label: "Seattle", long: -122.3321, lat: 47.6062 },
-  { id: "atlanta", label: "Atlanta", long: -84.388, lat: 33.749 },
-  { id: "austin", label: "Austin", long: -97.7431, lat: 30.2672 },
-  { id: "miami", label: "Miami", long: -80.1917902, lat: 25.7616798 },
-  { id: "la", label: "LA", long: -118.2437, lat: 34.0522 },
-  {
-    id: "palm_springs_area",
-    label: "Palm Springs Area",
-    long: -116.5453,
-    lat: 33.8303,
-  },
-  { id: "vegas", label: "Vegas", long: -115.1398, lat: 36.1699 },
-  { id: "sf", label: "SF", long: -122.4194, lat: 37.7749 },
-  { id: "boston", label: "Boston", long: -71.0589, lat: 42.3601 },
-];
-
-export default function CitiesFilter() {
-  const filter = useCitiesFilter((state) => state.filter);
-  const setFilter = useCitiesFilter((state) => state.setFilter);
-
+export function FiltersBtn() {
   const open = useCitiesFilter((state) => state.open);
   const setOpen = useCitiesFilter((state) => state.setOpen);
 
-  console.log(filter);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="secondary" className="pointer-events-auto">
+          <FilterIcon />
+          Filter
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-center font-bold">Filters</DialogTitle>
+        </DialogHeader>
+        <PropertyFilter />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default function CitiesFilter({
+  isLandingPage = false,
+}: {
+  isLandingPage?: boolean;
+}) {
+  const filter = useCitiesFilter((state) => state.filter);
+  const setFilter = useCitiesFilter((state) => state.setFilter);
+  const setLocationBoundingBox = useCitiesFilter(
+    (state) => state.setLocationBoundingBox,
+  );
+
+  const ref = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  const isOverflowing = useOverflow(viewportRef);
+
+  function scrollLeft() {
+    if (viewportRef.current) {
+      viewportRef.current.scrollBy({ left: -200, behavior: "smooth" });
+    }
+  }
+
+  function scrollRight() {
+    if (viewportRef.current) {
+      viewportRef.current.scrollBy({ left: 200, behavior: "smooth" });
+    }
+  }
+
+  const router = useRouter();
 
   return (
-    <div className="grid grid-cols-8">
-      <div className="col-span-5 flex w-full items-center justify-center xl:col-span-7 ">
-        <Carousel
-          opts={{
-            align: "start",
-          }}
-          className="w-full md:px-10"
-        >
-          <CarouselContent>
-            {cities.map((city, index) => (
-              <CarouselItem key={index} className={"basis-1/10"}>
-                <Button
-                  variant={"ghost"}
-                  onClick={() => {
-                    setFilter(city);
-                  }}
-                  className={cn(city.id === filter.id && "font-bold", "p-1")}
-                >
-                  {city.label}
-                </Button>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-0" />
-          <CarouselNext className="right-0" />
-        </Carousel>
-      </div>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant={"outlineLight"}
-            className="col-span-3 ml-5  border-[1px] p-3 py-6 font-bold xl:col-span-1 "
-          >
-            <div className="grid grid-cols-2 place-items-center gap-1 md:gap-5">
-              <LucideListFilter />
-              <p>Filter</p>
+    <div className="sticky top-header-height z-10 h-14 bg-white">
+      <div className="absolute inset-2">
+        <ScrollArea ref={ref} viewportRef={viewportRef}>
+          <div className="flex justify-center gap-1 px-12 pb-2">
+            <div className="hidden md:flex">
+              {cities.map((city) => {
+                if (city.id === "all" && isLandingPage) return null;
+                const isSelected = city.id === filter?.id && !isLandingPage;
+                return (
+                  <Button
+                    key={city.id}
+                    variant="ghost"
+                    onClick={async () => {
+                      if (isLandingPage) {
+                        void router.push({
+                          pathname: "/explore",
+                          query: { city: city.id },
+                        });
+                      } else {
+                        setFilter(city);
+                        setLocationBoundingBox({
+                          northeastLat: 0,
+                          northeastLng: 0,
+                          southwestLat: 0,
+                          southwestLng: 0,
+                        });
+                      }
+                    }}
+                    className={cn(
+                      "px-3 text-xs font-bold sm:text-base",
+                      isSelected
+                        ? "bg-zinc-300 hover:bg-zinc-300"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {city.label}
+                  </Button>
+                );
+              })}
             </div>
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogTitle className="flex items-center justify-center font-bold">
-            Filters
-          </DialogTitle>
-          <PropertyFilter />
-        </DialogContent>
-      </Dialog>
+            <div className="flex md:hidden">
+              {cities.slice(0, 4).map((city) => {
+                if (city.id === "all" && isLandingPage) return null;
+                const isSelected = city.id === filter?.id && !isLandingPage;
+                return (
+                  <Button
+                    key={city.id}
+                    variant="ghost"
+                    onClick={async () => {
+                      if (isLandingPage) {
+                        void router.push({
+                          pathname: "/explore",
+                          query: { city: city.id },
+                        });
+                      } else {
+                        setFilter(city);
+                        setLocationBoundingBox({
+                          northeastLat: 0,
+                          northeastLng: 0,
+                          southwestLat: 0,
+                          southwestLng: 0,
+                        });
+                      }
+                    }}
+                    className={cn(
+                      "px-3 text-xs font-bold sm:text-base",
+                      isSelected
+                        ? "bg-zinc-300 hover:bg-zinc-300"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {city.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
+      {isOverflowing && (
+        <>
+          <div className="pointer-events-none relative left-0 top-2 inline-block bg-gradient-to-r from-white via-white via-50% to-transparent pr-5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="pointer-events-auto rounded-full"
+              onClick={scrollLeft}
+            >
+              <ChevronLeftIcon />
+            </Button>
+          </div>
+          <div className="pointer-events-none absolute right-0 top-2 flex gap-2 bg-gradient-to-l from-white via-white via-80% to-transparent pl-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="pointer-events-auto rounded-full"
+              onClick={scrollRight}
+            >
+              <ChevronRightIcon />
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
