@@ -11,10 +11,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { env } from "@/env";
 import { cn } from "@/utils/utils";
 import { Check } from "lucide-react";
-import Script from "next/script";
 import usePlaceAutocomplete from "use-places-autocomplete";
 import { FormControl } from "../ui/form";
 
@@ -42,11 +40,9 @@ export default function PlacesPopover({
     setValue: setInput,
     suggestions: { status: suggestionsLoading, data },
     clearSuggestions,
-    init,
   } = usePlaceAutocomplete({
     callbackName: "PlacesAutocomplete",
     debounce: 300,
-    // initOnMount: false,
   });
 
   // const [open, setOpen] = useState(false);
@@ -56,11 +52,6 @@ export default function PlacesPopover({
 
   return (
     <>
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback="PlacesAutocomplete"`}
-        onLoad={init}
-      />
-
       <Popover open={open} onOpenChange={setOpen} {...props}>
         <PopoverTrigger asChild>
           <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
