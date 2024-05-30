@@ -1,23 +1,21 @@
-import Link from "next/link";
-import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ChevronRight, Clock, MessageCircle } from "lucide-react";
 import UserAvatar from "@/components/_common/UserAvatar";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ArrowRight, ChevronRight, Clock, MessageCircle } from "lucide-react";
 
-import { cn, formatCurrency, plural } from "@/utils/utils";
-import { api, type RouterOutputs } from "@/utils/api";
-import "leaflet/dist/leaflet.css";
+import { api } from "@/utils/api";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import { cn, formatCurrency, plural } from "@/utils/utils";
+import "leaflet/dist/leaflet.css";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
-
-
 
 type Trip = {
   id: number;
@@ -26,14 +24,14 @@ type Trip = {
     name: string;
     imageUrls: string[];
     address: string;
-    checkInInfo: string;
-    hostName: string;
+    checkInInfo: string | null;
+    hostName: string | null;
     host: {
-      image: string;
-      name: string;
-      id: number;
+      image: string | null;
+      name: string | null;
+      id: string;
       email: string;
-    };
+    } | null;
   };
   madeByGroup: {
     members: Object[];
@@ -42,10 +40,10 @@ type Trip = {
   checkOut: Date;
   numGuests: number;
   totalPrice: number;
-  acceptedAt: Date;
-  createdAt: Date;
-  tramonaFee: number;
-  location: string;
+  acceptedAt: Date | null;
+  createdAt: Date | null;
+  tramonaFee: number | null;
+  location: string | null;
 };
 
 export default function TripPage({ trip }: { trip: Trip }) {
@@ -105,7 +103,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                     name={trip.property.hostName}
                     // image={trip.property.host?.image}
                     image={
-                      trip.property.host?.image ||
+                      trip.property.host?.image ??
                       "/assets/images/tramona-logo.jpeg"
                     }
                   />
@@ -180,7 +178,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                     <SingleLocationMap
                       lat={coordinateData.coordinates.location!.lat}
                       lng={coordinateData.coordinates.location!.lng}
-                      />
+                    />
                   </div>
                 )}
               </div>
@@ -283,8 +281,8 @@ export default function TripPage({ trip }: { trip: Trip }) {
         <div className="sticky top-[100px] z-10 hidden h-[700px] overflow-clip rounded-lg lg:block">
           {coordinateData && (
             <SingleLocationMap
-            lat={coordinateData.coordinates.location!.lat}
-            lng={coordinateData.coordinates.location!.lng}
+              lat={coordinateData.coordinates.location!.lat}
+              lng={coordinateData.coordinates.location!.lng}
             />
           )}
         </div>

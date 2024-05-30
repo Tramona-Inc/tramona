@@ -1,11 +1,14 @@
-import Head from "next/head";
 import { useSession } from "next-auth/react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import TripPage from "@/components/my-trips/TripPage";
 import Spinner from "@/components/_common/Spinner";
-import { RouterOutputs, api } from "@/utils/api";
+import TripPage from "@/components/my-trips/TripPage";
+import { type RouterOutputs, api } from "@/utils/api";
+
+type RequestTrip = RouterOutputs["offers"]["getByIdWithDetails"];
+type BidsTrip = RouterOutputs["myTrips"]["getBidByIdWithDetails"];
 
 export default function TripDetailsPage() {
   useSession({ required: true });
@@ -13,16 +16,36 @@ export default function TripDetailsPage() {
   const tripId = parseInt(router.query.id as string);
   const tripType = router.query.type as string;
 
-  const { data: trip} =  tripType === "request" ? api.offers.getByIdWithDetails.useQuery({ id: tripId },
-    { enabled: router.isReady },
-  ) : api.myTrips.getBidByIdWithDetails.useQuery({ id: tripId },
-    { enabled: router.isReady },
-  );
+  const { data: trip } =
+    tripType === "request"
+      ? api.offers.getByIdWithDetails.useQuery(
+          { id: tripId },
+          { enabled: router.isReady },
+        )
+      : api.myTrips.getBidByIdWithDetails.useQuery(
+          { id: tripId },
+          { enabled: router.isReady },
+        );
 
-  type RequestTrip = RouterOutputs["offers"]["getByIdWithDetails"];
-  type BidsTrip = RouterOutputs["myTrips"]["getBidByIdWithDetails"];
-  const normalizeTripData = (trip : RequestTrip | BidsTrip, tripType: string) => {
-    if (tripType === "request") {
+  function isRequestTrip(
+    trip: RequestTrip | BidsTrip,
+    tripType: string,
+  ): trip is RequestTrip {
+    return tripType === "request";
+  }
+
+  function isBidsTrip(
+    trip: RequestTrip | BidsTrip,
+    tripType: string,
+  ): trip is BidsTrip {
+    return tripType === "bid";
+  }
+
+  const normalizeTripData = (
+    trip: RequestTrip | BidsTrip,
+    tripType: string,
+  ) => {
+    if (isRequestTrip(trip, tripType)) {
       return {
         createdAt: trip.createdAt,
         totalPrice: trip.totalPrice,
@@ -36,24 +59,23 @@ export default function TripDetailsPage() {
         madeByGroup: trip.request.madeByGroup,
         property: trip.property,
       };
-    } else if (tripType === "bid") {
+    } else if (isBidsTrip(trip, tripType)) {
       return {
         createdAt: trip.createdAt,
-        totalPrice: trip.amount,  // Assuming amount is equivalent to totalPrice
+        totalPrice: trip.amount, // Assuming amount is equivalent to totalPrice
         acceptedAt: trip.acceptedAt,
         id: trip.id,
-        tramonaFee: null,  // Assuming tramonaFee is not available for bids
+        tramonaFee: null, // Assuming tramonaFee is not available for bids
         checkIn: trip.checkIn,
         checkOut: trip.checkOut,
         numGuests: trip.numGuests,
-        location: null,  // Assuming location is not available for bids
+        location: null, // Assuming location is not available for bids
         madeByGroup: trip.madeByGroup,
         property: trip.property,
       };
     }
     return null;
   };
-
   let normalizedTrip;
   if (trip) {
     normalizedTrip = normalizeTripData(trip, tripType);
