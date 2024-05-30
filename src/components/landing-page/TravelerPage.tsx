@@ -76,7 +76,7 @@ export default function TravelerPage({
           <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
             Explore popular destinations
           </h2>
-          <div className="sticky top-header-height">
+          <div className="sticky top-header-height border-b">
             <CitiesFilter isLandingPage />
           </div>
           <section className="relative grid grid-cols-1 grid-rows-2 gap-10 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
