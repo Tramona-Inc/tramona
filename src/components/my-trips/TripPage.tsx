@@ -36,9 +36,36 @@ const Marker = dynamic(
   },
 );
 
-type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
+type Trip = {
+  id: number;
+  property: {
+    id: number;
+    name: string;
+    imageUrls: string[];
+    address: string;
+    checkInInfo: string;
+    hostName: string;
+    host: {
+      image: string;
+      name: string;
+      id: number;
+      email: string;
+    };
+  };
+  madeByGroup: {
+    members: Object[];
+  };
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number;
+  totalPrice: number;
+  acceptedAt: Date;
+  createdAt: Date;
+  tramonaFee: number;
+  location: string;
+};
 
-export default function TripPage({ trip }: { trip: OfferWithDetails }) {
+export default function TripPage({ trip }: { trip: Trip }) {
   const router = useRouter();
 
   const chatWithAdmin = useChatWithAdmin();
@@ -47,10 +74,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
     location: trip.property.address,
   });
 
-  const tripDuration = dayjs(trip.request.checkOut).diff(
-    trip.request.checkIn,
-    "day",
-  );
+  const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
 
   return (
     <div className="container col-span-10 flex flex-col gap-5 py-10 2xl:col-span-11">
@@ -84,7 +108,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                 The countdown to your trip begins
               </p>
               <p className="text-3xl font-bold">
-                {dayjs(trip.request.checkIn).fromNow(true)} to go
+                {dayjs(trip.checkIn).fromNow(true)} to go
               </p>
             </div>
           </div>
@@ -96,11 +120,19 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                 <div className="flex gap-2">
                   <UserAvatar
                     name={trip.property.hostName}
-                    image={trip.property.host?.image}
+                    // image={trip.property.host?.image}
+                    image={
+                      trip.property.host?.image ||
+                      "/assets/images/tramona-logo.jpeg"
+                    }
                   />
                   <div>
                     <p className="text-sm text-muted-foreground">Hosted by</p>
-                    <p>{trip.property.hostName}</p>
+                    <p>
+                      {trip.property.host?.name
+                        ? trip.property.host.name
+                        : "Tramona"}
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -127,27 +159,27 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
               <p>
                 <span>{plural(tripDuration, "night")}</span>
                 <span className="mx-2">·</span>
-                <span>{plural(trip.request.numGuests, "Adult")}</span>
+                <span>{plural(trip.numGuests, "Adult")}</span>
               </p>
 
               <div className="flex items-center justify-between py-5">
                 <div className="flex flex-col">
                   <p className="font-bold">Check-in</p>
                   <p className="text-lg font-bold">
-                    {dayjs(trip.request.checkIn).format("ddd, MMM D")}
+                    {dayjs(trip.checkIn).format("ddd, MMM D")}
                   </p>
                   <p className="font-semibold">
-                    {dayjs(trip.request.checkIn).format("h:mm a")}
+                    {dayjs(trip.checkIn).format("h:mm a")}
                   </p>
                 </div>
                 <ArrowRight />
                 <div className="flex flex-col">
                   <p className="font-bold">Check-in</p>
                   <p className="text-lg font-bold">
-                    {dayjs(trip.request.checkOut).format("ddd, MMM D")}
+                    {dayjs(trip.checkOut).format("ddd, MMM D")}
                   </p>
                   <p className="font-semibold">
-                    {dayjs(trip.request.checkOut).format("h:mm a")}
+                    {dayjs(trip.checkOut).format("h:mm a")}
                   </p>
                 </div>
               </div>
