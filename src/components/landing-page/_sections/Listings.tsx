@@ -1,12 +1,12 @@
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
+import { FilterXIcon } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
-import HomeOfferCard from "../HomeOfferCard";
+import HomeOfferCard, { HomeOfferCardSkeleton } from "../HomeOfferCard";
 import { Button } from "@/components/ui/button";
 import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
-import { FilterXIcon } from "lucide-react";
+import { range } from "lodash";
 
 export default function Listings() {
   const filters = useCitiesFilter((state) => state);
@@ -30,6 +30,10 @@ export default function Listings() {
       checkIn: filters.checkIn,
       checkOut: filters.checkOut,
       radius: filters.radius,
+      northeastLat: filters.locationBoundingBox.northeastLat,
+      northeastLng: filters.locationBoundingBox.northeastLng,
+      southwestLat: filters.locationBoundingBox.southwestLat,
+      southwestLng: filters.locationBoundingBox.southwestLng,
     },
     {
       // the cursor from where to start fetching thecurrentProperties
@@ -64,18 +68,7 @@ export default function Listings() {
     [properties],
   );
 
-  const skeletons = Array.from({ length: 12 }, (_, index) => (
-    <div key={index}>
-      <Skeleton className="aspect-square rounded-xl" />
-      <div className="flex h-[90px] flex-col justify-center">
-        <SkeletonText />
-        <SkeletonText />
-      </div>
-      <Skeleton className="h-10 rounded-lg" />
-      <Skeleton className="mt-2 h-10 rounded-xl" />
-    </div>
-  ));
-
+  const skeletons = range(12).map((i) => <HomeOfferCardSkeleton key={i} />);
   return (
     <section className="relative grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {isLoading ? (

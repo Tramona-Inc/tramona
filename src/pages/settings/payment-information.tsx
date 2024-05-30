@@ -4,6 +4,8 @@ import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import type Stripe from "stripe";
 
 function Card({ payment }: { payment: Stripe.PaymentMethod }) {
@@ -29,9 +31,12 @@ export default function PaymentInformation() {
 
   return (
     <SettingsLayout>
-      <div className="mx-auto my-8 max-w-4xl space-y-5">
+      <div className="mx-auto min-h-screen max-w-4xl space-y-5 lg:my-8 lg:min-h-screen-minus-header-n-footer">
         <div className="space-y-4 rounded-lg border bg-white p-4">
-          <h1 className="text-lg font-bold">Payment Method</h1>
+          <Link href="/settings" className="inline-block lg:hidden">
+            <ChevronLeft />
+          </Link>
+          <h2 className="text-lg font-bold">Payment Method</h2>
 
           <Elements stripe={stripePromise} options={options}>
             <AddPaymentInfoForm />
@@ -39,13 +44,17 @@ export default function PaymentInformation() {
         </div>
 
         <div className="space-y-4 rounded-lg border bg-white p-4">
-          <h1 className="text-lg font-bold">Saved Cards</h1>
+          <h2 className="text-lg font-bold">Saved Cards</h2>
 
-          {payments && payments.cards.data.length > 0 && (
+          {payments && payments.cards.data.length > 0 ? (
             <div className="space-y-5">
               {payments.cards.data.map((payment) => (
                 <Card key={payment.id} payment={payment} />
               ))}
+            </div>
+          ) : (
+            <div className=" py-4 text-muted-foreground">
+              No saved cards yet
             </div>
           )}
         </div>

@@ -42,8 +42,7 @@ const updateRequestInputSchema = z.object({
 });
 
 export const requestsRouter = createTRPCRouter({
-  getMyRequestsPublic: publicProcedure
-  .query(async ({ ctx }) => {
+  getMyRequestsPublic: publicProcedure.query(async ({ ctx }) => {
     const groupedRequests = await ctx.db.query.requests
       .findMany({
         where: exists(

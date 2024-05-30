@@ -1,5 +1,5 @@
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
-import Onboarding10 from "@/components/host/onboarding/Onboarding10";
+// import Onboarding10 from "@/components/host/onboarding/Onboarding10";
 import Onboarding2 from "@/components/host/onboarding/Onboarding2";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
@@ -21,7 +21,7 @@ export default function Onboarding() {
 
   return (
     <OnboardingLayout>
-      {progress === 0 && <Onboarding1 onPressNext={onPressNext}/>}
+      {progress === 0 && <Onboarding1 onPressNext={onPressNext} />}
       {progress === 1 && <Onboarding2 />}
       {progress === 2 && <Onboarding3 />}
       {progress === 3 && <Onboarding4 />}
@@ -30,7 +30,7 @@ export default function Onboarding() {
       {progress === 6 && <Onboarding7 />}
       {progress === 7 && <Onboarding8 />}
       {progress === 8 && <Onboarding9 />}
-      {progress === 9 && <Onboarding10 />}
+      {/* {progress === 9 && <Onboarding10 />} */}
     </OnboardingLayout>
   );
 }

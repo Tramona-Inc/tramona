@@ -7,23 +7,21 @@ import Head from "next/head";
 import CityRequestsTab from "../../components/requests/CityRequestsTab";
 import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
-import { useIsSm } from "@/utils/utils";
 
 function RequestsTabs() {
-  const isMobile = !useIsSm();
   return (
     <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
         <TabsTrigger value="cityRequests">
-          {!isMobile && <MapPinIcon />}
+          <MapPinIcon className="hidden sm:block" />
           City Requests
         </TabsTrigger>
         <TabsTrigger value="propertyOffers">
-          {!isMobile && <HomeIcon />}
+          <HomeIcon className="hidden sm:block" />
           Property Offers
         </TabsTrigger>
         <TabsTrigger value="history">
-          {!isMobile && <HistoryIcon />}
+          <HistoryIcon className="hidden sm:block" />
           History
         </TabsTrigger>
       </TabsList>
@@ -51,7 +49,7 @@ export default function Page() {
       </Head>
 
       <DashboardLayout type="guest">
-        <div className="min-h-screen-minus-header px-4 pb-64 pt-5">
+        <div className="pb-footer-height min-h-screen-minus-header px-4 pt-5">
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">

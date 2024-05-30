@@ -22,8 +22,10 @@ import { api } from "@/utils/api";
 import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { ChevronLeft } from "lucide-react";
 import { type Session } from "next-auth";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -81,8 +83,11 @@ function PersonalInformationForm({
 
   return (
     <SettingsLayout>
-      <div className="mx-auto my-8 max-w-4xl">
-        <div className="space-y-4 rounded-lg border bg-white p-4">
+      <div className="mx-auto max-w-4xl lg:my-8">
+        <div className=" space-y-2 rounded-lg border bg-white p-4 lg:space-y-4">
+          <Link href="/settings" className="inline-block lg:hidden">
+            <ChevronLeft />
+          </Link>
           <Form {...form}>
             <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
             {/* {JSON.stringify(form.formState.errors, null, 2)} */}

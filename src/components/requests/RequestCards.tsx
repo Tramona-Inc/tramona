@@ -40,7 +40,7 @@ export function RequestCards({
       ? requestGroups.filter(
           ({ group }) =>
             !previousRequestGroups.find(
-              ({ group: group2 }) => group2?.id === group.id,
+              ({ group: group2 }) => group2.id === group.id,
             )?.group.hasApproved,
         )
       : [];
@@ -62,7 +62,7 @@ export function RequestCards({
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-1">
+    <div className="space-y-4">
       {requestGroups.map(({ group: requestGroup, requests }) => (
         <RequestGroupCards
           key={requestGroup.id}

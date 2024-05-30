@@ -25,8 +25,8 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {
-      lat: coordinates?.coordinates?.lat ?? 0,
-      long: coordinates?.coordinates?.lng ?? 0,
+      lat: coordinates?.coordinates.location?.lat ?? 0,
+      long: coordinates?.coordinates.location?.lng ?? 0,
       radius: 25,
     },
     { refetchOnWindowFocus: false },
@@ -53,7 +53,7 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
   ));
 
   return (
-    <div className="relative flex h-[1000px] flex-col gap-y-4 overflow-y-auto">
+    <div className="sticky top-header-height h-screen-minus-header-n-footer space-y-4 overflow-y-auto py-8">
       <h1 className="text-xl font-bold">
         See similar properties in {city.split(",")[0]}
       </h1>

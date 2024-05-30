@@ -75,6 +75,7 @@ export default function DateRangeInput({
           disabled={dateIsDisabled}
           numberOfMonths={1}
           showOutsideDays={true}
+          className="h-80"
         />
       </PopoverContent>
     </Popover>

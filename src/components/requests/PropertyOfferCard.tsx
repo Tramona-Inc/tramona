@@ -7,12 +7,16 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { EllipsisIcon, Pencil, TrashIcon } from "lucide-react";
+import {
+  EllipsisIcon,
+  ExternalLinkIcon,
+  Pencil,
+  TrashIcon,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 import PropertyCounterOptions from "../property-offer-response/PropertyOfferOptions";
 import { Badge, type BadgeProps } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -36,6 +40,8 @@ function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
     case "Accepted":
       return "green";
     case "Rejected":
+      return "red";
+    case "Cancelled":
       return "red";
   }
 }
@@ -62,7 +68,8 @@ export default function PropertyOfferCard({
     counter?.status === "Pending" &&
     counter.userId !== session?.user.id &&
     offer.status !== "Rejected" &&
-    offer.status !== "Accepted";
+    offer.status !== "Accepted" &&
+    offer.status !== "Cancelled";
 
   const badge = (
     <Badge variant={getBadgeColor(offer.status)}>
@@ -88,7 +95,7 @@ export default function PropertyOfferCard({
   const originalNightlyBiddingOffer = offer.amount / totalNights;
 
   return (
-    <Card className="cursor-pointer p-0 lg:overflow-clip">
+    <Card className="p-0 lg:overflow-clip">
       <CardContent className="flex">
         <Link
           href={`/property/${offer.propertyId}`}
@@ -134,6 +141,18 @@ export default function PropertyOfferCard({
             <p className="text-lg font-bold text-black ">
               {offer.property.name}
             </p>
+
+            {!isGuestDashboard && offer.property.originalListingUrl && (
+              <a
+                href={offer.property.originalListingUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-teal-900 underline underline-offset-4"
+              >
+                View original listing{" "}
+                <ExternalLinkIcon className="inline size-[1em]" />
+              </a>
+            )}
 
             <p className="text-xs text-muted-foreground">
               Airbnb Price:{" "}
@@ -189,13 +208,15 @@ export default function PropertyOfferCard({
           )}
         </div>
       </CardContent>
-      <div className="lg:hidden">
-        <Separator className="my-1" />
-        <MobileSimilarProperties
-          city={offer.property.address!}
-          location={offer.property.address!}
-        />
-      </div>
+      {isGuestDashboard && (
+        <div className="md:hidden">
+          <Separator className="my-1" />
+          <MobileSimilarProperties
+            city={offer.property.address}
+            location={offer.property.address}
+          />
+        </div>
+      )}
     </Card>
   );
 }

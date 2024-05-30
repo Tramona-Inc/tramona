@@ -7,7 +7,7 @@ import SearchPropertiesMap from "./SearchPropertiesMap";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SearchListings from "./SearchListings";
 import Banner from "@/components/landing-page/Banner";
 import CitiesFilter from "@/components/landing-page/CitiesFilter";
@@ -31,14 +31,22 @@ import { useCitiesFilter } from "@/utils/store/cities-filter";
 import MobileSearchListings from "./MobileSearchListings";
 import MobileFilterBar from "./MobileFilterBar";
 import { AdjustedPropertiesProvider } from "./AdjustedPropertiesContext";
+import { useRouter } from "next/router";
+import { cities } from "../cities";
 
 export default function SearchPage() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
-  //onLoad erase all filters
+  const router = useRouter();
+
   useEffect(() => {
-    setFilter(undefined);
-  }, []);
+    const city =
+      typeof router.query.city === "string"
+        ? cities.find((c) => c.id === router.query.city)
+        : undefined;
+
+    setFilter(city);
+  }, [router.query.city, setFilter]);
   const isFilterUndefined = filter === undefined;
 
   useMaybeSendUnsentRequests();
@@ -76,6 +84,19 @@ export default function SearchPage() {
     isBucketListProperty,
     setInitialBucketList,
   ]);
+  //we are passing holding the fetchNextPageOfAdjustedProperties to here this is the parent component
+  //SearchListings will call it SearchPropertiesMap will set it after the call
+  const functionRef = useRef<() => void>(null);
+
+  const setFunctionRef = (func: () => void) => {
+    (functionRef as React.MutableRefObject<(() => void) | null>).current = func;
+  };
+
+  const callFetchAdjustedPropertiesFunction = () => {
+    if (functionRef.current) {
+      functionRef.current();
+    }
+  };
 
   return (
     <VerificationProvider>
@@ -94,13 +115,17 @@ export default function SearchPage() {
                   <div
                     className={`col-span-1  ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
                   >
-                    <SearchListings isFilterUndefined={isFilterUndefined} />
+                    <SearchListings
+                      isFilterUndefined={isFilterUndefined}
+                      callSiblingFunction={callFetchAdjustedPropertiesFunction}
+                    />
                   </div>
                   {!isFilterUndefined && (
                     <div className="col-span-1 md:col-span-1 lg:col-span-2">
                       <div className="sticky top-16">
                         <SearchPropertiesMap
                           isFilterUndefined={isFilterUndefined}
+                          setFunctionRef={setFunctionRef}
                         />
                       </div>
                     </div>
@@ -115,9 +140,15 @@ export default function SearchPage() {
                 <MobileFilterBar />
               </div>
               <div>
-                <SearchPropertiesMap isFilterUndefined={isFilterUndefined} />
+                <SearchPropertiesMap
+                  isFilterUndefined={isFilterUndefined}
+                  setFunctionRef={setFunctionRef}
+                />
               </div>
-              <MobileSearchListings isFilterUndefined={isFilterUndefined} />
+              <MobileSearchListings
+                isFilterUndefined={isFilterUndefined}
+                callSiblingFunction={callFetchAdjustedPropertiesFunction}
+              />
             </div>
           )}
         </div>
@@ -142,7 +173,7 @@ function MobileJustSearch() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="fixed top-[58px] z-30 w-full">
+      <SheetTrigger className="fixed inset-x-1 top-[calc(var(--header-height)+4px)] z-30">
         <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg border bg-white px-3 py-4 text-center font-semibold text-muted-foreground shadow-md">
           <SearchIcon />
           Search

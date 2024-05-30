@@ -15,7 +15,7 @@ import {
   counterInsertSchema,
   counters,
 } from "@/server/db/schema/tables/counters";
-import { getNumNights } from '@/utils/utils';
+import { getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
@@ -189,7 +189,7 @@ export const biddingRouter = createTRPCRouter({
         .values({ ...input, madeByGroupId: madeByGroupId });
       // }
     }),
-update: protectedProcedure
+  update: protectedProcedure
     .input(bidInsertSchema)
     .mutation(async ({ ctx, input }) => {
       const bid = await ctx.db.query.bids.findFirst({
@@ -223,11 +223,11 @@ update: protectedProcedure
 
       await ctx.db
         .update(bids)
-        .set({ 
+        .set({
           checkIn: input.date.from,
           checkOut: input.date.to,
-          amount: (input.nightlyPrice * 100) * totalNights,
-          statusUpdatedAt: new Date() 
+          amount: input.nightlyPrice * 100 * totalNights,
+          statusUpdatedAt: new Date(),
         })
         .where(eq(bids.id, input.offerId));
     }),
@@ -302,6 +302,7 @@ update: protectedProcedure
             originalNightlyPrice: true,
             longitude: true,
             latitude: true,
+            originalListingUrl: true,
           },
         },
         counters: {
@@ -317,6 +318,41 @@ update: protectedProcedure
         },
       },
       where: eq(bids.status, "Pending"),
+      orderBy: desc(bids.createdAt),
+    });
+  }),
+
+  getAllAccepted: roleRestrictedProcedure(["admin"]).query(async () => {
+    return await db.query.bids.findMany({
+      with: {
+        madeByGroup: {
+          with: { members: { with: { user: true } }, invites: true },
+        },
+        property: {
+          columns: {
+            id: true,
+            name: true,
+            address: true,
+            imageUrls: true,
+            originalNightlyPrice: true,
+            longitude: true,
+            latitude: true,
+            originalListingUrl: true,
+          },
+        },
+        counters: {
+          orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+          limit: 1,
+          columns: {
+            id: true,
+            counterAmount: true,
+            createdAt: true,
+            status: true,
+            userId: true,
+          },
+        },
+      },
+      where: eq(bids.status, "Accepted"),
       orderBy: desc(bids.createdAt),
     });
   }),
@@ -382,12 +418,7 @@ update: protectedProcedure
 
   accept: protectedProcedure
     .input(z.object({ bidId: z.number(), amount: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      const userIsWithBid = await userWithBid({
-        userId: ctx.user.id,
-        bidId: input.bidId,
-      });
-
+    .mutation(async ({ input }) => {
       const bidInfo = await db.query.bids.findFirst({
         where: eq(bids.id, input.bidId),
         with: {
@@ -451,13 +482,44 @@ update: protectedProcedure
       //   bidId: input.bidId,
       // });
 
+      await updateBidStatus({ id: input.bidId, status: "Rejected" });
+
       // if (!userIsWithBid) {
       //   throw new TRPCError({ code: "UNAUTHORIZED" });
       // } else {
       // await updateBidStatus({ id: input.bidId, status: "Rejected" });
       // }
 
-      await updateBidStatus({ id: input.bidId, status: "Rejected" });
+      // TODO: email travellers
+    }),
+
+  cancel: protectedProcedure
+    .input(z.object({ bidId: z.number() }))
+    .mutation(async ({ input }) => {
+      // const userIsWithBid = await userWithBid({
+      //   userId: ctx.user.id,
+      //   bidId: input.bidId,
+      // });
+
+      // if (!userIsWithBid) {
+      //   throw new TRPCError({ code: "UNAUTHORIZED" });
+      // } else {
+      // await updateBidStatus({ id: input.bidId, status: "Rejected" });
+      // }
+      const paymentIntent = await db
+        .select({ paymentIntentId: bids.paymentIntentId })
+        .from(bids)
+        .where(eq(bids.id, input.bidId));
+      let refund;
+      if (paymentIntent !== null) {
+        refund = await stripe.refunds.create({
+          payment_intent: paymentIntent,
+        });
+      }
+
+      if (refund?.status === "succeeded") {
+        await updateBidStatus({ id: input.bidId, status: "Cancelled" });
+      }
 
       // TODO: email travellers
     }),

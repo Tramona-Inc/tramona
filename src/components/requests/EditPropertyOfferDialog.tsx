@@ -23,7 +23,7 @@ export default function EditOfferDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogTitle>Edit</DialogTitle>
+        <DialogTitle>Edit offer</DialogTitle>
         <EditForm
           offerId={offerId}
           propertyId={propertyId}

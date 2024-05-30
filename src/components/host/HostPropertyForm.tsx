@@ -50,7 +50,7 @@ export const hostPropertyFormSchema = z.object({
   numRatings: zodInteger({ min: 1 }),
   amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
   about: zodString({ maxLen: Infinity }),
-  address: optional(zodString({ maxLen: 1000 })),
+  address: zodString({ maxLen: 1000 }),
   checkInInfo: optional(zodString()),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   imageUrls: z

@@ -45,10 +45,10 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       if ((!input.latitude || !input.longitude) && input.address) {
-        const coords = await getCoordinates(input.address);
-        if (coords) {
-          input.latitude = coords.lat;
-          input.longitude = coords.lng;
+        const { location } = await getCoordinates(input.address);
+        if (location) {
+          input.latitude = location.lat;
+          input.longitude = location.lng;
         }
       }
 
@@ -155,6 +155,10 @@ export const propertiesRouter = createTRPCRouter({
         radius: z.number().optional(),
         checkIn: z.date().optional(),
         checkOut: z.date().optional(),
+        northeastLat: z.number().optional(),
+        northeastLng: z.number().optional(),
+        southwestLat: z.number().optional(),
+        southwestLng: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -163,6 +167,11 @@ export const propertiesRouter = createTRPCRouter({
       const lat = input.lat ?? 0;
       const long = input.long ?? 0;
       const radius = input.radius;
+
+      const northeastLat = input.northeastLat ?? 0;
+      const northeastLng = input.northeastLng ?? 0;
+      const southwestLat = input.southwestLat ?? 0;
+      const southwestLng = input.southwestLng ?? 0;
 
       const data = await ctx.db
         .select({
@@ -205,7 +214,12 @@ export const propertiesRouter = createTRPCRouter({
         .where(
           and(
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
-            input.lat && input.long
+            input.lat &&
+              input.long &&
+              !northeastLat &&
+              !northeastLng &&
+              !southwestLat &&
+              !southwestLng
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`,
             input.roomType
@@ -251,9 +265,16 @@ export const propertiesRouter = createTRPCRouter({
             WHERE booked_dates.property_id = properties.id 
               AND booked_dates.date >= CURRENT_DATE 
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
+
+            northeastLat && northeastLng && southwestLat && southwestLng
+              ? sql`
+              latitude BETWEEN ${southwestLat} AND ${northeastLat}
+              AND longitude BETWEEN ${southwestLng} AND ${northeastLng}
+            `
+              : sql`true`,
           ),
         )
-        .limit(12)
+        .limit(15)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
