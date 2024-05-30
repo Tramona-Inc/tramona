@@ -448,6 +448,9 @@ export const propertiesRouter = createTRPCRouter({
         })
         .then((res) => res?.curTeamId);
 
+      console.log("USER ID", ctx.user.id);
+      console.log("CURR ID", curTeamId);
+
       if (!curTeamId) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
