@@ -28,7 +28,7 @@
     --input: var(--zinc-300);
     --ring: var(--black);
     --radius: 0.5rem;
-    --mobile-header-height: 83px;
+    --mobile-header-height: 74px;
     --header-height: 56px;
     --footer-height: var(--mobile-header-height);
     --screen-minus-header: calc(100vh - var(--header-height));

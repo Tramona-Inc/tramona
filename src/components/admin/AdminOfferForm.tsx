@@ -68,6 +68,7 @@ const formSchema = z.object({
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
+  tramonaFee: zodNumber({ min: 0 }),
   checkInInfo: optional(zodString()),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
@@ -125,6 +126,7 @@ export default function AdminOfferForm({
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
+            tramonaFee: offer.tramonaFee ?? undefined,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
@@ -196,6 +198,7 @@ export default function AdminOfferForm({
         requestId: request.id,
         propertyId: offer.property.id,
         totalPrice,
+        tramonaFee: data.tramonaFee * 100,
       };
 
       await Promise.all([
@@ -219,7 +222,7 @@ export default function AdminOfferForm({
         return;
       }
 
-      const newOffer = { requestId: request.id, propertyId, totalPrice };
+      const newOffer = { requestId: request.id, propertyId, totalPrice,tramonaFee: data.tramonaFee * 100};
 
       await createOffersMutation
         .mutateAsync(newOffer)
@@ -309,6 +312,24 @@ export default function AdminOfferForm({
                   inputMode="decimal"
                   prefix="$"
                   suffix="/night"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tramonaFee"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Tramona Fee</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  inputMode="decimal"
+                  prefix="$"
                 />
               </FormControl>
               <FormMessage />

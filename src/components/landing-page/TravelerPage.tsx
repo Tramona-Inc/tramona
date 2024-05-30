@@ -12,14 +12,14 @@ import CitiesFilter from "./CitiesFilter";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { type StaticProperty } from "@/pages";
+import { type LpProperty } from "@/pages";
 import HomeOfferCard from "./HomeOfferCard";
 import { useIsLg, useIsMd, useIsSm, useIsXl } from "@/utils/utils";
 
 export default function TravelerPage({
   staticProperties,
 }: {
-  staticProperties: StaticProperty[];
+  staticProperties: LpProperty[];
 }) {
   useMaybeSendUnsentRequests();
 
