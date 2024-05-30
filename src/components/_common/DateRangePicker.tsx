@@ -94,8 +94,6 @@ export default function DateRangePicker({
     onChange(e);
   };
 
-  //console.log(value);
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -129,6 +127,7 @@ export default function DateRangePicker({
           disabled={(date: Date) => !!dateIsDisabled(date)}
           numberOfMonths={1}
           showOutsideDays={true}
+          className="h-80"
         />
       </PopoverContent>
     </Popover>

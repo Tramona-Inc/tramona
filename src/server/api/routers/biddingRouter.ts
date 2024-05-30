@@ -337,6 +337,7 @@ export const biddingRouter = createTRPCRouter({
             originalNightlyPrice: true,
             longitude: true,
             latitude: true,
+            originalListingUrl: true,
           },
         },
         counters: {
