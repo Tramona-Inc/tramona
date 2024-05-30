@@ -26,7 +26,7 @@ export const groupMembers = pgTable(
   {
     groupId: integer("group_id")
       .notNull()
-      .references(() => groups.id),
+      .references(() => groups.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
