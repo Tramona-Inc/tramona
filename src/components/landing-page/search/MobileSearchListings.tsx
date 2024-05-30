@@ -9,11 +9,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Listings from "../_sections/Listings";
+import SearchListings from "./SearchListings";
 
 export default function MobileSearchListings({
   isFilterUndefined,
+  callSiblingFunction,
 }: {
   isFilterUndefined: boolean;
+  callSiblingFunction: () => void;
 }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   return (
@@ -39,7 +42,10 @@ export default function MobileSearchListings({
             <DrawerDescription>Places within the map area</DrawerDescription>
           )}
         </DrawerHeader>
-        <Listings />
+        <SearchListings
+          isFilterUndefined={isFilterUndefined}
+          callSiblingFunction={callSiblingFunction}
+        />
       </DrawerContent>
     </Drawer>
   );

@@ -7,10 +7,12 @@ import SearchPropertiesMap from "./SearchPropertiesMap";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SearchListings from "./SearchListings";
 import Banner from "@/components/landing-page/Banner";
-import CitiesFilter from "@/components/landing-page/CitiesFilter";
+import CitiesFilter, {
+  FiltersBtn,
+} from "@/components/landing-page/CitiesFilter";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
@@ -84,12 +86,25 @@ export default function SearchPage() {
     isBucketListProperty,
     setInitialBucketList,
   ]);
+  //we are passing holding the fetchNextPageOfAdjustedProperties to here this is the parent component
+  //SearchListings will call it SearchPropertiesMap will set it after the call
+  const functionRef = useRef<() => void>(null);
+
+  const setFunctionRef = (func: () => void) => {
+    (functionRef as React.MutableRefObject<(() => void) | null>).current = func;
+  };
+
+  const callFetchAdjustedPropertiesFunction = () => {
+    if (functionRef.current) {
+      functionRef.current();
+    }
+  };
 
   return (
     <VerificationProvider>
       <AdjustedPropertiesProvider>
         <Head>
-          <title>Tramona</title>
+          <title>Explore | Tramona</title>
         </Head>
         <div className="relative mb-20 bg-white">
           <VerificationBanner />
@@ -97,18 +112,28 @@ export default function SearchPage() {
             <div className="mt-32 space-y-8 px-4">
               <DynamicDesktopSearchBar />
               <div className="space-y-4">
-                <CitiesFilter />
+                <div className="flex items-center gap-2 border-b">
+                  <div className="w-full">
+                    <CitiesFilter />
+                  </div>
+                  <FiltersBtn />
+                </div>
+
                 <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
                   <div
                     className={`col-span-1  ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
                   >
-                    <SearchListings isFilterUndefined={isFilterUndefined} />
+                    <SearchListings
+                      isFilterUndefined={isFilterUndefined}
+                      callSiblingFunction={callFetchAdjustedPropertiesFunction}
+                    />
                   </div>
                   {!isFilterUndefined && (
                     <div className="col-span-1 md:col-span-1 lg:col-span-2">
                       <div className="sticky top-16">
                         <SearchPropertiesMap
                           isFilterUndefined={isFilterUndefined}
+                          setFunctionRef={setFunctionRef}
                         />
                       </div>
                     </div>
@@ -123,9 +148,15 @@ export default function SearchPage() {
                 <MobileFilterBar />
               </div>
               <div>
-                <SearchPropertiesMap isFilterUndefined={isFilterUndefined} />
+                <SearchPropertiesMap
+                  isFilterUndefined={isFilterUndefined}
+                  setFunctionRef={setFunctionRef}
+                />
               </div>
-              <MobileSearchListings isFilterUndefined={isFilterUndefined} />
+              <MobileSearchListings
+                isFilterUndefined={isFilterUndefined}
+                callSiblingFunction={callFetchAdjustedPropertiesFunction}
+              />
             </div>
           )}
         </div>
