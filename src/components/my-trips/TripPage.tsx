@@ -1,5 +1,4 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -13,28 +12,12 @@ import { cn, formatCurrency, plural } from "@/utils/utils";
 import { api, type RouterOutputs } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((module) => module.MapContainer),
-  {
-    ssr: false, // Disable server-side rendering for this component
-  },
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((module) => module.TileLayer),
-  {
-    ssr: false,
-  },
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((module) => module.Marker),
-  {
-    ssr: false,
-  },
-);
+
 
 type Trip = {
   id: number;
@@ -194,26 +177,10 @@ export default function TripPage({ trip }: { trip: Trip }) {
 
                 {coordinateData && (
                   <div className="relative z-10 my-3 overflow-clip rounded-lg">
-                    <MapContainer
-                      center={[
-                        coordinateData.coordinates.location!.lat,
-                        coordinateData.coordinates.location!.lng,
-                      ]}
-                      zoom={14}
-                      scrollWheelZoom={false}
-                      className="h-[300px]"
-                    >
-                      <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    <SingleLocationMap
+                      lat={coordinateData.coordinates.location!.lat}
+                      lng={coordinateData.coordinates.location!.lng}
                       />
-                      <Marker
-                        position={[
-                          coordinateData.coordinates.location!.lat,
-                          coordinateData.coordinates.location!.lng,
-                        ]}
-                      />
-                    </MapContainer>
                   </div>
                 )}
               </div>
@@ -315,26 +282,10 @@ export default function TripPage({ trip }: { trip: Trip }) {
 
         <div className="sticky top-[100px] z-10 hidden h-[700px] overflow-clip rounded-lg lg:block">
           {coordinateData && (
-            <MapContainer
-              center={[
-                coordinateData.coordinates.location!.lat,
-                coordinateData.coordinates.location!.lng,
-              ]}
-              zoom={14}
-              scrollWheelZoom={false}
-              className="h-[700px]"
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker
-                position={[
-                  coordinateData.coordinates.location!.lat,
-                  coordinateData.coordinates.location!.lng,
-                ]}
-              />
-            </MapContainer>
+            <SingleLocationMap
+            lat={coordinateData.coordinates.location!.lat}
+            lng={coordinateData.coordinates.location!.lng}
+            />
           )}
         </div>
       </div>
