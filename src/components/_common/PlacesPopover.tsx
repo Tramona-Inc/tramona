@@ -57,7 +57,7 @@ export default function PlacesPopover({
   return (
     <>
       <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places`}
+        src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback="PlacesAutocomplete"`}
         onLoad={init}
       />
 
