@@ -7,7 +7,10 @@ import SimiliarProperties from "./SimilarProperties";
 import { useEffect, useState } from "react";
 
 export default function PropertyOfferTab() {
-  const { data: offers } = api.biddings.getMyBids.useQuery();
+  const { data: unfilteredOffers } = api.biddings.getMyBids.useQuery();
+  const offers = unfilteredOffers?.filter(
+    (offer) => offer.status === "Pending",
+  );
 
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
   const selectedOffer = offers?.find((offer) => offer.id === selectedOfferId);

@@ -57,8 +57,8 @@ export default function PropertyOfferCard({
   | {
       isGuestDashboard: true;
       offer: RouterOutputs["biddings"]["getMyBids"][number];
-      selectedOfferId: number | null;
-      setSelectedOfferId: (id: number | null) => void;
+      selectedOfferId?: number | null;
+      setSelectedOfferId?: (id: number | null) => void;
     }
   | {
       isGuestDashboard?: false;

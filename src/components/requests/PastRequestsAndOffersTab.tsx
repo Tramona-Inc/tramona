@@ -4,20 +4,28 @@ import { RequestCards } from "@/components/requests/RequestCards";
 import { api } from "@/utils/api";
 import { type DetailedRequest } from "./RequestCard";
 import { useState } from "react";
+import PropertyOfferCard from "./PropertyOfferCard";
 
 export default function PastRequestsAndOffersTab() {
-  const [selectedRequest, setSelectedRequest] =
-    useState<DetailedRequest | null>(null);
   const { data: requests } = api.requests.getMyRequests.useQuery();
+  const { data: unfilteredOffers } = api.biddings.getMyBids.useQuery();
+  const offers = unfilteredOffers?.filter(
+    (offer) => offer.status !== "Pending",
+  );
 
-  if (!requests) return <Spinner />;
+  if (!requests || !offers) return <Spinner />;
 
   return requests.inactiveRequestGroups.length !== 0 ? (
-    <RequestCards
-      requestGroups={requests.inactiveRequestGroups}
-      setSelectedRequest={setSelectedRequest}
-      selectedRequest={selectedRequest}
-    />
+    <div className="space-y-4">
+      <RequestCards requestGroups={requests.inactiveRequestGroups} />
+      {offers.map((offer) => (
+        <PropertyOfferCard
+          key={offer.id}
+          offer={offer}
+          isGuestDashboard={true}
+        />
+      ))}
+    </div>
   ) : (
     <div className="flex flex-col items-center gap-4">
       <p className="text-center">

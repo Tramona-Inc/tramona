@@ -5,7 +5,7 @@ import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import CityRequestsTab from "../../components/requests/CityRequestsTab";
-import PastRequestsAndOffersTab from "../../components/requests/InactiveRequestGroups";
+import PastRequestsAndOffersTab from "../../components/requests/PastRequestsAndOffersTab";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
 
 function RequestsTabs() {

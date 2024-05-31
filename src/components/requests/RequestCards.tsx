@@ -1,8 +1,5 @@
 import { type DetailedRequest } from "@/components/requests/RequestCard";
-import { api } from "@/utils/api";
 import { useEffect, useState } from "react";
-import { useInterval } from "@/utils/useInterval";
-import { usePrevious } from "@uidotdev/usehooks";
 import RequestGroupCards from "./RequestGroup";
 import { type RequestGroup } from "@/server/db/schema";
 
@@ -12,8 +9,8 @@ export function RequestCards({
   setSelectedRequest,
 }: {
   requestGroups: { group: RequestGroup; requests: DetailedRequest[] }[];
-  selectedRequest: DetailedRequest | null;
-  setSelectedRequest: (request: DetailedRequest | null) => void;
+  selectedRequest?: DetailedRequest | null;
+  setSelectedRequest?: (request: DetailedRequest | null) => void;
 }) {
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -60,7 +57,7 @@ export function RequestCards({
     const firstRequest = requestGroups[0]?.requests[0];
 
     if (firstRequest) {
-      setSelectedRequest(firstRequest);
+      setSelectedRequest?.(firstRequest);
     }
   }, []);
 
