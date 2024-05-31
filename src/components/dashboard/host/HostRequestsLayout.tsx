@@ -112,7 +112,7 @@ function SidebarProperty({
       <div className="flex-1 text-sm">
         <p className="line-clamp-1 font-medium">{property.name}</p>
         <p className="line-clamp-1 text-muted-foreground">{property.address}</p>
-        <Badge size="sm">{plural(property.numRequests, "request")}</Badge>
+        <Badge size="sm">{plural(property.numBids, "request")}</Badge>
       </div>
     </Link>
   );
