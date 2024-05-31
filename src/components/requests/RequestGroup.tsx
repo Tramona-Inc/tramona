@@ -21,11 +21,6 @@ export default function RequestGroupCards({
   selectedRequest: DetailedRequest | null;
   setSelectedRequest: (request: DetailedRequest | null) => void;
 }) {
-  useEffect(() => {
-    if (requests.length > 0) {
-      setSelectedRequest(requests[0] ?? null);
-    }
-  }, []);
   if (requests.length === 0) return null;
 
   // const requestUnconfirmedBtn = (

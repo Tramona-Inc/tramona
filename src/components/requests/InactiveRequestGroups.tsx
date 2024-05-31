@@ -5,7 +5,7 @@ import { api } from "@/utils/api";
 import { type DetailedRequest } from "./RequestCard";
 import { useState } from "react";
 
-export default function InactiveRequestGroups() {
+export default function PastRequestsAndOffersTab() {
   const [selectedRequest, setSelectedRequest] =
     useState<DetailedRequest | null>(null);
   const { data: requests } = api.requests.getMyRequests.useQuery();
@@ -28,7 +28,7 @@ export default function InactiveRequestGroups() {
           }
           redirectTitle={"Request Deal"}
           href={"/"}
-        ></EmptyStateValue>
+        />
       </p>
     </div>
   );
