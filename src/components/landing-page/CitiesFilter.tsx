@@ -68,7 +68,7 @@ export default function CitiesFilter({
   const router = useRouter();
 
   return (
-    <div className="sticky top-header-height z-10 h-14 bg-white">
+    <div className="sticky top-14 z-20 h-14 border-b bg-white">
       <div className="absolute inset-2">
         <ScrollArea ref={ref} viewportRef={viewportRef}>
           <div className="flex justify-center gap-1 px-12 pb-2">
