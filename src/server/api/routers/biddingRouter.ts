@@ -292,6 +292,19 @@ export const biddingRouter = createTRPCRouter({
 
       return await ctx.db.query.bids.findMany({
         where: and(eq(bids.propertyId, propertyId), eq(bids.status, "Pending")),
+        with: {
+          counters: {
+            orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+            limit: 1,
+            columns: {
+              id: true,
+              counterAmount: true,
+              createdAt: true,
+              status: true,
+              userId: true,
+            },
+          },
+        },
       });
     }),
 

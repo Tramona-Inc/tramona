@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,21 +13,25 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
-import AcceptBidDialog from "./AcceptBidDialog";
+import { CheckIcon, ChevronDownIcon, RefreshCw, XIcon } from "lucide-react";
 import { useState } from "react";
+import AcceptBidDialog from "./AcceptBidDialog";
+import { CounterBidDialog } from "./CounterBidDialog";
 
 export default function HostBidCard({
   bid,
 }: {
   bid: RouterOutputs["biddings"]["getByPropertyId"][number];
 }) {
+  // const counters  = api.biddings.
+
   const fmtdPrice = formatCurrency(bid.amount);
   const numNights = getNumNights(bid.checkIn, bid.checkOut);
   const fmtdPricePerNight = formatCurrency(bid.amount / numNights);
   const fmtdDateRange = formatDateRange(bid.checkIn, bid.checkOut);
 
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
+  const [counterDialogOpen, setCounterDialogOpen] = useState(false);
 
   return (
     <>
@@ -36,11 +40,16 @@ export default function HostBidCard({
         open={acceptDialogOpen}
         setOpen={setAcceptDialogOpen}
       />
+      <CounterBidDialog
+        offerId={bid.id}
+        open={counterDialogOpen}
+        setOpen={setCounterDialogOpen}
+        counterNightlyPrice={bid.counters[0]?.counterAmount ?? 0}
+        previousOfferNightlyPrice={bid.counters[0]?.counterAmount ?? 0}
+        originalNightlyBiddingOffer={bid.amount / numNights}
+      />
       <Card>
-        {/* <div className="flex justify-between">
-      <Badge variant="yellow">Pending</Badge>
-      <BidGroupAvatars isAdminDashboard bid={bid} />
-    </div> */}
+        <CardHeader>Counter Offer</CardHeader>
         <div className="flex items-end gap-4">
           <div>
             <div className="font-semibold">{fmtdPricePerNight}/night</div>
@@ -69,6 +78,10 @@ export default function HostBidCard({
               <DropdownMenuItem onClick={() => setAcceptDialogOpen(true)}>
                 <CheckIcon />
                 Accept
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCounterDialogOpen(true)}>
+                <RefreshCw />
+                Counter
               </DropdownMenuItem>
               <DropdownMenuItem red>
                 <XIcon />
