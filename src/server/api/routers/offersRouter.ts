@@ -553,9 +553,15 @@ export const offersRouter = createTRPCRouter({
       }
     }),
 
+  //I want the all of the offers from each request that has been accepted except for the offer that has been accepted
+  //Search in all requests, if there has been an off that has been accepted, then remove that offer from the list of offers
+  //If there has been no offer accepted, then return nothing for that request
   getAllUnmatchedOffers: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.offers.findMany({
-      where: isNull(offers.requestId),
+    //go through all the requests and filter out the ones that have an offer that has been accepted
+    const completedRequests = await ctx.db.query.requests.findMany({
+      where: {
+        requests.resolvedAt : isNotNull(),
+      },
     });
   }),
 });
