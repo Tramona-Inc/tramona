@@ -1,7 +1,7 @@
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import PlacesInput from "@/components/_common/PlacesInput";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -9,7 +9,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   CalendarIcon,
@@ -27,10 +27,12 @@ import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import MapModal from "@/components/map-modal";
 import { api } from "@/utils/api";
 
-export function DesktopRequestDealTab({ openModal, setInitialLocation }) {
+export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
   const [open, setOpen] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [initialLocation, setInitialLocation] = useState(null);
 
   function afterSubmit() {
     setOpen(true);
@@ -40,6 +42,13 @@ export function DesktopRequestDealTab({ openModal, setInitialLocation }) {
   const { form, onSubmit } = useCityRequestForm({ setCurTab, afterSubmit });
 
   const [link, setLink] = useState(false);
+
+  const onSave = (location, radius) => {
+    console.log(location, radius);
+  };
+  useEffect(() => {
+    console.log(initialLocation);
+  }, [initialLocation]);
 
   return (
     <>
@@ -63,6 +72,7 @@ export function DesktopRequestDealTab({ openModal, setInitialLocation }) {
               variant="lpDesktop"
               placeholder="Select a location"
               icon={MapPinIcon}
+              setInitialLocation={setInitialLocation}
             />
 
             <FormField
@@ -186,6 +196,31 @@ export function DesktopRequestDealTab({ openModal, setInitialLocation }) {
                 </div>
               )}
             </div>
+            <div className="space-y-1">
+              <p className="text-sm">
+                Have a specific location in mind? Drop a pin and tell us.
+              </p>
+
+              <Dialog open={mapOpen} onOpenChange={setMapOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Expand Map
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <MapModal
+                    setOpen={setMapOpen}
+                    initialLocation={initialLocation}
+                    onSave={onSave}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+
             <div className="flex justify-end sm:justify-start">
               <Button
                 type="submit"

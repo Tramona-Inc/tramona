@@ -2,22 +2,20 @@ import { useState, useEffect } from "react";
 import { Map, Marker, Circle } from "google-maps-react";
 
 interface MapModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   initialLocation: { lat: number; lng: number };
   onSave: (location: { lat: number; lng: number }, radius: number) => void;
+  setOpen: (open: boolean) => void;
 }
 
-const MapModal = ({ isOpen, onClose, initialLocation, onSave }: MapModalProps) => {
+const MapModal = ({ initialLocation, onSave, setOpen }: MapModalProps) => {
   const [selectedLocation, setSelectedLocation] = useState(initialLocation);
   const [radius, setRadius] = useState(8046.72); // 5 miles in meters
 
   useEffect(() => {
-    if (isOpen) {
       setSelectedLocation(initialLocation);
       setRadius(8046.72);
-    }
-  }, [initialLocation, isOpen]);
+      console.log(initialLocation);
+  }, [initialLocation]);
 
   const handleMapClick = (_mapProps, _map, clickEvent: { latLng: { lat: () => number; lng: () => number; }; }) => {
     // Ensure that clickEvent and its properties are defined
@@ -41,10 +39,9 @@ const MapModal = ({ isOpen, onClose, initialLocation, onSave }: MapModalProps) =
 
   const handleSave = () => {
     onSave(selectedLocation, radius);
-    onClose();
   };
 
-  if (!isOpen) return null;
+  console.log("selected", selectedLocation)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ">
@@ -91,7 +88,7 @@ const MapModal = ({ isOpen, onClose, initialLocation, onSave }: MapModalProps) =
             />
           </div>
           <div className="mt-4 flex justify-end">
-            <button onClick={onClose} className="mr-2">
+            <button onClick={() => setOpen(false)} className="mr-2">
               Cancel
             </button>
             <button onClick={handleSave}>Save Location</button>

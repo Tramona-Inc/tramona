@@ -6,6 +6,7 @@ import { useState } from "react";
 import { type InputVariant } from "../ui/input";
 import { InputButton } from "../ui/input-button";
 import { cn } from "@/utils/utils";
+import { api } from "@/utils/api";
 
 export default function PlacesInput<
   TFieldValues extends FieldValues,
@@ -16,6 +17,7 @@ export default function PlacesInput<
   placeholder,
   variant,
   icon,
+  setInitialLocation,
   ...props
 }: Omit<
   React.ComponentProps<typeof FormField<TFieldValues, TName>>,
@@ -26,8 +28,10 @@ export default function PlacesInput<
   placeholder?: string;
   variant?: InputVariant;
   icon?: React.FC<{ className?: string }>;
-}) {
+  setInitialLocation: (location: { lat: number; lng: number }) => void;
+  }) {
   const [open, setOpen] = useState(false);
+  const utils = api.useUtils();
 
   return (
     <FormField
@@ -38,7 +42,19 @@ export default function PlacesInput<
             open={open}
             setOpen={setOpen}
             value={field.value}
-            onValueChange={field.onChange}
+            onValueChange={async (location) => {
+              field.onChange(location);
+              if (location) {
+                const { coordinates } = await utils.offers.getCoordinates.fetch(
+                  {
+                    location,
+                  },
+                );
+
+                const { lat, lng } = coordinates.location!;
+                setInitialLocation({lat: lat, lng: lng});
+              }
+            }}
             className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
             trigger={({ value, disabled }) => (
               <InputButton
