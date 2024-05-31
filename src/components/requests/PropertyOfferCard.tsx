@@ -32,6 +32,7 @@ import EditPropertyOfferDialog from "./EditPropertyOfferDialog";
 import MobileSimilarProperties from "./MobileSimilarProperties";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
+import HostCounterOffer from "../property-offer-response/HostCounterOffer";
 
 function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
@@ -154,7 +155,19 @@ export default function PropertyOfferCard({
               </a>
             )}
 
-            <p className="text-xs text-muted-foreground">
+            {!isGuestDashboard && offer.property.originalListingUrl && (
+              <a
+                href={offer.property.originalListingUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-teal-900 underline underline-offset-4"
+              >
+                View original listing{" "}
+                <ExternalLinkIcon className="inline size-[1em]" />
+              </a>
+            )}
+
+            <p className="text-sm text-muted-foreground">
               Airbnb Price:{" "}
               {formatCurrency(
                 offer.property.originalNightlyPrice
@@ -164,20 +177,30 @@ export default function PropertyOfferCard({
               /night
             </p>
 
-            <div className="text-md flex items-center gap-1 font-semibold">
-              {formatDateRange(offer.checkIn, offer.checkOut)} &middot;{" "}
-              {plural(offer.numGuests, "guest")}
+            <div className="flex flex-row items-start space-x-6 text-left">
+              <div className="text-md font-semibold">
+                {formatDateRange(offer.checkIn, offer.checkOut)} &middot;{" "}
+                {plural(offer.numGuests, "guest")}
+              </div>
             </div>
           </div>
 
           <Separator />
 
-          <div>
-            <p className="text-sm">
-              <span className="font-bold">Original Bidding Offer: </span>
-              {formatCurrency(originalNightlyBiddingOffer)}
-              /night
-            </p>
+          <div className="flex flex-row space-x-2">
+            {userCanCounter && (
+              <HostCounterOffer
+                counterNightlyPrice={counterNightlyPrice}
+                previousOfferNightlyPrice={originalNightlyBiddingOffer}
+              />
+            )}
+            <div className="py-1">
+              <p className="text-sm">
+                <span className="font-bold">Original Bidding Offer: </span>
+                {formatCurrency(originalNightlyBiddingOffer)}
+                /night
+              </p>
+            </div>
           </div>
 
           {/* {!isGuestDashboard && (
