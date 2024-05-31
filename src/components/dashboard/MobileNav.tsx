@@ -86,7 +86,7 @@ export default function MobileNav({
                     "relative flex flex-col items-center justify-center text-center text-xs font-medium text-muted-foreground",
                   )}
                 >
-                  <LucideMenu className="size-8" />
+                  <LucideMenu className="h-7 w-7" />
                   <p>Menu</p>
                 </div>
               </SheetTrigger>
@@ -141,8 +141,7 @@ export default function MobileNav({
                     <Button asChild variant="darkOutline">
                       <Link href="/">Switch to Traveler</Link>
                     </Button>
-                  ) : !isHost ? //   <Link href="/host-onboarding">Become a host</Link> // <Button asChild variant="darkOutline">
-                  // </Button>
+                  ) : !isHost ? // </Button> //   <Link href="/host-onboarding">Become a host</Link> // <Button asChild variant="darkOutline">
                   null : (
                     <Button asChild variant="darkOutline">
                       <Link href="/host">Switch to Host</Link>

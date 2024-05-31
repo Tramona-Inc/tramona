@@ -50,19 +50,6 @@ export default function CitiesFilter({
 
   const ref = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
-  // const [scrollX, setScrollX] = useState(0);
-
-  // useEffect(() => {
-  //   const el = ref.current;
-  //   if (!el) return;
-  //   const onScroll = () => setScrollX(el.scrollLeft);
-
-  //   addEventListener("scroll", onScroll);
-
-  //   return () => {
-  //     removeEventListener("scroll", onScroll);
-  //   };
-  // }, []);
 
   function scrollLeft() {
     if (viewportRef.current) {
@@ -79,7 +66,7 @@ export default function CitiesFilter({
   const router = useRouter();
 
   return (
-    <div className="sticky top-header-height z-10 h-14 border-b bg-white">
+    <div className="sticky top-14 z-20 h-14 border-b bg-white">
       <div className="absolute inset-2">
         <ScrollArea ref={ref} viewportRef={viewportRef}>
           <div className="flex gap-1 pb-2 pl-12 pr-40">
@@ -122,7 +109,6 @@ export default function CitiesFilter({
         </ScrollArea>
       </div>
       <div className="pointer-events-none relative left-0 top-2 inline-block bg-gradient-to-r from-white via-white via-50% to-transparent pr-5">
-        {/* TODO: fix scrollX and only show when scrollX > somethin */}
         <Button
           variant="ghost"
           size="icon"
