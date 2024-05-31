@@ -459,18 +459,20 @@ export const propertiesRouter = createTRPCRouter({
         .findMany({
           columns: { id: true, imageUrls: true, name: true, address: true },
           where: eq(properties.hostTeamId, curTeamId),
-          with: { requestsToProperties: true },
+          with: { requestsToProperties: true, bidsToProperties: true },
         })
         .then((res) =>
           res
             .map((p) => {
-              const { requestsToProperties, ...rest } = p;
+              const { requestsToProperties, bidsToProperties, ...rest } = p;
               return {
                 ...rest,
                 numRequests: requestsToProperties.length,
+                numBids: bidsToProperties.length,
               };
             })
-            .sort((a, b) => b.numRequests - a.numRequests),
+            .sort((a, b) => b.numRequests - a.numRequests)
+            .sort((a, b) => b.numBids - a.numBids),
         );
     },
   ),
