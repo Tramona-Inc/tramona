@@ -1,4 +1,5 @@
-import Document, { Html, Head, Main, NextScript } from "next/document";
+import { env } from "@/env";
+import Document, { Head, Html, Main, NextScript } from "next/document";
 import Script from "next/script";
 import { mulish } from "./_app";
 
@@ -7,6 +8,10 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
+          <Script
+            src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback="PlacesAutocomplete"`}
+            strategy="beforeInteractive"
+          />
           <Script id="clarity-tag" strategy="afterInteractive">
             {`
             (function(c,l,a,r,i,t,y){

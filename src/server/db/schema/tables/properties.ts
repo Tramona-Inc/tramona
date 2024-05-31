@@ -219,7 +219,7 @@ export const bookedDates = pgTable(
   {
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id),
+      .references(() => properties.id, { onDelete: "cascade" }),
     date: date("date", { mode: "date" }).notNull(),
   },
   (t) => ({

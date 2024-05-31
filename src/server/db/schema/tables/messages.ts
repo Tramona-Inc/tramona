@@ -23,7 +23,7 @@ export const messages = pgTable(
     id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
     conversationId: varchar("conversation_id")
       .notNull()
-      .references(() => conversations.id),
+      .references(() => conversations.id, { onDelete: "cascade" }),
     userId: text("user_id").references(() => users.id, {
       onDelete: "set null",
     }),
@@ -45,15 +45,13 @@ export const conversationParticipants = pgTable(
   {
     conversationId: varchar("conversation_id")
       .notNull()
-      .references(() => conversations.id),
+      .references(() => conversations.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
-      .references(() => users.id, {
-        onDelete: "cascade",
-      }),
+      .references(() => users.id, { onDelete: "cascade" }),
   },
-  (tt) => ({
-    compoundKey: primaryKey({ columns: [tt.conversationId, tt.userId] }),
+  (t) => ({
+    compoundKey: primaryKey({ columns: [t.conversationId, t.userId] }),
   }),
 );
 

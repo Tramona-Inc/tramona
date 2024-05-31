@@ -25,17 +25,11 @@ export default function PropertyCounterOptions({
   const { data: session } = useSession();
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-2">
       <div className="flex flex-col">
-        {previousOfferNightlyPrice !== 0 && (
-          <p className="text-xs">
-            <span className="font-bold">Your Previous offer: </span>
-            {formatCurrency(previousOfferNightlyPrice)}/night
-          </p>
-        )}
-        {counterNightlyPrice !== 0 && (
+        {/* {counterNightlyPrice !== 0 && (
           <div>
-            <p className="rounded-sm text-xs">
+            <p className="w-fit rounded-sm border border-[#D9D6D1] bg-[#F2F1EF] px-2 py-1 text-sm font-bold">
               <span className="font-bold">
                 {session?.user.role === "guest" ? "Host" : "Traveller"} Counter
                 offer:{" "}
@@ -43,6 +37,12 @@ export default function PropertyCounterOptions({
               {formatCurrency(counterNightlyPrice)}/night
             </p>
           </div>
+        )} */}
+        {previousOfferNightlyPrice !== 0 && (
+          <p className="px-2 text-xs">
+            <span className="font-bold">Your Previous offer: </span>
+            {formatCurrency(previousOfferNightlyPrice)}/night
+          </p>
         )}
       </div>
       <div className="flex gap-2">
