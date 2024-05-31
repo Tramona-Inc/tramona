@@ -552,4 +552,10 @@ export const offersRouter = createTRPCRouter({
         }
       }
     }),
+
+  getAllUnmatchedOffers: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.offers.findMany({
+      where: isNull(offers.requestId),
+    });
+  }),
 });
