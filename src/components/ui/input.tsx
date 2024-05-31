@@ -8,12 +8,13 @@ import VisibleIcon from "../_icons/VisibleIcon";
 import { cva, type VariantProps } from "class-variance-authority";
 import { FormLabel } from "./form";
 import { Slot } from "@radix-ui/react-slot";
-import { XIcon } from "lucide-react";
 
 // I customized this input component to support prefixes and suffixes.
 // They can be any ReactNode, including strings or JSX elements.
 // Prefixes/suffixes of type string are given default styles,
 // and for <Input type="password">, the suffix is the eyeball button
+
+// make sure to keep this in sync wiwth input-button.tsx (or refactor if u want)
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &
   VariantProps<typeof inputVariants> & {

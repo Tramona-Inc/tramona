@@ -26,6 +26,7 @@ export const offers = pgTable(
     acceptedAt: timestamp("accepted_at"),
     paymentIntentId: varchar("payment_intent_id"),
     checkoutSessionId: varchar("checkout_session_id"),
+    tramonaFee: integer("tramona_fee").notNull().default(0), // in cents
   },
   (t) => ({
     madePublicAtIndex: index().on(t.madePublicAt),

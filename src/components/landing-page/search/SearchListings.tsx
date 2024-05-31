@@ -8,17 +8,19 @@ import { Button } from "@/components/ui/button";
 import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
 import { FilterXIcon } from "lucide-react";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
-
 export default function SearchListings({
   isFilterUndefined,
+  callSiblingFunction,
 }: {
   isFilterUndefined: boolean;
+  callSiblingFunction: () => void;
 }) {
   const filters = useCitiesFilter((state) => state);
 
   // The properties that the map is currently displaying
   const { adjustedProperties } = useAdjustedProperties();
 
+  // Fetching properties based on filters
   const {
     data: properties,
     isLoading,
@@ -46,32 +48,43 @@ export default function SearchListings({
     },
   );
 
-  // a ref to the last property element
+  // Use intersection observer to detect when the user reaches the bottom of the page
   const { entry, ref } = useIntersection({
     root: null, // null means observing in the context of the viewport
     threshold: 1,
   });
 
+  // Fetch more properties when the user reaches the bottom of the page
   useEffect(() => {
-    // if the user reaches the bottom of the page, and there are more properties to fetch, fetch them
     if (
       entry?.isIntersecting &&
       properties?.pages.length &&
       properties.pages[properties.pages.length - 1]?.nextCursor
     ) {
-      void fetchNextPage();
+      if (
+        filters.locationBoundingBox.northeastLat === 0 &&
+        filters.guests === 0
+      ) {
+        console.log("fetching next page for initial properties");
+        void fetchNextPage();
+      } else {
+        console.log("fetched next page of adjusted from listing ");
+        callSiblingFunction();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry]);
 
-  // memoize the properties, so that they don't get re-rendered on every re-render
+  // Use memoization to avoid re-computing properties on every render
   const currentProperties = useMemo(() => {
     if (adjustedProperties !== null) {
+      console.log("using adjusted properties");
       return adjustedProperties.pages.flatMap((page) => page.data);
     }
     return properties?.pages.flatMap((page) => page.data) ?? [];
   }, [adjustedProperties, properties]);
 
+  // Skeleton loading state for better UX
   const skeletons = Array.from({ length: 12 }, (_, index) => (
     <div key={index}>
       <Skeleton className="aspect-square rounded-xl" />
@@ -84,9 +97,14 @@ export default function SearchListings({
     </div>
   ));
 
+  // Main component rendering
   return (
     <section
-      className={`relative grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 ${isFilterUndefined ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"}`}
+      className={`relative grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 ${
+        isFilterUndefined
+          ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+          : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3"
+      }`}
     >
       {isLoading ? (
         // if we're still fetching the initial properties, display the loader
@@ -95,7 +113,13 @@ export default function SearchListings({
         // if there are properties to show, display them
         <>
           {currentProperties.map((property) => (
-            <HomeOfferCard key={property.id} property={property} />
+            <HomeOfferCard
+              key={
+                //we were getting duplicate keys so we added this random number
+                property.id * 11134 * Math.random()
+              }
+              property={property}
+            />
           ))}
           {isFetchingNextPage && skeletons}
           <div ref={ref} className="absolute bottom-[calc(100vh-12rem)]"></div>

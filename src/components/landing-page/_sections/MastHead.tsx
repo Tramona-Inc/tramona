@@ -50,7 +50,7 @@ const infoCards = [
 
 export default function MastHead() {
   return (
-    <section className="relative min-h-screen-minus-header bg-white p-4">
+    <section className="relative bg-white p-4">
       <div className="relative overflow-clip rounded-3xl border">
         <Image
           src={landingBg}
@@ -74,9 +74,9 @@ export default function MastHead() {
                 Book the same properties you see on Airbnb for less
               </h1>
               <p className="text-xs text-white lg:pt-4 lg:text-base">
-                With Airbnb hosts averaging 60% vacancy rates year-round,
-                Tramona matches you with hosts who are willing to meet your
-                price.
+                With Airbnb hosts averaging 60% vacancy rates year-round, hosts
+                use Tramona to fill their calendars by matching with your
+                desired price
               </p>
             </div>
           </div>
