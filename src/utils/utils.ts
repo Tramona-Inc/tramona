@@ -8,6 +8,7 @@ import {
   isSameMonth,
   isSameYear,
 } from "date-fns";
+import { RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -272,3 +273,23 @@ export const generateTimeStamp = () => {
 
   return formattedTimestamp;
 };
+
+export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
+  const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (element) {
+      const handleResize = () => {
+        setIsOverflowing(element.scrollWidth > element.clientWidth);
+      };
+
+      handleResize();
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, [ref]);
+
+  return isOverflowing;
+}

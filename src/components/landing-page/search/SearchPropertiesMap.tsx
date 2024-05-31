@@ -31,8 +31,10 @@ export type MapBoundary = {
 
 function SearchPropertiesMap({
   isFilterUndefined,
+  setFunctionRef,
 }: {
   isFilterUndefined: boolean;
+  setFunctionRef: (ref: any) => void;
 }) {
   //zustand
   const filters = useCitiesFilter((state) => state);
@@ -130,6 +132,12 @@ function SearchPropertiesMap({
 
     return null;
   }, [filters]);
+
+  //w2hen the SearchListing fetched new properties get the query here
+  useEffect(() => {
+    console.log("setting function ref from propertiesMap");
+    setFunctionRef(fetchNextPageOfAdjustedProperties);
+  }, [setFunctionRef]);
 
   // When the filter changes the location, this use effect will pan the map to the new location
   useEffect(() => {

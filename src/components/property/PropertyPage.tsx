@@ -310,15 +310,13 @@ export default function PropertyPage({ property }: { property: Property }) {
         )}
       </section>
       <section id="cancellation" className="scroll-mt-36">
-        <h1 className="text-lg font-semibold md:text-xl">
+        <h2 className="text-lg font-semibold md:text-xl">
           Cancellation Policy
-        </h1>
+        </h2>
         <div className="py-2">
           <p className="text-sm font-medium text-black">
-            {property.cancellationPolicy === null ||
-            property.cancellationPolicy.toLowerCase() === "n/a"
-              ? property.cancellationPolicy
-              : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+            {property.cancellationPolicy ??
+              "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
           </p>
         </div>
       </section>

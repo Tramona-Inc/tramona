@@ -122,10 +122,10 @@ export const referralEarnings = pgTable(
     id: serial("id").primaryKey(),
     referralCode: text("referral_code")
       .notNull()
-      .references(() => referralCodes.referralCode, { onDelete: "set null" }),
+      .references(() => referralCodes.referralCode, { onDelete: "cascade" }),
     refereeId: text("referee_id")
       .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     offerId: integer("offer_id")
       .notNull()
       .references(() => offers.id, { onDelete: "cascade" }),
