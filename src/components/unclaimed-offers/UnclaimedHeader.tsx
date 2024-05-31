@@ -1,26 +1,30 @@
-import { Button } from "../ui/button";
+import Link from "next/link";
+import UnclaimedCitySearch from "./UnclaimedCitySearch";
+import { imageSVG } from "@/components/unclaimed-offers/UnclaimedSVG";
 
 export default function UnclaimedHeader() {
   return (
-    <div className="flex w-5/6 flex-col items-center justify-center">
-      <div className=" flex flex-col items-center justify-center gap-y-1 text-center ">
-        <h1 className="text-4xl font-extrabold">Un-claimed Matches</h1>
-        <p className="mt-2 text-lg">
-          Have a friend thinking of traveling? Share a deal with them and earn a
-          30% revenue split
-        </p>
-        <div className="text-xs">
+    <div className="relative flex w-full flex-row items-center justify-start bg-[#F1F5F5]">
+      <div className=" flex flex-col justify-center gap-y-4 p-20 px-28 text-start">
+        <h1 className="text-5xl font-semibold">Unclaimed Matches</h1>
+        <div className="mt-2 text-lg">
+          Have a friend thinking of traveling? Share a deal with them and earn{" "}
+          <br /> a 30% revenue split.{" "}
+          <Link
+            href="/referral"
+            className="text-teal-700 underline underline-offset-2"
+          >
+            Learn more
+          </Link>
+        </div>
+        <div className="text-sm font-semibold">
           Once they book, the money will be deposited directly to your referral
-          dashboard
+          dashboard.
         </div>
+        <UnclaimedCitySearch />
       </div>
-      <div className="flex w-full flex-row justify-between">
-        <Button variant="outlineLight">How these deals work</Button>
-        <div>
-          {" "}
-          Want an unclaimed match directly sent to you?
-          <p>These are bookable now and they go fast </p>
-        </div>
+      <div className="xl:right-42 absolute bottom-0 hidden rounded-full lg:right-0 lg:block">
+        {imageSVG}
       </div>
     </div>
   );

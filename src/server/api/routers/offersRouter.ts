@@ -15,16 +15,28 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
-  requests,
-  requestsToProperties,
 } from "@/server/db/schema";
 import { getAddress, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  isNotNull,
+  isNull,
+  lt,
+  ne,
+  notInArray,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
+import { requests } from "../../db/schema/tables/requests";
+import { reservationSelectSchema } from "../../db/schema/tables/reservations";
+import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -559,9 +571,35 @@ export const offersRouter = createTRPCRouter({
   getAllUnmatchedOffers: publicProcedure.query(async ({ ctx }) => {
     //go through all the requests and filter out the ones that have an offer that has been accepted
     const completedRequests = await ctx.db.query.requests.findMany({
-      where: {
-        requests.resolvedAt : isNotNull(),
+      where: isNotNull(requests.resolvedAt),
+    });
+    const unMatchedOffers = await ctx.db.query.offers.findMany({
+      where: and(
+        isNull(offers.acceptedAt),
+        // notInArray(
+        //   offers.requestId,
+        //   completedRequests.map((req) => req.id),
+        // ),
+      ),
+      with: {
+        property: {
+          columns: {
+            name: true,
+            originalNightlyPrice: true,
+            imageUrls: true,
+            id: true,
+            maxNumGuests: true,
+            numBedrooms: true,
+          },
+        },
+        request: {
+          columns: {
+            checkIn: true,
+            checkOut: true,
+          },
+        },
       },
     });
+    return unMatchedOffers;
   }),
 });
