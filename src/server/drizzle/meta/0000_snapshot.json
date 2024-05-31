@@ -1,0 +1,2780 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "5",
+  "dialect": "pg",
+  "tables": {
+    "session": {
+      "name": "session",
+      "schema": "",
+      "columns": {
+        "sessionToken": {
+          "name": "sessionToken",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "session_userId_index": {
+          "name": "session_userId_index",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "session_userId_user_id_fk": {
+          "name": "session_userId_user_id_fk",
+          "tableFrom": "session",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "host_profiles": {
+      "name": "host_profiles",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "host_type",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'other'"
+        },
+        "profile_url": {
+          "name": "profile_url",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "became_host_at": {
+          "name": "became_host_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "stripeAccountId": {
+          "name": "stripeAccountId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "charges_enabled": {
+          "name": "charges_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "cur_team_id": {
+          "name": "cur_team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "host_profiles_user_id_index": {
+          "name": "host_profiles_user_id_index",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        },
+        "host_profiles_cur_team_id_index": {
+          "name": "host_profiles_cur_team_id_index",
+          "columns": [
+            "cur_team_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "host_profiles_cur_team_id_host_teams_id_fk": {
+          "name": "host_profiles_cur_team_id_host_teams_id_fk",
+          "tableFrom": "host_profiles",
+          "tableTo": "host_teams",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "cur_team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "host_profiles_user_id_user_id_fk": {
+          "name": "host_profiles_user_id_user_id_fk",
+          "tableFrom": "host_profiles",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "conversations": {
+      "name": "conversations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(21)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "offer_id": {
+          "name": "offer_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "messages": {
+      "name": "messages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(21)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "conversation_id": {
+          "name": "conversation_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "varchar(1500)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "read": {
+          "name": "read",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "is_edit": {
+          "name": "is_edit",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "messages_conversation_id_index": {
+          "name": "messages_conversation_id_index",
+          "columns": [
+            "conversation_id"
+          ],
+          "isUnique": false
+        },
+        "messages_user_id_index": {
+          "name": "messages_user_id_index",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "messages_conversation_id_conversations_id_fk": {
+          "name": "messages_conversation_id_conversations_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "conversations",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "messages_user_id_user_id_fk": {
+          "name": "messages_user_id_user_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "offers": {
+      "name": "offers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_price": {
+          "name": "total_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "made_public_at": {
+          "name": "made_public_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "accepted_at": {
+          "name": "accepted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payment_intent_id": {
+          "name": "payment_intent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checkout_session_id": {
+          "name": "checkout_session_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tramona_fee": {
+          "name": "tramona_fee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "offers_made_public_at_index": {
+          "name": "offers_made_public_at_index",
+          "columns": [
+            "made_public_at"
+          ],
+          "isUnique": false
+        },
+        "offers_accepted_at_index": {
+          "name": "offers_accepted_at_index",
+          "columns": [
+            "accepted_at"
+          ],
+          "isUnique": false
+        },
+        "offers_request_id_index": {
+          "name": "offers_request_id_index",
+          "columns": [
+            "request_id"
+          ],
+          "isUnique": false
+        },
+        "offers_property_id_index": {
+          "name": "offers_property_id_index",
+          "columns": [
+            "property_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "offers_property_id_properties_id_fk": {
+          "name": "offers_property_id_properties_id_fk",
+          "tableFrom": "offers",
+          "tableTo": "properties",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "property_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "offers_request_id_requests_id_fk": {
+          "name": "offers_request_id_requests_id_fk",
+          "tableFrom": "offers",
+          "tableTo": "requests",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "request_groups": {
+      "name": "request_groups",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "has_approved": {
+          "name": "has_approved",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "confirmation_sent_at": {
+          "name": "confirmation_sent_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "have_sent_follow_up": {
+          "name": "have_sent_follow_up",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "request_groups_created_by_user_id_index": {
+          "name": "request_groups_created_by_user_id_index",
+          "columns": [
+            "created_by_user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "request_groups_created_by_user_id_user_id_fk": {
+          "name": "request_groups_created_by_user_id_user_id_fk",
+          "tableFrom": "request_groups",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "referral_codes": {
+      "name": "referral_codes",
+      "schema": "",
+      "columns": {
+        "referral_code": {
+          "name": "referral_code",
+          "type": "varchar(7)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_booking_volume": {
+          "name": "total_booking_volume",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "num_sign_ups_using_code": {
+          "name": "num_sign_ups_using_code",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "num_bookings_using_code": {
+          "name": "num_bookings_using_code",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "owner_id_idx": {
+          "name": "owner_id_idx",
+          "columns": [
+            "owner_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "referral_codes_owner_id_user_id_fk": {
+          "name": "referral_codes_owner_id_user_id_fk",
+          "tableFrom": "referral_codes",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "referral_earnings": {
+      "name": "referral_earnings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "referral_code": {
+          "name": "referral_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referee_id": {
+          "name": "referee_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "offer_id": {
+          "name": "offer_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "earning_status": {
+          "name": "earning_status",
+          "type": "earning_status",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "cashback_earned": {
+          "name": "cashback_earned",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "referral_earnings_referral_code_index": {
+          "name": "referral_earnings_referral_code_index",
+          "columns": [
+            "referral_code"
+          ],
+          "isUnique": false
+        },
+        "referral_earnings_referee_id_index": {
+          "name": "referral_earnings_referee_id_index",
+          "columns": [
+            "referee_id"
+          ],
+          "isUnique": false
+        },
+        "referral_earnings_offer_id_index": {
+          "name": "referral_earnings_offer_id_index",
+          "columns": [
+            "offer_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "referral_earnings_offer_id_offers_id_fk": {
+          "name": "referral_earnings_offer_id_offers_id_fk",
+          "tableFrom": "referral_earnings",
+          "tableTo": "offers",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "offer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "referral_earnings_referee_id_user_id_fk": {
+          "name": "referral_earnings_referee_id_user_id_fk",
+          "tableFrom": "referral_earnings",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "referee_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "referral_earnings_referral_code_referral_codes_referral_code_fk": {
+          "name": "referral_earnings_referral_code_referral_codes_referral_code_fk",
+          "tableFrom": "referral_earnings",
+          "tableTo": "referral_codes",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "referral_code"
+          ],
+          "columnsTo": [
+            "referral_code"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "user": {
+      "name": "user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "emailVerified": {
+          "name": "emailVerified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar(510)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "referral_code_used": {
+          "name": "referral_code_used",
+          "type": "varchar(7)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "role",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'guest'"
+        },
+        "referral_tier": {
+          "name": "referral_tier",
+          "type": "referral_tier",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Partner'"
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_text_at": {
+          "name": "last_text_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "is_whats_app": {
+          "name": "is_whats_app",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_identity_verified": {
+          "name": "is_identity_verified",
+          "type": "is_identity_verified",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'false'"
+        },
+        "verification_report_id": {
+          "name": "verification_report_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_of_birth": {
+          "name": "date_of_birth",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "setup_intent_id": {
+          "name": "setup_intent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profile_url": {
+          "name": "profile_url",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "socials": {
+          "name": "socials",
+          "type": "varchar[]",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'"
+        },
+        "about": {
+          "name": "about",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "user_phone_number_index": {
+          "name": "user_phone_number_index",
+          "columns": [
+            "phone_number"
+          ],
+          "isUnique": false
+        },
+        "user_email_index": {
+          "name": "user_email_index",
+          "columns": [
+            "email"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "groups": {
+      "name": "groups",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "groups_owner_id_user_id_fk": {
+          "name": "groups_owner_id_user_id_fk",
+          "tableFrom": "groups",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "bucket_list_destinations": {
+      "name": "bucket_list_destinations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "planned_check_in": {
+          "name": "planned_check_in",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "planned_check_out": {
+          "name": "planned_check_out",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bucket_list_destinations_user_id_user_id_fk": {
+          "name": "bucket_list_destinations_user_id_user_id_fk",
+          "tableFrom": "bucket_list_destinations",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "bucket_list_properties": {
+      "name": "bucket_list_properties",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bucket_list_properties_property_id_properties_id_fk": {
+          "name": "bucket_list_properties_property_id_properties_id_fk",
+          "tableFrom": "bucket_list_properties",
+          "tableTo": "properties",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "property_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "bucket_list_properties_user_id_user_id_fk": {
+          "name": "bucket_list_properties_user_id_user_id_fk",
+          "tableFrom": "bucket_list_properties",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "counters": {
+      "name": "counters",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "bid_id": {
+          "name": "bid_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "counter_amount": {
+          "name": "counter_amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "status": {
+          "name": "status",
+          "type": "bid_status",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Pending'"
+        },
+        "status_updated_at": {
+          "name": "status_updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "counters_bid_id_index": {
+          "name": "counters_bid_id_index",
+          "columns": [
+            "bid_id"
+          ],
+          "isUnique": false
+        },
+        "counters_property_id_index": {
+          "name": "counters_property_id_index",
+          "columns": [
+            "property_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "counters_bid_id_bids_id_fk": {
+          "name": "counters_bid_id_bids_id_fk",
+          "tableFrom": "counters",
+          "tableTo": "bids",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "bid_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "counters_property_id_properties_id_fk": {
+          "name": "counters_property_id_properties_id_fk",
+          "tableFrom": "counters",
+          "tableTo": "properties",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "property_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "counters_user_id_user_id_fk": {
+          "name": "counters_user_id_user_id_fk",
+          "tableFrom": "counters",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "request_updated_info": {
+      "name": "request_updated_info",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "preferences": {
+          "name": "preferences",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_price_usd_nightly": {
+          "name": "updated_price_usd_nightly",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property_links": {
+          "name": "property_links",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "request_updated_info_request_id_index": {
+          "name": "request_updated_info_request_id_index",
+          "columns": [
+            "request_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "request_updated_info_request_id_requests_id_fk": {
+          "name": "request_updated_info_request_id_requests_id_fk",
+          "tableFrom": "request_updated_info",
+          "tableTo": "requests",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "reservations": {
+      "name": "reservations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "echo_token": {
+          "name": "echo_token",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_in": {
+          "name": "check_in",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "check_out": {
+          "name": "check_out",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_address": {
+          "name": "property_address",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_town": {
+          "name": "property_town",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_country_iso": {
+          "name": "property_country_iso",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "superhog_verification_id": {
+          "name": "superhog_verification_id",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "superhog_reservation_id": {
+          "name": "superhog_reservation_id",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "superhog_status": {
+          "name": "superhog_status",
+          "type": "superhog_status",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'null'"
+        },
+        "name_of_verified_user": {
+          "name": "name_of_verified_user",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "requests": {
+      "name": "requests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "made_by_group_id": {
+          "name": "made_by_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "request_group_id": {
+          "name": "request_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_total_price": {
+          "name": "max_total_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "check_in": {
+          "name": "check_in",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "check_out": {
+          "name": "check_out",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "num_guests": {
+          "name": "num_guests",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "min_num_beds": {
+          "name": "min_num_beds",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "min_num_bedrooms": {
+          "name": "min_num_bedrooms",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "property_type": {
+          "name": "property_type",
+          "type": "property_type",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "note": {
+          "name": "note",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "airbnb_link": {
+          "name": "airbnb_link",
+          "type": "varchar(512)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "min_num_bathrooms": {
+          "name": "min_num_bathrooms",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        }
+      },
+      "indexes": {
+        "requests_made_by_group_id_index": {
+          "name": "requests_made_by_group_id_index",
+          "columns": [
+            "made_by_group_id"
+          ],
+          "isUnique": false
+        },
+        "requests_request_group_id_index": {
+          "name": "requests_request_group_id_index",
+          "columns": [
+            "request_group_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "requests_made_by_group_id_groups_id_fk": {
+          "name": "requests_made_by_group_id_groups_id_fk",
+          "tableFrom": "requests",
+          "tableTo": "groups",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "made_by_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "requests_request_group_id_request_groups_id_fk": {
+          "name": "requests_request_group_id_request_groups_id_fk",
+          "tableFrom": "requests",
+          "tableTo": "request_groups",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "request_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "bids": {
+      "name": "bids",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "made_by_group_id": {
+          "name": "made_by_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "num_guests": {
+          "name": "num_guests",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "check_in": {
+          "name": "check_in",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "check_out": {
+          "name": "check_out",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accepted_at": {
+          "name": "accepted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "setup_intent_id": {
+          "name": "setup_intent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payment_method_id": {
+          "name": "payment_method_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "bid_status",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Pending'"
+        },
+        "status_updated_at": {
+          "name": "status_updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "payment_intent_id": {
+          "name": "payment_intent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "bids_made_by_group_id_index": {
+          "name": "bids_made_by_group_id_index",
+          "columns": [
+            "made_by_group_id"
+          ],
+          "isUnique": false
+        },
+        "bids_property_id_index": {
+          "name": "bids_property_id_index",
+          "columns": [
+            "property_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "bids_made_by_group_id_groups_id_fk": {
+          "name": "bids_made_by_group_id_groups_id_fk",
+          "tableFrom": "bids",
+          "tableTo": "groups",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "made_by_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "bids_property_id_properties_id_fk": {
+          "name": "bids_property_id_properties_id_fk",
+          "tableFrom": "bids",
+          "tableTo": "properties",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "property_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "host_teams": {
+      "name": "host_teams",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "host_teams_owner_id_index": {
+          "name": "host_teams_owner_id_index",
+          "columns": [
+            "owner_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "host_teams_owner_id_user_id_fk": {
+          "name": "host_teams_owner_id_user_id_fk",
+          "tableFrom": "host_teams",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "properties": {
+      "name": "properties",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "host_id": {
+          "name": "host_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "host_team_id": {
+          "name": "host_team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property_type": {
+          "name": "property_type",
+          "type": "property_type",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "room_type": {
+          "name": "room_type",
+          "type": "property_room_type",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Entire place'"
+        },
+        "max_num_guests": {
+          "name": "max_num_guests",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "num_beds": {
+          "name": "num_beds",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "num_bedrooms": {
+          "name": "num_bedrooms",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "num_bathrooms": {
+          "name": "num_bathrooms",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "host_name": {
+          "name": "host_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_in_info": {
+          "name": "check_in_info",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_in_time": {
+          "name": "check_in_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_out_time": {
+          "name": "check_out_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amenities": {
+          "name": "amenities",
+          "type": "varchar[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "other_amenities": {
+          "name": "other_amenities",
+          "type": "varchar[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "about": {
+          "name": "about",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pets_allowed": {
+          "name": "pets_allowed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smoking_allowed": {
+          "name": "smoking_allowed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "other_house_rules": {
+          "name": "other_house_rules",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avg_rating": {
+          "name": "avg_rating",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "num_ratings": {
+          "name": "num_ratings",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "airbnb_url": {
+          "name": "airbnb_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "airbnb_message_url": {
+          "name": "airbnb_message_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "original_nightly_price": {
+          "name": "original_nightly_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "area_description": {
+          "name": "area_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "map_screenshot": {
+          "name": "map_screenshot",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "is_private": {
+          "name": "is_private",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "cancellation_policy": {
+          "name": "cancellation_policy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "properties_host_id_user_id_fk": {
+          "name": "properties_host_id_user_id_fk",
+          "tableFrom": "properties",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "host_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "conversation_participants": {
+      "name": "conversation_participants",
+      "schema": "",
+      "columns": {
+        "conversation_id": {
+          "name": "conversation_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "conversation_participants_conversation_id_conversations_id_fk": {
+          "name": "conversation_participants_conversation_id_conversations_id_fk",
+          "tableFrom": "conversation_participants",
+          "tableTo": "conversations",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversation_participants_user_id_user_id_fk": {
+          "name": "conversation_participants_user_id_user_id_fk",
+          "tableFrom": "conversation_participants",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "conversation_participants_conversation_id_user_id_pk": {
+          "name": "conversation_participants_conversation_id_user_id_pk",
+          "columns": [
+            "conversation_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "group_members": {
+      "name": "group_members",
+      "schema": "",
+      "columns": {
+        "group_id": {
+          "name": "group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "group_members_group_id_groups_id_fk": {
+          "name": "group_members_group_id_groups_id_fk",
+          "tableFrom": "group_members",
+          "tableTo": "groups",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "group_members_user_id_user_id_fk": {
+          "name": "group_members_user_id_user_id_fk",
+          "tableFrom": "group_members",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "group_members_group_id_user_id_pk": {
+          "name": "group_members_group_id_user_id_pk",
+          "columns": [
+            "group_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "booked_dates": {
+      "name": "booked_dates",
+      "schema": "",
+      "columns": {
+        "property_id": {
+          "name": "property_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "booked_dates_property_id_index": {
+          "name": "booked_dates_property_id_index",
+          "columns": [
+            "property_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "booked_dates_property_id_properties_id_fk": {
+          "name": "booked_dates_property_id_properties_id_fk",
+          "tableFrom": "booked_dates",
+          "tableTo": "properties",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "property_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "booked_dates_date_property_id_pk": {
+          "name": "booked_dates_date_property_id_pk",
+          "columns": [
+            "property_id",
+            "date"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "requests_to_properties": {
+      "name": "requests_to_properties",
+      "schema": "",
+      "columns": {
+        "request_id": {
+          "name": "request_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "requests_to_properties_property_id_properties_id_fk": {
+          "name": "requests_to_properties_property_id_properties_id_fk",
+          "tableFrom": "requests_to_properties",
+          "tableTo": "properties",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "property_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "requests_to_properties_request_id_requests_id_fk": {
+          "name": "requests_to_properties_request_id_requests_id_fk",
+          "tableFrom": "requests_to_properties",
+          "tableTo": "requests",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "requests_to_properties_request_id_property_id_pk": {
+          "name": "requests_to_properties_request_id_property_id_pk",
+          "columns": [
+            "request_id",
+            "property_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "host_team_members": {
+      "name": "host_team_members",
+      "schema": "",
+      "columns": {
+        "host_team_id": {
+          "name": "host_team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "host_team_members_host_team_id_host_teams_id_fk": {
+          "name": "host_team_members_host_team_id_host_teams_id_fk",
+          "tableFrom": "host_team_members",
+          "tableTo": "host_teams",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "host_team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "host_team_members_user_id_user_id_fk": {
+          "name": "host_team_members_user_id_user_id_fk",
+          "tableFrom": "host_team_members",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "host_team_members_host_team_id_user_id_pk": {
+          "name": "host_team_members_host_team_id_user_id_pk",
+          "columns": [
+            "host_team_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "verificationToken": {
+      "name": "verificationToken",
+      "schema": "",
+      "columns": {
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "verificationToken_identifier_token_pk": {
+          "name": "verificationToken_identifier_token_pk",
+          "columns": [
+            "identifier",
+            "token"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "group_invites": {
+      "name": "group_invites",
+      "schema": "",
+      "columns": {
+        "group_id": {
+          "name": "group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invitee_email": {
+          "name": "invitee_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "group_invites_group_id_groups_id_fk": {
+          "name": "group_invites_group_id_groups_id_fk",
+          "tableFrom": "group_invites",
+          "tableTo": "groups",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "group_invites_group_id_invitee_email_pk": {
+          "name": "group_invites_group_id_invitee_email_pk",
+          "columns": [
+            "group_id",
+            "invitee_email"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "host_team_invites": {
+      "name": "host_team_invites",
+      "schema": "",
+      "columns": {
+        "host_team_id": {
+          "name": "host_team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invitee_email": {
+          "name": "invitee_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "host_team_invites_host_team_id_index": {
+          "name": "host_team_invites_host_team_id_index",
+          "columns": [
+            "host_team_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "host_team_invites_host_team_id_host_teams_id_fk": {
+          "name": "host_team_invites_host_team_id_host_teams_id_fk",
+          "tableFrom": "host_team_invites",
+          "tableTo": "host_teams",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "host_team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "host_team_invites_host_team_id_invitee_email_pk": {
+          "name": "host_team_invites_host_team_id_invitee_email_pk",
+          "columns": [
+            "host_team_id",
+            "invitee_email"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "account": {
+      "name": "account",
+      "schema": "",
+      "columns": {
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "providerAccountId": {
+          "name": "providerAccountId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "token_type": {
+          "name": "token_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session_state": {
+          "name": "session_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "account_userId_user_id_fk": {
+          "name": "account_userId_user_id_fk",
+          "tableFrom": "account",
+          "tableTo": "user",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "account_provider_providerAccountId_pk": {
+          "name": "account_provider_providerAccountId_pk",
+          "columns": [
+            "provider",
+            "providerAccountId"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {
+    "key_status": {
+      "name": "key_status",
+      "values": {
+        "default": "default",
+        "valid": "valid",
+        "invalid": "invalid",
+        "expired": "expired"
+      }
+    },
+    "key_type": {
+      "name": "key_type",
+      "values": {
+        "aead-ietf": "aead-ietf",
+        "aead-det": "aead-det",
+        "hmacsha512": "hmacsha512",
+        "hmacsha256": "hmacsha256",
+        "auth": "auth",
+        "shorthash": "shorthash",
+        "generichash": "generichash",
+        "kdf": "kdf",
+        "secretbox": "secretbox",
+        "secretstream": "secretstream",
+        "stream_xchacha20": "stream_xchacha20"
+      }
+    },
+    "property_room_type": {
+      "name": "property_room_type",
+      "values": {
+        "Entire place": "Entire place",
+        "Shared room": "Shared room",
+        "Private room": "Private room",
+        "Other": "Other",
+        "Flexible": "Flexible"
+      }
+    },
+    "property_amenities": {
+      "name": "property_amenities",
+      "values": {
+        "Street Parking": "Street Parking",
+        "Garage Parking": "Garage Parking",
+        "Ev charging": "Ev charging",
+        "Driveway parking": "Driveway parking",
+        "Wifi": "Wifi",
+        "TV": "TV",
+        "Kitchen": "Kitchen",
+        "Washer": "Washer",
+        "Free parking on premises": "Free parking on premises",
+        "Paid parking on premises": "Paid parking on premises",
+        "Air conditioning": "Air conditioning",
+        "Dedicated workspace": "Dedicated workspace",
+        "Couch": "Couch",
+        "Carbon monoxide detector": "Carbon monoxide detector",
+        "Emergency exit": "Emergency exit",
+        "Fire extinguisher": "Fire extinguisher",
+        "First aid kit": "First aid kit",
+        "Smoke detector": "Smoke detector",
+        "Desk": "Desk",
+        "Internet": "Internet",
+        "Laptop friendly workspace": "Laptop friendly workspace",
+        "Pocket wifi": "Pocket wifi",
+        "Wireless Internet": "Wireless Internet",
+        "Coffee maker": "Coffee maker",
+        "Cookware": "Cookware",
+        "Dishes and silverware": "Dishes and silverware",
+        "Dishwasher": "Dishwasher",
+        "Kettle": "Kettle",
+        "Microwave": "Microwave",
+        "Oven": "Oven",
+        "Freezer": "Freezer",
+        "Refrigerator": "Refrigerator",
+        "Stove": "Stove",
+        "Toaster": "Toaster",
+        "Beach": "Beach",
+        "Beach Front": "Beach Front",
+        "Beach View": "Beach View",
+        "Downtown": "Downtown",
+        "Golf course front": "Golf course front",
+        "Golf view": "Golf view",
+        "Lake": "Lake",
+        "Lake access": "Lake access",
+        "Lake Front": "Lake Front",
+        "Mountain": "Mountain",
+        "Mountain view": "Mountain view",
+        "Near Ocean": "Near Ocean",
+        "Ocean Front": "Ocean Front",
+        "Resort": "Resort",
+        "River": "River",
+        "Rural": "Rural",
+        "Sea view": "Sea view",
+        "Ski In": "Ski In",
+        "Ski in/Ski out": "Ski in/Ski out",
+        "Ski Out": "Ski Out",
+        "Town": "Town",
+        "Village": "Village",
+        "Water View": "Water View",
+        "Waterfront": "Waterfront",
+        "Outdoor pool": "Outdoor pool",
+        "Garden or backyard": "Garden or backyard",
+        "Bicycles available": "Bicycles available",
+        "Patio or balcony": "Patio or balcony",
+        "BBQ grill": "BBQ grill",
+        "Beach essentials": "Beach essentials",
+        "Elevator": "Elevator",
+        "Indoor pool": "Indoor pool",
+        "Hot tub": "Hot tub",
+        "Gym": "Gym",
+        "Swimming pool": "Swimming pool",
+        "Communal pool": "Communal pool",
+        "Free parking on street": "Free parking on street",
+        "EV charger": "EV charger",
+        "Single level home": "Single level home",
+        "Private pool": "Private pool",
+        "Paid parking off premises": "Paid parking off premises",
+        "Breakfast": "Breakfast",
+        "Long term stays allowed": "Long term stays allowed",
+        "Luggage dropoff allowed": "Luggage dropoff allowed",
+        "High touch surfaces disinfected": "High touch surfaces disinfected",
+        "Enhanced cleaning practices": "Enhanced cleaning practices",
+        "Doorman": "Doorman",
+        "Cleaning Disinfection": "Cleaning Disinfection",
+        "Cleaning before checkout": "Cleaning before checkout",
+        "Grab-rails for shower and toilet": "Grab-rails for shower and toilet",
+        "Tub with shower bench": "Tub with shower bench",
+        "Wheelchair accessible": "Wheelchair accessible",
+        "Wide clearance to bed": "Wide clearance to bed",
+        "Wide clearance to shower and toilet": "Wide clearance to shower and toilet",
+        "Wide hallway clearance": "Wide hallway clearance",
+        "Accessible-height toilet": "Accessible-height toilet",
+        "Accessible-height bed": "Accessible-height bed",
+        "Outdoor dining area": "Outdoor dining area",
+        "Pool table": "Pool table",
+        "Piano": "Piano",
+        "Exercise equipment": "Exercise equipment",
+        "Fire pit": "Fire pit",
+        "Outdoor shower": "Outdoor shower",
+        "Private entrance": "Private entrance",
+        "Pets Allowed": "Pets Allowed",
+        "Dishes & silverware": "Dishes & silverware",
+        "Dining table and chairs": "Dining table and chairs",
+        "Bathtub": "Bathtub",
+        "Hair dryer": "Hair dryer",
+        "Hot water": "Hot water",
+        "Shampoo": "Shampoo",
+        "Essentials": "Essentials",
+        "Bed linens": "Bed linens",
+        "Dryer": "Dryer",
+        "Dryer in common space": "Dryer in common space",
+        "Extra pillows and blankets": "Extra pillows and blankets",
+        "Hangers": "Hangers",
+        "Iron": "Iron",
+        "Room-darkening shades": "Room-darkening shades",
+        "Safe": "Safe",
+        "Towels provided": "Towels provided",
+        "Washer in common space": "Washer in common space",
+        "Cable TV": "Cable TV",
+        "Dvd player": "Dvd player",
+        "Game console": "Game console",
+        "Stereo system": "Stereo system",
+        "Baby bath": "Baby bath",
+        "Baby monitor": "Baby monitor",
+        "Babysitter recommendations": "Babysitter recommendations",
+        "Children’s books and toys": "Children’s books and toys",
+        "Changing table": "Changing table",
+        "Children’s dinnerware": "Children’s dinnerware",
+        "Crib": "Crib",
+        "Family/kid friendly": "Family/kid friendly",
+        "Fireplace guards": "Fireplace guards",
+        "High chair": "High chair",
+        "Outlet covers": "Outlet covers",
+        "Pack ’n Play/travel crib": "Pack ’n Play/travel crib",
+        "Stair gates": "Stair gates",
+        "Table corner guards": "Table corner guards",
+        "Window guards": "Window guards",
+        "Heating": "Heating",
+        "Indoor fireplace": "Indoor fireplace"
+      }
+    },
+    "factor_type": {
+      "name": "factor_type",
+      "values": {
+        "totp": "totp",
+        "webauthn": "webauthn"
+      }
+    },
+    "factor_status": {
+      "name": "factor_status",
+      "values": {
+        "unverified": "unverified",
+        "verified": "verified"
+      }
+    },
+    "aal_level": {
+      "name": "aal_level",
+      "values": {
+        "aal1": "aal1",
+        "aal2": "aal2",
+        "aal3": "aal3"
+      }
+    },
+    "code_challenge_method": {
+      "name": "code_challenge_method",
+      "values": {
+        "s256": "s256",
+        "plain": "plain"
+      }
+    },
+    "host_type": {
+      "name": "host_type",
+      "values": {
+        "airbnb": "airbnb",
+        "direct": "direct",
+        "vrbo": "vrbo",
+        "other": "other"
+      }
+    },
+    "property_safety_items": {
+      "name": "property_safety_items",
+      "values": {
+        "Smoke alarm": "Smoke alarm",
+        "First aid kit": "First aid kit",
+        "Fire extinguisher": "Fire extinguisher",
+        "Carbon monoxide alarm": "Carbon monoxide alarm"
+      }
+    },
+    "property_standout_amenities": {
+      "name": "property_standout_amenities",
+      "values": {
+        "Pool": "Pool",
+        "Hot tub": "Hot tub",
+        "Patio": "Patio",
+        "BBQ grill": "BBQ grill",
+        "Outdoor dining area": "Outdoor dining area",
+        "Fire pit": "Fire pit",
+        "Pool table": "Pool table",
+        "Indoor fireplace": "Indoor fireplace",
+        "Piano": "Piano",
+        "Exercise equipment": "Exercise equipment",
+        "Lake access": "Lake access",
+        "Beach access": "Beach access",
+        "Ski-in/Ski-out": "Ski-in/Ski-out",
+        "Outdoor shower": "Outdoor shower"
+      }
+    },
+    "property_type": {
+      "name": "property_type",
+      "values": {
+        "house": "house",
+        "guesthouse": "guesthouse",
+        "apartment": "apartment",
+        "room": "room",
+        "townhouse": "townhouse",
+        "Condominium": "Condominium",
+        "Apartment": "Apartment",
+        "Guesthouse": "Guesthouse",
+        "House": "House",
+        "Loft": "Loft",
+        "Boat": "Boat",
+        "Camper/RV": "Camper/RV",
+        "Chalet": "Chalet",
+        "Bed & Breakfast": "Bed & Breakfast",
+        "Villa": "Villa",
+        "Tent": "Tent",
+        "Cabin": "Cabin",
+        "Townhouse": "Townhouse",
+        "Bungalow": "Bungalow",
+        "Hut": "Hut",
+        "Other": "Other",
+        "Home": "Home",
+        "Hotels": "Hotels",
+        "Alternative": "Alternative",
+        "Studio": "Studio",
+        "Aparthotel": "Aparthotel",
+        "Hotel": "Hotel",
+        "Yurt": "Yurt",
+        "Treehouse": "Treehouse",
+        "Cottage": "Cottage",
+        "Guest suite": "Guest suite",
+        "Tiny house": "Tiny house",
+        "Bed & breakfast": "Bed & breakfast",
+        "Camper/rv": "Camper/rv",
+        "Serviced apartment": "Serviced apartment"
+      }
+    },
+    "earning_status": {
+      "name": "earning_status",
+      "values": {
+        "pending": "pending",
+        "paid": "paid",
+        "cancelled": "cancelled"
+      }
+    },
+    "referral_tier": {
+      "name": "referral_tier",
+      "values": {
+        "Partner": "Partner",
+        "Ambassador": "Ambassador"
+      }
+    },
+    "role": {
+      "name": "role",
+      "values": {
+        "guest": "guest",
+        "host": "host",
+        "admin": "admin"
+      }
+    },
+    "equality_op": {
+      "name": "equality_op",
+      "values": {
+        "eq": "eq",
+        "neq": "neq",
+        "lt": "lt",
+        "lte": "lte",
+        "gt": "gt",
+        "gte": "gte",
+        "in": "in"
+      }
+    },
+    "action": {
+      "name": "action",
+      "values": {
+        "INSERT": "INSERT",
+        "UPDATE": "UPDATE",
+        "DELETE": "DELETE",
+        "TRUNCATE": "TRUNCATE",
+        "ERROR": "ERROR"
+      }
+    },
+    "is_identity_verified": {
+      "name": "is_identity_verified",
+      "values": {
+        "false": "false",
+        "true": "true",
+        "pending": "pending"
+      }
+    },
+    "bid_status": {
+      "name": "bid_status",
+      "values": {
+        "Pending": "Pending",
+        "Accepted": "Accepted",
+        "Rejected": "Rejected",
+        "Cancelled": "Cancelled"
+      }
+    },
+    "superhog_status": {
+      "name": "superhog_status",
+      "values": {
+        "Approved": "Approved",
+        "Flagged": "Flagged",
+        "Rejected": "Rejected",
+        "Pending": "Pending",
+        "null": "null"
+      }
+    },
+    "one_time_token_type": {
+      "name": "one_time_token_type",
+      "values": {
+        "confirmation_token": "confirmation_token",
+        "reauthentication_token": "reauthentication_token",
+        "recovery_token": "recovery_token",
+        "email_change_token_new": "email_change_token_new",
+        "email_change_token_current": "email_change_token_current",
+        "phone_change_token": "phone_change_token"
+      }
+    }
+  },
+  "schemas": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}

@@ -84,6 +84,16 @@ export const users = pgTable(
       .default(sql`'{}'`),
     about: text("about"),
     // destinations: varchar("destinations").array(),
+    offerByHostEmail: boolean("offerByHostEmail").default(false).notNull(),
+    responseByHostEmail: boolean("responseByHostEmail").default(false).notNull(),
+    tripUpdatesEmail: boolean("tripUpdatesEmail").default(false).notNull(),
+    msgByHostEmail: boolean("msgByHostEmail").default(false).notNull(),
+    offerByHostText: boolean("offerByHostText").default(false).notNull(),
+    responseByHostText: boolean("responseByHostText").default(false).notNull(),
+    tripUpdatesText: boolean("tripUpdatesText").default(false).notNull(),
+    expirationMsgText: boolean("expirationMsgText").default(false).notNull(),
+    mandatoryText:boolean("mandatoryText").default(true).notNull(),
+    mandatoryEmail:boolean("mandatoryEmail").default(true).notNull()
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),

@@ -1,4 +1,4 @@
-import { CreditCard, User } from "lucide-react";
+import { CreditCard, User, Bell } from "lucide-react";
 import Link from "next/link";
 
 export default function SettingsSidebar() {
@@ -25,7 +25,7 @@ export default function SettingsSidebar() {
           </div>
         </Link>
         <Link
-          href="/settings/notifications"
+          href="/settings/notificationsLogic"
           className="rounded-lg hover:bg-zinc-100"
         >
           <div className="flex items-center gap-2 p-2">
