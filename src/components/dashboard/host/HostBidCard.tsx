@@ -1,3 +1,5 @@
+import { getBadgeColor } from "@/components/host/HostPropertyOfferCard";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import {
@@ -14,6 +16,7 @@ import {
   plural,
 } from "@/utils/utils";
 import { CheckIcon, ChevronDownIcon, RefreshCw, XIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import AcceptBidDialog from "./AcceptBidDialog";
 import { CounterBidDialog } from "./CounterBidDialog";
@@ -33,6 +36,29 @@ export default function HostBidCard({
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [counterDialogOpen, setCounterDialogOpen] = useState(false);
 
+  const { data: session } = useSession();
+
+  const counters = bid.counters[0];
+
+  const userCanCounter =
+    bid.counters.length > 0 &&
+    counters &&
+    counters.status === "Pending" &&
+    counters.userId !== session?.user.id &&
+    bid.status !== "Rejected" &&
+    bid.status !== "Accepted";
+
+  const badge = (
+    <Badge variant={getBadgeColor(bid.status)}>
+      {userCanCounter ? "Counter Offer" : bid.status}
+    </Badge>
+  );
+
+  const counterNightlyPrice = (bid.counters[0]?.counterAmount ?? 0) / numNights;
+  const previousOfferNightlyPrice =
+    (bid.counters[1]?.counterAmount ?? 0) / numNights;
+  const originalNightlyBiddingOffer = bid.amount / numNights;
+
   return (
     <>
       <AcceptBidDialog
@@ -44,12 +70,30 @@ export default function HostBidCard({
         offerId={bid.id}
         open={counterDialogOpen}
         setOpen={setCounterDialogOpen}
-        counterNightlyPrice={bid.counters[0]?.counterAmount ?? 0}
-        previousOfferNightlyPrice={bid.counters[0]?.counterAmount ?? 0}
-        originalNightlyBiddingOffer={bid.amount / numNights}
+        counterNightlyPrice={counterNightlyPrice}
+        previousOfferNightlyPrice={previousOfferNightlyPrice}
+        originalNightlyBiddingOffer={originalNightlyBiddingOffer}
       />
       <Card>
-        <CardHeader>Counter Offer</CardHeader>
+        <CardHeader>
+          <div>{badge}</div>
+          <div>
+            {previousOfferNightlyPrice !== 0 && (
+              <p className="text-xs">
+                <span className="font-bold">Your Previous offer: </span>
+                {formatCurrency(previousOfferNightlyPrice)}/night
+              </p>
+            )}
+            {counterNightlyPrice !== 0 && (
+              <div>
+                <p className="rounded-sm text-xs">
+                  <span className="font-bold">Traveller Counter offer: </span>
+                  {formatCurrency(counterNightlyPrice)}/night
+                </p>
+              </div>
+            )}
+          </div>
+        </CardHeader>
         <div className="flex items-end gap-4">
           <div>
             <div className="font-semibold">{fmtdPricePerNight}/night</div>

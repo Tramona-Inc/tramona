@@ -295,7 +295,7 @@ export const biddingRouter = createTRPCRouter({
         with: {
           counters: {
             orderBy: (counters, { desc }) => [desc(counters.createdAt)],
-            limit: 1,
+            limit: 2,
             columns: {
               id: true,
               counterAmount: true,

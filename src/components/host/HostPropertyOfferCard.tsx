@@ -26,7 +26,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Separator } from "../ui/separator";
-function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
+
+export function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
     case "Pending":
       return "yellow";
