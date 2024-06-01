@@ -118,8 +118,8 @@ export default function WelcomeEmail({ name }: { name: string }) {
           />
         </div>
         <div style={{ float: 'right' }}>
-          {/* <a href="https://www.instagram.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
-            <Instagram />
+          <a href="https://www.instagram.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
+            {/* <Instagram /> */}
             <img
             src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
             alt="Tramona Logo"
@@ -127,14 +127,14 @@ export default function WelcomeEmail({ name }: { name: string }) {
             />
           </a>
           <a href="https://www.facebook.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
-            <Facebook />
+            {/* <Facebook /> */}
             <img
             src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
             alt="Tramona Logo"
             style={{ width: '32px' }}
             />
           </a>
-          <a href="https://www.linkedin.com/company/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
+          {/* <a href="https://www.linkedin.com/company/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
             <Linkedin />
           </a> */}
         </div>
