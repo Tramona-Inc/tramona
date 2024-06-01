@@ -5,7 +5,7 @@ import {
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
@@ -61,19 +61,6 @@ export default function TravelerPage({
     isBucketListProperty,
     setInitialBucketList,
   ]);
-
-  const { data: bids } = api.biddings.getMyBids.useQuery();
-
-  useEffect(() => {
-    if (!handledacceptedBid && bids) {
-      const bid = bids.find((bid) => bid.status === "Accepted");
-      if (bid) {
-        setacceptedBid(bid);
-        setOpen(true);
-        setHandledacceptedBid(true);
-      }
-    }
-  }, [bids, handledacceptedBid]);
 
   return (
     <VerificationProvider>
