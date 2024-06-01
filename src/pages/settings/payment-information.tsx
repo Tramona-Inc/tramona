@@ -36,7 +36,7 @@ export default function PaymentInformation() {
           <Link href="/settings" className="inline-block lg:hidden">
             <ChevronLeft />
           </Link>
-          <h1 className="text-lg font-bold">Payment Method</h1>
+          <h2 className="text-lg font-bold">Payment Method</h2>
 
           <Elements stripe={stripePromise} options={options}>
             <AddPaymentInfoForm />
@@ -44,13 +44,17 @@ export default function PaymentInformation() {
         </div>
 
         <div className="space-y-4 rounded-lg border bg-white p-4">
-          <h1 className="text-lg font-bold">Saved Cards</h1>
+          <h2 className="text-lg font-bold">Saved Cards</h2>
 
-          {payments && payments.cards.data.length > 0 && (
+          {payments && payments.cards.data.length > 0 ? (
             <div className="space-y-5">
               {payments.cards.data.map((payment) => (
                 <Card key={payment.id} payment={payment} />
               ))}
+            </div>
+          ) : (
+            <div className=" py-4 text-muted-foreground">
+              No saved cards yet
             </div>
           )}
         </div>

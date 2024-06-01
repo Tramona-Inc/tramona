@@ -274,7 +274,7 @@ export const propertiesRouter = createTRPCRouter({
               : sql`true`,
           ),
         )
-        .limit(12)
+        .limit(15)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {

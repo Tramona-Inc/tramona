@@ -2,7 +2,6 @@ import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import {
   Dialog,
   DialogContent,
@@ -14,9 +13,7 @@ import { api, type RouterOutputs } from "@/utils/api";
 import {
   formatCurrency,
   formatDateRange,
-  getDiscountPercentage,
   getNumNights,
-  getTramonaFeeTotal,
   plural,
 } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
@@ -65,10 +62,10 @@ export default function OfferPage({
   const offerNightlyPrice =
     offer.totalPrice / getNumNights(request.checkIn, request.checkOut);
 
-  const discountPercentage = getDiscountPercentage(
-    property.originalNightlyPrice ?? 0,
-    offerNightlyPrice ?? 0,
-  );
+  // const discountPercentage = getDiscountPercentage(
+  //   property.originalNightlyPrice ?? 0,
+  //   offerNightlyPrice ?? 0,
+  // );
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
   if (property.originalNightlyPrice === null) {
@@ -76,9 +73,7 @@ export default function OfferPage({
   }
   const originalTotal = property.originalNightlyPrice * numNights;
 
-  const tramonaServiceFee = getTramonaFeeTotal(
-    originalTotal - offer.totalPrice,
-  );
+  const tramonaServiceFee = offer.tramonaFee;
 
   // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
@@ -87,26 +82,20 @@ export default function OfferPage({
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
   const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
-  const firstImageUrl: string = property.imageUrls?.[0] ?? "";
+  const firstImageUrl = property.imageUrls[0]!;
   return (
     <div className="space-y-4">
       <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
         <Dialog>
           {isMobile ? (
             // Only render the first image on small screens
-            <div className="">
+            <div>
               <DialogTrigger
                 key={0}
                 onClick={() => setIndexOfSelectedImage(0)}
                 className="hover:opacity-90"
               >
-                <Image
-                  src={firstImageUrl}
-                  alt=""
-                  fill
-                  objectFit="cover"
-                  className=""
-                />
+                <Image src={firstImageUrl} alt="" fill objectFit="cover" />
               </DialogTrigger>
             </div>
           ) : (
@@ -122,13 +111,7 @@ export default function OfferPage({
                   onClick={() => setIndexOfSelectedImage(index)}
                   className="hover:opacity-90"
                 >
-                  <Image
-                    src={imageUrl}
-                    alt=""
-                    fill
-                    objectFit="cover"
-                    className=""
-                  />
+                  <Image src={imageUrl} alt="" fill objectFit="cover" />
                 </DialogTrigger>
               </div>
             ))
@@ -304,7 +287,7 @@ export default function OfferPage({
 
                 <DialogContent className="max-w-4xl">
                   <DialogHeader>
-                    <DialogTitle className="">Amenities</DialogTitle>
+                    <DialogTitle>Amenities</DialogTitle>
                   </DialogHeader>
                   <div className="max-h-96 overflow-y-scroll">
                     <AmenitiesComponent
@@ -321,16 +304,14 @@ export default function OfferPage({
             </h1>
             <div className="py-2">
               <p className="text-sm font-medium text-black">
-                {property.cancellationPolicy === null ||
-                property.cancellationPolicy.toLowerCase() === "n/a"
-                  ? property.cancellationPolicy
-                  : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+                {property.cancellationPolicy ??
+                  "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
               </p>
             </div>
           </section>
         </div>
         <div className="flex-1">
-          <Card className="">
+          <Card>
             <div>
               <h2 className="flex items-center text-3xl font-semibold">
                 {formatCurrency(offerNightlyPrice)}
@@ -472,11 +453,6 @@ export default function OfferPage({
           </section>
         </div>
       )}
-      <div className="bg-accent px-4 py-1">
-        this is the house link
-        <span className="mx-3 ">This is the house link</span>
-        Share with your friends
-      </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { formatCurrency } from "@/utils/utils";
 import { Poi } from "./SearchPropertiesMap";
 import { useCallback, useState } from "react";
 import Image from "next/image";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 
 const PoiMarkers = (props: { pois: Poi[] | [] }) => {
   const [markerRef, marker] = useAdvancedMarkerRef();
@@ -16,7 +17,6 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
   const [infoWindowShownIndex, setInfoWindowShownIndex] = useState<
     number | null
   >(null);
-
   const map = useMap("9c8e46d54d7a528b");
   const router = useRouter();
 
@@ -48,7 +48,10 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
           >
             <div className="flex flex-col items-center justify-center">
               <div className="z-40 rounded-xl bg-zinc-700 p-2 text-white">
-                {formatCurrency(poi.originalNightlyPrice).trim()}/night
+                {formatCurrency(
+                  poi.originalNightlyPrice * AVG_AIRBNB_MARKUP,
+                ).trim()}
+                /night
               </div>
             </div>
           </AdvancedMarker>
@@ -73,7 +76,10 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
                   {poi.key}
                   <span className="text-center text-sm font-semibold ">
                     {" "}
-                    {formatCurrency(poi.originalNightlyPrice)}/night{" "}
+                    {formatCurrency(
+                      poi.originalNightlyPrice * AVG_AIRBNB_MARKUP,
+                    )}
+                    /night{" "}
                   </span>
                 </div>
               </div>

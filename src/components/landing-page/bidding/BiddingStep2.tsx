@@ -27,9 +27,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import BidPaymentForm from "./BidPaymentForm";
 
-function BiddingInfoCard({ property }: { property: Property }) {
+function BiddingInfoCard({ property, price }: { property: Property, price: number}) {
   const date = useBidding((state) => state.date);
-  const price = useBidding((state) => state.price);
+  // const price = useBidding((state) => state.price);
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
   const totalPrice = totalNightlyPrice;
 
@@ -107,9 +107,11 @@ function BiddingInfoCard({ property }: { property: Property }) {
 function BiddingStep2({
   property,
   setStep,
+  price,
 }: {
   property: Property;
   setStep: (step: number) => void;
+  price: number;
 }) {
   const addPropertyIdBids = useBidding((state) => state.addPropertyIdBids);
   const { data: payments } = api.stripe.getListOfPayments.useQuery();
@@ -120,7 +122,7 @@ function BiddingStep2({
   const [error, setError] = useState("");
 
   const date = useBidding((state) => state.date);
-  const price = useBidding((state) => state.price);
+  // const price = useBidding((state) => state.price);
   const guest = useBidding((state) => state.guest);
   // const setStep = useBidding((state) => state.setStep);
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
@@ -196,7 +198,7 @@ function BiddingStep2({
       <h1 className="text-lg font-semibold tracking-tight md:text-3xl">
         Step 2 of 2: Confirm Payment{" "}
       </h1>
-      <BiddingInfoCard property={property} />
+      <BiddingInfoCard property={property} price={price}/>
       <div className="mt-4 w-[300px] md:w-[500px]">
         {payments && payments.cards.data.length > 0 ? (
           <div className="space-y-5">

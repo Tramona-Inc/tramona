@@ -79,9 +79,7 @@ export default function OfferCardNoBid({
           <CarouselDots count={count} current={current} />
         </Carousel>
         <div className="flex flex-col">
-          <p className="max-w-full overflow-hidden text-ellipsis text-nowrap font-semibold">
-            {property.name}
-          </p>
+          <p className="truncate font-semibold">{property.name}</p>
           <p className="text-xs font-light">
             {plural(property.maxNumGuests, "guest")},{" "}
             {plural(property.numBedrooms, "bedroom")},{" "}

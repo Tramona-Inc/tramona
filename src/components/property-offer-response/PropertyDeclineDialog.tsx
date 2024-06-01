@@ -39,7 +39,6 @@ export default function PropertyDeclineDialog({
   });
   const slackMutation = api.twilio.sendSlack.useMutation();
 
-
   const getTraveler = api.groups.getGroupOwner.useMutation();
 
   const { mutate } = api.biddings.reject.useMutation({
@@ -107,16 +106,15 @@ export default function PropertyDeclineDialog({
         <Button variant={"secondaryLight"}>Decline</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>Are you sure you want to withdraw this offer?</DialogTitle>
-        <p>
-          Your offer will be permanently withdrawn. You can not undo this
-          action.
-        </p>
+        <DialogTitle>Are you sure you want to decline this offer?</DialogTitle>
+        <p>You can not undo this action.</p>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant={"secondary"}>Cancel</Button>
           </DialogClose>
-          <Button onClick={handleDecline}>Withdraw Offer</Button>
+          <Button disabled={isLoading} onClick={handleDecline}>
+            Decline Offer
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
