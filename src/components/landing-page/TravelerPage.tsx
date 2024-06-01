@@ -5,7 +5,7 @@ import {
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
@@ -19,6 +19,7 @@ export default function TravelerPage({
   staticProperties: LpProperty[];
 }) {
   useMaybeSendUnsentRequests();
+
 
   // const isSm = useIsSm();
   // const isMd = useIsMd();
@@ -60,6 +61,19 @@ export default function TravelerPage({
     isBucketListProperty,
     setInitialBucketList,
   ]);
+
+  const { data: offers } = api.biddings.getMyBids.useQuery();
+
+  function useCheckAcceptedOffer(): void {
+    useEffect(() => {
+      const offer = offers?.find((offer) => offer.status === "Accepted");
+      if (offer) {
+        setAcceptOpen(true);
+      }
+    }, []);
+  }
+
+  useCheckAcceptedOffer();
 
   return (
     <VerificationProvider>
