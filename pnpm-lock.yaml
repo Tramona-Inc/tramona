@@ -410,7 +410,7 @@ importers:
         version: 1.4.11
       '@types/node':
         specifier: ^20.11.5
-        version: 20.12.7
+        version: 20.13.0
       '@types/pg':
         specifier: ^8.10.9
         version: 8.11.4
@@ -4576,11 +4576,8 @@ packages:
   '@types/node@18.19.33':
     resolution: {integrity: sha512-NR9+KrpSajr2qBVp/Yt5TU/rp+b5Mayi3+OlMlcg2cVCfRmcG5PWZ7S4+MG9PZ5gWBoc9Pd0BKSRViuBCRPu0A==}
 
-  '@types/node@20.12.12':
-    resolution: {integrity: sha512-eWLDGF/FOSPtAvEqeRAQ4C8LSA7M1I7i0ky1I8U7kD1J5ITyW3AsRhQrKVoWf5pFKZ2kILsEGJhsI9r93PYnOw==}
-
-  '@types/node@20.12.7':
-    resolution: {integrity: sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==}
+  '@types/node@20.13.0':
+    resolution: {integrity: sha512-FM6AOb3khNkNIXPnHFDYaHerSv8uN22C91z098AnGccVu+Pcdhi+pNUFDi0iLmPIsVE0JBD0KVS7mzUYt4nRzQ==}
 
   '@types/nodemailer@6.4.14':
     resolution: {integrity: sha512-fUWthHO9k9DSdPCSPRqcu6TWhYyxTBg382vlNIttSe9M7XfsT06y0f24KHXtbnijPGGRIcVvdKHTNikOI6qiHA==}
@@ -12767,7 +12764,7 @@ snapshots:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       '@types/yargs': 16.0.9
       chalk: 4.1.2
 
@@ -12776,7 +12773,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       '@types/yargs': 17.0.32
       chalk: 4.1.2
 
@@ -14226,7 +14223,7 @@ snapshots:
 
   '@slack/logger@4.0.0':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@slack/types@2.11.0': {}
 
@@ -14234,7 +14231,7 @@ snapshots:
     dependencies:
       '@slack/logger': 4.0.0
       '@slack/types': 2.11.0
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       '@types/retry': 0.12.0
       axios: 1.6.8
       eventemitter3: 5.0.1
@@ -15731,28 +15728,28 @@ snapshots:
 
   '@types/bcrypt@5.0.2':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/body-parser@1.19.5':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/chai@4.3.16': {}
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/cookie@0.4.1': {}
 
   '@types/cors@2.8.17':
     dependencies:
-      '@types/node': 20.12.12
+      '@types/node': 20.13.0
 
   '@types/cross-spawn@6.0.6':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/d3-array@3.2.1': {}
 
@@ -15806,7 +15803,7 @@ snapshots:
 
   '@types/express-serve-static-core@4.17.41':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       '@types/qs': 6.9.12
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -15828,7 +15825,7 @@ snapshots:
 
   '@types/graceful-fs@4.1.9':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/html-minifier-terser@6.1.0': {}
 
@@ -15850,7 +15847,7 @@ snapshots:
 
   '@types/jsonwebtoken@9.0.6':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/leaflet@1.9.12':
     dependencies:
@@ -15874,24 +15871,20 @@ snapshots:
 
   '@types/node-fetch@2.6.11':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       form-data: 4.0.0
 
   '@types/node@18.19.33':
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@20.12.12':
-    dependencies:
-      undici-types: 5.26.5
-
-  '@types/node@20.12.7':
+  '@types/node@20.13.0':
     dependencies:
       undici-types: 5.26.5
 
   '@types/nodemailer@6.4.14':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/normalize-package-data@2.4.4': {}
 
@@ -15899,7 +15892,7 @@ snapshots:
 
   '@types/pg@8.11.4':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       pg-protocol: 1.6.0
       pg-types: 4.0.2
 
@@ -15935,13 +15928,13 @@ snapshots:
   '@types/send@0.17.4':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/serve-static@1.15.5':
     dependencies:
       '@types/http-errors': 2.0.4
       '@types/mime': 3.0.4
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/unist@2.0.10': {}
 
@@ -15949,7 +15942,7 @@ snapshots:
 
   '@types/webpack@5.28.5(@swc/core@1.5.7(@swc/helpers@0.5.2))(esbuild@0.18.20)':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       tapable: 2.2.1
       webpack: 5.91.0(@swc/core@1.5.7(@swc/helpers@0.5.2))(esbuild@0.18.20)
     transitivePeerDependencies:
@@ -15960,7 +15953,7 @@ snapshots:
 
   '@types/ws@8.5.10':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -15974,7 +15967,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
     optional: true
 
   '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
@@ -17676,7 +17669,7 @@ snapshots:
     dependencies:
       '@types/cookie': 0.4.1
       '@types/cors': 2.8.17
-      '@types/node': 20.12.12
+      '@types/node': 20.13.0
       accepts: 1.3.8
       base64id: 2.0.0
       cookie: 0.4.2
@@ -19228,7 +19221,7 @@ snapshots:
     dependencies:
       '@jest/types': 29.6.3
       '@types/graceful-fs': 4.1.9
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -19243,14 +19236,14 @@ snapshots:
   jest-mock@27.5.1:
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
 
   jest-regex-util@29.6.3: {}
 
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -19258,13 +19251,13 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -21583,7 +21576,7 @@ snapshots:
 
   stripe@14.23.0:
     dependencies:
-      '@types/node': 20.12.7
+      '@types/node': 20.13.0
       qs: 6.12.0
 
   strnum@1.0.5: {}
