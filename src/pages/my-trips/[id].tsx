@@ -1,12 +1,15 @@
-import Head from "next/head";
 import { useSession } from "next-auth/react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import TripPage from "@/components/my-trips/TripPage";
 import Spinner from "@/components/_common/Spinner";
+import TripPage from "@/components/my-trips/TripPage";
 import { type RouterOutputs, api } from "@/utils/api";
 import { z } from "zod";
+
+type RequestTrip = RouterOutputs["offers"]["getByIdWithDetails"];
+type BidsTrip = RouterOutputs["myTrips"]["getBidByIdWithDetails"];
 
 export default function TripDetailsPage() {
   useSession({ required: true });
@@ -28,22 +31,25 @@ export default function TripDetailsPage() {
           { enabled: router.isReady },
         );
 
-  type RequestTrip = RouterOutputs["offers"]["getByIdWithDetails"];
-  type BidsTrip = RouterOutputs["myTrips"]["getBidByIdWithDetails"];
+  function isRequestTrip(
+    trip: RequestTrip | BidsTrip,
+    tripType: string,
+  ): trip is RequestTrip {
+    return tripType === "request";
+  }
 
-  function normalizeTripData({
-    trip,
-    tripType,
-  }:
-    | {
-        trip: RequestTrip;
-        tripType: "request";
-      }
-    | {
-        trip: BidsTrip;
-        tripType: "bid";
-      }) {
-    if (tripType === "request") {
+  function isBidsTrip(
+    trip: RequestTrip | BidsTrip,
+    tripType: string,
+  ): trip is BidsTrip {
+    return tripType === "bid";
+  }
+
+  const normalizeTripData = (
+    trip: RequestTrip | BidsTrip,
+    tripType: string,
+  ) => {
+    if (isRequestTrip(trip, tripType)) {
       return {
         createdAt: trip.createdAt,
         totalPrice: trip.totalPrice,
@@ -57,7 +63,7 @@ export default function TripDetailsPage() {
         madeByGroup: trip.request.madeByGroup,
         property: trip.property,
       };
-    } else {
+    } else if (isBidsTrip(trip, tripType)) {
       return {
         createdAt: trip.createdAt,
         totalPrice: trip.amount, // Assuming amount is equivalent to totalPrice
@@ -72,8 +78,8 @@ export default function TripDetailsPage() {
         property: trip.property,
       };
     }
-  }
-
+    return null;
+  };
   let normalizedTrip;
   if (trip) {
     normalizedTrip = normalizeTripData({ trip, tripType });
