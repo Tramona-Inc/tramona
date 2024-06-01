@@ -5,19 +5,21 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ChevronRight, Clock, MessageCircle } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ChevronRight, MessageCircle
+} from "lucide-react";
 import UserAvatar from "@/components/_common/UserAvatar";
 
 import { cn, formatCurrency, plural } from "@/utils/utils";
-import { api, type RouterOutputs } from "@/utils/api";
+import { api } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
-
-
 
 type Trip = {
   id: number;
@@ -86,6 +88,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
             >
               <Images className="mx-1 w-4" /> Show all photos
             </Badge> */}
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-black"></div>
             <div className="absolute bottom-8 left-5 text-white">
               <p className="text-base font-semibold lg:text-lg">
                 The countdown to your trip begins
@@ -134,8 +137,8 @@ export default function TripPage({ trip }: { trip: Trip }) {
             <div>
               <div className="flex items-end justify-between">
                 <h2 className="text-2xl font-bold">Your trip</h2>
-                <Badge variant="lightGray" className="border text-emerald-600">
-                  <Clock className="w-4" />
+                <Badge variant="green">
+                  <Check className="w-4" />
                   Booking confirmed
                 </Badge>
               </div>
@@ -157,7 +160,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 </div>
                 <ArrowRight />
                 <div className="flex flex-col">
-                  <p className="font-bold">Check-in</p>
+                  <p className="font-bold">Check-out</p>
                   <p className="text-lg font-bold">
                     {dayjs(trip.checkOut).format("ddd, MMM D")}
                   </p>
@@ -180,7 +183,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                     <SingleLocationMap
                       lat={coordinateData.coordinates.location!.lat}
                       lng={coordinateData.coordinates.location!.lng}
-                      />
+                    />
                   </div>
                 )}
               </div>
@@ -283,8 +286,8 @@ export default function TripPage({ trip }: { trip: Trip }) {
         <div className="sticky top-[100px] z-10 hidden h-[700px] overflow-clip rounded-lg lg:block">
           {coordinateData && (
             <SingleLocationMap
-            lat={coordinateData.coordinates.location!.lat}
-            lng={coordinateData.coordinates.location!.lng}
+              lat={coordinateData.coordinates.location!.lat}
+              lng={coordinateData.coordinates.location!.lng}
             />
           )}
         </div>

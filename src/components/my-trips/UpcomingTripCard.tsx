@@ -52,7 +52,7 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
                   name={trip.property.host?.name}
                   // image={trip.property.host?.image}
                   image={
-                    trip.property.host?.image ||
+                    trip.property.host?.image ??
                     "/assets/images/tramona-logo.jpeg"
                   }
                 />
