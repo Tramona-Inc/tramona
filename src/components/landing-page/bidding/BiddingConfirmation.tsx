@@ -11,12 +11,14 @@ import Confetti from 'react-confetti';
 function BiddingConfirmation({
   property,
   setOpen,
+  price,
 }: {
   property: Property;
   setOpen: (open: boolean) => void;
+  price: number;
 }) {
   const date = useBidding((state) => state.date);
-  const price = useBidding((state) => state.price);
+  // const price = useBidding((state) => state.price);
 
   const resetSession = useBidding((state) => state.resetSession);
 

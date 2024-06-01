@@ -22,6 +22,7 @@ function MakeBid({
   // const setStep = useBidding((state) => state.setStep);
 
   const [step, setStep] = useState(0);
+  const [price, setPrice] = useState(0);
 
   // ! Later make the verification not skiappable
   // ! Uncomment to display verificaiton
@@ -97,10 +98,10 @@ function MakeBid({
               <ChevronLeft />
             </Button>
           )}
-          {step == 0 && <BiddingStep1 property={property} setStep={setStep} />}
-          {step == 1 && <BiddingStep2 property={property} setStep={setStep} />}
+          {step == 0 && <BiddingStep1 property={property} setStep={setStep} setPrice={setPrice} />}
+          {step == 1 && <BiddingStep2 property={property} setStep={setStep} price={price} />}
           {step == 2 && (
-            <BiddingConfirmation property={property} setOpen={setOpen} />
+            <BiddingConfirmation property={property} setOpen={setOpen} price={price} />
           )}
         </div>
       )}

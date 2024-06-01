@@ -3,8 +3,6 @@ import RequestCard, {
 } from "@/components/requests/RequestCard";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
 import { type RequestGroup } from "@/server/db/schema";
-import { RequestUnconfirmedButton } from "./RequestUnconfirmedButton";
-import { useEffect } from "react";
 
 export default function RequestGroupCards({
   requestGroup,
@@ -18,14 +16,9 @@ export default function RequestGroupCards({
   requests: DetailedRequest[];
   isWaiting: boolean;
   startTimer: () => void;
-  selectedRequest: DetailedRequest | null;
-  setSelectedRequest: (request: DetailedRequest | null) => void;
+  selectedRequest?: DetailedRequest | null;
+  setSelectedRequest?: (request: DetailedRequest | null) => void;
 }) {
-  useEffect(() => {
-    if (requests.length > 0) {
-      setSelectedRequest(requests[0] ?? null);
-    }
-  }, []);
   if (requests.length === 0) return null;
 
   // const requestUnconfirmedBtn = (
@@ -37,7 +30,7 @@ export default function RequestGroupCards({
   // );
 
   const handleCardClick = (request: DetailedRequest) => {
-    setSelectedRequest(request);
+    setSelectedRequest?.(request);
   };
 
   if (requests.length === 1) {
