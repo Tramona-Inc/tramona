@@ -6,19 +6,34 @@ import { api } from "@/utils/api";
 import { formatDateMonthDay } from "@/utils/utils";
 import Link from "next/link";
 import { getDiscountPercentage } from "@/utils/utils";
+import { useEffect, useState } from "react";
 
 export default function SuccessfulBidDialog({
   open,
   setOpen,
-  acceptedBid,
 }: {
   open: boolean;
   setOpen: (o: boolean) => void;
-  acceptedBid: Bid | null;
 }) {
+  const [acceptedBid, setacceptedBid] = useState<Bid | null>(null);
+
+  const { data: bids } = api.biddings.getMyBids.useQuery();
   const { data: property } = api.properties.getById.useQuery({
     id: acceptedBid?.propertyId ?? 0,
   });
+  const { mutateAsync: markDialogSeen } =
+    api.biddings.putDialogShown.useMutation();
+
+  useEffect(() => {
+    if (bids) {
+      const bid = bids.find((bid) => bid.status === "Accepted");
+      if (bid && !bid.dialogShown) {
+        setacceptedBid(bid);
+        setOpen(true);
+        void markDialogSeen({ bidId: bid.id });
+      }
+    }
+  }, [bids, markDialogSeen, setOpen]);
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
