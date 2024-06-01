@@ -7,6 +7,7 @@ import { formatDateMonthDay } from "@/utils/utils";
 import Link from "next/link";
 import { getDiscountPercentage } from "@/utils/utils";
 import { useEffect, useState } from "react";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 
 export default function SuccessfulBidDialog({
   open,
@@ -46,7 +47,7 @@ export default function SuccessfulBidDialog({
             </div>
             <div className="absolute inset-x-0 bottom-0 flex h-12 items-center justify-center bg-zinc-300 text-center">
               <p className="font-bold text-teal-900">
-                {`You saved ${getDiscountPercentage(property?.originalNightlyPrice ?? 0, acceptedBid?.amount ?? 0)}% on this stay`}
+                {`You saved ${getDiscountPercentage((property?.originalNightlyPrice ?? 0) * AVG_AIRBNB_MARKUP, acceptedBid?.amount ?? 0)}% on this stay`}
               </p>
             </div>
           </div>
