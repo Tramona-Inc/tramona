@@ -5,7 +5,7 @@ import {
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
 import CitiesFilter from "./CitiesFilter";
@@ -15,6 +15,7 @@ import Link from "next/link";
 import { type LpProperty } from "@/pages";
 import HomeOfferCard from "./HomeOfferCard";
 import { useIsLg, useIsMd, useIsSm, useIsXl } from "@/utils/utils";
+import SuccessfulOffer from "../offers/SuccessfulOffer";
 
 export default function TravelerPage({
   staticProperties,
@@ -22,6 +23,8 @@ export default function TravelerPage({
   staticProperties: LpProperty[];
 }) {
   useMaybeSendUnsentRequests();
+
+  const [acceptOpen, setAcceptOpen] = useState(false);
 
   const isSm = useIsSm();
   const isMd = useIsMd();
@@ -64,11 +67,25 @@ export default function TravelerPage({
     setInitialBucketList,
   ]);
 
+  const { data: offers } = api.biddings.getMyBids.useQuery();
+
+  function useCheckAcceptedOffer(): void {
+    useEffect(() => {
+      const offer = offers?.find((offer) => offer.status === "Accepted");
+      if (offer) {
+        setAcceptOpen(true);
+      }
+    }, []);
+  }
+
+  useCheckAcceptedOffer();
+
   return (
     <VerificationProvider>
       <Head>
         <title>Tramona</title>
       </Head>
+      <SuccessfulOffer open={acceptOpen} setOpen={setAcceptOpen} />
       <div className="relative mb-20 overflow-x-hidden bg-white">
         <VerificationBanner />
         <MastHead />
