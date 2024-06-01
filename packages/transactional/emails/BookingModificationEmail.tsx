@@ -25,7 +25,7 @@ export default function BookingModificationEmail({
             alt="Tramona Logo"
             style={{ width: '24px', verticalAlign: 'middle' }}
           />
-          <span className="ml-2 text-green-800 font-bold text-lg" style={{ verticalAlign: 'middle' }}>Tramona</span>
+          <span className="ml-2 text-black font-bold text-lg" style={{ verticalAlign: 'middle' }}>Tramona</span>
         </div>
         <div className="my-4 mx-auto w-full" style={{ borderBottom: '2px solid #e0e0e0' }}></div>
         <Text className="text-3xl text-left mb-8">

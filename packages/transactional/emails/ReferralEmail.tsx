@@ -51,7 +51,7 @@ export default function ReferralEmail({
           </div>
           <div style={{ float: 'right' }}>
             <Button
-              className="bg-green-900 text-white text-center py-[0.5em] px-4 text-md rounded-md cursor-pointer"
+              className="bg-green-900 text-white text-center py-[0.6em] px-4 text-md rounded-md cursor-pointer"
               style={{ verticalAlign: 'middle' }}
             >
               Copy
