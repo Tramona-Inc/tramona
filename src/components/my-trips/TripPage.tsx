@@ -1,44 +1,56 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ChevronRight, Clock, MessageCircle } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ChevronRight, MessageCircle
+} from "lucide-react";
 import UserAvatar from "@/components/_common/UserAvatar";
 
 import { cn, formatCurrency, plural } from "@/utils/utils";
-import { api, type RouterOutputs } from "@/utils/api";
+import { api } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((module) => module.MapContainer),
-  {
-    ssr: false, // Disable server-side rendering for this component
-  },
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((module) => module.TileLayer),
-  {
-    ssr: false,
-  },
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((module) => module.Marker),
-  {
-    ssr: false,
-  },
-);
+type Trip = {
+  id: number;
+  property: {
+    id: number;
+    name: string;
+    imageUrls: string[];
+    address: string;
+    checkInInfo: string;
+    hostName: string;
+    host: {
+      image: string;
+      name: string;
+      id: number;
+      email: string;
+    };
+  };
+  madeByGroup: {
+    members: Object[];
+  };
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number;
+  totalPrice: number;
+  acceptedAt: Date;
+  createdAt: Date;
+  tramonaFee: number;
+  location: string;
+};
 
-type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
-
-export default function TripPage({ trip }: { trip: OfferWithDetails }) {
+export default function TripPage({ trip }: { trip: Trip }) {
   const router = useRouter();
 
   const chatWithAdmin = useChatWithAdmin();
@@ -47,10 +59,7 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
     location: trip.property.address,
   });
 
-  const tripDuration = dayjs(trip.request.checkOut).diff(
-    trip.request.checkIn,
-    "day",
-  );
+  const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
 
   return (
     <div className="container col-span-10 flex flex-col gap-5 py-10 2xl:col-span-11">
@@ -79,12 +88,13 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
             >
               <Images className="mx-1 w-4" /> Show all photos
             </Badge> */}
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-black"></div>
             <div className="absolute bottom-8 left-5 text-white">
               <p className="text-base font-semibold lg:text-lg">
                 The countdown to your trip begins
               </p>
               <p className="text-3xl font-bold">
-                {dayjs(trip.request.checkIn).fromNow(true)} to go
+                {dayjs(trip.checkIn).fromNow(true)} to go
               </p>
             </div>
           </div>
@@ -96,11 +106,19 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
                 <div className="flex gap-2">
                   <UserAvatar
                     name={trip.property.hostName}
-                    image={trip.property.host?.image}
+                    // image={trip.property.host?.image}
+                    image={
+                      trip.property.host?.image ||
+                      "/assets/images/tramona-logo.jpeg"
+                    }
                   />
                   <div>
                     <p className="text-sm text-muted-foreground">Hosted by</p>
-                    <p>{trip.property.hostName}</p>
+                    <p>
+                      {trip.property.host?.name
+                        ? trip.property.host.name
+                        : "Tramona"}
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -119,35 +137,35 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
             <div>
               <div className="flex items-end justify-between">
                 <h2 className="text-2xl font-bold">Your trip</h2>
-                <Badge variant="lightGray" className="border text-emerald-600">
-                  <Clock className="w-4" />
+                <Badge variant="green">
+                  <Check className="w-4" />
                   Booking confirmed
                 </Badge>
               </div>
               <p>
                 <span>{plural(tripDuration, "night")}</span>
                 <span className="mx-2">·</span>
-                <span>{plural(trip.request.numGuests, "Adult")}</span>
+                <span>{plural(trip.numGuests, "Adult")}</span>
               </p>
 
               <div className="flex items-center justify-between py-5">
                 <div className="flex flex-col">
                   <p className="font-bold">Check-in</p>
                   <p className="text-lg font-bold">
-                    {dayjs(trip.request.checkIn).format("ddd, MMM D")}
+                    {dayjs(trip.checkIn).format("ddd, MMM D")}
                   </p>
                   <p className="font-semibold">
-                    {dayjs(trip.request.checkIn).format("h:mm a")}
+                    {dayjs(trip.checkIn).format("h:mm a")}
                   </p>
                 </div>
                 <ArrowRight />
                 <div className="flex flex-col">
-                  <p className="font-bold">Check-in</p>
+                  <p className="font-bold">Check-out</p>
                   <p className="text-lg font-bold">
-                    {dayjs(trip.request.checkOut).format("ddd, MMM D")}
+                    {dayjs(trip.checkOut).format("ddd, MMM D")}
                   </p>
                   <p className="font-semibold">
-                    {dayjs(trip.request.checkOut).format("h:mm a")}
+                    {dayjs(trip.checkOut).format("h:mm a")}
                   </p>
                 </div>
               </div>
@@ -162,26 +180,10 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
 
                 {coordinateData && (
                   <div className="relative z-10 my-3 overflow-clip rounded-lg">
-                    <MapContainer
-                      center={[
-                        coordinateData.coordinates.location!.lat,
-                        coordinateData.coordinates.location!.lng,
-                      ]}
-                      zoom={14}
-                      scrollWheelZoom={false}
-                      className="h-[300px]"
-                    >
-                      <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      />
-                      <Marker
-                        position={[
-                          coordinateData.coordinates.location!.lat,
-                          coordinateData.coordinates.location!.lng,
-                        ]}
-                      />
-                    </MapContainer>
+                    <SingleLocationMap
+                      lat={coordinateData.coordinates.location!.lat}
+                      lng={coordinateData.coordinates.location!.lng}
+                    />
                   </div>
                 )}
               </div>
@@ -283,26 +285,10 @@ export default function TripPage({ trip }: { trip: OfferWithDetails }) {
 
         <div className="sticky top-[100px] z-10 hidden h-[700px] overflow-clip rounded-lg lg:block">
           {coordinateData && (
-            <MapContainer
-              center={[
-                coordinateData.coordinates.location!.lat,
-                coordinateData.coordinates.location!.lng,
-              ]}
-              zoom={14}
-              scrollWheelZoom={false}
-              className="h-[700px]"
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker
-                position={[
-                  coordinateData.coordinates.location!.lat,
-                  coordinateData.coordinates.location!.lng,
-                ]}
-              />
-            </MapContainer>
+            <SingleLocationMap
+              lat={coordinateData.coordinates.location!.lat}
+              lng={coordinateData.coordinates.location!.lng}
+            />
           )}
         </div>
       </div>

@@ -1,8 +1,10 @@
 import { type UpcomingTrip } from "@/components/my-trips/UpcomingTrips";
+import EditOfferDialog from "@/components/requests/EditPropertyOfferDialog";
 import { type AcceptedBids, type AcceptedTrips } from "@/pages/my-trips";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { bids, groupMembers, offers, requests } from "@/server/db/schema";
+import { bidSelectSchema, bids, groupMembers, offers, requests } from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
 import { and, eq, exists, inArray, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 
@@ -45,6 +47,7 @@ const getAllAcceptedOffers = async (userId: string) => {
 const transformBookedTrips = (trip: AcceptedTrips): UpcomingTrip => {
   return {
     id: trip.id,
+    type: "request",
     request: {
       checkIn: new Date(trip.request.checkIn),
       checkOut: new Date(trip.request.checkOut),
@@ -64,6 +67,7 @@ const transformBookedTrips = (trip: AcceptedTrips): UpcomingTrip => {
 const transformAcceptedBids = (trip: AcceptedBids): UpcomingTrip => {
   return {
     id: trip.property.id,
+    type: "bid",
     request: {
       checkIn: new Date(trip.checkIn),
       checkOut: new Date(trip.checkOut),
@@ -315,4 +319,49 @@ export const myTripsRouter = createTRPCRouter({
   getAcceptedBids: protectedProcedure.query(async ({ ctx, input }) => {
     return getAllAcceptedBids(ctx.user.id);
   }),
+
+  getBidByIdWithDetails: protectedProcedure
+    .input(bidSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const offer = await ctx.db.query.bids.findFirst({
+        where: eq(bids.propertyId, input.id),
+        columns: {
+          createdAt: true,
+          checkIn: true,
+          checkOut: true,
+          numGuests: true,
+          amount: true,
+          acceptedAt: true,
+          id: true,
+        },
+        with: {
+          madeByGroup: { with: { members: true } },
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!offer) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      const memberIds = offer.madeByGroup.members.map(
+        (member) => member.userId,
+      );
+
+      if (!memberIds.includes(ctx.user.id) && ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      // const transformedAcceptedBids: UpcomingTrip[] = (offer ?? []).map(
+      //   transformAcceptedBids,
+      // );
+
+      return offer;
+    }),
 });

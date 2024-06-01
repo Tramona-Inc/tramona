@@ -17,11 +17,12 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
-  price: zodNumber({ min: 1 }),
+  watchedPrice: zodNumber({ min: 1 }),
   guest: zodNumber({ min: 1 }),
 });
 
@@ -30,13 +31,15 @@ type FormSchema = z.infer<typeof formSchema>;
 function BiddingStep1({
   property,
   setStep,
+  setPrice,
 }: {
   property: Property;
   setStep: (step: number) => void;
+  setPrice: (price: number) => void;
 }) {
   // const setStep = useBidding((state) => state.setStep);
 
-  const setPrice = useBidding((state) => state.setPrice);
+  // const setPrice = useBidding((state) => state.setPrice);
   const currentPrice = useBidding((state) => state.price);
 
   const setGuest = useBidding((state) => state.setGuest);
@@ -47,13 +50,13 @@ function BiddingStep1({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      price: currentPrice,
+      watchedPrice: currentPrice,
       guest: guest,
     },
   });
 
   function onSubmit(values: FormSchema) {
-    setPrice(values.price);
+    setPrice(values.watchedPrice);
     setGuest(values.guest);
     setStep(1);
 
@@ -68,7 +71,7 @@ function BiddingStep1({
     ? property.originalNightlyPrice / threshhold
     : 0;
 
-  const { price } = form.watch();
+  const { watchedPrice } = form.watch();
 
   return (
     <div className="flex w-full flex-col items-center justify-center">
@@ -118,7 +121,7 @@ function BiddingStep1({
               <p className="mb-2 font-semibold">Name your price</p>
               <FormField
                 control={form.control}
-                name="price"
+                name="watchedPrice"
                 render={({ field }) => (
                   <FormItem className="col-span-full">
                     <FormControl>
@@ -131,7 +134,7 @@ function BiddingStep1({
                       />
                     </FormControl>
                     <FormMessage />
-                    {price > 0 && price <= reccomendedPrice / 100 && (
+                    {watchedPrice > 0 && watchedPrice <= reccomendedPrice / 100 && (
                       <p className="max-w-[300px] text-xs text-destructive">
                         You are unlikely to get this price, up your price for a
                         higher chance
