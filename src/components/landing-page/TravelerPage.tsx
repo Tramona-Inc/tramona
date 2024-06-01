@@ -62,18 +62,18 @@ export default function TravelerPage({
     setInitialBucketList,
   ]);
 
-  const { data: offers } = api.biddings.getMyBids.useQuery();
+  const { data: bids } = api.biddings.getMyBids.useQuery();
 
-  function useCheckAcceptedOffer(): void {
-    useEffect(() => {
-      const offer = offers?.find((offer) => offer.status === "Accepted");
-      if (offer) {
-        setAcceptOpen(true);
+  useEffect(() => {
+    if (!handledacceptedBid && bids) {
+      const bid = bids.find((bid) => bid.status === "Accepted");
+      if (bid) {
+        setacceptedBid(bid);
+        setOpen(true);
+        setHandledacceptedBid(true);
       }
-    }, []);
-  }
-
-  useCheckAcceptedOffer();
+    }
+  }, [bids, handledacceptedBid]);
 
   return (
     <VerificationProvider>
