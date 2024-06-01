@@ -4,9 +4,7 @@ import { useSession } from "next-auth/react";
 import Header from "../../Header";
 import Footer from "../DesktopFooter";
 import { useIsMd } from "@/utils/utils";
-import { useEffect, useState } from "react";
-import { api } from "@/utils/api";
-import { type Bid } from "@/server/db/schema/tables/bids";
+import { useState } from "react";
 import SuccessfulBidDialog from "@/components/offers/SuccessfulBidDialog";
 
 type DashboardLayoutProps = {
