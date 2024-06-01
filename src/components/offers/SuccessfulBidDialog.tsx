@@ -1,14 +1,24 @@
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
+import { type Bid } from "@/server/db/schema/tables/bids";
+import { api } from "@/utils/api";
+import { formatDateMonthDay } from "@/utils/utils";
+import Link from "next/link";
 
-export default function SuccessfulOffer({
+export default function SuccessfulBidDialog({
   open,
   setOpen,
+  acceptedBid,
 }: {
   open: boolean;
   setOpen: (o: boolean) => void;
+  acceptedBid: Bid | null;
 }) {
+  const { data: property } = api.properties.getById.useQuery({
+    id: acceptedBid?.propertyId ?? 0,
+  });
+
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogContent>
@@ -16,11 +26,7 @@ export default function SuccessfulOffer({
           <h1 className="text-4xl font-extrabold">You&apos;re Goin&apos;</h1>
           <div className="relative overflow-clip rounded-2xl">
             <div className="h-96 w-96">
-              <Image
-                src="https://a0.muscache.com/im/pictures/miso/Hosting-51484349/original/d1be29ea-f986-48b7-afa1-e3728de75a87.jpeg?im_w=720"
-                alt=""
-                fill
-              />
+              <Image src={property?.imageUrls[0] ?? ""} alt="" fill />
             </div>
             <div className="absolute inset-x-0 bottom-0 flex h-12 items-center justify-center bg-zinc-300 text-center">
               <p className="font-bold text-teal-900">
@@ -30,12 +36,16 @@ export default function SuccessfulOffer({
           </div>
 
           <h3 className="text-2xl font-bold">
-            Congrats on placing the winning offer!
+            Congrats on placing the winning bid!
           </h3>
-          <p>Your trip to Paris from June 22nd - June 28th is confirmed</p>
-          <Button variant="greenPrimary" className="px-10">
-            My Trips
-          </Button>
+          {acceptedBid && (
+            <p>{`Your trip to ${property?.address} from ${formatDateMonthDay(acceptedBid.checkIn)} - ${formatDateMonthDay(acceptedBid.checkOut)} is confirmed`}</p>
+          )}
+          <Link href="/my-trips">
+            <Button variant="greenPrimary" className="px-10">
+              My Trips
+            </Button>
+          </Link>
         </div>
       </DialogContent>
     </Dialog>
