@@ -5,7 +5,7 @@ import {
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
 import CitiesFilter from "./CitiesFilter";
@@ -15,8 +15,6 @@ import Link from "next/link";
 import { type LpProperty } from "@/pages";
 import HomeOfferCard from "./HomeOfferCard";
 import { useIsLg, useIsMd, useIsSm, useIsXl } from "@/utils/utils";
-import SuccessfulBidDialog from "../offers/SuccessfulBidDialog";
-import { type Bid } from "@/server/db/schema";
 
 export default function TravelerPage({
   staticProperties,
@@ -24,10 +22,6 @@ export default function TravelerPage({
   staticProperties: LpProperty[];
 }) {
   useMaybeSendUnsentRequests();
-
-  const [open, setOpen] = useState(false);
-  const [acceptedBid, setacceptedBid] = useState<Bid | null>(null);
-  const [handledacceptedBid, setHandledacceptedBid] = useState(false);
 
   const isSm = useIsSm();
   const isMd = useIsMd();
@@ -70,31 +64,11 @@ export default function TravelerPage({
     setInitialBucketList,
   ]);
 
-  const { data: bids } = api.biddings.getMyBids.useQuery();
-
-  useEffect(() => {
-    if (!handledacceptedBid && bids) {
-      const bid = bids.find((bid) => bid.status === "Accepted");
-      if (bid) {
-        setacceptedBid(bid);
-        setOpen(true);
-        setHandledacceptedBid(true);
-      }
-    }
-  }, [bids, handledacceptedBid]);
-
   return (
     <VerificationProvider>
       <Head>
         <title>Tramona</title>
       </Head>
-      {acceptedBid && (
-        <SuccessfulBidDialog
-          open={open}
-          setOpen={setOpen}
-          acceptedBid={acceptedBid}
-        />
-      )}
       <div className="relative mb-20 overflow-x-hidden bg-white">
         <VerificationBanner />
         <MastHead />

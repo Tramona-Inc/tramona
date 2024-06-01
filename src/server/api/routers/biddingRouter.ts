@@ -545,4 +545,12 @@ export const biddingRouter = createTRPCRouter({
       numGuests: random(1, 5),
     });
   }),
+  putDialogShown: protectedProcedure
+    .input(z.object({ bidId: zodInteger() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(bids)
+        .set({ dialogShown: true })
+        .where(eq(bids.id, input.bidId));
+    }),
 });

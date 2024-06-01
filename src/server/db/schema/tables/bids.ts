@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   index,
   integer,
@@ -46,6 +47,7 @@ export const bids = pgTable(
     statusUpdatedAt: timestamp("status_updated_at").notNull().defaultNow(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    dialogShown: boolean("dialog_shown").notNull().default(false),
   },
   (t) => ({
     madeByGroupIdIdx: index().on(t.madeByGroupId),

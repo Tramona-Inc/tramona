@@ -5,6 +5,7 @@ import { type Bid } from "@/server/db/schema/tables/bids";
 import { api } from "@/utils/api";
 import { formatDateMonthDay } from "@/utils/utils";
 import Link from "next/link";
+import { getDiscountPercentage } from "@/utils/utils";
 
 export default function SuccessfulBidDialog({
   open,
@@ -30,7 +31,7 @@ export default function SuccessfulBidDialog({
             </div>
             <div className="absolute inset-x-0 bottom-0 flex h-12 items-center justify-center bg-zinc-300 text-center">
               <p className="font-bold text-teal-900">
-                You saved 55% on this stay
+                {`You saved ${getDiscountPercentage(property?.originalNightlyPrice ?? 0, acceptedBid?.amount ?? 0)}% on this stay`}
               </p>
             </div>
           </div>
@@ -41,11 +42,13 @@ export default function SuccessfulBidDialog({
           {acceptedBid && (
             <p>{`Your trip to ${property?.address} from ${formatDateMonthDay(acceptedBid.checkIn)} - ${formatDateMonthDay(acceptedBid.checkOut)} is confirmed`}</p>
           )}
-          <Link href="/my-trips">
-            <Button variant="greenPrimary" className="px-10">
-              My Trips
-            </Button>
-          </Link>
+          <div>
+            <Link href="/my-trips">
+              <Button variant="greenPrimary" className="px-10">
+                My Trips
+              </Button>
+            </Link>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
