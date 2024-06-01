@@ -570,16 +570,18 @@ export const offersRouter = createTRPCRouter({
   //If there has been no offer accepted, then return nothing for that request
   getAllUnmatchedOffers: publicProcedure.query(async ({ ctx }) => {
     //go through all the requests and filter out the ones that have an offer that has been accepted
+
     const completedRequests = await ctx.db.query.requests.findMany({
       where: isNotNull(requests.resolvedAt),
     });
+    console.log(completedRequests);
     const unMatchedOffers = await ctx.db.query.offers.findMany({
       where: and(
         isNull(offers.acceptedAt),
-        // notInArray(
-        //   offers.requestId,
-        //   completedRequests.map((req) => req.id),
-        // ),
+        notInArray(
+          offers.requestId,
+          completedRequests.map((req) => req.id),
+        ),
       ),
       with: {
         property: {
