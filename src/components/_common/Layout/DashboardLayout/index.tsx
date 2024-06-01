@@ -22,33 +22,11 @@ export default function DashboardLayout({
   const isMd = useIsMd();
 
   const [open, setOpen] = useState(false);
-  const [acceptedBid, setacceptedBid] = useState<Bid | null>(null);
-
-  const { data: bids } = api.biddings.getMyBids.useQuery();
-  const { mutateAsync: markDialogSeen } =
-    api.biddings.putDialogShown.useMutation();
-
-  useEffect(() => {
-    if (bids) {
-      const bid = bids.find((bid) => bid.status === "Accepted");
-      if (bid && !bid.dialogShown) {
-        setacceptedBid(bid);
-        setOpen(true);
-        void markDialogSeen({ bidId: bid.id });
-      }
-    }
-  }, [bids, markDialogSeen]);
 
   return (
     <>
       <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
-      {acceptedBid && (
-        <SuccessfulBidDialog
-          open={open}
-          setOpen={setOpen}
-          acceptedBid={acceptedBid}
-        />
-      )}
+      <SuccessfulBidDialog open={open} setOpen={setOpen} />
       <div className="relative min-h-screen-minus-header lg:flex">
         {session && (
           <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
