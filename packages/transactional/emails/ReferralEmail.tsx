@@ -16,6 +16,7 @@ export default function ReferralEmail({
   referralCode = 'LNI81XP'
 }: ReferralEmailProps) {
   let referralLink = 'https://tramona.com/auth/signup?code=' + referralCode;
+
   return (
     <Layout title_preview="You earned money!">
       <div className="p-6 bg-white border-b border-gray-300">
@@ -34,7 +35,7 @@ export default function ReferralEmail({
           </div>
         </div>
         <Button
-          href="#"
+          href="https://www.tramona.com/account"
           className="bg-green-900 text-white text-center py-3 px-6 text-lg rounded-md mb-4 w-11/12 mx-auto"
         >
           View balance
@@ -43,21 +44,20 @@ export default function ReferralEmail({
         <div className="border-t border-gray-300 my-4"></div>
         <Text className="text-center mb-4">Keep sharing your code to keep earning!</Text>
         <div>
-            <div style={{float: 'left', width: '85%'}}>
+          <div style={{ float: 'left', width: '85%' }}>
             <Text className="py-2 px-4 m-0 no-underline" style={{ background: '#f3f4f6', borderRadius: '8px', color: 'black', textDecoration: 'none' }}>
-                {referralLink}
+              {referralLink}
             </Text>
-            </div>
-            <div style={{float: 'right' }}>
+          </div>
+          <div style={{ float: 'right' }}>
             <Button
-                href="#"
-                className="bg-green-900 text-white text-center py-[0.6em] px-4 text-md rounded-md"
-                style={{ verticalAlign: 'middle' }}
+              className="bg-green-900 text-white text-center py-[0.5em] px-4 text-md rounded-md cursor-pointer"
+              style={{ verticalAlign: 'middle' }}
             >
-                Copy
+              Copy
             </Button>
-            </div>
-            <div style={{clear: 'both'}}></div>
+          </div>
+          <div style={{ clear: 'both' }}></div>
         </div>
       </div>
     </Layout>

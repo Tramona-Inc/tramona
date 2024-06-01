@@ -53,7 +53,7 @@ export default function BookingCancellationEmail({
           The Tramona Team
         </Text>
         <Button
-          href="https://www.tramona.com/"
+          href="https://www.tramona.com/help-center"
           className="bg-green-900 text-white text-center py-3 px-6 text-lg rounded-md mb-6 w-11/12 mx-auto"
         >
           Contact Us
@@ -68,25 +68,20 @@ export default function BookingCancellationEmail({
           />
         </div>
         <div style={{ float: 'right' }}>
-          <a href="https://www.instagram.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
-            {/* <Instagram /> */}
+          <a href="https://www.instagram.com/shoptramona/" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
             <img
             src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
             alt="Tramona Logo"
             style={{ width: '32px' }}
             />
           </a>
-          <a href="https://www.facebook.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
-            {/* <Facebook /> */}
+          <a href="https://www.facebook.com/ShopTramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
             <img
             src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
             alt="Tramona Logo"
             style={{ width: '32px' }}
             />
           </a>
-          {/* <a href="https://www.linkedin.com/company/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
-            <Linkedin />
-          </a> */}
         </div>
         <div style={{ clear: 'both' }}></div>
       </div>

@@ -56,7 +56,7 @@ export default function BookingModificationEmail({
           Please let us know if you have any questions or concerns regarding this change.
         </Text>
         <Button
-          href="https://www.tramona.com/"
+          href="https://www.tramona.com/help-center"
           className="bg-green-900 text-white text-center py-3 px-6 text-lg rounded-md mb-6 w-11/12 mx-auto"
         >
           Contact
@@ -71,18 +71,18 @@ export default function BookingModificationEmail({
             />
           </div>
           <div style={{ float: 'right' }}>
-            <a href="https://www.instagram.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
+            <a href="https://www.instagram.com/shoptramona/" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
               <img
-                src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
-                alt="Instagram"
-                style={{ width: '32px' }}
+              src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
+              alt="Tramona Logo"
+              style={{ width: '32px' }}
               />
             </a>
-            <a href="https://www.facebook.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
+            <a href="https://www.facebook.com/ShopTramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
               <img
-                src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
-                alt="Facebook"
-                style={{ width: '32px' }}
+              src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
+              alt="Tramona Logo"
+              style={{ width: '32px' }}
               />
             </a>
           </div>

@@ -105,7 +105,7 @@ export default function ReservationConfirmedEmail({
           </div>
         </div>
         <Button
-          href="https://www.tramona.com/"
+          href="https://www.tramona.com/my-trips"
           className="bg-green-900 text-white text-center py-3 px-6 text-lg rounded-md mb-6 w-11/12 mx-auto"
         >
           View trip details

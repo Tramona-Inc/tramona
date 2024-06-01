@@ -68,7 +68,7 @@ export default function NewOfferEmail({
         </div>
         </div>
         <div className="my-6 mx-auto w-full" style={{ borderBottom: '2px solid #e0e0e0' }}></div>
-        <Text className="text-center mb-4">Don't miss this deal!</Text>
+        {/* <Text className="text-center mb-4">Don't miss this deal!</Text>
         <div style={{ width: '70%', margin: '0 auto 24px auto', textAlign: 'center' }}>
           <table style={{ width: '100%', tableLayout: 'fixed' }}>
           <tbody>
@@ -76,14 +76,14 @@ export default function NewOfferEmail({
               <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>0</td>
               <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>0</td>
               <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px' }}>:</td>
-              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>0</td>
-              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>0</td>
+              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>2</td>
+              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>3</td>
               <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px' }}>:</td>
-              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>0</td>
-              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>0</td>
+              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>5</td>
+              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>9</td>
               <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px' }}>:</td>
-              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>0</td>
-              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>0</td>
+              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>5</td>
+              <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '24px', padding: '8px', backgroundColor: '#f3f3f3', borderRadius: '4px' }}>9</td>
             </tr>
             <tr>
               <td style={{ textAlign: 'center', paddingLeft: '16px' }}>Days</td>
@@ -96,7 +96,7 @@ export default function NewOfferEmail({
             </tr>
           </tbody>
         </table>
-        </div>
+        </div> */}
         <div style={{ textAlign: 'left', float: 'left' }}>
           <Text className="text-xl font-bold m-0">Your trip</Text>
           <Text className="text-left font-bold mt-0">{nights} nights • {adults} Adults</Text>
@@ -117,7 +117,7 @@ export default function NewOfferEmail({
           </div>
         </div>
         <Button
-          href="#"
+          href="https://www.tramona.com/requests"
           className="bg-green-900 text-white text-center py-3 px-6 text-lg rounded-md mb-6 w-11/12 mx-auto"
         >
           View offer

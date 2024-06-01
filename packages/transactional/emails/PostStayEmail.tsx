@@ -21,7 +21,7 @@ export default function PostStayEmail({
             alt="Tramona Logo"
             style={{ width: '24px', verticalAlign: 'middle' }}
           />
-          <span className="ml-2 text-green-800 font-bold text-lg" style={{ verticalAlign: 'middle' }}>Tramona</span>
+          <span className="ml-2 text-black font-bold text-lg" style={{ verticalAlign: 'middle' }}>Tramona</span>
         </div>
         <div className="my-4 mx-auto w-full" style={{ borderBottom: '2px solid #e0e0e0' }}></div>
         <Text className="text-3xl text-left mb-8">
@@ -48,7 +48,7 @@ export default function PostStayEmail({
             Tramona Team
         </Text>
         <Button
-          href="https://www.tramona.com/"
+          href="https://www.tramona.com/my-trips"
           className="bg-green-900 text-white text-center py-3 px-6 text-lg rounded-md mb-6 w-11/12 mx-auto"
         >
           Leave a Review
@@ -63,25 +63,20 @@ export default function PostStayEmail({
           />
         </div>
         <div style={{ float: 'right' }}>
-          <a href="https://www.instagram.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
-            {/* <Instagram /> */}
+          <a href="https://www.instagram.com/shoptramona/" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
             <img
             src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
             alt="Tramona Logo"
             style={{ width: '32px' }}
             />
           </a>
-          <a href="https://www.facebook.com/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
-            {/* <Facebook /> */}
+          <a href="https://www.facebook.com/ShopTramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
             <img
             src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
             alt="Tramona Logo"
             style={{ width: '32px' }}
             />
           </a>
-          {/* <a href="https://www.linkedin.com/company/tramona" style={{ display: 'inline-block', marginLeft: '16px', color: "black" }}>
-            <Linkedin />
-          </a> */}
         </div>
         <div style={{ clear: 'both' }}></div>
       </div>
