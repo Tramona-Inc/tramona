@@ -176,14 +176,12 @@ export const stripeRouter = createTRPCRouter({
 
       if (stripeCustomerId) {
         return stripe.checkout.sessions.create({
-          ui_mode: "embedded",
-          mode: "setup",
           payment_method_types: ["card"],
           currency: "usd",
-          // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
-          // cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
+          success_url: `${env.NEXTAUTH_URL}/requests/${input.requestId}/?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
           // return_url: `${env.NEXTAUTH_URL}/payment-intent`,
-          redirect_on_completion: "never",
+          // redirect_on_completion: "never",
           metadata: metadata, // metadata access for checkout session
           customer: stripeCustomerId,
         });
