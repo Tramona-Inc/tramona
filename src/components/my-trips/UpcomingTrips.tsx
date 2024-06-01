@@ -11,6 +11,7 @@ type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
 export type UpcomingTrip = {
   id: string | number;
+  type: string
   request: {
     checkIn: Date;
     checkOut: Date;
