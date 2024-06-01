@@ -117,27 +117,27 @@ function LargeHeader(props: HeaderProps) {
   );
 }
 
-function SmallSidebar(props: HeaderProps) {
-  const isVisible = !useIsLg();
-  if (!isVisible || props.type === "marketing") return null;
+// function SmallSidebar(props: HeaderProps) {
+//   const isVisible = !useIsLg();
+//   if (!isVisible || props.type === "marketing") return null;
 
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <MenuIcon />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-max p-0">
-        {props.type === "dashboard" && (
-          <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
-            <Sidebar withLogo type={props.sidebarType} />
-          </aside>
-        )}
-      </SheetContent>
-    </Sheet>
-  );
-}
+//   return (
+//     <Sheet>
+//       <SheetTrigger asChild>
+//         <Button variant="ghost" size="icon">
+//           <MenuIcon />
+//         </Button>
+//       </SheetTrigger>
+//       <SheetContent side="left" className="w-max p-0">
+//         {props.type === "dashboard" && (
+//           <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
+//             <Sidebar withLogo type={props.sidebarType} />
+//           </aside>
+//         )}
+//       </SheetContent>
+//     </Sheet>
+//   );
+// }
 
 function SmallHeader(props: HeaderProps) {
   const { status } = useSession();

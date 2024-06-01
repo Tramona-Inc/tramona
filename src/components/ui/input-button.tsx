@@ -7,10 +7,11 @@ import { FormLabel } from "./form";
 import { labelVariants, overlayVariants } from "./input";
 import { XIcon } from "lucide-react";
 
-// I customized this inputButton component to support prefixes and suffixes.
-// They can be any ReactNode, including strings or JSX elements.
-// Prefixes/suffixes of type string are given default styles,
-// and for <InputButton type="password">, the suffix is the eyeball button
+// a lot of this code is copy pasted from input, so make sure to keep them in sync (or refactor if u want)
+
+// this is a button that looks like an input field and has the same variants as the input component.
+// it can be used as a trigger for date pickers, and is also used in
+// the PlacesInput component to trigger the PlacesPopover, for example.
 
 export type InputButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof inputButtonVariants> & {

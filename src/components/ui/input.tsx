@@ -8,12 +8,13 @@ import VisibleIcon from "../_icons/VisibleIcon";
 import { cva, type VariantProps } from "class-variance-authority";
 import { FormLabel } from "./form";
 import { Slot } from "@radix-ui/react-slot";
-import { XIcon } from "lucide-react";
 
 // I customized this input component to support prefixes and suffixes.
 // They can be any ReactNode, including strings or JSX elements.
 // Prefixes/suffixes of type string are given default styles,
 // and for <Input type="password">, the suffix is the eyeball button
+
+// make sure to keep this in sync wiwth input-button.tsx (or refactor if u want)
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &
   VariantProps<typeof inputVariants> & {
@@ -27,7 +28,7 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &
 export type InputVariant = NonNullable<InputProps["variant"]>;
 
 const inputVariants = cva(
-  "flex items-center w-full rounded-md appearance-none border outline-transparent outline file:border-0 file:bg-transparent border-input file:text-sm file:font-medium disabled:opacity-50 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:outline focus-visible:outline-ring disabled:cursor-not-allowed",
+  "flex items-center w-full rounded-md appearance-none border outline-transparent outline file:border-0 file:bg-transparent border-input file:text-sm file:font-medium disabled:opacity-50 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-black focus-visible:outline-none disabled:cursor-not-allowed",
   {
     variants: {
       variant: {

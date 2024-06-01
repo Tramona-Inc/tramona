@@ -11,11 +11,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check } from "lucide-react";
-import { cn } from "@/utils/utils";
-import { FormControl } from "../ui/form";
-import usePlaceAutocomplete from "use-places-autocomplete";
 import useTimeout from "@/utils/useTimeout";
+import { cn } from "@/utils/utils";
+import { Check } from "lucide-react";
+import usePlaceAutocomplete from "use-places-autocomplete";
+import { FormControl } from "../ui/form";
 
 export default function PlacesPopover({
   value,
@@ -41,9 +41,11 @@ export default function PlacesPopover({
     setValue: setInput,
     suggestions: { status: suggestionsLoading, data },
     clearSuggestions,
+    // init,
   } = usePlaceAutocomplete({
     callbackName: "PlacesAutocomplete",
     debounce: 300,
+    // initOnMount: false,
   });
 
   // const [open, setOpen] = useState(false);
@@ -52,63 +54,70 @@ export default function PlacesPopover({
   useTimeout(() => setOpen(autoFocus), 0);
 
   return (
-    <Popover open={open} onOpenChange={setOpen} {...props}>
-      <PopoverTrigger asChild>
-        <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
-      </PopoverTrigger>
-      <PopoverContent dontAnimate align="start" className={className}>
-        <Command>
-          <CommandInput
-            value={input}
-            onValueChange={(value) => {
-              setInput(value);
+    <>
+      {/* <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback="PlacesAutocomplete"`}
+        onLoad={init}
+      /> */}
 
-              if (value === "" || data.length === 0) clearSuggestions();
-            }}
-            required
-            placeholder="Search locations..."
-          />
-          {/* {suggestionsLoading && (
-									<CommandGroup>Loading suggestions...</CommandGroup>
-								)} */}
-          {suggestionsLoading === "OK" && (
-            <CommandList>
-              {data.map((suggestion) => (
-                <CommandItem
-                  key={suggestion.place_id}
-                  value={suggestion.description}
-                  onSelect={() => {
-                    onValueChange(suggestion.description);
-                    setInput(suggestion.description);
-                    setOpen(false);
-                  }}
-                  className="flex"
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4 flex-shrink-0",
-                      suggestion.description === value
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  <p className="line-clamp-1">{suggestion.description}</p>
-                </CommandItem>
-              ))}
-            </CommandList>
-          )}
-          {input === "" && (
-            <CommandGroup>
-              <p className="mt-2 text-center text-sm text-muted-foreground">
-                Start typing to see suggestions
-              </p>
-            </CommandGroup>
-          )}
-          {data.length === 0 && input !== "" && (
-            <CommandEmpty>No suggestions</CommandEmpty>
-          )}
-        </Command>
-      </PopoverContent>
-    </Popover>
+      <Popover open={open} onOpenChange={setOpen} {...props}>
+        <PopoverTrigger asChild>
+          <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
+        </PopoverTrigger>
+        <PopoverContent dontAnimate align="start" className={className}>
+          <Command>
+            <CommandInput
+              value={input}
+              onValueChange={(value) => {
+                setInput(value);
+
+                if (value === "" || data.length === 0) clearSuggestions();
+              }}
+              required
+              placeholder="Search locations..."
+            />
+            {/* {suggestionsLoading && (
+                    <CommandGroup>Loading suggestions...</CommandGroup>
+                  )} */}
+            {suggestionsLoading === "OK" && (
+              <CommandList>
+                {data.map((suggestion) => (
+                  <CommandItem
+                    key={suggestion.place_id}
+                    value={suggestion.description}
+                    onSelect={() => {
+                      onValueChange(suggestion.description);
+                      setInput(suggestion.description);
+                      setOpen(false);
+                    }}
+                    className="flex"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4 flex-shrink-0",
+                        suggestion.description === value
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                    <p className="line-clamp-1">{suggestion.description}</p>
+                  </CommandItem>
+                ))}
+              </CommandList>
+            )}
+            {input === "" && (
+              <CommandGroup>
+                <p className="mt-2 text-center text-sm text-muted-foreground">
+                  Start typing to see suggestions
+                </p>
+              </CommandGroup>
+            )}
+            {data.length === 0 && input !== "" && (
+              <CommandEmpty>No suggestions</CommandEmpty>
+            )}
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </>
   );
 }

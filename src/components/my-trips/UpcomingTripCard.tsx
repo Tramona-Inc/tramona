@@ -50,7 +50,11 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
               <div className="flex gap-2">
                 <UserAvatar
                   name={trip.property.host?.name}
-                  image={trip.property.host?.image}
+                  // image={trip.property.host?.image}
+                  image={
+                    trip.property.host?.image ??
+                    "/assets/images/tramona-logo.jpeg"
+                  }
                 />
                 <div className="flex w-full justify-between">
                   <div>
@@ -58,7 +62,7 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
                     <p>
                       {trip.property.host?.name
                         ? trip.property.host.name
-                        : "info@tramona"}
+                        : "Tramona"}
                     </p>
                   </div>
                 </div>
@@ -77,7 +81,7 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
                 {formatDateRange(trip.request.checkIn, trip.request.checkOut)}
               </p>
               <Link
-                href={`/my-trips/${trip.id}`}
+                href={`/my-trips/${trip.id}?type=${trip.type}`}
                 className="text-sm font-bold underline underline-offset-4"
               >
                 View more
