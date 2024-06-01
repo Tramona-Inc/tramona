@@ -173,9 +173,7 @@ export default function HomeOfferCard({
           <CarouselDots count={count} current={current} />
         </Carousel>
         <div className="flex flex-col">
-          <p className="max-w-full overflow-hidden text-ellipsis text-nowrap font-semibold">
-            {property.name}
-          </p>
+          <p className="truncate font-semibold">{property.name}</p>
           {property.originalNightlyPrice !== null && (
             <p>
               <span className="text-xs">Airbnb Price: </span>

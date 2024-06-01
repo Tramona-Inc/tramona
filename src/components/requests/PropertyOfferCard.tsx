@@ -2,6 +2,7 @@ import { type Bid } from "@/server/db/schema";
 import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import {
+  cn,
   formatCurrency,
   formatDateRange,
   getNumNights,
@@ -32,6 +33,7 @@ import EditPropertyOfferDialog from "./EditPropertyOfferDialog";
 import MobileSimilarProperties from "./MobileSimilarProperties";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import WithdrawPropertyOfferDialog from "./WithdrawPropertyOfferDialog";
+import HostCounterOffer from "../property-offer-response/HostCounterOffer";
 
 function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
   switch (status) {
@@ -49,14 +51,20 @@ function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
 export default function PropertyOfferCard({
   offer,
   isGuestDashboard,
+  selectedOfferId,
+  setSelectedOfferId,
 }:
   | {
       isGuestDashboard: true;
       offer: RouterOutputs["biddings"]["getMyBids"][number];
+      selectedOfferId?: number | null;
+      setSelectedOfferId?: (id: number | null) => void;
     }
   | {
       isGuestDashboard?: false;
       offer: RouterOutputs["biddings"]["getAllPending"][number];
+      selectedOfferId?: undefined;
+      setSelectedOfferId?: undefined;
     }) {
   const { data: session } = useSession();
 
@@ -95,7 +103,16 @@ export default function PropertyOfferCard({
   const originalNightlyBiddingOffer = offer.amount / totalNights;
 
   return (
-    <Card className="p-0 lg:overflow-clip">
+    <Card
+      className={cn(
+        "border-0 p-0 outline outline-2 lg:overflow-clip",
+        isGuestDashboard && "cursor-pointer",
+        selectedOfferId === offer.id
+          ? "outline-foreground"
+          : "outline-transparent",
+      )}
+      onClick={() => setSelectedOfferId?.(offer.id)}
+    >
       <CardContent className="flex">
         <Link
           href={`/property/${offer.propertyId}`}
@@ -154,7 +171,19 @@ export default function PropertyOfferCard({
               </a>
             )}
 
-            <p className="text-xs text-muted-foreground">
+            {!isGuestDashboard && offer.property.originalListingUrl && (
+              <a
+                href={offer.property.originalListingUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-teal-900 underline underline-offset-4"
+              >
+                View original listing{" "}
+                <ExternalLinkIcon className="inline size-[1em]" />
+              </a>
+            )}
+
+            <p className="text-sm text-muted-foreground">
               Airbnb Price:{" "}
               {formatCurrency(
                 offer.property.originalNightlyPrice
@@ -164,20 +193,30 @@ export default function PropertyOfferCard({
               /night
             </p>
 
-            <div className="text-md flex items-center gap-1 font-semibold">
-              {formatDateRange(offer.checkIn, offer.checkOut)} &middot;{" "}
-              {plural(offer.numGuests, "guest")}
+            <div className="flex flex-row items-start space-x-6 text-left">
+              <div className="text-md font-semibold">
+                {formatDateRange(offer.checkIn, offer.checkOut)} &middot;{" "}
+                {plural(offer.numGuests, "guest")}
+              </div>
             </div>
           </div>
 
           <Separator />
 
-          <div>
-            <p className="text-sm">
-              <span className="font-bold">Original Bidding Offer: </span>
-              {formatCurrency(originalNightlyBiddingOffer)}
-              /night
-            </p>
+          <div className="flex flex-row space-x-2">
+            {userCanCounter && (
+              <HostCounterOffer
+                counterNightlyPrice={counterNightlyPrice}
+                previousOfferNightlyPrice={originalNightlyBiddingOffer}
+              />
+            )}
+            <div className="py-1">
+              <p className="text-sm">
+                <span className="font-bold">Original Bidding Offer: </span>
+                {formatCurrency(originalNightlyBiddingOffer)}
+                /night
+              </p>
+            </div>
           </div>
 
           {/* {!isGuestDashboard && (

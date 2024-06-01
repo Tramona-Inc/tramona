@@ -5,7 +5,7 @@ import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import CityRequestsTab from "../../components/requests/CityRequestsTab";
-import InactiveRequestGroups from "../../components/requests/InactiveRequestGroups";
+import PastRequestsAndOffersTab from "../../components/requests/PastRequestsAndOffersTab";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
 
 function RequestsTabs() {
@@ -32,7 +32,7 @@ function RequestsTabs() {
         <PropertyOfferTab />
       </TabsContent>
       <TabsContent value="history">
-        <InactiveRequestGroups />
+        <PastRequestsAndOffersTab />
       </TabsContent>
     </Tabs>
   );
@@ -49,7 +49,7 @@ export default function Page() {
       </Head>
 
       <DashboardLayout type="guest">
-        <div className="pb-footer-height min-h-screen-minus-header px-4 pt-5">
+        <div className="min-h-screen-minus-header px-4 pb-footer-height pt-5">
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">

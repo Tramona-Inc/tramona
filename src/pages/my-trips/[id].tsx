@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import TripPage from "@/components/my-trips/TripPage";
 import { type RouterOutputs, api } from "@/utils/api";
+import { z } from "zod";
 
 type RequestTrip = RouterOutputs["offers"]["getByIdWithDetails"];
 type BidsTrip = RouterOutputs["myTrips"]["getBidByIdWithDetails"];
@@ -14,7 +15,10 @@ export default function TripDetailsPage() {
   useSession({ required: true });
   const router = useRouter();
   const tripId = parseInt(router.query.id as string);
-  const tripType = router.query.type as string;
+  const tripType = z
+    .enum(["request", "bid"])
+    .catch("bid")
+    .parse(router.query.type);
 
   const { data: trip } =
     tripType === "request"
@@ -78,7 +82,7 @@ export default function TripDetailsPage() {
   };
   let normalizedTrip;
   if (trip) {
-    normalizedTrip = normalizeTripData(trip, tripType);
+    normalizedTrip = normalizeTripData({ trip, tripType });
   }
 
   if (router.isFallback) {
