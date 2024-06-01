@@ -83,7 +83,7 @@ export default function SearchPage() {
     propertyBidsError,
     bucketListError,
     setInitialBids,
-    isBucketListProperty,
+    isPropertyBids,
     setInitialBucketList,
   ]);
   //we are passing holding the fetchNextPageOfAdjustedProperties to here this is the parent component
@@ -109,16 +109,24 @@ export default function SearchPage() {
         <div className="relative mb-20 bg-white">
           <VerificationBanner />
           {!isMobile ? (
-            <div className="mt-32 space-y-8 px-4">
-              <DynamicDesktopSearchBar />
-              <div className="space-y-4">
+            <div className="mt-12 space-y-4 px-4">
+              <div className="item-center flex justify-center text-2xl font-black">
+                Explore popular destinations
+              </div>
+              <div className="item-center flex justify-center text-lg">
+                Search through our properties, send an offer, and the host will
+                accept, deny or counter your offer in 24 hours or less.
+              </div>
+              <div className="sticky top-16 z-30 bg-white">
+                <DynamicDesktopSearchBar />
                 <div className="flex items-center gap-2 border-b">
                   <div className="w-full">
                     <CitiesFilter />
                   </div>
                   <FiltersBtn />
                 </div>
-
+              </div>
+              <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
                   <div
                     className={`col-span-1  ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
@@ -142,21 +150,32 @@ export default function SearchPage() {
               </div>
             </div>
           ) : (
-            <div className="relative flex flex-col">
-              <MobileJustSearch />
-              <div className="my-1 mt-16">
-                <MobileFilterBar />
+            <div>
+              <div className="mt-4 space-y-2 p-4">
+                <div className="text-center text-3xl font-bold">
+                  Explore popular destinations
+                </div>
+                <div className="text-center text-lg">
+                  Search through our properties, send an offer, and the host
+                  will accept, deny or counter your offer in 24 hours or less.
+                </div>
               </div>
-              <div>
-                <SearchPropertiesMap
+              <div className="relative flex flex-col">
+                <MobileJustSearch />
+                <div className="my-1 mt-16">
+                  <MobileFilterBar />
+                </div>
+                <div>
+                  <SearchPropertiesMap
+                    isFilterUndefined={isFilterUndefined}
+                    setFunctionRef={setFunctionRef}
+                  />
+                </div>
+                <MobileSearchListings
                   isFilterUndefined={isFilterUndefined}
-                  setFunctionRef={setFunctionRef}
+                  callSiblingFunction={callFetchAdjustedPropertiesFunction}
                 />
               </div>
-              <MobileSearchListings
-                isFilterUndefined={isFilterUndefined}
-                callSiblingFunction={callFetchAdjustedPropertiesFunction}
-              />
             </div>
           )}
         </div>
@@ -181,10 +200,10 @@ function MobileJustSearch() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="fixed inset-x-1 top-[calc(var(--header-height)+4px)] z-30">
+      <SheetTrigger className="sticky top-[calc(var(--header-height)+4px)] z-30 p-4">
         <div className="z-30 flex flex-row items-center gap-x-3 rounded-lg border bg-white px-3 py-4 text-center font-semibold text-muted-foreground shadow-md">
           <SearchIcon />
-          Search
+          Search properties to send offers on
         </div>
       </SheetTrigger>
       <SheetContent side="top" className="h-full">

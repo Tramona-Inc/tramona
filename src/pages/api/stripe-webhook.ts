@@ -56,6 +56,7 @@ export default async function webhook(
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
 
+
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
 
@@ -237,7 +238,7 @@ export default async function webhook(
             })
             .where(eq(offers.id, listing_id));
 
-          // console.log("Checkout session was successful!");
+          console.log("Checkout session was successful!");
         } else {
           // console.error("Metadata or listing_id is null or undefined");
         }

@@ -506,20 +506,25 @@ export const biddingRouter = createTRPCRouter({
       // } else {
       // await updateBidStatus({ id: input.bidId, status: "Rejected" });
       // }
-      const paymentIntent = await db
+      const paymentIntentId = await db
         .select({ paymentIntentId: bids.paymentIntentId })
         .from(bids)
-        .where(eq(bids.id, input.bidId));
-      let refund;
-      if (paymentIntent !== null) {
-        refund = await stripe.refunds.create({
-          payment_intent: paymentIntent,
-        });
+        .where(eq(bids.id, input.bidId))
+        .then((res) => res[0]?.paymentIntentId);
+
+      if (paymentIntentId == null) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      if (refund?.status === "succeeded") {
-        await updateBidStatus({ id: input.bidId, status: "Cancelled" });
+      const refund = await stripe.refunds.create({
+        payment_intent: paymentIntentId,
+      });
+
+      if (refund.status !== "succeeded") {
+        throw new TRPCError({ code: "BAD_REQUEST" });
       }
+
+      await updateBidStatus({ id: input.bidId, status: "Cancelled" });
 
       // TODO: email travellers
     }),
