@@ -82,7 +82,7 @@ export default function TripDetailsPage() {
   };
   let normalizedTrip;
   if (trip) {
-    normalizedTrip = normalizeTripData({ trip, tripType });
+    normalizedTrip = normalizeTripData(trip, tripType);
   }
 
   if (router.isFallback) {
