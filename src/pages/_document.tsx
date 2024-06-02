@@ -9,7 +9,7 @@ class MyDocument extends Document {
       <Html lang="en">
         <Head>
           <Script
-            src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback="PlacesAutocomplete"`}
+            src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback=PlacesAutocomplete`}
             strategy="beforeInteractive"
           />
           <Script id="clarity-tag" strategy="afterInteractive">
@@ -39,14 +39,14 @@ class MyDocument extends Document {
         <body className={mulish.className}>
           <Main />
           <NextScript />
-          <Script
+          {/* <Script
             defer
             async
             id="googlemaps"
             type="text/javascript"
             strategy="afterInteractive"
             src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}&libraries=places&callback=PlacesAutocomplete&loading=async`}
-          />
+          /> */}
         </body>
       </Html>
     );
