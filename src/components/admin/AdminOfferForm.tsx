@@ -55,6 +55,8 @@ const formSchema = z.object({
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
   address: zodString({ maxLen: 1000 }),
+  latitude: zodNumber(),
+  longitude: zodNumber(),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
@@ -110,7 +112,7 @@ export default function AdminOfferForm({
             // im sorry
             // ?? undefineds are to turn string | null into string | undefined
             hostName: offer.property.hostName ?? undefined,
-            address: offer.property.address ?? undefined,
+            address: offer.property.address,
             areaDescription: offer.property.areaDescription ?? undefined,
             mapScreenshot: offer.property.mapScreenshot ?? undefined,
             maxNumGuests: offer.property.maxNumGuests,
@@ -125,8 +127,8 @@ export default function AdminOfferForm({
             airbnbMessageUrl: offer.property.airbnbMessageUrl ?? undefined,
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
-            offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
-            tramonaFee: offer.tramonaFee ?? undefined,
+            offeredNightlyPriceUSD: offeredNightlyPriceUSD,
+            tramonaFee: offer.tramonaFee,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
@@ -222,7 +224,12 @@ export default function AdminOfferForm({
         return;
       }
 
-      const newOffer = { requestId: request.id, propertyId, totalPrice,tramonaFee: data.tramonaFee * 100};
+      const newOffer = {
+        requestId: request.id,
+        propertyId,
+        totalPrice,
+        tramonaFee: data.tramonaFee * 100,
+      };
 
       await createOffersMutation
         .mutateAsync(newOffer)
@@ -326,11 +333,7 @@ export default function AdminOfferForm({
             <FormItem className="col-span-full">
               <FormLabel>Tramona Fee</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  inputMode="decimal"
-                  prefix="$"
-                />
+                <Input {...field} inputMode="decimal" prefix="$" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -557,6 +560,34 @@ export default function AdminOfferForm({
               <FormLabel>Address</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="latitude"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Latitude</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" inputMode="decimal" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="longitude"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Longitude</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" inputMode="decimal" />
               </FormControl>
               <FormMessage />
             </FormItem>
