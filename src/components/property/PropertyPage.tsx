@@ -270,7 +270,7 @@ export default function PropertyPage({ property }: { property: Property }) {
                   <DialogHeader>
                     <DialogTitle className="">Amenities</DialogTitle>
                   </DialogHeader>
-                  <div className="max-h-96 overflow-y-scroll">
+                  <div className="max-h-96 overflow-y-auto">
                     <AmenitiesComponent
                       propertyAmenities={property.amenities}
                     />
