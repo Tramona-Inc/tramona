@@ -43,7 +43,7 @@ export const hostMobileNavLinks = [
     icon: BadgePercent,
   },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/host/properties", name: "stays", icon: Briefcase },
+  { href: "/host/properties", name: "Properties", icon: HomeIcon },
 ];
 
 export const hostNavLinks = [
