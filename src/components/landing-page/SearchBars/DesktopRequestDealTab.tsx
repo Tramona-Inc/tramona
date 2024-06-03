@@ -108,7 +108,7 @@ export function DesktopRequestDealTab() {
                   <FormControl>
                     <Input
                       {...field}
-                      label="Maximum price"
+                      label="Maximum nightly price"
                       placeholder="Price per night"
                       suffix="/night"
                       icon={DollarSignIcon}
