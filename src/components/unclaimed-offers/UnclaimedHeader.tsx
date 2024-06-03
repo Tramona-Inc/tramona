@@ -5,7 +5,7 @@ import { imageSVG } from "@/components/unclaimed-offers/UnclaimedSVG";
 export default function UnclaimedHeader() {
   return (
     <div className="relative flex w-full flex-row items-center justify-start bg-[#F1F5F5]">
-      <div className=" flex flex-col justify-center gap-y-4 p-20 px-28 text-start">
+      <div className=" flex flex-col justify-center gap-y-4 p-14 px-28 text-start">
         <h1 className="text-5xl font-semibold">Unclaimed Matches</h1>
         <div className="z-20 mt-2 text-lg">
           Have a friend thinking of traveling? Share a deal with them

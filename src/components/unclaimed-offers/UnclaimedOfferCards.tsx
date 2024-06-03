@@ -21,14 +21,11 @@ export default function UnclaimedOfferCard() {
 
   return (
     <div className="w-5/6 space-y-2">
-      <div className=" flex flex-col gap-y-1">
-        <h2 className=" text-3xl font-semibold">
-          Amazing deals happening now!{" "}
-        </h2>
+      <div className="flex flex-col gap-y-1">
+        <h2 className="text-3xl font-semibold">Amazing deals happening now!</h2>
         <div className="mb-10 flex flex-row items-center gap-x-1 text-teal-700">
           <InfoIcon size={18} strokeWidth={2.4} />
           <Link href="/how-it-works" className="underline underline-offset-2">
-            {" "}
             How it works
           </Link>
         </div>
@@ -45,18 +42,25 @@ export default function UnclaimedOfferCard() {
         </div>
       </div>
       {!isLoading ? (
-        unMatchedOffers &&
-        unMatchedOffers &&
-        unMatchedOffers.map((offer, index) => (
-          <div key={offer.property.id}>
-            <UnMatchedPropertyCard offer={offer} />
-            {index === 2 && (
-              <div className="flex flex-row">
-                <>img</>
-              </div>
-            )}
-          </div>
-        ))
+        unMatchedOffers ? (
+          unMatchedOffers.map((offer, index) => (
+            <div key={offer.property.id}>
+              <UnMatchedPropertyCard offer={offer} />
+              {index === 2 && (
+                <div className="flex flex-row">
+                  <Image
+                    src="/path/to/your/image.jpg" // Replace with the actual path to your image
+                    alt="Custom Image"
+                    width={500}
+                    height={300}
+                  />
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div>Sorry, we currently don't have any unmatched offers.</div>
+        )
       ) : (
         <div className="flex-1 px-6 text-sm">
           <div className="flex flex-row gap-x-4 ">

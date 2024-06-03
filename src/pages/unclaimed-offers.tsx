@@ -6,13 +6,13 @@ import Link from "next/link";
 export default function Page() {
   return (
     <MainLayout>
-      <div className="flex flex-col items-center justify-center gap-y-5">
+      <div className="mb-16 flex flex-col items-center justify-center gap-y-5">
         <UnclaimedHeader />
         <UnclaimedOfferCards />
         <div className="my-4 flex flex-col items-center gap-y-3">
           <p>
             Dont see something you like? Make a request and get a match
-            specifically tailored to your needs
+            specifically tailored to your needs.
           </p>
           <Button
             variant="outline"
