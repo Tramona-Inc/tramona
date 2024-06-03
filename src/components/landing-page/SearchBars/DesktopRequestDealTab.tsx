@@ -54,24 +54,15 @@ export function DesktopRequestDealTab() {
           /> */}
 
           <div className="flex flex-col gap-2">
-            <FormField
+            <PlacesInput
               control={form.control}
               name={`data.${curTab}.location`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      label="Location"
-                      placeholder="Enter your destination"
-                      icon={Users2Icon}
-                      variant="lpDesktop"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              formLabel="Location"
+              variant="lpDesktop"
+              placeholder="Select a location"
+              icon={MapPinIcon}
             />
+
             <FormField
               control={form.control}
               name={`data.${curTab}.date`}
