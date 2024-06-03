@@ -55,8 +55,6 @@ const formSchema = z.object({
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
   address: zodString({ maxLen: 1000 }),
-  latitude: zodNumber(),
-  longitude: zodNumber(),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
@@ -565,35 +563,6 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="latitude"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Latitude</FormLabel>
-              <FormControl>
-                <Input {...field} type="text" inputMode="decimal" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="longitude"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Longitude</FormLabel>
-              <FormControl>
-                <Input {...field} type="text" inputMode="decimal" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="checkInInfo"
