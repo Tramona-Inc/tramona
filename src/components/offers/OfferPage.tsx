@@ -33,6 +33,10 @@ import { useMediaQuery } from "../_utils/useMediaQuery";
 import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
+import router from "next/router";
+
+import { useSession } from "next-auth/react";
+import ShareOfferDialog from "./ShareOfferDialog";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -41,6 +45,7 @@ export default function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
+  const { status } = useSession();
   let isBooked = false;
 
   const { data, isLoading } =
@@ -232,7 +237,7 @@ export default function OfferPage({
       </div>
 
       <hr className="h-px border-0 bg-gray-300" />
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      <div className="flex flex-col-reverse gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
           <section>
             <div className="flex items-center gap-2">
@@ -385,38 +390,51 @@ export default function OfferPage({
                 {formatCurrency(offer.totalPrice + tramonaServiceFee + tax)}
               </p>
             </div>
-            {!isLoading ? (
-              <HowToBookDialog
-                isBooked={isBooked}
-                listingId={offer.id}
-                propertyName={property.name}
-                originalNightlyPrice={property.originalNightlyPrice}
-                airbnbUrl={property.airbnbUrl ?? ""}
-                checkIn={request.checkIn}
-                checkOut={request.checkOut}
-                requestId={request.id}
-                offer={{ property, request, ...offer }}
-                totalPrice={offer.totalPrice}
-                offerNightlyPrice={offerNightlyPrice}
-                isAirbnb={isAirbnb}
-              >
-                <Button
-                  size="lg"
-                  className="w-full rounded-full"
-                  disabled={isBooked}
+            {status === "authenticated" ? (
+              isLoading ? (
+                <Spinner />
+              ) : (
+                <HowToBookDialog
+                  isBooked={isBooked}
+                  listingId={offer.id}
+                  propertyName={property.name}
+                  originalNightlyPrice={property.originalNightlyPrice}
+                  airbnbUrl={property.airbnbUrl ?? ""}
+                  checkIn={request.checkIn}
+                  checkOut={request.checkOut}
+                  requestId={request.id}
+                  offer={{ property, request, ...offer }}
+                  totalPrice={offer.totalPrice}
+                  offerNightlyPrice={offerNightlyPrice}
+                  isAirbnb={isAirbnb}
                 >
-                  {isBooked ? (
-                    <>
-                      <CheckIcon className="size-5" />
-                      Booked
-                    </>
-                  ) : (
-                    <>Confirm Booking</>
-                  )}
-                </Button>
-              </HowToBookDialog>
+                  <Button
+                    size="lg"
+                    className="w-full rounded-full"
+                    disabled={isBooked}
+                  >
+                    {isBooked ? (
+                      <>
+                        <CheckIcon className="size-5" />
+                        Booked
+                      </>
+                    ) : (
+                      <>Confirm Booking</>
+                    )}
+                  </Button>
+                </HowToBookDialog>
+              )
             ) : (
-              <Spinner />
+              <Button
+                onClick={() => {
+                  router.push({
+                    pathname: "/auth/signin",
+                    query: { from: `/public-offer/${offer.id}` },
+                  });
+                }}
+              >
+                Log in to Book
+              </Button>
             )}
           </Card>
         </div>
@@ -453,6 +471,7 @@ export default function OfferPage({
           </section>
         </div>
       )}
+      <ShareOfferDialog id={offer.id} isRequest={false} />
     </div>
   );
 }

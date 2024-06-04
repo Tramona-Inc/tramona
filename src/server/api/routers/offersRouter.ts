@@ -259,6 +259,48 @@ export const offersRouter = createTRPCRouter({
       return offer;
     }),
 
+  getByPublicIdWithDetails: publicProcedure
+    .input(offerSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const offer = await ctx.db.query.offers.findFirst({
+        where: and(
+          eq(offers.id, input.id),
+          //isNotNull(offers.madePublicAt) //for now this is empty because we we want users to be able to share.
+        ),
+        columns: {
+          createdAt: true,
+          totalPrice: true,
+          acceptedAt: true,
+          id: true,
+          tramonaFee: true,
+        },
+        with: {
+          request: {
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+              location: true,
+              id: true,
+            },
+          },
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
+      console.log("this is offer router offer", offer);
+      if (!offer) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      return offer;
+    }),
+
   makePublic: roleRestrictedProcedure(["admin", "host"])
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
