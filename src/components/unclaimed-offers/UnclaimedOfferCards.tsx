@@ -15,10 +15,6 @@ export default function UnclaimedOfferCard() {
   const { data: unMatchedOffers, isLoading } =
     api.offers.getAllUnmatchedOffers.useQuery();
 
-  //creating the cards
-  console.log("This is the offers");
-  console.log(unMatchedOffers as UnMatchedOffers[]);
-
   return (
     <div className="w-5/6 space-y-2">
       <div className="flex flex-col gap-y-1">
@@ -59,7 +55,7 @@ export default function UnclaimedOfferCard() {
             </div>
           ))
         ) : (
-          <div>Sorry, we currently don't have any unmatched offers.</div>
+          <div>Sorry, we currently don&apos;t have any unmatched offers.</div>
         )
       ) : (
         <div className="flex-1 px-6 text-sm">
@@ -77,7 +73,7 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
   return (
     <div className="grid grid-cols-10 items-center gap-x-2 rounded-xl border text-center">
       <Image
-        src={offer.property.imageUrls[0] || ""}
+        src={offer.property.imageUrls[0] ?? ""}
         alt=""
         width={150}
         height={130}

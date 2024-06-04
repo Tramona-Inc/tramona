@@ -426,7 +426,7 @@ export default function OfferPage({
             ) : (
               <Button
                 onClick={() => {
-                  router.push({
+                  void router.push({
                     pathname: "/auth/signin",
                     query: { from: `/public-offer/${offer.id}` },
                   });
@@ -473,7 +473,7 @@ export default function OfferPage({
       <ShareOfferDialog
         id={offer.id}
         isRequest={false}
-        linkImage={property.imageUrls[0] || ""}
+        linkImage={property.imageUrls[0] ?? ""}
         propertyName={property.name}
       />
     </div>
