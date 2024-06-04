@@ -137,7 +137,6 @@ export const offersRouter = createTRPCRouter({
           acceptedAt: true,
           tramonaFee: true,
         },
-
         with: {
           request: {
             columns: {

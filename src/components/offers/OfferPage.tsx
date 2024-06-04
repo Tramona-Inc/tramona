@@ -1,4 +1,3 @@
-import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,22 +15,25 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { AspectRatio } from "../ui/aspect-ratio";
+import "leaflet/dist/leaflet.css";
 import {
-  CheckIcon,
-  ImagesIcon,
-  ChevronRight,
-  UsersRoundIcon,
+  ArrowLeftToLineIcon,
+  ArrowRightToLineIcon,
   CalendarDays,
+  CheckIcon,
+  ChevronRight,
+  ImagesIcon,
+  UsersRoundIcon,
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
 import Spinner from "../_common/Spinner";
-import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
-import "leaflet/dist/leaflet.css";
-import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
-import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
+import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
+import { AspectRatio } from "../ui/aspect-ratio";
 import AmenitiesComponent from "./CategorizedAmenities";
+import OfferPhotos from "./OfferPhotos";
 import PropertyAmenities from "./PropertyAmenities";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
@@ -42,6 +44,8 @@ export default function OfferPage({
   offer: OfferWithDetails;
 }) {
   let isBooked = false;
+
+  const router = useRouter();
 
   const { data, isLoading } =
     api.offers.getStripePaymentIntentAndCheckoutSessionId.useQuery({
@@ -83,6 +87,14 @@ export default function OfferPage({
 
   const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
+
+  const { mutate: handleConversation } =
+    api.messages.createConversationWithOffer.useMutation({
+      onSuccess: (conversationId: string) => {
+        void router.push(`/messages?conversationId=${conversationId}`);
+      },
+    });
+
   return (
     <div className="space-y-4">
       <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
@@ -313,6 +325,17 @@ export default function OfferPage({
         <div className="flex-1">
           <Card>
             <div>
+              <Button
+                onClick={() =>
+                  handleConversation({
+                    offerId: String(offer.id),
+                    offerUserId: property.host?.id ?? "",
+                    offerPropertyName: property.name,
+                  })
+                }
+              >
+                Inquire
+              </Button>
               <h2 className="flex items-center text-3xl font-semibold">
                 {formatCurrency(offerNightlyPrice)}
                 <span className="ml-2 py-0 text-sm font-normal text-gray-500">
