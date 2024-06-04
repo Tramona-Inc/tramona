@@ -90,8 +90,9 @@ export default function OfferPage({
 
   const { mutate: handleConversation } =
     api.messages.createConversationWithOffer.useMutation({
-      onSuccess: (conversationId: string) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
+      onSuccess: (conversationId: string | undefined) => {
+        if (conversationId)
+          void router.push(`/messages?conversationId=${conversationId}`);
       },
     });
 
@@ -325,26 +326,30 @@ export default function OfferPage({
         <div className="flex-1">
           <Card>
             <div>
-              <Button
-                onClick={() =>
-                  handleConversation({
-                    offerId: String(offer.id),
-                    offerUserId: property.host?.id ?? "",
-                    offerPropertyName: property.name,
-                  })
-                }
-              >
-                Inquire
-              </Button>
-              <h2 className="flex items-center text-3xl font-semibold">
-                {formatCurrency(offerNightlyPrice)}
-                <span className="ml-2 py-0 text-sm font-normal text-gray-500">
-                  per night
-                </span>
-              </h2>
-              <p className="text-sm font-medium text-black">
-                Original price: {formatCurrency(originalTotal / numNights)}
-              </p>
+              <div className="flex flex-col">
+                <h2 className="flex items-center text-3xl font-semibold">
+                  {formatCurrency(offerNightlyPrice)}
+                  <span className="ml-2 py-0 text-sm font-normal text-gray-500">
+                    per night
+                  </span>
+                </h2>
+                <p className="text-sm font-medium text-black">
+                  Original price: {formatCurrency(originalTotal / numNights)}
+                </p>
+
+                <Button
+                  className="w-[100px]"
+                  onClick={() =>
+                    handleConversation({
+                      offerId: String(offer.id),
+                      offerUserId: property.host?.id ?? "",
+                      offerPropertyName: property.name,
+                    })
+                  }
+                >
+                  Inquire
+                </Button>
+              </div>
               <div className="my-2 grid gap-1">
                 <div>
                   <div className="inline-flex w-full items-center justify-start rounded-full py-2 md:rounded-3xl lg:rounded-full">
