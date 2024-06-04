@@ -247,7 +247,7 @@ export default function OfferPage({
       <hr className="h-px border-0 bg-gray-300" />
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
-          <section>
+          <section className="flex flex-row justify-between">
             <div className="flex items-center gap-2">
               <UserAvatar
                 name={hostName}
@@ -259,6 +259,18 @@ export default function OfferPage({
                 <p className="text-lg font-medium">{hostName}</p>
               </div>
             </div>
+
+            <Button
+              onClick={() =>
+                handleConversation({
+                  offerId: String(offer.id),
+                  offerUserId: property.host?.id ?? "",
+                  offerPropertyName: property.name,
+                })
+              }
+            >
+              Message Host
+            </Button>
           </section>
           <hr className="h-px border-0 bg-gray-300" />
           <section id="overview" className="scroll-mt-36">
@@ -336,19 +348,6 @@ export default function OfferPage({
                 <p className="text-sm font-medium text-black">
                   Original price: {formatCurrency(originalTotal / numNights)}
                 </p>
-
-                <Button
-                  className="w-[100px]"
-                  onClick={() =>
-                    handleConversation({
-                      offerId: String(offer.id),
-                      offerUserId: property.host?.id ?? "",
-                      offerPropertyName: property.name,
-                    })
-                  }
-                >
-                  Inquire
-                </Button>
               </div>
               <div className="my-2 grid gap-1">
                 <div>
