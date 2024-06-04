@@ -2,7 +2,6 @@ import { relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
 import { bids } from "./tables/bids";
-import { bidsToProperties } from "./tables/bidsToProperties";
 import {
   bucketListDestinations,
   bucketListProperties,
@@ -89,7 +88,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   }),
   offers: many(offers),
   requestsToProperties: many(requestsToProperties),
-  bidsToProperties: many(bidsToProperties),
+  bids: many(bids),
   bookedDates: many(bookedDates),
   reservations: many(reservations),
 }));
@@ -157,20 +156,6 @@ export const requestsToPropertiesRelations = relations(
     }),
     property: one(properties, {
       fields: [requestsToProperties.propertyId],
-      references: [properties.id],
-    }),
-  }),
-);
-
-export const bidsToPropertiesRelations = relations(
-  bidsToProperties,
-  ({ one }) => ({
-    bid: one(bids, {
-      fields: [bidsToProperties.bidId],
-      references: [bids.id],
-    }),
-    property: one(properties, {
-      fields: [bidsToProperties.propertyId],
       references: [properties.id],
     }),
   }),

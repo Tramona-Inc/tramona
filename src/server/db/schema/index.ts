@@ -5,7 +5,6 @@ export * from "./tables/auth/accounts";
 export * from "./tables/auth/sessions";
 export * from "./tables/auth/verificationTokens";
 export * from "./tables/bids";
-export * from "./tables/bidsToProperties";
 export * from "./tables/bucketList";
 export * from "./tables/counters";
 export * from "./tables/groups";
