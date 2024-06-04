@@ -74,6 +74,7 @@ const formSchema = z.object({
   checkInInfo: optional(zodString()),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
+  cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
   // mapScreenshot: optional(zodString()),
 });
@@ -665,6 +666,20 @@ export default function AdminOfferForm({
               <FormLabel>Area Description (optional)</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cancellationPolicy"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Cancellation Policy (optional)</FormLabel>
+              <FormControl>
+                <Textarea {...field} className="resize-y" rows={2} />
               </FormControl>
               <FormMessage />
             </FormItem>
