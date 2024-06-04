@@ -36,7 +36,7 @@ import PropertyAmenities from "./PropertyAmenities";
 import router from "next/router";
 
 import { useSession } from "next-auth/react";
-import ShareOfferDialog from "./ShareOfferDialog";
+import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -384,7 +384,6 @@ export default function OfferPage({
             <div className="flex justify-between">
               <div>
                 <p className="font-semibold">Total</p>
-                <p className="text-xs text-gray-500">taxes not included.</p>
               </div>
               <p className="font-bold">
                 {formatCurrency(offer.totalPrice + tramonaServiceFee + tax)}
@@ -471,7 +470,12 @@ export default function OfferPage({
           </section>
         </div>
       )}
-      <ShareOfferDialog id={offer.id} isRequest={false} />
+      <ShareOfferDialog
+        id={offer.id}
+        isRequest={false}
+        linkImage={property.imageUrls[0] || ""}
+        propertyName={property.name}
+      />
     </div>
   );
 }

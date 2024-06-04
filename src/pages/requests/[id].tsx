@@ -16,6 +16,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import ShareOfferDialog from "@/components/_common/ShareLink/ShareOfferDialog";
 
 function Page({ google }: { google: GoogleAPI }) {
   const router = useRouter();
@@ -32,6 +33,7 @@ function Page({ google }: { google: GoogleAPI }) {
       enabled: router.isReady,
     },
   );
+  const [firstImage, setFirstImage] = useState("");
 
   useEffect(() => {
     const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
@@ -40,6 +42,7 @@ function Page({ google }: { google: GoogleAPI }) {
         lat: offer.property.latitude,
         lng: offer.property.longitude,
       });
+      setFirstImage(offer.property.imageUrls[0] ?? "");
     }
   }, [selectedOfferId]);
 
@@ -71,11 +74,21 @@ function Page({ google }: { google: GoogleAPI }) {
     return <Spinner />;
   }
 
-
   return (
     <DashboadLayout type="guest">
       <Head>
         <title>Offers for you | Tramona</title>
+        <meta property="og:title" content="Check my properties out" />
+        <meta
+          property="og:description"
+          content="Check this property out -- Sign up here, from any device!"
+        />
+        <meta property="og:image" content={firstImage} />
+        <meta
+          property="og:url"
+          content={`https://tramona.com/public-offers/${requestId}`}
+        />
+        <meta property="og:type" content="website" />
       </Head>
       {request && offers ? (
         <div>
@@ -99,6 +112,15 @@ function Page({ google }: { google: GoogleAPI }) {
                     Offer {i + 1}
                   </TabsTrigger>
                 ))}
+                <div className="mx-4  mt-5 flex h-full items-center justify-center">
+                  {" "}
+                  <ShareOfferDialog
+                    id={request.id}
+                    isRequest={true}
+                    linkImage={firstImage}
+                    propertyName={offers[0].request.location}
+                  />
+                </div>
               </TabsList>
 
               <div className="flex flex-col lg:flex-row lg:space-x-10">
