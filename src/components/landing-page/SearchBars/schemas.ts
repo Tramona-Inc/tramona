@@ -18,7 +18,7 @@ export const searchSchema = z.object({
 export const defaultSearchOrReqValues: Partial<z.input<typeof searchSchema>> =
   {};
 
-const cityRequestSchema = z
+export const cityRequestSchema = z
   .object({
     location: zodString(),
     date: z.object({ from: z.date(), to: z.date() }),
