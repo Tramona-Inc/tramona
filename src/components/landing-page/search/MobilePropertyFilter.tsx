@@ -1,3 +1,6 @@
+import { CounterInput } from "@/components/_common/CounterInput";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -6,27 +9,26 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { useCitiesFilter } from "@/utils/store/cities-filter";
-import { useZodForm } from "@/utils/useZodForm";
-import { z } from "zod";
-import { CounterInput } from "@/components/_common/CounterInput";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ListFilterIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { useZodForm } from "@/utils/useZodForm";
+import { ListFilterIcon } from "lucide-react";
+import { z } from "zod";
 
 export function Total({
   name,
+  optional,
   total,
   setTotal,
 }: {
   name: string;
+  optional?: boolean;
   total: number;
   setTotal: (total: number) => void;
 }) {
@@ -34,6 +36,7 @@ export function Total({
     <div className="flex flex-row items-center justify-between">
       <p className="text-sm font-semibold">{name}</p>
       <CounterInput value={total} onChange={setTotal} />
+      {optional && <p className="text-xs text-muted-foreground">Optional</p>}
     </div>
   );
 }

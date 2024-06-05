@@ -1,7 +1,8 @@
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import PlacesInput from "@/components/_common/PlacesInput";
+import { Total } from "@/components/landing-page/search/MobilePropertyFilter";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -9,21 +10,19 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   CalendarIcon,
   DollarSignIcon,
-  FilterIcon,
   Link2,
   MapPinIcon,
   Plus,
   Users2Icon,
 } from "lucide-react";
-import { useCityRequestForm } from "./useCityRequestForm";
 import Link from "next/link";
+import { useState } from "react";
 import Confetti from "react-confetti";
-import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
+import { useCityRequestForm } from "./useCityRequestForm";
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
@@ -120,17 +119,67 @@ export function DesktopRequestDealTab() {
               )}
             />
 
-            <div className="flex items-center gap-2 text-teal-900">
-              <CityRequestFiltersDialog form={form} curTab={curTab}>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="px-2 text-teal-900 hover:bg-teal-900/15"
-                >
-                  <FilterIcon />
-                  More filters
-                </Button>
-              </CityRequestFiltersDialog>
+            {/* <CityRequestFiltersDialog form={form} curTab={curTab}>
+              <Button
+                variant="ghost"
+                type="button"
+                className="px-2 text-teal-900 hover:bg-teal-900/15"
+              >
+                <FilterIcon />
+                More filters
+              </Button>
+            </CityRequestFiltersDialog> */}
+
+            <div className="grid grid-cols-3 gap-2">
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBeds`}
+                render={({ field }) => (
+                  <FormItem className="rounded-lg border px-2">
+                    <FormControl>
+                      <Total
+                        name="Beds"
+                        optional={true}
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBedrooms`}
+                render={({ field }) => (
+                  <FormItem className="rounded-lg border px-2">
+                    <FormControl>
+                      <Total
+                        name="Bedrooms"
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBathrooms`}
+                render={({ field }) => (
+                  <FormItem className="rounded-lg border px-2">
+                    <FormControl>
+                      <Total
+                        name="Bathrooms"
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div className="space-y-1">
