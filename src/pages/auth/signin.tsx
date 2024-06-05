@@ -90,7 +90,11 @@ export default function SignIn({
 
   useEffect(() => {
     if (query.error) {
-      errorToast("Couldn't log in, please try again");
+      if (query.error === "SessionRequired") {
+        toast({ title: "Please log in to continue" });
+      } else {
+        errorToast("Couldn't log in, please try again");
+      }
     }
 
     if (query.isVerified) {
