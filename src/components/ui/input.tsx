@@ -1,13 +1,13 @@
 import * as React from "react";
 
 import { cn } from "@/utils/utils";
+import { Slot } from "@radix-ui/react-slot";
 import { useMeasure } from "@uidotdev/usehooks";
+import { cva, type VariantProps } from "class-variance-authority";
 import { useState } from "react";
 import HiddenIcon from "../_icons/HiddenIcon";
 import VisibleIcon from "../_icons/VisibleIcon";
-import { cva, type VariantProps } from "class-variance-authority";
 import { FormLabel } from "./form";
-import { Slot } from "@radix-ui/react-slot";
 
 // I customized this input component to support prefixes and suffixes.
 // They can be any ReactNode, including strings or JSX elements.
@@ -122,7 +122,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <div
         ref={suffixRef}
         className={
-          typeof suffix === "string" ? "text-xs text-muted-foreground" : ""
+          typeof suffix === "string" ? "text-sm text-muted-foreground" : ""
         }
       >
         {type === "password" ? suffix ?? passwordEyeballButton : suffix}
