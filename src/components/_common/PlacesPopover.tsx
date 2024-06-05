@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/popover";
 import useTimeout from "@/utils/useTimeout";
 import { cn } from "@/utils/utils";
-import { Check } from "lucide-react";
+import { Check, MapPin } from "lucide-react";
 import usePlaceAutocomplete from "use-places-autocomplete";
 import { FormControl } from "../ui/form";
+// import { MapPinIcon } from "lucide-react"
 
 export default function PlacesPopover({
   value,
@@ -65,12 +66,11 @@ export default function PlacesPopover({
           <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
         </PopoverTrigger>
         <PopoverContent dontAnimate align="start" className={className}>
-          <Command>
+          <Command className="bg-white">
             <CommandInput
               value={input}
               onValueChange={(value) => {
                 setInput(value);
-
                 if (value === "" || data.length === 0) clearSuggestions();
               }}
               required
@@ -82,6 +82,7 @@ export default function PlacesPopover({
             {suggestionsLoading === "OK" && (
               <CommandList>
                 {data.map((suggestion) => (
+                  
                   <CommandItem
                     key={suggestion.place_id}
                     value={suggestion.description}
@@ -90,24 +91,29 @@ export default function PlacesPopover({
                       setInput(suggestion.description);
                       setOpen(false);
                     }}
-                    className="flex"
-                  >
-                    <Check
+                    className="flex flex-row text-base h-12"
+                    >
+                    {/* <MapPin
                       className={cn(
                         "mr-2 h-4 w-4 flex-shrink-0",
                         suggestion.description === value
                           ? "opacity-100"
                           : "opacity-0",
                       )}
-                    />
-                    <p className="line-clamp-1">{suggestion.description}</p>
+                    /> */}
+                      {/* <div className="flex flex-row space-x-2"> */}
+                      <div className="content-around mr-2"><MapPin className="h-8 w-6 flex-shrink-0"/></div>
+                      <div className="line-clamp-1 content-around">{suggestion.description}</div>
+                      {/* </div> */}
+                      
+                    
                   </CommandItem>
                 ))}
               </CommandList>
             )}
             {input === "" && (
               <CommandGroup>
-                <p className="mt-2 text-center text-sm text-muted-foreground">
+                <p className="mt-2 text-center text-sm text-muted-foreground bg-white">
                   Start typing to see suggestions
                 </p>
               </CommandGroup>

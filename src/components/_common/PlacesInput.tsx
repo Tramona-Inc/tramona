@@ -39,7 +39,7 @@ export default function PlacesInput<
             setOpen={setOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
+            className="w-96 -translate-y-11 overflow-clip px-0 pt-0 bg-white"
             trigger={({ value, disabled }) => (
               <InputButton
                 withClearBtn
@@ -54,7 +54,7 @@ export default function PlacesInput<
                 icon={icon}
                 className="bg-white"
               >
-                {value ? value : "Select a location"}
+                {value ? value : "Select a location"} 
               </InputButton>
             )}
           />
