@@ -97,15 +97,21 @@ export const groupsRouter = createTRPCRouter({
     }),
 
   inviteUserById: protectedProcedure
-    .input(z.object({ userId: z.string(), groupId: z.number() }))
+    .input(z.object({ inviteLinkId: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const groupOwnerId = await getGroupOwnerId(input.groupId);
+      const groupId = await ctx.db.query.groupInvitesLink.findFirst({
+        where: eq(groupInvitesLink.id, input.inviteLinkId),
+        columns: { groupId: true },
+      }).then((res) => res?.groupId);
 
-      if (ctx.user.id !== groupOwnerId) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (groupId !== undefined) {
+        await ctx.db.insert(groupMembers).values({
+          groupId: groupId,
+          userId: ctx.user.id,
+        });
+      } else {
+        throw new TRPCError({ code: "BAD_REQUEST" });
       }
-
-      await ctx.db.insert(groupMembers).values(input);
     }),
 
   leaveGroup: protectedProcedure

@@ -62,7 +62,4 @@ export const groupInvitesLink = pgTable(
       .references(() => groups.id),
     expiresAt: timestamp("expires_at").notNull(),
   },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.groupId, vt.id] }),
-  }),
 );
