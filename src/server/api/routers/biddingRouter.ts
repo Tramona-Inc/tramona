@@ -11,7 +11,6 @@ import {
   properties,
   users,
 } from "@/server/db/schema";
-import { bidsToProperties } from "@/server/db/schema/tables/bidsToProperties";
 import {
   counterInsertSchema,
   counters,
@@ -186,16 +185,10 @@ export const biddingRouter = createTRPCRouter({
         groupId: madeByGroupId,
       });
 
-      const bid = await ctx.db
+      await ctx.db
         .insert(bids)
         .values({ ...input, madeByGroupId: madeByGroupId })
         .returning({ id: bids.id });
-
-      if (bid[0]) {
-        await ctx.db
-          .insert(bidsToProperties)
-          .values({ bidId: bid[0].id, propertyId: input.propertyId });
-      }
     }),
   update: protectedProcedure
     .input(bidInsertSchema)
