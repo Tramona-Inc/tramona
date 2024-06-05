@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import DateRangeInput from "../_common/DateRangeInput";
 import PlacesInput from "../_common/PlacesInput";
-import { cityRequestSchema } from "../landing-page/SearchBars/schemas";
+import { editCityRequestSchema } from "../landing-page/SearchBars/schemas";
 import { Button } from "../ui/button";
 import { DialogClose, DialogFooter } from "../ui/dialog";
 import {
@@ -32,7 +32,7 @@ export default function EditRequestForm({
 }: {
   request: DetailedRequest | RequestWithUser;
 }) {
-  const formSchema = cityRequestSchema;
+  const formSchema = editCityRequestSchema;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

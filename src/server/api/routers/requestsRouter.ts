@@ -1,4 +1,4 @@
-import { cityRequestSchema } from "@/components/landing-page/SearchBars/schemas";
+import { editCityRequestSchema } from "@/components/landing-page/SearchBars/schemas";
 import { env } from "@/env";
 import {
   createTRPCRouter,
@@ -560,7 +560,7 @@ export const requestsRouter = createTRPCRouter({
     }),
 
   editRequest: protectedProcedure
-    .input(cityRequestSchema)
+    .input(editCityRequestSchema)
     .query(async ({ ctx, input }) => {
       if (!input.requestId) {
         throw new TRPCError({
