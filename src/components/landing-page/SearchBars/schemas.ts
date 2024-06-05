@@ -20,7 +20,7 @@ export const defaultSearchOrReqValues: Partial<z.input<typeof searchSchema>> =
 
 export const cityRequestSchema = z
   .object({
-    requestId: zodString().optional(),
+    requestId: zodNumber().optional(),
     location: zodString(),
     date: z.object({ from: z.date(), to: z.date() }),
     numGuests: zodInteger({ min: 1 }),

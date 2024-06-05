@@ -586,7 +586,7 @@ export const requestsRouter = createTRPCRouter({
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
 
-        const updateRequest = await db
+        return await db
           .update(requests)
           .set({
             location: input.location,
