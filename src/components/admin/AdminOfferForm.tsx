@@ -153,7 +153,8 @@ export default function AdminOfferForm({
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
-  const getOwnerMutation = api.groups.getGroupOwner.useMutation();
+  // const getOwnerMutation = api.groups.getGroupOwner.useMutation();
+  const getMembersMutation = api.groups.getGroupMembers.useMutation();
 
   async function onSubmit(data: FormSchema) {
     let url: string | null = null;
@@ -236,19 +237,24 @@ export default function AdminOfferForm({
         .catch(() => errorToast());
     }
 
-    const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+    //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+    const travelers = await getMembersMutation.mutateAsync(
+      request.madeByGroupId,
+    );
 
-    if (traveler?.phoneNumber) {
-      if (traveler.isWhatsApp) {
-        await twilioWhatsAppMutation.mutateAsync({
-          templateId: "HXfeb90955f0801d551e95a6170a5cc015",
-          to: traveler.phoneNumber,
-        });
-      } else {
-        await twilioMutation.mutateAsync({
-          to: traveler.phoneNumber,
-          msg: "You have a new offer for a request in your Tramona account!",
-        });
+    for (const traveler of travelers) {
+      if (traveler?.phoneNumber) {
+        if (traveler.isWhatsApp) {
+          await twilioWhatsAppMutation.mutateAsync({
+            templateId: "HXfeb90955f0801d551e95a6170a5cc015",
+            to: traveler.phoneNumber,
+          });
+        } else {
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: "You have a new match for a request in your Tramona account!",
+          });
+        }
       }
     }
 
