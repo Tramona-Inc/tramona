@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
 import HostPropertiesPriceRestriction from "./HostPropertiesPriceRestriction";
+import HostPropertiesCancellation from "./HostPropertiesCancellation";
 
 export default function HostPropertyInfo({
   property,
@@ -52,7 +53,7 @@ export default function HostPropertyInfo({
           <p>Availability stuff</p>
         </TabsContent>
         <TabsContent value="cancellation">
-          <p>Cancellation stuff</p>
+          <HostPropertiesCancellation />
         </TabsContent>
       </Tabs>
     </div>
