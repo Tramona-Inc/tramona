@@ -1,12 +1,22 @@
+import { Total } from "@/components/landing-page/search/MobilePropertyFilter";
 import { getNumNights } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon, DollarSignIcon, Link2, MapPinIcon, Users2Icon } from "lucide-react";
+import {
+  CalendarIcon,
+  DollarSignIcon,
+  Link2,
+  MapPinIcon,
+  Plus,
+  Users2Icon,
+} from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import DateRangeInput from "../_common/DateRangeInput";
 import PlacesInput from "../_common/PlacesInput";
 import { cityRequestSchema } from "../landing-page/SearchBars/schemas";
 import { Button } from "../ui/button";
+import { DialogClose, DialogFooter } from "../ui/dialog";
 import {
   Form,
   FormControl,
@@ -40,7 +50,9 @@ export default function EditRequestForm({
     },
   });
 
-  function onSubmit() {
+  const [link, setLink] = useState<boolean>(request.airbnbLink ? true : false);
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
     return null;
   }
 
@@ -48,15 +60,9 @@ export default function EditRequestForm({
     <>
       <Form {...form}>
         <form
-          onSubmit={onSubmit}
+          onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col justify-between gap-y-4"
         >
-          {/* <RequestTabsSwitcher
-            curTab={curTab}
-            setCurTab={setCurTab}
-            form={form}
-          /> */}
-
           <div className="flex flex-col gap-2">
             <PlacesInput
               control={form.control}
@@ -124,17 +130,72 @@ export default function EditRequestForm({
               )}
             />
 
-            <div className="flex items-center gap-2 text-teal-900">
-              <CityRequestFiltersDialog form={form} curTab={curTab}>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="px-2 text-teal-900 hover:bg-teal-900/15"
-                >
-                  <FilterIcon />
-                  More filters
-                </Button>
-              </CityRequestFiltersDialog>
+            {/* <CityRequestFiltersDialog form={form} curTab={curTab}>
+              <Button
+                variant="ghost"
+                type="button"
+                className="px-2 text-teal-900 hover:bg-teal-900/15"
+              >
+                <FilterIcon />
+                More filters
+              </Button>
+            </CityRequestFiltersDialog> */}
+
+            <div className="grid grid-cols-2 gap-2">
+              <FormField
+                control={form.control}
+                name={"minNumBeds"}
+                render={({ field }) => (
+                  <FormItem className="rounded-lg border px-2">
+                    <FormControl>
+                      <Total
+                        className="text-sm font-bold"
+                        name="Beds"
+                        optional={true}
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={"minNumBedrooms"}
+                render={({ field }) => (
+                  <FormItem className="rounded-lg border px-2">
+                    <FormControl>
+                      <Total
+                        className="text-sm font-bold"
+                        name="Bedrooms"
+                        optional={true}
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={"minNumBathrooms"}
+                render={({ field }) => (
+                  <FormItem className="rounded-lg border px-2">
+                    <FormControl>
+                      <Total
+                        className="text-sm font-bold"
+                        name="Bathrooms"
+                        optional={true}
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div className="space-y-1">
@@ -177,6 +238,10 @@ export default function EditRequestForm({
                   <Button
                     variant="link"
                     type="button"
+                    onClick={() => {
+                      setLink(!link);
+                      form.setValue("airbnbLink", "");
+                    }}
                     className="font-bold text-teal-900"
                   >
                     Cancel
@@ -191,9 +256,23 @@ export default function EditRequestForm({
                 disabled={form.formState.isSubmitting}
                 className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
               >
-                Submit Request
+                Edit Request
               </Button>
             </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant={"secondary"}>Cancel</Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                size="lg"
+                disabled={form.formState.isSubmitting}
+                className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
+              >
+                Edit Request
+              </Button>
+            </DialogFooter>
           </div>
         </form>
       </Form>
