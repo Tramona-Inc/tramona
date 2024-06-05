@@ -1,4 +1,6 @@
 import { Total } from "@/components/landing-page/search/MobilePropertyFilter";
+import { api } from "@/utils/api";
+import { errorToast } from "@/utils/toasts";
 import { getNumNights } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -25,23 +27,29 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import { toast } from "../ui/use-toast";
 import { type DetailedRequest, type RequestWithUser } from "./RequestCard";
 
 export default function EditRequestForm({
   request,
+  setOpen,
 }: {
   request: DetailedRequest | RequestWithUser;
+  setOpen: (open: boolean) => void;
 }) {
   const formSchema = editCityRequestSchema;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      requestId: request.id,
       location: request.location,
       date: { from: request.checkIn, to: request.checkOut },
       numGuests: request.numGuests,
       maxNightlyPriceUSD:
-        request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut),
+        request.maxTotalPrice /
+        getNumNights(request.checkIn, request.checkOut) /
+        100,
       minNumBedrooms: request.minNumBedrooms ?? 0,
       minNumBeds: request.minNumBeds ?? 0,
       minNumBathrooms: request.minNumBathrooms ?? 0,
@@ -52,8 +60,21 @@ export default function EditRequestForm({
 
   const [link, setLink] = useState<boolean>(request.airbnbLink ? true : false);
 
+  const { mutate } = api.requests.editRequest.useMutation({
+    onSuccess: () => {
+      setOpen(false);
+      toast({
+        title: "Successfully edited requests",
+        description: "Your request has been updated!",
+      });
+    },
+    onError: () => {
+      errorToast("Couldn't update your request");
+    },
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    return null;
+    mutate({ ...values });
   }
 
   return (
@@ -129,17 +150,6 @@ export default function EditRequestForm({
                 </FormItem>
               )}
             />
-
-            {/* <CityRequestFiltersDialog form={form} curTab={curTab}>
-              <Button
-                variant="ghost"
-                type="button"
-                className="px-2 text-teal-900 hover:bg-teal-900/15"
-              >
-                <FilterIcon />
-                More filters
-              </Button>
-            </CityRequestFiltersDialog> */}
 
             <div className="grid grid-cols-2 gap-2">
               <FormField
@@ -249,26 +259,14 @@ export default function EditRequestForm({
                 </div>
               )}
             </div>
-            <div className="flex justify-end sm:justify-start">
-              <Button
-                type="submit"
-                size="lg"
-                disabled={form.formState.isSubmitting}
-                className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
-              >
-                Edit Request
-              </Button>
-            </div>
-
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant={"secondary"}>Cancel</Button>
               </DialogClose>
               <Button
                 type="submit"
-                size="lg"
                 disabled={form.formState.isSubmitting}
-                className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
+                className="rounded-md bg-teal-900 hover:bg-teal-950 sm:rounded-full lg:rounded-md"
               >
                 Edit Request
               </Button>

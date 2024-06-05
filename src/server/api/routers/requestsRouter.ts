@@ -561,7 +561,7 @@ export const requestsRouter = createTRPCRouter({
 
   editRequest: protectedProcedure
     .input(editCityRequestSchema)
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       if (!input.requestId) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -595,8 +595,7 @@ export const requestsRouter = createTRPCRouter({
             numGuests: input.numGuests,
             maxTotalPrice: Math.round(
               getNumNights(input.date.from, input.date.to) *
-                input.maxNightlyPriceUSD *
-                100,
+                (input.maxNightlyPriceUSD * 100),
             ),
             // roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER]).optional(),
             minNumBedrooms: input.minNumBedrooms,

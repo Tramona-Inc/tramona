@@ -1,14 +1,4 @@
-import { api } from "@/utils/api";
-import { errorToast } from "@/utils/toasts";
-import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "../ui/dialog";
-import { toast } from "../ui/use-toast";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import EditRequestForm from "./EditRequestForm";
 import { type DetailedRequest, type RequestWithUser } from "./RequestCard";
 
@@ -21,12 +11,11 @@ export default function EditRequestDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogTitle>Edit</DialogTitle>
-        <EditRequestForm request={request} />
+        <EditRequestForm request={request} setOpen={onOpenChange} />
       </DialogContent>
     </Dialog>
   );
