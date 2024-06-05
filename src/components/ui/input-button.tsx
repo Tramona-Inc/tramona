@@ -91,7 +91,9 @@ const InputButton = React.forwardRef<HTMLButtonElement, InputButtonProps>(
     return (
       <div className="relative">
         {label && (
-          <FormLabel className={labelVariants({ variant })}>{label}</FormLabel>
+          <p className={cn(labelVariants({ variant }), "pointer-events-none")}>
+            {label}
+          </p>
         )}
         <button
           type="button"

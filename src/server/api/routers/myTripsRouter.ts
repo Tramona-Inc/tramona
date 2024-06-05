@@ -1,9 +1,14 @@
 import { type UpcomingTrip } from "@/components/my-trips/UpcomingTrips";
-import EditOfferDialog from "@/components/requests/EditPropertyOfferDialog";
 import { type AcceptedBids, type AcceptedTrips } from "@/pages/my-trips";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { bidSelectSchema, bids, groupMembers, offers, requests } from "@/server/db/schema";
+import {
+  bidSelectSchema,
+  bids,
+  groupMembers,
+  offers,
+  requests,
+} from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, inArray, isNotNull } from "drizzle-orm";
 import { z } from "zod";
@@ -208,11 +213,11 @@ const getCertainTrips = async (
   switch (type) {
     case "previous":
       return allAcceptedOffers
-        .filter((trip) => trip.checkOut && trip.checkOut < date)
+        .filter((trip) => trip.checkOut < date)
         .map((trip) => trip.offerId);
     case "upcoming":
       return allAcceptedOffers
-        .filter((trip) => trip.checkOut && trip.checkOut >= date)
+        .filter((trip) => trip.checkOut >= date)
         .map((trip) => trip.offerId);
     default:
       return [];
@@ -228,9 +233,7 @@ export const myTripsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Get all accepted offers
-      const allAcceptedOffers = (
-        await getAllAcceptedOffers(ctx.user.id)
-      ).filter((id) => id !== null);
+      const allAcceptedOffers = await getAllAcceptedOffers(ctx.user.id);
 
       // Get upcoming trips
       const upcomingTripIds = await getCertainTrips(
@@ -280,10 +283,11 @@ export const myTripsRouter = createTRPCRouter({
       const allAcceptedBids = await getAllAcceptedBids(ctx.user.id);
 
       // Transform accepted bids and trips
-      const transformedTrips: UpcomingTrip[] = (displayAllUpcomingTrips ?? []).map(
-        transformBookedTrips,
-      );
-      const transformedAcceptedBids: UpcomingTrip[] = (allAcceptedBids ?? []).map(
+      const transformedTrips: UpcomingTrip[] =
+        // @ts-expect-error temporary fix until refactor
+        displayAllUpcomingTrips.map(transformBookedTrips);
+
+      const transformedAcceptedBids: UpcomingTrip[] = allAcceptedBids.map(
         transformAcceptedBids,
       );
 
@@ -316,7 +320,7 @@ export const myTripsRouter = createTRPCRouter({
 
       return displayAllUpcomingTrips;
     }),
-  getAcceptedBids: protectedProcedure.query(async ({ ctx, input }) => {
+  getAcceptedBids: protectedProcedure.query(async ({ ctx }) => {
     return getAllAcceptedBids(ctx.user.id);
   }),
 

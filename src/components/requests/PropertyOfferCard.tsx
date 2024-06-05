@@ -247,15 +247,16 @@ export default function PropertyOfferCard({
           )}
         </div>
       </CardContent>
-      {isGuestDashboard && (
-        <div className="md:hidden">
-          <Separator className="my-1" />
-          <MobileSimilarProperties
-            city={offer.property.address}
-            location={offer.property.address}
-          />
-        </div>
-      )}
+      {isGuestDashboard &&
+        setSelectedOfferId && ( // hacky way to check that it's not history tab ._.
+          <div className="md:hidden">
+            <Separator className="my-1" />
+            <MobileSimilarProperties
+              city={offer.property.address}
+              location={offer.property.address}
+            />
+          </div>
+        )}
     </Card>
   );
 }

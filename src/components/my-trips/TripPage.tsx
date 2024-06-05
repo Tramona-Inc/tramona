@@ -1,17 +1,22 @@
+import Image from "next/image";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { ArrowRight, Check, ChevronRight, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowLeftIcon,
+  ArrowRight,
+  Check,
+  ChevronRight,
+  MessageCircle,
+} from "lucide-react";
 
-import { api } from "@/utils/api";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { cn, formatCurrency, plural } from "@/utils/utils";
-import { api, type RouterOutputs } from "@/utils/api";
+import { formatCurrency, plural } from "@/utils/utils";
+import { api } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 
@@ -48,8 +53,6 @@ type Trip = {
 };
 
 export default function TripPage({ trip }: { trip: Trip }) {
-  const router = useRouter();
-
   const chatWithAdmin = useChatWithAdmin();
 
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
@@ -59,34 +62,32 @@ export default function TripPage({ trip }: { trip: Trip }) {
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
 
   return (
-    <div className="container col-span-10 flex flex-col gap-5 py-10 2xl:col-span-11">
-      <Link
-        href={"/my-trips"}
-        className={cn(
-          buttonVariants({ variant: "ghost" }),
-          "w-[170px] rounded-full font-bold",
-        )}
-      >
-        &larr; Back to My Trips
-      </Link>
+    <div className=" col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
+      <Button asChild size="icon" variant="ghost" className="rounded-full">
+        <Link href={"/my-trips"}>
+          <ArrowLeftIcon />
+        </Link>
+      </Button>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <div className="overflow-clip rounded-lg bg-white">
-          <div className="relative">
-            <img
-              src={trip.property.imageUrls[0]}
-              width={700}
-              height={400}
-              className="w-full"
+        <div>
+          <div className="relative h-96 overflow-clip rounded-xl">
+            <Image
+              src={trip.property.imageUrls[0]!}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              priority
+              className="object-cover"
             />
             {/* <Badge
-              variant="lightGray"
+              variant="lightZinc"
               className="absolute right-4 top-4 font-bold"
             >
               <Images className="mx-1 w-4" /> Show all photos
             </Badge> */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-black"></div>
-            <div className="absolute bottom-8 left-5 text-white">
+            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-black"></div>
+            <div className="absolute bottom-5 left-4 text-white">
               <p className="text-base font-semibold lg:text-lg">
                 The countdown to your trip begins
               </p>
@@ -96,7 +97,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
             </div>
           </div>
 
-          <div className="space-y-3 p-4">
+          <div className="space-y-3 pt-8">
             <div>
               <h1 className="text-3xl font-bold">{trip.property.name}</h1>
               <div className="flex justify-between pt-2">
@@ -129,7 +130,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
               </div>
             </div>
 
-            <div className="h-[2px] rounded-full bg-gray-200"></div>
+            <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
             <div>
               <div className="flex items-end justify-between">
@@ -140,14 +141,15 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 </Badge>
               </div>
               <p>
-                <span>{plural(tripDuration, "night")}</span>
-                <span className="mx-2">·</span>
-                <span>{plural(trip.numGuests, "Adult")}</span>
+                <span>{plural(tripDuration, "night")}</span> ·{" "}
+                <span>{plural(trip.numGuests, "guest")}</span>
               </p>
 
               <div className="flex items-center justify-between py-5">
                 <div className="flex flex-col">
-                  <p className="font-bold">Check-in</p>
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    Check-in
+                  </p>
                   <p className="text-lg font-bold">
                     {dayjs(trip.checkIn).format("ddd, MMM D")}
                   </p>
@@ -157,7 +159,9 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 </div>
                 <ArrowRight />
                 <div className="flex flex-col">
-                  <p className="font-bold">Check-out</p>
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    Check-out
+                  </p>
                   <p className="text-lg font-bold">
                     {dayjs(trip.checkOut).format("ddd, MMM D")}
                   </p>
@@ -167,7 +171,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 </div>
               </div>
 
-              <div className="h-[2px] rounded-full bg-gray-200"></div>
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
               <div className="flex flex-col lg:hidden">
                 <p className="pb-2 pt-5 text-xl font-bold">Getting there</p>
@@ -191,7 +195,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 Show property details <ChevronRight />
               </Link>
 
-              <div className="h-[2px] rounded-full bg-gray-200"></div>
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
               <div>
                 <p className="pb-2 pt-5 text-xl font-bold">Payment info</p>
@@ -211,7 +215,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 </Link>
               </div>
 
-              <div className="h-[2px] rounded-full bg-gray-200"></div>
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
               <div className="py-5">
                 {trip.property.checkInInfo && (
@@ -257,7 +261,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 </ol>
               </div>
 
-              <div className="h-[2px] rounded-full bg-gray-200"></div>
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
               <div className="pt-5">
                 <p className="pb-3 font-bold">Support</p>
@@ -270,7 +274,7 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 </p> */}
 
                 <Link
-                  href={"/faq"}
+                  href={"/help-center"}
                   className="flex justify-between pb-3 pt-5 font-semibold hover:underline"
                 >
                   Get Help <ChevronRight />
@@ -279,7 +283,6 @@ export default function TripPage({ trip }: { trip: Trip }) {
             </div>
           </div>
         </div>
-
         <div className="sticky top-[100px] z-10 hidden h-[700px] overflow-clip rounded-lg lg:block">
           {coordinateData && (
             <SingleLocationMap

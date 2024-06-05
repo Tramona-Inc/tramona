@@ -3,15 +3,9 @@ import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg"
 import Spinner from "@/components/_common/Spinner";
 import UpcomingTripCard from "@/components/my-trips/UpcomingTripCard";
 
-type MyTripsType<T> = T extends (infer U)[] ? U : never;
-
-// export type UpcomingTrip = MyTripsType<
-//   RouterOutputs["myTrips"]["getUpcomingTrips"]
-// >;
-
 export type UpcomingTrip = {
   id: string | number;
-  type: string
+  type: "request" | "bid";
   request: {
     checkIn: Date;
     checkOut: Date;
