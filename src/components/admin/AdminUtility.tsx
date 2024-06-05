@@ -1,3 +1,4 @@
+import { AddImageToUser } from "./AddImageToUser";
 import { DeleteImage } from "./DeleteImage";
 import MakeUserHost from "./MakeUserHost";
 import ViewRecentHosts from "./view-recent-host/ViewRecentHosts";
@@ -11,6 +12,9 @@ export default function AdminUtility() {
         </div>
         <div className="flex-1">
           <DeleteImage />
+        </div>
+        <div className="flex-1">
+          <AddImageToUser />
         </div>
       </div>
       <ViewRecentHosts />

@@ -1,8 +1,8 @@
-import * as bcrypt from "bcrypt";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
+  roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
   hostProfiles,
@@ -10,6 +10,7 @@ import {
   userUpdateSchema,
   users,
 } from "@/server/db/schema";
+import * as bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
@@ -303,5 +304,19 @@ export const usersRouter = createTRPCRouter({
         .where(eq(users.id, ctx.user.id));
 
       return "success";
+    }),
+  addImageToUser: roleRestrictedProcedure(["admin"])
+    .input(
+      z.object({
+        userId: zodString(),
+        imageUrl: zodString(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db
+        .update(users)
+        .set({ image: input.imageUrl })
+        .where(eq(users.id, input.userId))
+        .returning({ userId: users.id });
     }),
 });
