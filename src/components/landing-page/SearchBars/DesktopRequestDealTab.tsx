@@ -138,6 +138,7 @@ export function DesktopRequestDealTab() {
                   <FormItem className="rounded-lg border px-2">
                     <FormControl>
                       <Total
+                        className="text-sm font-bold"
                         name="Beds"
                         optional={true}
                         total={field.value ?? 0}
@@ -155,7 +156,9 @@ export function DesktopRequestDealTab() {
                   <FormItem className="rounded-lg border px-2">
                     <FormControl>
                       <Total
+                        className="text-sm font-bold"
                         name="Bedrooms"
+                        optional={true}
                         total={field.value ?? 0}
                         setTotal={field.onChange}
                       />
@@ -171,7 +174,9 @@ export function DesktopRequestDealTab() {
                   <FormItem className="rounded-lg border px-2">
                     <FormControl>
                       <Total
+                        className="text-sm font-bold"
                         name="Bathrooms"
+                        optional={true}
                         total={field.value ?? 0}
                         setTotal={field.onChange}
                       />

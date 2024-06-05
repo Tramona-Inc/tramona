@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useZodForm } from "@/utils/useZodForm";
+import { cn } from "@/utils/utils";
 import { ListFilterIcon } from "lucide-react";
 import { z } from "zod";
 
@@ -26,15 +27,19 @@ export function Total({
   optional,
   total,
   setTotal,
+  className,
 }: {
   name: string;
   optional?: boolean;
   total: number;
   setTotal: (total: number) => void;
+  className?: string;
 }) {
   return (
     <div className="flex flex-row items-center justify-between">
-      <p className="text-sm font-semibold">{name}</p>
+      <p className={cn(!className ? "text-sm font-semibold" : className)}>
+        {name}
+      </p>
       <CounterInput value={total} onChange={setTotal} />
       {optional && <p className="text-xs text-muted-foreground">Optional</p>}
     </div>
