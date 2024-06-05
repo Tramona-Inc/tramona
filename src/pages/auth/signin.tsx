@@ -85,6 +85,9 @@ export default function SignIn({
       email: email,
       password: password,
       callbackUrl: from ?? `${window.location.origin}/auth/onboarding`,
+    }).then(() => {
+      
+      return null
     });
   };
 

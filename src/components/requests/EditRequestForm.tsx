@@ -1,9 +1,20 @@
+import { getNumNights } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MapPinIcon } from "lucide-react";
+import { CalendarIcon, DollarSignIcon, Link2, MapPinIcon, Users2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
+import DateRangeInput from "../_common/DateRangeInput";
+import PlacesInput from "../_common/PlacesInput";
 import { cityRequestSchema } from "../landing-page/SearchBars/schemas";
-import { Form } from "../ui/form";
+import { Button } from "../ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
 import { type DetailedRequest, type RequestWithUser } from "./RequestCard";
 
 export default function EditRequestForm({
@@ -15,7 +26,18 @@ export default function EditRequestForm({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      location: request.location,
+      date: { from: request.checkIn, to: request.checkOut },
+      numGuests: request.numGuests,
+      maxNightlyPriceUSD:
+        request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut),
+      minNumBedrooms: request.minNumBedrooms ?? 0,
+      minNumBeds: request.minNumBeds ?? 0,
+      minNumBathrooms: request.minNumBathrooms ?? 0,
+      airbnbLink: request.airbnbLink ?? "",
+      note: request.note ?? "",
+    },
   });
 
   function onSubmit() {
@@ -28,7 +50,6 @@ export default function EditRequestForm({
         <form
           onSubmit={onSubmit}
           className="flex flex-col justify-between gap-y-4"
-          key={curTab} // rerender on tab changes (idk why i have to do this myself)
         >
           {/* <RequestTabsSwitcher
             curTab={curTab}
@@ -48,7 +69,7 @@ export default function EditRequestForm({
 
             <FormField
               control={form.control}
-              name={`data.${curTab}.date`}
+              name={"date"}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -67,7 +88,7 @@ export default function EditRequestForm({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.numGuests`}
+              name={"numGuests"}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -85,7 +106,7 @@ export default function EditRequestForm({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.maxNightlyPriceUSD`}
+              name={"maxNightlyPriceUSD"}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -137,7 +158,7 @@ export default function EditRequestForm({
                   <div className="basis-full">
                     <FormField
                       control={form.control}
-                      name={`data.${curTab}.airbnbLink`}
+                      name={"airbnbLink"}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -156,10 +177,6 @@ export default function EditRequestForm({
                   <Button
                     variant="link"
                     type="button"
-                    onClick={() => {
-                      setLink(!link);
-                      form.setValue(`data.${curTab}.airbnbLink`, "");
-                    }}
                     className="font-bold text-teal-900"
                   >
                     Cancel
@@ -178,45 +195,6 @@ export default function EditRequestForm({
               </Button>
             </div>
           </div>
-
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent>
-              <h1 className="mb-4 text-center text-2xl font-bold">
-                Congrats on submitting a request!
-              </h1>
-              <p className="mb-4">
-                We have sent it out to every host in{" "}
-                <b>{form.getValues(`data.${curTab}.location`)}</b>.
-              </p>
-              <p className="mb-4">
-                In the next 24 hours, hosts will send you properties that match
-                your requirements. To check out matches,{" "}
-                <Link
-                  href="/requests"
-                  className="font-semibold text-teal-700 underline"
-                >
-                  click here
-                </Link>
-                .
-              </p>
-              <p className="mb-6">
-                In the meantime, check out some other properties we have on
-                Tramona and make more offers.
-              </p>
-              <Button
-                asChild
-                className="rounded-lg bg-teal-900 px-4 py-2 text-white hover:bg-teal-950"
-              >
-                Explore more properties
-              </Button>
-
-              {showConfetti && (
-                <div className="z-100 pointer-events-none fixed inset-0">
-                  <Confetti width={window.innerWidth} recycle={false} />
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
         </form>
       </Form>
     </>
