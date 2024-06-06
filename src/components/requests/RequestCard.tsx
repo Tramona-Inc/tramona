@@ -117,10 +117,12 @@ export default function RequestCard({
                   <TrashIcon />
                   Withdraw
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOpenEdit(true)}>
-                  <Pencil />
-                  Edit
-                </DropdownMenuItem>
+                {getRequestStatus(request) === "pending" && (
+                  <DropdownMenuItem onClick={() => setOpenEdit(true)}>
+                    <Pencil />
+                    Edit
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
