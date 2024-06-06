@@ -4,17 +4,13 @@ import HostPropertiesPriceRestriction from "./HostPropertiesPriceRestriction";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
 
-export default function HostPropertyInfo({
-  property,
-}: {
-  property: Property | null;
-}) {
+export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
     <div className="space-y-4 p-6">
       <div>
-        <h1 className="text-2xl font-bold">{property?.name}</h1>
+        <h1 className="text-2xl font-bold">{property.name}</h1>
         <p className="font-semibold text-muted-foreground">
-          {property?.address}
+          {property.address}
         </p>
       </div>
       <Tabs defaultValue="details">
