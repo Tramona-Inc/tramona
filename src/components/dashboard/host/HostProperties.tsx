@@ -31,12 +31,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { NewPropertyBtn } from "./HostPropertiesLayout";
 import { Separator } from "@/components/ui/separator";
+import { useRouter } from "next/router";
 
-export default function HostProperties({
-  onSendData,
-}: {
-  onSendData: (property: Property) => void;
-}) {
+export default function HostProperties() {
   const [open, setOpen] = useState(false);
 
   const { data: properties } = api.properties.getHostProperties.useQuery({
@@ -51,11 +48,7 @@ export default function HostProperties({
             <div className="grid gap-4 lg:grid-cols-1">
               {properties.map((property) => (
                 <>
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    onSendData={onSendData}
-                  />
+                  <PropertyCard key={property.id} property={property} />
                   <Separator />
                 </>
               ))}
@@ -79,19 +72,14 @@ export default function HostProperties({
   );
 }
 
-function PropertyCard({
-  property,
-  onSendData,
-}: {
-  property: Property;
-  onSendData: (property: Property) => void;
-}) {
-  const handleClick = () => {
-    onSendData(property);
-  };
+function PropertyCard({ property }: { property: Property }) {
+  const router = useRouter();
 
   return (
-    <a onClick={handleClick} className=" cursor-pointer">
+    <a
+      onClick={() => router.push(`/host/properties/${property.id}`)}
+      className=" cursor-pointer"
+    >
       <div className="flex items-center gap-2 overflow-clip rounded-lg border-zinc-100 bg-card px-2 py-3 hover:bg-zinc-100">
         <div className="relative h-20 w-20">
           <Image

@@ -18,14 +18,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PlusIcon } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import HostProperties from "./HostProperties";
-import { type Property } from "@/server/db/schema";
 
 export default function HostPropertiesLayout({
   children,
-  onSendData,
 }: {
   children: ReactNode;
-  onSendData: (property: Property) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -47,7 +44,7 @@ export default function HostPropertiesLayout({
           <AccordionItem value="listed">
             <AccordionTrigger>Listed</AccordionTrigger>
             <AccordionContent>
-              <HostProperties onSendData={onSendData} />
+              <HostProperties />
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="drafts">
