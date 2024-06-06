@@ -1,15 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DollarSign, Info, Pencil } from "lucide-react";
+import { HostPropertyEditBtn } from "./HostPropertiesDetails";
 
 export default function HostPropertiesPriceRestriction() {
   return (
     <div className="my-6">
       <div className="text-end">
-        <Button variant="darkOutline" className="border-zinc-300 font-bold">
-          <Pencil />
-          Enter edit mode
-        </Button>
+        <HostPropertyEditBtn />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-bold">Property bids</h2>

@@ -1,14 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
+import { HostPropertyEditBtn } from "./HostPropertiesDetails";
 
 export default function HostPropertiesCancellation() {
   return (
     <div className="my-6">
       <div className="text-end">
-        <Button variant="darkOutline" className="border-zinc-300 font-bold">
-          <Pencil />
-          Enter edit mode
-        </Button>
+        <HostPropertyEditBtn />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-bold">Your policy</h2>
