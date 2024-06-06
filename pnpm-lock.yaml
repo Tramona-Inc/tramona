@@ -204,14 +204,14 @@ importers:
         specifier: ^1.11.10
         version: 1.11.11
       drizzle-orm:
-        specifier: ^0.30.0
-        version: 0.30.6(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0)
+        specifier: ^0.31.0
+        version: 0.31.1(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0)
       drizzle-pagination:
         specifier: ^1.0.10
-        version: 1.0.10(drizzle-orm@0.30.6(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0))
+        version: 1.0.10(drizzle-orm@0.31.1(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0))
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.30.6(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0))(zod@3.22.4)
+        version: 0.5.1(drizzle-orm@0.31.1(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0))(zod@3.22.4)
       embla-carousel-autoplay:
         specifier: 8.0.4
         version: 8.0.4(embla-carousel@8.0.4)
@@ -5748,8 +5748,8 @@ packages:
     resolution: {integrity: sha512-mLVDS4nXmO09wFVlzGrdshWnAL+U9eQGC5zRs6hTN6Q9arwQGWU2XnZ17I8BM8Quau8CQRx3Ms6VPgRWJFVp7Q==}
     hasBin: true
 
-  drizzle-orm@0.30.6:
-    resolution: {integrity: sha512-8RgNUmY7J03GRuRgBV5SaJNbYgLVPjdSWNS/bRkIMIHt2TFCA439lJsNpqYX8asyKMqkw8ceBiamUnCIXZIt9w==}
+  drizzle-orm@0.31.1:
+    resolution: {integrity: sha512-hTbYne2XX3y6sV7WSxcPH6/vNSiQSUG9VZsFI27jBMCN0OT3Ok7ao3pIT5OMAqWkzJCRFgGjAaUeTAZWPgOKag==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=3'
@@ -5763,7 +5763,7 @@ packages:
       '@types/pg': '*'
       '@types/react': '>=18'
       '@types/sql.js': '*'
-      '@vercel/postgres': '*'
+      '@vercel/postgres': '>=0.8.0'
       '@xata.io/client': '*'
       better-sqlite3: '>=7'
       bun-types: '*'
@@ -16866,7 +16866,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.30.6(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0):
+  drizzle-orm@0.31.1(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0):
     optionalDependencies:
       '@types/pg': 8.11.6
       '@types/react': 18.2.74
@@ -16874,13 +16874,13 @@ snapshots:
       postgres: 3.4.4
       react: 18.2.0
 
-  drizzle-pagination@1.0.10(drizzle-orm@0.30.6(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0)):
+  drizzle-pagination@1.0.10(drizzle-orm@0.31.1(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0)):
     dependencies:
-      drizzle-orm: 0.30.6(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0)
+      drizzle-orm: 0.31.1(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0)
 
-  drizzle-zod@0.5.1(drizzle-orm@0.30.6(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0))(zod@3.22.4):
+  drizzle-zod@0.5.1(drizzle-orm@0.31.1(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0))(zod@3.22.4):
     dependencies:
-      drizzle-orm: 0.30.6(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0)
+      drizzle-orm: 0.31.1(@types/pg@8.11.6)(@types/react@18.2.74)(pg@8.12.0)(postgres@3.4.4)(react@18.2.0)
       zod: 3.22.4
 
   duplexer@0.1.2: {}
