@@ -44,7 +44,7 @@ export default function AcceptForm({
     id: offer?.propertyId ?? 0,
   });
 
-  const getTraveler = api.groups.getGroupOwner.useMutation();
+  const getTravelers = api.groups.getGroupMembers.useMutation();
 
   async function onSubmit() {
     if (!offer || !property) return;
@@ -75,21 +75,23 @@ export default function AcceptForm({
       //   }
       // }
     } else {
-      const traveler = await getTraveler.mutateAsync(offer.madeByGroupId);
-      if (traveler?.phoneNumber) {
-        if (traveler.isWhatsApp) {
-          await twilioWhatsAppMutation.mutateAsync({
-            templateId: "HX28c41122cfa312e326a9b5fc5e7bc255",
-            to: traveler.phoneNumber,
-            cost: nightlyPrice,
-            name: property?.name,
-            dates: formatDateRange(offer?.checkIn, offer?.checkOut),
-          });
-        } else {
-          await twilioMutation.mutateAsync({
-            to: traveler.phoneNumber,
-            msg: `Tramona: Congratulations! Your ${nightlyPrice}/night offer for ${property.name} from ${formatDateRange(offer.checkIn, offer.checkOut)} has been accepted by the host and your stay has been booked. Please visit the My Trips page at Tramona.com to view `,
-          });
+      const travelers = await getTravelers.mutateAsync(offer.madeByGroupId);
+      for (const traveler of travelers) {
+        if (traveler?.phoneNumber) {
+          if (traveler.isWhatsApp) {
+            await twilioWhatsAppMutation.mutateAsync({
+              templateId: "HX28c41122cfa312e326a9b5fc5e7bc255",
+              to: traveler.phoneNumber,
+              cost: nightlyPrice,
+              name: property?.name,
+              dates: formatDateRange(offer?.checkIn, offer?.checkOut),
+            });
+          } else {
+            await twilioMutation.mutateAsync({
+              to: traveler.phoneNumber,
+              msg: `Tramona: Congratulations! Your ${nightlyPrice}/night offer for ${property.name} from ${formatDateRange(offer.checkIn, offer.checkOut)} has been accepted by the host and your stay has been booked. Please visit the My Trips page at Tramona.com to view `,
+            });
+          }
         }
       }
     }

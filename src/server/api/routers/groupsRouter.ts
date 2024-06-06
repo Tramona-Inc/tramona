@@ -172,4 +172,16 @@ export const groupsRouter = createTRPCRouter({
         })
         .then((res) => res?.owner);
     }),
+
+    getGroupMembers: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ input: groupId, ctx }) => {
+      return await ctx.db.query.groupMembers
+        .findMany({
+          columns: {},
+          with: { user: { columns: { phoneNumber: true, isWhatsApp: true } } },
+          where: eq(groupMembers.groupId, groupId),
+        })
+        .then((res) => res.map((member) => member.user));
+    }),
 });
