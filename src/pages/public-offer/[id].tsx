@@ -9,9 +9,11 @@ import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap
 import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
 import { and, eq } from "drizzle-orm";
+import { RouterInputs } from "@/utils/api";
+import { OfferWithDetails } from "@/components/property/PropertyPage";
 
 type PageProps = {
-  offer: any; // Replace with a more specific type if you have one
+  offer: OfferWithDetails; // Replace with a more specific type if you have one
   requestId: number;
   firstImage: string;
 };
