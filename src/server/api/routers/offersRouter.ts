@@ -541,68 +541,85 @@ export const offersRouter = createTRPCRouter({
 
       const { request, property } = offer;
 
-      const groupOwner = await ctx.db.query.groups
-        .findFirst({
-          where: eq(groups.id, request.madeByGroup.id),
-          with: {
-            owner: {
-              columns: { id: true, phoneNumber: true, isWhatsApp: true },
-            },
-          },
-        })
-        .then((res) => res?.owner);
+      // const groupOwner = await ctx.db.query.groups
+      //   .findFirst({
+      //     where: eq(groups.id, request.madeByGroup.id),
+      //     with: {
+      //       owner: {
+      //         columns: { id: true, phoneNumber: true, isWhatsApp: true },
+      //       },
+      //     },
+      //   })
+      //   .then((res) => res?.owner);
 
-      if (!groupOwner) return;
-
-      const groupOwnerHasOtherOffers = await ctx.db.query.groupMembers
-        .findFirst({
-          where: eq(groupMembers.userId, groupOwner.id),
+      const members = await ctx.db.query.groupMembers
+        .findMany({
           columns: {},
           with: {
-            group: {
-              columns: {},
-              with: {
-                requests: {
-                  columns: {},
-                  with: { offers: { columns: { id: true } } },
+            user: {
+              columns: { phoneNumber: true, isWhatsApp: true, id: true },
+            },
+          },
+          where: eq(groupMembers.groupId, request.madeByGroup.id),
+        })
+        .then((res) => res.map((member) => member.user));
+
+      if (!members) return;
+
+      for (const member of members) {
+        const memberHasOtherOffers = await ctx.db.query.groupMembers
+          .findFirst({
+            where: eq(groupMembers.userId, member.id),
+            columns: {},
+            with: {
+              group: {
+                columns: {},
+                with: {
+                  requests: {
+                    columns: {},
+                    with: { offers: { columns: { id: true } } },
+                  },
                 },
               },
             },
-          },
-        })
-        .then(
-          (res) =>
-            res && res.group.requests.some((req) => req.offers.length > 0),
+          })
+          .then(
+            (res) =>
+              res && res.group.requests.some((req) => req.offers.length > 0),
+          );
+
+        const fmtdDateRange = formatDateRange(
+          request.checkIn,
+          request.checkOut,
         );
+        const url = `${env.NEXTAUTH_URL}/requests`;
 
-      const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-      const url = `${env.NEXTAUTH_URL}/requests`;
-
-      if (groupOwner.phoneNumber) {
-        if (groupOwner.isWhatsApp) {
-          groupOwnerHasOtherOffers
-            ? void sendWhatsApp({
-                templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
-                to: groupOwner.phoneNumber,
-                propertyName: property.name,
-                propertyAddress: request.location, //??can this be null
-                checkIn: request.checkIn,
-                checkOut: request.checkOut,
-                url: url,
-              })
-            : void sendWhatsApp({
-                templateId: "HXb293923af34665e7eefc81be0579e5db",
-                to: groupOwner.phoneNumber,
-                propertyName: property.name,
-                propertyAddress: request.location,
-                checkIn: request.checkIn,
-                checkOut: request.checkOut,
-              });
-        } else {
-          void sendText({
-            to: groupOwner.phoneNumber,
-            content: `Tramona: Hello, your ${property.name} in ${request.location} offer from ${fmtdDateRange} has expired.${groupOwnerHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
-          });
+        if (member.phoneNumber) {
+          if (member.isWhatsApp) {
+            memberHasOtherOffers
+              ? void sendWhatsApp({
+                  templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
+                  to: member.phoneNumber,
+                  propertyName: property.name,
+                  propertyAddress: request.location, //??can this be null
+                  checkIn: request.checkIn,
+                  checkOut: request.checkOut,
+                  url: url,
+                })
+              : void sendWhatsApp({
+                  templateId: "HXb293923af34665e7eefc81be0579e5db",
+                  to: member.phoneNumber,
+                  propertyName: property.name,
+                  propertyAddress: request.location,
+                  checkIn: request.checkIn,
+                  checkOut: request.checkOut,
+                });
+          } else {
+            void sendText({
+              to: member.phoneNumber,
+              content: `Tramona: Hello, your ${property.name} in ${request.location} offer from ${fmtdDateRange} has expired.${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
+            });
+          }
         }
       }
     }),

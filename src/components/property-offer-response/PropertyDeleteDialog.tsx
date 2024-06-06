@@ -40,7 +40,9 @@ export default function PropertyDeleteDialog({
     id: data?.propertyId ?? 0,
   });
 
-  const getTraveler = api.groups.getGroupOwner.useMutation();
+  // const getTraveler = api.groups.getGroupOwner.useMutation();
+  const getTravelers = api.groups.getGroupMembers.useMutation();
+
 
   const { mutate } = api.biddings.cancel.useMutation({
     onSuccess: async () => {
@@ -50,25 +52,28 @@ export default function PropertyDeleteDialog({
 
       if (!data || !property) return;
 
-      const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
-      if (traveler?.phoneNumber) {
-        const nightlyPrice =
-          counterNightlyPrice > 0
-            ? formatCurrency(counterNightlyPrice)
-            : formatCurrency(originalNightlyBiddingOffer);
-        if (traveler.isWhatsApp) {
-          await twilioWhatsAppMutation.mutateAsync({
-            templateId: "HXd7d55b299c2170bd5af4cef76e058d78",
-            to: traveler.phoneNumber,
-            cost: nightlyPrice,
-            name: property?.name,
-            dates: formatDateRange(data?.checkIn, data?.checkOut),
-          });
-        } else {
-          await twilioMutation.mutateAsync({
-            to: traveler.phoneNumber,
-            msg: `Tramona: Your ${nightlyPrice}/night offer for ${property.name} from ${formatDateRange(data.checkIn, data.checkOut)} has been canceled. A full refund will be coming your way shortly. Please visit Tramona.com to submit a new request or place new offers`,
-          });
+      // const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
+      const travelers = await getTravelers.mutateAsync(data?.madeByGroupId);
+      for (const traveler of travelers) {
+        if (traveler?.phoneNumber) {
+          const nightlyPrice =
+            counterNightlyPrice > 0
+              ? formatCurrency(counterNightlyPrice)
+              : formatCurrency(originalNightlyBiddingOffer);
+          if (traveler.isWhatsApp) {
+            await twilioWhatsAppMutation.mutateAsync({
+              templateId: "HXd7d55b299c2170bd5af4cef76e058d78",
+              to: traveler.phoneNumber,
+              cost: nightlyPrice,
+              name: property?.name,
+              dates: formatDateRange(data?.checkIn, data?.checkOut),
+            });
+          } else {
+            await twilioMutation.mutateAsync({
+              to: traveler.phoneNumber,
+              msg: `Tramona: Your ${nightlyPrice}/night offer for ${property.name} from ${formatDateRange(data.checkIn, data.checkOut)} has been canceled. A full refund will be coming your way shortly. Please visit Tramona.com to submit a new request or place new offers`,
+            });
+          }
         }
       }
     },

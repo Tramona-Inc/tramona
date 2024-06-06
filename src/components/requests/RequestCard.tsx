@@ -126,6 +126,7 @@ export default function RequestCard({
           {fmtdFilters && <p>{fmtdFilters} &middot;</p>}
           <p>{fmtdNumGuests}</p>
           {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
+          {request.airbnbLink && <a className="underline" href={request.airbnbLink}>Airbnb Link</a>}
         </div>
         <div className="flex justify-end gap-2">{children}</div>
         {isSelected && (

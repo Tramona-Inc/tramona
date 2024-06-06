@@ -5,8 +5,10 @@ import {
   serial,
   text,
   timestamp,
+  varchar,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { nanoid } from "nanoid";
 
 // we cant tie groups to requests directly,
 // because we will have request-less offers soon
@@ -41,7 +43,7 @@ export const groupInvites = pgTable(
   {
     groupId: integer("group_id")
       .notNull()
-      .references(() => groups.id),
+      .references(() => groups.id, { onDelete: "cascade" }),
     inviteeEmail: text("invitee_email").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
   },
@@ -49,3 +51,11 @@ export const groupInvites = pgTable(
     compoundKey: primaryKey({ columns: [vt.groupId, vt.inviteeEmail] }),
   }),
 );
+
+export const groupInvitesLink = pgTable("group_invites_link", {
+  id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
+  groupId: integer("group_id")
+    .notNull()
+    .references(() => groups.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at").notNull(),
+});

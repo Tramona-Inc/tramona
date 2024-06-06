@@ -75,7 +75,7 @@ export function MobileSearchTab({ closeSheet }: { closeSheet: () => void }) {
                 <FormControl>
                   <Input
                     {...field}
-                    label="Maximum price"
+                    label="Maximum nightly price"
                     placeholder="Price per night"
                     suffix="/night"
                     icon={DollarSignIcon}

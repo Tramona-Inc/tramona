@@ -91,7 +91,7 @@ export function MobileRequestDealTab({
                   <FormControl>
                     <Input
                       {...field}
-                      label="Maximum price"
+                      label="Maximum nightly price"
                       suffix="/night"
                       placeholder="Price per night"
                       icon={DollarSignIcon}
