@@ -9,7 +9,6 @@ import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap
 import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
 import { and, eq } from "drizzle-orm";
-import { RouterInputs } from "@/utils/api";
 import { OfferWithDetails } from "@/components/property/PropertyPage";
 
 type PageProps = {
@@ -20,7 +19,7 @@ type PageProps = {
 
 const Page = ({ offer, requestId, firstImage }: PageProps) => {
   const router = useRouter();
-
+  console.log("First image", firstImage);
   if (router.isFallback || !offer) {
     return <Spinner />;
   }
@@ -46,7 +45,7 @@ const Page = ({ offer, requestId, firstImage }: PageProps) => {
           description: metaDescription,
           images: [
             {
-              url: "https://572c-104-32-193-204.ngrok-free.app/api/og?cover=https://a0.muscache.com/im/pictures/prohost-api/Hosting-1162477721754661798/original/0c00ec02-540d-4d24-ba50-638ccd676340.jpeg?im_w=720",
+              url: `https://9503-104-32-193-204.ngrok-free.app/api/og?cover=${firstImage}`,
               width: 900,
               height: 800,
               alt: "Og Image Alt Second",

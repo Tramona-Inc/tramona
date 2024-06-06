@@ -17,8 +17,26 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import ShareOfferDialog from "@/components/_common/ShareLink/ShareOfferDialog";
+import { NextSeo } from "next-seo";
 
-function Page({ google }: { google: GoogleAPI }) {
+import { db } from "@/server/db";
+import { offers } from "@/server/db/schema/tables/offers";
+import { and, eq } from "drizzle-orm";
+
+type PageProps = {
+  offer: OfferWithDetails; // Replace with a more specific type if you have one
+  serverRequestId: number;
+  serverFirstImage: string;
+  serverFirstPropertyName: string;
+  google: GoogleAPI;
+};
+//using server as prefix to differentiate between the server and client requests
+function Page({
+  google,
+  serverRequestId,
+  serverFirstImage,
+  serverFirstPropertyName,
+}: PageProps) {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
   const [selectedOfferId, setSelectedOfferId] = useState("");
@@ -78,17 +96,28 @@ function Page({ google }: { google: GoogleAPI }) {
     <DashboadLayout type="guest">
       <Head>
         <title>Offers for you | Tramona</title>
-        <meta property="og:title" content="Check my properties out" />
-        <meta
-          property="og:description"
-          content="Check this property out -- Sign up here, from any device!"
+        <NextSeo
+          title="Offers for you | Tramona"
+          description="Check this property out -- Sign up here, from any device!"
+          canonical={`https://tramona.com/requests/${requestId}`}
+          openGraph={{
+            url: `https://tramona.com/requests/${requestId}`,
+            type: "website",
+            title: "Check my properties out",
+            description:
+              "Check this property out -- Sign up here, from any device!",
+            images: [
+              {
+                url: firstImage,
+                width: 900,
+                height: 800,
+                alt: "Og Image Alt Second",
+                type: "image/jpeg",
+              },
+            ],
+            site_name: "Tramona",
+          }}
         />
-        <meta property="og:image" content={firstImage} />
-        <meta
-          property="og:url"
-          content={`https://tramona.com/public-offers/${requestId}`}
-        />
-        <meta property="og:type" content="website" />
       </Head>
       {request && offers ? (
         <div className=" mx-auto md:w-[98%]">
@@ -170,6 +199,30 @@ function Page({ google }: { google: GoogleAPI }) {
     </DashboadLayout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const serverRequestId = parseInt(context.query.id as string);
+  const firstPropertyOfRequest = await db.query.offers.findFirst({
+    where: and(eq(offers.requestId, serverRequestId)),
+  });
+  const serverFirstImage =
+    firstPropertyOfRequest?.property.imageUrls?.[0] ?? "";
+  const serverFirstPropertyName =
+    firstPropertyOfRequest?.request.location ?? "";
+  const serverRequestLocation = await db.query.requests.findFirst({
+    where: { id: serverRequestId },
+    select: { location: true },
+  });
+  console.log("serverRequestLocation", serverRequestLocation);
+  console.log("serverFirstImage", serverFirstImage);
+  return {
+    props: {
+      serverRequestId,
+      serverFirstImage,
+      serverFirstPropertyName,
+    },
+  };
+};
 
 export default GoogleApiWrapper({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",
