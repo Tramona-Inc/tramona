@@ -9,7 +9,6 @@ import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap
 import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
 import { and, eq } from "drizzle-orm";
-import Head from "next/head";
 
 type PageProps = {
   offer: any; // Replace with a more specific type if you have one
