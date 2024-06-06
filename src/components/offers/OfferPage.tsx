@@ -35,7 +35,24 @@ import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
-function formatDateRange(fromDate: Date, toDate?: Date) {
+function formatDateRange(fromDate: Date | string, toDate?: Date | string) {
+  // Convert to Date objects if necessary
+  //The GSSP function will be called and convert the dates to strings so we need to convert it back to dates
+  if (typeof fromDate === "string") {
+    fromDate = new Date(fromDate);
+  }
+  if (toDate && typeof toDate === "string") {
+    toDate = new Date(toDate);
+  }
+
+  // Check if fromDate and toDate are valid Date objects
+  if (!(fromDate instanceof Date) || isNaN(fromDate.getTime())) {
+    throw new TypeError("fromDate is not a valid Date object");
+  }
+  if (toDate && (!(toDate instanceof Date) || isNaN(toDate.getTime()))) {
+    throw new TypeError("toDate is not a valid Date object");
+  }
+
   const options: Intl.DateTimeFormatOptions = {
     weekday: "short",
     month: "short",
