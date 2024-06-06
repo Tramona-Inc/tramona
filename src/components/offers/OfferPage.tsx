@@ -37,7 +37,7 @@ export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 function formatDateRange(fromDate: Date | string, toDate?: Date | string) {
   // Convert to Date objects if necessary
-  //The GSSP function will be called and convert the dates to strings so we need to convert it back to dates
+  //converting because the gssp function returns a string
   if (typeof fromDate === "string") {
     fromDate = new Date(fromDate);
   }
@@ -60,7 +60,9 @@ function formatDateRange(fromDate: Date | string, toDate?: Date | string) {
   };
 
   const fromFormatted = fromDate.toLocaleDateString("en-US", options);
-  const toFormatted = toDate ? toDate.toLocaleDateString("en-US", options) : "";
+  const toFormatted = toDate
+    ? (toDate as Date).toLocaleDateString("en-US", options)
+    : "";
 
   return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
 }

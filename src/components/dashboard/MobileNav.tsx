@@ -165,7 +165,7 @@ export default function MobileNav({
 
   return (
     <header
-      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001]  *:lg:hidden ${type == "unlogged" ? `justify-around px-20` : ` *:flex-1`}`}
+      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001]  lg:hidden *:lg:hidden ${type == "unlogged" ? `justify-around px-20` : ` *:flex-1`}`}
     >
       {navLinks.map((link, index) => (
         <NavBarLink key={index} href={link.href} icon={link.icon}>

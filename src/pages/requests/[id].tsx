@@ -91,7 +91,7 @@ function Page({ google }: { google: GoogleAPI }) {
         <meta property="og:type" content="website" />
       </Head>
       {request && offers ? (
-        <div className=" mx-auto md:w-11/12">
+        <div className=" mx-auto md:w-[98%]">
           <div className="py-4">
             <Link
               href="/requests"
