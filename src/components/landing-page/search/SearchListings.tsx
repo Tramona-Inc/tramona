@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
 import { FilterXIcon } from "lucide-react";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
+import Link from "next/link";
 export default function SearchListings({
   isFilterUndefined,
   callSiblingFunction,
@@ -97,6 +98,8 @@ export default function SearchListings({
     </div>
   ));
 
+  const locationName = filters.filter?.label?.includes(',') ? filters.filter.label.split(',')[0] : filters.filter?.label
+
   // Main component rendering
   return (
     <section
@@ -128,17 +131,15 @@ export default function SearchListings({
         <div className="col-span-full flex min-h-80 flex-col items-center justify-center gap-4">
           <ListingsEmptySvg />
           <p className="text-xl font-semibold">
-            Sorry, we couldn&apos;t find any properties for your search
+            We haven&apos;t uploaded our properties for this location yet 
           </p>
           <p className="text-balance text-center text-muted-foreground">
-            Clear filters and try again, or <b>request a deal</b> above to have
-            us connect you with our host network!
+            However we have <b>50+ hosts</b> in our network with properties in this area 
           </p>
 
           <div className="flex w-64 flex-col gap-2">
-            <Button variant="secondary" onClick={() => filters.clearFilter()}>
-              <FilterXIcon className="size-5" />
-              Clear filters
+            <Button variant="secondary" asChild>
+              <Link href="/">Get Deals for {locationName}</Link>
             </Button>
           </div>
         </div>
