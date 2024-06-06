@@ -1,8 +1,8 @@
 import { type NextApiResponse } from "next";
 
 import { db } from "@/server/db";
-import { users, groups, bids } from "@/server/db/schema";
-import { eq, and, ne, sql } from "drizzle-orm";
+import { users, groups, bids, groupMembers } from "@/server/db/schema";
+import { eq, and, ne, sql, inArray } from "drizzle-orm";
 
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 
@@ -35,26 +35,44 @@ export default async function handler(res: NextApiResponse) {
   `);
   try {
     for (const bid of mostRecentCounterPerBid) {
-      const usersWithUnconfirmedRequests = await db
-        .selectDistinct({
-          isWhatsApp: users.isWhatsApp,
-          phoneNumber: users.phoneNumber,
-          userId: users.id,
+      const groupsWithUnconfirmedRequests = await db
+        .select({
+          id: groups.id,
         })
         .from(groups)
         .leftJoin(bids, eq(groups.id, bids.madeByGroupId))
-        .leftJoin(users, eq(groups.ownerId, users.id))
         .where(and(eq(bids.id, bid.bid_id), ne(groups.ownerId, bid.user_id)));
 
-      for (const user of usersWithUnconfirmedRequests) {
-        if (user.isWhatsApp) {
+      const groupMembersWithUnconfirmedRequests = await db
+        .select({
+          userId: groupMembers.userId,
+          isWhatsApp: users.isWhatsApp,
+          phoneNumber: users.phoneNumber,
+        })
+        .from(groupMembers)
+        .leftJoin(users, eq(groupMembers.userId, users.id))
+        .where(inArray(groupMembers.groupId, groupsWithUnconfirmedRequests.map((group) => group.id)));
+
+      // const usersWithUnconfirmedRequests = await db
+      //   .selectDistinct({
+      //     isWhatsApp: users.isWhatsApp,
+      //     phoneNumber: users.phoneNumber,
+      //     userId: users.id,
+      //   })
+      //   .from(groups)
+      //   .leftJoin(bids, eq(groups.id, bids.madeByGroupId))
+      //   .leftJoin(users, eq(groups.ownerId, users.id))
+      //   .where(and(eq(bids.id, bid.bid_id), ne(groups.ownerId, bid.user_id)));
+
+      for (const member of groupMembersWithUnconfirmedRequests) {
+        if (member.isWhatsApp) {
           await sendWhatsApp({
             templateId: "HX5a68298da1bf273a3e5fcb1211b17d0a",
-            to: user.phoneNumber!,
+            to: member.phoneNumber!,
           });
         } else {
           await sendText({
-            to: user.phoneNumber!,
+            to: member.phoneNumber!,
             content: `Tramona: You have 3 hours left to respond to a counter offer that the host has sent you. Make sure to respond or you will lose out on the exclusive offer.`,
           });
         }

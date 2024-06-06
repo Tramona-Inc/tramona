@@ -39,7 +39,9 @@ export default function PropertyDeclineDialog({
   });
   const slackMutation = api.twilio.sendSlack.useMutation();
 
-  const getTraveler = api.groups.getGroupOwner.useMutation();
+  // const getTraveler = api.groups.getGroupOwner.useMutation();
+  const getTravelers = api.groups.getGroupMembers.useMutation();
+
 
   const { mutate } = api.biddings.reject.useMutation({
     onSuccess: async () => {
@@ -71,25 +73,28 @@ export default function PropertyDeclineDialog({
         //   }
         // }
       } else {
-        const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
-        if (traveler?.phoneNumber) {
-          const nightlyPrice =
-            counterNightlyPrice > 0
-              ? formatCurrency(counterNightlyPrice)
-              : formatCurrency(originalNightlyBiddingOffer);
-          if (traveler.isWhatsApp) {
-            await twilioWhatsAppMutation.mutateAsync({
-              templateId: "HX74ffb496915d8e4ef39b41e624ca605e",
-              to: traveler.phoneNumber,
-              cost: nightlyPrice,
-              name: property?.name,
-              dates: formatDateRange(data?.checkIn, data?.checkOut),
-            });
-          } else {
-            await twilioMutation.mutateAsync({
-              to: traveler.phoneNumber,
-              msg: `Tramona: Your ${nightlyPrice}/night offer for ${property.name} from ${formatDateRange(data.checkIn, data.checkOut)} has been rejected by the host, visit Tramona.com to submit a new offer. Your card has not been charged.`,
-            });
+        //const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
+        const travelers = await getTravelers.mutateAsync(data?.madeByGroupId);
+        for (const traveler of travelers) {
+          if (traveler.phoneNumber) {
+            const nightlyPrice =
+              counterNightlyPrice > 0
+                ? formatCurrency(counterNightlyPrice)
+                : formatCurrency(originalNightlyBiddingOffer);
+            if (traveler.isWhatsApp) {
+              await twilioWhatsAppMutation.mutateAsync({
+                templateId: "HX74ffb496915d8e4ef39b41e624ca605e",
+                to: traveler.phoneNumber,
+                cost: nightlyPrice,
+                name: property.name,
+                dates: formatDateRange(data.checkIn, data.checkOut),
+              });
+            } else {
+              await twilioMutation.mutateAsync({
+                to: traveler.phoneNumber,
+                msg: `Tramona: Your ${nightlyPrice}/night offer for ${property.name} from ${formatDateRange(data.checkIn, data.checkOut)} has been rejected by the host, visit Tramona.com to submit a new offer. Your card has not been charged.`,
+              });
+            }
           }
         }
       }

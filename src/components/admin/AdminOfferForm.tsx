@@ -55,8 +55,6 @@ const formSchema = z.object({
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
   address: zodString({ maxLen: 1000 }),
-  latitude: zodNumber(),
-  longitude: zodNumber(),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
@@ -74,6 +72,7 @@ const formSchema = z.object({
   checkInInfo: optional(zodString()),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
+  cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
   // mapScreenshot: optional(zodString()),
 });
@@ -153,7 +152,8 @@ export default function AdminOfferForm({
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
-  const getOwnerMutation = api.groups.getGroupOwner.useMutation();
+  // const getOwnerMutation = api.groups.getGroupOwner.useMutation();
+  const getMembersMutation = api.groups.getGroupMembers.useMutation();
 
   async function onSubmit(data: FormSchema) {
     let url: string | null = null;
@@ -236,19 +236,24 @@ export default function AdminOfferForm({
         .catch(() => errorToast());
     }
 
-    const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+    //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+    const travelers = await getMembersMutation.mutateAsync(
+      request.madeByGroupId,
+    );
 
-    if (traveler?.phoneNumber) {
-      if (traveler.isWhatsApp) {
-        await twilioWhatsAppMutation.mutateAsync({
-          templateId: "HXfeb90955f0801d551e95a6170a5cc015",
-          to: traveler.phoneNumber,
-        });
-      } else {
-        await twilioMutation.mutateAsync({
-          to: traveler.phoneNumber,
-          msg: "You have a new offer for a request in your Tramona account!",
-        });
+    for (const traveler of travelers) {
+      if (traveler?.phoneNumber) {
+        if (traveler.isWhatsApp) {
+          await twilioWhatsAppMutation.mutateAsync({
+            templateId: "HXfeb90955f0801d551e95a6170a5cc015",
+            to: traveler.phoneNumber,
+          });
+        } else {
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: "You have a new match for a request in your Tramona account!",
+          });
+        }
       }
     }
 
@@ -565,35 +570,6 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="latitude"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Latitude</FormLabel>
-              <FormControl>
-                <Input {...field} type="text" inputMode="decimal" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="longitude"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Longitude</FormLabel>
-              <FormControl>
-                <Input {...field} type="text" inputMode="decimal" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="checkInInfo"
@@ -665,6 +641,20 @@ export default function AdminOfferForm({
               <FormLabel>Area Description (optional)</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cancellationPolicy"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Cancellation Policy (optional)</FormLabel>
+              <FormControl>
+                <Textarea {...field} className="resize-y" rows={2} />
               </FormControl>
               <FormMessage />
             </FormItem>
