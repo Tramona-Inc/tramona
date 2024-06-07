@@ -1,12 +1,18 @@
-const isProduction = process.env.NODE_ENV === "production";
 import { DefaultSeoProps } from "next-seo";
-import { desc } from "drizzle-orm";
+const isProduction = process.env.NODE_ENV === "production";
+const baseUrl = isProduction
+  ? "https://www.tramona.com"
+  : " https://eb50-2601-600-8e81-3180-a582-a67c-29a5-6c49.ngrok-free.app"; //change to your live server
 const config: DefaultSeoProps = {
+  title: "Tramona",
+  description:
+    "Tramona is a platform that connects travelers with hosts to create unique deals for short-term stays.",
+  canonical: baseUrl,
   openGraph: {
     type: "website",
     locale: "en_IE",
     title: "Tramona",
-    url: isProduction ? "https://www.tramona.com" : "http://localhost:3000",
+    url: baseUrl,
     description:
       "Tramona is a platform that connects travelers with hosts to create unique deals for short-term stays.",
     siteName: "Tramona",
@@ -25,5 +31,4 @@ const config: DefaultSeoProps = {
     cardType: "summary_large_image",
   },
 };
-
 export default config;
