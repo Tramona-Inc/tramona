@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+//ts-expect-error GOOGLE MAPS TYPES ARE BROKEN
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
@@ -11,16 +10,17 @@ import {
   Map,
   type GoogleAPI,
 } from "google-maps-react";
-import { useSession } from "next-auth/react";
-import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import ShareOfferDialog from "@/components/_common/ShareLink/ShareOfferDialog";
-import { NextSeo } from "next-seo";
+import ShareButton from "@/components/_common/ShareLink/ShareButton";
+import { OfferWithDetails } from "@/components/property/PropertyPage";
 
+import { NextSeo } from "next-seo";
+import { GetServerSideProps } from "next";
 import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
+import { requests } from "@/server/db/schema/tables/requests";
 import { and, eq } from "drizzle-orm";
 
 type PageProps = {
@@ -28,11 +28,11 @@ type PageProps = {
   serverRequestId: number;
   serverFirstImage: string;
   serverFirstPropertyName: string;
-  serverRequestLocation: { location: string };
+  serverRequestLocation: string; // Ensure this is a plain string
   google: GoogleAPI;
   baseUrl: string;
 };
-//using server as prefix to differentiate between the server and client requests
+
 function Page({
   google,
   serverRequestId,
@@ -91,30 +91,27 @@ function Page({
 
   return (
     <DashboadLayout type="guest">
-      <Head>
-        <title>Offers for you | Tramona</title>
-        <NextSeo
-          title={serverFirstPropertyName}
-          description={`Check out your tramona offers in ${server}`}
-          canonical={`${baseUrl}/requests/${requestId}`}
-          openGraph={{
-            url: `${baseUrl}/requests/${requestId}`,
-            type: "website",
-            title: "Check my properties out",
-            description: "Check these properties out",
-            images: [
-              {
-                url: `${baseUrl}/api/og?cover=${firstImage}`,
-                width: 900,
-                height: 800,
-                alt: "Og Image Alt Second",
-                type: "image/jpeg",
-              },
-            ],
-            site_name: "Tramona",
-          }}
-        />
-      </Head>
+      <NextSeo
+        title={serverFirstPropertyName}
+        description={`Check out your tramona offers in ${serverRequestLocation}`}
+        canonical={`${baseUrl}/requests/${serverRequestId}`}
+        openGraph={{
+          url: `${baseUrl}/requests/${serverRequestId}`,
+          type: "website",
+          title: serverFirstPropertyName,
+          description: `Check out your tramona offers in ${serverRequestLocation}`,
+          images: [
+            {
+              url: serverFirstImage,
+              width: 900,
+              height: 800,
+              alt: "Og Image Alt Second",
+              type: "image/jpeg",
+            },
+          ],
+          site_name: "Tramona",
+        }}
+      />
       {request && offers ? (
         <div className=" mx-auto md:w-[98%]">
           <div className="py-4">
@@ -138,12 +135,10 @@ function Page({
                   </TabsTrigger>
                 ))}
                 <div className="mx-4  mt-5 flex h-full items-center justify-center">
-                  {" "}
-                  <ShareOfferDialog
+                  <ShareButton
                     id={request.id}
                     isRequest={true}
-                    linkImage={firstImage}
-                    propertyName={offers[0].request.location}
+                    propertyName={offers[0]!.request.location}
                   />
                 </div>
               </TabsList>
@@ -158,14 +153,14 @@ function Page({
                 </div>
                 <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
                   <div className="relative h-screen lg:h-full">
+                    {/* @ts-expect-error GOOGLE MAPS TYPES ARE BROKEN */}
                     <Map google={google} zoom={15} center={mapCenter}>
-                      {/* Child components like Marker, InfoWindow, etc. */}
                       {offers.map(
                         (offer, i) =>
                           offer.property.latitude &&
                           offer.property.longitude && (
                             <Circle
-                              key={i} // Unique key for each Circle
+                              key={i}
                               radius={200}
                               fillColor={
                                 selectedOfferId === `${offer.id}`
@@ -197,35 +192,32 @@ function Page({
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const serverRequestId = parseInt(context.query.id as string);
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
-    : "https://9503-104-32-193-204.ngrok-free.app"; //change to your live server
-
-  const serverRequestId = parseInt(context.query.id as string);
+    : "https://6fb1-104-32-193-204.ngrok-free.app"; //change to your live dev server
 
   const firstPropertyOfRequest = await db.query.offers.findFirst({
     where: and(eq(offers.requestId, serverRequestId)),
     with: {
-      property: { imageUrls: true },
+      property: true,
     },
   });
-  // console.log("firstPropertyOfRequest", firstPropertyOfRequest);
 
-  const serverFirstImage = firstPropertyOfRequest.property.imageUrls?.[0] ?? "";
+  const serverFirstImage = firstPropertyOfRequest!.property.imageUrls[0] ?? "";
 
   const serverFirstPropertyName =
     firstPropertyOfRequest?.property.name ?? "Tramona property";
-  console.log("serverFirstPropertyName", serverFirstPropertyName);
 
-  const serverRequestLocation = await db.query.requests.findFirst({
-    where: { id: serverRequestId },
-    select: { location: true },
-  });
+  const serverRequestLocationResult = await db
+    .select({
+      location: requests.location,
+    })
+    .from(requests)
+    .where(eq(requests.id, serverRequestId));
 
-  console.log("serverRequestLocation", serverRequestLocation);
-  console.log("serverFirstImage", serverFirstImage);
-  console.log("serverFirstPropertyName", serverFirstPropertyName);
+  const serverRequestLocation = serverRequestLocationResult[0]?.location ?? "";
 
   return {
     props: {

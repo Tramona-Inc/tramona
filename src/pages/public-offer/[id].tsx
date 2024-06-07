@@ -13,12 +13,12 @@ import { OfferWithDetails } from "@/components/property/PropertyPage";
 
 type PageProps = {
   offer: OfferWithDetails; // Replace with a more specific type if you have one
-  requestId: number;
+  offerId: number;
   firstImage: string;
   baseUrl: string;
 };
 
-const Page = ({ offer, requestId, firstImage, baseUrl }: PageProps) => {
+const Page = ({ offer, offerId, firstImage, baseUrl }: PageProps) => {
   const router = useRouter();
   console.log("First image", firstImage);
   if (router.isFallback || !offer) {
@@ -85,15 +85,15 @@ const Page = ({ offer, requestId, firstImage, baseUrl }: PageProps) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const requestId = parseInt(context.query.id as string);
+  const offerId = parseInt(context.query.id as string);
 
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
-    : "https://9503-104-32-193-204.ngrok-free.app"; //change to your live server
+    : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
 
   const offer = await db.query.offers.findFirst({
-    where: and(eq(offers.id, requestId)),
+    where: and(eq(offers.id, offerId)),
     columns: {
       createdAt: true,
       totalPrice: true,
@@ -154,7 +154,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       offer: serializedOffer,
-      requestId,
+      offerId,
       firstImage,
       baseUrl,
     },

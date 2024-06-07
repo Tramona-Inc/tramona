@@ -13,17 +13,15 @@ import { Button } from "../../ui/button";
 const ShareDialogContent = ({
   id,
   isRequest,
-  linkImage,
   propertyName,
 }: {
   id: number;
   isRequest: boolean;
-  linkImage: string;
   propertyName: string;
 }) => {
   const shareUrl = isRequest
     ? `https://tramona.com/request/${id}`
-    : `https://tramona.com/public-offers/${id}`;
+    : `https://tramona.com/public-offer/${id}`;
   const title = propertyName;
   const description = isRequest
     ? "Check my properties offers out"
@@ -32,7 +30,7 @@ const ShareDialogContent = ({
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const link = `https://tramona.com/public-offers/${id}`;
+    const link = `https://tramona.com/public-offer/${id}`;
     navigator.clipboard.writeText(link).then(
       () => {
         setCopied(true);
@@ -54,7 +52,7 @@ const ShareDialogContent = ({
             value={
               isRequest
                 ? `https://tramona.com/request/${id}`
-                : `https://tramona.com/public-offers/${id}`
+                : `https://tramona.com/public-offer/${id}`
             }
             readOnly
             className="w-full appearance-none rounded-xl border px-5 py-2"
@@ -78,7 +76,7 @@ const ShareDialogContent = ({
           <EmailIcon size={32} round />
         </EmailShareButton>
         <a
-          href={`sms:&body=${encodeURIComponent(`${title} - ${description} - ${shareUrl} - ${linkImage}`)}`}
+          href={`sms:&body=${shareUrl}`}
           className="items-center rounded-full bg-green-500 px-2 py-2  text-white"
         >
           <MessageCircleIcon size={18} />
