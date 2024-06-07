@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
-import { HostPropertyEditBtn } from "./HostPropertiesDetails";
+import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 
 export default function HostPropertiesCancellation() {
   return (

@@ -3,10 +3,15 @@ import { type Property } from "@/server/db/schema";
 import HostPropertiesPriceRestriction from "./HostPropertiesPriceRestriction";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-4 sm:p-6">
+      <Link href="/host/properties" className="sm:hidden">
+        <ChevronLeft />
+      </Link>
       <div>
         <h1 className="text-2xl font-bold">{property.name}</h1>
         <p className="font-semibold text-muted-foreground">

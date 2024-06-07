@@ -1,18 +1,9 @@
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
-import { Button } from "@/components/ui/button";
 import { type Property } from "@/server/db/schema/tables/properties";
 import { capitalize } from "@/utils/utils";
-import { Dot, MapPin, Pencil } from "lucide-react";
+import { Dot, MapPin } from "lucide-react";
 import Image from "next/image";
-
-export function HostPropertyEditBtn() {
-  return (
-    <Button variant="darkOutline" className="border-zinc-300 font-bold">
-      <Pencil />
-      Enter edit mode
-    </Button>
-  );
-}
+import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 
 export default function HostPropertiesDetails({
   property,

@@ -23,9 +23,16 @@ export default function Page() {
       <Head>
         <title>Properties | Tramona</title>
       </Head>
-      <HostPropertiesLayout>
-        {property && <HostPropertyInfo property={property} />}
-      </HostPropertiesLayout>
+      <div className="hidden sm:block">
+        <HostPropertiesLayout>
+          {property && <HostPropertyInfo property={property} />}
+        </HostPropertiesLayout>
+      </div>
+      <div className="sm:hidden">
+        <div className="mb-6">
+          {property && <HostPropertyInfo property={property} />}
+        </div>
+      </div>
     </DashboardLayout>
   );
 }

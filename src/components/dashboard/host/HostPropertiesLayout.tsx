@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { PlusIcon } from "lucide-react";
+import { Pencil, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import HostProperties from "./HostProperties";
 
@@ -67,10 +67,12 @@ export default function HostPropertiesLayout({
             <div className="grid grid-cols-1">{children}</div>
           </div>
         ) : (
-          <div className="grid h-screen-minus-header flex-1 place-items-center">
-            <p className="font-medium text-muted-foreground">
-              Select a property to view more details
-            </p>
+          <div className="hidden sm:block">
+            <div className="flex min-h-screen-minus-header-n-footer items-center justify-center">
+              <p className="font-medium text-muted-foreground">
+                Select a property to view more details
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -107,5 +109,14 @@ export function NewPropertyBtn({
         <HostPropertyForm setOpen={setOpen} />
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function HostPropertyEditBtn() {
+  return (
+    <Button variant="darkOutline" className="border-zinc-300 font-bold">
+      <Pencil />
+      Enter edit mode
+    </Button>
   );
 }
