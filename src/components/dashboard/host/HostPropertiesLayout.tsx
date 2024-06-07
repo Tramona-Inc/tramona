@@ -114,9 +114,14 @@ export function NewPropertyBtn({
 
 export function HostPropertyEditBtn() {
   return (
-    <Button variant="darkOutline" className="border-zinc-300 font-bold">
-      <Pencil />
-      Enter edit mode
-    </Button>
+    <div className="fixed bottom-20 right-4 z-50 sm:static">
+      <Button
+        variant="secondary"
+        className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+      >
+        <Pencil size={20} />
+        Edit
+      </Button>
+    </div>
   );
 }
