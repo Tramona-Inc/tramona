@@ -16,52 +16,64 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PlusIcon } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import HostProperties from "./HostProperties";
 
 export default function HostPropertiesLayout({
   children,
-}: {
-  children: ReactNode;
-}) {
+}: React.PropsWithChildren) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="flex">
-      <ScrollArea className="sticky inset-y-0 min-h-screen-minus-header w-96 border-r px-4 py-8">
-        <h1 className="text-3xl font-bold">Properties</h1>
-        <p className="text-muted-foreground">24% currently vacant</p>
-        <div className="my-4">
-          <NewPropertyBtn open={open} setOpen={setOpen} />
-          {/* <Link href="/host-onboarding">
+      <div className="sticky top-20 h-screen-minus-header-n-footer w-96 border-r px-4 py-8">
+        <ScrollArea>
+          <h1 className="text-3xl font-bold">Properties</h1>
+          <p className="text-muted-foreground">24% currently vacant</p>
+          <div className="my-4">
+            <NewPropertyBtn open={open} setOpen={setOpen} />
+            {/* <Link href="/host-onboarding">
             <Button variant="secondaryLight" className="font-semi bg-white">
               <PlusIcon />
               New Listing
             </Button>
           </Link> */}
-        </div>
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="listed">
-            <AccordionTrigger>Listed</AccordionTrigger>
-            <AccordionContent>
-              <HostProperties />
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="drafts">
-            <AccordionTrigger>Drafts</AccordionTrigger>
-            <AccordionContent>
-              <p>Drafts stuff</p>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="archive">
-            <AccordionTrigger>Archives</AccordionTrigger>
-            <AccordionContent>
-              <p>Archives stuff</p>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </ScrollArea>
-      <div className="flex-1">{children}</div>
+          </div>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="listed">
+              <AccordionTrigger>Listed</AccordionTrigger>
+              <AccordionContent>
+                <HostProperties />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="drafts">
+              <AccordionTrigger>Drafts</AccordionTrigger>
+              <AccordionContent>
+                <p>Drafts stuff</p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="archive">
+              <AccordionTrigger>Archives</AccordionTrigger>
+              <AccordionContent>
+                <p>Archives stuff</p>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </ScrollArea>
+      </div>
+      <div className="flex-1">
+        {children ? (
+          <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-4xl rounded-2xl border">
+            <div className="grid grid-cols-1">{children}</div>
+          </div>
+        ) : (
+          <div className="grid h-screen-minus-header flex-1 place-items-center">
+            <p className="font-medium text-muted-foreground">
+              Select a property to view more details
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

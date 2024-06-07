@@ -24,9 +24,7 @@ export default function Page() {
         <title>Properties | Tramona</title>
       </Head>
       <HostPropertiesLayout>
-        <div className="mx-auto my-10 min-h-screen-minus-header-n-footer max-w-4xl rounded-2xl border">
-          {property && <HostPropertyInfo property={property} />}
-        </div>
+        {property && <HostPropertyInfo property={property} />}
       </HostPropertiesLayout>
     </DashboardLayout>
   );
