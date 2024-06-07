@@ -10,11 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
-import {
-  formatCurrency,
-  getNumNights,
-  plural,
-} from "@/utils/utils";
+import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   CheckIcon,
@@ -36,14 +32,14 @@ import PropertyAmenities from "./PropertyAmenities";
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 function formatDateRange(fromDate: Date, toDate?: Date) {
-  const options: Intl.DateTimeFormatOptions = { 
-    weekday: 'short', 
-    month: 'short', 
-    day: 'numeric' 
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
   };
 
-  const fromFormatted = fromDate.toLocaleDateString('en-US', options);
-  const toFormatted = toDate ? toDate.toLocaleDateString('en-US', options) : '';
+  const fromFormatted = fromDate.toLocaleDateString("en-US", options);
+  const toFormatted = toDate ? toDate.toLocaleDateString("en-US", options) : "";
 
   return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
 }
@@ -346,7 +342,7 @@ export default function OfferPage({
                 </div>
               </div>
               <div className="w-full rounded-full py-2 md:rounded-3xl lg:rounded-full">
-                <div>                  
+                <div>
                   <p className="text-sm text-gray-600">Tramona price</p>
                   <p className="flex items-center font-bold">
                     {formatCurrency(offerNightlyPrice)}
@@ -365,7 +361,8 @@ export default function OfferPage({
               <div className="-space-y-1 text-black">
                 <div className="flex justify-between py-2">
                   <p className="font-medium underline">
-                    {formatCurrency(offerNightlyPrice)} &times; {numNights} nights
+                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
+                    nights
                   </p>
                   <p className="ms-1 font-bold">
                     {formatCurrency(offerNightlyPrice * numNights)}
@@ -382,20 +379,45 @@ export default function OfferPage({
             <hr className="h-px bg-gray-300 py-0" />
             <div className="flex justify-between">
               <div>
-                <p className="font-bold text-xl">Total</p>
+                <p className="text-xl font-bold">Total</p>
               </div>
-              <p className="font-bold text-xl">
-                {formatCurrency(offerNightlyPrice * numNights + tramonaServiceFee)}
+              <p className="text-xl font-bold">
+                {formatCurrency(
+                  offerNightlyPrice * numNights + tramonaServiceFee,
+                )}
               </p>
             </div>
             {!isLoading ? (
-              <Button
-                size="lg"
-                className="w-full bg-green-700 hover:bg-green-800 text-white"
-                disabled={isBooked}
+              <HowToBookDialog
+                isBooked={isBooked}
+                listingId={offer.id}
+                propertyName={property.name}
+                originalNightlyPrice={property.originalNightlyPrice}
+                airbnbUrl={property.airbnbUrl ?? ""}
+                checkIn={request.checkIn}
+                checkOut={request.checkOut}
+                requestId={request.id}
+                offer={{ property, request, ...offer }}
+                totalPrice={offer.totalPrice}
+                offerNightlyPrice={offerNightlyPrice}
+                isAirbnb={isAirbnb}
               >
-                Confirm Booking
-              </Button>
+                <Button
+                  size="lg"
+                  variant="greenPrimary"
+                  className="w-full"
+                  disabled={isBooked}
+                >
+                  {isBooked ? (
+                    <>
+                      <CheckIcon className="size-5" />
+                      Booked
+                    </>
+                  ) : (
+                    <>Confirm Booking</>
+                  )}
+                </Button>
+              </HowToBookDialog>
             ) : (
               <Spinner />
             )}

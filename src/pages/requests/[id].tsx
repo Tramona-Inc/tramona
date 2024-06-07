@@ -3,6 +3,7 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import {
@@ -11,7 +12,7 @@ import {
   Map,
   type GoogleAPI,
 } from "google-maps-react";
-import { useSession } from "next-auth/react";
+import { ArrowLeftIcon } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -60,17 +61,9 @@ function Page({ google }: { google: GoogleAPI }) {
     .flat(1)
     .find(({ id }) => id === requestId);
 
-  const { mutate: handleConversation } =
-    api.messages.createConversationWithOffer.useMutation({
-      onSuccess: (conversationId) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
-      },
-    });
-
   if (router.isFallback) {
     return <Spinner />;
   }
-
 
   return (
     <DashboadLayout type="guest">
@@ -79,13 +72,12 @@ function Page({ google }: { google: GoogleAPI }) {
       </Head>
       {request && offers ? (
         <div>
-          <div className="py-4">
-            <Link
-              href="/requests"
-              className="rounded-full px-4 py-2 font-medium text-black hover:bg-white/10"
-            >
-              &larr; Back to all requests
-            </Link>
+          <div className="p-4">
+            <Button asChild variant="ghost" className="rounded-full">
+              <Link href="/requests">
+                <ArrowLeftIcon /> Back to all requests
+              </Link>
+            </Button>
           </div>
           <div className="px-4 pb-32">
             <Tabs
