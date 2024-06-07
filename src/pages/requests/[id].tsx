@@ -80,7 +80,7 @@ function Page({ google }: { google: GoogleAPI }) {
         <meta property="og:image" content={firstImage} />
         <meta
           property="og:url"
-          content={`https://tramona.com/public-offers/${requestId}`}
+          content={`https://tramona.com/public-offer/${requestId}`}
         />
         <meta property="og:type" content="website" />
       </Head>
