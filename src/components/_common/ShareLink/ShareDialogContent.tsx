@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   WhatsappShareButton,
   EmailShareButton,
   WhatsappIcon,
   EmailIcon,
-  FacebookMessengerShareButton,
-  FacebookIcon,
 } from "react-share";
-import { CopyIcon, MessageCircleIcon, Facebook } from "lucide-react";
+import { CopyIcon, MessageCircleIcon } from "lucide-react";
 import { Button } from "../../ui/button";
 
 const ShareDialogContent = ({

@@ -2,6 +2,7 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import {
@@ -10,6 +11,7 @@ import {
   Map,
   type GoogleAPI,
 } from "google-maps-react";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -113,14 +115,13 @@ function Page({
         }}
       />
       {request && offers ? (
-        <div className=" mx-auto md:w-[98%]">
-          <div className="py-4">
-            <Link
-              href="/requests"
-              className="rounded-full px-4 py-2 font-medium text-black hover:bg-white/10"
-            >
-              &larr; Back to all requests
-            </Link>
+        <div>
+          <div className="p-4">
+            <Button asChild variant="ghost" className="rounded-full">
+              <Link href="/requests">
+                <ArrowLeftIcon /> Back to all requests
+              </Link>
+            </Button>
           </div>
           <div className="px-4 pb-32">
             <Tabs

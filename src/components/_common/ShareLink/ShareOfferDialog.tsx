@@ -16,7 +16,7 @@ function ShareOfferDialog({
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const link = `https://tramona.com/public-offers/${id}`;
+    const link = `https://tramona.com/public-offer/${id}`;
     navigator.clipboard.writeText(link).then(
       () => {
         setCopied(true);
