@@ -113,10 +113,10 @@ export default function SearchPage() {
               <div className="item-center flex justify-center text-2xl font-black">
                 Explore popular destinations
               </div>
-              <div className="item-center flex justify-center text-lg">
+              <p className="text-balance text-center text-lg">
                 Search through our properties, send an offer, and the host will
                 accept, deny or counter your offer in 24 hours or less.
-              </div>
+              </p>
               <div className="sticky top-16 z-30 bg-white">
                 <DynamicDesktopSearchBar />
                 <div className="flex items-center gap-2 border-b">
@@ -155,7 +155,7 @@ export default function SearchPage() {
                 <div className="text-center text-3xl font-bold">
                   Explore popular destinations
                 </div>
-                <div className="text-center text-lg">
+                <div className="text-pretty text-center">
                   Search through our properties, send an offer, and the host
                   will accept, deny or counter your offer in 24 hours or less.
                 </div>

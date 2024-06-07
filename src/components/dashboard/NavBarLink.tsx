@@ -17,11 +17,12 @@ export function NavBarLink({
       render={({ selected }) => (
         <div
           className={cn(
-            "relative flex flex-col items-center gap-1 px-1 py-3 text-center text-xs font-medium",
-            selected ? "text-teal-700" : "text-muted-foreground",
+            "relative flex flex-col items-center gap-1 px-1 py-3 text-center text-xs font-light",
+            selected ? "text-teal-700" : "text--secondary-foreground",
           )}
         >
-          <Icon className="size-6 lg:size-8" />
+          {/* @ts-expect-error ignore because of the strokeWidth, We might change it so i didnt refactor, idk. */}
+          <Icon className="size-6 lg:size-8" strokeWidth={1.8} />
           {children}
         </div>
       )}

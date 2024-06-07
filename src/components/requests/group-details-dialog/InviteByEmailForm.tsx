@@ -24,6 +24,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
   const mutation = api.groups.inviteUserByEmail.useMutation();
+  const { data: inviteLink } = api.groups.generateInviteLink.useQuery({
+    groupId: request.madeByGroup.id,
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -44,6 +47,21 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
       },
     );
   }
+
+  const handleCopyToClipboard = () => {
+    if (inviteLink) {
+      navigator.clipboard
+        .writeText(inviteLink.link)
+        .then(() => {
+          toast({
+            title: "Link copied to clipboard!",
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to copy: ", err);
+        });
+    }
+  };
 
   async function onSubmit({ email }: FormValues) {
     await inviteUserByEmail({
@@ -100,6 +118,15 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
           Invite
         </Button>
       </form>
+      {inviteLink && (
+        <div className="mt-4 flex gap-2">
+          <Input
+            value={inviteLink.link}
+            readOnly
+          />
+          <Button onClick={handleCopyToClipboard}>Copy</Button>
+        </div>
+      )}
     </Form>
   );
 }

@@ -27,10 +27,6 @@ export default function VerifyEmailLink({
         </div>
         <CustomButton link={url} title="Verify Email" />
         <div className="text-brand px-6 text-left text-base">
-          <Text className="text-brand text-left">
-            If you did not request this, please ignore this email and your
-            password will remain unchanged.
-          </Text>
           <Text className="text-brand text-left">Thanks,</Text>
           <Text className="text-brand text-left">
             <strong>Tramona Team</strong>

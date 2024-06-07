@@ -3,6 +3,7 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import {
@@ -11,11 +12,12 @@ import {
   Map,
   type GoogleAPI,
 } from "google-maps-react";
-import { useSession } from "next-auth/react";
+import { ArrowLeftIcon } from "lucide-react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import ShareOfferDialog from "@/components/_common/ShareLink/ShareOfferDialog";
 
 function Page({ google }: { google: GoogleAPI }) {
   const router = useRouter();
@@ -32,6 +34,7 @@ function Page({ google }: { google: GoogleAPI }) {
       enabled: router.isReady,
     },
   );
+  const [firstImage, setFirstImage] = useState("");
 
   useEffect(() => {
     const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
@@ -40,6 +43,7 @@ function Page({ google }: { google: GoogleAPI }) {
         lat: offer.property.latitude,
         lng: offer.property.longitude,
       });
+      setFirstImage(offer.property.imageUrls[0] ?? "");
     }
   }, [selectedOfferId]);
 
@@ -60,32 +64,34 @@ function Page({ google }: { google: GoogleAPI }) {
     .flat(1)
     .find(({ id }) => id === requestId);
 
-  const { mutate: handleConversation } =
-    api.messages.createConversationWithOffer.useMutation({
-      onSuccess: (conversationId) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
-      },
-    });
-
   if (router.isFallback) {
     return <Spinner />;
   }
-
 
   return (
     <DashboadLayout type="guest">
       <Head>
         <title>Offers for you | Tramona</title>
+        <meta property="og:title" content="Check my properties out" />
+        <meta
+          property="og:description"
+          content="Check this property out -- Sign up here, from any device!"
+        />
+        <meta property="og:image" content={firstImage} />
+        <meta
+          property="og:url"
+          content={`https://tramona.com/public-offers/${requestId}`}
+        />
+        <meta property="og:type" content="website" />
       </Head>
       {request && offers ? (
         <div>
-          <div className="py-4">
-            <Link
-              href="/requests"
-              className="rounded-full px-4 py-2 font-medium text-black hover:bg-white/10"
-            >
-              &larr; Back to all requests
-            </Link>
+          <div className="p-4">
+            <Button asChild variant="ghost" className="rounded-full">
+              <Link href="/requests">
+                <ArrowLeftIcon /> Back to all requests
+              </Link>
+            </Button>
           </div>
           <div className="px-4 pb-32">
             <Tabs
@@ -99,6 +105,15 @@ function Page({ google }: { google: GoogleAPI }) {
                     Offer {i + 1}
                   </TabsTrigger>
                 ))}
+                <div className="mx-4  mt-5 flex h-full items-center justify-center">
+                  {" "}
+                  <ShareOfferDialog
+                    id={request.id}
+                    isRequest={true}
+                    linkImage={firstImage}
+                    propertyName={offers[0].request.location}
+                  />
+                </div>
               </TabsList>
 
               <div className="flex flex-col lg:flex-row lg:space-x-10">
