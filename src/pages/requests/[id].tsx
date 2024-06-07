@@ -28,14 +28,18 @@ type PageProps = {
   serverRequestId: number;
   serverFirstImage: string;
   serverFirstPropertyName: string;
+  serverRequestLocation: { location: string };
   google: GoogleAPI;
+  baseUrl: string;
 };
 //using server as prefix to differentiate between the server and client requests
 function Page({
   google,
   serverRequestId,
   serverFirstImage,
+  serverRequestLocation,
   serverFirstPropertyName,
+  baseUrl,
 }: PageProps) {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
@@ -81,13 +85,6 @@ function Page({
     .flat(1)
     .find(({ id }) => id === requestId);
 
-  const { mutate: handleConversation } =
-    api.messages.createConversationWithOffer.useMutation({
-      onSuccess: (conversationId) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
-      },
-    });
-
   if (router.isFallback) {
     return <Spinner />;
   }
@@ -97,18 +94,17 @@ function Page({
       <Head>
         <title>Offers for you | Tramona</title>
         <NextSeo
-          title="Offers for you | Tramona"
-          description="Check this property out -- Sign up here, from any device!"
-          canonical={`https://tramona.com/requests/${requestId}`}
+          title={serverFirstPropertyName}
+          description={`Check out your tramona offers in ${server}`}
+          canonical={`${baseUrl}/requests/${requestId}`}
           openGraph={{
-            url: `https://tramona.com/requests/${requestId}`,
+            url: `${baseUrl}/requests/${requestId}`,
             type: "website",
             title: "Check my properties out",
-            description:
-              "Check this property out -- Sign up here, from any device!",
+            description: "Check these properties out",
             images: [
               {
-                url: firstImage,
+                url: `${baseUrl}/api/og?cover=${firstImage}`,
                 width: 900,
                 height: 800,
                 alt: "Og Image Alt Second",
@@ -201,25 +197,43 @@ function Page({
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "https://9503-104-32-193-204.ngrok-free.app"; //change to your live server
+
   const serverRequestId = parseInt(context.query.id as string);
+
   const firstPropertyOfRequest = await db.query.offers.findFirst({
     where: and(eq(offers.requestId, serverRequestId)),
+    with: {
+      property: { imageUrls: true },
+    },
   });
-  const serverFirstImage =
-    firstPropertyOfRequest?.property.imageUrls?.[0] ?? "";
+  // console.log("firstPropertyOfRequest", firstPropertyOfRequest);
+
+  const serverFirstImage = firstPropertyOfRequest.property.imageUrls?.[0] ?? "";
+
   const serverFirstPropertyName =
-    firstPropertyOfRequest?.request.location ?? "";
+    firstPropertyOfRequest?.property.name ?? "Tramona property";
+  console.log("serverFirstPropertyName", serverFirstPropertyName);
+
   const serverRequestLocation = await db.query.requests.findFirst({
     where: { id: serverRequestId },
     select: { location: true },
   });
+
   console.log("serverRequestLocation", serverRequestLocation);
   console.log("serverFirstImage", serverFirstImage);
+  console.log("serverFirstPropertyName", serverFirstPropertyName);
+
   return {
     props: {
+      serverRequestLocation,
       serverRequestId,
       serverFirstImage,
       serverFirstPropertyName,
+      baseUrl,
     },
   };
 };
