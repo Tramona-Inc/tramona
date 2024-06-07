@@ -487,7 +487,6 @@ export default function OfferPage({
       <ShareOfferDialog
         id={offer.id}
         isRequest={false}
-        linkImage={property.imageUrls[0] ?? ""}
         propertyName={property.name}
       />
     </div>
