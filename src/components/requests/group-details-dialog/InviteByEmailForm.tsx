@@ -145,7 +145,7 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
               <Button onClick={handleCopyToClipboard}>Copy</Button>
             </>
           ) : (
-            <Button className="flex-1 w-100" onClick={handleShare}>Share</Button>
+            <Button className="flex-1 w-100" onClick={handleShare}>Add other travelers</Button>
           )}
         </div>
       )}
