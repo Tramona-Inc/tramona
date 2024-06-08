@@ -15,16 +15,28 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
-  requests,
-  requestsToProperties,
 } from "@/server/db/schema";
 import { getAddress, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  isNotNull,
+  isNull,
+  lt,
+  ne,
+  notInArray,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
+import { requests } from "../../db/schema/tables/requests";
+import { reservationSelectSchema } from "../../db/schema/tables/reservations";
+import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -67,20 +79,20 @@ export const offersRouter = createTRPCRouter({
 
           // update referralCode
           ctx.user.referralCodeUsed &&
-          tx
-            .update(referralCodes)
-            .set({
-              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
-            })
-            .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+            tx
+              .update(referralCodes)
+              .set({
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
+              })
+              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 
           ctx.user.referralCodeUsed &&
-          tx
-            .update(referralCodes)
-            .set({
-              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
-            })
-            .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+            tx
+              .update(referralCodes)
+              .set({
+                numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
+              })
+              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
         ]);
 
         if (results.some((result) => result.status === "rejected")) {
@@ -241,6 +253,48 @@ export const offersRouter = createTRPCRouter({
 
       if (!memberIds.includes(ctx.user.id) && ctx.user.role !== "admin") {
         throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return offer;
+    }),
+
+  getByPublicIdWithDetails: publicProcedure
+    .input(offerSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const offer = await ctx.db.query.offers.findFirst({
+        where: and(
+          eq(offers.id, input.id),
+          //isNotNull(offers.madePublicAt) //for now this is empty because we we want users to be able to share.
+        ),
+        columns: {
+          createdAt: true,
+          totalPrice: true,
+          acceptedAt: true,
+          id: true,
+          tramonaFee: true,
+        },
+        with: {
+          request: {
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+              location: true,
+              id: true,
+            },
+          },
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
+      console.log("this is offer router offer", offer);
+      if (!offer) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
       return offer;
@@ -497,15 +551,17 @@ export const offersRouter = createTRPCRouter({
       //   })
       //   .then((res) => res?.owner);
 
-
       const members = await ctx.db.query.groupMembers
         .findMany({
           columns: {},
-          with: { user: { columns: { phoneNumber: true, isWhatsApp: true, id: true } } },
+          with: {
+            user: {
+              columns: { phoneNumber: true, isWhatsApp: true, id: true },
+            },
+          },
           where: eq(groupMembers.groupId, request.madeByGroup.id),
         })
         .then((res) => res.map((member) => member.user));
-
 
       if (!members) return;
 
@@ -531,29 +587,32 @@ export const offersRouter = createTRPCRouter({
               res && res.group.requests.some((req) => req.offers.length > 0),
           );
 
-        const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
+        const fmtdDateRange = formatDateRange(
+          request.checkIn,
+          request.checkOut,
+        );
         const url = `${env.NEXTAUTH_URL}/requests`;
 
         if (member.phoneNumber) {
           if (member.isWhatsApp) {
             memberHasOtherOffers
               ? void sendWhatsApp({
-                templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
-                to: member.phoneNumber,
-                propertyName: property.name,
-                propertyAddress: request.location, //??can this be null
-                checkIn: request.checkIn,
-                checkOut: request.checkOut,
-                url: url,
-              })
+                  templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
+                  to: member.phoneNumber,
+                  propertyName: property.name,
+                  propertyAddress: request.location, //??can this be null
+                  checkIn: request.checkIn,
+                  checkOut: request.checkOut,
+                  url: url,
+                })
               : void sendWhatsApp({
-                templateId: "HXb293923af34665e7eefc81be0579e5db",
-                to: member.phoneNumber,
-                propertyName: property.name,
-                propertyAddress: request.location,
-                checkIn: request.checkIn,
-                checkOut: request.checkOut,
-              });
+                  templateId: "HXb293923af34665e7eefc81be0579e5db",
+                  to: member.phoneNumber,
+                  propertyName: property.name,
+                  propertyAddress: request.location,
+                  checkIn: request.checkIn,
+                  checkOut: request.checkOut,
+                });
           } else {
             void sendText({
               to: member.phoneNumber,
@@ -564,4 +623,43 @@ export const offersRouter = createTRPCRouter({
       }
     }),
 
+  //I want the all of the offers from each request that has been accepted except for the offer that has been accepted
+  //Search in all requests, if there has been an off that has been accepted, then remove that offer from the list of offers
+  //If there has been no offer accepted, then return nothing for that request
+  getAllUnmatchedOffers: publicProcedure.query(async ({ ctx }) => {
+    //go through all the requests and filter out the ones that have an offer that has been accepted
+
+    const completedRequests = await ctx.db.query.requests.findMany({
+      where: isNotNull(requests.resolvedAt),
+    });
+    console.log(completedRequests);
+    const unMatchedOffers = await ctx.db.query.offers.findMany({
+      where: and(
+        isNull(offers.acceptedAt),
+        notInArray(
+          offers.requestId,
+          completedRequests.map((req) => req.id),
+        ),
+      ),
+      with: {
+        property: {
+          columns: {
+            name: true,
+            originalNightlyPrice: true,
+            imageUrls: true,
+            id: true,
+            maxNumGuests: true,
+            numBedrooms: true,
+          },
+        },
+        request: {
+          columns: {
+            checkIn: true,
+            checkOut: true,
+          },
+        },
+      },
+    });
+    return unMatchedOffers;
+  }),
 });

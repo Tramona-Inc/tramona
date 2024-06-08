@@ -37,7 +37,7 @@ export default function HowToBookDialog(
       listingId={offer.id}
       propertyName={propertyName}
       originalNightlyPrice={originalNightlyPrice}
-      airbnbUrl={airbnbUrl ?? ""}
+      airbnbUrl={airbnbUrl}
       checkIn={checkIn}
       checkOut={checkOut}
       requestId={requestId}
@@ -53,7 +53,7 @@ export default function HowToBookDialog(
       listingId={offer.id}
       propertyName={propertyName}
       originalNightlyPrice={originalNightlyPrice}
-      airbnbUrl={airbnbUrl ?? ""}
+      airbnbUrl={airbnbUrl}
       checkIn={checkIn}
       checkOut={checkOut}
       requestId={requestId}
