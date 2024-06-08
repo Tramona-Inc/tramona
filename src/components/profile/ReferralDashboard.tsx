@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, ChangeEvent } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
@@ -34,6 +34,7 @@ export default function ReferralDashboard() {
   const messageWithLink = `${message}\n\n${url}`;
 
   const [isEditingMessage, setIsEditingMessage] = useState(false);
+  const [referralCode, setReferralCode] = useState<string>("");
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -43,6 +44,10 @@ export default function ReferralDashboard() {
     localStorage.setItem("referralMessage", message);
     setMessage(message);
     toast({ title: "Message saved", description: "Copy it and share!" });
+  }
+
+  function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
+    setReferralCode(event.target.value);
   }
 
   if (isLoading) return <Spinner />;
@@ -125,6 +130,22 @@ export default function ReferralDashboard() {
                   </Button>
                 )}
               />
+            </div>
+          </section>
+          <section className="space-y-2">
+            <h3 className="text-xl font-bold">Enter Referral code</h3>
+            <p className="text-sm">
+              We`re you referred by a friend? Enter their referral code below.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex-1">
+                <Input value={referralCode} onChange={handleInputChange} />
+              </div>
+                <Button
+                  className="bg-teal-900 px-0 lg:w-20"
+                >
+                  Submit
+                </Button>
             </div>
           </section>
           <section className="space-y-2">
