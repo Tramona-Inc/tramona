@@ -8,7 +8,6 @@ import {
   formatDateRange,
   getDiscountPercentage,
   getNumNights,
-  getTramonaFeeTotal,
 } from "@/utils/utils";
 import { CheckIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -61,9 +60,7 @@ export default function DirectBookDialog(
   const checkOutDate = formatDateMonthDay(checkOut);
   const numNights = getNumNights(checkIn, checkOut);
   const originalTotal = originalNightlyPrice * numNights;
-  const tramonaServiceFee = getTramonaFeeTotal(
-    originalTotal - offer.totalPrice,
-  );
+  const tramonaServiceFee = offer.tramonaFee;
   // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
 
   const tax = 0;

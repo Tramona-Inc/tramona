@@ -1,8 +1,8 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+//ts-expect-error GOOGLE MAPS TYPES ARE BROKEN
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import {
@@ -11,13 +11,38 @@ import {
   Map,
   type GoogleAPI,
 } from "google-maps-react";
-import { useSession } from "next-auth/react";
-import Head from "next/head";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import ShareButton from "@/components/_common/ShareLink/ShareButton";
+import { OfferWithDetails } from "@/components/property/PropertyPage";
 
-function Page({ google }: { google: GoogleAPI }) {
+import { NextSeo } from "next-seo";
+import { GetServerSideProps } from "next";
+import { db } from "@/server/db";
+import { offers } from "@/server/db/schema/tables/offers";
+import { requests } from "@/server/db/schema/tables/requests";
+import { and, eq } from "drizzle-orm";
+
+type PageProps = {
+  offer: OfferWithDetails; // Replace with a more specific type if you have one
+  serverRequestId: number;
+  serverFirstImage: string;
+  serverFirstPropertyName: string;
+  serverRequestLocation: string; // Ensure this is a plain string
+  google: GoogleAPI;
+  baseUrl: string;
+};
+
+function Page({
+  google,
+  serverRequestId,
+  serverFirstImage,
+  serverRequestLocation,
+  serverFirstPropertyName,
+  baseUrl,
+}: PageProps) {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
   const [selectedOfferId, setSelectedOfferId] = useState("");
@@ -32,6 +57,7 @@ function Page({ google }: { google: GoogleAPI }) {
       enabled: router.isReady,
     },
   );
+  const [firstImage, setFirstImage] = useState("");
 
   useEffect(() => {
     const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
@@ -40,6 +66,7 @@ function Page({ google }: { google: GoogleAPI }) {
         lat: offer.property.latitude,
         lng: offer.property.longitude,
       });
+      setFirstImage(offer.property.imageUrls[0] ?? "");
     }
   }, [selectedOfferId]);
 
@@ -60,32 +87,41 @@ function Page({ google }: { google: GoogleAPI }) {
     .flat(1)
     .find(({ id }) => id === requestId);
 
-  const { mutate: handleConversation } =
-    api.messages.createConversationWithOffer.useMutation({
-      onSuccess: (conversationId) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
-      },
-    });
-
   if (router.isFallback) {
     return <Spinner />;
   }
 
-
   return (
     <DashboadLayout type="guest">
-      <Head>
-        <title>Offers for you | Tramona</title>
-      </Head>
+      <NextSeo
+        title={serverFirstPropertyName}
+        description={`Check out your tramona offers in ${serverRequestLocation}`}
+        canonical={`${baseUrl}/requests/${serverRequestId}`}
+        openGraph={{
+          url: `${baseUrl}/requests/${serverRequestId}`,
+          type: "website",
+          title: serverFirstPropertyName,
+          description: `Check out your tramona offers in ${serverRequestLocation}`,
+          images: [
+            {
+              url: serverFirstImage,
+              width: 900,
+              height: 800,
+              alt: "Og Image Alt Second",
+              type: "image/jpeg",
+            },
+          ],
+          site_name: "Tramona",
+        }}
+      />
       {request && offers ? (
         <div>
-          <div className="py-4">
-            <Link
-              href="/requests"
-              className="rounded-full px-4 py-2 font-medium text-black hover:bg-white/10"
-            >
-              &larr; Back to all requests
-            </Link>
+          <div className="p-4">
+            <Button asChild variant="ghost" className="rounded-full">
+              <Link href="/requests">
+                <ArrowLeftIcon /> Back to all requests
+              </Link>
+            </Button>
           </div>
           <div className="px-4 pb-32">
             <Tabs
@@ -99,6 +135,13 @@ function Page({ google }: { google: GoogleAPI }) {
                     Offer {i + 1}
                   </TabsTrigger>
                 ))}
+                <div className="mx-4  mt-5 flex h-full items-center justify-center">
+                  <ShareButton
+                    id={request.id}
+                    isRequest={true}
+                    propertyName={offers[0]!.request.location}
+                  />
+                </div>
               </TabsList>
 
               <div className="flex flex-col lg:flex-row lg:space-x-10">
@@ -111,14 +154,14 @@ function Page({ google }: { google: GoogleAPI }) {
                 </div>
                 <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
                   <div className="relative h-screen lg:h-full">
+                    {/* @ts-expect-error GOOGLE MAPS TYPES ARE BROKEN */}
                     <Map google={google} zoom={15} center={mapCenter}>
-                      {/* Child components like Marker, InfoWindow, etc. */}
                       {offers.map(
                         (offer, i) =>
                           offer.property.latitude &&
                           offer.property.longitude && (
                             <Circle
-                              key={i} // Unique key for each Circle
+                              key={i}
                               radius={200}
                               fillColor={
                                 selectedOfferId === `${offer.id}`
@@ -148,6 +191,45 @@ function Page({ google }: { google: GoogleAPI }) {
     </DashboadLayout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const serverRequestId = parseInt(context.query.id as string);
+  const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "https://6fb1-104-32-193-204.ngrok-free.app"; //change to your live dev server
+
+  const firstPropertyOfRequest = await db.query.offers.findFirst({
+    where: and(eq(offers.requestId, serverRequestId)),
+    with: {
+      property: true,
+    },
+  });
+
+  const serverFirstImage = firstPropertyOfRequest!.property.imageUrls[0] ?? "";
+
+  const serverFirstPropertyName =
+    firstPropertyOfRequest?.property.name ?? "Tramona property";
+
+  const serverRequestLocationResult = await db
+    .select({
+      location: requests.location,
+    })
+    .from(requests)
+    .where(eq(requests.id, serverRequestId));
+
+  const serverRequestLocation = serverRequestLocationResult[0]?.location ?? "";
+
+  return {
+    props: {
+      serverRequestLocation,
+      serverRequestId,
+      serverFirstImage,
+      serverFirstPropertyName,
+      baseUrl,
+    },
+  };
+};
 
 export default GoogleApiWrapper({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",

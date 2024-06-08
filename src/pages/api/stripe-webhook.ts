@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { env } from "@/env";
 import {
   createConversationWithAdmin,
@@ -6,15 +7,12 @@ import {
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
-  bids,
   offers,
-  properties,
   referralCodes,
   referralEarnings,
   requests,
   users,
 } from "@/server/db/schema";
-import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
@@ -56,7 +54,6 @@ export default async function webhook(
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
 
-
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
 
@@ -97,29 +94,27 @@ export default async function webhook(
             where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
           });
 
-          const propertyID = parseInt(
-            paymentIntentSucceeded.metadata.property_id!,
-            10,
-          );
-          const property = await db.query.properties.findFirst({
-            where: eq(properties.id, propertyID),
-          });
-          const requestID = parseInt(
-            paymentIntentSucceeded.metadata.request_id!,
-          );
-          const request = await db.query.requests.findFirst({
-            where: eq(requests.id, requestID),
-          });
-          const offer = await db.query.offers.findFirst({
-            where: eq(offers.requestId, requestID),
-          });
+          // const propertyID = parseInt(
+          //   paymentIntentSucceeded.metadata.property_id!,
+          //   10,
+          // );
+          // const requestID = parseInt(
+          //   paymentIntentSucceeded.metadata.request_id!,
+          // );
+          // const property = await db.query.properties.findFirst({
+          //   where: eq(properties.id, propertyID),
+          // });
+          // const request = await db.query.requests.findFirst({
+          //   where: eq(requests.id, requestID),
+          // });
+          // const offer = await db.query.offers.findFirst({
+          //   where: eq(offers.requestId, requestID),
+          // });
 
-          const bidID = parseInt(
-            paymentIntentSucceeded.metadata.bid_id!,
-          );
-          const bid = await db.query.bids.findFirst({
-            where: eq(bids.id, bidID),
-          });
+          // const bidID = parseInt(paymentIntentSucceeded.metadata.bid_id!);
+          // const bid = await db.query.bids.findFirst({
+          //   where: eq(bids.id, bidID),
+          // });
 
           //send BookingConfirmationEmail
           //Send user confirmation email
@@ -223,10 +218,7 @@ export default async function webhook(
         const checkoutSessionCompleted = event.data.object;
 
         // * Make sure to check listing_id isnt' null
-        if (
-          checkoutSessionCompleted.metadata &&
-          checkoutSessionCompleted.metadata.listing_id !== null
-        ) {
+        if (checkoutSessionCompleted.metadata) {
           const listing_id = parseInt(
             checkoutSessionCompleted.metadata.listing_id!,
           );
@@ -300,7 +292,7 @@ export default async function webhook(
             console.log("This is last verification report object");
             console.log(verificationReport.document);
             if (verificationReport.document?.dob) {
-              const dob = verificationReport.document?.dob;
+              const dob = verificationReport.document.dob;
               //formatting dob object into strin
               const day = dob.day!.toString().padStart(2, "0");
               const month = dob.month!.toString().padStart(2, "0");

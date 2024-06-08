@@ -10,7 +10,6 @@ import {
   formatCurrency,
   formatDateRange,
   getNumNights,
-  getTramonaFeeTotal,
 } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -50,7 +49,6 @@ export default function AirbnbBookDialog(
   const originalTotalPrice =
     originalNightlyPrice * getNumNights(checkIn, checkOut);
   const totalSavings = originalTotalPrice - totalPrice;
-  const tramonafee = getTramonaFeeTotal(totalSavings);
 
   const messageToHost = `Hi, I was offered your property on Tramona for ${formatCurrency(
     totalPrice,
@@ -74,7 +72,7 @@ export default function AirbnbBookDialog(
       propertyId: offer.property.id,
       requestId: requestId,
       name: offer.property.name,
-      price: tramonafee, // Airbnb (tramona fee) Set's price for checkout
+      price: offer.tramonaFee, // Airbnb (tramona fee) Set's price for checkout
       description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
       images: offer.property.imageUrls,

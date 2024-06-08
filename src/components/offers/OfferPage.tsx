@@ -10,19 +10,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
-import {
-  formatCurrency,
-  getNumNights,
-  plural,
-} from "@/utils/utils";
+import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
-import {
-  CheckIcon,
-  ImagesIcon,
-  ChevronRight,
-  UsersRoundIcon,
-  CalendarDays,
-} from "lucide-react";
+import { CheckIcon, ImagesIcon, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
@@ -32,18 +22,41 @@ import { useMediaQuery } from "../_utils/useMediaQuery";
 import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
+import router from "next/router";
+
+import { useSession } from "next-auth/react";
+import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
-function formatDateRange(fromDate: Date, toDate?: Date) {
-  const options: Intl.DateTimeFormatOptions = { 
-    weekday: 'short', 
-    month: 'short', 
-    day: 'numeric' 
+function formatDateRange(fromDate: Date | string, toDate?: Date | string) {
+  // Convert to Date objects if necessary
+  //converting because the gssp function returns a string
+  if (typeof fromDate === "string") {
+    fromDate = new Date(fromDate);
+  }
+  if (toDate && typeof toDate === "string") {
+    toDate = new Date(toDate);
+  }
+
+  // Check if fromDate and toDate are valid Date objects
+  if (!(fromDate instanceof Date) || isNaN(fromDate.getTime())) {
+    throw new TypeError("fromDate is not a valid Date object");
+  }
+  if (toDate && (!(toDate instanceof Date) || isNaN(toDate.getTime()))) {
+    throw new TypeError("toDate is not a valid Date object");
+  }
+
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
   };
 
-  const fromFormatted = fromDate.toLocaleDateString('en-US', options);
-  const toFormatted = toDate ? toDate.toLocaleDateString('en-US', options) : '';
+  const fromFormatted = fromDate.toLocaleDateString("en-US", options);
+  const toFormatted = toDate
+    ? (toDate as Date).toLocaleDateString("en-US", options)
+    : "";
 
   return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
 }
@@ -53,6 +66,7 @@ export default function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
+  const { status } = useSession();
   let isBooked = false;
 
   const { data, isLoading } =
@@ -88,8 +102,6 @@ export default function OfferPage({
   const tramonaServiceFee = offer.tramonaFee;
 
   // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
-
-  const tax = 0;
 
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
@@ -244,7 +256,7 @@ export default function OfferPage({
       </div>
 
       <hr className="h-px border-0 bg-gray-300" />
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      <div className="flex flex-col-reverse gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
           <section>
             <div className="flex items-center gap-2">
@@ -346,7 +358,7 @@ export default function OfferPage({
                 </div>
               </div>
               <div className="w-full rounded-full py-2 md:rounded-3xl lg:rounded-full">
-                <div>                  
+                <div>
                   <p className="text-sm text-gray-600">Tramona price</p>
                   <p className="flex items-center font-bold">
                     {formatCurrency(offerNightlyPrice)}
@@ -365,7 +377,10 @@ export default function OfferPage({
               <div className="-space-y-1 text-black">
                 <div className="flex justify-between py-2">
                   <p className="font-medium underline">
-                    {formatCurrency(offerNightlyPrice)} &times; {numNights} nights
+                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
+                    nights
+                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
+                    nights
                   </p>
                   <p className="ms-1 font-bold">
                     {formatCurrency(offerNightlyPrice * numNights)}
@@ -382,22 +397,57 @@ export default function OfferPage({
             <hr className="h-px bg-gray-300 py-0" />
             <div className="flex justify-between">
               <div>
-                <p className="font-bold text-xl">Total</p>
+                <p className="text-xl font-bold">Total</p>
               </div>
-              <p className="font-bold text-xl">
-                {formatCurrency(offerNightlyPrice * numNights + tramonaServiceFee)}
+              <p className="text-xl font-bold">
+                {formatCurrency(
+                  offerNightlyPrice * numNights + tramonaServiceFee,
+                )}
               </p>
             </div>
-            {!isLoading ? (
-              <Button
-                size="lg"
-                className="w-full bg-green-700 hover:bg-green-800 text-white"
-                disabled={isBooked}
-              >
-                Confirm Booking
-              </Button>
+            {status === "authenticated" ? (
+              isLoading ? (
+                <Spinner />
+              ) : (
+                <HowToBookDialog
+                  isBooked={isBooked}
+                  listingId={offer.id}
+                  propertyName={property.name}
+                  originalNightlyPrice={property.originalNightlyPrice}
+                  airbnbUrl={property.airbnbUrl ?? ""}
+                  checkIn={request.checkIn}
+                  checkOut={request.checkOut}
+                  requestId={request.id}
+                  offer={{ property, request, ...offer }}
+                  totalPrice={offer.totalPrice}
+                  offerNightlyPrice={offerNightlyPrice}
+                  isAirbnb={isAirbnb}
+                >
+                  <Button size="lg" variant="greenPrimary" disabled={isBooked}>
+                    {isBooked ? (
+                      <>
+                        <CheckIcon className="size-5" />
+                        Booked
+                      </>
+                    ) : (
+                      <>Confirm Booking</>
+                    )}
+                  </Button>
+                </HowToBookDialog>
+              )
             ) : (
-              <Spinner />
+              <Button
+                onClick={() => {
+                  void router.push({
+                    pathname: "/auth/signin",
+                    query: { from: `/public-offer/${offer.id}` },
+                  });
+                }}
+                variant="greenPrimary"
+                className="w-full"
+              >
+                Log in to Book
+              </Button>
             )}
           </Card>
         </div>
@@ -434,6 +484,11 @@ export default function OfferPage({
           </section>
         </div>
       )}
+      <ShareOfferDialog
+        id={offer.id}
+        isRequest={false}
+        propertyName={property.name}
+      />
     </div>
   );
 }
