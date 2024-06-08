@@ -4,12 +4,6 @@ import OfferPage from "@/components/offers/OfferPage";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
-import {
-  Circle,
-  GoogleApiWrapper,
-  Map,
-  type GoogleAPI,
-} from "google-maps-react";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -32,12 +26,10 @@ type PageProps = {
   serverFirstImage: string;
   serverFirstPropertyName: string;
   serverRequestLocation: string; // Ensure this is a plain string
-  google: GoogleAPI;
   baseUrl: string;
 };
 
 function Page({
-  google,
   serverRequestId,
   serverFirstImage,
   serverRequestLocation,
@@ -212,6 +204,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-export default GoogleApiWrapper({
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",
-})(Page);
+export default Page;
