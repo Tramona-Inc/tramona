@@ -9,17 +9,35 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
-import { formatCurrency, getNumNights, plural } from "@/utils/utils";
-import { AspectRatio } from "../ui/aspect-ratio";
-import { CheckIcon, ImagesIcon, ChevronRight } from "lucide-react";
+import {
+  formatCurrency,
+  formatDateRange,
+  getNumNights,
+  plural,
+} from "@/utils/utils";
+import "leaflet/dist/leaflet.css";
+import {
+  ArrowLeftToLineIcon,
+  ArrowRightToLineIcon,
+  CalendarDays,
+  CheckIcon,
+  ChevronRight,
+  ImagesIcon,
+  UsersRoundIcon,
+} from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Spinner from "../_common/Spinner";
 import { useMediaQuery } from "../_utils/useMediaQuery";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import { AspectRatio } from "../ui/aspect-ratio";
+import { AspectRatio } from "../ui/aspect-ratio";
 import AmenitiesComponent from "./CategorizedAmenities";
+import OfferPhotos from "./OfferPhotos";
 import OfferPhotos from "./OfferPhotos";
 import PropertyAmenities from "./PropertyAmenities";
 import router from "next/router";
@@ -68,6 +86,8 @@ export default function OfferPage({
 }) {
   const { status } = useSession();
   let isBooked = false;
+
+  const router = useRouter();
 
   const router = useRouter();
 

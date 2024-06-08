@@ -13,17 +13,23 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
 import { Total } from "../search/MobilePropertyFilter";
+import { Plus } from "lucide-react";
+import { InputLink } from "./inputLink";
 
 export function MobileRequestDealTab({
   closeSheet,
+  className,
 }: {
   closeSheet?: () => void;
+  className? : string;
 }) {
   const [curTab, setCurTab] = useState(0);
   const { form, onSubmit } = useCityRequestForm({
     setCurTab,
     afterSubmit: closeSheet,
   });
+
+  const [link, setLink] = useState(false)
 
   return (
     <Form {...form}>
@@ -162,6 +168,59 @@ export function MobileRequestDealTab({
                     <FormMessage />
                   </FormItem>)} />
           </div>
+          <div className="space-y-1">
+              <p className="text-xs">
+                Already have a property you like? Tramona will get you the same property, or their next door neighbour
+              </p>
+              {!link && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setLink(!link)}
+                >
+                  <Plus size={20} />
+                  Add link
+                </Button>
+              )}
+              {link && (
+                <div className="flex flex-row h-7">
+                  {/* <div className="basis-full"> */}
+                    <FormField
+                      control={form.control}
+                      name={`data.${curTab}.airbnbLink`}
+                      render={({ field }) => (
+                        <FormItem className="basis-full rounded-lg border justify-center items-center">
+                          <FormControl>
+                            <div className="flex rounded-lg border h-7">
+                            <div><p className="h-[25.5px] rounded-s-lg bg-slate-200 px-1">Airbnb.com/</p></div>
+                            <InputLink
+                              {...field}
+                              placeholder="Paste Airbnb link"
+                              className={!className ? "md:bg-secondary lg:bg-white" : className}
+                            />
+                            {/* <input type="text" placeholder="Paste Airbnb link"/> */}
+                            </div>
+                          </FormControl>
+                          {/* <FormMessage /> */}
+                        </FormItem>
+                      )}
+                    />
+                  {/* </div> */}
+                  <Button
+                    variant="link"
+                    type="button"
+                    onClick={() => {
+                      setLink(!link);
+                      form.setValue(`data.${curTab}.airbnbLink`, "");
+                    }}
+                    className="font-bold text-teal-900 h-7"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
           {/* <AirbnbLinkPopover /> */}
           {/* <p className="mt-1 text-xs text-muted-foreground">
                 Have a property you are eyeing, input the Airbnb link here.
