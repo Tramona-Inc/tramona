@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+//ts-expect-error GOOGLE MAPS TYPES ARE BROKEN
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
@@ -13,13 +12,37 @@ import {
   type GoogleAPI,
 } from "google-maps-react";
 import { ArrowLeftIcon } from "lucide-react";
-import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import ShareOfferDialog from "@/components/_common/ShareLink/ShareOfferDialog";
+import ShareButton from "@/components/_common/ShareLink/ShareButton";
+import { OfferWithDetails } from "@/components/property/PropertyPage";
 
-function Page({ google }: { google: GoogleAPI }) {
+import { NextSeo } from "next-seo";
+import { GetServerSideProps } from "next";
+import { db } from "@/server/db";
+import { offers } from "@/server/db/schema/tables/offers";
+import { requests } from "@/server/db/schema/tables/requests";
+import { and, eq } from "drizzle-orm";
+
+type PageProps = {
+  offer: OfferWithDetails; // Replace with a more specific type if you have one
+  serverRequestId: number;
+  serverFirstImage: string;
+  serverFirstPropertyName: string;
+  serverRequestLocation: string; // Ensure this is a plain string
+  google: GoogleAPI;
+  baseUrl: string;
+};
+
+function Page({
+  google,
+  serverRequestId,
+  serverFirstImage,
+  serverRequestLocation,
+  serverFirstPropertyName,
+  baseUrl,
+}: PageProps) {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
   const [selectedOfferId, setSelectedOfferId] = useState("");
@@ -70,20 +93,27 @@ function Page({ google }: { google: GoogleAPI }) {
 
   return (
     <DashboadLayout type="guest">
-      <Head>
-        <title>Offers for you | Tramona</title>
-        <meta property="og:title" content="Check my properties out" />
-        <meta
-          property="og:description"
-          content="Check this property out -- Sign up here, from any device!"
-        />
-        <meta property="og:image" content={firstImage} />
-        <meta
-          property="og:url"
-          content={`https://tramona.com/public-offer/${requestId}`}
-        />
-        <meta property="og:type" content="website" />
-      </Head>
+      <NextSeo
+        title={serverFirstPropertyName}
+        description={`Check out your tramona offers in ${serverRequestLocation}`}
+        canonical={`${baseUrl}/requests/${serverRequestId}`}
+        openGraph={{
+          url: `${baseUrl}/requests/${serverRequestId}`,
+          type: "website",
+          title: serverFirstPropertyName,
+          description: `Check out your tramona offers in ${serverRequestLocation}`,
+          images: [
+            {
+              url: serverFirstImage,
+              width: 900,
+              height: 800,
+              alt: "Og Image Alt Second",
+              type: "image/jpeg",
+            },
+          ],
+          site_name: "Tramona",
+        }}
+      />
       {request && offers ? (
         <div>
           <div className="p-4">
@@ -106,12 +136,10 @@ function Page({ google }: { google: GoogleAPI }) {
                   </TabsTrigger>
                 ))}
                 <div className="mx-4  mt-5 flex h-full items-center justify-center">
-                  {" "}
-                  <ShareOfferDialog
+                  <ShareButton
                     id={request.id}
                     isRequest={true}
-                    linkImage={firstImage}
-                    propertyName={offers[0].request.location}
+                    propertyName={offers[0]!.request.location}
                   />
                 </div>
               </TabsList>
@@ -126,14 +154,14 @@ function Page({ google }: { google: GoogleAPI }) {
                 </div>
                 <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
                   <div className="relative h-screen lg:h-full">
+                    {/* @ts-expect-error GOOGLE MAPS TYPES ARE BROKEN */}
                     <Map google={google} zoom={15} center={mapCenter}>
-                      {/* Child components like Marker, InfoWindow, etc. */}
                       {offers.map(
                         (offer, i) =>
                           offer.property.latitude &&
                           offer.property.longitude && (
                             <Circle
-                              key={i} // Unique key for each Circle
+                              key={i}
                               radius={200}
                               fillColor={
                                 selectedOfferId === `${offer.id}`
@@ -163,6 +191,45 @@ function Page({ google }: { google: GoogleAPI }) {
     </DashboadLayout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const serverRequestId = parseInt(context.query.id as string);
+  const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "https://6fb1-104-32-193-204.ngrok-free.app"; //change to your live dev server
+
+  const firstPropertyOfRequest = await db.query.offers.findFirst({
+    where: and(eq(offers.requestId, serverRequestId)),
+    with: {
+      property: true,
+    },
+  });
+
+  const serverFirstImage = firstPropertyOfRequest!.property.imageUrls[0] ?? "";
+
+  const serverFirstPropertyName =
+    firstPropertyOfRequest?.property.name ?? "Tramona property";
+
+  const serverRequestLocationResult = await db
+    .select({
+      location: requests.location,
+    })
+    .from(requests)
+    .where(eq(requests.id, serverRequestId));
+
+  const serverRequestLocation = serverRequestLocationResult[0]?.location ?? "";
+
+  return {
+    props: {
+      serverRequestLocation,
+      serverRequestId,
+      serverFirstImage,
+      serverFirstPropertyName,
+      baseUrl,
+    },
+  };
+};
 
 export default GoogleApiWrapper({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ?? "",
