@@ -1,12 +1,15 @@
 import { Input } from "@/components/ui/input";
 import { DollarSign, Info } from "lucide-react";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
+import { useState } from "react";
 
 export default function HostPropertiesPriceRestriction() {
+  const [editing, setEditing] = useState(false);
+
   return (
     <div className="my-6">
       <div className="text-end">
-        <HostPropertyEditBtn />
+        <HostPropertyEditBtn editing={editing} setEditing={setEditing} />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-bold">Property bids</h2>

@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 
 export default function HostPropertiesCancellation() {
+  const [editing, setEditing] = useState(false);
+
   return (
     <div className="my-6">
       <div className="text-end">
-        <HostPropertyEditBtn />
+        <HostPropertyEditBtn editing={editing} setEditing={setEditing} />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-bold">Your policy</h2>
