@@ -1,3 +1,4 @@
+import { editCityRequestSchema } from "@/components/landing-page/SearchBars/schemas";
 import { env } from "@/env";
 import {
   createTRPCRouter,
@@ -556,5 +557,54 @@ export const requestsRouter = createTRPCRouter({
         ...updateInfo,
         propertyLinks: deserializedPropertyLinks,
       };
+    }),
+
+  editRequest: protectedProcedure
+    .input(editCityRequestSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!input.requestId) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Request ID Required",
+        });
+      } else {
+        const groupOwnerId = await ctx.db.query.requests
+          .findFirst({
+            where: eq(requests.id, input.requestId),
+            columns: {},
+            with: {
+              madeByGroup: { columns: { ownerId: true } },
+            },
+          })
+          .then((res) => res?.madeByGroup.ownerId);
+
+        if (!groupOwnerId) {
+          throw new TRPCError({ code: "BAD_REQUEST" });
+        }
+
+        if (ctx.user.id !== groupOwnerId) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+
+        return await db
+          .update(requests)
+          .set({
+            location: input.location,
+            checkIn: input.date.from,
+            checkOut: input.date.to,
+            numGuests: input.numGuests,
+            maxTotalPrice: Math.round(
+              getNumNights(input.date.from, input.date.to) *
+                (input.maxNightlyPriceUSD * 100),
+            ),
+            // roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER]).optional(),
+            minNumBedrooms: input.minNumBedrooms,
+            minNumBeds: input.minNumBeds,
+            minNumBathrooms: input.minNumBathrooms,
+            airbnbLink: input.airbnbLink,
+            note: input.note,
+          })
+          .where(eq(requests.id, input.requestId));
+      }
     }),
 });

@@ -5,9 +5,9 @@ import { Slot } from "@radix-ui/react-slot";
 import { useMeasure } from "@uidotdev/usehooks";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useState } from "react";
-import HiddenIcon from "../_icons/HiddenIcon";
-import VisibleIcon from "../_icons/VisibleIcon";
-import { FormLabel } from "./form";
+import HiddenIcon from "@/components/_icons/HiddenIcon";
+import VisibleIcon from "@/components/_icons/VisibleIcon";
+import { FormLabel } from "@/components/ui/form";
 
 // I customized this input component to support prefixes and suffixes.
 // They can be any ReactNode, including strings or JSX elements.
@@ -28,13 +28,13 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &
 export type InputVariant = NonNullable<InputProps["variant"]>;
 
 const inputVariants = cva(
-  "flex items-center w-full rounded-md appearance-none border outline-transparent outline file:border-0 file:bg-transparent border-input file:text-sm file:font-medium disabled:opacity-50 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-black focus-visible:outline-none disabled:cursor-not-allowed",
+  "flex w-full justify-center items-center",
   {
     variants: {
       variant: {
-        default: "h-10 bg-zinc-50",
-        lpDesktop: "h-16 pt-4",
-        lpMobile: "h-12 bg-white",
+        default: "h-6",
+        lpDesktop: "h-10 pt-4",
+        lpMobile: "h-8 bg-white",
       },
     },
     defaultVariants: {
@@ -43,21 +43,21 @@ const inputVariants = cva(
   },
 );
 
-export const overlayVariants = cva(
-  "flex items-center pointer-events-none absolute inset-x-0 bottom-0 px-3",
-  {
-    variants: {
-      variant: {
-        default: "h-10",
-        lpDesktop: "h-12",
-        lpMobile: "h-12",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
+// export const overlayVariants = cva(
+//   "flex items-center pointer-events-none absolute inset-x-0 bottom-0 px-3",
+//   {
+//     variants: {
+//       variant: {
+//         default: "h-10",
+//         lpDesktop: "h-12",
+//         lpMobile: "h-12",
+//       },
+//     },
+//     defaultVariants: {
+//       variant: "default",
+//     },
+//   },
+// );
 
 export const labelVariants = cva("", {
   variants: {
@@ -72,7 +72,7 @@ export const labelVariants = cva("", {
   },
 });
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const InputLink = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
       className,
@@ -147,7 +147,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                   : "password"
                 : type
             }
-            className={cn("peer", inputVariants({ variant }), className)}
+            className={cn(inputVariants({ variant }), className)}
             style={{
               paddingLeft: 12 + (prefixWidth ?? 0) + (Icon ? 22 : 0),
               paddingRight: 12 + (suffixWidth ?? 0),
@@ -159,7 +159,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
         </Slot>
-        <div className={overlayVariants({ variant })}>
+        {/* <div className={overlayVariants({ variant })}>
           {Icon && <Icon className="size-4" />}
           <div
             className={cn(
@@ -170,11 +170,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {prefixEl}
             {suffixEl}
           </div>
-        </div>
+        </div> */}
       </div>
     );
   },
 );
-Input.displayName = "Input";
+InputLink.displayName = "Input";
 
-export { Input };
+export { InputLink };

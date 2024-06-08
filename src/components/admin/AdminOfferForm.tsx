@@ -20,6 +20,8 @@ import {
   zodUrl,
 } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CaretSortIcon } from "@radix-ui/react-icons";
+import { SelectIcon } from "@radix-ui/react-select";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -34,8 +36,6 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
-import { CaretSortIcon } from "@radix-ui/react-icons";
-import { SelectIcon } from "@radix-ui/react-select";
 
 import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { getS3ImgUrl } from "@/utils/formatters";
@@ -74,6 +74,7 @@ const formSchema = z.object({
   checkOutTime: optional(zodTime),
   cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
+  airbnbHostImageUrl: optional(zodUrl()),
   // mapScreenshot: optional(zodString()),
 });
 
@@ -135,6 +136,7 @@ export default function AdminOfferForm({
             checkInTime: offer.property.checkInTime ?? undefined,
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
+            airbnbHostImageUrl: offer.property.hostImageUrl,
           }
         : {}),
     },
@@ -189,6 +191,7 @@ export default function AdminOfferForm({
       numBathrooms: 1,
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
+      hostImageUrl: propertyData.airbnbHostImageUrl, 
       mapScreenshot: url,
     };
 
@@ -547,6 +550,20 @@ export default function AdminOfferForm({
               render={({ field }) => (
                 <FormItem className="col-span-full">
                   <FormLabel>Airbnb Message Host Url</FormLabel>
+                  <FormControl>
+                    <Input {...field} inputMode="url" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="airbnbHostImageUrl"
+              render={({ field }) => (
+                <FormItem className="col-span-full">
+                  <FormLabel>Airbnb Host Image Url</FormLabel>
                   <FormControl>
                     <Input {...field} inputMode="url" />
                   </FormControl>

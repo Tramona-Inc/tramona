@@ -14,6 +14,7 @@ import { useIsSm } from "@/utils/utils";
 export function NewCityRequestBtn() {
   const isMobile = !useIsSm();
   const [open, setOpen] = useState(false);
+  
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -30,7 +31,7 @@ export function NewCityRequestBtn() {
         {isMobile ? (
           <MobileRequestDealTab closeSheet={() => setOpen(false)} />
         ) : (
-          <DesktopRequestDealTab />
+          <DesktopRequestDealTab className="bg-background"/>
         )}
       </DialogContent>
     </Dialog>

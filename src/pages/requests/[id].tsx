@@ -11,7 +11,6 @@ import {
   Map,
   type GoogleAPI,
 } from "google-maps-react";
-import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -60,17 +59,9 @@ function Page({ google }: { google: GoogleAPI }) {
     .flat(1)
     .find(({ id }) => id === requestId);
 
-  const { mutate: handleConversation } =
-    api.messages.createConversationWithOffer.useMutation({
-      onSuccess: (conversationId) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
-      },
-    });
-
   if (router.isFallback) {
     return <Spinner />;
   }
-
 
   return (
     <DashboadLayout type="guest">

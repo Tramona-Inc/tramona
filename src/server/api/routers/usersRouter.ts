@@ -1,8 +1,8 @@
-import * as bcrypt from "bcrypt";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
+  roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
   hostProfiles,
@@ -10,6 +10,7 @@ import {
   userUpdateSchema,
   users,
 } from "@/server/db/schema";
+import * as bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
@@ -305,65 +306,18 @@ export const usersRouter = createTRPCRouter({
 
       return "success";
     }),
-
-    getNotificationSetting: protectedProcedure.query( async ({ ctx }) => {
-      return await ctx.db.query.users.findFirst({
-        where: eq(users.id, ctx.user.id),
-      columns: {
-        offerByHostEmail: true,
-        responseByHostEmail: true,
-        tripUpdatesEmail: true,
-        msgByHostEmail: true,
-        offerByHostText: true,
-        responseByHostText: true,
-        tripUpdatesText: true,
-        expirationMsgText: true,
-        mandatoryText: true,
-        mandatoryEmail: true,
-      },
-      })
-    }),
-
-    updateNotificationSetting: protectedProcedure
+  addImageToUser: roleRestrictedProcedure(["admin"])
     .input(
       z.object({
-        offerByHostEmail: z.boolean(),
-        responseByHostEmail: z.boolean(),
-        tripUpdatesEmail: z.boolean(),
-        msgByHostEmail: z.boolean(),
-        offerByHostText: z.boolean(),
-        responseByHostText: z.boolean(),
-        tripUpdatesText: z.boolean(),
-        expirationMsgText: z.boolean(),
-        mandatoryText: z.boolean(),
-        mandatoryEmail: z.boolean()
+        userId: zodString(),
+        imageUrl: zodString(),
       }),
-    ).mutation(async ({ctx, input}) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: eq(users.id, ctx.user.id),
-      });
-
-      if (!user) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "User not found",
-        });
-      }
-
-      await ctx.db
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db
         .update(users)
-        .set({ offerByHostEmail: input.offerByHostEmail,
-               responseByHostEmail: input.responseByHostEmail,
-               tripUpdatesEmail: input.tripUpdatesEmail,
-               msgByHostEmail: input.msgByHostEmail,
-               offerByHostText: input.offerByHostText,
-               responseByHostText: input.responseByHostText,
-               tripUpdatesText: input.tripUpdatesText,
-               expirationMsgText: input.expirationMsgText
-         })
-        .where(eq(users.id, ctx.user.id));
-
-      return "success";
-
+        .set({ image: input.imageUrl })
+        .where(eq(users.id, input.userId))
+        .returning({ userId: users.id });
     }),
 });

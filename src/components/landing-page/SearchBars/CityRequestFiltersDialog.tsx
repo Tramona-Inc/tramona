@@ -11,7 +11,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"; 
 import { Total } from "../search/MobilePropertyFilter";
 
 export function CityRequestFiltersDialog({
@@ -41,6 +41,8 @@ export function CityRequestFiltersDialog({
                     name="Beds"
                     total={field.value ?? 0}
                     setTotal={field.onChange}
+                    size="size-3/5"
+                    textSize="text-xs"
                   />
                 </FormControl>
                 <FormMessage />
@@ -57,6 +59,8 @@ export function CityRequestFiltersDialog({
                     name="Bedrooms"
                     total={field.value ?? 0}
                     setTotal={field.onChange}
+                    size="size-3/5"
+                    textSize="text-xs"
                   />
                 </FormControl>
                 <FormMessage />
@@ -73,6 +77,8 @@ export function CityRequestFiltersDialog({
                     name="Bathrooms"
                     total={field.value ?? 0}
                     setTotal={field.onChange}
+                    size="size-3/5"
+                    textSize="text-xs"
                   />
                 </FormControl>
                 <FormMessage />

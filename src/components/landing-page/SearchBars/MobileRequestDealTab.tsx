@@ -12,6 +12,7 @@ import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
+import { Total } from "../search/MobilePropertyFilter";
 
 export function MobileRequestDealTab({
   closeSheet,
@@ -102,6 +103,64 @@ export function MobileRequestDealTab({
                 </FormItem>
               )}
             />
+            <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBeds`}
+                render={({ field }) => (
+                  <FormItem className="h-10 rounded-lg border px-1">
+                    <FormControl>
+                      <Total
+                        className="text-xs/[10px] font-bold"
+                        name="Beds"
+                        optional={true}
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                        size="size-2/5"
+                        textSize="text-[11px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBedrooms`}
+                render={({ field }) => (
+                  <FormItem className="h-10 rounded-lg border px-1">
+                    <FormControl>
+                      <Total
+                        className="text-xs font-bold"
+                        name="Bedrooms"
+                        optional={true}
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                        size="size-2/5"
+                        textSize="text-[11px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBathrooms`}
+                render={({ field }) => (
+                  <FormItem className="h-10 rounded-lg border px-1">
+                    <FormControl>
+                      <Total
+                        className="text-xs font-bold"
+                        name="Bathrooms"
+                        optional={true}
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                        size="size-2/5"
+                        textSize="text-xs"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>)} />
           </div>
           {/* <AirbnbLinkPopover /> */}
           {/* <p className="mt-1 text-xs text-muted-foreground">

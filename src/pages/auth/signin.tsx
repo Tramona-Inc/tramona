@@ -90,9 +90,8 @@ export default function SignIn({
       password: password,
       callbackUrl: from ?? `${window.location.origin}/auth/onboarding`,
     }).then(() => {
-      if (inviteLinkId) {
-        void inviteUser({ inviteLinkId});
-      }
+      
+      return null
     });
   };
 

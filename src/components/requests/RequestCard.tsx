@@ -1,9 +1,3 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
 import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
@@ -12,16 +6,23 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { EllipsisIcon, MapPinIcon, TrashIcon } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
-import RequestGroupAvatars from "./RequestGroupAvatars";
-import RequestCardBadge from "./RequestCardBadge";
-import { Button } from "../ui/button";
+import { EllipsisIcon, MapPinIcon, Pencil, TrashIcon } from "lucide-react";
 import { useState } from "react";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import RequestCardBadge from "./RequestCardBadge";
+import RequestGroupAvatars from "./RequestGroupAvatars";
 import WithdrawRequestDialog from "./WithdrawRequestDialog";
 
-import MobileSimilarProperties from "./MobileSimilarProperties";
 import { Separator } from "../ui/separator";
+import EditRequestDialog from "./EditRequestDialog";
+import MobileSimilarProperties from "./MobileSimilarProperties";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -62,6 +63,7 @@ export default function RequestCard({
   const showAvatars = request.numGuests > 1 || isAdminDashboard;
 
   const [open, setOpen] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
 
   return (
     <Card className="block">
@@ -69,6 +71,11 @@ export default function RequestCard({
         requestId={request.id}
         open={open}
         onOpenChange={setOpen}
+      />
+      <EditRequestDialog
+        request={request}
+        open={openEdit}
+        onOpenChange={setOpenEdit}
       />
       <CardContent className="space-y-2">
         {/* <p className="font-mono text-xs uppercase text-muted-foreground">
@@ -110,6 +117,12 @@ export default function RequestCard({
                   <TrashIcon />
                   Withdraw
                 </DropdownMenuItem>
+                {getRequestStatus(request) === "pending" && (
+                  <DropdownMenuItem onClick={() => setOpenEdit(true)}>
+                    <Pencil />
+                    Edit
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

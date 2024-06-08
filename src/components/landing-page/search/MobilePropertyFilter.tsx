@@ -1,3 +1,6 @@
+import { CounterInput } from "@/components/_common/CounterInput";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -6,34 +9,43 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { useCitiesFilter } from "@/utils/store/cities-filter";
-import { useZodForm } from "@/utils/useZodForm";
-import { z } from "zod";
-import { CounterInput } from "@/components/_common/CounterInput";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ListFilterIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { useZodForm } from "@/utils/useZodForm";
+import { cn } from "@/utils/utils";
+import { ListFilterIcon } from "lucide-react";
+import { z } from "zod";
 
 export function Total({
   name,
+  optional,
   total,
   setTotal,
+  className,
+  size,
+  textSize,
 }: {
   name: string;
+  optional?: boolean;
   total: number;
   setTotal: (total: number) => void;
+  className?: string;
+  size: string;
+  textSize: string;
 }) {
   return (
-    <div className="flex flex-row items-center justify-between">
-      <p className="text-sm font-semibold">{name}</p>
-      <CounterInput value={total} onChange={setTotal} />
+    <div className="flex flex-row justify-between items-center">
+      <p className={cn(!className ? "text-sm font-semibold" : className)}>
+        {name}
+      </p>
+      <CounterInput value={total} onChange={setTotal} className={cn(size)}/>
+      {optional && <p className={cn(textSize, "text-muted-foreground")}>Optional</p>}
     </div>
   );
 }
@@ -139,6 +151,8 @@ export default function MobilePropertyFilter() {
                         name="Beds"
                         total={field.value ?? 0}
                         setTotal={field.onChange}
+                        size="size-3/5"
+                        textSize="text-xs"
                       />
                     </FormControl>
                     <FormMessage />
@@ -156,6 +170,8 @@ export default function MobilePropertyFilter() {
                         name="Bedrooms"
                         total={field.value ?? 0}
                         setTotal={field.onChange}
+                        size="size-3/5"
+                        textSize="text-xs"
                       />
                     </FormControl>
                     <FormMessage />
@@ -173,6 +189,8 @@ export default function MobilePropertyFilter() {
                         name="Bathrooms"
                         total={field.value ?? 0}
                         setTotal={field.onChange}
+                        size="size-3/5"
+                        textSize="text-xs"
                       />
                     </FormControl>
                     <FormMessage />

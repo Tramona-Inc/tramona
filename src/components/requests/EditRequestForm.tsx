@@ -1,17 +1,8 @@
-import DateRangeInput from "@/components/_common/DateRangeInput";
-import PlacesInput from "@/components/_common/PlacesInput";
 import { Total } from "@/components/landing-page/search/MobilePropertyFilter";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import { InputLink } from "./inputLink";
-import { Input } from "@/components/ui/input"
+import { api } from "@/utils/api";
+import { errorToast } from "@/utils/toasts";
+import { getNumNights } from "@/utils/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CalendarIcon,
   DollarSignIcon,
@@ -20,54 +11,97 @@ import {
   Plus,
   Users2Icon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { type z } from "zod";
+import DateRangeInput from "../_common/DateRangeInput";
+import PlacesInput from "../_common/PlacesInput";
+import { editCityRequestSchema } from "../landing-page/SearchBars/schemas";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogClose, DialogFooter } from "../ui/dialog";
 import Confetti from "react-confetti";
-import { useCityRequestForm } from "./useCityRequestForm";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { toast } from "../ui/use-toast";
+import { type DetailedRequest, type RequestWithUser } from "./RequestCard";
 import { useMediaQuery } from '@/components/_utils/useMediaQuery'
+import Link from 'next/link';
+import { InputLink } from '@/components/landing-page/SearchBars/inputLink'
 
-export function DesktopRequestDealTab({
-  className,
+export default function EditRequestForm({
+  request,
+  setOpen,
 }: {
-  className?: string;
+  request: DetailedRequest | RequestWithUser;
+  setOpen: (open: boolean) => void;
 }) {
-  const [curTab, setCurTab] = useState(0);
-  const [open, setOpen] = useState(false);
+  const formSchema = editCityRequestSchema;
+  const [ afterRequestEdit, SetAfterRequestEdit ] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false);
 
-  function afterSubmit() {
-    setOpen(true);
-    setShowConfetti(true);
-    setTimeout(()=> {
-      if(!open) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      requestId: request.id,
+      location: request.location,
+      date: { from: request.checkIn, to: request.checkOut },
+      numGuests: request.numGuests,
+      maxNightlyPriceUSD:
+        request.maxTotalPrice /
+        getNumNights(request.checkIn, request.checkOut) /
+        100,
+      minNumBedrooms: request.minNumBedrooms ?? 0,
+      minNumBeds: request.minNumBeds ?? 0,
+      minNumBathrooms: request.minNumBathrooms ?? 0,
+      airbnbLink: request.airbnbLink ?? "",
+      note: request.note ?? "",
+    },
+  });
+
+  const [link, setLink] = useState<boolean>(request.airbnbLink ? true : false);
+
+  const { mutate } = api.requests.editRequest.useMutation({
+    onSuccess: () => {
+      // setOpen(false);
+      toast({
+        title: "Successfully edited requests",
+        description: "Your request has been updated!",
+      });
+    },
+    onError: () => {
+      errorToast("Couldn't update your request");
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    mutate({ ...values });
+    SetAfterRequestEdit(true)
+    setShowConfetti(true)
+    setTimeout(() => {
+      if(!afterRequestEdit) {
         setOpen(false)
       }
     }, 5000)
   }
-
-  const { form, onSubmit } = useCityRequestForm({ setCurTab, afterSubmit });
-
-  const [link, setLink] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 640px)")
+  const isMobile = useMediaQuery("(max-width: 578px)")
 
   return (
     <>
       <Form {...form}>
         <form
-          onSubmit={onSubmit}
-          className="flex flex-col justify-between gap-y-4"
-          key={curTab} // rerender on tab changes (idk why i have to do this myself)
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-y-4"
         >
-          {/* <RequestTabsSwitcher
-            curTab={curTab}
-            setCurTab={setCurTab}
-            form={form}
-          /> */}
-
           <div className="flex flex-col gap-2">
             <PlacesInput
               control={form.control}
-              name={`data.${curTab}.location`}
+              name={"location"}
               formLabel="Location"
               variant="lpDesktop"
               placeholder="Select a location"
@@ -76,7 +110,7 @@ export function DesktopRequestDealTab({
 
             <FormField
               control={form.control}
-              name={`data.${curTab}.date`}
+              name={"date"}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -95,7 +129,7 @@ export function DesktopRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.numGuests`}
+              name={"numGuests"}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -113,13 +147,13 @@ export function DesktopRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.maxNightlyPriceUSD`}
+              name={"maxNightlyPriceUSD"}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Input
                       {...field}
-                      label="Maximum nightly price"
+                      label="Maximum price"
                       placeholder="Price per night"
                       suffix="/night"
                       icon={DollarSignIcon}
@@ -131,32 +165,22 @@ export function DesktopRequestDealTab({
               )}
             />
 
-            {/* <CityRequestFiltersDialog form={form} curTab={curTab}>
-              <Button
-                variant="ghost"
-                type="button"
-                className="px-2 text-teal-900 hover:bg-teal-900/15"
-              >
-                <FilterIcon />
-                More filters
-              </Button>
-            </CityRequestFiltersDialog> */}
             {!isMobile ? 
             <div className="flex flex-cols-2 gap-2">
               <FormField
                 control={form.control}
-                name={`data.${curTab}.minNumBeds`}
+                name={"minNumBeds"}
                 render={({ field }) => (
                   <FormItem className="h-10 rounded-lg border px-1">
                     <FormControl>
                       <Total
-                        className="text-xs/[10px] font-bold"
+                        className="text-xs font-bold"
                         name="Beds"
                         optional={true}
                         total={field.value ?? 0}
                         setTotal={field.onChange}
                         size="size-2/5"
-                        textSize="text-[11px]"
+                        textSize="text-[0.45em]"
                       />
                     </FormControl>
                     <FormMessage />
@@ -165,7 +189,7 @@ export function DesktopRequestDealTab({
               />
               <FormField
                 control={form.control}
-                name={`data.${curTab}.minNumBedrooms`}
+                name={"minNumBedrooms"}
                 render={({ field }) => (
                   <FormItem className="h-10 rounded-lg border px-1">
                     <FormControl>
@@ -176,7 +200,7 @@ export function DesktopRequestDealTab({
                         total={field.value ?? 0}
                         setTotal={field.onChange}
                         size="size-2/5"
-                        textSize="text-[11px]"
+                        textSize="text-[0.45em]"
                       />
                     </FormControl>
                     <FormMessage />
@@ -185,7 +209,7 @@ export function DesktopRequestDealTab({
               />
               <FormField
                 control={form.control}
-                name={`data.${curTab}.minNumBathrooms`}
+                name={"minNumBathrooms"}
                 render={({ field }) => (
                   <FormItem className="h-10 rounded-lg border px-1">
                     <FormControl>
@@ -196,24 +220,24 @@ export function DesktopRequestDealTab({
                         total={field.value ?? 0}
                         setTotal={field.onChange}
                         size="size-2/5"
-                        textSize="text-[11px]"
+                        textSize="text-[0.45em]"
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div> 
-            : 
+            </div>
+            :
             <div className="flex gap-2 justify-between flex-col w-auto">
             <FormField
               control={form.control}
-              name={`data.${curTab}.minNumBeds`}
+              name={'minNumBeds'}
               render={({ field }) => (
                 <FormItem className="rounded-lg border px-2">
                   <FormControl>
                     <Total
-                      className="text-sm font-bold"
+                      className="text-sm font-bold pr-8"
                       name="Beds"
                       optional={true}
                       total={field.value ?? 0}
@@ -228,9 +252,9 @@ export function DesktopRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.minNumBedrooms`}
+              name={'minNumBedrooms'}
               render={({ field }) => (
-                <FormItem className="h-10 rounded-lg border px-2">
+                <FormItem className="rounded-lg border px-2">
                   <FormControl>
                     <Total
                       className="text-sm font-bold"
@@ -248,9 +272,9 @@ export function DesktopRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.minNumBathrooms`}
+              name={'minNumBathrooms'}
               render={({ field }) => (
-                <FormItem className="h-10 rounded-lg border px-2">
+                <FormItem className="rounded-lg border px-2">
                   <FormControl>
                     <Total
                       className="text-sm font-bold"
@@ -262,14 +286,15 @@ export function DesktopRequestDealTab({
                       textSize="text-xs"
                     />
                   </FormControl>
-                  <FormMessage />
+                  {/* <FormMessage /> */}
                 </FormItem>
               )}
             />
             </div>
             }
+
             <div className="space-y-1">
-              <p className="text-xs">
+            <p className="text-xs">
                 Already have a property you like? Tramona will get you the same property, or their next door neighbour
               </p>
               {!link && (
@@ -288,16 +313,16 @@ export function DesktopRequestDealTab({
                   {/* <div className="basis-full"> */}
                     <FormField
                       control={form.control}
-                      name={`data.${curTab}.airbnbLink`}
+                      name={'airbnbLink'}
                       render={({ field }) => (
                         <FormItem className="basis-full rounded-lg border justify-center items-center">
                           <FormControl>
                             <div className="flex rounded-lg border h-7">
-                            <div><p className="h-[25.5px] rounded-s-lg bg-slate-200 px-1">Airbnb.com/</p></div>
+                            <div><p className="h-[1.6rem] rounded-s-lg bg-slate-200 px-1">Airbnb.com/</p></div>
                             <InputLink
                               {...field}
                               placeholder="Paste Airbnb link"
-                              className={!className ? "md:bg-secondary lg:bg-white" : className}
+                              className="bg-background"
                             />
                             {/* <input type="text" placeholder="Paste Airbnb link"/> */}
                             </div>
@@ -312,7 +337,7 @@ export function DesktopRequestDealTab({
                     type="button"
                     onClick={() => {
                       setLink(!link);
-                      form.setValue(`data.${curTab}.airbnbLink`, "");
+                      form.setValue('airbnbLink', "");
                     }}
                     className="font-bold text-teal-900 h-7"
                   >
@@ -321,26 +346,28 @@ export function DesktopRequestDealTab({
                 </div>
               )}
             </div>
-            <div className="flex justify-end sm:justify-start">
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant={"secondary"}>Cancel</Button>
+              </DialogClose>
+              {/* <DialogClose asChild> */}
               <Button
                 type="submit"
-                size="lg"
                 disabled={form.formState.isSubmitting}
-                className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
+                className="rounded-md bg-teal-900 hover:bg-teal-950 sm:rounded-full lg:rounded-md"
               >
-                Submit Request
+                Edit Request
               </Button>
-            </div>
-          </div>
-
-          <Dialog open={open} onOpenChange={setOpen}>
+              {/* </DialogClose> */}
+            </DialogFooter>
+            <Dialog open={afterRequestEdit} onOpenChange={SetAfterRequestEdit}>
             <DialogContent>
               <h1 className="mb-4 text-center text-2xl font-bold">
-                Congrats on submitting a request!
+                Your Request has been editted successfully
               </h1>
               <p className="mb-4">
                 We have sent it out to every host in{" "}
-                <b>{form.getValues(`data.${curTab}.location`)}</b>.
+                <b>{form.getValues("location")}</b>.
               </p>
               <p className="mb-4">
                 In the next 24 hours, hosts will send you properties that match
@@ -371,6 +398,7 @@ export function DesktopRequestDealTab({
               )}
             </DialogContent>
           </Dialog>
+          </div>
         </form>
       </Form>
     </>

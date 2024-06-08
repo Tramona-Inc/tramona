@@ -27,7 +27,7 @@ export function Total({
   return (
     <div className="flex flex-row items-center justify-between">
       <p className="text-sm font-semibold">{name}</p>
-      <CounterInput value={total} onChange={setTotal} />
+      <CounterInput value={total} onChange={setTotal} className="size-3/5"/>
     </div>
   );
 }
