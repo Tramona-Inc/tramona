@@ -1,4 +1,3 @@
-//ts-expect-error GOOGLE MAPS TYPES ARE BROKEN
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
@@ -24,6 +23,8 @@ import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
 import { requests } from "@/server/db/schema/tables/requests";
 import { and, eq } from "drizzle-orm";
+
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 
 type PageProps = {
   offer: OfferWithDetails; // Replace with a more specific type if you have one
@@ -68,7 +69,7 @@ function Page({
       });
       setFirstImage(offer.property.imageUrls[0] ?? "");
     }
-  }, [selectedOfferId]);
+  }, [selectedOfferId, offers]);
 
   const [effectHasRun, setEffectHasRun] = useState(false);
 
@@ -154,31 +155,11 @@ function Page({
                 </div>
                 <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
                   <div className="relative h-screen lg:h-full">
-                    {/* @ts-expect-error GOOGLE MAPS TYPES ARE BROKEN */}
-                    <Map google={google} zoom={15} center={mapCenter}>
-                      {offers.map(
-                        (offer, i) =>
-                          offer.property.latitude &&
-                          offer.property.longitude && (
-                            <Circle
-                              key={i}
-                              radius={200}
-                              fillColor={
-                                selectedOfferId === `${offer.id}`
-                                  ? "#1F362C"
-                                  : "#CCD9D7"
-                              }
-                              strokeColor="black"
-                              center={{
-                                lat: offer.property.latitude,
-                                lng: offer.property.longitude,
-                              }}
-                              onClick={() => setSelectedOfferId(`${offer.id}`)}
-                              label={`Offer ${i + 1}`}
-                            ></Circle>
-                          ),
-                      )}
-                    </Map>
+                    <SingleLocationMap
+                      key={`${mapCenter.lat}-${mapCenter.lng}`} // Unique key to force re-render
+                      lat={mapCenter.lat}
+                      lng={mapCenter.lng}
+                    />
                   </div>
                 </div>
               </div>
