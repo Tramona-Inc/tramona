@@ -18,7 +18,7 @@ type PageProps = {
   baseUrl: string;
 };
 
-const Page = ({ offer, offerId, firstImage, baseUrl }: PageProps) => {
+const Page = ({ offer, firstImage, baseUrl }: PageProps) => {
   const router = useRouter();
   console.log("First image", firstImage);
   if (router.isFallback || !offer) {
