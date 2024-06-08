@@ -4,6 +4,7 @@ import { capitalize } from "@/utils/utils";
 import { Dot, MapPin } from "lucide-react";
 import Image from "next/image";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
+import { convertTo12HourFormat } from "@/utils/utils";
 
 export default function HostPropertiesDetails({
   property,
@@ -63,9 +64,17 @@ export default function HostPropertiesDetails({
           <div className="text-muted-foreground">
             <p>{capitalize(property.checkInInfo ?? "")} check-in / out</p>
             <div className="flex">
-              <p>Check-in: {property.checkInTime}</p>
+              <p>
+                Check-in:{" "}
+                {property.checkInTime &&
+                  convertTo12HourFormat(property.checkInTime)}
+              </p>
               <Dot />
-              <p>Check-out: {property.checkOutTime}</p>
+              <p>
+                Check-out:{" "}
+                {property.checkOutTime &&
+                  convertTo12HourFormat(property.checkOutTime)}
+              </p>
             </div>
           </div>
         </section>

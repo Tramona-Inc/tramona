@@ -16,28 +16,29 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Pencil, PlusIcon } from "lucide-react";
-import { useState } from "react";
+// import { useState } from "react";
 import HostProperties from "./HostProperties";
+import Link from "next/link";
 
 export default function HostPropertiesLayout({
   children,
 }: React.PropsWithChildren) {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
 
   return (
     <div className="flex">
-      <div className="sticky top-20 h-screen-minus-header-n-footer w-96 border-r px-4 py-8">
+      <div className="sticky top-20 h-screen-minus-header-n-footer w-96 overflow-auto border-r px-4 py-8">
         <ScrollArea>
           <h1 className="text-3xl font-bold">Properties</h1>
           <p className="text-muted-foreground">24% currently vacant</p>
           <div className="my-4">
-            <NewPropertyBtn open={open} setOpen={setOpen} />
-            {/* <Link href="/host-onboarding">
-            <Button variant="secondaryLight" className="font-semi bg-white">
-              <PlusIcon />
-              New Listing
-            </Button>
-          </Link> */}
+            {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
+            <Link href="/host-onboarding">
+              <Button variant="secondaryLight" className="font-semi bg-white">
+                <PlusIcon />
+                New Listing
+              </Button>
+            </Link>
           </div>
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="listed">
