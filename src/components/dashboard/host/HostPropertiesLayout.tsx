@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Pencil, PlusIcon } from "lucide-react";
-// import { useState } from "react";
 import HostProperties from "./HostProperties";
 import Link from "next/link";
 
@@ -113,15 +112,28 @@ export function NewPropertyBtn({
   );
 }
 
-export function HostPropertyEditBtn() {
+export function HostPropertyEditBtn({
+  editing,
+  setEditing,
+}: {
+  editing: boolean;
+  setEditing: (editing: boolean) => void;
+}) {
   return (
     <div className="fixed bottom-20 right-4 z-50 sm:static">
       <Button
         variant="secondary"
         className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+        onClick={() => setEditing(!editing)}
       >
-        <Pencil size={20} />
-        Edit
+        {editing ? (
+          "Done"
+        ) : (
+          <>
+            <Pencil size={20} />
+            Enter edit mode
+          </>
+        )}
       </Button>
     </div>
   );

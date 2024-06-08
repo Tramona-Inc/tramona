@@ -1,25 +1,64 @@
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { type Property } from "@/server/db/schema/tables/properties";
 import { capitalize } from "@/utils/utils";
-import { Dot, MapPin } from "lucide-react";
+import { Dot, MapPin, PackageOpen, PencilLine, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { convertTo12HourFormat } from "@/utils/utils";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Onboarding2 from "@/components/host/onboarding/Onboarding2";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 
 export default function HostPropertiesDetails({
   property,
 }: {
   property: Property;
 }) {
+  const [editing, setEditing] = useState(false);
+
+  const propertyType = useHostOnboarding((state) => state.listing.propertyType);
+
   return (
     <div className="my-6">
-      <div className="text-end">
-        <HostPropertyEditBtn />
+      <div className="flex items-center justify-between">
+        {editing && (
+          <div className="grid grid-cols-3 gap-2">
+            <Button variant="secondary">
+              <Trash2 />
+              Delete
+            </Button>
+            <Button variant="secondary">
+              <PackageOpen />
+              Archive
+            </Button>
+            <Button variant="secondary">
+              <PencilLine />
+              Move to drafts
+            </Button>
+          </div>
+        )}
+        <div className="flex-1 text-end">
+          <HostPropertyEditBtn editing={editing} setEditing={setEditing} />
+        </div>
       </div>
       <div className="divide-y">
         <section className="space-y-2 py-4">
-          <h2 className="text-lg font-bold">Type of property</h2>
-          <p className="text-muted-foreground">{property.propertyType}</p>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Type of property</h2>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding2 editing />
+              </DialogContent>
+            </Dialog>
+          </div>
+          <p className="text-muted-foreground">
+            {editing ? propertyType : property.propertyType}
+          </p>
         </section>
         <section className="space-y-2 py-4">
           <h2 className="text-lg font-bold">Living situation</h2>

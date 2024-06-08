@@ -56,9 +56,13 @@ export default function OnboardingFooter({
         numBathrooms: listing.bathrooms,
         address:
           listing.location.street +
+          ", " +
           listing.location.city +
+          ", " +
           listing.location.apt +
+          " " +
           listing.location.state +
+          " " +
           listing.location.zipcode,
         checkInInfo: listing.checkInType,
         checkInTime: listing.checkIn,
