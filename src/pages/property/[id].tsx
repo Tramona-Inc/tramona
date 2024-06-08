@@ -92,11 +92,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     .from(properties)
     .where(eq(properties.id, serverPropertyId));
 
-  console.log("serverProperyId");
-  console.log(serverPropertyId.toString());
-  console.log(propertyInfo[0]!.name);
-  console.log(propertyInfo[0]!.images[0] ?? "");
-
   return {
     props: {
       serverPropertyId: serverPropertyId.toString(),
