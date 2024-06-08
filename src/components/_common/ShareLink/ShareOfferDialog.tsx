@@ -3,21 +3,20 @@ import { DialogContent, Dialog, DialogTrigger } from "../../ui/dialog";
 import { useState } from "react";
 import { CopyIcon, ShareIcon } from "lucide-react";
 import ShareDialogContent from "./ShareDialogContent";
+
 function ShareOfferDialog({
   id,
   isRequest,
-  linkImage,
   propertyName,
 }: {
   id: number;
   isRequest: boolean;
-  linkImage: string;
   propertyName: string;
 }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const link = `https://tramona.com/public-offers/${id}`;
+    const link = `https://tramona.com/public-offer/${id}`;
     navigator.clipboard.writeText(link).then(
       () => {
         setCopied(true);
@@ -37,7 +36,6 @@ function ShareOfferDialog({
         <ShareDialogContent
           id={id}
           isRequest={isRequest}
-          linkImage={linkImage}
           propertyName={propertyName}
         />
       </DialogContent>
