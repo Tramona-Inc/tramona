@@ -1,4 +1,4 @@
-import { useRef, useState, ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
@@ -124,7 +124,8 @@ export default function ReferralDashboard() {
                 render={({ justCopied, copyMessage }) => (
                   <Button
                     onClick={copyMessage}
-                    className="bg-teal-900 px-0 lg:w-20"
+                    variant="greenPrimary"
+                    className="sm:w-24"
                   >
                     {justCopied ? "Copied!" : "Copy"}
                   </Button>
@@ -135,17 +136,15 @@ export default function ReferralDashboard() {
           <section className="space-y-2">
             <h3 className="text-xl font-bold">Enter Referral code</h3>
             <p className="text-sm">
-              We`re you referred by a friend? Enter their referral code below.
+              Were you referred by a friend? Enter their referral code below.
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <div className="flex-1">
                 <Input value={referralCode} onChange={handleInputChange} />
               </div>
-                <Button
-                  className="bg-teal-900 px-0 lg:w-20"
-                >
-                  Submit
-                </Button>
+              <Button variant="greenPrimary" className="sm:w-24">
+                Submit
+              </Button>
             </div>
           </section>
           <section className="space-y-2">
