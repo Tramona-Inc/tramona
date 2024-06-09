@@ -12,13 +12,7 @@ import {
 import { api, type RouterOutputs } from "@/utils/api";
 import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
-import {
-  CheckIcon,
-  ImagesIcon,
-  ChevronRight,
-  UsersRoundIcon,
-  CalendarDays,
-} from "lucide-react";
+import { CheckIcon, ImagesIcon, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
@@ -108,8 +102,6 @@ export default function OfferPage({
   const tramonaServiceFee = offer.tramonaFee;
 
   // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
-
-  const tax = 0;
 
   const renderSeeMoreButton = property.imageUrls.length > 4;
 
@@ -387,6 +379,8 @@ export default function OfferPage({
                   <p className="font-medium underline">
                     {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
                     nights
+                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
+                    nights
                   </p>
                   <p className="ms-1 font-bold">
                     {formatCurrency(offerNightlyPrice * numNights)}
@@ -429,11 +423,7 @@ export default function OfferPage({
                   offerNightlyPrice={offerNightlyPrice}
                   isAirbnb={isAirbnb}
                 >
-                  <Button
-                    size="lg"
-                    className="w-full  bg-green-700 text-white hover:bg-green-800"
-                    disabled={isBooked}
-                  >
+                  <Button size="lg" variant="greenPrimary" disabled={isBooked}>
                     {isBooked ? (
                       <>
                         <CheckIcon className="size-5" />
@@ -453,7 +443,8 @@ export default function OfferPage({
                     query: { from: `/public-offer/${offer.id}` },
                   });
                 }}
-                className="w-full bg-green-700 text-white hover:bg-green-800"
+                variant="greenPrimary"
+                className="w-full"
               >
                 Log in to Book
               </Button>

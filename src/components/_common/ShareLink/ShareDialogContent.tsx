@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   WhatsappShareButton,
   EmailShareButton,
   WhatsappIcon,
   EmailIcon,
-  FacebookMessengerShareButton,
-  FacebookIcon,
 } from "react-share";
-import { CopyIcon, MessageCircleIcon, Facebook } from "lucide-react";
+import { CopyIcon, MessageCircleIcon } from "lucide-react";
 import { Button } from "../../ui/button";
 
 const ShareDialogContent = ({
@@ -23,7 +21,7 @@ const ShareDialogContent = ({
 }) => {
   const shareUrl = isRequest
     ? `https://tramona.com/request/${id}`
-    : `https://tramona.com/public-offers/${id}`;
+    : `https://tramona.com/public-offer/${id}`;
   const title = propertyName;
   const description = isRequest
     ? "Check my properties offers out"
@@ -32,7 +30,7 @@ const ShareDialogContent = ({
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const link = `https://tramona.com/public-offers/${id}`;
+    const link = `https://tramona.com/public-offer/${id}`;
     navigator.clipboard.writeText(link).then(
       () => {
         setCopied(true);
@@ -54,7 +52,7 @@ const ShareDialogContent = ({
             value={
               isRequest
                 ? `https://tramona.com/request/${id}`
-                : `https://tramona.com/public-offers/${id}`
+                : `https://tramona.com/public-offer/${id}`
             }
             readOnly
             className="w-full appearance-none rounded-xl border px-5 py-2"
