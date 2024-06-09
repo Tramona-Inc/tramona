@@ -386,26 +386,25 @@ export function DesktopRequestDealTab() {
                 <div className="space-y-2 p-2">
                   {inviteLink && (
                     <Button
-                      onClick={() => {
-                        if (navigator.share) {
-                          navigator
-                            .share({
+                      onClick={async () => {
+                        try {
+                          if (navigator.share) {
+                            await navigator.share({
                               title:
                                 "Tramona is a platform that connects travelers with hosts to create unique deals for short-term stays. Check it out!",
                               url: inviteLink,
-                            })
-                            .then(() => {
-                              toast({ title: "Link shared successfully!" });
-                            })
-                            .catch((error) => {
-                              toast({
-                                title: "Error sharing link",
-                                description: error.message,
-                              });
                             });
-                        } else {
-                          navigator.clipboard.writeText(inviteLink).then(() => {
+                            toast({ title: "Link shared successfully!" });
+                          } else {
+                            await navigator.clipboard.writeText(inviteLink);
                             toast({ title: "Link copied to clipboard!" });
+                          }
+                        } catch (error: unknown) {
+                          const errorMessage =
+                            error instanceof Error ? error.message : "Unknown error";
+                          toast({
+                            title: "Error sharing link",
+                            description: errorMessage,
                           });
                         }
                       }}
