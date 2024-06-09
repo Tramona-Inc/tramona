@@ -32,7 +32,7 @@ function SingleLocationMap({ lat, lng }: MapPointerProps) {
           defaultCenter={location}
           defaultZoom={13}
           disableDefaultUI={true}
-          maxZoom={18}
+          maxZoom={17}
         >
           <MapPointer location={location} />
         </Map>

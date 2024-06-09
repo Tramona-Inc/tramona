@@ -9,18 +9,18 @@ import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap
 import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
 import { and, eq } from "drizzle-orm";
-import { RouterInputs } from "@/utils/api";
 import { OfferWithDetails } from "@/components/property/PropertyPage";
 
 type PageProps = {
   offer: OfferWithDetails; // Replace with a more specific type if you have one
-  requestId: number;
+  offerId: number;
   firstImage: string;
+  baseUrl: string;
 };
 
-const Page = ({ offer, requestId, firstImage }: PageProps) => {
+const Page = ({ offer, firstImage, baseUrl }: PageProps) => {
   const router = useRouter();
-
+  console.log("First image", firstImage);
   if (router.isFallback || !offer) {
     return <Spinner />;
   }
@@ -46,7 +46,7 @@ const Page = ({ offer, requestId, firstImage }: PageProps) => {
           description: metaDescription,
           images: [
             {
-              url: "https://572c-104-32-193-204.ngrok-free.app/api/og?cover=https://a0.muscache.com/im/pictures/prohost-api/Hosting-1162477721754661798/original/0c00ec02-540d-4d24-ba50-638ccd676340.jpeg?im_w=720",
+              url: `${baseUrl}/api/og?cover=${firstImage}`,
               width: 900,
               height: 800,
               alt: "Og Image Alt Second",
@@ -85,10 +85,15 @@ const Page = ({ offer, requestId, firstImage }: PageProps) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const requestId = parseInt(context.query.id as string);
+  const offerId = parseInt(context.query.id as string);
+
+  const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
 
   const offer = await db.query.offers.findFirst({
-    where: and(eq(offers.id, requestId)),
+    where: and(eq(offers.id, offerId)),
     columns: {
       createdAt: true,
       totalPrice: true,
@@ -149,8 +154,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       offer: serializedOffer,
-      requestId,
+      offerId,
       firstImage,
+      baseUrl,
     },
   };
 };
