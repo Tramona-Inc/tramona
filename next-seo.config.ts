@@ -33,5 +33,4 @@ const config: DefaultSeoProps = {
     cardType: "summary_large_image",
   },
 };
-
 export default config;
