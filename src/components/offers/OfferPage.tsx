@@ -26,40 +26,9 @@ import router from "next/router";
 
 import { useSession } from "next-auth/react";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
+import { formatDateRange } from "@/utils/utils";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
-
-function formatDateRange(fromDate: Date | string, toDate?: Date | string) {
-  // Convert to Date objects if necessary
-  //converting because the gssp function returns a string
-  if (typeof fromDate === "string") {
-    fromDate = new Date(fromDate);
-  }
-  if (toDate && typeof toDate === "string") {
-    toDate = new Date(toDate);
-  }
-
-  // Check if fromDate and toDate are valid Date objects
-  if (!(fromDate instanceof Date) || isNaN(fromDate.getTime())) {
-    throw new TypeError("fromDate is not a valid Date object");
-  }
-  if (toDate && (!(toDate instanceof Date) || isNaN(toDate.getTime()))) {
-    throw new TypeError("toDate is not a valid Date object");
-  }
-
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  };
-
-  const fromFormatted = fromDate.toLocaleDateString("en-US", options);
-  const toFormatted = toDate
-    ? (toDate as Date).toLocaleDateString("en-US", options)
-    : "";
-
-  return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
-}
 
 export default function OfferPage({
   offer: { property, request, ...offer },
