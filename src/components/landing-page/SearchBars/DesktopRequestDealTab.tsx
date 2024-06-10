@@ -220,133 +220,66 @@ export function DesktopRequestDealTab({ className }: { className?: string }) {
                 More filters
               </Button>
             </CityRequestFiltersDialog> */}
-            {!isMobile ? (
-              <div className="flex-cols-2 flex gap-2">
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.minNumBeds`}
-                  render={({ field }) => (
-                    <FormItem className="h-10 rounded-lg border px-1">
-                      <FormControl>
-                        <Total
-                          className="text-xs/[10px] font-bold"
-                          name="Beds"
-                          optional={true}
-                          total={field.value ?? 0}
-                          setTotal={field.onChange}
-                          size="size-2/5"
-                          textSize="text-[11px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.minNumBedrooms`}
-                  render={({ field }) => (
-                    <FormItem className="h-10 rounded-lg border px-1">
-                      <FormControl>
-                        <Total
-                          className="text-xs font-bold"
-                          name="Bedrooms"
-                          optional={true}
-                          total={field.value ?? 0}
-                          setTotal={field.onChange}
-                          size="size-2/5"
-                          textSize="text-[11px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.minNumBathrooms`}
-                  render={({ field }) => (
-                    <FormItem className="h-10 rounded-lg border px-1">
-                      <FormControl>
-                        <Total
-                          className="text-xs font-bold"
-                          name="Bathrooms"
-                          optional={true}
-                          total={field.value ?? 0}
-                          setTotal={field.onChange}
-                          size="size-2/5"
-                          textSize="text-[11px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            ) : (
-              <div className="flex w-auto flex-col justify-between gap-2">
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.minNumBeds`}
-                  render={({ field }) => (
-                    <FormItem className="rounded-lg border px-2">
-                      <FormControl>
-                        <Total
-                          className="text-sm font-bold"
-                          name="Beds"
-                          optional={true}
-                          total={field.value ?? 0}
-                          setTotal={field.onChange}
-                          size="size-3/5"
-                          textSize="text-xs"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.minNumBedrooms`}
-                  render={({ field }) => (
-                    <FormItem className="h-10 rounded-lg border px-2">
-                      <FormControl>
-                        <Total
-                          className="text-sm font-bold"
-                          name="Bedrooms"
-                          optional={true}
-                          total={field.value ?? 0}
-                          setTotal={field.onChange}
-                          size="size-3/5"
-                          textSize="text-xs"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.minNumBathrooms`}
-                  render={({ field }) => (
-                    <FormItem className="h-10 rounded-lg border px-2">
-                      <FormControl>
-                        <Total
-                          className="text-sm font-bold"
-                          name="Bathrooms"
-                          optional={true}
-                          total={field.value ?? 0}
-                          setTotal={field.onChange}
-                          size="size-3/5"
-                          textSize="text-xs"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
+
+            <div className="flex h-16 gap-2 overflow-x-auto">
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBeds`}
+                render={({ field }) => (
+                  <FormItem className="h-10 rounded-lg border bg-white pl-4 pr-2">
+                    <FormControl>
+                      <Total
+                        className="text-xs/[10px] font-bold"
+                        name="Beds"
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                        size="size-2/5"
+                        textSize="text-[11px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBedrooms`}
+                render={({ field }) => (
+                  <FormItem className="h-10 rounded-lg border bg-white pl-4 pr-2">
+                    <FormControl>
+                      <Total
+                        className="text-xs font-bold"
+                        name="Bedrooms"
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                        size="size-2/5"
+                        textSize="text-[11px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.minNumBathrooms`}
+                render={({ field }) => (
+                  <FormItem className="h-10 rounded-lg border bg-white pl-4 pr-2">
+                    <FormControl>
+                      <Total
+                        className="text-xs font-bold"
+                        name="Bathrooms"
+                        total={field.value ?? 0}
+                        setTotal={field.onChange}
+                        size="size-2/5"
+                        textSize="text-[11px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <div className="space-y-1">
               <p className="text-xs">
                 Already have a property you like? Tramona will get you the same
