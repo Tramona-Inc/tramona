@@ -231,14 +231,14 @@ export const requestsRouter = createTRPCRouter({
         .max(MAX_REQUEST_GROUP_SIZE),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.transaction(async (tx) => {
+      const transactionResults = await ctx.db.transaction(async (tx) => {
         const requestGroupId = await tx
           .insert(requestGroups)
           .values({ createdByUserId: ctx.user.id })
           .returning()
           .then((res) => res[0]!.id);
 
-        const results = await Promise.allSettled(
+        const results = await Promise.all(
           input.map(async (req) => {
             const madeByGroupId = await tx
               .insert(groups)
@@ -256,17 +256,21 @@ export const requestsRouter = createTRPCRouter({
               madeByGroupId,
               requestGroupId,
             });
+
+            return { madeByGroupId, requestGroupId };
           }),
         );
+        //   results.forEach((result) => {
+        //     if (result.status === "rejected") {
+        //       throw new TRPCError({
+        //         code: "INTERNAL_SERVER_ERROR",
+        //         message: JSON.stringify(result.reason),
+        //       });
+        //     }
+        //   });
+        // });
 
-        results.forEach((result) => {
-          if (result.status === "rejected") {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: JSON.stringify(result.reason),
-            });
-          }
-        });
+        return { madeByGroupIds: results.map((r) => r.madeByGroupId), results };
       });
 
       // if (ctx.user.isWhatsApp) {
@@ -282,32 +286,38 @@ export const requestsRouter = createTRPCRouter({
       //   });
       // }
 
-      if (env.NODE_ENV !== "production") return;
+      if (env.NODE_ENV === "production") {
+        const name = ctx.user.name ?? ctx.user.email;
 
-      const name = ctx.user.name ?? ctx.user.email;
+        if (input.length > 1) {
+          sendSlackMessage(
+            `*${name} just made ${input.length} requests*`,
+            `<https://tramona.com/admin|Go to admin dashboard>`,
+          );
+        } else {
+          const request = input[0]!;
 
-      if (input.length > 1) {
-        sendSlackMessage(
-          `*${name} just made ${input.length} requests*`,
-          `<https://tramona.com/admin|Go to admin dashboard>`,
-        );
+          const pricePerNight =
+            request.maxTotalPrice /
+            getNumNights(request.checkIn, request.checkOut);
+          const fmtdPrice = formatCurrency(pricePerNight);
+          const fmtdDateRange = formatDateRange(
+            request.checkIn,
+            request.checkOut,
+          );
+          const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
 
-        return;
+          sendSlackMessage(
+            `*${name} just made a request: ${request.location}*`,
+            `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+            `<https://tramona.com/admin|Go to admin dashboard>`,
+          );
+        }
       }
 
-      const request = input[0]!;
+      const { madeByGroupIds, results } = transactionResults;
 
-      const pricePerNight =
-        request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
-      const fmtdPrice = formatCurrency(pricePerNight);
-      const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-      const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
-
-      sendSlackMessage(
-        `*${name} just made a request: ${request.location}*`,
-        `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-        `<https://tramona.com/admin|Go to admin dashboard>`,
-      );
+      return { madeByGroupIds, results };
     }),
 
   // resolving a request with no offers = reject
