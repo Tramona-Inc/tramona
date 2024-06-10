@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Head from "next/head";
 import CityRequestsTab from "../../components/requests/CityRequestsTab";
 import PastRequestsAndOffersTab from "../../components/requests/PastRequestsAndOffersTab";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
@@ -62,7 +61,7 @@ export default function Page() {
               url: `https://www.tramona.com/assets/images/landing-page/main.png`,
               width: 900,
               height: 800,
-              alt: "Og Image Alt Second",
+              alt: "Tramona",
               type: "image/jpeg",
             },
           ],

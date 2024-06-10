@@ -1,12 +1,13 @@
-import { useState } from "react";
 import {
   WhatsappShareButton,
   EmailShareButton,
   WhatsappIcon,
   EmailIcon,
 } from "react-share";
-import { CopyIcon, MessageCircleIcon } from "lucide-react";
+import { MessageCircleIcon } from "lucide-react";
 import { Button } from "../../ui/button";
+import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
+import { Input } from "@/components/ui/input";
 
 const ShareDialogContent = ({
   id,
@@ -18,55 +19,32 @@ const ShareDialogContent = ({
   propertyName: string;
 }) => {
   const shareUrl = isRequest
-    ? `https://tramona.com/request/${id}`
+    ? `https://tramona.com/requests/${id}`
     : `https://tramona.com/public-offer/${id}`;
   const title = propertyName;
   const description = isRequest
     ? "Check my properties offers out"
     : "Check this property out";
 
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    const link = `https://tramona.com/public-offer/${id}`;
-    navigator.clipboard.writeText(link).then(
-      () => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000); // Reset the copied state after 2 seconds
-      },
-      (err) => {
-        console.error("Failed to copy: ", err);
-      },
-    );
-  };
-
   return (
-    <div className="text-xl font-semibold">
-      <div className=" flex flex-col justify-around gap-y-3 text-xl">
-        {isRequest ? <h1>Share all Offers Link</h1> : <h1>Share Offer Link</h1>}
-        <div className=" flex appearance-none flex-row items-center justify-between gap-x-2 text-base font-normal">
-          <input
-            type="text"
-            value={
-              isRequest
-                ? `https://tramona.com/request/${id}`
-                : `https://tramona.com/public-offer/${id}`
-            }
-            readOnly
-            className="w-full appearance-none rounded-xl border px-5 py-2"
-          />
-          <Button size="icon" variant="outlineMinimal" onClick={handleCopy}>
-            {" "}
-            <CopyIcon />{" "}
-          </Button>
+    <div>
+      <h2 className="text-xl font-semibold">
+        {isRequest ? <p>Share all Offers Link</p> : <p>Share Offer Link</p>}
+      </h2>
+      <div className="flex gap-2 pt-4">
+        <div className="flex-1">
+          <Input type="text" value={shareUrl} readOnly />
         </div>
-        {copied && (
-          <span className="ml-2 text-center text-base text-green-700">
-            Link copied!
-          </span>
-        )}
+        <CopyToClipboardBtn
+          message={shareUrl}
+          render={({ justCopied, copyMessage }) => (
+            <Button className="w-24" variant="secondary" onClick={copyMessage}>
+              {justCopied ? "Copied!" : "Copy"}
+            </Button>
+          )}
+        />
       </div>
-      <div className="mt-4 flex space-x-4">
+      <div className="flex gap-4 pt-2 text-white">
         <WhatsappShareButton url={shareUrl} title={title}>
           <WhatsappIcon size={32} round />
         </WhatsappShareButton>
@@ -75,7 +53,7 @@ const ShareDialogContent = ({
         </EmailShareButton>
         <a
           href={`sms:&body=${shareUrl}`}
-          className="items-center rounded-full bg-green-500 px-2 py-2  text-white"
+          className="items-center rounded-full bg-green-500 p-2 "
         >
           <MessageCircleIcon size={18} />
         </a>
