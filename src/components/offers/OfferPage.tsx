@@ -346,10 +346,8 @@ export default function OfferPage({
               <div className="-space-y-1 text-black">
                 <div className="flex justify-between py-2">
                   <p className="font-medium underline">
-                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
-                    nights
-                    {formatCurrency(offerNightlyPrice)} &times; {numNights}{" "}
-                    nights
+                    {formatCurrency(offerNightlyPrice)} &times;{" "}
+                    {plural(numNights, "night")}
                   </p>
                   <p className="ms-1 font-bold">
                     {formatCurrency(offerNightlyPrice * numNights)}

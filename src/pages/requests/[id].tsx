@@ -9,10 +9,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import ShareButton from "@/components/_common/ShareLink/ShareButton";
-import { OfferWithDetails } from "@/components/property/PropertyPage";
+import { type OfferWithDetails } from "@/components/property/PropertyPage";
 
 import { NextSeo } from "next-seo";
-import { GetServerSideProps } from "next";
+import { type GetServerSideProps } from "next";
 import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
 import { requests } from "@/server/db/schema/tables/requests";
@@ -50,7 +50,6 @@ function Page({
       enabled: router.isReady,
     },
   );
-  const [firstImage, setFirstImage] = useState("");
 
   useEffect(() => {
     const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
@@ -59,7 +58,6 @@ function Page({
         lat: offer.property.latitude,
         lng: offer.property.longitude,
       });
-      setFirstImage(offer.property.imageUrls[0] ?? "");
     }
   }, [selectedOfferId, offers]);
 
