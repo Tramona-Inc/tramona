@@ -11,12 +11,10 @@ import { Button } from "../../ui/button";
 const ShareDialogContent = ({
   id,
   isRequest,
-  linkImage,
   propertyName,
 }: {
   id: number;
   isRequest: boolean;
-  linkImage: string;
   propertyName: string;
 }) => {
   const shareUrl = isRequest
@@ -76,7 +74,7 @@ const ShareDialogContent = ({
           <EmailIcon size={32} round />
         </EmailShareButton>
         <a
-          href={`sms:&body=${encodeURIComponent(`${title} - ${description} - ${shareUrl} - ${linkImage}`)}`}
+          href={`sms:&body=${shareUrl}`}
           className="items-center rounded-full bg-green-500 px-2 py-2  text-white"
         >
           <MessageCircleIcon size={18} />
