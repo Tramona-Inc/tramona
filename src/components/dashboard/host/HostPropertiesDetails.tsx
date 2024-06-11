@@ -19,6 +19,8 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { api } from "@/utils/api";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
+import Onboarding5 from "@/components/host/onboarding/Onboarding5";
+import { check } from "drizzle-orm/mysql-core";
 
 export default function HostPropertiesDetails({
   property,
@@ -47,8 +49,23 @@ export default function HostPropertiesDetails({
 
   const location = useHostOnboarding((state) => state.listing.location);
   const address = `${location.street}, ${location.apt && location.apt + ","} ${location.city}, ${location.state} ${location.zipcode}`;
-
   const setLocation = useHostOnboarding((state) => state.setLocation);
+
+  const checkInType = useHostOnboarding((state) => state.listing.checkInType);
+  const setCheckInType = useHostOnboarding((state) => state.setCheckInType);
+
+  const checkIn = useHostOnboarding((state) => state.listing.checkIn);
+  const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
+
+  const checkOut = useHostOnboarding((state) => state.listing.checkOut);
+  const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
+
+  const otherCheckInType = useHostOnboarding(
+    (state) => state.listing.otherCheckInType,
+  );
+  const setOtherCheckInType = useHostOnboarding(
+    (state) => state.setOtherCheckInType,
+  );
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
@@ -56,14 +73,15 @@ export default function HostPropertiesDetails({
     const newProperty = {
       ...property,
       propertyType: propertyType,
-      checkInTime: convertTo24HourFormat(property.checkInTime ?? ""),
-      checkOutTime: convertTo24HourFormat(property.checkOutTime ?? ""),
+      checkInTime: convertTo24HourFormat(checkIn),
+      checkOutTime: convertTo24HourFormat(checkOut),
       roomType: spaceType,
       maxNumGuests: maxGuests,
       numBedrooms: bedrooms,
       numBeds: beds,
       numBathrooms: bathrooms,
       address: address,
+      checkInInfo: checkInType,
     };
 
     await updateProperty(newProperty);
@@ -76,7 +94,13 @@ export default function HostPropertiesDetails({
     setBeds(property.numBeds);
     property.numBathrooms && setBathrooms(property.numBathrooms);
     setSpaceType(property.roomType);
+    setCheckInType(property.checkInInfo ?? "");
+    setCheckIn(property.checkInTime ?? "");
+    setCheckOut(property.checkOutTime ?? "");
   }, [
+    property.checkInInfo,
+    property.checkInTime,
+    property.checkOutTime,
     property.maxNumGuests,
     property.numBathrooms,
     property.numBedrooms,
@@ -86,6 +110,9 @@ export default function HostPropertiesDetails({
     setBathrooms,
     setBedrooms,
     setBeds,
+    setCheckIn,
+    setCheckInType,
+    setCheckOut,
     setMaxGuests,
     setPropertyType,
     setSpaceType,
@@ -217,21 +244,45 @@ export default function HostPropertiesDetails({
             </div>
           </div>
         </section>
+
+        {/* TODO: fix check-in/check-out time functionality and error handling */}
         <section className="space-y-2 py-4">
-          <h2 className="text-lg font-bold">Check-in</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Check-in</h2>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding5 editing />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button>Save</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="text-muted-foreground">
-            <p>{capitalize(property.checkInInfo ?? "")} check-in / out</p>
+            <p>
+              {capitalize(editing ? checkInType : property.checkInInfo ?? "")}{" "}
+              check-in / out
+            </p>
             <div className="flex">
               <p>
                 Check-in:{" "}
-                {property.checkInTime &&
-                  convertTo12HourFormat(property.checkInTime)}
+                {editing
+                  ? convertTo12HourFormat(checkIn)
+                  : property.checkInTime &&
+                    convertTo12HourFormat(property.checkInTime)}
               </p>
               <Dot />
               <p>
                 Check-out:{" "}
-                {property.checkOutTime &&
-                  convertTo12HourFormat(property.checkOutTime)}
+                {editing
+                  ? convertTo12HourFormat(checkOut)
+                  : property.checkOutTime &&
+                    convertTo12HourFormat(property.checkOutTime)}
               </p>
             </div>
           </div>

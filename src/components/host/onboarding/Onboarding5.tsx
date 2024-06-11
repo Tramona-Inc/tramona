@@ -19,7 +19,7 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function Onboarding4() {
+export default function Onboarding5({ editing = false }) {
   const otherCheckInType = useHostOnboarding(
     (state) => state.listing.otherCheckInType,
   );
@@ -67,7 +67,7 @@ export default function Onboarding4() {
 
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-10">
           <h1 className="text-4xl font-bold">
@@ -177,12 +177,14 @@ export default function Onboarding4() {
           </Form>
         </div>
       </div>
-      <OnboardingFooter
-        handleNext={form.handleSubmit(handleFormSubmit)}
-        isFormValid={form.formState.isValid}
-        isForm={true}
-        handleError={handleError}
-      />
+      {!editing && (
+        <OnboardingFooter
+          handleNext={form.handleSubmit(handleFormSubmit)}
+          isFormValid={form.formState.isValid}
+          isForm={true}
+          handleError={handleError}
+        />
+      )}
     </>
   );
 }
