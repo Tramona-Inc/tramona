@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   integer,
   pgTable,
@@ -27,6 +28,7 @@ export const offers = pgTable(
     paymentIntentId: varchar("payment_intent_id"),
     checkoutSessionId: varchar("checkout_session_id"),
     tramonaFee: integer("tramona_fee").notNull().default(0), // in cents
+    fromUnclaimedOffers: boolean("from_unclaimed_offers_form").default(false),
   },
   (t) => ({
     madePublicAtIndex: index().on(t.madePublicAt),
