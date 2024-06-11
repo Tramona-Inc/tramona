@@ -123,9 +123,10 @@ export default function RequestCard({
         <div>
           <p>Requested {fmtdPrice}/night</p>
           <p>{fmtdDateRange}</p>
-          {fmtdFilters && <p>{fmtdFilters}</p>}
-          {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
+          {fmtdFilters && <p>{fmtdFilters} &middot;</p>}
           <p>{fmtdNumGuests}</p>
+          {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
+          {request.airbnbLink && <a className="underline" href={request.airbnbLink}>Airbnb Link</a>}
         </div>
         <div className="flex justify-end gap-2">{children}</div>
         {isSelected && (

@@ -56,7 +56,7 @@ export default function PlacesInput<
               }
             }}
             className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
-            trigger={({ value, disabled }) => (
+            trigger={({ value }) => (
               <InputButton
                 withClearBtn
                 variant={variant}
@@ -66,7 +66,7 @@ export default function PlacesInput<
                 setValue={field.onChange}
                 type="button"
                 role="combobox"
-                disabled={disabled}
+                // disabled={disabled}
                 icon={icon}
                 className="bg-white"
               >

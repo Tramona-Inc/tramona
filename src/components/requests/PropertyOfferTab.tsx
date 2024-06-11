@@ -4,9 +4,22 @@ import PropertyOffersEmptySvg from "../_common/EmptyStateSvg/PropertyOffersEmpty
 import Spinner from "../_common/Spinner";
 import PropertyOfferCard from "./PropertyOfferCard";
 import SimiliarProperties from "./SimilarProperties";
+import { useEffect, useState } from "react";
 
 export default function PropertyOfferTab() {
-  const { data: offers } = api.biddings.getMyBids.useQuery();
+  const { data: unfilteredOffers } = api.biddings.getMyBids.useQuery();
+  const offers = unfilteredOffers?.filter(
+    (offer) => offer.status === "Pending",
+  );
+
+  const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
+  const selectedOffer = offers?.find((offer) => offer.id === selectedOfferId);
+
+  useEffect(() => {
+    if (!selectedOfferId && offers) {
+      setSelectedOfferId(offers[0]?.id ?? null);
+    }
+  }, [offers, selectedOfferId]);
 
   if (!offers) return <Spinner />;
 
@@ -18,16 +31,19 @@ export default function PropertyOfferTab() {
             key={offer.id}
             offer={offer}
             isGuestDashboard={true}
+            selectedOfferId={selectedOfferId}
+            setSelectedOfferId={setSelectedOfferId}
           />
         ))}
       </div>
       <div className="hidden md:col-span-2 md:block">
-        {offers.length > 0 && (
-          // ! Change to one prop (calls the same)
+        {selectedOffer ? (
           <SimiliarProperties
-            location={offers[0]!.property.address}
-            city={offers[0]!.property.address}
+            location={selectedOffer.property.address}
+            city={selectedOffer.property.address}
           />
+        ) : (
+          <Spinner />
         )}
       </div>
     </div>

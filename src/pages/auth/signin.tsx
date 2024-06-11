@@ -26,6 +26,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useInviteStore } from "@/utils/store/inviteLink";
 
 export default function SignIn({
   providers,
@@ -72,6 +73,9 @@ export default function SignIn({
   });
 
   const { query } = useRouter();
+  const [inviteLinkId] = useInviteStore((state) => [state.inviteLinkId]);
+  const { mutate: inviteUser } = api.groups.inviteUserById.useMutation();
+
 
   const handleSubmit = async ({
     email,
@@ -85,12 +89,21 @@ export default function SignIn({
       email: email,
       password: password,
       callbackUrl: from ?? `${window.location.origin}/auth/onboarding`,
+    }).then(() => {
+      if (inviteLinkId) {
+        void inviteUser({ inviteLinkId});
+      }
     });
   };
 
+
   useEffect(() => {
     if (query.error) {
-      errorToast("Couldn't log in, please try again");
+      if (query.error === "SessionRequired") {
+        toast({ title: "Please log in to continue" });
+      } else {
+        errorToast("Couldn't log in, please try again");
+      }
     }
 
     if (query.isVerified) {

@@ -63,7 +63,7 @@ export default function MessagePage() {
     api.messages.getNumUnreadMessages.useQuery();
 
   useEffect(() => {
-    if (Notification.permission === "default") {
+    if ("Notification" in window && Notification.permission === "default") {
       void Notification.requestPermission();
     }
   }, []);

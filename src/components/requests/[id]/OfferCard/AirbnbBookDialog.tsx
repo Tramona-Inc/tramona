@@ -4,19 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
+import { useStripe } from "@/utils/stripe-client";
 import {
   cn,
   formatCurrency,
   formatDateRange,
   getNumNights,
-  getTramonaFeeTotal,
 } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
-import { useStripe } from '@/utils/stripe-client';
 
 export default function AirbnbBookDialog(
   props: React.PropsWithChildren<{
@@ -50,7 +49,6 @@ export default function AirbnbBookDialog(
   const originalTotalPrice =
     originalNightlyPrice * getNumNights(checkIn, checkOut);
   const totalSavings = originalTotalPrice - totalPrice;
-  const tramonafee = getTramonaFeeTotal(totalSavings);
 
   const messageToHost = `Hi, I was offered your property on Tramona for ${formatCurrency(
     totalPrice,
@@ -60,9 +58,6 @@ export default function AirbnbBookDialog(
   )} and I'd like to book it at that price.`;
 
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
-  const getSession = api.stripe.getStripeSession.useMutation();
-  const getSetupIntent = api.stripe.getSetUpIntent.useMutation();
-  const createSetupCheckout = api.stripe.createSetupIntentSession.useMutation();
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
 
@@ -72,31 +67,23 @@ export default function AirbnbBookDialog(
     const user = session.data?.user;
     if (!user) return;
 
-    const response = await createSetupCheckout.mutateAsync({
+    const response = await createCheckout.mutateAsync({
       listingId: offer.id,
       propertyId: offer.property.id,
       requestId: requestId,
       name: offer.property.name,
-      price: tramonafee, // Airbnb (tramona fee) Set's price for checkout
+      price: offer.tramonaFee, // Airbnb (tramona fee) Set's price for checkout
       description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
-      // images: offer.property.imageUrls,
+      images: offer.property.imageUrls,
       totalSavings,
       phoneNumber: user.phoneNumber ?? "",
-      // userId: user.id,
+      userId: user.id,
     });
 
     const stripe = await stripePromise;
 
     if (stripe !== null && response) {
-      const sesh = await getSession.mutateAsync({
-        sessionId: response.id,
-      });
-
-      const intent = await getSetupIntent.mutateAsync({
-        setupIntent: sesh.metadata.setupIntent as string,
-      });
-      console.log(intent);
       await stripe.redirectToCheckout({
         sessionId: response.id,
       });

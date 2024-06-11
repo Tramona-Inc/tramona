@@ -76,6 +76,10 @@ export default function TravelerPage({
           <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
             Explore popular destinations
           </h2>
+          <p className="text-center text-lg">
+            Search through our properties, send an offer, and the host will
+            accept, deny or counter your offer in 24 hours or less.
+          </p>
           <div className="sticky top-header-height border-b">
             <CitiesFilter isLandingPage />
           </div>

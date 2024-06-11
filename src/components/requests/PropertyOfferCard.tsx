@@ -2,6 +2,7 @@ import { type Bid } from "@/server/db/schema";
 import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import {
+  cn,
   formatCurrency,
   formatDateRange,
   getNumNights,
@@ -50,14 +51,20 @@ function getBadgeColor(status: Bid["status"]): BadgeProps["variant"] {
 export default function PropertyOfferCard({
   offer,
   isGuestDashboard,
+  selectedOfferId,
+  setSelectedOfferId,
 }:
   | {
       isGuestDashboard: true;
       offer: RouterOutputs["biddings"]["getMyBids"][number];
+      selectedOfferId?: number | null;
+      setSelectedOfferId?: (id: number | null) => void;
     }
   | {
       isGuestDashboard?: false;
       offer: RouterOutputs["biddings"]["getAllPending"][number];
+      selectedOfferId?: undefined;
+      setSelectedOfferId?: undefined;
     }) {
   const { data: session } = useSession();
 
@@ -96,7 +103,16 @@ export default function PropertyOfferCard({
   const originalNightlyBiddingOffer = offer.amount / totalNights;
 
   return (
-    <Card className="p-0 lg:overflow-clip">
+    <Card
+      className={cn(
+        "border-0 p-0 outline outline-2 lg:overflow-clip",
+        isGuestDashboard && "cursor-pointer",
+        selectedOfferId === offer.id
+          ? "outline-foreground"
+          : "outline-transparent",
+      )}
+      onClick={() => setSelectedOfferId?.(offer.id)}
+    >
       <CardContent className="flex">
         <Link
           href={`/property/${offer.propertyId}`}
@@ -231,15 +247,16 @@ export default function PropertyOfferCard({
           )}
         </div>
       </CardContent>
-      {isGuestDashboard && (
-        <div className="md:hidden">
-          <Separator className="my-1" />
-          <MobileSimilarProperties
-            city={offer.property.address}
-            location={offer.property.address}
-          />
-        </div>
-      )}
+      {isGuestDashboard &&
+        setSelectedOfferId && ( // hacky way to check that it's not history tab ._.
+          <div className="md:hidden">
+            <Separator className="my-1" />
+            <MobileSimilarProperties
+              city={offer.property.address}
+              location={offer.property.address}
+            />
+          </div>
+        )}
     </Card>
   );
 }
