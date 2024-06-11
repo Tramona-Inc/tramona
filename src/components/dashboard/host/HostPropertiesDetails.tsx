@@ -4,12 +4,19 @@ import { capitalize } from "@/utils/utils";
 import { Dot, MapPin, PackageOpen, PencilLine, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
-import { convertTo12HourFormat } from "@/utils/utils";
+import { convertTo12HourFormat, convertTo24HourFormat } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import Onboarding2 from "@/components/host/onboarding/Onboarding2";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { api } from "@/utils/api";
 
 export default function HostPropertiesDetails({
   property,
@@ -19,6 +26,19 @@ export default function HostPropertiesDetails({
   const [editing, setEditing] = useState(false);
 
   const propertyType = useHostOnboarding((state) => state.listing.propertyType);
+
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+
+  const handleFormSubmit = async () => {
+    const newProperty = {
+      ...property,
+      propertyType: propertyType,
+      checkInTime: convertTo24HourFormat(property.checkInTime ?? ""),
+      checkOutTime: convertTo24HourFormat(property.checkOutTime ?? ""),
+    };
+
+    await updateProperty(newProperty);
+  };
 
   return (
     <div className="my-6">
@@ -40,7 +60,11 @@ export default function HostPropertiesDetails({
           </div>
         )}
         <div className="flex-1 text-end">
-          <HostPropertyEditBtn editing={editing} setEditing={setEditing} />
+          <HostPropertyEditBtn
+            editing={editing}
+            setEditing={setEditing}
+            onSubmit={handleFormSubmit}
+          />
         </div>
       </div>
       <div className="divide-y">
@@ -53,6 +77,11 @@ export default function HostPropertiesDetails({
               </DialogTrigger>
               <DialogContent>
                 <Onboarding2 editing />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button>Save</Button>
+                  </DialogClose>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
