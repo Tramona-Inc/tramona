@@ -22,7 +22,7 @@ importers:
         version: 3.4.0
       '@hookform/resolvers':
         specifier: ^3.3.4
-        version: 3.3.4(react-hook-form@7.51.2(react@18.2.0))
+        version: 3.3.4(react-hook-form@7.51.5(react@18.2.0))
       '@mantine/hooks':
         specifier: ^7.8.0
         version: 7.8.0(react@18.2.0)
@@ -310,7 +310,7 @@ importers:
         version: 2.1.4(@swc/helpers@0.5.2)(eslint@8.57.0)
       react-hook-form:
         specifier: ^7.49.3
-        version: 7.51.2(react@18.2.0)
+        version: 7.51.5(react@18.2.0)
       react-icons:
         specifier: ^5.1.0
         version: 5.1.0(react@18.2.0)
@@ -8610,8 +8610,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  react-hook-form@7.51.2:
-    resolution: {integrity: sha512-y++lwaWjtzDt/XNnyGDQy6goHskFualmDlf+jzEZvjvz6KWDf7EboL7pUvRCzPTJd0EOPpdekYaQLEvvG6m6HA==}
+  react-hook-form@7.51.5:
+    resolution: {integrity: sha512-J2ILT5gWx1XUIJRETiA7M19iXHlG74+6O3KApzvqB/w8S5NQR7AbU8HVZrMALdmDgWpRPYiZJl0zx8Z4L2mP6Q==}
     engines: {node: '>=12.22.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18
@@ -12614,9 +12614,9 @@ snapshots:
     dependencies:
       crypto-js: 4.2.0
 
-  '@hookform/resolvers@3.3.4(react-hook-form@7.51.2(react@18.2.0))':
+  '@hookform/resolvers@3.3.4(react-hook-form@7.51.5(react@18.2.0))':
     dependencies:
-      react-hook-form: 7.51.2(react@18.2.0)
+      react-hook-form: 7.51.5(react@18.2.0)
 
   '@humanwhocodes/config-array@0.11.14':
     dependencies:
@@ -20364,7 +20364,7 @@ snapshots:
       - utf-8-validate
       - webpack-cli
 
-  react-hook-form@7.51.2(react@18.2.0):
+  react-hook-form@7.51.5(react@18.2.0):
     dependencies:
       react: 18.2.0
 
