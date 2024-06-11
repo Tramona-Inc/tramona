@@ -6,7 +6,7 @@ import Image from "next/image";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { convertTo12HourFormat, convertTo24HourFormat } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -17,6 +17,7 @@ import {
 import Onboarding2 from "@/components/host/onboarding/Onboarding2";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { api } from "@/utils/api";
+import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 
 export default function HostPropertiesDetails({
   property,
@@ -26,6 +27,22 @@ export default function HostPropertiesDetails({
   const [editing, setEditing] = useState(false);
 
   const propertyType = useHostOnboarding((state) => state.listing.propertyType);
+  const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
+
+  const maxGuests = useHostOnboarding((state) => state.listing.maxGuests);
+  const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
+
+  const bedrooms = useHostOnboarding((state) => state.listing.bedrooms);
+  const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
+
+  const beds = useHostOnboarding((state) => state.listing.beds);
+  const setBeds = useHostOnboarding((state) => state.setBeds);
+
+  const bathrooms = useHostOnboarding((state) => state.listing.bathrooms);
+  const setBathrooms = useHostOnboarding((state) => state.setBathrooms);
+
+  const spaceType = useHostOnboarding((state) => state.listing.spaceType);
+  const setSpaceType = useHostOnboarding((state) => state.setSpaceType);
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
@@ -35,10 +52,37 @@ export default function HostPropertiesDetails({
       propertyType: propertyType,
       checkInTime: convertTo24HourFormat(property.checkInTime ?? ""),
       checkOutTime: convertTo24HourFormat(property.checkOutTime ?? ""),
+      roomType: spaceType,
+      maxNumGuests: maxGuests,
+      numBedrooms: bedrooms,
+      numBeds: beds,
+      numBathrooms: bathrooms,
     };
 
     await updateProperty(newProperty);
   };
+
+  useEffect(() => {
+    setPropertyType(property.propertyType);
+    setMaxGuests(property.maxNumGuests);
+    setBedrooms(property.numBedrooms);
+    setBeds(property.numBeds);
+    property.numBathrooms && setBathrooms(property.numBathrooms);
+    setSpaceType(property.roomType);
+  }, [
+    property.maxNumGuests,
+    property.numBathrooms,
+    property.numBedrooms,
+    property.numBeds,
+    property.propertyType,
+    property.roomType,
+    setBathrooms,
+    setBedrooms,
+    setBeds,
+    setMaxGuests,
+    setPropertyType,
+    setSpaceType,
+  ]);
 
   return (
     <div className="my-6">
@@ -90,26 +134,46 @@ export default function HostPropertiesDetails({
           </p>
         </section>
         <section className="space-y-2 py-4">
-          <h2 className="text-lg font-bold">Living situation</h2>
-          <p className="text-muted-foreground">{property.roomType}</p>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Living situation</h2>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding3 editing />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button>Save</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+          <p className="text-muted-foreground">
+            {editing ? spaceType : property.roomType}
+          </p>
           <div className="flex lowercase text-muted-foreground">
-            {property.maxNumGuests}{" "}
-            {property.maxNumGuests && property.maxNumGuests > 1
-              ? " guests"
-              : " guest"}{" "}
-            <Dot />
-            {property.numBedrooms}{" "}
-            {property.numBedrooms && property.numBedrooms > 1
-              ? " bedrooms"
-              : " bedroom"}{" "}
-            <Dot />
-            {property.numBeds}{" "}
-            {property.numBeds && property.numBeds > 1 ? " beds" : " bed"}{" "}
-            <Dot />
-            {property.numBathrooms}{" "}
-            {property.numBathrooms && property.numBathrooms > 1
-              ? " bathrooms"
-              : " bathroom"}
+            {editing ? (
+              <>
+                {`${maxGuests} ${maxGuests > 1 ? "guests" : "guest"}`} <Dot />
+                {`${bedrooms} ${bedrooms > 1 ? "bedrooms" : "bedroom"}`} <Dot />
+                {`${beds} ${beds > 1 ? "beds" : "bed"}`} <Dot />
+                {bathrooms &&
+                  `${bathrooms} ${bathrooms > 1 ? "bathrooms" : "bathroom"}`}
+              </>
+            ) : (
+              <>
+                {`${property.maxNumGuests} ${property.maxNumGuests > 1 ? "guests" : "guest"}`}{" "}
+                <Dot />
+                {`${property.numBedrooms} ${property.numBedrooms > 1 ? "bedrooms" : "bedroom"}`}{" "}
+                <Dot />
+                {`${property.numBeds} ${property.numBeds > 1 ? "beds" : "bed"}`}{" "}
+                <Dot />
+                {property.numBathrooms &&
+                  `${property.numBathrooms} ${property.numBathrooms > 1 ? "bathrooms" : "bathroom"}`}
+              </>
+            )}
           </div>
         </section>
         <section className="space-y-2 py-4">

@@ -74,7 +74,7 @@ export function Total({
   );
 }
 
-export default function Onboarding3() {
+export default function Onboarding3({ editing = false }) {
   const maxGuests = useHostOnboarding((state) => state.listing.maxGuests);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
 
@@ -98,7 +98,7 @@ export default function Onboarding3() {
 
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="mb-5 flex w-full flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-5">
           <h1 className="text-4xl font-bold">What is the living situation?</h1>
@@ -150,11 +150,13 @@ export default function Onboarding3() {
           </div>
         </div>
       </div>
-      <OnboardingFooter
-        isFormValid={spaceType !== "Other"}
-        isForm={true}
-        handleError={handleError}
-      />
+      {!editing && (
+        <OnboardingFooter
+          isFormValid={spaceType !== "Other"}
+          isForm={true}
+          handleError={handleError}
+        />
+      )}
     </>
   );
 }
