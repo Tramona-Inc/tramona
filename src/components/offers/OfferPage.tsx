@@ -24,27 +24,22 @@ import {
   ChevronRight,
   ImagesIcon,
   UsersRoundIcon,
+  MessageCircleIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useRouter } from "next/router";
-import { useState } from "react";
 import Spinner from "../_common/Spinner";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 import { useMediaQuery } from "../_utils/useMediaQuery";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import { AspectRatio } from "../ui/aspect-ratio";
-import { AspectRatio } from "../ui/aspect-ratio";
 import AmenitiesComponent from "./CategorizedAmenities";
-import OfferPhotos from "./OfferPhotos";
 import OfferPhotos from "./OfferPhotos";
 import PropertyAmenities from "./PropertyAmenities";
 import router from "next/router";
 
 import { useSession } from "next-auth/react";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
-import { formatDateRange } from "@/utils/utils";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -55,8 +50,6 @@ export default function OfferPage({
 }) {
   const { status } = useSession();
   let isBooked = false;
-
-  const router = useRouter();
 
   const router = useRouter();
 
@@ -272,6 +265,7 @@ export default function OfferPage({
             </div>
 
             <Button
+              variant="secondary"
               onClick={() =>
                 handleConversation({
                   offerId: String(offer.id),
@@ -280,6 +274,7 @@ export default function OfferPage({
                 })
               }
             >
+              <MessageCircleIcon />
               Message Host
             </Button>
           </section>
