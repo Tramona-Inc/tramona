@@ -292,7 +292,7 @@ importers:
         version: 18.2.0
       react-calendly:
         specifier: ^4.3.0
-        version: 4.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 4.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-confetti:
         specifier: ^6.1.0
         version: 6.1.0(react@18.2.0)
@@ -8554,8 +8554,8 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  react-calendly@4.3.0:
-    resolution: {integrity: sha512-JFZzYhyJBaoZDseB3UqzeOx1rbzCK24nr5pqH/6zJEh7CZ/pn5R49rkIJ0g5E7j5WQ3K7xBSgBD7WgM36v3gZw==}
+  react-calendly@4.3.1:
+    resolution: {integrity: sha512-poyUH3NOUOlsotr8ho5WzbsbPuRAppaY+Jvu+C/PkwTP6WT807pNFI8+HrbbuRknXZbd75zpzysOJQvcu3P8Pg==}
     engines: {node: '>=8', npm: '>=5'}
     peerDependencies:
       react: '>=16.8.0'
@@ -20248,7 +20248,7 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  react-calendly@4.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  react-calendly@4.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
