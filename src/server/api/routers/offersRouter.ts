@@ -37,6 +37,7 @@ import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { reservationSelectSchema } from "../../db/schema/tables/reservations";
 import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
+import { columns } from "@/components/admin/view-recent-host/table/columns";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -165,6 +166,15 @@ export const offersRouter = createTRPCRouter({
             with: {
               host: {
                 columns: { id: true, name: true, email: true, image: true },
+              },
+              reviews: {
+                columns: {
+                  id: true,
+                  rating: true,
+                  review: true,
+                  profilePic: true,
+                  name: true,
+                },
               },
             },
           },

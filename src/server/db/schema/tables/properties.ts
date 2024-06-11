@@ -17,9 +17,10 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { object, z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
+import { reviews } from "./reviews";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -154,6 +155,7 @@ export const properties = pgTable("properties", {
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
+  hostProfilePic: varchar("host_profile_pic"),
 
   address: varchar("address", { length: 1000 }).notNull(),
   latitude: doublePrecision("latitude"),
@@ -190,7 +192,6 @@ export const properties = pgTable("properties", {
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),
   cancellationPolicy: text("cancellation_policy"),
-
   createdAt: timestamp("created_at").notNull().defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
 });

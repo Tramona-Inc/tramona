@@ -25,6 +25,7 @@ import { requestGroups, requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
 import { reservations } from "./tables/reservations";
 import { referralCodes, referralEarnings, users } from "./tables/users";
+import { reviews } from "./tables/reviews";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -90,6 +91,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   requestsToProperties: many(requestsToProperties),
   bookedDates: many(bookedDates),
   reservations: many(reservations),
+  reviews: many(reviews),
 }));
 
 export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
@@ -238,6 +240,13 @@ export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
   group: one(groups, {
     fields: [groupInvites.groupId],
     references: [groups.id],
+  }),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  property: one(properties, {
+    fields: [reviews.propertyId],
+    references: [properties.id],
   }),
 }));
 

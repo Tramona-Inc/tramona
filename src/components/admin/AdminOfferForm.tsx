@@ -54,6 +54,7 @@ const formSchema = z.object({
   propertyName: zodString(),
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
+  hostProfilePic: zodUrl(),
   address: zodString({ maxLen: 1000 }),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
@@ -74,6 +75,14 @@ const formSchema = z.object({
   checkOutTime: optional(zodTime),
   cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
+  reviews: optional(z
+    .object({
+      profilePic: zodUrl(),
+      name: zodString(),
+      review: zodString(),
+      rating: zodNumber(),
+    })
+    .array()),
   // mapScreenshot: optional(zodString()),
 });
 
@@ -106,11 +115,13 @@ export default function AdminOfferForm({
         { value: "" },
       ],
       amenities: [],
+      reviews: [{ profilePic: "", name: "", review: "", rating: 0 }],
       ...(offer
         ? {
             // im sorry
             // ?? undefineds are to turn string | null into string | undefined
             hostName: offer.property.hostName ?? undefined,
+            hostProfilePic: offer.property.hostProfilePic ?? undefined,
             address: offer.property.address,
             areaDescription: offer.property.areaDescription ?? undefined,
             mapScreenshot: offer.property.mapScreenshot ?? undefined,
@@ -135,6 +146,12 @@ export default function AdminOfferForm({
             checkInTime: offer.property.checkInTime ?? undefined,
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
+            reviews: offer.property.reviews.map((review) => ({
+              profilePic: review.profilePic,
+              name: review.name,
+              rating: review.rating,
+              review: review.review,
+            })),
           }
         : {}),
     },
@@ -145,10 +162,16 @@ export default function AdminOfferForm({
     control: form.control,
   });
 
+  const reviewInputs = useFieldArray({
+    name: "reviews",
+    control: form.control,
+  });
+
   const updatePropertiesMutation = api.properties.update.useMutation();
   const updateOffersMutation = api.offers.update.useMutation();
   const createPropertiesMutation = api.properties.create.useMutation();
   const createOffersMutation = api.offers.create.useMutation();
+  const createReviewsMutation = api.reviews.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
@@ -192,6 +215,7 @@ export default function AdminOfferForm({
       mapScreenshot: url,
     };
 
+
     // if offer wasnt null then this is an "update offer" form
     // so update the current property and offer...
     if (offer) {
@@ -203,6 +227,18 @@ export default function AdminOfferForm({
         tramonaFee: data.tramonaFee * 100,
       };
 
+      if (propertyData.reviews && propertyData.reviews.length > 0) {
+        for (const review of propertyData.reviews) {
+          await createReviewsMutation.mutateAsync({
+            propertyId: offer.property.id,
+            name: review.name,
+            profilePic: review.profilePic,
+            rating: review.rating,
+            review: review.review,
+          });
+        }
+      }
+
       await Promise.all([
         updatePropertiesMutation.mutateAsync({
           ...newProperty,
@@ -210,6 +246,7 @@ export default function AdminOfferForm({
           isPrivate: true,
         }),
         updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
+
       ]);
       // ...otherwise its a "create offer" form so make a new property and offer
     } else {
@@ -230,6 +267,18 @@ export default function AdminOfferForm({
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
       };
+
+      if (propertyData.reviews && propertyData.reviews.length > 0) {
+        for (const review of propertyData.reviews) {
+          await createReviewsMutation.mutateAsync({
+            propertyId,
+            name: review.name,
+            profilePic: review.profilePic,
+            rating: review.rating,
+            review: review.review,
+          });
+        }
+      }
 
       await createOffersMutation
         .mutateAsync(newOffer)
@@ -304,6 +353,20 @@ export default function AdminOfferForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Host name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="hostProfilePic"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Host profile picture</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -724,6 +787,78 @@ export default function AdminOfferForm({
               onClick={() => imageUrlInputs.append({ value: "" })}
             >
               Add another image (optional)
+            </Button>
+          </div>
+        </FormItem>
+
+        <FormItem className="col-span-full space-y-1">
+          <FormLabel>Reviews</FormLabel>
+          <div className="space-y-4">
+            {reviewInputs.fields.map((review, index) => (
+              <div key={review.id} className="space-y-1">
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.profilePic`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input {...field} placeholder="Profile Picture URL" />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.name`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input {...field} placeholder="Name" />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.rating`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="0"
+                        max="5"
+                        placeholder="Rating (0-5)"
+                      />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.review`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Textarea {...field} placeholder="Review" />
+                    </FormControl>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="emptyInput"
+                  onClick={() => reviewInputs.remove(index)}
+                >
+                  Remove Review
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              onClick={() =>
+                reviewInputs.append({
+                  profilePic: "",
+                  name: "",
+                  rating: 0,
+                  review: "",
+                })
+              }
+            >
+              Add Another Review
             </Button>
           </div>
         </FormItem>
