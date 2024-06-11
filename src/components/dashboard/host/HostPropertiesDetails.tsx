@@ -18,6 +18,7 @@ import Onboarding2 from "@/components/host/onboarding/Onboarding2";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { api } from "@/utils/api";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
+import Onboarding4 from "@/components/host/onboarding/Onboarding4";
 
 export default function HostPropertiesDetails({
   property,
@@ -44,6 +45,11 @@ export default function HostPropertiesDetails({
   const spaceType = useHostOnboarding((state) => state.listing.spaceType);
   const setSpaceType = useHostOnboarding((state) => state.setSpaceType);
 
+  const location = useHostOnboarding((state) => state.listing.location);
+  const address = `${location.street}, ${location.apt && location.apt + ","} ${location.city}, ${location.state} ${location.zipcode}`;
+
+  const setLocation = useHostOnboarding((state) => state.setLocation);
+
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
   const handleFormSubmit = async () => {
@@ -57,6 +63,7 @@ export default function HostPropertiesDetails({
       numBedrooms: bedrooms,
       numBeds: beds,
       numBathrooms: bathrooms,
+      address: address,
     };
 
     await updateProperty(newProperty);
@@ -176,11 +183,30 @@ export default function HostPropertiesDetails({
             )}
           </div>
         </section>
+
+        {/* TODO: fix edit location functionality */}
         <section className="space-y-2 py-4">
-          <h2 className="text-lg font-bold">Location</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Location</h2>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding4 editing />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button>Save</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="flex items-center gap-2">
             <MapPin />
-            <p className="text-muted-foreground">{property.address}</p>
+            <p className="text-muted-foreground">
+              {editing ? address : property.address}
+            </p>
           </div>
           <div className="relative mb-10 h-[400px]">
             <div className="absolute inset-0 z-0">
