@@ -22,7 +22,7 @@ importers:
         version: 3.4.0
       '@hookform/resolvers':
         specifier: ^3.3.4
-        version: 3.3.4(react-hook-form@7.51.5(react@18.2.0))
+        version: 3.6.0(react-hook-form@7.51.5(react@18.2.0))
       '@mantine/hooks':
         specifier: ^7.8.0
         version: 7.8.0(react@18.2.0)
@@ -2310,8 +2310,8 @@ packages:
   '@googlemaps/url-signature@1.0.34':
     resolution: {integrity: sha512-1KiM7IkGpm/ZIQDbYH9mk81GNGOrIime/YQoNfAnrKr8+ojbup2i4uEsbfAUHrV0qHK/0P08VI1iNU2Lbk5SuQ==}
 
-  '@hookform/resolvers@3.3.4':
-    resolution: {integrity: sha512-o5cgpGOuJYrd+iMKvkttOclgwRW86EsWJZZRC23prf0uU2i48Htq4PuT73AVb9ionFyZrwYEITuOFGF+BydEtQ==}
+  '@hookform/resolvers@3.6.0':
+    resolution: {integrity: sha512-UBcpyOX3+RR+dNnqBd0lchXpoL8p4xC21XP8H6Meb8uve5Br1GCnmg0PcBoKKqPKgGu9GHQ/oygcmPrQhetwqw==}
     peerDependencies:
       react-hook-form: ^7.0.0
 
@@ -8556,6 +8556,7 @@ packages:
   puppeteer@22.6.1:
     resolution: {integrity: sha512-736QHNKtPD4tPeFbIn73E4l0CWsLzvRFlm0JsLG/VsyM8Eh0FRFNmMp+M3+GSMwdmYxqOVpTgzB6VQDxWxu8xQ==}
     engines: {node: '>=18'}
+    deprecated: < 22.6.4 is no longer supported
     hasBin: true
 
   qs@6.11.0:
@@ -12712,7 +12713,7 @@ snapshots:
     dependencies:
       crypto-js: 4.2.0
 
-  '@hookform/resolvers@3.3.4(react-hook-form@7.51.5(react@18.2.0))':
+  '@hookform/resolvers@3.6.0(react-hook-form@7.51.5(react@18.2.0))':
     dependencies:
       react-hook-form: 7.51.5(react@18.2.0)
 
