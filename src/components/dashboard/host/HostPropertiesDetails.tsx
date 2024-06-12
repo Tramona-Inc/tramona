@@ -15,12 +15,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Onboarding2 from "@/components/host/onboarding/Onboarding2";
-import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import {
+  type LocationType,
+  useHostOnboarding,
+} from "@/utils/store/host-onboarding";
 import { api } from "@/utils/api";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
 import Onboarding5 from "@/components/host/onboarding/Onboarding5";
-import { check } from "drizzle-orm/mysql-core";
 
 export default function HostPropertiesDetails({
   property,
@@ -48,7 +50,7 @@ export default function HostPropertiesDetails({
   const setSpaceType = useHostOnboarding((state) => state.setSpaceType);
 
   const location = useHostOnboarding((state) => state.listing.location);
-  const address = `${location.street}, ${location.apt && location.apt + ","} ${location.city}, ${location.state} ${location.zipcode}`;
+  const address = `${location.street}, ${location.apt && location.apt + ", "}${location.city}, ${location.state} ${location.zipcode}, ${location.country}`;
   const setLocation = useHostOnboarding((state) => state.setLocation);
 
   const checkInType = useHostOnboarding((state) => state.listing.checkInType);
@@ -68,6 +70,9 @@ export default function HostPropertiesDetails({
   );
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: address,
+  });
 
   const handleFormSubmit = async () => {
     const newProperty = {
@@ -82,9 +87,29 @@ export default function HostPropertiesDetails({
       numBathrooms: bathrooms,
       address: address,
       checkInInfo: checkInType,
+      latitude: coordinateData?.coordinates.location?.lat,
+      longitude: coordinateData?.coordinates.location?.lng,
     };
 
     await updateProperty(newProperty);
+  };
+
+  const addressWithApt: LocationType = {
+    country: property.address.split(", ")[4] ?? "",
+    street: property.address.split(", ")[0] ?? "",
+    apt: property.address.split(", ")[1] ?? "",
+    city: property.address.split(", ")[2] ?? "",
+    state: property.address.split(", ")[3]?.split(" ")[0] ?? "",
+    zipcode: property.address.split(", ")[3]?.split(" ")[1] ?? "",
+  };
+
+  const addressWithoutApt: LocationType = {
+    country: property.address.split(", ")[3] ?? "",
+    street: property.address.split(", ")[0] ?? "",
+    apt: "",
+    city: property.address.split(", ")[1] ?? "",
+    state: property.address.split(", ")[2]?.split(" ")[0] ?? "",
+    zipcode: property.address.split(", ")[2]?.split(" ")[1] ?? "",
   };
 
   useEffect(() => {
@@ -97,26 +122,8 @@ export default function HostPropertiesDetails({
     setCheckInType(property.checkInInfo ?? "");
     setCheckIn(property.checkInTime ?? "");
     setCheckOut(property.checkOutTime ?? "");
-  }, [
-    property.checkInInfo,
-    property.checkInTime,
-    property.checkOutTime,
-    property.maxNumGuests,
-    property.numBathrooms,
-    property.numBedrooms,
-    property.numBeds,
-    property.propertyType,
-    property.roomType,
-    setBathrooms,
-    setBedrooms,
-    setBeds,
-    setCheckIn,
-    setCheckInType,
-    setCheckOut,
-    setMaxGuests,
-    setPropertyType,
-    setSpaceType,
-  ]);
+    setLocation(location.apt ? addressWithApt : addressWithoutApt);
+  }, [property]);
 
   return (
     <div className="my-6">
@@ -222,9 +229,9 @@ export default function HostPropertiesDetails({
               <DialogContent>
                 <Onboarding4 editing />
                 <DialogFooter>
-                  <DialogClose asChild>
+                  {/* <DialogClose asChild>
                     <Button>Save</Button>
-                  </DialogClose>
+                  </DialogClose> */}
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -238,8 +245,16 @@ export default function HostPropertiesDetails({
           <div className="relative mb-10 h-[400px]">
             <div className="absolute inset-0 z-0">
               <SingleLocationMap
-                lat={property.latitude ?? 0}
-                lng={property.longitude ?? 0}
+                lat={
+                  editing
+                    ? coordinateData?.coordinates.location?.lat ?? 0
+                    : property.latitude ?? 0
+                }
+                lng={
+                  editing
+                    ? coordinateData?.coordinates.location?.lng ?? 0
+                    : property.longitude ?? 0
+                }
               />
             </div>
           </div>

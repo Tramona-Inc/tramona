@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   country: zodString(),
@@ -242,13 +243,15 @@ export default function Onboarding4({ editing = false }) {
           )}
         </div>
       </div>
-      {!editing && (
+      {!editing ? (
         <OnboardingFooter
           handleNext={form.handleSubmit(handleFormSubmit)}
           isFormValid={form.formState.isValid}
           isForm={true}
           handleError={handleError}
         />
+      ) : (
+        <Button onClick={form.handleSubmit(handleFormSubmit)}>Save</Button>
       )}
     </>
   );
