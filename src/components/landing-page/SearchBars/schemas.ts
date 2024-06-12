@@ -30,6 +30,9 @@ const cityRequestSchema = z
     minNumBathrooms: z.number().optional(),
     airbnbLink: optional(zodUrl()),
     note: optional(zodString()),
+    radius: z.number().optional(),
+    lat: z.number().optional(),
+    lng: z.number().optional(),
   })
   .refine(({ date }) => date.from < date.to, {
     message: "Must stay for at least 1 night",

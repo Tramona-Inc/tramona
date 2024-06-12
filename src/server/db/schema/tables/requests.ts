@@ -39,6 +39,9 @@ export const requests = pgTable(
     airbnbLink: varchar("airbnb_link", { length: 512 }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     resolvedAt: timestamp("resolved_at"),
+    // lat: integer("lat"),
+    // lng: integer("lng"),
+    // radius: integer("radius"),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),

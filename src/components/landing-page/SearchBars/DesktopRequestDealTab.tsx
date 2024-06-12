@@ -41,7 +41,6 @@ export function DesktopRequestDealTab() {
   const [open, setOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [initialLocation, setInitialLocation] = useState(null);
   const [madeByGroupIds, setMadeByGroupIds] = useState<number[]>([]);
   const [emails, setEmails] = useState<string[]>([""]);
   const [link, setLink] = useState(false);
@@ -50,12 +49,20 @@ export function DesktopRequestDealTab() {
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailFormVisible, setIsEmailFormVisible] = useState(false);
 
+
   const { form, onSubmit } = useCityRequestForm({ setCurTab, afterSubmit });
 
   const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
     { groupId: groupId! },
     { enabled: groupId !== null },
   );
+
+  function onSave(location: { lat: number; lng: number }, radius: number): void {
+    console.log("onSave", location, radius);
+    form.setValue(`data.${curTab}.lat`, location.lat);
+    form.setValue(`data.${curTab}.lng`, location.lng);
+    form.setValue(`data.${curTab}.radius`, radius);
+  }
 
   useEffect(() => {
     if (inviteLinkQuery.data) {
@@ -72,6 +79,64 @@ export function DesktopRequestDealTab() {
     setShowConfetti(true);
   }
 
+  const handleCopyToClipboard = () => {
+    if (inviteLink) {
+      navigator.clipboard
+        .writeText(inviteLink)
+        .then(() => {
+          toast({
+            title: "Link copied to clipboard!",
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to copy: ", err);
+        });
+    }
+  };
+
+  const handleEmailChange = (index: number, value: string) => {
+    const newEmails = [...emails];
+    newEmails[index] = value;
+    setEmails(newEmails);
+  };
+
+  const addEmailField = () => {
+    if (emails.length < 3) {
+      setEmails([...emails, ""]);
+    }
+  };
+
+  const removeEmailField = (index: number) => {
+    if (index !== 0) {
+      const newEmails = emails.filter((_, i) => i !== index);
+      setEmails(newEmails);
+    }
+  };
+
+  const inviteUserByEmail = api.groups.inviteUserByEmail.useMutation();
+
+  const handleInvite = async () => {
+    if (madeByGroupIds.length === 0) {
+      toast({ title: "Group IDs not available" });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      for (const email of emails) {
+        for (const groupId of madeByGroupIds) {
+          if (email.length > 0) {
+            await inviteUserByEmail.mutateAsync({ email, groupId });
+          }
+        }
+      }
+      toast({ title: "Invites sent successfully!" });
+    } catch (error) {
+      toast({ title: "Error sending invites" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -95,7 +160,7 @@ export function DesktopRequestDealTab() {
               variant="lpDesktop"
               placeholder="Select a location"
               icon={MapPinIcon}
-              setInitialLocation={setInitialLocation}
+              onSave={onSave}
             />
 
             <FormField
@@ -219,30 +284,7 @@ export function DesktopRequestDealTab() {
                 </div>
               )}
             </div>
-            <div className="space-y-1">
-              <p className="text-sm">
-                Have a specific location in mind? Drop a pin and tell us.
-              </p>
 
-              <Dialog open={mapOpen} onOpenChange={setMapOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                  >
-                    Expand Map
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl">
-                  <MapModal
-                    setOpen={setMapOpen}
-                    initialLocation={initialLocation}
-                    onSave={onSave}
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
 
             <div className="flex justify-end sm:justify-start">
               <Button
