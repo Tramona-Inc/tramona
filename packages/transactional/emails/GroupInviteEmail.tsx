@@ -13,7 +13,7 @@ export default function GroupInviteEmail({
       <div className="pt-2" style={{ textAlign: "center" }}>
         <div className="text-brand px-6 text-left text-base">
           <Text className="text-brand text-left text-2xl font-bold">
-            {name ? `Hi ${name},` : ""}
+            Hi,
           </Text>
           <Text className="text-brand text-left">
             {name ?? email} invited you to their request on Tramona! Sign up at

@@ -16,7 +16,7 @@ export function useCityRequestForm({
   afterSubmit,
 }: {
   setCurTab: (val: number) => void;
-  afterSubmit?: () => void;
+  afterSubmit?: (madeByGroupIds?: number[]) => void; 
 }) {
   const form = useZodForm({
     schema: multiCityRequestSchema,
@@ -60,7 +60,8 @@ export function useCityRequestForm({
       });
     } else {
       await createRequests(newRequests)
-        .then(() => {
+        .then((result) => {
+          
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
           form.reset();
@@ -69,7 +70,7 @@ export function useCityRequestForm({
             defaultSearchOrReqValues as CityRequestDefaultVals,
           ]);
           setCurTab(0);
-          afterSubmit?.();
+          afterSubmit?.(result.madeByGroupIds);
         })
         .catch(() => errorToast());
     }
