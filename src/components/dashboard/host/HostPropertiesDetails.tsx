@@ -119,10 +119,10 @@ export default function HostPropertiesDetails({
     setBeds(property.numBeds);
     property.numBathrooms && setBathrooms(property.numBathrooms);
     setSpaceType(property.roomType);
+    setLocation(location.apt ? addressWithApt : addressWithoutApt);
     setCheckInType(property.checkInInfo ?? "");
     setCheckIn(property.checkInTime ?? "");
     setCheckOut(property.checkOutTime ?? "");
-    setLocation(location.apt ? addressWithApt : addressWithoutApt);
   }, [property]);
 
   return (
@@ -271,9 +271,9 @@ export default function HostPropertiesDetails({
               <DialogContent>
                 <Onboarding5 editing />
                 <DialogFooter>
-                  <DialogClose asChild>
+                  {/* <DialogClose asChild>
                     <Button>Save</Button>
-                  </DialogClose>
+                  </DialogClose> */}
                 </DialogFooter>
               </DialogContent>
             </Dialog>

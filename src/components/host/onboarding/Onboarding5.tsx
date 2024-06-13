@@ -11,6 +11,7 @@ import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   checkIn: zodString({ maxLen: 100 }),
@@ -177,13 +178,15 @@ export default function Onboarding5({ editing = false }) {
           </Form>
         </div>
       </div>
-      {!editing && (
+      {!editing ? (
         <OnboardingFooter
           handleNext={form.handleSubmit(handleFormSubmit)}
           isFormValid={form.formState.isValid}
           isForm={true}
           handleError={handleError}
         />
+      ) : (
+        <Button onClick={form.handleSubmit(handleFormSubmit)}>Save</Button>
       )}
     </>
   );
