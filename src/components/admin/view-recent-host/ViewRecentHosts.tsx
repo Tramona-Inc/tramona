@@ -12,7 +12,7 @@ import { DataTable } from "./table/data-table";
 export type HostsInfo = RouterOutputs["users"]["getHostInfo"][number];
 
 export default function ViewRecentHosts() {
-  const { data } = api.host.getHostsInfo.useQuery();
+  const { data } = api.users.getHostInfo.useQuery();
 
   return (
     <Card>
