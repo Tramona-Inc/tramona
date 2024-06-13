@@ -235,7 +235,7 @@ export default function AdminOfferForm({
       await createOffersMutation
         .mutateAsync(newOffer)
         .catch(() => errorToast());
-        
+
       const travelers = await getMembersMutation.mutateAsync(
         request.madeByGroupId,
       );
@@ -250,7 +250,7 @@ export default function AdminOfferForm({
           } else {
             await twilioMutation.mutateAsync({
               to: traveler.phoneNumber,
-              msg: "You have a new match for a request in your Tramona account!",
+              msg: `You have a new match for a request in your Tramona account! Go here to check it out: www.tramona.com/requests/${request.id}`,
             });
           }
         }
