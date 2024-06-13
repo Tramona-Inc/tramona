@@ -184,7 +184,7 @@ importers:
         version: 2.1640.0
       axios:
         specifier: ^1.6.7
-        version: 1.6.8
+        version: 1.7.2
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
@@ -4991,8 +4991,8 @@ packages:
     resolution: {integrity: sha512-QbUdXJVTpvUTHU7871ppZkdOLBeGUKBQWHkHrvN2V9IQWGMt61zf3B45BtzjxEJzYuj0JBjBZP/hmYS/R9pmAw==}
     engines: {node: '>=4'}
 
-  axios@1.6.8:
-    resolution: {integrity: sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==}
+  axios@1.7.2:
+    resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
 
   axobject-query@3.2.1:
     resolution: {integrity: sha512-jsyHu61e6N4Vbz/v18DHwWYKK0bSWLqn47eeDSKPB7m8tqMHF9YJ+mhIk2lVteyZrY8tnSj/jHOv4YiTCuCJgg==}
@@ -12701,9 +12701,9 @@ snapshots:
     dependencies:
       '@googlemaps/url-signature': 1.0.34
       agentkeepalive: 4.5.0
-      axios: 1.6.8
+      axios: 1.7.2
       query-string: 7.1.3
-      retry-axios: 2.6.0(axios@1.6.8)
+      retry-axios: 2.6.0(axios@1.7.2)
     transitivePeerDependencies:
       - debug
 
@@ -14029,7 +14029,7 @@ snapshots:
   '@sendgrid/client@8.1.3':
     dependencies:
       '@sendgrid/helpers': 8.0.0
-      axios: 1.6.8
+      axios: 1.7.2
     transitivePeerDependencies:
       - debug
 
@@ -14065,7 +14065,7 @@ snapshots:
       '@slack/types': 2.12.0
       '@types/node': 20.13.0
       '@types/retry': 0.12.0
-      axios: 1.6.8
+      axios: 1.7.2
       eventemitter3: 5.0.1
       form-data: 4.0.0
       is-electron: 2.2.2
@@ -16365,7 +16365,7 @@ snapshots:
 
   axe-core@4.9.1: {}
 
-  axios@1.6.8:
+  axios@1.7.2:
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -20789,9 +20789,9 @@ snapshots:
       onetime: 5.1.2
       signal-exit: 3.0.7
 
-  retry-axios@2.6.0(axios@1.6.8):
+  retry-axios@2.6.0(axios@1.7.2):
     dependencies:
-      axios: 1.6.8
+      axios: 1.7.2
 
   retry@0.13.1: {}
 
@@ -21576,7 +21576,7 @@ snapshots:
 
   twilio@4.23.0:
     dependencies:
-      axios: 1.6.8
+      axios: 1.7.2
       dayjs: 1.11.11
       https-proxy-agent: 5.0.1
       jsonwebtoken: 9.0.2
