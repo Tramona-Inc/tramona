@@ -35,7 +35,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function Onboarding4({ editing = false }) {
+export default function Onboarding4({
+  editing = false,
+  setHandleOnboarding,
+}: {
+  editing?: boolean;
+  setHandleOnboarding: (handle: () => void) => void;
+}) {
   const [location, setLocation] = useState({
     country: "",
     street: "",
@@ -115,6 +121,7 @@ export default function Onboarding4({ editing = false }) {
       }`;
       setAddress(addressConversion);
     }
+    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
   }, [form.formState]);
   // I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
@@ -243,15 +250,13 @@ export default function Onboarding4({ editing = false }) {
           )}
         </div>
       </div>
-      {!editing ? (
+      {!editing && (
         <OnboardingFooter
           handleNext={form.handleSubmit(handleFormSubmit)}
           isFormValid={form.formState.isValid}
           isForm={true}
           handleError={handleError}
         />
-      ) : (
-        <Button onClick={form.handleSubmit(handleFormSubmit)}>Save</Button>
       )}
     </>
   );

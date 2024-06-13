@@ -30,6 +30,7 @@ export default function HostPropertiesDetails({
   property: Property;
 }) {
   const [editing, setEditing] = useState(false);
+  const [handleOnboarding, setHandleOnboarding] = useState<() => void>();
 
   const propertyType = useHostOnboarding((state) => state.listing.propertyType);
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
@@ -227,11 +228,20 @@ export default function HostPropertiesDetails({
                 {editing && <a className="text-sm font-bold underline">Edit</a>}
               </DialogTrigger>
               <DialogContent>
-                <Onboarding4 editing />
+                <Onboarding4
+                  editing
+                  setHandleOnboarding={setHandleOnboarding}
+                />
                 <DialogFooter>
-                  {/* <DialogClose asChild>
-                    <Button>Save</Button>
-                  </DialogClose> */}
+                  <DialogClose asChild>
+                    <Button
+                      onClick={async () => {
+                        handleOnboarding?.();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </DialogClose>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -260,7 +270,6 @@ export default function HostPropertiesDetails({
           </div>
         </section>
 
-        {/* TODO: fix check-in/check-out time functionality and error handling */}
         <section className="space-y-2 py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Check-in</h2>
@@ -269,19 +278,27 @@ export default function HostPropertiesDetails({
                 {editing && <a className="text-sm font-bold underline">Edit</a>}
               </DialogTrigger>
               <DialogContent>
-                <Onboarding5 editing />
+                <Onboarding5
+                  editing
+                  setHandleOnboarding={setHandleOnboarding}
+                />
                 <DialogFooter>
-                  {/* <DialogClose asChild>
-                    <Button>Save</Button>
-                  </DialogClose> */}
+                  <DialogClose asChild>
+                    <Button
+                      onClick={async () => {
+                        handleOnboarding?.();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </DialogClose>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
           <div className="text-muted-foreground">
             <p>
-              {capitalize(editing ? checkInType : property.checkInInfo ?? "")}{" "}
-              check-in / out
+              {capitalize(editing ? checkInType : property.checkInInfo ?? "")}
             </p>
             <div className="flex">
               <p>
