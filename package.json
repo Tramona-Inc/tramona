@@ -93,7 +93,7 @@
     "drizzle-orm": "^0.31.0",
     "drizzle-pagination": "^1.0.10",
     "drizzle-zod": "^0.5.1",
-    "embla-carousel-autoplay": "8.0.4",
+    "embla-carousel-autoplay": "8.1.5",
     "embla-carousel-react": "8.0.4",
     "framer-motion": "^11.0.15",
     "google-map-react": "^2.2.1",
