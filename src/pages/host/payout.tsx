@@ -15,15 +15,10 @@ export default function Payout() {
   const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
   const utils = api.useUtils();
 
-  const { mutateAsync: createStripeConnectAccount } =
+  const { mutate: createStripeConnectAccount } =
     api.stripe.createStripeConnectAccount.useMutation({
-      onSuccess: (url) => {
-        setIsLoading(false);
+      onSuccess: () => {
         void utils.invalidate();
-
-        if (url) {
-          void router.push(url);
-        }
       },
     });
 
