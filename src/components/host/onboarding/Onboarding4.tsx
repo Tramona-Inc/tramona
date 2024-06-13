@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   country: zodString(),
@@ -34,7 +35,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function Onboarding4() {
+export default function Onboarding4({
+  editing = false,
+  setHandleOnboarding,
+}: {
+  editing?: boolean;
+  setHandleOnboarding: (handle: () => void) => void;
+}) {
   const [location, setLocation] = useState({
     country: "",
     street: "",
@@ -114,6 +121,7 @@ export default function Onboarding4() {
       }`;
       setAddress(addressConversion);
     }
+    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
   }, [form.formState]);
   // I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
@@ -126,7 +134,7 @@ export default function Onboarding4() {
 
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-5">
           <h1 className="text-4xl font-bold">
@@ -242,12 +250,14 @@ export default function Onboarding4() {
           )}
         </div>
       </div>
-      <OnboardingFooter
-        handleNext={form.handleSubmit(handleFormSubmit)}
-        isFormValid={form.formState.isValid}
-        isForm={true}
-        handleError={handleError}
-      />
+      {!editing && (
+        <OnboardingFooter
+          handleNext={form.handleSubmit(handleFormSubmit)}
+          isFormValid={form.formState.isValid}
+          isForm={true}
+          handleError={handleError}
+        />
+      )}
     </>
   );
 }

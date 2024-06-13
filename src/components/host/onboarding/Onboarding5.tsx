@@ -10,7 +10,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { set } from "lodash";
 
 const formSchema = z.object({
   checkIn: zodString({ maxLen: 100 }),
@@ -19,7 +21,13 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function Onboarding4() {
+export default function Onboarding5({
+  editing = false,
+  setHandleOnboarding,
+}: {
+  editing?: boolean;
+  setHandleOnboarding: (handle: () => void) => void;
+}) {
   const otherCheckInType = useHostOnboarding(
     (state) => state.listing.otherCheckInType,
   );
@@ -65,9 +73,13 @@ export default function Onboarding4() {
     setError(true);
   }
 
+  useEffect(() => {
+    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+  }, [form.formState]);
+
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-10">
           <h1 className="text-4xl font-bold">
@@ -177,12 +189,14 @@ export default function Onboarding4() {
           </Form>
         </div>
       </div>
-      <OnboardingFooter
-        handleNext={form.handleSubmit(handleFormSubmit)}
-        isFormValid={form.formState.isValid}
-        isForm={true}
-        handleError={handleError}
-      />
+      {!editing && (
+        <OnboardingFooter
+          handleNext={form.handleSubmit(handleFormSubmit)}
+          isFormValid={form.formState.isValid}
+          isForm={true}
+          handleError={handleError}
+        />
+      )}
     </>
   );
 }

@@ -290,6 +290,14 @@ export function convertTo12HourFormat(time24: string) {
   return time12;
 }
 
+export function convertTo24HourFormat(time: string): string {
+  // Assuming input format is HH:mm:ss
+  const [hour, minute] = time.split(":");
+  const formattedHour = (hour ?? "").padStart(2, "0");
+  const formattedMinute = (minute ?? "").padStart(2, "0");
+  return `${formattedHour}:${formattedMinute}`;
+}
+
 export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
 

@@ -115,26 +115,37 @@ export function NewPropertyBtn({
 export function HostPropertyEditBtn({
   editing,
   setEditing,
+  onSubmit,
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
+  onSubmit?: () => void;
 }) {
   return (
     <div className="fixed bottom-20 right-4 z-50 sm:static">
-      <Button
-        variant="secondary"
-        className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
-        onClick={() => setEditing(!editing)}
-      >
-        {editing ? (
-          "Done"
-        ) : (
-          <>
-            <Pencil size={20} />
-            Enter edit mode
-          </>
-        )}
-      </Button>
+      {editing ? (
+        <Button
+          variant="secondary"
+          className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+          onClick={() => {
+            setEditing(!editing);
+            onSubmit?.();
+          }}
+          type="button"
+        >
+          Done
+        </Button>
+      ) : (
+        <Button
+          variant="secondary"
+          className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+          onClick={() => setEditing(!editing)}
+          type="button"
+        >
+          <Pencil size={20} />
+          Enter edit mode
+        </Button>
+      )}
     </div>
   );
 }
