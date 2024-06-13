@@ -94,6 +94,7 @@ export default function AdminOfferForm({
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
     : 1;
+  const tramonaFee = offer ? offer.tramonaFee / 100 : 0;
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -127,7 +128,7 @@ export default function AdminOfferForm({
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD,
-            tramonaFee: offer.tramonaFee,
+            tramonaFee: tramonaFee,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
@@ -234,28 +235,29 @@ export default function AdminOfferForm({
       await createOffersMutation
         .mutateAsync(newOffer)
         .catch(() => errorToast());
-    }
+        
+      const travelers = await getMembersMutation.mutateAsync(
+        request.madeByGroupId,
+      );
 
-    //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
-    const travelers = await getMembersMutation.mutateAsync(
-      request.madeByGroupId,
-    );
-
-    for (const traveler of travelers) {
-      if (traveler?.phoneNumber) {
-        if (traveler.isWhatsApp) {
-          await twilioWhatsAppMutation.mutateAsync({
-            templateId: "HXfeb90955f0801d551e95a6170a5cc015",
-            to: traveler.phoneNumber,
-          });
-        } else {
-          await twilioMutation.mutateAsync({
-            to: traveler.phoneNumber,
-            msg: "You have a new match for a request in your Tramona account!",
-          });
+      for (const traveler of travelers) {
+        if (traveler?.phoneNumber) {
+          if (traveler.isWhatsApp) {
+            await twilioWhatsAppMutation.mutateAsync({
+              templateId: "HXfeb90955f0801d551e95a6170a5cc015",
+              to: traveler.phoneNumber,
+            });
+          } else {
+            await twilioMutation.mutateAsync({
+              to: traveler.phoneNumber,
+              msg: "You have a new match for a request in your Tramona account!",
+            });
+          }
         }
       }
     }
+
+    //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
 
     successfulAdminOfferToast({
       propertyName: newProperty.name,
