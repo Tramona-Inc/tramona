@@ -31,9 +31,9 @@ export const env = createEnv({
     EMAIL_FROM: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
-    RESEND_API_KEY: z.string(),
     STRIPE_SECRET_KEY: z.string(),
     STRIPE_WEBHOOK_SECRET: z.string(),
+    STRIPE_RESTRICTED_KEY_ALL: z.string(),
     FACEBOOK_CLIENT_ID: z.string(),
     FACEBOOK_CLIENT_SECRET: z.string(),
     TWILIO_ACCOUNT_SID: z.string(),
@@ -47,6 +47,11 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: z.string(),
     REGION: z.string(),
     MAP_SCREENSHOTS_BUCKET_NAME: z.string(),
+    RAPIDAPI_KEY: z.string(),
+    RAPIDAPI_HOST: z.string(),
+    GOOGLE_MAPS_KEY: z.string(),
+    OCP_APIM_SUBSCRIPTION_KEY: z.string(),
+    X_ENVIRONMENT: z.string(),
   },
 
   /**
@@ -78,11 +83,11 @@ export const env = createEnv({
     EMAIL_FROM: process.env.EMAIL_FROM,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_GOOGLE_PLACES_KEY: process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_RESTRICTED_KEY_ALL: process.env.STRIPE_RESTRICTED_KEY_ALL,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
     FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,
@@ -99,6 +104,11 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     REGION: process.env.REGION,
     MAP_SCREENSHOTS_BUCKET_NAME: process.env.MAP_SCREENSHOTS_BUCKET_NAME,
+    RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
+    RAPIDAPI_HOST: process.env.RAPIDAPI_HOST,
+    GOOGLE_MAPS_KEY: process.env.GOOGLE_MAPS_KEY,
+    OCP_APIM_SUBSCRIPTION_KEY: process.env.OCP_APIM_SUBSCRIPTION_KEY,
+    X_ENVIRONMENT: process.env.X_ENVIRONMENT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -1,19 +1,48 @@
+import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import LargeRequestCard from "@/components/requests/[id]/LargeRequestCard";
-import OfferCard from "@/components/requests/[id]/OfferCard";
-import HowToBookDialog from "@/components/requests/[id]/OfferCard/HowToBookDialog";
-import PaywallDialog from "@/components/requests/[id]/PaywallDialog";
+import OfferPage from "@/components/offers/OfferPage";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
-import { getNumNights } from "@/utils/utils";
-import { TagIcon } from "lucide-react";
-import Head from "next/head";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import ShareButton from "@/components/_common/ShareLink/ShareButton";
+import { type OfferWithDetails } from "@/components/property/PropertyPage";
 
-export default function Page() {
+import { NextSeo } from "next-seo";
+import { type GetServerSideProps } from "next";
+import { db } from "@/server/db";
+import { offers } from "@/server/db/schema/tables/offers";
+import { requests } from "@/server/db/schema/tables/requests";
+import { and, eq } from "drizzle-orm";
+
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+
+type PageProps = {
+  offer: OfferWithDetails; // Replace with a more specific type if you have one
+  serverRequestId: number;
+  serverFirstImage: string;
+  serverFirstPropertyName: string;
+  serverRequestLocation: string; // Ensure this is a plain string
+  baseUrl: string;
+};
+
+function Page({
+  serverRequestId,
+  serverFirstImage,
+  serverRequestLocation,
+  serverFirstPropertyName,
+  baseUrl,
+}: PageProps) {
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
+  const [selectedOfferId, setSelectedOfferId] = useState("");
+  const [mapCenter, setMapCenter] = useState({
+    lat: 37.774929,
+    lng: -122.419416,
+  }); // Default center
 
   const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery(
     { id: requestId },
@@ -22,109 +51,155 @@ export default function Page() {
     },
   );
 
-  const { data: requests } = api.requests.getMyRequests.useQuery();
+  useEffect(() => {
+    const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
+    if (offer?.property.longitude && offer.property.latitude) {
+      setMapCenter({
+        lat: offer.property.latitude,
+        lng: offer.property.longitude,
+      });
+    }
+  }, [selectedOfferId, offers]);
 
-  const request = requests?.activeRequests.find(({ id }) => id === requestId);
+  const [effectHasRun, setEffectHasRun] = useState(false);
 
-  const { mutate } = api.messages.createConversationWithAdmin.useMutation({
-    onSuccess: (conversationId) => {
-      void router.push(`/messages?conversationId=${conversationId}`);
-    },
-  });
+  useEffect(() => {
+    if (offers?.[0] && !effectHasRun) {
+      setEffectHasRun(true);
+      setSelectedOfferId(`${offers[0].id}`);
+    }
+  }, [offers, effectHasRun]);
 
-  function handleConversation() {
-    mutate();
+  // ik this seems dumb but its better because it reuses the same
+  // getMyRequests query that we (probably) already have cached
+  const { data: requests } = api.requests.getMyRequestsPublic.useQuery();
+  const request = requests?.activeRequestGroups
+    .map((group) => group.requests)
+    .flat(1)
+    .find(({ id }) => id === requestId);
+
+  if (router.isFallback) {
+    return <Spinner />;
   }
 
   return (
-    <>
-      <Head>
-        <title>Offers for you | Tramona</title>
-      </Head>
-      <div className="relative">
-        <div className="absolute inset-0 bg-primary">
-          <div className="relative top-1/2 h-1/2 bg-background sm:rounded-t-3xl"></div>
-        </div>
-        <div className="px-4 py-16">
-          <div className="mx-auto max-w-xl">
-            <LargeRequestCard request={request} />
+    <DashboadLayout type="guest">
+      <NextSeo
+        title={serverFirstPropertyName}
+        description={`Check out your tramona offers in ${serverRequestLocation}`}
+        canonical={`${baseUrl}/requests/${serverRequestId}`}
+        openGraph={{
+          url: `${baseUrl}/requests/${serverRequestId}`,
+          type: "website",
+          title: serverFirstPropertyName,
+          description: `Check out your tramona offers in ${serverRequestLocation}`,
+          images: [
+            {
+              url: serverFirstImage,
+              width: 900,
+              height: 800,
+              alt: "Og Image Alt Second",
+              type: "image/jpeg",
+            },
+          ],
+          site_name: "Tramona",
+        }}
+      />
+      {request && offers ? (
+        <div>
+          <div className="p-4">
+            <Button asChild variant="ghost" className="rounded-full">
+              <Link href="/requests">
+                <ArrowLeftIcon /> Back to all requests
+              </Link>
+            </Button>
+          </div>
+          <div className="px-4 pb-32">
+            <Tabs
+              defaultValue={`${offers[0]?.id}`}
+              value={selectedOfferId}
+              onValueChange={setSelectedOfferId}
+            >
+              <TabsList className="w-max">
+                {offers.map((offer, i) => (
+                  <TabsTrigger key={offer.id} value={`${offer.id}`}>
+                    Offer {i + 1}
+                  </TabsTrigger>
+                ))}
+                <div className="mx-4  mt-5 flex h-full items-center justify-center">
+                  <ShareButton
+                    id={request.id}
+                    isRequest={true}
+                    propertyName={offers[0]!.request.location}
+                  />
+                </div>
+              </TabsList>
+
+              <div className="flex flex-col lg:flex-row lg:space-x-10">
+                <div className="flex-1">
+                  {offers.map((offer) => (
+                    <TabsContent key={offer.id} value={`${offer.id}`}>
+                      <OfferPage offer={offer} />
+                    </TabsContent>
+                  ))}
+                </div>
+                <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
+                  <div className="relative h-screen lg:h-full">
+                    <SingleLocationMap
+                      key={`${mapCenter.lat}-${mapCenter.lng}`} // Unique key to force re-render
+                      lat={mapCenter.lat}
+                      lng={mapCenter.lng}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Tabs>
           </div>
         </div>
-        <Link
-          href="/requests"
-          className="absolute left-4 top-4 rounded-full px-4 py-2 font-medium text-white hover:bg-white/10"
-        >
-          &larr; Back to all requests
-        </Link>
-      </div>
-      <div className="px-4 pb-64">
-        <div className="mx-auto max-w-5xl">
-          <h1 className="flex flex-1 items-center gap-2 py-4 text-3xl font-bold text-black">
-            <TagIcon /> Offers for you{" "}
-          </h1>
-          {request && offers ? (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {offers.map((offer) => (
-                <OfferCard
-                  key={offer.id}
-                  offer={offer}
-                  requestId={requestId}
-                  checkIn={request.checkIn}
-                  checkOut={request.checkOut}
-                >
-                  <Button
-                    onClick={() => handleConversation()}
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full"
-                  >
-                    Message
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full"
-                    asChild
-                  >
-                    <Link href={`/listings/${offer.id}`}>More details</Link>
-                  </Button>
-                  {false /* offer.isPremium */ ? (
-                    <PaywallDialog>
-                      <Button size="lg" variant="gold" className="rounded-lg">
-                        Join Tramona Lisa
-                      </Button>
-                    </PaywallDialog>
-                  ) : (
-                    <HowToBookDialog
-                      isBooked={false} // default will always be false in request page
-                      listingId={offer.id}
-                      propertyName={offer.property.name}
-                      offerNightlyPrice={
-                        offer.totalPrice /
-                        getNumNights(request.checkIn, request.checkOut)
-                      }
-                      totalPrice={offer.totalPrice}
-                      originalNightlyPrice={offer.property.originalNightlyPrice}
-                      airbnbUrl={offer.property.airbnbUrl ?? ""}
-                      checkIn={request.checkIn}
-                      checkOut={request.checkOut}
-                      requestId={requestId}
-                      offer={offer}
-                      isAirbnb={offer.property.airbnbUrl !== null}
-                    >
-                      <Button size="lg" className="min-w-32 rounded-full">
-                        Book
-                      </Button>
-                    </HowToBookDialog>
-                  )}
-                </OfferCard>
-              ))}
-            </div>
-          ) : (
-            <Spinner />
-          )}
-        </div>
-      </div>
-    </>
+      ) : (
+        <Spinner />
+      )}
+    </DashboadLayout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const serverRequestId = parseInt(context.query.id as string);
+  const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "https://6fb1-104-32-193-204.ngrok-free.app"; //change to your live dev server
+
+  const firstPropertyOfRequest = await db.query.offers.findFirst({
+    where: and(eq(offers.requestId, serverRequestId)),
+    with: {
+      property: true,
+    },
+  });
+
+  const serverFirstImage = firstPropertyOfRequest!.property.imageUrls[0] ?? "";
+
+  const serverFirstPropertyName =
+    firstPropertyOfRequest?.property.name ?? "Tramona property";
+
+  const serverRequestLocationResult = await db
+    .select({
+      location: requests.location,
+    })
+    .from(requests)
+    .where(eq(requests.id, serverRequestId));
+
+  const serverRequestLocation = serverRequestLocationResult[0]?.location ?? "";
+
+  return {
+    props: {
+      serverRequestLocation,
+      serverRequestId,
+      serverFirstImage,
+      serverFirstPropertyName,
+      baseUrl,
+    },
+  };
+};
+
+export default Page;

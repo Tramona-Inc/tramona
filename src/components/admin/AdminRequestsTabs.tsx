@@ -1,4 +1,3 @@
-import { api } from "@/utils/api";
 import Link from "next/link";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
@@ -10,24 +9,32 @@ const navs = [
   },
   {
     title: "Past Requests",
-    description: "View completd requests thate user has booked",
+    description: "View completed requests that user has booked",
     href: "/admin/past-requests",
   },
   {
     title: "Utility",
-    description: "Additional utility functions for admin privelages only",
+    description: "Additional utility functions for admin privileges only",
     href: "/admin/utility",
+  },
+  {
+    title: "Admin Property Upload",
+    description: "Backdoor form to upload properties for hosts",
+    href: "/admin/property-upload",
+  },
+  {
+    title: "Admin Superhog Verification",
+    description: "Manually verify Superhog status for users",
+    href: "/admin/superhog",
   },
 ];
 
 export default function AdminRequestsTabs() {
-  const { data: requests } = api.requests.getAll.useQuery();
-
   return (
     <div className="grid grid-cols-2 gap-5">
       {navs.map((nav, index) => {
         return (
-          <Card key="index">
+          <Card key={index}>
             <Link href={nav.href}>
               <CardHeader>
                 <CardTitle>{nav.title}</CardTitle>

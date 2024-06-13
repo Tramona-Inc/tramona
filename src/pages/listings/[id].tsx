@@ -7,7 +7,7 @@
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
 import Spinner from "@/components/_common/Spinner";
-import OfferPage from "@/components/listings/OfferPage";
+import OfferPage from "@/components/offers/OfferPage";
 import { api } from "@/utils/api";
 
 import { useSession } from "next-auth/react";
@@ -29,7 +29,7 @@ export default function Listings() {
   return (
     <>
       <Head>
-        <title>Listings Property Preview | Tramona</title>
+        <title>Listing Property | Tramona</title>
       </Head>
       <div className="px-4 pb-64 pt-16">
         <div className="mx-auto max-w-5xl">

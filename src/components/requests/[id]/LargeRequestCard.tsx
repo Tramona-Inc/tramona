@@ -1,16 +1,15 @@
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
+import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
-  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
-import Image from "next/image";
 import { type DetailedRequest } from "../RequestCard";
+import RequestRefreshDialog from "../RequestRefreshDialog";
+import RequestCardBadge from "../RequestCardBadge";
 
 export default function LargeRequestCard({
   request,
@@ -33,7 +32,7 @@ export default function LargeRequestCard({
   });
 
   return (
-    <Card size="lg" className="h-64">
+    <Card size="lg" className="min-h-64">
       <CardContent className="space-y-2">
         <h2 className="flex items-center gap-1 text-lg font-semibold text-zinc-700">
           <MapPinIcon className="-translate-y-0.5 text-zinc-300" />
@@ -65,53 +64,9 @@ export default function LargeRequestCard({
         )}
       </CardContent>
       <div className="flex justify-end">
-        <LargeRequestCardBadge request={request} />
+        <RequestCardBadge size="lg" request={request} />
       </div>
+      {request.numOffers > 0 && <RequestRefreshDialog request={request} />}
     </Card>
   );
-}
-
-function LargeRequestCardBadge({ request }: { request: DetailedRequest }) {
-  switch (getRequestStatus(request)) {
-    case "pending":
-      const msAgo = Date.now() - request.createdAt.getTime();
-      const showTimeAgo = msAgo > 1000 * 60 * 60;
-      const fmtdTimeAgo = showTimeAgo ? `(${formatInterval(msAgo)})` : "";
-      return (
-        <Badge size="lg" variant="yellow">
-          Pending {fmtdTimeAgo}
-        </Badge>
-      );
-    case "accepted":
-      return (
-        <Badge size="lg" variant="green" className="pr-1">
-          {request.numOffers > 0 ? request.numOffers : "No"}{" "}
-          {request.numOffers === 1 ? "offer" : "offers"}
-          <div className="flex items-center -space-x-2">
-            {request.hostImages.map((imageUrl) => (
-              <Image
-                key={imageUrl}
-                src={imageUrl}
-                alt=""
-                width={22}
-                height={22}
-                className="inline-block"
-              />
-            ))}
-          </div>
-        </Badge>
-      );
-    case "rejected":
-      return (
-        <Badge size="lg" variant="red">
-          Rejected
-        </Badge>
-      );
-    case "booked":
-      return (
-        <Badge size="lg" variant="blue">
-          Used
-        </Badge>
-      );
-  }
 }

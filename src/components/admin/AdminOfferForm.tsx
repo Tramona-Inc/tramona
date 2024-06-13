@@ -8,13 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  ALL_PROPERTY_AMENITIES,
-  ALL_PROPERTY_SAFETY_ITEMS,
-  ALL_PROPERTY_STANDOUT_AMENITIES,
-  ALL_PROPERTY_TYPES,
-  type Request,
-} from "@/server/db/schema";
+import { ALL_PROPERTY_TYPES, type Request } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
 import { capitalize, plural } from "@/utils/utils";
@@ -40,18 +34,27 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
-import { useSession } from "next-auth/react";
+import { CaretSortIcon } from "@radix-ui/react-icons";
+import { SelectIcon } from "@radix-ui/react-select";
 
-import { getNumNights } from "@/utils/utils";
-import ErrorMsg from "../ui/ErrorMsg";
-import axios from "axios";
+import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { getS3ImgUrl } from "@/utils/formatters";
+import { getNumNights } from "@/utils/utils";
+import axios from "axios";
+import ErrorMsg from "../ui/ErrorMsg";
+
+const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+
+// custom Zod validator for time
+const zodTime = z.string().regex(timeRegex, {
+  message: "Invalid time format. Time must be in HH:MM format.",
+});
 
 const formSchema = z.object({
   propertyName: zodString(),
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
-  address: optional(zodString({ maxLen: 1000 })),
+  address: zodString({ maxLen: 1000 }),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
@@ -61,15 +64,17 @@ const formSchema = z.object({
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
-  amenities: z.enum(ALL_PROPERTY_AMENITIES).array(),
-  standoutAmenities: z.enum(ALL_PROPERTY_STANDOUT_AMENITIES).array(),
-  safetyItems: z.enum(ALL_PROPERTY_SAFETY_ITEMS).array(),
+  amenities: z.string().array().nullable(),
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
+  tramonaFee: zodNumber({ min: 0 }),
   checkInInfo: optional(zodString()),
+  checkInTime: optional(zodTime),
+  checkOutTime: optional(zodTime),
+  cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
-  mapScreenshot: zodString(),
+  // mapScreenshot: optional(zodString()),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -85,9 +90,6 @@ export default function AdminOfferForm({
   request: Request;
   offer?: OfferWithProperty;
 }) {
-  const { data: session } = useSession();
-  const user = session?.user;
-
   const numberOfNights = getNumNights(request.checkIn, request.checkOut);
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
@@ -104,14 +106,12 @@ export default function AdminOfferForm({
         { value: "" },
       ],
       amenities: [],
-      standoutAmenities: [],
-      safetyItems: [],
       ...(offer
         ? {
             // im sorry
             // ?? undefineds are to turn string | null into string | undefined
             hostName: offer.property.hostName ?? undefined,
-            address: offer.property.address ?? undefined,
+            address: offer.property.address,
             areaDescription: offer.property.areaDescription ?? undefined,
             mapScreenshot: offer.property.mapScreenshot ?? undefined,
             maxNumGuests: offer.property.maxNumGuests,
@@ -121,16 +121,19 @@ export default function AdminOfferForm({
             avgRating: offer.property.avgRating,
             numRatings: offer.property.numRatings,
             amenities: offer.property.amenities,
-            standoutAmenities: offer.property.standoutAmenities,
-            safetyItems: offer.property.safetyItems,
             about: offer.property.about,
             airbnbUrl: offer.property.airbnbUrl ?? undefined,
             airbnbMessageUrl: offer.property.airbnbMessageUrl ?? undefined,
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
-            offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
-            originalNightlyPriceUSD: offer.property.originalNightlyPrice / 100,
+            offeredNightlyPriceUSD: offeredNightlyPriceUSD,
+            tramonaFee: offer.tramonaFee,
+            originalNightlyPriceUSD: offer.property.originalNightlyPrice
+              ? offer.property.originalNightlyPrice / 100
+              : 0,
             checkInInfo: offer.property.checkInInfo ?? undefined,
+            checkInTime: offer.property.checkInTime ?? undefined,
+            checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
           }
         : {}),
@@ -148,8 +151,9 @@ export default function AdminOfferForm({
   const createOffersMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
-
-  const utils = api.useUtils();
+  const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+  // const getOwnerMutation = api.groups.getGroupOwner.useMutation();
+  const getMembersMutation = api.groups.getGroupMembers.useMutation();
 
   async function onSubmit(data: FormSchema) {
     let url: string | null = null;
@@ -171,13 +175,18 @@ export default function AdminOfferForm({
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
     // const totalPrice = offeredPriceUSD * 100;
-    const totalPrice = data.offeredNightlyPriceUSD * numberOfNights * 100;
+    const totalPrice = Math.round(
+      data.offeredNightlyPriceUSD * numberOfNights * 100,
+    );
 
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
-      type: propertyData.propertyType,
-      originalNightlyPrice: propertyData.originalNightlyPriceUSD * 100,
+      propertyType: propertyData.propertyType,
+      originalNightlyPrice: Math.round(
+        propertyData.originalNightlyPriceUSD * 100,
+      ),
+      numBathrooms: 1,
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
       mapScreenshot: url,
@@ -191,19 +200,21 @@ export default function AdminOfferForm({
         requestId: request.id,
         propertyId: offer.property.id,
         totalPrice,
+        tramonaFee: data.tramonaFee * 100,
       };
 
       await Promise.all([
         updatePropertiesMutation.mutateAsync({
           ...newProperty,
           id: offer.property.id,
+          isPrivate: true,
         }),
         updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
       ]);
       // ...otherwise its a "create offer" form so make a new property and offer
     } else {
       const propertyId = await createPropertiesMutation
-        .mutateAsync(newProperty)
+        .mutateAsync({ ...newProperty, isPrivate: true })
         .catch(() => errorToast());
 
       if (!propertyId) {
@@ -213,24 +224,37 @@ export default function AdminOfferForm({
         return;
       }
 
-      const newOffer = { requestId: request.id, propertyId, totalPrice };
+      const newOffer = {
+        requestId: request.id,
+        propertyId,
+        totalPrice,
+        tramonaFee: data.tramonaFee * 100,
+      };
 
       await createOffersMutation
         .mutateAsync(newOffer)
         .catch(() => errorToast());
     }
 
-    await Promise.all([
-      utils.properties.invalidate(),
-      utils.offers.invalidate(),
-      utils.requests.invalidate(),
-    ]);
+    //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+    const travelers = await getMembersMutation.mutateAsync(
+      request.madeByGroupId,
+    );
 
-    if (user?.phoneNumber) {
-      await twilioMutation.mutateAsync({
-        to: user.phoneNumber, // TODO: text the traveller, not the admin
-        msg: "You have a new offer for a request in your Tramona account!",
-      });
+    for (const traveler of travelers) {
+      if (traveler?.phoneNumber) {
+        if (traveler.isWhatsApp) {
+          await twilioWhatsAppMutation.mutateAsync({
+            templateId: "HXfeb90955f0801d551e95a6170a5cc015",
+            to: traveler.phoneNumber,
+          });
+        } else {
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: "You have a new match for a request in your Tramona account!",
+          });
+        }
+      }
     }
 
     successfulAdminOfferToast({
@@ -309,6 +333,20 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
+          name="tramonaFee"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Tramona Fee</FormLabel>
+              <FormControl>
+                <Input {...field} inputMode="decimal" prefix="$" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="offeredNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
@@ -356,6 +394,9 @@ export default function AdminOfferForm({
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a property type" />
+                    <SelectIcon>
+                      <CaretSortIcon className="h-4 w-4 opacity-50" />
+                    </SelectIcon>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -461,42 +502,6 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
-          name="standoutAmenities"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Standout Amenities</FormLabel>
-              <FormControl>
-                <TagSelect
-                  options={ALL_PROPERTY_STANDOUT_AMENITIES}
-                  onChange={field.onChange}
-                  value={field.value}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="safetyItems"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Safety Items</FormLabel>
-              <FormControl>
-                <TagSelect
-                  options={ALL_PROPERTY_SAFETY_ITEMS}
-                  onChange={field.onChange}
-                  value={field.value}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="about"
           render={({ field }) => (
             <FormItem className="col-span-full">
@@ -557,7 +562,7 @@ export default function AdminOfferForm({
           name="address"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Address (optional)</FormLabel>
+              <FormLabel>Address</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
               </FormControl>
@@ -565,7 +570,6 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="checkInInfo"
@@ -579,13 +583,39 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
-
         <FormField
+          control={form.control}
+          name="checkInTime"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Check In Time (optional)</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="checkOutTime"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Check Out Time (optional)</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* <FormField
           control={form.control}
           name="mapScreenshot"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Screenshot of Map</FormLabel>
+              <FormLabel>Screenshot of Map (optional)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -601,7 +631,7 @@ export default function AdminOfferForm({
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <FormField
           control={form.control}
@@ -611,6 +641,20 @@ export default function AdminOfferForm({
               <FormLabel>Area Description (optional)</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cancellationPolicy"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Cancellation Policy (optional)</FormLabel>
+              <FormControl>
+                <Textarea {...field} className="resize-y" rows={2} />
               </FormControl>
               <FormMessage />
             </FormItem>

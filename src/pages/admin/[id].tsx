@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { api } from "@/utils/api";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import RequestCardBadge from "@/components/requests/RequestCardBadge";
 
 export default function Page() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function Page() {
         <div className="px-4 py-16">
           <div className="mx-auto max-w-xl">
             {request ? (
-              <RequestCard withUser request={request} />
+              <RequestCard isAdminDashboard request={request} />
             ) : (
               <Card className="h-56" />
             )}
@@ -60,15 +61,16 @@ export default function Page() {
                   key={offer.id}
                   offer={offer}
                   requestId={requestId}
-                  checkIn={request.checkIn} checkOut={request.checkOut}
+                  checkIn={request.checkIn}
+                  checkOut={request.checkOut}
                 >
+                  {offer.acceptedAt && <RequestCardBadge request={request} />}
                   <RevokeOfferDialog
                     requestId={request.id}
                     requestCheckIn={request.checkIn}
                     requestCheckOut={request.checkOut}
                     offerId={offer.id}
-                    propertyAddress={offer.property.address!}
-                    userPhoneNumber={request.madeByUser.phoneNumber!}
+                    propertyAddress={offer.property.address}
                     propertyName={offer.property.name}
                     offerCount={offerCount!}
                   >

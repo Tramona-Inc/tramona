@@ -11,6 +11,7 @@ import { api } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
 import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 import Spinner from "../_common/Spinner";
+import { ChevronRight } from "lucide-react";
 
 const defaultMessage = `Hey! Join this new travel platform. They let people travel at any price they want. You name the price and they'll find a bnb out of your budget and make it work with your price. Here's the link, check it out:`;
 
@@ -47,121 +48,115 @@ export default function ReferralDashboard() {
   if (isLoading) return <Spinner />;
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-xl bg-zinc-100 p-4">
-        <p className="text-base text-muted-foreground">Referral Status</p>
-        <p className="text-3xl font-bold">
-          {user?.referralTier}
-          <Link
-            href="/program"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-2 text-sm font-medium text-muted-foreground underline underline-offset-2"
-          >
-            Learn more
-          </Link>
+    <div className="space-y-8 pb-20 lg:pt-16">
+      <div className="space-y-2 border-b p-4 lg:border-0 lg:p-0">
+        <h1 className="text-2xl font-bold lg:text-4xl">My Referrals</h1>
+        <p className="text-sm lg:text-lg">
+          Earn 30% of what we make off everyone you refer
         </p>
-        <div className="my-2 h-px bg-zinc-300"></div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      </div>
+      <div className="grid grid-cols-1 space-y-2 lg:grid-cols-3 lg:gap-4 lg:space-y-0">
+        <section className="space-y-6 rounded-lg border p-4">
           <div>
-            <p className="text-center text-4xl font-bold">
-              {data?.numSignUpsUsingCode ?? "-"}
-            </p>
-            <p className="text-center text-base text-muted-foreground">
-              referred
-            </p>
+            <div className="flex justify-between">
+              <p className="text-base">Referral Status</p>
+              <Link
+                href="/program"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 text-sm font-medium underline underline-offset-2"
+              >
+                Learn more
+              </Link>
+            </div>
+            <p className="text-2xl font-semibold">{user?.referralTier}</p>
           </div>
-          <div>
-            <p className="text-center text-4xl font-bold">
-              {formatCurrency(data?.totalBookingVolume ?? 0)}
-            </p>
-            <p className="text-center text-base text-muted-foreground">
-              total earnings
-            </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="border-r-2">
+              <p className="text-4xl font-semibold">
+                {data?.numSignUpsUsingCode ?? "-"}
+              </p>
+              <p>Referred</p>
+            </div>
+            <div>
+              <p className="text-4xl font-semibold">
+                {data?.numBookingsUsingCode ?? 0}
+              </p>
+              <p>Bookings</p>
+            </div>
+            <div className="col-span-2 border-t-2 pt-4">
+              <p className="text-4xl font-semibold">
+                {formatCurrency(data?.totalBookingVolume ?? 0)}
+              </p>
+              <p>Total cash back</p>
+            </div>
           </div>
-          <div>
-            <p className="text-center text-4xl font-bold">
-              {data?.numBookingsUsingCode ?? 0}
-            </p>
-            <p className="text-center text-base text-muted-foreground">
-              bookings
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="space-y-2">
-        <div>
-          <h3 className="text-2xl font-semibold">Share your referral link</h3>
-          <p className="text-base text-muted-foreground">
-            Share your referral link by copying and sending it or sharing it on
-            your social media.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Input value={url} className="text-base" disabled />
-          <CopyToClipboardBtn
-            message={url}
-            render={({ justCopied, copyMessage }) => (
-              <Button size="lg" className="w-full" onClick={copyMessage}>
-                {justCopied ? "Copied!" : "Copy link"}
-              </Button>
-            )}
-          />
-        </div>
-      </section>
-      <section className="space-y-2">
-        <div>
-          <h3 className="text-2xl font-semibold">Share a message</h3>
-          <p className="text-base text-muted-foreground">
-            Your referral link will be automatically added to the end of the
-            message.
-          </p>
-        </div>
-
-        <Textarea
-          ref={textAreaRef}
-          disabled={!isEditingMessage}
-          defaultValue={`${message}`}
-          onChange={(e) => setMessage(e.target.value)}
-          className="h-24 text-base"
-        />
-        <div className="flex gap-2">
-          <CopyToClipboardBtn
-            message={messageWithLink}
-            render={({ justCopied, copyMessage }) => (
-              <Button onClick={copyMessage} size="lg" className="flex-1">
-                {justCopied ? "Copied!" : "Copy message"}
-              </Button>
-            )}
-          />
-          {isEditingMessage ? (
-            <Button
-              onClick={() => {
-                saveReferralMessage();
-                setIsEditingMessage(false);
-              }}
-              size="lg"
-              variant="outline"
-              className="flex-1"
+          <div className="flex items-center gap-1">
+            <Link
+              href="/account/balance"
+              className={
+                "text-sm font-bold hover:underline hover:underline-offset-2"
+              }
             >
-              Save
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                setIsEditingMessage(true);
-                setTimeout(() => textAreaRef.current?.select(), 0);
-              }}
-              size="lg"
-              variant="outline"
-              className="flex-1"
-            >
-              Edit message
-            </Button>
-          )}
+              View cash back
+            </Link>
+            <ChevronRight size={16} />
+          </div>
+        </section>
+        <div className="col-span-2 space-y-10 rounded-lg p-4">
+          <section className="space-y-2">
+            <h3 className="text-xl font-bold">Share your referral link</h3>
+            <p className="text-sm">
+              Share your referral link by copying and sending it or sharing it
+              on your social media.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex-1">
+                <Input value={url} readOnly />
+              </div>
+              <CopyToClipboardBtn
+                message={url}
+                render={({ justCopied, copyMessage }) => (
+                  <Button
+                    onClick={copyMessage}
+                    className="bg-teal-900 px-0 lg:w-20"
+                  >
+                    {justCopied ? "Copied!" : "Copy"}
+                  </Button>
+                )}
+              />
+            </div>
+          </section>
+          <section className="space-y-2">
+            <h3 className="text-xl font-bold">Share a message</h3>
+            <p className="text-sm">
+              Your referral link will be automatically added to the end of the
+              message.
+            </p>
+
+            <Textarea
+              ref={textAreaRef}
+              // disabled={!isEditingMessage}
+              defaultValue={`${message}`}
+              onChange={(e) => setMessage(e.target.value)}
+              className="h-36 text-base lg:h-24"
+            />
+            <div className="flex justify-end">
+              <CopyToClipboardBtn
+                message={messageWithLink}
+                render={({ justCopied, copyMessage }) => (
+                  <Button
+                    onClick={copyMessage}
+                    className="w-full bg-teal-900 px-6 lg:w-auto"
+                  >
+                    {justCopied ? "Copied!" : "Copy"}
+                  </Button>
+                )}
+              />
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

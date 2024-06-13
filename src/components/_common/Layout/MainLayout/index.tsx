@@ -1,7 +1,7 @@
 import { cn } from "@/utils/utils";
 import React from "react";
 import Header from "../../Header";
-import Footer from "../Footer";
+import Footer from "../DesktopFooter";
 
 type MainLayoutProps = {
   className?: string;
@@ -21,9 +21,7 @@ export default function MainLayout({
       ) : (
         <Header type="marketing" />
       )}
-      <main
-        className={cn("min-h-screen-minus-header bg-background", className)}
-      >
+      <main className={cn("min-h-screen-minus-header bg-white", className)}>
         {children}
       </main>
       <Footer />

@@ -1,16 +1,17 @@
-import { PasswordResetEmailLink } from "@/components/email-templates/PasswordResetEmailLink";
-import { VerifyEmailLink } from "@/components/email-templates/VerifyEmail";
+import PasswordResetEmailLink from "packages/transactional/emails/PasswordResetEmailLink";
+import VerifyEmailLink from "packages/transactional/emails/VerifyEmail";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { db } from "@/server/db";
 import {
   ALL_HOST_TYPES,
   hostProfiles,
+  hostTeams,
   referralCodes,
   users,
   type User,
 } from "@/server/db/schema";
-import { sendEmail } from "@/server/server-utils";
+import { addUserToGroups, sendEmail } from "@/server/server-utils";
 import { generateReferralCode } from "@/utils/utils";
 import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
@@ -48,7 +49,7 @@ async function insertUserAuth(
   name: string,
   email: string,
   hashedPassword: string,
-  makeHost: boolean = false,
+  makeHost = false,
 ) {
   return await db
     .insert(users)
@@ -144,23 +145,27 @@ export const authRouter = createTRPCRouter({
           user = await insertUserAuth(input.name, input.email, hashedPassword);
 
           if (user) {
-            // Create referral code
-            await ctx.db.insert(referralCodes).values({
-              ownerId: user.id,
-              referralCode: generateReferralCode(),
-            });
+            await Promise.all([
+              // Create referral code
+              ctx.db.insert(referralCodes).values({
+                ownerId: user.id,
+                referralCode: generateReferralCode(),
+              }),
 
-            // Link user account
-            await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
-              provider: "credentials",
-              providerAccountId: user.id,
-              userId: user.id,
-              type: "email",
-            });
+              // Link user account
+              CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
+                provider: "credentials",
+                providerAccountId: user.id,
+                userId: user.id,
+                type: "email",
+              }),
+
+              // add user to groups they were invited to
+              addUserToGroups(user),
+            ]);
           }
         }
 
-        // Send email verification token
         if (user) {
           await sendVerificationEmail(user);
         }
@@ -235,11 +240,22 @@ export const authRouter = createTRPCRouter({
         }
 
         if (user) {
+          // create new team for just the host
+          const teamId = await ctx.db
+            .insert(hostTeams)
+            .values({
+              ownerId: user.id,
+              name: `${user.name ?? user.username ?? user.email}`,
+            })
+            .returning()
+            .then((res) => res[0]!.id);
+
           // Insert Host info
           await ctx.db.insert(hostProfiles).values({
             userId: user.id,
             type: input.hostType,
             profileUrl: input.profileUrl,
+            curTeamId: teamId,
           });
 
           // Send email verification token

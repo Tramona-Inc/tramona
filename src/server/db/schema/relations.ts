@@ -1,15 +1,29 @@
 import { relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
+import { bids } from "./tables/bids";
+import {
+  bucketListDestinations,
+  bucketListProperties,
+} from "./tables/bucketList";
+import { counters } from "./tables/counters";
+import { groupInvites, groupMembers, groups } from "./tables/groups";
 import { hostProfiles } from "./tables/hostProfiles";
+import {
+  hostTeamInvites,
+  hostTeamMembers,
+  hostTeams,
+} from "./tables/hostTeams";
 import {
   conversationParticipants,
   conversations,
   messages,
 } from "./tables/messages";
 import { offers } from "./tables/offers";
-import { properties } from "./tables/properties";
-import { requests } from "./tables/requests";
+import { bookedDates, properties } from "./tables/properties";
+import { requestGroups, requests } from "./tables/requests";
+import { requestsToProperties } from "./tables/requestsToProperties";
+import { reservations } from "./tables/reservations";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -17,11 +31,18 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   sessions: many(sessions),
   referralCode: one(referralCodes), // the one they own, not the one used at signup
   propertiesOwned: many(properties),
-  requestsMade: many(requests),
   referralEarnings: many(referralEarnings),
   messages: many(messages),
   conversations: many(conversationParticipants),
   hostProfile: one(hostProfiles),
+  groups: many(groupMembers),
+  ownedGroups: many(groups),
+  requestGroupsCreated: many(requestGroups),
+  hostTeams: many(hostTeamMembers),
+  bids: many(bids),
+  reservations: many(reservations),
+  bucketListDestinations: many(bucketListDestinations),
+  bucketListProperties: many(bucketListProperties),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -50,6 +71,10 @@ export const hostProfilesRelations = relations(hostProfiles, ({ one }) => ({
     fields: [hostProfiles.userId],
     references: [users.id],
   }),
+  curTeam: one(hostTeams, {
+    fields: [hostProfiles.curTeamId],
+    references: [hostTeams.id],
+  }),
 }));
 
 export const propertiesRelations = relations(properties, ({ one, many }) => ({
@@ -57,16 +82,83 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     fields: [properties.hostId],
     references: [users.id],
   }),
+  hostTeam: one(hostTeams, {
+    fields: [properties.hostTeamId],
+    references: [hostTeams.id],
+  }),
   offers: many(offers),
+  requestsToProperties: many(requestsToProperties),
+  bookedDates: many(bookedDates),
+  reservations: many(reservations),
+}));
+
+export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
+  property: one(properties, {
+    fields: [bookedDates.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
-  madeByUser: one(users, {
-    fields: [requests.userId],
-    references: [users.id],
+  madeByGroup: one(groups, {
+    fields: [requests.madeByGroupId],
+    references: [groups.id],
+  }),
+  requestGroup: one(requestGroups, {
+    fields: [requests.requestGroupId],
+    references: [requestGroups.id],
   }),
   offers: many(offers),
+  requestsToProperties: many(requestsToProperties),
 }));
+
+export const bidsRelations = relations(bids, ({ one, many }) => ({
+  madeByGroup: one(groups, {
+    fields: [bids.madeByGroupId],
+    references: [groups.id],
+  }),
+  property: one(properties, {
+    fields: [bids.propertyId],
+    references: [properties.id],
+  }),
+  counters: many(counters),
+}));
+
+export const countersRelations = relations(counters, ({ one }) => ({
+  bid: one(bids, {
+    fields: [counters.bidId],
+    references: [bids.id],
+  }),
+  property: one(properties, {
+    fields: [counters.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const requestGroupsRelations = relations(
+  requestGroups,
+  ({ one, many }) => ({
+    requests: many(requests),
+    createdByUser: one(users, {
+      fields: [requestGroups.createdByUserId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const requestsToPropertiesRelations = relations(
+  requestsToProperties,
+  ({ one }) => ({
+    request: one(requests, {
+      fields: [requestsToProperties.requestId],
+      references: [requests.id],
+    }),
+    property: one(properties, {
+      fields: [requestsToProperties.propertyId],
+      references: [properties.id],
+    }),
+  }),
+);
 
 export const offersRelations = relations(offers, ({ one }) => ({
   property: one(properties, {
@@ -120,4 +212,100 @@ export const conversationParticipantsRelations = relations(
   }),
 );
 
+export const groupsRelations = relations(groups, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [groups.ownerId],
+    references: [users.id],
+  }),
+  members: many(groupMembers),
+  invites: many(groupInvites),
+  requests: many(requests),
+  bids: many(bids),
+}));
 
+export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupMembers.groupId],
+    references: [groups.id],
+  }),
+  user: one(users, {
+    fields: [groupMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupInvites.groupId],
+    references: [groups.id],
+  }),
+}));
+
+export const hostTeamsRelations = relations(hostTeams, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [hostTeams.ownerId],
+    references: [users.id],
+  }),
+  members: many(hostTeamMembers),
+  invites: many(hostTeamInvites),
+  properties: many(properties),
+}));
+
+export const hostTeamMembersRelations = relations(
+  hostTeamMembers,
+  ({ one }) => ({
+    hostTeam: one(hostTeams, {
+      fields: [hostTeamMembers.hostTeamId],
+      references: [hostTeams.id],
+    }),
+    user: one(users, {
+      fields: [hostTeamMembers.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const hostTeamInviteRelations = relations(
+  hostTeamInvites,
+  ({ one }) => ({
+    hostTeam: one(hostTeams, {
+      fields: [hostTeamInvites.hostTeamId],
+      references: [hostTeams.id],
+    }),
+  }),
+);
+
+export const reservationsRelations = relations(reservations, ({ one }) => ({
+  property: one(properties, {
+    fields: [reservations.propertyId],
+    references: [properties.id],
+  }),
+  user: one(users, {
+    fields: [reservations.userId],
+    references: [users.id],
+  }),
+}));
+
+export const bucketListDestinationsRelations = relations(
+  bucketListDestinations,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [bucketListDestinations.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const bucketListPropertiesRelations = relations(
+  bucketListProperties,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [bucketListProperties.userId],
+      references: [users.id],
+    }),
+    property: one(properties, {
+      fields: [bucketListProperties.propertyId],
+      references: [properties.id],
+    }),
+  }),
+);

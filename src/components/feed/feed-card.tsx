@@ -38,7 +38,7 @@ type Props = {
 };
 
 // export type FeedWithInfo =
-//   inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
+//   RouterOutputs["offers"]["getAllOffers"][number];
 
 // type Props = {
 //   offer: FeedWithInfo;
@@ -103,14 +103,14 @@ export default function FeedCard({ offer }: Props) {
   // const offerDate = dayjs(offer.request.resolvedAt).fromNow();
 
   return (
-    <Card className="w-[390px] lg:w-[500px] md:w-[450px]">
+    <Card className="w-[390px] md:w-[450px] lg:w-[500px]">
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex gap-3">
           <UserAvatar
             name={name[0]}
             email={undefined}
             image={offer.hostPicUrl}
-            
+
             // image={offer.request.madeByUser.image}
           />
           <div>
@@ -140,13 +140,12 @@ export default function FeedCard({ offer }: Props) {
                   alt={`${0}`}
                   // width={2000}
                   // height={2000}
-                  // layout="fill"
+                  // fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  fill 
-                  priority 
+                  fill
+                  priority
                   style={{
                     objectFit: "cover",
-                    
                   }}
                 />
               </div>

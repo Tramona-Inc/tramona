@@ -2,6 +2,7 @@
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
+import ErrorMsg from "@/components/ui/ErrorMsg";
 import {
   Form,
   FormControl,
@@ -13,6 +14,7 @@ import {
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,34 +26,84 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
-const formSchema = z.object({
-  email: zodEmail(),
-  password: z.string(),
-});
+import { useInviteStore } from "@/utils/store/inviteLink";
 
 export default function SignIn({
   providers,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const utils = api.useUtils();
+
+  const formSchema = z
+    .object({
+      email: zodEmail(),
+      password: z.string(),
+    })
+    .superRefine(async (credentials, ctx) => {
+      const result = await utils.users.checkCredentials.fetch(credentials);
+      if (result === "success") return;
+      switch (result) {
+        case "email not found":
+          ctx.addIssue({
+            message: "Account not found for this email",
+            code: "custom",
+            path: ["email"],
+          });
+          break;
+        case "incorrect credentials":
+          ctx.addIssue({
+            message: "Incorrect credentials, please try again",
+            code: "custom",
+            path: ["password"],
+          });
+          break;
+        case "incorrect password":
+          ctx.addIssue({
+            message: "Incorrect password, please try again",
+            code: "custom",
+            path: ["password"],
+          });
+          break;
+      }
+    });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
   });
 
   const { query } = useRouter();
+  const [inviteLinkId] = useInviteStore((state) => [state.inviteLinkId]);
+  const { mutate: inviteUser } = api.groups.inviteUserById.useMutation();
+
 
   const handleSubmit = async ({
     email,
     password,
   }: z.infer<typeof formSchema>) => {
+    // Relies on middleware to redirect to dashbaord
+    // onboarding checks if user has a phone number else go to dashboard
+    const from = query.from as string | undefined;
+
     await signIn("credentials", {
       email: email,
       password: password,
+      callbackUrl: from ?? `${window.location.origin}/auth/onboarding`,
+    }).then(() => {
+      if (inviteLinkId) {
+        void inviteUser({ inviteLinkId});
+      }
     });
   };
 
+
   useEffect(() => {
     if (query.error) {
-      errorToast("Couldn't log in, please try again");
+      if (query.error === "SessionRequired") {
+        toast({ title: "Please log in to continue" });
+      } else {
+        errorToast("Couldn't log in, please try again");
+      }
     }
 
     if (query.isVerified) {
@@ -68,7 +120,9 @@ export default function SignIn({
         <title>Log in | Tramona</title>
       </Head>
       <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
-        <h1 className="text-5xl font-bold tracking-tight">Log in to Tramona</h1>
+        <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+          Log in to Tramona
+        </h1>
 
         <section className="flex flex-col items-center justify-center space-y-5">
           <div className="w-full space-y-5">
@@ -103,7 +157,7 @@ export default function SignIn({
                     </FormItem>
                   )}
                 />
-                <FormMessage />
+                <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
                 <Button
                   disabled={form.formState.isSubmitting}
                   type="submit"
@@ -160,7 +214,7 @@ export default function SignIn({
         </section>
 
         <p>
-          Don&apos; have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/auth/signup"
             className="font-semibold text-primary underline underline-offset-2"

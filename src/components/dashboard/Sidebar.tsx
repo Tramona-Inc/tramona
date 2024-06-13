@@ -1,102 +1,154 @@
-import NavLink from "../_utils/NavLink";
-
-import { cn } from "@/utils/utils";
 import {
-  BriefcaseIcon,
-  DollarSignIcon,
-  HistoryIcon,
-  InboxIcon,
-  LayoutDashboardIcon,
-  MessageCircleIcon,
-  TagIcon,
-  WrenchIcon,
+  adminNavLinks,
+  guestNavLinks,
+  hostNavLinks,
+} from "@/config/sideNavLinks";
+import { api } from "@/utils/api";
+import { plural } from "@/utils/utils";
+import {
+  ArrowLeftRight,
+  Contact,
+  Menu,
+  MessageCircleQuestion,
+  Settings,
+  ShieldQuestion,
+  Wallet,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
-
-function SidebarLink({
-  href,
-  children,
-  icon: Icon,
-}: {
-  href: string;
-  children: React.ReactNode;
-  icon: React.FC<{ className?: string }>;
-}) {
-  return (
-    <NavLink
-      href={href}
-      render={({ selected }) => (
-        <div
-          className={cn(
-            "flex items-center gap-4 border-[3px] border-transparent px-4 py-2 font-medium",
-            selected
-              ? "border-r-black bg-zinc-200 text-black"
-              : "text-zinc-700 hover:bg-zinc-200",
-          )}
-        >
-          <Icon
-            className={cn("size-6", selected ? "text-black" : "text-zinc-500")}
-          />
-          {children}
-        </div>
-      )}
-    />
-  );
-}
-
-const adminNavLinks = [
-  { href: "/admin", name: "Overview", icon: LayoutDashboardIcon },
-  {
-    href: "/admin/incoming-requests",
-    name: "Incoming Requests",
-    icon: InboxIcon,
-  },
-  { href: "/admin/past-requests", name: "Past Requests", icon: HistoryIcon },
-  { href: "/admin/utility", name: "Utility", icon: WrenchIcon },
-  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-];
-
-const hostNavLinks = [
-  { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
-  { href: "/host/payout", name: "Payout", icon: DollarSignIcon },
-  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-];
-
-const guestNavLinks = [
-  { href: "/dashboard", name: "Overview", icon: LayoutDashboardIcon },
-  { href: "/requests", name: "My Requests", icon: TagIcon },
-  { href: "/my-trips", name: "My Trips", icon: BriefcaseIcon },
-  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-];
+import { Badge } from "../ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { NavBarLink } from "./NavBarLink";
 
 export default function Sidebar({
   type,
   withLogo = false,
 }: {
-  type: "admin" | "guest" | "host";
+  type: "admin" | "guest" | "host" | "unlogged";
   withLogo?: boolean;
 }) {
+  //using session to check user's role if the role is == admin "Switch to Admin link will appear"
+  const { data: session } = useSession();
+
+  const isAdmin = session && session.user.role === "admin";
+
   const navLinks =
     type === "admin"
       ? adminNavLinks
       : type === "host"
         ? hostNavLinks
-        : guestNavLinks;
+        : isAdmin
+          ? [
+              ...guestNavLinks,
+              { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
+            ]
+          : guestNavLinks;
+
+  const { data: totalUnreadMessages } =
+    api.messages.getNumUnreadMessages.useQuery(undefined, {
+      // refetchInterval: 10000,
+    });
+
+  const notifyMe = useCallback(async () => {
+    // Check if the browser supports notifications if (!("Notification" in window) || !totalUnreadMessages) return;
+
+    // add && document.visibilityState !== 'visible' to show notification when person is not on chat screen
+    if (Notification.permission === "granted") {
+      // Check whether notification permissions have already been granted;
+      // if so, create a notification
+      const title = "Tramona Messages";
+      const icon = "/assets/images/tramona-logo.jpeg";
+      const body = `You have ${plural(totalUnreadMessages ?? 0, "unread message")}!`;
+      new Notification(title, { body, icon });
+      const notificationSound = new Audio("/assets/sounds/sound.mp3");
+      void notificationSound.play();
+    }
+  }, [totalUnreadMessages]);
+
+  useEffect(() => {
+    totalUnreadMessages && notifyMe;
+  }, [totalUnreadMessages, notifyMe]);
 
   return (
-    <div className="sticky top-0 flex h-full w-64 flex-col border-r">
+    <div className="sticky top-0 flex h-full w-64 flex-col bg-[#fafafa] lg:w-20">
       {withLogo && (
         <div className="p-3">
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-center">
+      <div className="flex flex-1 flex-col gap-2 bg-[#fafafa] pt-4">
         {navLinks.map((link, index) => (
-          <SidebarLink key={index} href={link.href} icon={link.icon}>
-            {link.name}
-          </SidebarLink>
+          <div key={index} className="relative">
+            <NavBarLink href={link.href} icon={link.icon}>
+              {link.name}
+            </NavBarLink>
+            {totalUnreadMessages !== undefined &&
+              totalUnreadMessages > 0 &&
+              link.name === "Messages" && (
+                <div className="pointer-events-none absolute inset-y-3 right-3 flex flex-col justify-center lg:justify-start">
+                  <Badge
+                    className="min-w-5 text-center"
+                    variant="solidRed"
+                    size="sm"
+                  >
+                    {totalUnreadMessages}
+                  </Badge>
+                </div>
+              )}
+          </div>
         ))}
       </div>
+      <div className="mb-6 bg-[#fafafa] text-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger className="">
+            <Menu />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuGroup>
+              <Link href="/settings/personal-information">
+                <DropdownMenuItem className="text-primary">
+                  <Settings />
+                  Settings
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/account">
+                <DropdownMenuItem className="text-primary">
+                  <Wallet /> Refer and earn
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/how-it-works">
+                <DropdownMenuItem className="text-primary">
+                  <ShieldQuestion />
+                  How it works
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/faq">
+                <DropdownMenuItem className="text-primary">
+                  <MessageCircleQuestion />
+                  FAQ
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/support">
+                <DropdownMenuItem className="text-primary">
+                  <Contact />
+                  Contact
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      {/* <button onClick={notifyMe}>NOTIFICATION</button>
+      <button onClick={play}>Sound</button>
+      <p>{`You have ${totalUnreadMessages ?? 0} unread message(s).`}</p> */}
     </div>
   );
 }

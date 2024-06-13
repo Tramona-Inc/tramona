@@ -1,9 +1,11 @@
-import { FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { Button } from "../ui/button";
+import { FormField, FormItem, FormMessage } from "../ui/form";
 
 import { type FieldPath, type FieldValues } from "react-hook-form";
 import PlacesPopover from "./PlacesPopover";
 import { useState } from "react";
+import { type InputVariant } from "../ui/input";
+import { InputButton } from "../ui/input-button";
+import { cn } from "@/utils/utils";
 
 export default function PlacesInput<
   TFieldValues extends FieldValues,
@@ -11,13 +13,19 @@ export default function PlacesInput<
 >({
   className,
   formLabel,
+  placeholder,
+  variant,
+  icon,
   ...props
 }: Omit<
   React.ComponentProps<typeof FormField<TFieldValues, TName>>,
   "render"
 > & {
-  className: string;
+  className?: string;
   formLabel: string;
+  placeholder?: string;
+  variant?: InputVariant;
+  icon?: React.FC<{ className?: string }>;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -25,25 +33,29 @@ export default function PlacesInput<
     <FormField
       {...props}
       render={({ field }) => (
-        <FormItem className={className}>
-          <FormLabel>{formLabel}</FormLabel>
+        <FormItem className={cn("relative", className)}>
           <PlacesPopover
-            autoFocus
             open={open}
             setOpen={setOpen}
             value={field.value}
             onValueChange={field.onChange}
-            className="w-96 -translate-x-6 -translate-y-12 overflow-clip px-0 pt-0"
-            trigger={({ value, disabled }) => (
-              <Button
-                variant={value ? "filledInput" : "emptyInput"}
+            className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
+            trigger={({ value }) => (
+              <InputButton
+                withClearBtn
+                variant={variant}
+                label={formLabel}
+                placeholder={placeholder}
+                value={value}
+                setValue={field.onChange}
                 type="button"
                 role="combobox"
-                disabled={disabled}
-                className="line-clamp-1 text-ellipsis text-left"
+                // disabled={disabled}
+                icon={icon}
+                className="bg-white"
               >
                 {value ? value : "Select a location"}
-              </Button>
+              </InputButton>
             )}
           />
           <FormMessage />

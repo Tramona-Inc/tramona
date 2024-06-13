@@ -7,24 +7,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/utils/utils";
 import {
-  ExternalLinkIcon,
-  LayoutDashboardIcon,
   LogOutIcon,
+  User2Icon,
   UserCheck2Icon,
   UserCheckIcon,
-  UserCogIcon,
-  type LucideProps,
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import HostTeamsDropdownItems from "./HostTeamsDropdownItems";
+import { api } from "@/utils/api";
+import { useState } from "react";
+import CreateHostTeamDialog from "./CreateHostTeamDialog";
 import { usePathname } from "next/navigation";
-import { type ForwardRefExoticComponent } from "react";
-
 function DropdownTop({ session }: { session: Session }) {
-  const title = session.user.name ?? session.user.email ?? "Anonymous";
+  const title = session.user.name ?? session.user.email;
   const subtitle = session.user.name ? session.user.email : null;
 
   return (
@@ -51,100 +49,87 @@ function DropdownTop({ session }: { session: Session }) {
   );
 }
 
-function DropdownLink({
-  children,
-  href,
-  Icon,
-  hasChildPages = false,
-  newTab = false,
-}: React.PropsWithChildren<{
-  href: string;
-  Icon: ForwardRefExoticComponent<LucideProps>;
-  hasChildPages?: boolean;
-  newTab?: boolean;
-}>) {
-  const pathname = usePathname();
-  const isSelected = hasChildPages
-    ? pathname.startsWith(href)
-    : pathname === href;
-
-  return (
-    <DropdownMenuItem asChild className="cursor-pointer">
-      <Link
-        href={href}
-        className={cn(
-          "flex items-center gap-2 py-2 pl-3",
-          isSelected
-            ? "pointer-events-none border-2 border-l-black bg-accent"
-            : "",
-        )}
-        target={newTab ? "_blank" : undefined}
-      >
-        <Icon
-          className={cn("size-5", isSelected ? "opacity-100" : "opacity-40")}
-        />{" "}
-        {children}
-      </Link>
-    </DropdownMenuItem>
-  );
-}
-
 export default function AvatarDropdown({ session }: { session: Session }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="focus:outline-none">
-        <UserAvatar
-          name={session.user.name}
-          email={session.user.email}
-          image={session.user.image}
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 py-4 font-medium">
-        <DropdownTop session={session} />
-        <DropdownMenuSeparator />
-        {session.user.role === "admin" && (
-          <>
-            <DropdownLink href="/admin" Icon={UserCheckIcon}>
-              Admin Dashboard
-            </DropdownLink>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        {session.user.role === "host" && (
-          <>
-            <DropdownLink href="/host" Icon={UserCheck2Icon}>
-              Host Dashboard
-            </DropdownLink>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        {session.user.role === "guest" && (
-          <>
-            <DropdownLink href="/dashboard" Icon={LayoutDashboardIcon}>
-              Dashboard
-            </DropdownLink>
-            <DropdownMenuSeparator />
-            <DropdownLink href="/for-hosts/sign-up" Icon={UserCheck2Icon}>
-              Become a Host
-            </DropdownLink>
-          </>
-        )}
+  const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
+  const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
+  const pathname = usePathname();
+  const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
-        <DropdownLink href="/profile" Icon={UserCogIcon}>
-          Profile Settings
-        </DropdownLink>
-        <DropdownLink newTab href="/" Icon={ExternalLinkIcon}>
-          Tramona Homepage
-        </DropdownLink>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => signOut({ callbackUrl: `${window.location.origin}` })}
-          className="group flex w-full cursor-pointer items-center gap-2 py-2 pl-3 text-destructive focus:bg-destructive focus:text-white"
-        >
-          <LogOutIcon className="opacity-50 group-focus:opacity-100" />
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+  return (
+    <>
+      <CreateHostTeamDialog open={chtDialogOpen} setOpen={setChtDialogOpen} />
+      <DropdownMenu>
+        <DropdownMenuTrigger className="focus:outline-none">
+          <UserAvatar
+            name={session.user.name}
+            email={session.user.email}
+            image={session.user.image}
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-80 py-4 font-medium">
+          <DropdownTop session={session} />
+          <DropdownMenuSeparator />
+          {session.user.role === "admin" && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/admin">
+                  <UserCheckIcon />
+                  Admin Dashboard
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          {hostProfile && (
+            <>
+              <HostTeamsDropdownItems
+                hostProfile={hostProfile}
+                hostTeams={hostTeams}
+                setChtDialogOpen={setChtDialogOpen}
+              />
+              <DropdownMenuItem asChild>
+                <Link href="/host">
+                  <UserCheck2Icon />
+                  Host Dashboard
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          {/* {session.user.role === "guest" && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/host-onboarding">
+                  <UserCheck2Icon />
+                  Become a Host
+                </Link>
+              </DropdownMenuItem>
+            </>
+          )} */}
+          <DropdownMenuItem asChild>
+            <Link href="/profile">
+              <User2Icon />
+              Profile
+            </Link>
+          </DropdownMenuItem>
+          {/* <DropdownMenuItem asChild>
+     <Link href="/">
+       <ExternalLinkIcon />
+       Tramona Homepage
+     </Link>
+   </DropdownMenuItem> */}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            red
+            onClick={() =>
+              signOut({ callbackUrl: `${window.location.origin}` })
+            }
+          >
+            <LogOutIcon />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

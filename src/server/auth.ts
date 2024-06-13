@@ -31,7 +31,24 @@ declare module "next-auth" {
   interface User extends TramonaUser {}
 
   interface Session extends DefaultSession {
-    user: TramonaUser;
+    user: Pick<
+      TramonaUser,
+      | "name"
+      | "email"
+      | "image"
+      | "id"
+      | "role"
+      | "username"
+      | "referralCodeUsed"
+      | "referralTier"
+      | "phoneNumber"
+      | "createdAt"
+      | "stripeCustomerId"
+      | "setupIntentId"
+      | "isIdentityVerified"
+      | "isWhatsApp"
+      | "dateOfBirth"
+    >;
   }
 }
 
@@ -54,6 +71,12 @@ export const authOptions: NextAuthOptions = {
           referralCodeUsed: token.referralCodeUsed,
           referralTier: token.referralTier,
           phoneNumber: token.phoneNumber,
+          createdAt: token.createdAt,
+          stripeCustomerId: token.stripeCustomerId,
+          setupIntentId: token.setupIntentId,
+          isIdentityVerified: token.isIdentityVerified,
+          isWhatsApp: token.isWhatsApp,
+          dateOfBirth: token.dateOfBirth,
         },
       };
     },
@@ -76,6 +99,12 @@ export const authOptions: NextAuthOptions = {
         newToken.referralCodeUsed = user.referralCodeUsed;
         newToken.referralTier = user.referralTier;
         newToken.phoneNumber = user.phoneNumber;
+        newToken.createdAt = user.createdAt;
+        newToken.stripeCustomerId = user.stripeCustomerId;
+        newToken.setupIntentId = user.setupIntentId;
+        newToken.isIdentityVerified = user.isIdentityVerified;
+        newToken.isWhatsApp = user.isWhatsApp;
+        newToken.dateOfBirth = user.dateOfBirth;
       }
 
       return newToken;

@@ -58,15 +58,15 @@ export default withAuth(
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    // If the user has not onboarded (phoneNumber is null) and they are not trying to access the onboarding page
+    // // If the user has not onboarded (phoneNumber is null) and they are not trying to access the onboarding page
 
-    if (
-      !isOnboardingPage &&
-      userPhoneNumber.success &&
-      userPhoneNumber.data === null
-    ) {
-      return NextResponse.redirect(new URL("/auth/onboarding", req.url));
-    }
+    // if (
+    //   !isOnboardingPage &&
+    //   userPhoneNumber.success &&
+    //   userPhoneNumber.data === null
+    // ) {
+    //   return NextResponse.redirect(new URL("/auth/onboarding", req.url));
+    // }
   },
   {
     callbacks: {
@@ -80,7 +80,7 @@ export default withAuth(
         }
 
         if (path.startsWith("/host")) {
-          return token?.role === "host";
+          return token?.role === "host" || token?.role === "admin";
         }
 
         // By default return true only if the token is not null
@@ -93,7 +93,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
+    // "/requests/:path*",
     "/auth/signin",
     "/auth/signup",
     "/admin/:path*",

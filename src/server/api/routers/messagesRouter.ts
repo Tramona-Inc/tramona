@@ -2,8 +2,8 @@ import { env } from "@/env";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
-import { zodNumber, zodString } from "@/utils/zod-utils";
-import { eq } from "drizzle-orm";
+import { zodString } from "@/utils/zod-utils";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
@@ -72,21 +72,63 @@ export async function fetchConversationWithAdmin(userId: string) {
 
   // Check if conversation contains two participants
   // and check if admin id is in there
-  const conversationWithAdmin = result?.conversations?.find(
+  const conversationWithAdmin = result?.conversations.find(
     (conv) =>
-      conv.conversation?.participants?.length === 2 &&
+      conv.conversation.participants.length === 2 &&
       conv.conversation.participants.some(
         (participant) => participant.user.id === ADMIN_ID,
       ),
   );
 
-  return conversationWithAdmin?.conversation?.id ?? null;
+  return conversationWithAdmin?.conversation.id ?? null;
 }
 
-async function generateConversation() {
+export async function fetchConversationWithOffer(
+  userId: string,
+  offerId: string,
+) {
+  const result = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    with: {
+      conversations: {
+        with: {
+          conversation: {
+            columns: {
+              offerId: true,
+            },
+            with: {
+              participants: {
+                with: {
+                  user: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const offerExists = result?.conversations.some(
+    (convo) => convo.conversation.offerId === offerId,
+  );
+
+  return offerExists;
+}
+
+async function generateConversation(
+  conversationName?: string,
+  offerId?: string,
+) {
   const [createdConversation] = await db
     .insert(conversations)
-    .values({})
+    .values({ name: conversationName ? conversationName : null, offerId })
     .returning({ id: conversations.id });
 
   return createdConversation?.id;
@@ -109,7 +151,32 @@ export async function createConversationWithAdmin(userId: string) {
   }
 }
 
-async function addUserToConversation(userId: string, conversationId: number) {
+export async function createConversationWithOffer(
+  userId: string,
+  offerUserId: string,
+  propertyName: string,
+  offerId: string,
+) {
+  // Generate conversation and get id
+  const createdConversationId = await generateConversation(
+    propertyName,
+    offerId,
+  );
+
+  if (createdConversationId !== undefined) {
+    // Insert participants for the user and admin
+    const participantValues = [
+      { conversationId: createdConversationId, userId: userId },
+      { conversationId: createdConversationId, userId: offerUserId },
+    ];
+
+    await db.insert(conversationParticipants).values(participantValues);
+
+    return createdConversationId;
+  }
+}
+
+async function addUserToConversation(userId: string, conversationId: string) {
   await db
     .insert(conversationParticipants)
     .values({ conversationId: conversationId, userId: userId });
@@ -143,7 +210,8 @@ export const messagesRouter = createTRPCRouter({
           ...conversation,
           participants: conversation.participants
             .filter((p) => p.user.id !== ctx.user.id)
-            .map((p) => p.user),
+            .map((p) => p.user)
+            .filter(Boolean),
         }),
       );
 
@@ -192,6 +260,33 @@ export const messagesRouter = createTRPCRouter({
     return conversationId;
   }),
 
+  createConversationWithOffer: protectedProcedure
+    .input(
+      z.object({
+        offerId: z.string(),
+        offerUserId: z.string(),
+        offerPropertyName: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const conversationExist = await fetchConversationWithOffer(
+        ctx.user.id,
+        input.offerId,
+      );
+
+      // Create conversation with host if it doesn't exist
+      if (!conversationExist) {
+        return await createConversationWithOffer(
+          ctx.user.id,
+          input.offerUserId === ""
+            ? env.TRAMONA_ADMIN_USER_ID
+            : input.offerUserId,
+          input.offerPropertyName,
+          input.offerId,
+        );
+      }
+    }),
+
   addUserToConversation: publicProcedure
     .input(
       z.object({
@@ -200,13 +295,13 @@ export const messagesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await addUserToConversation(input.userId, parseInt(input.conversationId));
+      await addUserToConversation(input.userId, input.conversationId);
     }),
 
   setMessageToRead: protectedProcedure
     .input(
       z.object({
-        messageId: zodNumber(),
+        messageId: zodString(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -225,5 +320,75 @@ export const messagesRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       await addTwoUserToConversation(input.user1Id, input.user2Id);
+    }),
+
+  getParticipantsPhoneNumbers: protectedProcedure
+    .input(z.object({ conversationId: zodString() }))
+    .query(async ({ ctx, input }) => {
+      const participants = await db
+        .select({
+          id: users.id,
+          phoneNumber: users.phoneNumber,
+          lastTextAt: users.lastTextAt,
+          isWhatsApp: users.isWhatsApp,
+        })
+        .from(conversationParticipants)
+        .innerJoin(users, eq(conversationParticipants.userId, users.id))
+        .where(
+          and(
+            eq(conversationParticipants.conversationId, input.conversationId),
+            ne(conversationParticipants.userId, ctx.user.id),
+          ),
+        );
+      return participants;
+    }),
+
+  getNumUnreadMessages: protectedProcedure.query(async ({ ctx }) => {
+    return await db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {},
+        with: {
+          conversations: {
+            columns: {},
+            with: {
+              conversation: {
+                columns: {},
+                with: {
+                  messages: {
+                    columns: { id: true },
+                    where: and(
+                      eq(messages.read, false),
+                      ne(messages.userId, ctx.user.id),
+                    ),
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((res) => {
+        if (!res) return 0; // No result found, so return 0 unread messages
+
+        // Iterate over conversations and calculate sum of message lengths
+        let totalLength = 0;
+        res.conversations.forEach((conv) => {
+          totalLength += conv.conversation.messages.length;
+        });
+        return totalLength;
+      });
+  }),
+  setMessagesToRead: protectedProcedure
+    .input(
+      z.object({
+        unreadMessageIds: z.string().array(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(messages)
+        .set({ read: true })
+        .where(inArray(messages.id, input.unreadMessageIds));
     }),
 });

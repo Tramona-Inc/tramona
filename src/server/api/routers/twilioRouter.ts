@@ -4,6 +4,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { sendSlackMessage } from "@/server/slack";
 import { zodString } from "@/utils/zod-utils";
 import { MailService } from "@sendgrid/mail";
 import { TRPCError } from "@trpc/server";
@@ -53,6 +54,98 @@ export const twilioRouter = createTRPCRouter({
       return response;
     }),
 
+  // sendWhatsApp: protectedProcedure
+  // .input(
+  //   z.object({
+  //     msg: z.string(),
+  //     to: z.string(),
+  //   }),
+  // )
+  // .mutation(async ({ input }) => {
+  //   const { msg, to } = input;
+
+  //   const response = await twilio.messages.create({
+  //     from: `whatsapp:${env.TWILIO_FROM}`,
+  //     body: msg,
+  //     to: `whatsapp:${to}`
+  //   });
+
+  //   return response;
+  // }),
+
+  sendWhatsApp: protectedProcedure
+    .input(
+      z.object({
+        templateId: z.string(),
+        to: z.string(),
+        propertyName: z.string().optional(),
+        propertyAddress: z.string().optional(),
+        url: z.string().optional(),
+        checkIn: z.date().optional(),
+        checkOut: z.date().optional(),
+        numRequests: z.number().optional(),
+        cost: z.string().optional(),
+        price: z.number().optional(),
+        dates: z.string().optional(),
+        name: z.string().optional(),
+        counterCost: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { templateId, to, propertyName, propertyAddress, url, checkIn, checkOut, numRequests, cost, price, dates, name, counterCost } = input;
+      let contentVariables: Record<number, string | undefined> = {};
+
+      // Set content variables based on template ID
+      if (templateId === 'HXd5256ff10d6debdf70a13d70504d39d5' || templateId === 'HXb293923af34665e7eefc81be0579e5db') {
+        contentVariables = {
+          1: propertyName,
+          2: propertyAddress,
+          3: checkIn?.toISOString(),
+          4: checkOut?.toISOString(),  //is this a problem?
+        };
+
+        if (templateId === 'HXd5256ff10d6debdf70a13d70504d39d5') {
+          contentVariables[5] = url;
+        }
+      } else if (templateId === "HX82b075be3d74f02e45957a453fd48cef") {
+        if (numRequests) {
+          contentVariables = {
+            1: numRequests > 1 ? `${numRequests} unconfirmed requests` : `${numRequests} unconfirmed request`,
+            2: numRequests > 1 ? `${numRequests} requests` : `${numRequests} request`,
+            3: url,
+          }
+        }
+      } else if (templateId === "HX28c41122cfa312e326a9b5fc5e7bc255" || templateId === "HX74ffb496915d8e4ef39b41e624ca605e" || templateId === "HXa9200c7721c008928f1a932678727214" || templateId === "HXd7d55b299c2170bd5af4cef76e058d78") {
+        contentVariables = {
+          1: cost,
+          2: name,
+          3: dates,
+        }
+        if (templateId === "HXa9200c7721c008928f1a932678727214") {
+          contentVariables[4] = counterCost;
+        }
+      } else if (templateId === "HX1650cf0e293142a6db2b458167025222") {
+        contentVariables = {
+          1: price?.toString(),
+          2: name,
+          3: dates,
+        }
+      }
+
+      // Create Twilio message payload
+      const twilioMessagePayload = {
+        contentSid: templateId,
+        from: `whatsapp:${env.TWILIO_FROM}`,
+        messagingServiceSid: 'MG7f313e1063abc277e6503fd9c9f3ef07',
+        to: `whatsapp:${to}`,
+        contentVariables: JSON.stringify(contentVariables),
+      };
+
+      // Send the Twilio message
+      const response = await twilio.messages.create(twilioMessagePayload);
+      return response;
+    }),
+
   sendEmail: protectedProcedure
     .input(
       z.object({
@@ -93,6 +186,16 @@ export const twilioRouter = createTRPCRouter({
         });
 
       return verification;
+    }),
+
+  sendSlack: protectedProcedure
+    .input(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      const { message } = input;
+
+      sendSlackMessage(message);
+
+      return "Slack message sent";
     }),
 
   verifyOTP: publicProcedure

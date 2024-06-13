@@ -3,6 +3,7 @@
  * for Docker builds.
  */
 await import("./src/env.js");
+import NextBundleAnalyzer from "@next/bundle-analyzer";
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -42,12 +43,6 @@ const config = {
         // pathname: "/im/pictures/**",
       },
       {
-        hostname: "trpc-test.s3.amazonaws.com",
-
-        // port: "",
-        // pathname: "/im/pictures/**",
-      },
-      {
         protocol: "https",
         hostname: "trpc-test.s3.amazonaws.com",
       },
@@ -75,6 +70,38 @@ const config = {
         protocol: "https",
         hostname: "tramona-map-screenshots.s3.us-east-1.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "www.airbnb.com",
+      },
+      {
+        protocol: "https",
+        hostname: "guesty-listing-images.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "guestybookings.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.guesty.com",
+      },
+      {
+        protocol: "https",
+        hostname: "dx577khz83dc.cloudfront.net",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
+      {
+        protocol: "https",
+        hostname: "tramona-images.s3.amazonaws.com",
+      },
     ],
   },
   experimental: {
@@ -82,4 +109,6 @@ const config = {
   },
 };
 
-export default config;
+export default NextBundleAnalyzer({ enabled: process.env.ANALYZE === "true" })(
+  config,
+);

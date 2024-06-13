@@ -18,7 +18,7 @@ export default function Payout() {
   const { mutateAsync: createStripeConnectAccount } =
     api.stripe.createStripeConnectAccount.useMutation({
       onSuccess: (url) => {
-        setIsLoading(false)
+        setIsLoading(false);
         void utils.invalidate();
 
         if (url) {

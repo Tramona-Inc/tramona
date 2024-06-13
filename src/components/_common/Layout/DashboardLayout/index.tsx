@@ -1,26 +1,40 @@
+import MobileNav from "@/components/dashboard/MobileNav";
 import Sidebar from "@/components/dashboard/Sidebar";
+import { useSession } from "next-auth/react";
 import Header from "../../Header";
-import Footer from "../Footer";
+import Footer from "../DesktopFooter";
+import { useIsMd } from "@/utils/utils";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
-  type: "admin" | "host" | "guest";
+  type: "admin" | "host" | "guest" | "unlogged";
 };
 
-export default function DashboadLayout({
+export default function DashboardLayout({
   children,
   type,
 }: DashboardLayoutProps) {
+  const { data: session } = useSession();
+  const isMd = useIsMd();
   return (
     <>
-      <Header type="dashboard" sidebarType={type} />
-      <div className="flex">
-        <aside className="h-screen-minus-header sticky hidden bg-zinc-100 lg:block">
-          <Sidebar type={type} />
-        </aside>
-        <main className="flex-1">{children}</main>
+      <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
+      <div className="relative min-h-screen-minus-header lg:flex">
+        {session && (
+          <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
+            <Sidebar type={type} />
+          </aside>
+        )}
+        <div className="lg:flex-1">
+          <main className="relative min-h-screen-minus-header">{children}</main>
+          {session ? (
+            <MobileNav type={type} />
+          ) : (
+            <MobileNav type={"unlogged"} />
+          )}
+          {isMd && <Footer />}
+        </div>
       </div>
-      <Footer />
     </>
   );
 }

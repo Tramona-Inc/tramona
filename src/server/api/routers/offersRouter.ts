@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -5,6 +6,8 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
+  groupMembers,
+  groups,
   offerInsertSchema,
   offerSelectSchema,
   offerUpdateSchema,
@@ -12,11 +15,28 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
-  requests,
 } from "@/server/db/schema";
+import { getAddress, getCoordinates } from "@/server/google-maps";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
+import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNotNull, isNull, lt, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  isNotNull,
+  isNull,
+  lt,
+  ne,
+  notInArray,
+  sql,
+} from "drizzle-orm";
+import { z } from "zod";
+import { requests } from "../../db/schema/tables/requests";
+import { reservationSelectSchema } from "../../db/schema/tables/reservations";
+import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -28,25 +48,19 @@ export const offersRouter = createTRPCRouter({
         with: {
           request: {
             columns: { id: true },
-            with: {
-              madeByUser: { columns: { id: true } },
-            },
+            with: { madeByGroup: { columns: { ownerId: true } } },
           },
         },
       });
 
       // request must still exist
       if (!offerDetails?.request) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
+        throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      // you can only accept your own offers
-      if (offerDetails.request.madeByUser.id !== ctx.user.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-        });
+      // only the owner of the group can accept offers
+      if (offerDetails.request.madeByGroup.ownerId !== ctx.user.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       await ctx.db.transaction(async (tx) => {
@@ -111,7 +125,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-  getByRequestIdWithProperty: protectedProcedure
+  getByRequestIdWithProperty: publicProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
@@ -132,8 +146,21 @@ export const offersRouter = createTRPCRouter({
           createdAt: true,
           totalPrice: true,
           id: true,
+          acceptedAt: true,
+          tramonaFee: true,
         },
+
         with: {
+          request: {
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+              location: true,
+              id: true,
+            },
+            with: { madeByGroup: { with: { members: true } } },
+          },
           property: {
             with: {
               host: {
@@ -145,6 +172,45 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
+  getCoordinates: publicProcedure
+    .input(z.object({ location: z.string() }))
+    .query(async ({ input }) => {
+      const coords = await getCoordinates(input.location);
+      return {
+        coordinates: coords,
+      };
+    }),
+
+  getCity: publicProcedure
+    .input(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { latitude, longitude } = input;
+
+      const addressComponents = await getAddress({
+        lat: latitude,
+        lng: longitude,
+      });
+
+      if (!addressComponents) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const city = addressComponents.find((component) =>
+        component.types.includes("locality"),
+      )?.long_name;
+
+      const state = addressComponents.find((component) =>
+        component.types.includes("administrative_area_level_1"),
+      )?.short_name;
+
+      return { city, state };
+    }),
+
   getByIdWithDetails: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
@@ -153,7 +219,9 @@ export const offersRouter = createTRPCRouter({
         columns: {
           createdAt: true,
           totalPrice: true,
+          acceptedAt: true,
           id: true,
+          tramonaFee: true,
         },
         with: {
           request: {
@@ -161,9 +229,10 @@ export const offersRouter = createTRPCRouter({
               checkIn: true,
               checkOut: true,
               numGuests: true,
+              location: true,
               id: true,
             },
-            with: { madeByUser: { columns: { id: true } } },
+            with: { madeByGroup: { with: { members: true } } },
           },
           property: {
             with: {
@@ -175,8 +244,58 @@ export const offersRouter = createTRPCRouter({
         },
       });
 
-      if (offer?.request.madeByUser.id !== ctx.user.id) {
+      if (!offer) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      const memberIds = offer.request.madeByGroup.members.map(
+        (member) => member.userId,
+      );
+
+      if (!memberIds.includes(ctx.user.id) && ctx.user.role !== "admin") {
         throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      return offer;
+    }),
+
+  getByPublicIdWithDetails: publicProcedure
+    .input(offerSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const offer = await ctx.db.query.offers.findFirst({
+        where: and(
+          eq(offers.id, input.id),
+          //isNotNull(offers.madePublicAt) //for now this is empty because we we want users to be able to share.
+        ),
+        columns: {
+          createdAt: true,
+          totalPrice: true,
+          acceptedAt: true,
+          id: true,
+          tramonaFee: true,
+        },
+        with: {
+          request: {
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+              location: true,
+              id: true,
+            },
+          },
+          property: {
+            with: {
+              host: {
+                columns: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+      });
+      console.log("this is offer router offer", offer);
+      if (!offer) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
       return offer;
@@ -229,59 +348,102 @@ export const offersRouter = createTRPCRouter({
     }));
   }),
 
-  getAllOffers: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.offers.findMany({
-      with: {
-        property: {
-          with: {
-            host: { columns: { name: true, email: true, image: true } },
-          },
-          columns: { name: true, originalNightlyPrice: true, imageUrls: true },
-        },
-        request: {
-          columns: {
-            userId: true,
-            checkIn: true,
-            checkOut: true,
-            resolvedAt: true,
-          },
-          with: {
-            madeByUser: { columns: { name: true, image: true } }, // Fetch user name
-          },
-        },
-      },
-      where: and(
-        isNotNull(offers.acceptedAt),
-        isNotNull(offers.paymentIntentId),
-        isNotNull(offers.checkoutSessionId),
-      ),
-      orderBy: desc(offers.createdAt),
-    });
+  // getAllOffers: publicProcedure.query(async ({ ctx }) => {
+  //   return await ctx.db.query.offers.findMany({
+  //     with: {
+  //       property: {
+  //         with: {
+  //           host: { columns: { name: true, email: true, image: true } },
+  //         },
+  //         columns: { name: true, originalNightlyPrice: true, imageUrls: true },
+  //       },
+  //       request: {
+  //         columns: {
+  //           userId: true,
+  //           checkIn: true,
+  //           checkOut: true,
+  //           resolvedAt: true,
+  //         },
+  //         with: {
+  //           madeByUser: { columns: { name: true, image: true } }, // Fetch user name
+  //         },
+  //       },
+  //     },
+  //     where: and(
+  //       isNotNull(offers.acceptedAt),
+  //       isNotNull(offers.paymentIntentId),
+  //       isNotNull(offers.checkoutSessionId),
+  //     ),
+  //     orderBy: desc(offers.createdAt),
+  //   });
 
-    // return await ctx.db.query.requests.findMany({
-    //   with: {
-    //     offers: {
-    //       with: {
-    //         property: {
-    //           with: {
-    //             host: { columns: { name: true, email: true, image: true } },
-    //           },
-    //         },
-    //       },
-    //     },
-    //     madeByUser: { columns: { name: true, image: true } },
-    //   },
-    //   orderBy: desc(requests.createdAt),
-    // });
-  }),
+  // return await ctx.db.query.requests.findMany({
+  //   with: {
+  //     offers: {
+  //       with: {
+  //         property: {
+  //           with: {
+  //             host: { columns: { name: true, email: true, image: true } },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     madeByUser: { columns: { name: true, image: true } },
+  //   },
+  //   orderBy: desc(requests.createdAt),
+  // });
+  // }),
 
-  getStripePaymentIntentAndCheckoutSessionId: protectedProcedure
+  getStripePaymentIntentAndCheckoutSessionId: publicProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
         columns: { paymentIntentId: true, checkoutSessionId: true },
       });
+    }),
+
+  acceptCityRequest: protectedProcedure
+    .input(
+      offerInsertSchema.pick({
+        requestId: true,
+        propertyId: true,
+        totalPrice: true,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const propertyHostTeam = await ctx.db.query.properties
+        .findFirst({
+          where: eq(properties.id, input.propertyId),
+          columns: { id: true },
+          with: {
+            hostTeam: { with: { members: true } },
+          },
+        })
+        .then((res) => res?.hostTeam);
+
+      if (!propertyHostTeam) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      if (
+        !propertyHostTeam.members.find(
+          (member) => member.userId === ctx.user.id,
+        )
+      ) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      await ctx.db.insert(offers).values(input);
+
+      await ctx.db
+        .delete(requestsToProperties)
+        .where(
+          and(
+            eq(requestsToProperties.propertyId, input.propertyId),
+            eq(requestsToProperties.requestId, input.requestId),
+          ),
+        );
     }),
 
   create: roleRestrictedProcedure(["admin", "host"])
@@ -336,20 +498,169 @@ export const offersRouter = createTRPCRouter({
   delete: roleRestrictedProcedure(["admin", "host"])
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "host") {
-        const request = await ctx.db.query.offers.findFirst({
-          where: eq(offers.id, input.id),
-          columns: {},
-          with: {
-            property: { columns: { hostId: true } },
+      const offer = await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.id),
+        columns: {},
+        with: {
+          property: { columns: { hostId: true, name: true } },
+          request: {
+            columns: {
+              checkIn: true,
+              checkOut: true,
+              id: true,
+              location: true,
+            },
+            with: {
+              madeByGroup: {
+                with: {
+                  members: {
+                    with: {
+                      user: {
+                        columns: { phoneNumber: true, isWhatsApp: true },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
-        });
+        },
+      });
 
-        if (request?.property.hostId !== ctx.user.id) {
+      if (!offer) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (ctx.user.role === "host") {
+        if (offer.property.hostId !== ctx.user.id) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
 
       await ctx.db.delete(offers).where(eq(offers.id, input.id));
+
+      const { request, property } = offer;
+
+      // const groupOwner = await ctx.db.query.groups
+      //   .findFirst({
+      //     where: eq(groups.id, request.madeByGroup.id),
+      //     with: {
+      //       owner: {
+      //         columns: { id: true, phoneNumber: true, isWhatsApp: true },
+      //       },
+      //     },
+      //   })
+      //   .then((res) => res?.owner);
+
+      const members = await ctx.db.query.groupMembers
+        .findMany({
+          columns: {},
+          with: {
+            user: {
+              columns: { phoneNumber: true, isWhatsApp: true, id: true },
+            },
+          },
+          where: eq(groupMembers.groupId, request.madeByGroup.id),
+        })
+        .then((res) => res.map((member) => member.user));
+
+      if (!members) return;
+
+      for (const member of members) {
+        const memberHasOtherOffers = await ctx.db.query.groupMembers
+          .findFirst({
+            where: eq(groupMembers.userId, member.id),
+            columns: {},
+            with: {
+              group: {
+                columns: {},
+                with: {
+                  requests: {
+                    columns: {},
+                    with: { offers: { columns: { id: true } } },
+                  },
+                },
+              },
+            },
+          })
+          .then(
+            (res) =>
+              res && res.group.requests.some((req) => req.offers.length > 0),
+          );
+
+        const fmtdDateRange = formatDateRange(
+          request.checkIn,
+          request.checkOut,
+        );
+        const url = `${env.NEXTAUTH_URL}/requests`;
+
+        if (member.phoneNumber) {
+          if (member.isWhatsApp) {
+            memberHasOtherOffers
+              ? void sendWhatsApp({
+                  templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
+                  to: member.phoneNumber,
+                  propertyName: property.name,
+                  propertyAddress: request.location, //??can this be null
+                  checkIn: request.checkIn,
+                  checkOut: request.checkOut,
+                  url: url,
+                })
+              : void sendWhatsApp({
+                  templateId: "HXb293923af34665e7eefc81be0579e5db",
+                  to: member.phoneNumber,
+                  propertyName: property.name,
+                  propertyAddress: request.location,
+                  checkIn: request.checkIn,
+                  checkOut: request.checkOut,
+                });
+          } else {
+            void sendText({
+              to: member.phoneNumber,
+              content: `Tramona: Hello, your ${property.name} in ${request.location} offer from ${fmtdDateRange} has expired.${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
+            });
+          }
+        }
+      }
     }),
+
+  //I want the all of the offers from each request that has been accepted except for the offer that has been accepted
+  //Search in all requests, if there has been an off that has been accepted, then remove that offer from the list of offers
+  //If there has been no offer accepted, then return nothing for that request
+  getAllUnmatchedOffers: publicProcedure.query(async ({ ctx }) => {
+    //go through all the requests and filter out the ones that have an offer that has been accepted
+
+    const completedRequests = await ctx.db.query.requests.findMany({
+      where: isNotNull(requests.resolvedAt),
+    });
+    console.log(completedRequests);
+    const unMatchedOffers = await ctx.db.query.offers.findMany({
+      where: and(
+        isNull(offers.acceptedAt),
+        notInArray(
+          offers.requestId,
+          completedRequests.map((req) => req.id),
+        ),
+      ),
+      with: {
+        property: {
+          columns: {
+            name: true,
+            originalNightlyPrice: true,
+            imageUrls: true,
+            id: true,
+            maxNumGuests: true,
+            numBedrooms: true,
+          },
+        },
+        request: {
+          columns: {
+            checkIn: true,
+            checkOut: true,
+          },
+        },
+      },
+    });
+    return unMatchedOffers;
+  }),
 });

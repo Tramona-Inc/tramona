@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   integer,
   pgTable,
@@ -19,17 +20,21 @@ export const offers = pgTable(
       .references(() => requests.id, { onDelete: "cascade" }),
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id, { onDelete: "set null" }),
+      .references(() => properties.id, { onDelete: "cascade" }),
     totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at").notNull().defaultNow(),
     madePublicAt: timestamp("made_public_at"),
     acceptedAt: timestamp("accepted_at"),
     paymentIntentId: varchar("payment_intent_id"),
     checkoutSessionId: varchar("checkout_session_id"),
+    tramonaFee: integer("tramona_fee").notNull().default(0), // in cents
+    //fromUnclaimedOffers: boolean("from_unclaimed_offers_form").default(false),
   },
   (t) => ({
-    madePublicAtIndex: index("made_public_at_index").on(t.madePublicAt),
-    acceptedAtIndex: index("accepted_at_index").on(t.acceptedAt),
+    madePublicAtIndex: index().on(t.madePublicAt),
+    acceptedAtIndex: index().on(t.acceptedAt),
+    requestidIdx: index().on(t.requestId),
+    propertyidIdx: index().on(t.propertyId),
   }),
 );
 

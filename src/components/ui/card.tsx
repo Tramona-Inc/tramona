@@ -4,13 +4,13 @@ import { cn } from "@/utils/utils";
 import { type VariantProps, cva } from "class-variance-authority";
 
 const cardVariants = cva(
-  "@container border text-card-foreground flex flex-col shadow-md bg-card border-zinc-100",
+  "border text-card-foreground relative flex flex-col bg-card border-zinc-100",
   {
     variants: {
       size: {
         sm: "rounded-lg space-y-3 p-3 shadow",
-        md: "rounded-xl space-y-4 p-4",
-        lg: "rounded-2xl space-y-6 p-6",
+        md: "rounded-xl space-y-4 p-4 shadow-md",
+        lg: "rounded-2xl space-y-6 p-6 shadow-md",
       },
     },
     defaultVariants: {
@@ -81,7 +81,7 @@ const CardFooter = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "flex flex-col items-stretch gap-2 @sm:flex-row @sm:items-center @sm:justify-end",
+      "flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end",
       className,
     )}
     {...props}

@@ -1,4 +1,5 @@
 import {
+  AnonymousAvatar,
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -19,16 +20,16 @@ export default function UserAvatar({
   image,
   size,
 }: {
-  name: string | null | undefined;
-  email: string | null | undefined;
-  image: string | null | undefined;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
 } & AvatarVariants) {
-  const fallback = name ? getInitials(name) : email?.[0] ?? "?";
 
+  if (!name && !email && !image) return <AnonymousAvatar size={size} />;
+  const fallback = name ? getInitials(name) : email?.[0] ?? "?";
   return (
     <Avatar size={size}>
-      {image && <AvatarImage src={image} alt="" style={{ objectFit: 'cover' }} />}
-      <AvatarFallback>{fallback}</AvatarFallback>
+      {image ? <AvatarImage src={image} alt="" /> : <AvatarFallback>{fallback}</AvatarFallback>}
     </Avatar>
   );
 }

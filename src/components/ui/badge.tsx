@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "@/utils/utils";
 
@@ -8,22 +8,26 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary/20 text-primary",
+        primary: "bg-primary/20 text-primary",
         secondary: "bg-zinc-200 text-zinc-600 font-medium",
-        red: "bg-red-200 text-red-800",
-        green: "bg-green-200 text-green-800",
-        yellow: "bg-yellow-200 text-yellow-800",
-        blue: "bg-blue-200 text-blue-800",
-        grey: "bg-grey-200 text-grey-800",
+        red: "text-red-800 bg-red-100 border border-red-200",
+        green: "bg-green-100 text-green-800 border border-green-200",
+        yellow: "bg-amber-100 text-amber-800 border border-amber-200",
+        blue: "bg-blue-100 border border-blue-200 text-blue-800",
+        gray: "bg-zinc-200 text-zinc-700",
+        lightGray: "bg-white text-[#4D535F]",
+        solidRed: "bg-red-600 text-white",
+        skeleton: "bg-accent animate-pulse",
+        primaryGreen: "bg-teal-900 hover:bg-teal-950 text-white",
       },
       size: {
-        sm: "text-xs px-1.5 py-0.5 gap-0.5",
-        md: "text-sm px-2.5 py-0.5 gap-1",
-        lg: "text-base px-3 py-1 gap-1.5",
+        sm: "text-xs px-1.5 h-5 gap-0.5 font-medium",
+        md: "text-sm px-2.5 h-6 gap-1",
+        lg: "text-base px-3 h-8 gap-1.5",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "secondary",
       size: "md",
     },
   },

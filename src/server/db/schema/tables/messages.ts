@@ -1,57 +1,58 @@
 import {
   boolean,
   index,
-  integer,
   pgTable,
   primaryKey,
-  serial,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { nanoid } from "nanoid";
 import { users } from "./users";
 
 export const conversations = pgTable("conversations", {
-  id: serial("id").primaryKey(),
+  id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
   name: varchar("name", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  offerId: varchar("offer_id"),
 });
 
 export const messages = pgTable(
   "messages",
   {
-    id: serial("id").primaryKey(),
-    conversationId: integer("conversation_id")
+    id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
+    conversationId: varchar("conversation_id")
       .notNull()
-      .references(() => conversations.id),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     message: varchar("message", { length: 1500 }).notNull(),
     read: boolean("read").default(false),
     isEdit: boolean("is_edit").default(false),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
-    conversationIndex: index("conversationIndex").on(t.conversationId),
-    userIndex: index("userIndex").on(t.userId),
+    conversationidIdx: index().on(t.conversationId),
+    useridIdx: index().on(t.userId),
   }),
 );
 
 export const conversationParticipants = pgTable(
   "conversation_participants",
   {
-    conversationId: integer("conversation_id")
+    conversationId: varchar("conversation_id")
       .notNull()
-      .references(() => conversations.id),
+      .references(() => conversations.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+      .references(() => users.id, { onDelete: "cascade" }),
   },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.conversationId, vt.userId] }),
+  (t) => ({
+    compoundKey: primaryKey({ columns: [t.conversationId, t.userId] }),
   }),
 );
-
 
 export type MessageType = typeof messages.$inferSelect;

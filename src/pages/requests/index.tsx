@@ -1,130 +1,38 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import Spinner from "@/components/_common/Spinner";
-import NewRequestDialog from "@/components/requests/NewRequestDialog";
-import RequestCard, {
-  type DetailedRequest,
-} from "@/components/requests/RequestCard";
-import { RequestCardAction } from "@/components/requests/RequestCardAction";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/utils/api";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { useEffect, useState } from "react";
-import { useInterval } from "@/utils/useInterval";
-import { usePrevious } from "@uidotdev/usehooks";
-import { HistoryIcon, Plus, TagIcon } from "lucide-react";
+import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Head from "next/head";
-
-function NewRequestButton() {
-  return (
-    <NewRequestDialog>
-      <Button className="pl-2">
-        <Plus />
-        New request
-      </Button>
-    </NewRequestDialog>
-  );
-}
-
-function RequestCards({
-  requests,
-}: {
-  requests: DetailedRequest[] | undefined;
-}) {
-  const [isWaiting, setIsWaiting] = useState(false);
-  const utils = api.useUtils();
-
-  const previousRequests = usePrevious(requests);
-
-  useEffect(() => {
-    if (!requests || !previousRequests) return;
-    const newlyApprovedRequests = requests.filter(
-      (req) =>
-        req.hasApproved &&
-        !previousRequests.find((req2) => req2.id === req.id)?.hasApproved,
-    );
-    if (newlyApprovedRequests.length > 0) {
-      setIsWaiting(false);
-    }
-  }, [requests]);
-
-  // Start the interval to invalidate requests every 10 seconds
-  useInterval(
-    () => void utils.requests.getMyRequests.invalidate(),
-    isWaiting ? 10 * 1000 : null,
-  ); // 10 seconds
-
-  const handleResendConfirmation = () => {
-    // Start the timer for 3 minutes
-    setIsWaiting(true);
-    setTimeout(
-      () => {
-        setIsWaiting(false);
-      },
-      3 * 60 * 1000,
-    ); // 3 minutes
-  };
-
-  return requests ? (
-    <div className="grid gap-4 lg:grid-cols-2">
-      {requests.map((request) => (
-        <RequestCard key={request.id} request={request}>
-          <RequestCardAction
-            key={request.id}
-            request={request}
-            onClick={handleResendConfirmation}
-            isWaiting={isWaiting}
-          />
-        </RequestCard>
-      ))}
-    </div>
-  ) : (
-    <Spinner />
-  );
-}
+import CityRequestsTab from "../../components/requests/CityRequestsTab";
+import PastRequestsAndOffersTab from "../../components/requests/PastRequestsAndOffersTab";
+import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
+import { NextSeo } from "next-seo";
 
 function RequestsTabs() {
-  const { data: requests } = api.requests.getMyRequests.useQuery();
-
   return (
-    <Tabs defaultValue="activeRequests" className="space-y-4">
+    <Tabs defaultValue="cityRequests" className="space-y-4">
       <TabsList>
-        <TabsTrigger
-          value="activeRequests"
-          count={requests?.activeRequests.length ?? "blank"}
-        >
-          <TagIcon /> Current Requests
+        <TabsTrigger value="cityRequests">
+          <MapPinIcon className="hidden sm:block" />
+          City Requests
         </TabsTrigger>
-        <TabsTrigger
-          value="inactiveRequests"
-          count={requests?.inactiveRequests.length ?? "blank"}
-        >
-          <HistoryIcon /> Past Requests
+        <TabsTrigger value="propertyOffers">
+          <HomeIcon className="hidden sm:block" />
+          Property Offers
+        </TabsTrigger>
+        <TabsTrigger value="history">
+          <HistoryIcon className="hidden sm:block" />
+          History
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="activeRequests">
-        {requests?.activeRequests.length !== 0 ? (
-          <RequestCards requests={requests?.activeRequests} />
-        ) : (
-          <div className="flex flex-col items-center gap-4 pt-32">
-            <p className="text-center text-muted-foreground">
-              No requests yet, make a request to get started
-            </p>
-            <NewRequestButton />
-          </div>
-        )}
+      <TabsContent value="cityRequests">
+        <CityRequestsTab />
       </TabsContent>
-      <TabsContent value="inactiveRequests">
-        {requests?.inactiveRequests.length !== 0 ? (
-          <RequestCards requests={requests?.inactiveRequests} />
-        ) : (
-          <div className="flex flex-col items-center gap-4 pt-32">
-            <p className="text-center text-muted-foreground">
-              Your past requests will show up here
-            </p>
-          </div>
-        )}
+      <TabsContent value="propertyOffers">
+        <PropertyOfferTab />
+      </TabsContent>
+      <TabsContent value="history">
+        <PastRequestsAndOffersTab />
       </TabsContent>
     </Tabs>
   );
@@ -133,21 +41,41 @@ function RequestsTabs() {
 export default function Page() {
   useSession({ required: true });
   useMaybeSendUnsentRequests();
-
+  const isProduction = process.env.NODE_ENV === "production";
+  let baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
   return (
     <>
-      <Head>
-        <title>My Requests | Tramona</title>
-      </Head>
-
+      <NextSeo
+        title="Requests & offers"
+        description="Check out your tramona offers and requests."
+        canonical={`${baseUrl}/requests`}
+        openGraph={{
+          url: `${baseUrl}/requests`,
+          type: "website",
+          title: "Requests & offers",
+          description: "Check out your tramona offers and requests.",
+          images: [
+            {
+              url: `https://www.tramona.com/assets/images/landing-page/main.png`,
+              width: 900,
+              height: 800,
+              alt: "Tramona",
+              type: "image/jpeg",
+            },
+          ],
+          site_name: "Tramona",
+        }}
+      />
       <DashboardLayout type="guest">
-        <div className="container col-span-10 px-4 pb-64 pt-5 2xl:col-span-11">
-          <div className="mx-auto">
+        <div className="min-h-screen-minus-header px-4 pb-footer-height pt-5">
+          <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
-              <h1 className="flex-1 py-4 text-4xl font-bold text-black">
-                My Requests
+              <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">
+                Requests & offers
               </h1>
-              <NewRequestButton />
+              {/* <NewRequestButton /> */}
             </div>
             <RequestsTabs />
           </div>

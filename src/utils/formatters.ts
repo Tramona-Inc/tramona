@@ -31,23 +31,21 @@ export function getFmtdFilters(
     !withoutNote && filters.note,
   ].filter(Boolean);
 
-  return fmtdFiltersList.length === 0 ? undefined : fmtdFiltersList.join(" • ");
+  return fmtdFiltersList.length === 0 ? undefined : fmtdFiltersList.join(" · ");
 }
 
 export function getRequestStatus(request: {
   resolvedAt: Date | null;
   numOffers: number;
-  hasApproved: boolean;
 }) {
-
   if (request.resolvedAt) {
     return request.numOffers === 0 ? "rejected" : "booked";
   }
-  if (request.hasApproved) {
-    return request.numOffers === 0 ? "pending" : "accepted";
-  } else {
-    return "unconfirmed";
-  }
+  return request.numOffers === 0 ? "pending" : "accepted";
+}
+
+export function isIncoming(request: Parameters<typeof getRequestStatus>[0]) {
+  return getRequestStatus(request) === "pending";
 }
 
 export function formatPhoneNumber(phoneNumber: string) {
@@ -58,9 +56,9 @@ export function formatPhoneNumber(phoneNumber: string) {
 export function getHomePageFromRole(role: User["role"]) {
   switch (role) {
     case "guest":
-      return "/dashboard";
+      return "/";
     case "host":
-      return "/messages";
+      return "/host";
     case "admin":
       return "/admin";
   }

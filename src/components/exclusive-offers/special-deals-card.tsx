@@ -15,16 +15,15 @@ import {
 } from "@/components/ui/carousel";
 import CarouselDots from "@/components/feed/carousel-dots";
 
-import type { AppRouter } from "@/server/api/root";
-import type { inferRouterOutputs } from "@trpc/server";
 import { formatCurrency } from "@/utils/utils";
 import Link from "next/link";
+import { type RouterOutputs } from "@/utils/api";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
 export type OfferWithInfo =
-  inferRouterOutputs<AppRouter>["offers"]["getAllOffers"][number];
+  RouterOutputs["offers"]["getAllPublicOffers"][number];
 
 type Props = {
   deal: OfferWithInfo;
@@ -87,7 +86,7 @@ export default function SpecialDealsCard({ deal }: Props) {
         <div className="mx-2 mb-1 mt-4 flex items-center justify-between">
           <div className="text-center text-secondary-foreground/50">
             <p className="text-2xl line-through lg:text-xl xl:text-2xl">
-              {formatCurrency(deal.property.originalNightlyPrice)}
+              {formatCurrency(deal.property.originalNightlyPrice ?? 0)}
             </p>
             <p className="text-sm">Airbnb price</p>
           </div>
@@ -98,7 +97,7 @@ export default function SpecialDealsCard({ deal }: Props) {
             <p className="text-sm">Our price</p>
           </div>
           <Link
-            href={`/listings/${deal.id}`}
+            href={`/offers/${deal.id}`}
             className={buttonVariants({
               variant: "default",
               className:

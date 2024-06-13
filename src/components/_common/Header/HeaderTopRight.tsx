@@ -11,21 +11,10 @@ function LogInBtn() {
   );
 }
 
-function SignUpBtn() {
-  return (
-    <Button asChild className="rounded-full" variant="darkPrimary">
-      <Link href="/auth/signup">Sign up</Link>
-    </Button>
-  );
-}
-
 export default function HeaderTopRight() {
   const { data: session, status } = useSession();
 
   return (
-    <>
-      {(status === "loading" || status === "unauthenticated") && <LogInBtn />}
-      {status === "authenticated" && <AvatarDropdown session={session} />}
-    </>
+    <>{status === "authenticated" && <AvatarDropdown session={session}/>}</>
   );
 }

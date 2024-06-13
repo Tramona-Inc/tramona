@@ -1,73 +1,135 @@
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { formatDateRange } from "@/utils/utils";
-import { CalendarIcon } from "lucide-react";
-import { type FieldPath, type FieldValues } from "react-hook-form";
+import { api } from "@/utils/api";
+import { convertUTCDateToLocalDate, formatDateRange } from "@/utils/utils";
+import { isSameDay } from "date-fns";
+import { useState } from "react";
+import { type DateRange } from "react-day-picker";
+import { type InputVariant } from "../ui/input";
+import { InputButton } from "../ui/input-button";
 
-export default function DateRangePicker<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->({
+export default function DateRangePicker({
+  propertyId,
   className,
-  formLabel,
-  ...props
-}: Omit<
-  React.ComponentProps<typeof FormField<TFieldValues, TName>>,
-  "render"
-> & {
-  className: string;
-  formLabel: string;
+  label,
+  placeholder = "Select dates",
+  variant,
+  icon,
+  disablePast = false,
+  value,
+  onChange,
+  alreadyBid,
+}: {
+  propertyId?: number;
+  className?: string;
+  label?: string;
+  placeholder?: string;
+  variant?: InputVariant;
+  icon?: React.FC<{ className?: string }>;
+  disablePast?: boolean;
+  value?: DateRange;
+  onChange: (value?: DateRange) => void;
+  alreadyBid?: boolean;
 }) {
+  const { data: dates, refetch: refetchBidDates } =
+    api.biddings.getDatesFromBid.useQuery(
+      { propertyId: propertyId ?? 0 },
+      {
+        enabled: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    );
+
+  const { data, refetch: refetchBlockedDates } =
+    api.properties.getBlockedDates.useQuery(
+      { propertyId: propertyId ?? 0 },
+      { enabled: false },
+    );
+
+  const disabledDays: Date[] | undefined = data?.map(
+    (date) => new Date(date.date),
+  );
+
+  function dateIsDisabled(date: Date) {
+    if (date < new Date() && disablePast) return true;
+
+    if (disabledDays?.some((d) => isSameDay(date, d))) return true;
+
+    // date is unreachable (there is a disabled day between it and the selected date)
+    return disabledDays?.some((d) => {
+      if (value?.from === undefined) return false;
+      return (value.from <= d && d <= date) || (date <= d && d <= value.from);
+    });
+  }
+
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSelect = (e: DateRange | undefined) => {
+    if (e?.from && e.to === undefined) {
+      e.to = e.from;
+    }
+
+    // Check for exact match of bid dates only if both from and to dates are selected
+    if (e) {
+      const hasExactMatch = (dates ?? []).some(
+        (bid) =>
+          e.to &&
+          e.from &&
+          isSameDay(convertUTCDateToLocalDate(e.from), new Date(bid.checkIn)) &&
+          isSameDay(convertUTCDateToLocalDate(e.to), new Date(bid.checkOut)),
+      );
+
+      if (hasExactMatch) {
+        setError("Already bid dates");
+        return;
+      }
+    }
+
+    setError(null); // Clear error if no exact match
+    onChange(e);
+  };
+
   return (
-    <FormField
-      {...props}
-      render={({ field }) => (
-        <FormItem className={className}>
-          <FormLabel>{formLabel}</FormLabel>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant={field.value ? "filledInput" : "emptyInput"}>
-                {field.value
-                  ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    formatDateRange(field.value.from, field.value.to)
-                  : "Select dates"}
-                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto p-0 backdrop-blur-md"
-              align="start"
-              side="top"
-            >
-              <Calendar
-                mode="range"
-                selected={field.value}
-                onSelect={(e) => {
-                  if (e?.from && e.to === undefined) {
-                    e.to = e.from;
-                  }
-                  field.onChange(e);
-                }}
-                disabled={(date) => date < new Date()}
-                numberOfMonths={1}
-                showOutsideDays={true}
-              />
-            </PopoverContent>
-          </Popover>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    <Popover>
+      <PopoverTrigger asChild>
+        <InputButton
+          onClick={() => {
+            void refetchBlockedDates();
+            if (alreadyBid) {
+              void refetchBidDates();
+            }
+          }}
+          className={className}
+          placeholder={placeholder}
+          variant={variant}
+          label={label}
+          icon={icon}
+          value={value?.from && formatDateRange(value.from, value.to)}
+        />
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-auto p-0 backdrop-blur-md"
+        align="start"
+        side="top"
+      >
+        <div className="flex flex-col items-center">
+          {error && <div className="mt-2 text-red-500">{error}</div>}
+        </div>
+        <Calendar
+          mode="range"
+          selected={value}
+          onSelect={handleSelect}
+          disabled={(date: Date) => !!dateIsDisabled(date)}
+          numberOfMonths={1}
+          showOutsideDays={true}
+          className="h-80"
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

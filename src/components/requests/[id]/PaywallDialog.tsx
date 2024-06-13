@@ -78,7 +78,7 @@ export default function PaywallDialog({
 
           <Separator />
           <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-            <p>Annual: $300/year&nbsp; • &nbsp;Monthly: $40/month</p>
+            <p>Annual: $300/year&nbsp; · &nbsp;Monthly: $40/month</p>
             <p>Cancel anytime</p>
           </div>
 

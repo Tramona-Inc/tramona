@@ -8,6 +8,7 @@ import {
   isSameMonth,
   isSameYear,
 } from "date-fns";
+import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -52,8 +53,8 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * formatCurrency(2000) => "$20.00"
  * ```
  */
-export function formatCurrency(cents: number) {
-  if (cents % 100 === 0) return `$${cents / 100}`;
+export function formatCurrency(cents: number, { round = false } = {}) {
+  if (cents % 100 === 0 || round) return `$${Math.round(cents / 100)}`;
   return `$${(cents / 100).toFixed(2)}`;
 }
 
@@ -77,7 +78,10 @@ export function capitalize(str: string) {
  * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
-export function formatDateRange(from: Date, to?: Date) {
+export function formatDateRange(fromDate: Date, toDate?: Date) {
+  const from = removeTimezoneFromDate(fromDate);
+  const to = toDate ? removeTimezoneFromDate(toDate) : "";
+
   const isCurYear = isSameYear(from, new Date());
 
   if (!to || isSameDay(from, to)) {
@@ -102,8 +106,21 @@ export function formatDateRange(from: Date, to?: Date) {
   return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
 }
 
+function removeTimezoneFromDate(date: Date) {
+  // Convert to ISO string and split by 'T' to get date part
+  return new Date(date).toISOString().split("Z")[0]!;
+}
+
 export function formatDateMonthDay(date: Date) {
   return formatDate(date, "MMMM d");
+}
+
+export function formatDateWeekMonthDay(date: Date) {
+  return formatDate(date, "EEE MMMM d");
+}
+
+export function formatDateMonthDayYear(date: Date) {
+  return formatDate(date, "MMMM d, yyyy");
 }
 
 // not used right now and probably will never have to:
@@ -115,8 +132,11 @@ export function formatDateMonthDay(date: Date) {
 //   return formatDateRange(fromDate, toDate);
 // }
 
-export function getNumNights(from: Date, to: Date) {
-  return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+// todo fix hacky
+export function getNumNights(from: Date | string, to: Date | string) {
+  return Math.round(
+    (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),
+  );
 }
 
 /**
@@ -168,15 +188,34 @@ export function getDiscountPercentage(
   return Math.round((1 - discountPrice / originalPrice) * 100);
 }
 
-export function useIsDesktop() {
-  return (useWindowSize()?.width ?? 0) >= 640;
-}
+// functions for when css doesnt cut it for showing/hiding stuff on screens
+// use these as a last resort cuz it can cause jank with ssr (unless the element isnt
+// visible on the first render in which case it doesnt matter for ssr)
 
-export function getTramonaFeeTotal(totalSavings: number) {
-  const fee = 0.2 * totalSavings;
+// these will need to be kept in sync with
+// https://tailwindcss.com/docs/screens and ./tailwind.config.ts
 
-  return fee;
-}
+export const useScreenWidth = () => useWindowSize().width ?? 0;
+
+/**
+ * screen width >= 640 (same as tailwind `sm:`)
+ */
+export const useIsSm = () => useScreenWidth() >= 640;
+
+/**
+ * screen width >= 768 (same as tailwind `md:`)
+ */
+export const useIsMd = () => useScreenWidth() >= 768;
+
+/**
+ * screen width >= 1024 (same as tailwind `lg:`))
+ */
+export const useIsLg = () => useScreenWidth() >= 1024;
+
+/**
+ * screen width >= 1850 (same as tailwind `lg:`))
+ */
+export const useIsXl = () => useScreenWidth() >= 1850;
 
 export function getFromAndTo(page: number, itemPerPage: number) {
   let from = page * itemPerPage;
@@ -189,3 +228,92 @@ export function getFromAndTo(page: number, itemPerPage: number) {
 
   return { from, to };
 }
+
+// hopefully we wont need this
+export function convertUTCDateToLocalDate(date: Date) {
+  const newDate = new Date(
+    date.getTime() + date.getTimezoneOffset() * 60 * 1000,
+  );
+
+  const offset = date.getTimezoneOffset() / 60;
+  const hours = date.getHours();
+
+  newDate.setHours(hours - offset);
+
+  return newDate;
+}
+
+export function checkDuplicates(nums: number[]) {
+  const set = new Set();
+
+  for (const num of nums) {
+    if (set.has(num)) {
+      return true;
+    }
+
+    set.add(num);
+  }
+
+  return false;
+}
+
+export const generateTimeStamp = () => {
+  const date = new Date();
+  const milliseconds = Math.round(date.getMilliseconds() / 10); // Round to 2 decimal places
+  const formattedMilliseconds = milliseconds.toString().padStart(2, "0"); // Ensure 2 digits
+
+  const formattedTimestamp: string =
+    date.toISOString().slice(0, -5) + "." + formattedMilliseconds;
+
+  return formattedTimestamp;
+};
+
+export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
+  const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (element) {
+      const handleResize = () => {
+        setIsOverflowing(element.scrollWidth > element.clientWidth);
+      };
+
+      handleResize();
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, [ref]);
+
+  return isOverflowing;
+}
+
+// export function formatDateRangeWithWeekday(
+//   fromDate: Date | string,
+//   toDate?: Date | string,
+// ) {
+//   // Convert to Date objects if necessary
+//   //converting because the gssp function returns a string
+//   if (typeof fromDate === "string") {
+//     fromDate = new Date(fromDate);
+//   }
+//   if (typeof toDate === "string") {
+//     toDate = new Date(toDate);
+//   }
+
+//   fromDate = removeTimezoneFromDate(fromDate);
+//   toDate = toDate && removeTimezoneFromDate(toDate);
+
+//   const options: Intl.DateTimeFormatOptions = {
+//     weekday: "short",
+//     month: "short",
+//     day: "numeric",
+//   };
+
+//   const fromFormatted = fromDate.toLocaleDateString("en-US", options);
+//   const toFormatted = toDate
+//     ? (toDate as Date).toLocaleDateString("en-US", options)
+//     : "";
+
+//   return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
+// }

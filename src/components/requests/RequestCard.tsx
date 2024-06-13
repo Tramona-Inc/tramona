@@ -1,35 +1,52 @@
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { type RouterOutputs } from "@/utils/api";
 import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
-  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
-import Image from "next/image";
-import { Badge } from "../ui/badge";
-import { Card, CardContent, CardFooter } from "../ui/card";
-import { type inferRouterOutputs } from "@trpc/server";
-import { type AppRouter } from "@/server/api/root";
+import { EllipsisIcon, MapPinIcon, TrashIcon } from "lucide-react";
+import { Card, CardContent } from "../ui/card";
+import RequestGroupAvatars from "./RequestGroupAvatars";
+import RequestCardBadge from "./RequestCardBadge";
+import { Button } from "../ui/button";
+import { useState } from "react";
+import WithdrawRequestDialog from "./WithdrawRequestDialog";
 
-export type DetailedRequest =
-  inferRouterOutputs<AppRouter>["requests"]["getMyRequests"][
-    | "activeRequests"
-    | "inactiveRequests"][number];
+import MobileSimilarProperties from "./MobileSimilarProperties";
+import { Separator } from "../ui/separator";
 
-export type RequestWithUser =
-  inferRouterOutputs<AppRouter>["requests"]["getAll"][
-    | "incomingRequests"
-    | "pastRequests"][number];
+export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
+  | "activeRequestGroups"
+  | "inactiveRequestGroups"][number]["requests"][number];
+
+export type RequestWithUser = RouterOutputs["requests"]["getAll"][
+  | "incomingRequests"
+  | "pastRequests"][number];
 
 export default function RequestCard({
-  withUser,
   request,
+  isSelected,
+  isAdminDashboard,
   children,
 }: React.PropsWithChildren<
-  | { request: DetailedRequest; withUser?: false | undefined }
-  | { request: RequestWithUser; withUser: true }
+  | {
+      request: DetailedRequest;
+      isAdminDashboard?: false | undefined;
+      isSelected?: boolean;
+    }
+  | {
+      request: RequestWithUser;
+      isAdminDashboard: true;
+      isSelected?: boolean;
+    }
 >) {
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
@@ -42,91 +59,86 @@ export default function RequestCard({
     excludeDefaults: true,
   });
 
+  const showAvatars = request.numGuests > 1 || isAdminDashboard;
+
+  const [open, setOpen] = useState(false);
+
   return (
-    <Card key={request.id}>
+    <Card className="block">
+      <WithdrawRequestDialog
+        requestId={request.id}
+        open={open}
+        onOpenChange={setOpen}
+      />
       <CardContent className="space-y-2">
-        <div className="flex items-start justify-between gap-1">
-          <div className="flex-1">
-            {withUser && (
-              <p className="text-xs font-medium text-zinc-500">
-                {request.madeByUser.email}
-              </p>
-            )}
-            <div className="flex items-start gap-1">
-              <MapPinIcon className="shrink-0 text-zinc-300" />
-              <h2 className="text-lg font-semibold text-zinc-700">
-                {request.location}
-              </h2>
-            </div>
-          </div>
+        {/* <p className="font-mono text-xs uppercase text-muted-foreground">
+          Id: {request.id} · Request group Id: {request.requestGroupId}
+        </p> */}
+        <RequestCardBadge request={request} />
+        {/* {request.requestGroup.hasApproved ? (
           <RequestCardBadge request={request} />
-        </div>
-        <div className="text-zinc-500">
-          <p>
-            requested{" "}
-            <strong className="text-lg text-zinc-600">{fmtdPrice}</strong>
-            <span className="text-sm">/night</span>
-          </p>
-          <div className="flex items-center gap-1">
-            <CalendarIcon className="size-4" />
-            <p className="mr-3">{fmtdDateRange}</p>
-            <UsersIcon className="size-4" />
-            <p>{fmtdNumGuests}</p>
-          </div>
-          {fmtdFilters && (
-            <div className="flex items-center gap-1">
-              <FilterIcon className="size-4" />
-              <p>{fmtdFilters}</p>
-            </div>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="lightGray" className="border tracking-tight">
+                Unconfirmed
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-64">
+              You haven&apos;t confirmed your request yet. Check your text
+              messages or click &quot;Resend Confirmation&quot; to start getting
+              offers.
+            </TooltipContent>
+          </Tooltip>
+        )} */}
+        <div className="absolute right-2 top-0 flex items-center gap-2">
+          {showAvatars && (
+            <RequestGroupAvatars
+              request={request}
+              isAdminDashboard={isAdminDashboard}
+            />
+          )}
+          {!isAdminDashboard && getRequestStatus(request) === "pending" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <EllipsisIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem red onClick={() => setOpen(true)}>
+                  <TrashIcon />
+                  Withdraw
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
-        {request.note && (
-          <div className="rounded-md bg-muted p-2 text-sm text-muted-foreground">
-            <p>&ldquo;{request.note}&rdquo;</p>
+        <div className="flex items-start gap-1">
+          <MapPinIcon className="shrink-0 text-primary" />
+          <h2 className="text-base font-bold text-primary md:text-lg">
+            {request.location}
+          </h2>
+        </div>
+        <div>
+          <p>Requested {fmtdPrice}/night</p>
+          <p>{fmtdDateRange}</p>
+          {fmtdFilters && <p>{fmtdFilters} &middot;</p>}
+          <p>{fmtdNumGuests}</p>
+          {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
+          {request.airbnbLink && <a className="underline" href={request.airbnbLink}>Airbnb Link</a>}
+        </div>
+        <div className="flex justify-end gap-2">{children}</div>
+        {isSelected && (
+          <div className="md:hidden">
+            <Separator className="my-1" />
+            <MobileSimilarProperties
+              location={request.location}
+              city={request.location}
+            />
           </div>
         )}
       </CardContent>
-      <CardFooter>{children}</CardFooter>
     </Card>
   );
-}
-
-function RequestCardBadge({
-  request,
-}: {
-  request: DetailedRequest | RequestWithUser;
-}) {
-  switch (getRequestStatus(request)) {
-    case "pending":
-      const msAgo = Date.now() - request.createdAt.getTime();
-      const showTimeAgo = msAgo > 1000 * 60 * 60;
-      const fmtdTimeAgo = showTimeAgo ? `(${formatInterval(msAgo)})` : "";
-      return <Badge variant="yellow">Pending {fmtdTimeAgo}</Badge>;
-    case "accepted":
-      return (
-        <Badge variant="green">
-          {plural(request.numOffers, "offer")}
-          {"hostImages" in request && request.hostImages.length > 0 && (
-            <div className="flex items-center -space-x-2">
-              {request.hostImages.map((imageUrl) => (
-                <Image
-                  key={imageUrl}
-                  src={imageUrl}
-                  alt=""
-                  width={22}
-                  height={22}
-                  className="inline-block"
-                />
-              ))}
-            </div>
-          )}
-        </Badge>
-      );
-    case "rejected":
-      return <Badge variant="red">Rejected</Badge>;
-    case "booked":
-      return <Badge variant="blue">Booked</Badge>;
-    case "unconfirmed":
-      return <Badge variant="secondary">Unconfirmed</Badge>
-  }
 }

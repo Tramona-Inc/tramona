@@ -41,7 +41,7 @@ export default function ReferralCodeDialog() {
   );
 }
 
-function ReferralCodeForm() {
+export function ReferralCodeForm() {
   const mutation = api.referralCodes.startUsingCode.useMutation();
 
   // i had to do this since mutateAsync throws a weird looking error, and i cant
@@ -104,10 +104,9 @@ function ReferralCodeForm() {
     successSlide ?? (
       <>
         <DialogHeader>
-          <DialogTitle>Did someone refer you?</DialogTitle>
-          <DialogDescription>
-            Please input their referral code!
-          </DialogDescription>
+          <DialogTitle className="text-center text-3xl font-bold">
+            Did someone refer you?
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -120,7 +119,7 @@ function ReferralCodeForm() {
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Enter referral code"
+                      placeholder="Please input their referral code here"
                       onChange={(e) =>
                         field.onChange(e.target.value.toUpperCase())
                       }

@@ -1,15 +1,21 @@
+import * as bcrypt from "bcrypt";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { referralCodes, users } from "@/server/db/schema";
+import {
+  hostProfiles,
+  referralCodes,
+  userUpdateSchema,
+  users,
+} from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
-import { zodEmail, zodString } from "@/utils/zod-utils";
+import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -30,20 +36,31 @@ export const usersRouter = createTRPCRouter({
     };
   }),
 
-  myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
-    const phone = await ctx.db.query.users.findFirst({
+  myVerificationStatus: protectedProcedure.query(async ({ ctx }) => {
+    const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
-        phoneNumber: true,
+        isIdentityVerified: true,
       },
-    })
-    .then((res) => {
-      return res?.phoneNumber ?? null
     });
+    return {
+      isIdentityVerified: res?.isIdentityVerified,
+    };
+  }),
 
+  myPhoneNumber: protectedProcedure.query(async ({ ctx }) => {
+    const phone = await ctx.db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {
+          phoneNumber: true,
+        },
+      })
+      .then((res) => {
+        return res?.phoneNumber ?? null;
+      });
 
     return phone;
-
   }),
 
   myReferralCode: protectedProcedure.query(async ({ ctx }) => {
@@ -71,26 +88,17 @@ export const usersRouter = createTRPCRouter({
   }),
 
   updateProfile: protectedProcedure
-    .input(
-      z.object({
-        name: zodString(),
-        email: zodEmail(),
-        phoneNumber: zodString({ maxLen: 20 }),
-      }),
-    )
+    .input(userUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const updatedUser = await ctx.db
         .update(users)
-        .set({
-          name: input.name,
-          email: input.email,
-          phoneNumber: input.phoneNumber,
-        })
-        .where(eq(users.id, ctx.user.id))
+        .set(input)
+        .where(eq(users.id, input.id))
         .returning();
 
       return updatedUser;
     }),
+
   createUrlToBeHost: protectedProcedure
     .input(
       z.object({
@@ -175,21 +183,125 @@ export const usersRouter = createTRPCRouter({
     }));
   }),
 
-    updatePhoneNumber: protectedProcedure
-      .input(
-        z.object({
-          phoneNumber: zodString({ maxLen: 20 }),
-        }),
-      )
-      .mutation(async ({ ctx, input }) => {
-        const updatedUser = await ctx.db
-          .update(users)
-          .set({
-            phoneNumber: input.phoneNumber,
-          })
-          .where(eq(users.id, ctx.user.id))
-          .returning();
+  updatePhoneNumber: protectedProcedure
+    .input(
+      z.object({
+        phoneNumber: zodString({ maxLen: 20 }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatedUser = await ctx.db
+        .update(users)
+        .set({
+          phoneNumber: input.phoneNumber,
+        })
+        .where(eq(users.id, ctx.user.id))
+        .returning();
 
-        return updatedUser;
-      })
+      return updatedUser;
+    }),
+
+  phoneNumberIsTaken: protectedProcedure
+    .input(
+      z.object({
+        phoneNumber: zodString({ maxLen: 20 }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.query.users
+        .findFirst({
+          columns: { id: true },
+          where: eq(users.phoneNumber, input.phoneNumber),
+        })
+        .then((res) => !!res);
+    }),
+
+  getMyHostProfile: protectedProcedure.query(async ({ ctx }) => {
+    return (
+      (await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+      })) ?? null
+    );
+  }),
+
+  checkCredentials: publicProcedure
+    .input(
+      z.object({
+        email: z.string(),
+        password: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { email, password } = input;
+
+      const user = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+
+      if (!user) {
+        return "email not found";
+      }
+
+      if (!user.password) {
+        return "incorrect credentials";
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return "incorrect password";
+      }
+
+      return "success";
+    }),
+
+  getPassword: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        password: true,
+      },
+    });
+  }),
+
+  updatePassword: protectedProcedure
+    .input(
+      z.object({
+        oldPassword: z.string(),
+        newPassword: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { oldPassword, newPassword } = input;
+
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      if (!user.password) {
+        return "user has no password";
+      }
+
+      const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+      if (!isPasswordValid) {
+        return "incorrect old password";
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await ctx.db
+        .update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, ctx.user.id));
+
+      return "success";
+    }),
 });

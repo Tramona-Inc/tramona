@@ -1,21 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
-import { TAX_PERCENTAGE } from "@/utils/constants";
+import { useStripe } from "@/utils/stripe-client";
 import {
   formatCurrency,
   formatDateMonthDay,
   formatDateRange,
   getDiscountPercentage,
   getNumNights,
-  getTramonaFeeTotal,
 } from "@/utils/utils";
 import { CheckIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { type OfferWithProperty } from ".";
-import { useStripe } from "./HowToBookDialog";
 
 export default function DirectBookDialog(
   props: React.PropsWithChildren<{
@@ -62,17 +60,17 @@ export default function DirectBookDialog(
   const checkOutDate = formatDateMonthDay(checkOut);
   const numNights = getNumNights(checkIn, checkOut);
   const originalTotal = originalNightlyPrice * numNights;
-  const tramonaServiceFee = getTramonaFeeTotal(
-    originalTotal - offer.totalPrice,
-  );
-  const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
+  const tramonaServiceFee = offer.tramonaFee;
+  // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
+
+  const tax = 0;
 
   const totalPriceWithFees = offer.totalPrice + tramonaServiceFee + tax;
 
   async function checkout() {
     const user = session.data?.user;
     if (!user) return;
-    
+
     const response = await createCheckout.mutateAsync({
       listingId: offer.id,
       propertyId: offer.property.id,
@@ -149,10 +147,10 @@ export default function DirectBookDialog(
               <p className="underline">Tramona service fee</p>
               <p>{formatCurrency(tramonaServiceFee)}</p>
             </div>
-            <div className="flex justify-between py-2">
+            {/* <div className="flex justify-between py-2">
               <p className="underline">Taxes</p>
               <p>{formatCurrency(tax)}</p>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="flex justify-between py-2">

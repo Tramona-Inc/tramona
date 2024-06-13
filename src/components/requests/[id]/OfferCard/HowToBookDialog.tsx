@@ -1,18 +1,6 @@
-import { env } from "@/env";
-import { loadStripe, type Stripe } from "@stripe/stripe-js";
-import { useMemo } from "react";
 import { type OfferWithProperty } from ".";
 import AirbnbDialog from "./AirbnbBookDialog";
 import DirectBookDialog from "./DirectBookDialog";
-
-export const useStripe = () => {
-  const stripe = useMemo<Promise<Stripe | null>>(
-    () => loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY),
-    [],
-  );
-
-  return stripe;
-};
 
 export default function HowToBookDialog(
   props: React.PropsWithChildren<{
@@ -49,7 +37,7 @@ export default function HowToBookDialog(
       listingId={offer.id}
       propertyName={propertyName}
       originalNightlyPrice={originalNightlyPrice}
-      airbnbUrl={airbnbUrl ?? ""}
+      airbnbUrl={airbnbUrl}
       checkIn={checkIn}
       checkOut={checkOut}
       requestId={requestId}
@@ -65,7 +53,7 @@ export default function HowToBookDialog(
       listingId={offer.id}
       propertyName={propertyName}
       originalNightlyPrice={originalNightlyPrice}
-      airbnbUrl={airbnbUrl ?? ""}
+      airbnbUrl={airbnbUrl}
       checkIn={checkIn}
       checkOut={checkOut}
       requestId={requestId}

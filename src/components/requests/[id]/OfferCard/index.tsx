@@ -1,4 +1,4 @@
-import { type AppRouter } from "@/server/api/root";
+import { type RouterOutputs } from "@/utils/api";
 import {
   cn,
   formatCurrency,
@@ -7,16 +7,15 @@ import {
   plural,
 } from "@/utils/utils";
 import { StarFilledIcon } from "@radix-ui/react-icons";
-import { type inferRouterOutputs } from "@trpc/server";
-import { BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
+import { BathIcon, BedIcon, DoorClosedIcon, Users2Icon } from "lucide-react";
+import { type PropsWithChildren } from "react";
 import UserAvatar from "../../../_common/UserAvatar";
 import SaleTagIcon from "../../../_icons/SaleTagIcon";
 import { Badge } from "../../../ui/badge";
 import { Card, CardContent, CardFooter } from "../../../ui/card";
-import { type PropsWithChildren } from "react"
 
 export type OfferWithProperty =
-  inferRouterOutputs<AppRouter>["offers"]["getByRequestIdWithProperty"][number];
+  RouterOutputs["offers"]["getByRequestIdWithProperty"][number];
 
 export default function OfferCard({
   offer: { property, ...offer },
@@ -36,11 +35,8 @@ export default function OfferCard({
   const numNights = getNumNights(checkIn, checkOut);
   const offerNightlyPrice = offer.totalPrice / numNights;
 
-  const numAmenities =
-    property.amenities.length + property.standoutAmenities.length;
-
   const discountPercentage = getDiscountPercentage(
-    property.originalNightlyPrice,
+    property.originalNightlyPrice ?? 0,
     offerNightlyPrice,
   );
 
@@ -72,7 +68,7 @@ export default function OfferCard({
                 </p>
                 <p>
                   <span className="text-3xl font-bold">
-                    {formatCurrency(property.originalNightlyPrice)}
+                    {formatCurrency(property.originalNightlyPrice ?? 0)}
                   </span>
                   <span className="text-sm">/night</span>
                 </p>
@@ -111,13 +107,15 @@ export default function OfferCard({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-1">
-            <Badge variant="secondary" icon={<StarFilledIcon />}>
-              {property.avgRating} ({property.numRatings})
-            </Badge>
+            {property.numRatings > 0 && (
+              <Badge variant="secondary" icon={<StarFilledIcon />}>
+                {property.avgRating} ({property.numRatings})
+              </Badge>
+            )}
             <Badge variant="secondary">{property.propertyType}</Badge>
-            {numAmenities > 0 && (
+            {property.amenities && property.amenities.length > 0 && (
               <Badge variant="secondary">
-                {plural(numAmenities, "amenity", "amenities")}
+                {plural(property.amenities.length, "amenity", "amenities")}
               </Badge>
             )}
           </div>
@@ -135,6 +133,13 @@ export default function OfferCard({
                 <p className="flex items-center gap-2 text-lg font-semibold text-black">
                   {property.numBedrooms}{" "}
                   <DoorClosedIcon className="text-muted-foreground" />
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Bathrooms</p>
+                <p className="flex items-center gap-2 text-lg font-semibold text-black">
+                  {property.numBathrooms}{" "}
+                  <BathIcon className="text-muted-foreground" />
                 </p>
               </div>
               <div>
