@@ -8,7 +8,7 @@ import {
   isSameMonth,
   isSameYear,
 } from "date-fns";
-import { RefObject, useEffect, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -79,7 +79,7 @@ export function capitalize(str: string) {
  * ```
  */
 export function formatDateRange(fromDate: Date, toDate?: Date) {
-  const from = removeTimezoneFromDate(fromDate) ?? "";
+  const from = removeTimezoneFromDate(fromDate);
   const to = toDate ? removeTimezoneFromDate(toDate) : "";
 
   const isCurYear = isSameYear(from, new Date());
@@ -108,7 +108,7 @@ export function formatDateRange(fromDate: Date, toDate?: Date) {
 
 function removeTimezoneFromDate(date: Date) {
   // Convert to ISO string and split by 'T' to get date part
-  return new Date(date).toISOString().split("Z")[0]; // todo fix hacky
+  return new Date(date).toISOString().split("Z")[0]!;
 }
 
 export function formatDateMonthDay(date: Date) {
@@ -217,12 +217,6 @@ export const useIsLg = () => useScreenWidth() >= 1024;
  */
 export const useIsXl = () => useScreenWidth() >= 1850;
 
-export function getTramonaFeeTotal(totalSavings: number) {
-  const fee = 0.2 * totalSavings;
-
-  return fee;
-}
-
 export function getFromAndTo(page: number, itemPerPage: number) {
   let from = page * itemPerPage;
 
@@ -315,3 +309,33 @@ export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
 
   return isOverflowing;
 }
+
+// export function formatDateRangeWithWeekday(
+//   fromDate: Date | string,
+//   toDate?: Date | string,
+// ) {
+//   // Convert to Date objects if necessary
+//   //converting because the gssp function returns a string
+//   if (typeof fromDate === "string") {
+//     fromDate = new Date(fromDate);
+//   }
+//   if (typeof toDate === "string") {
+//     toDate = new Date(toDate);
+//   }
+
+//   fromDate = removeTimezoneFromDate(fromDate);
+//   toDate = toDate && removeTimezoneFromDate(toDate);
+
+//   const options: Intl.DateTimeFormatOptions = {
+//     weekday: "short",
+//     month: "short",
+//     day: "numeric",
+//   };
+
+//   const fromFormatted = fromDate.toLocaleDateString("en-US", options);
+//   const toFormatted = toDate
+//     ? (toDate as Date).toLocaleDateString("en-US", options)
+//     : "";
+
+//   return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
+// }

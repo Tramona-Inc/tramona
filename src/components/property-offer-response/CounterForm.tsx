@@ -18,7 +18,6 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 
-
 const formSchema = z.object({
   counterPrice: zodInteger(),
 });
@@ -49,7 +48,8 @@ export default function CounterForm({
     id: offer?.propertyId ?? 0,
   });
 
-  const getTraveler = api.groups.getGroupOwner.useMutation();
+  // const getTraveler = api.groups.getGroupOwner.useMutation();
+  const getTravelers = api.groups.getGroupMembers.useMutation();
 
   const { mutateAsync } = api.biddings.createCounter.useMutation({
     onSuccess: async () => {
@@ -101,27 +101,30 @@ export default function CounterForm({
         // }
       } else {
         //send to traveler
-        const traveler = await getTraveler.mutateAsync(offer.madeByGroupId);
-        if (traveler?.phoneNumber) {
-          const nightlyPrice =
-            previousOfferNightlyPrice > 0
-              ? formatCurrency(previousOfferNightlyPrice)
-              : formatCurrency(originalNightlyBiddingOffer);
-          if (traveler.isWhatsApp) {
-            await twilioWhatsAppMutation.mutateAsync({
-              templateId: "HXa9200c7721c008928f1a932678727214",
-              to: traveler.phoneNumber,
-              cost: nightlyPrice,
-              name: property?.name,
-              dates: formatDateRange(offer.checkIn, offer.checkOut),
-              counterCost: formatCurrency(counterNightlyPrice),
-            });
-          } else {
-            if (!isLoading) {
-              await twilioMutation.mutateAsync({
+        // const traveler = await getTraveler.mutateAsync(offer.madeByGroupId);
+        const travelers = await getTravelers.mutateAsync(offer.madeByGroupId);
+        for (const traveler of travelers) {
+          if (traveler.phoneNumber) {
+            const nightlyPrice =
+              previousOfferNightlyPrice > 0
+                ? formatCurrency(previousOfferNightlyPrice)
+                : formatCurrency(originalNightlyBiddingOffer);
+            if (traveler.isWhatsApp) {
+              await twilioWhatsAppMutation.mutateAsync({
+                templateId: "HXa9200c7721c008928f1a932678727214",
                 to: traveler.phoneNumber,
-                msg: `Tramona: Your ${nightlyPrice}/night offer for ${property?.name} from ${formatDateRange(offer.checkIn, offer.checkOut)} has been counter offered by the host. You have 24 hours to respond before the offer expires, visit Tramona.com to view.`,
+                cost: nightlyPrice,
+                name: property?.name,
+                dates: formatDateRange(offer.checkIn, offer.checkOut),
+                counterCost: formatCurrency(counterNightlyPrice),
               });
+            } else {
+              if (!isLoading) {
+                await twilioMutation.mutateAsync({
+                  to: traveler.phoneNumber,
+                  msg: `Tramona: Your ${nightlyPrice}/night offer for ${property?.name} from ${formatDateRange(offer.checkIn, offer.checkOut)} has been counter offered by the host. You have 24 hours to respond before the offer expires, visit Tramona.com to view.`,
+                });
+              }
             }
           }
         }

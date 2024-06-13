@@ -52,7 +52,7 @@ export function useSearchBarForm({
 
         setFilter({
           id: "",
-          label: "",
+          label: location,
           lat,
           long: lng,
         });

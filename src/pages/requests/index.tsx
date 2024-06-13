@@ -3,10 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Head from "next/head";
 import CityRequestsTab from "../../components/requests/CityRequestsTab";
 import PastRequestsAndOffersTab from "../../components/requests/PastRequestsAndOffersTab";
 import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
+import { NextSeo } from "next-seo";
 
 function RequestsTabs() {
   return (
@@ -41,13 +41,33 @@ function RequestsTabs() {
 export default function Page() {
   useSession({ required: true });
   useMaybeSendUnsentRequests();
-
+  const isProduction = process.env.NODE_ENV === "production";
+  let baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
   return (
     <>
-      <Head>
-        <title>Requests & Offers | Tramona</title>
-      </Head>
-
+      <NextSeo
+        title="Requests & offers"
+        description="Check out your tramona offers and requests."
+        canonical={`${baseUrl}/requests`}
+        openGraph={{
+          url: `${baseUrl}/requests`,
+          type: "website",
+          title: "Requests & offers",
+          description: "Check out your tramona offers and requests.",
+          images: [
+            {
+              url: `https://www.tramona.com/assets/images/landing-page/main.png`,
+              width: 900,
+              height: 800,
+              alt: "Tramona",
+              type: "image/jpeg",
+            },
+          ],
+          site_name: "Tramona",
+        }}
+      />
       <DashboardLayout type="guest">
         <div className="min-h-screen-minus-header px-4 pb-footer-height pt-5">
           <div className="mx-auto max-w-7xl">
