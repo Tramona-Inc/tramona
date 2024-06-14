@@ -12,7 +12,6 @@ export const superhogStatusEnum = pgEnum("superhog_status", [
   "Flagged",
   "Rejected",
   "Pending",
-  "null",
 ]);
 
 export const reservations = pgTable("reservations", {
@@ -31,7 +30,7 @@ export const reservations = pgTable("reservations", {
   superhogReservationId: varchar("superhog_reservation_id", {
     length: 100,
   }).notNull(),
-  superhogStatus: superhogStatusEnum("superhog_status").default("null"),
+  superhogStatus: superhogStatusEnum("superhog_status"),
   nameOfVerifiedUser: varchar("name_of_verified_user", {
     length: 100,
   }).notNull(),

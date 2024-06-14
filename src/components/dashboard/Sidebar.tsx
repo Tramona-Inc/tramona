@@ -78,13 +78,13 @@ export default function Sidebar({
   }, [totalUnreadMessages, notifyMe]);
 
   return (
-    <div className="sticky top-0 flex h-full w-64 flex-col lg:w-20">
+    <div className="sticky top-0 flex h-full w-64 flex-col bg-[#fafafa] lg:w-20">
       {withLogo && (
         <div className="p-3">
           <TramonaLogo />
         </div>
       )}
-      <div className="flex flex-1 flex-col gap-2 pt-4">
+      <div className="flex flex-1 flex-col gap-2 bg-[#fafafa] pt-4">
         {navLinks.map((link, index) => (
           <div key={index} className="relative">
             <NavBarLink href={link.href} icon={link.icon}>
@@ -106,9 +106,9 @@ export default function Sidebar({
           </div>
         ))}
       </div>
-      <div className="mb-6 text-center">
+      <div className="mb-6 bg-[#fafafa] text-center">
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger className="">
             <Menu />
           </DropdownMenuTrigger>
           <DropdownMenuContent>

@@ -72,6 +72,7 @@ const formSchema = z.object({
   checkInInfo: optional(zodString()),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
+  cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
   // mapScreenshot: optional(zodString()),
 });
@@ -110,7 +111,7 @@ export default function AdminOfferForm({
             // im sorry
             // ?? undefineds are to turn string | null into string | undefined
             hostName: offer.property.hostName ?? undefined,
-            address: offer.property.address ?? undefined,
+            address: offer.property.address,
             areaDescription: offer.property.areaDescription ?? undefined,
             mapScreenshot: offer.property.mapScreenshot ?? undefined,
             maxNumGuests: offer.property.maxNumGuests,
@@ -125,8 +126,8 @@ export default function AdminOfferForm({
             airbnbMessageUrl: offer.property.airbnbMessageUrl ?? undefined,
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
-            offeredNightlyPriceUSD: offeredNightlyPriceUSD ?? undefined,
-            tramonaFee: offer.tramonaFee ?? undefined,
+            offeredNightlyPriceUSD: offeredNightlyPriceUSD,
+            tramonaFee: offer.tramonaFee,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
@@ -151,7 +152,8 @@ export default function AdminOfferForm({
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
-  const getOwnerMutation = api.groups.getGroupOwner.useMutation();
+  // const getOwnerMutation = api.groups.getGroupOwner.useMutation();
+  const getMembersMutation = api.groups.getGroupMembers.useMutation();
 
   async function onSubmit(data: FormSchema) {
     let url: string | null = null;
@@ -222,26 +224,36 @@ export default function AdminOfferForm({
         return;
       }
 
-      const newOffer = { requestId: request.id, propertyId, totalPrice,tramonaFee: data.tramonaFee * 100};
+      const newOffer = {
+        requestId: request.id,
+        propertyId,
+        totalPrice,
+        tramonaFee: data.tramonaFee * 100,
+      };
 
       await createOffersMutation
         .mutateAsync(newOffer)
         .catch(() => errorToast());
     }
 
-    const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+    //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
+    const travelers = await getMembersMutation.mutateAsync(
+      request.madeByGroupId,
+    );
 
-    if (traveler?.phoneNumber) {
-      if (traveler.isWhatsApp) {
-        await twilioWhatsAppMutation.mutateAsync({
-          templateId: "HXfeb90955f0801d551e95a6170a5cc015",
-          to: traveler.phoneNumber,
-        });
-      } else {
-        await twilioMutation.mutateAsync({
-          to: traveler.phoneNumber,
-          msg: "You have a new offer for a request in your Tramona account!",
-        });
+    for (const traveler of travelers) {
+      if (traveler?.phoneNumber) {
+        if (traveler.isWhatsApp) {
+          await twilioWhatsAppMutation.mutateAsync({
+            templateId: "HXfeb90955f0801d551e95a6170a5cc015",
+            to: traveler.phoneNumber,
+          });
+        } else {
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: "You have a new match for a request in your Tramona account!",
+          });
+        }
       }
     }
 
@@ -326,11 +338,7 @@ export default function AdminOfferForm({
             <FormItem className="col-span-full">
               <FormLabel>Tramona Fee</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  inputMode="decimal"
-                  prefix="$"
-                />
+                <Input {...field} inputMode="decimal" prefix="$" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -562,7 +570,6 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="checkInInfo"
@@ -634,6 +641,20 @@ export default function AdminOfferForm({
               <FormLabel>Area Description (optional)</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cancellationPolicy"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Cancellation Policy (optional)</FormLabel>
+              <FormControl>
+                <Textarea {...field} className="resize-y" rows={2} />
               </FormControl>
               <FormMessage />
             </FormItem>

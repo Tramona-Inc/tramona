@@ -213,7 +213,7 @@ export default function PropertyPage({ property }: { property: Property }) {
       </div>
 
       <hr className="h-px border-0 bg-gray-300" />
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      <div className="flex flex-col-reverse gap-4 md:flex-row md:items-start">
         <div className="flex-[2] space-y-6">
           {/* <section>
             <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function PropertyPage({ property }: { property: Property }) {
                   <DialogHeader>
                     <DialogTitle className="">Amenities</DialogTitle>
                   </DialogHeader>
-                  <div className="max-h-96 overflow-y-scroll">
+                  <div className="max-h-96 overflow-y-auto">
                     <AmenitiesComponent
                       propertyAmenities={property.amenities}
                     />
