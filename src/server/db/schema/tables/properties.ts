@@ -52,6 +52,7 @@ export const ALL_PROPERTY_TYPES = [
   "Home",
   "Hotels",
   "Alternative",
+  "house",
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
