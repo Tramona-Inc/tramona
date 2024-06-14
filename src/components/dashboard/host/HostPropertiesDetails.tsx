@@ -26,6 +26,7 @@ import Onboarding5 from "@/components/host/onboarding/Onboarding5";
 import Onboarding8 from "@/components/host/onboarding/Onboarding8";
 import Onboarding9 from "@/components/host/onboarding/Onboarding9";
 import Onboarding7 from "@/components/host/onboarding/Onboarding7";
+import Onboarding6 from "@/components/host/onboarding/Onboarding6";
 
 export default function HostPropertiesDetails({
   property,
@@ -65,6 +66,17 @@ export default function HostPropertiesDetails({
 
   const checkOut = useHostOnboarding((state) => state.listing.checkOut);
   const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
+
+  const amenities: string[] = useHostOnboarding(
+    (state) => state.listing.amenities,
+  );
+  const setAmenities = useHostOnboarding((state) => state.setAmenities);
+  const otherAmenities: string[] = useHostOnboarding(
+    (state) => state.listing.otherAmenities,
+  );
+  const setOtherAmenities = useHostOnboarding(
+    (state) => state.setOtherAmenities,
+  );
 
   const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
   const setImageUrls = useHostOnboarding((state) => state.setImageUrls);
@@ -111,6 +123,8 @@ export default function HostPropertiesDetails({
       checkInInfo: checkInType,
       checkInTime: convertTo24HourFormat(checkIn),
       checkOutTime: convertTo24HourFormat(checkOut),
+      amenities: amenities,
+      otherAmenities: otherAmenities,
       imageUrls: imageURLs,
       name: title,
       about: description,
@@ -151,6 +165,8 @@ export default function HostPropertiesDetails({
     setCheckInType(property.checkInInfo ?? "");
     setCheckIn(property.checkInTime ?? "");
     setCheckOut(property.checkOutTime ?? "");
+    setAmenities(property.amenities ?? []);
+    setOtherAmenities(property.otherAmenities);
     setImageUrls(property.imageUrls);
     setTitle(property.name);
     setDescription(property.about);
@@ -353,13 +369,49 @@ export default function HostPropertiesDetails({
           </div>
         </section>
         <section className="space-y-2 py-4">
-          <h2 className="text-lg font-bold">Amenities</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Amenities</h2>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding6
+                  editing
+                  setHandleOnboarding={setHandleOnboarding}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button
+                      onClick={async () => {
+                        handleOnboarding?.();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="grid grid-cols-2 gap-y-2 text-muted-foreground">
-            {property.amenities?.map((amenity, index) => (
-              <div key={index} className="flex items-center">
-                <p>{amenity}</p>
-              </div>
-            ))}
+            {(editing ? amenities : property.amenities)?.map(
+              (amenity, index) => (
+                <div key={index} className="flex items-center">
+                  <p>{amenity}</p>
+                </div>
+              ),
+            )}
+            <div className="col-span-full">
+              <p className="font-semibold text-primary">Other Amenities</p>
+            </div>
+            {(editing ? otherAmenities : property.otherAmenities).map(
+              (amenity, index) => (
+                <div key={index} className="flex items-center">
+                  <p>{capitalize(amenity)}</p>
+                </div>
+              ),
+            )}
           </div>
         </section>
         <section className="space-y-2 py-4">

@@ -146,7 +146,13 @@ function CheckboxSelect({
   );
 }
 
-export default function Onboarding6() {
+export default function Onboarding6({
+  editing = false,
+  setHandleOnboarding,
+}: {
+  editing?: boolean;
+  setHandleOnboarding: (handle: () => void) => void;
+}) {
   const amenities: string[] = useHostOnboarding(
     (state) => state.listing.amenities,
   );
@@ -175,7 +181,7 @@ export default function Onboarding6() {
 
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="my-20 flex flex-col gap-10">
           <h1 className="text-4xl font-bold">What amenities do you offer?</h1>
@@ -221,19 +227,6 @@ export default function Onboarding6() {
 
           <div>
             <h3 className="mb-5 text-2xl font-semibold">Laundry</h3>
-            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
-              {laundryItems.map((item) => (
-                <CheckboxSelect
-                  key={item.id}
-                  item={item}
-                  isSelected={amenities.includes(item.id)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="mb-5 text-2xl font-semibold">Internet & office</h3>
             <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
               {laundryItems.map((item) => (
                 <CheckboxSelect
@@ -299,7 +292,7 @@ export default function Onboarding6() {
           </div>
         </div>
       </div>
-      <OnboardingFooter isForm={false} />
+      {!editing && <OnboardingFooter isForm={false} />}
     </>
   );
 }

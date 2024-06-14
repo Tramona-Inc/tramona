@@ -124,17 +124,22 @@ export function HostPropertyEditBtn({
   return (
     <div className="fixed bottom-20 right-4 z-50 sm:static">
       {editing ? (
-        <Button
-          variant="secondary"
-          className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
-          onClick={() => {
-            setEditing(!editing);
-            onSubmit?.();
-          }}
-          type="button"
-        >
-          Done
-        </Button>
+        <div className="space-x-2">
+          <Button variant="secondary" onClick={() => setEditing(!editing)}>
+            Cancel
+          </Button>
+          <Button
+            variant="secondary"
+            className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+            onClick={() => {
+              setEditing(!editing);
+              onSubmit?.();
+            }}
+            type="button"
+          >
+            Done
+          </Button>
+        </div>
       ) : (
         <Button
           variant="secondary"
