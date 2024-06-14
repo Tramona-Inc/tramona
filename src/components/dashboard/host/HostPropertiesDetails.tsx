@@ -25,6 +25,7 @@ import Onboarding4 from "@/components/host/onboarding/Onboarding4";
 import Onboarding5 from "@/components/host/onboarding/Onboarding5";
 import Onboarding8 from "@/components/host/onboarding/Onboarding8";
 import Onboarding9 from "@/components/host/onboarding/Onboarding9";
+import Onboarding7 from "@/components/host/onboarding/Onboarding7";
 
 export default function HostPropertiesDetails({
   property,
@@ -65,6 +66,9 @@ export default function HostPropertiesDetails({
   const checkOut = useHostOnboarding((state) => state.listing.checkOut);
   const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
 
+  const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
+  const setImageUrls = useHostOnboarding((state) => state.setImageUrls);
+
   const title = useHostOnboarding((state) => state.listing.title);
   const setTitle = useHostOnboarding((state) => state.setTitle);
 
@@ -96,17 +100,18 @@ export default function HostPropertiesDetails({
     const newProperty = {
       ...property,
       propertyType: propertyType,
-      checkInTime: convertTo24HourFormat(checkIn),
-      checkOutTime: convertTo24HourFormat(checkOut),
       roomType: spaceType,
       maxNumGuests: maxGuests,
       numBedrooms: bedrooms,
       numBeds: beds,
       numBathrooms: bathrooms,
       address: address,
-      checkInInfo: checkInType,
       latitude: coordinateData?.coordinates.location?.lat,
       longitude: coordinateData?.coordinates.location?.lng,
+      checkInInfo: checkInType,
+      checkInTime: convertTo24HourFormat(checkIn),
+      checkOutTime: convertTo24HourFormat(checkOut),
+      imageUrls: imageURLs,
       name: title,
       about: description,
       petsAllowed: petsAllowed,
@@ -146,6 +151,7 @@ export default function HostPropertiesDetails({
     setCheckInType(property.checkInInfo ?? "");
     setCheckIn(property.checkInTime ?? "");
     setCheckOut(property.checkOutTime ?? "");
+    setImageUrls(property.imageUrls);
     setTitle(property.name);
     setDescription(property.about);
     setPetsAllowed(property.petsAllowed ?? false);
@@ -357,11 +363,35 @@ export default function HostPropertiesDetails({
           </div>
         </section>
         <section className="space-y-2 py-4">
-          <h2 className="text-lg font-bold">Photos</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Photos</h2>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding7
+                  editing
+                  setHandleOnboarding={setHandleOnboarding}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button
+                      onClick={async () => {
+                        handleOnboarding?.();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
             <div className="relative col-span-2 row-span-2 bg-accent">
               <Image
-                src={property.imageUrls[0]!}
+                src={editing ? imageURLs[0]! : property.imageUrls[0]!}
                 alt=""
                 fill
                 objectFit="cover"
@@ -370,7 +400,7 @@ export default function HostPropertiesDetails({
             </div>
             <div className="relative col-span-1 row-span-1 bg-accent">
               <Image
-                src={property.imageUrls[1]!}
+                src={editing ? imageURLs[1]! : property.imageUrls[1]!}
                 alt=""
                 fill
                 objectFit="cover"
@@ -378,7 +408,7 @@ export default function HostPropertiesDetails({
             </div>
             <div className="relative col-span-1 row-span-1 bg-accent">
               <Image
-                src={property.imageUrls[2]!}
+                src={editing ? imageURLs[2]! : property.imageUrls[2]!}
                 alt=""
                 fill
                 objectFit="cover"
@@ -386,7 +416,7 @@ export default function HostPropertiesDetails({
             </div>
             <div className="relative col-span-1 row-span-1 bg-accent">
               <Image
-                src={property.imageUrls[3]!}
+                src={editing ? imageURLs[3]! : property.imageUrls[3]!}
                 alt=""
                 fill
                 objectFit="cover"
@@ -394,7 +424,7 @@ export default function HostPropertiesDetails({
             </div>
             <div className="relative col-span-1 row-span-1 bg-accent">
               <Image
-                src={property.imageUrls[4]!}
+                src={editing ? imageURLs[4]! : property.imageUrls[4]!}
                 alt=""
                 fill
                 objectFit="cover"

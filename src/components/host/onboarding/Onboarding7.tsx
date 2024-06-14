@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
 const formSchema = z.object({
   imageURLs: z
@@ -23,7 +23,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function Onboarding7() {
+export default function Onboarding7({
+  editing = false,
+  setHandleOnboarding,
+}: {
+  editing?: boolean;
+  setHandleOnboarding: (handle: () => void) => void;
+}) {
   const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
   const [error, setError] = useState(false);
 
@@ -47,9 +53,13 @@ export default function Onboarding7() {
     setError(true);
   }
 
+  useEffect(() => {
+    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+  }, [form.formState]);
+
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="px-4 pb-32 pt-16">
           <div className="mx-auto max-w-3xl">
@@ -94,12 +104,14 @@ export default function Onboarding7() {
           </div>
         </div>
       </div>
-      <OnboardingFooter
-        handleNext={form.handleSubmit(handleFormSubmit)}
-        isFormValid={form.formState.isValid || imageURLs.length >= 5}
-        isForm={true}
-        handleError={handleError}
-      />
+      {!editing && (
+        <OnboardingFooter
+          handleNext={form.handleSubmit(handleFormSubmit)}
+          isFormValid={form.formState.isValid || imageURLs.length >= 5}
+          isForm={true}
+          handleError={handleError}
+        />
+      )}
     </>
   );
 }
