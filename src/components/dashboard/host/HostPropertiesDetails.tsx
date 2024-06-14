@@ -24,7 +24,7 @@ import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
 import Onboarding5 from "@/components/host/onboarding/Onboarding5";
 import Onboarding8 from "@/components/host/onboarding/Onboarding8";
-import { set } from "lodash";
+import Onboarding9 from "@/components/host/onboarding/Onboarding9";
 
 export default function HostPropertiesDetails({
   property,
@@ -71,6 +71,22 @@ export default function HostPropertiesDetails({
   const description = useHostOnboarding((state) => state.listing.description);
   const setDescription = useHostOnboarding((state) => state.setDescription);
 
+  const petsAllowed = useHostOnboarding((state) => state.listing.petsAllowed);
+  const smokingAllowed = useHostOnboarding(
+    (state) => state.listing.smokingAllowed,
+  );
+  const otherHouseRules = useHostOnboarding(
+    (state) => state.listing.otherHouseRules,
+  );
+
+  const setPetsAllowed = useHostOnboarding((state) => state.setPetsAllowed);
+  const setSmokingAllowed = useHostOnboarding(
+    (state) => state.setSmokingAllowed,
+  );
+  const setOtherHouseRules = useHostOnboarding(
+    (state) => state.setOtherHouseRules,
+  );
+
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: address,
@@ -93,6 +109,9 @@ export default function HostPropertiesDetails({
       longitude: coordinateData?.coordinates.location?.lng,
       name: title,
       about: description,
+      petsAllowed: petsAllowed,
+      smokingAllowed: smokingAllowed,
+      otherHouseRules: otherHouseRules,
     };
 
     await updateProperty(newProperty);
@@ -129,6 +148,9 @@ export default function HostPropertiesDetails({
     setCheckOut(property.checkOutTime ?? "");
     setTitle(property.name);
     setDescription(property.about);
+    setPetsAllowed(property.petsAllowed ?? false);
+    setSmokingAllowed(property.smokingAllowed ?? false);
+    setOtherHouseRules(property.otherHouseRules ?? "");
   }, [property]);
 
   return (
@@ -420,16 +442,52 @@ export default function HostPropertiesDetails({
           </div>
         </section>
         <section className="space-y-2 py-4">
-          <h2 className="text-lg font-bold">House rules</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">House rules</h2>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding9
+                  editing
+                  setHandleOnboarding={setHandleOnboarding}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button
+                      onClick={async () => {
+                        handleOnboarding?.();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="text-muted-foreground">
-            <p>{property.petsAllowed ? "Pets allowed" : "No pets"}</p>
-            <p>{property.smokingAllowed ? "Smoking allowed" : "No smoking"}</p>
+            <p>
+              {(editing ? petsAllowed : property.petsAllowed)
+                ? "Pets allowed"
+                : "No pets"}
+            </p>
+            <p>
+              {(editing ? smokingAllowed : property.smokingAllowed)
+                ? "Smoking allowed"
+                : "No smoking"}
+            </p>
           </div>
           <h3 className="font-semibold">Additional rules</h3>
           <p className="text-muted-foreground">
-            {property.otherHouseRules
-              ? capitalize(property.otherHouseRules)
-              : "No additional rules"}
+            {editing
+              ? otherHouseRules
+                ? otherHouseRules
+                : "No additional rules"
+              : property.otherHouseRules
+                ? property.otherHouseRules
+                : "No additional rules"}
           </p>
         </section>
       </div>
