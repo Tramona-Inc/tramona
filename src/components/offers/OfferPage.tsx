@@ -205,45 +205,79 @@ export default function OfferPage({
         )}
       </div>
 
-      <div className="flex justify-start space-x-4">
-        <a
-          href="#overview"
-          className="font-medium text-black hover:text-gray-800"
-        >
-          Overview
-        </a>
-        <a href="#amenities" className="text-gray-600 hover:text-gray-800">
-          Amenities
-        </a>
-        <a href="#cancellation" className="text-gray-600 hover:text-gray-800">
-          Cancellation Policy
-        </a>
-        {property.checkInTime && (
-          <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
-            House rules
-          </a>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
-        <div className="flex-[2] space-y-2">
-          <h1 className="items-center text-lg font-semibold sm:text-3xl">
-            {property.name}
-          </h1>
-          <div className="text-sm font-medium">
-            <span>{plural(property.maxNumGuests, "Guest")}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBedrooms, "bedroom")}</span>
-            <span className="mx-2">·</span>
-            <span>{property.propertyType}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBeds, "bed")}</span>
-            {property.numBathrooms && (
-              <>
-                <span className="mx-2">·</span>
-                <span>{plural(property.numBathrooms, "bath")}</span>
-              </>
+      <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row justify-between">
+        <div className="flex flex-col space-y-4">
+          <div className="flex justify-start space-x-4">
+            <a
+              href="#overview"
+              className="font-medium text-black hover:text-gray-800"
+            >
+              Overview
+            </a>
+            <a href="#amenities" className="text-gray-600 hover:text-gray-800">
+              Amenities
+            </a>
+            <a
+              href="#cancellation"
+              className="text-gray-600 hover:text-gray-800"
+            >
+              Cancellation Policy
+            </a>
+            {property.checkInTime && (
+              <a
+                href="#house-rules"
+                className="text-gray-600 hover:text-gray-800"
+              >
+                House rules
+              </a>
             )}
+          </div>
+
+          <div className="flex flex-col gap-4 md:flex-row md:items-start">
+            <div className="flex-[2] space-y-2">
+              <h1 className="items-center text-lg font-semibold sm:text-3xl">
+                {property.name}
+              </h1>
+              <div className="text-sm font-medium">
+                <span>{plural(property.maxNumGuests, "Guest")}</span>
+                <span className="mx-2">·</span>
+                <span>{plural(property.numBedrooms, "bedroom")}</span>
+                <span className="mx-2">·</span>
+                <span>{property.propertyType}</span>
+                <span className="mx-2">·</span>
+                <span>{plural(property.numBeds, "bed")}</span>
+                {property.numBathrooms && (
+                  <>
+                    <span className="mx-2">·</span>
+                    <span>{plural(property.numBathrooms, "bath")}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex w-[350px] flex-col items-center justify-center space-y-2">
+          <p className="text-center text-xs text-gray-500">
+            Remember, Airbnb <span className="font-bold">hides the fees</span>{" "}
+            until the end of the booking process.{" "}
+            <span className="font-bold">Tramona has all fees included</span>.
+            Press “<span className="font-bold">Book</span>” or “
+            <span className="font-bold">Reserve</span>” on Airbnb to see the
+            final price.
+          </p>
+          <div className="flex space-x-4">
+            <Button
+              variant="outline"
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
+              Property on Airbnb
+            </Button>
+            <Button
+              variant="outline"
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
+              Pricing Screen
+            </Button>
           </div>
         </div>
       </div>

@@ -75,6 +75,8 @@ const formSchema = z.object({
   cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
   airbnbHostImageUrl: optional(zodUrl()),
+  airbnbPropertyUrl: optional(zodUrl()),
+  pricingScreenUrl : optional(zodUrl()),
   // mapScreenshot: optional(zodString()),
 });
 
@@ -137,6 +139,8 @@ export default function AdminOfferForm({
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
             airbnbHostImageUrl: offer.property.hostImageUrl,
+            airbnbPropertyUrl: offer.property.airbnbBookUrl ?? undefined,
+            pricingScreenUrl: offer.property.pricingScreenUrl ?? undefined,
           }
         : {}),
     },
@@ -191,7 +195,7 @@ export default function AdminOfferForm({
       numBathrooms: 1,
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
-      hostImageUrl: propertyData.airbnbHostImageUrl, 
+      hostImageUrl: propertyData.airbnbHostImageUrl,
       mapScreenshot: url,
     };
 
