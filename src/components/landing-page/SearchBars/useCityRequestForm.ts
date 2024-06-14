@@ -16,7 +16,7 @@ export function useCityRequestForm({
   afterSubmit,
 }: {
   setCurTab: (val: number) => void;
-  afterSubmit?: (madeByGroupIds?: number[]) => void; 
+  afterSubmit?: (madeByGroupIds?: number[]) => void;
 }) {
   const form = useZodForm({
     schema: multiCityRequestSchema,
@@ -43,6 +43,8 @@ export function useCityRequestForm({
       };
     });
 
+    console.log("DKFJDKJSFKDFJ", newRequests);
+
     if (status === "unauthenticated") {
       localStorage.setItem("unsentRequests", JSON.stringify(newRequests));
       void router.push("/auth/signin").then(() => {
@@ -61,7 +63,7 @@ export function useCityRequestForm({
     } else {
       await createRequests(newRequests)
         .then((result) => {
-          
+
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
           form.reset();

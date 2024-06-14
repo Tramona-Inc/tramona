@@ -127,6 +127,8 @@ export default function RequestCard({
           <p>{fmtdNumGuests}</p>
           {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
           {request.airbnbLink && <a className="underline" href={request.airbnbLink}>Airbnb Link</a>}
+          {isAdminDashboard && request.radius && <p>Radius: {request.radius} meters</p>}
+          {isAdminDashboard && request.lat && request.lng && <p>Coordinates: {request.lat}, {request.lng}</p>}
         </div>
         <div className="flex justify-end gap-2">{children}</div>
         {isSelected && (

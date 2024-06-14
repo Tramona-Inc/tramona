@@ -45,6 +45,7 @@ const MapModal = ({
   };
 
   const handleSave = () => {
+    setOpen(false);
     onSave(initialLocation, radius);
   };
 
