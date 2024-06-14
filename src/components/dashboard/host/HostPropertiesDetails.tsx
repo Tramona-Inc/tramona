@@ -23,6 +23,8 @@ import { api } from "@/utils/api";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
 import Onboarding5 from "@/components/host/onboarding/Onboarding5";
+import Onboarding8 from "@/components/host/onboarding/Onboarding8";
+import { set } from "lodash";
 
 export default function HostPropertiesDetails({
   property,
@@ -63,12 +65,11 @@ export default function HostPropertiesDetails({
   const checkOut = useHostOnboarding((state) => state.listing.checkOut);
   const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
 
-  const otherCheckInType = useHostOnboarding(
-    (state) => state.listing.otherCheckInType,
-  );
-  const setOtherCheckInType = useHostOnboarding(
-    (state) => state.setOtherCheckInType,
-  );
+  const title = useHostOnboarding((state) => state.listing.title);
+  const setTitle = useHostOnboarding((state) => state.setTitle);
+
+  const description = useHostOnboarding((state) => state.listing.description);
+  const setDescription = useHostOnboarding((state) => state.setDescription);
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
@@ -90,6 +91,8 @@ export default function HostPropertiesDetails({
       checkInInfo: checkInType,
       latitude: coordinateData?.coordinates.location?.lat,
       longitude: coordinateData?.coordinates.location?.lng,
+      name: title,
+      about: description,
     };
 
     await updateProperty(newProperty);
@@ -124,6 +127,8 @@ export default function HostPropertiesDetails({
     setCheckInType(property.checkInInfo ?? "");
     setCheckIn(property.checkInTime ?? "");
     setCheckOut(property.checkOutTime ?? "");
+    setTitle(property.name);
+    setDescription(property.about);
   }, [property]);
 
   return (
@@ -376,14 +381,42 @@ export default function HostPropertiesDetails({
           </div>
         </section>
         <section className="space-y-2 py-4">
-          <h2 className="text-lg font-bold">Description</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Description</h2>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding8
+                  editing
+                  setHandleOnboarding={setHandleOnboarding}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button
+                      onClick={async () => {
+                        handleOnboarding?.();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div>
             <h3 className="font-semibold ">Title</h3>
-            <p className="text-muted-foreground">{property.name}</p>
+            <p className="text-muted-foreground">
+              {editing ? title : property.name}
+            </p>
           </div>
           <div>
             <h3 className="font-semibold ">Description</h3>
-            <p className="text-muted-foreground">{property.about}</p>
+            <p className="text-muted-foreground">
+              {editing ? description : property.about}
+            </p>
           </div>
         </section>
         <section className="space-y-2 py-4">
