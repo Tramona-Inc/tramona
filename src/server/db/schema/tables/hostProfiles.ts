@@ -19,6 +19,7 @@ export const hostProfiles = pgTable(
   "host_profiles",
   {
     userId: text("user_id")
+      .primaryKey()
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     type: hostTypeEnum("type").notNull().default("other"),
