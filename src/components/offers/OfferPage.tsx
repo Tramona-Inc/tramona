@@ -99,6 +99,7 @@ export default function OfferPage({
           void router.push(`/messages?conversationId=${conversationId}`);
       },
     });
+    console.log(property);
 
   return (
     <div className="space-y-4">
@@ -205,7 +206,7 @@ export default function OfferPage({
         )}
       </div>
 
-      <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row justify-between">
+      <div className="flex flex-col justify-between space-y-4 md:flex-row md:space-y-0">
         <div className="flex flex-col space-y-4">
           <div className="flex justify-start space-x-4">
             <a
@@ -256,30 +257,44 @@ export default function OfferPage({
             </div>
           </div>
         </div>
-        <div className="flex w-[350px] flex-col items-center justify-center space-y-2">
-          <p className="text-center text-xs text-gray-500">
-            Remember, Airbnb <span className="font-bold">hides the fees</span>{" "}
-            until the end of the booking process.{" "}
-            <span className="font-bold">Tramona has all fees included</span>.
-            Press “<span className="font-bold">Book</span>” or “
-            <span className="font-bold">Reserve</span>” on Airbnb to see the
-            final price.
-          </p>
-          <div className="flex space-x-4">
-            <Button
-              variant="outline"
-              className="bg-red-500 text-white hover:bg-red-600"
-            >
-              Property on Airbnb
-            </Button>
-            <Button
-              variant="outline"
-              className="bg-red-500 text-white hover:bg-red-600"
-            >
-              Pricing Screen
-            </Button>
+        {property.pricingScreenUrl && property.airbnbBookUrl && (
+          <div className="flex w-[350px] flex-col items-center justify-center space-y-2">
+            <p className="text-center text-xs text-gray-500">
+              Remember, Airbnb <span className="font-bold">hides the fees</span>{" "}
+              until the end of the booking process.{" "}
+              <span className="font-bold">Tramona has all fees included</span>.
+              Press “<span className="font-bold">Book</span>” or “
+              <span className="font-bold">Reserve</span>” on Airbnb to see the
+              final price.
+            </p>
+            <div className="flex space-x-4">
+              <a
+                href={property.airbnbBookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  variant="outline"
+                  className="bg-red-500 text-white hover:bg-red-600"
+                >
+                  Property on Airbnb
+                </Button>
+              </a>
+              <a
+                href={property.pricingScreenUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  variant="outline"
+                  className="bg-red-500 text-white hover:bg-red-600"
+                >
+                  Pricing Screen
+                </Button>
+              </a>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <hr className="h-px border-0 bg-gray-300" />

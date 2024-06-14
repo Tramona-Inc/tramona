@@ -75,8 +75,8 @@ const formSchema = z.object({
   cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
   airbnbHostImageUrl: optional(zodUrl()),
-  airbnbPropertyUrl: optional(zodUrl()),
-  pricingScreenUrl : optional(zodUrl()),
+  airbnbBookUrl: optional(zodUrl()),
+  pricingScreenUrl: optional(zodUrl()),
   // mapScreenshot: optional(zodString()),
 });
 
@@ -139,7 +139,7 @@ export default function AdminOfferForm({
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
             airbnbHostImageUrl: offer.property.hostImageUrl,
-            airbnbPropertyUrl: offer.property.airbnbBookUrl ?? undefined,
+            airbnbBookUrl: offer.property.airbnbBookUrl ?? undefined,
             pricingScreenUrl: offer.property.pricingScreenUrl ?? undefined,
           }
         : {}),
@@ -553,7 +553,7 @@ export default function AdminOfferForm({
               name="airbnbMessageUrl"
               render={({ field }) => (
                 <FormItem className="col-span-full">
-                  <FormLabel>Airbnb Message Host Url</FormLabel>
+                  <FormLabel>Airbnb Message Host Url (optional)</FormLabel>
                   <FormControl>
                     <Input {...field} inputMode="url" />
                   </FormControl>
@@ -676,6 +676,34 @@ export default function AdminOfferForm({
               <FormLabel>Cancellation Policy (optional)</FormLabel>
               <FormControl>
                 <Textarea {...field} className="resize-y" rows={2} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="airbnbBookUrl"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Airbnb Property Checkout Url (optional)</FormLabel>
+              <FormControl>
+                <Input {...field} inputMode="url" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="pricingScreenUrl"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Pricing Screen Url (optional)</FormLabel>
+              <FormControl>
+                <Input {...field} inputMode="url" />
               </FormControl>
               <FormMessage />
             </FormItem>
