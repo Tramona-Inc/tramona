@@ -11,8 +11,6 @@ import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { set } from "lodash";
 
 const formSchema = z.object({
   checkIn: zodString({ maxLen: 100 }),
@@ -26,7 +24,7 @@ export default function Onboarding5({
   setHandleOnboarding,
 }: {
   editing?: boolean;
-  setHandleOnboarding: (handle: () => void) => void;
+  setHandleOnboarding?: (handle: () => void) => void;
 }) {
   const otherCheckInType = useHostOnboarding(
     (state) => state.listing.otherCheckInType,
@@ -74,7 +72,8 @@ export default function Onboarding5({
   }
 
   useEffect(() => {
-    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+    setHandleOnboarding &&
+      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
   }, [form.formState]);
 
   return (

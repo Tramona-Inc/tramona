@@ -18,11 +18,69 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Pencil, PlusIcon } from "lucide-react";
 import HostProperties from "./HostProperties";
 import Link from "next/link";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 
 export default function HostPropertiesLayout({
   children,
 }: React.PropsWithChildren) {
   // const [open, setOpen] = useState(false);
+
+  const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
+  const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
+  const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
+  const setBeds = useHostOnboarding((state) => state.setBeds);
+  const setBathrooms = useHostOnboarding((state) => state.setBathrooms);
+  const setSpaceType = useHostOnboarding((state) => state.setSpaceType);
+  const setLocation = useHostOnboarding((state) => state.setLocation);
+  const setCheckInType = useHostOnboarding((state) => state.setCheckInType);
+  const setOtherCheckInType = useHostOnboarding(
+    (state) => state.setOtherCheckInType,
+  );
+  const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
+  const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
+  const setAmenities = useHostOnboarding((state) => state.setAmenities);
+  const setOtherAmenities = useHostOnboarding(
+    (state) => state.setOtherAmenities,
+  );
+  const setImageUrls = useHostOnboarding((state) => state.setImageUrls);
+  const setTitle = useHostOnboarding((state) => state.setTitle);
+  const setDescription = useHostOnboarding((state) => state.setDescription);
+  const setPetsAllowed = useHostOnboarding((state) => state.setPetsAllowed);
+  const setSmokingAllowed = useHostOnboarding(
+    (state) => state.setSmokingAllowed,
+  );
+  const setOtherHouseRules = useHostOnboarding(
+    (state) => state.setOtherHouseRules,
+  );
+
+  function setStatesDefault() {
+    setPropertyType("Apartment"),
+      setMaxGuests(1),
+      setBedrooms(1),
+      setBeds(1),
+      setBathrooms(1),
+      setSpaceType("Entire place"),
+      setLocation({
+        street: "",
+        apt: "",
+        city: "",
+        state: "",
+        zipcode: "",
+        country: "",
+      }),
+      setCheckInType("self"),
+      setOtherCheckInType(false),
+      setCheckIn(""),
+      setCheckOut(""),
+      setAmenities([]),
+      setOtherAmenities([]),
+      setImageUrls([]),
+      setTitle(""),
+      setDescription(""),
+      setPetsAllowed(false),
+      setSmokingAllowed(false),
+      setOtherHouseRules("");
+  }
 
   return (
     <div className="flex">
@@ -33,7 +91,11 @@ export default function HostPropertiesLayout({
           <div className="my-4">
             {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
             <Link href="/host-onboarding">
-              <Button variant="secondaryLight" className="font-semi bg-white">
+              <Button
+                variant="secondaryLight"
+                className="font-semi bg-white"
+                onClick={setStatesDefault}
+              >
                 <PlusIcon />
                 New Listing
               </Button>

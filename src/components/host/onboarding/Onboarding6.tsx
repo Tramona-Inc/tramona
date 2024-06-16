@@ -148,10 +148,8 @@ function CheckboxSelect({
 
 export default function Onboarding6({
   editing = false,
-  setHandleOnboarding,
 }: {
   editing?: boolean;
-  setHandleOnboarding: (handle: () => void) => void;
 }) {
   const amenities: string[] = useHostOnboarding(
     (state) => state.listing.amenities,

@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
   imageURLs: z
@@ -28,12 +28,10 @@ export default function Onboarding7({
   setHandleOnboarding,
 }: {
   editing?: boolean;
-  setHandleOnboarding: (handle: () => void) => void;
+  setHandleOnboarding?: (handle: () => void) => void;
 }) {
   const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
   const [error, setError] = useState(false);
-
-  console.log(imageURLs);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -45,7 +43,6 @@ export default function Onboarding7({
   const setImageUrls = useHostOnboarding((state) => state.setImageUrls);
 
   async function handleFormSubmit({ imageURLs }: FormValues) {
-    console.log(imageURLs);
     setImageUrls(imageURLs);
   }
 
@@ -54,7 +51,8 @@ export default function Onboarding7({
   }
 
   useEffect(() => {
-    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+    setHandleOnboarding &&
+      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
   }, [form.formState]);
 
   return (

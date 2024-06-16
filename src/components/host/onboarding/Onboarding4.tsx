@@ -22,7 +22,6 @@ import { useState, useEffect } from "react";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
-import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   country: zodString(),
@@ -40,7 +39,7 @@ export default function Onboarding4({
   setHandleOnboarding,
 }: {
   editing?: boolean;
-  setHandleOnboarding: (handle: () => void) => void;
+  setHandleOnboarding?: (handle: () => void) => void;
 }) {
   const [location, setLocation] = useState({
     country: "",
@@ -121,7 +120,8 @@ export default function Onboarding4({
       }`;
       setAddress(addressConversion);
     }
-    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+    setHandleOnboarding &&
+      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
   }, [form.formState]);
   // I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
@@ -129,7 +129,7 @@ export default function Onboarding4({
   });
 
   function handleError(): void {
-    throw new Error("Function not implemented.");
+    setError(!error);
   }
 
   return (

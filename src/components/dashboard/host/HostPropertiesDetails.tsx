@@ -37,6 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useRouter } from "next/router";
 
 export default function HostPropertiesDetails({
   property,
@@ -45,6 +46,7 @@ export default function HostPropertiesDetails({
 }) {
   const [editing, setEditing] = useState(false);
   const [handleOnboarding, setHandleOnboarding] = useState<() => void>();
+  const router = useRouter();
 
   const propertyType = useHostOnboarding((state) => state.listing.propertyType);
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
@@ -114,7 +116,9 @@ export default function HostPropertiesDetails({
   );
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-  const { mutateAsync: deleteProperty } = api.properties.delete.useMutation();
+  const { mutateAsync: deleteProperty } = api.properties.delete.useMutation({
+    onSuccess: () => void router.push("/host/properties"),
+  });
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: address,
   });
@@ -407,19 +411,10 @@ export default function HostPropertiesDetails({
                 {editing && <a className="text-sm font-bold underline">Edit</a>}
               </DialogTrigger>
               <DialogContent>
-                <Onboarding6
-                  editing
-                  setHandleOnboarding={setHandleOnboarding}
-                />
+                <Onboarding6 editing />
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button
-                      onClick={async () => {
-                        handleOnboarding?.();
-                      }}
-                    >
-                      Save
-                    </Button>
+                    <Button>Save</Button>
                   </DialogClose>
                 </DialogFooter>
               </DialogContent>

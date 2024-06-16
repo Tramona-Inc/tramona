@@ -30,7 +30,7 @@ export default function Onboarding9({
   setHandleOnboarding,
 }: {
   editing?: boolean;
-  setHandleOnboarding: (handle: () => void) => void;
+  setHandleOnboarding?: (handle: () => void) => void;
 }) {
   const petsAllowed = useHostOnboarding((state) => state.listing.petsAllowed);
   const smokingAllowed = useHostOnboarding(
@@ -64,7 +64,8 @@ export default function Onboarding9({
   }
 
   useEffect(() => {
-    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+    setHandleOnboarding &&
+      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
   }, [form.formState]);
 
   return (

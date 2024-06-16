@@ -16,19 +16,19 @@ export const options = [
   {
     id: "Entire place" as SpaceType,
     icon: <Home />,
-    title: "Apartment",
+    title: "Entire Place",
     text: "Guests have the whole place to themselves.",
   },
   {
     id: "Private room" as SpaceType,
     icon: <Room />,
-    title: "Home",
+    title: "Private Room",
     text: "Guests have their own room in a home and access to shared spaces.",
   },
   {
     id: "Shared room" as SpaceType,
     icon: <SharedRoom />,
-    title: "Hotels, B&Bs, & More",
+    title: "Shared Room",
     text: "Guests sleep in a room or common area that may be shared with you or others.",
   },
 ];

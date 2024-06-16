@@ -30,7 +30,7 @@ export default function Onboarding8({
   setHandleOnboarding,
 }: {
   editing?: boolean;
-  setHandleOnboarding: (handle: () => void) => void;
+  setHandleOnboarding?: (handle: () => void) => void;
 }) {
   const title = useHostOnboarding((state) => state.listing.title);
   const setTitle = useHostOnboarding((state) => state.setTitle);
@@ -59,14 +59,15 @@ export default function Onboarding8({
   }
 
   useEffect(() => {
-    setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+    setHandleOnboarding &&
+      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
   }, [form.formState]);
 
   return (
     <>
       {!editing && <SaveAndExit />}
       <div className="container my-10 flex flex-grow flex-col justify-center">
-        <h1 className="mb-8 text-3xl font-bold">Describe your listing</h1>
+        <h1 className="mb-3 text-3xl font-bold">Describe your listing</h1>
         {error && (
           <p className="text-red-500">Please fill out all required fields</p>
         )}
