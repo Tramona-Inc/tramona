@@ -59,7 +59,9 @@ export default function OnboardingFooter({
           " " +
           listing.location.state +
           " " +
-          listing.location.zipcode,
+          listing.location.zipcode +
+          ", " +
+          listing.location.country,
         checkInInfo: listing.checkInType,
         checkInTime: listing.checkIn,
         checkOutTime: listing.checkOut,
