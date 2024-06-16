@@ -27,6 +27,16 @@ import Onboarding8 from "@/components/host/onboarding/Onboarding8";
 import Onboarding9 from "@/components/host/onboarding/Onboarding9";
 import Onboarding7 from "@/components/host/onboarding/Onboarding7";
 import Onboarding6 from "@/components/host/onboarding/Onboarding6";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function HostPropertiesDetails({
   property,
@@ -104,6 +114,7 @@ export default function HostPropertiesDetails({
   );
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const { mutateAsync: deleteProperty } = api.properties.delete.useMutation();
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: address,
   });
@@ -180,10 +191,30 @@ export default function HostPropertiesDetails({
       <div className="flex items-center justify-between">
         {editing && (
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="secondary">
-              <Trash2 />
-              Delete
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="secondary" className=" text-red-500">
+                  <Trash2 />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  Are you sure you want to delete this property?
+                </AlertDialogHeader>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  property.
+                </AlertDialogDescription>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => deleteProperty(property)}>
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
             <Button variant="secondary">
               <PackageOpen />
               Archive
