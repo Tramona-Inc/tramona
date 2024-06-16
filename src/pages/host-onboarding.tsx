@@ -1,4 +1,5 @@
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
+// import Onboarding10 from "@/components/host/onboarding/Onboarding10";
 import Onboarding2 from "@/components/host/onboarding/Onboarding2";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
