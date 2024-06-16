@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import Stripe from "stripe";
+import Stripe from "stripe"
 import { z } from "zod";
 
 export const config = {
