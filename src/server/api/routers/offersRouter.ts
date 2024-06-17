@@ -15,6 +15,7 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
+  reviews
 } from "@/server/db/schema";
 import { getAddress, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";

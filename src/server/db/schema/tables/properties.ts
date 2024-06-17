@@ -195,6 +195,9 @@ export const properties = pgTable("properties", {
   cancellationPolicy: text("cancellation_policy"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
+  airbnbBookUrl: varchar("airbnb_book_url"),
+  hostImageUrl: varchar("host_image_url"),
+  pricingScreenUrl: varchar("pricing_screen_url"),
 });
 
 export type Property = typeof properties.$inferSelect;
