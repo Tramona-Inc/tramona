@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+/* map-modal.tsx */
+import { useState } from "react";
 import { Map, Marker, Circle } from "google-maps-react";
 
 interface MapModalProps {
   initialLocation: { lat: number; lng: number };
   onSave: (location: { lat: number; lng: number }, radius: number) => void;
   setOpen: (open: boolean) => void;
-  setInitialLocation: (lat: number, lng: number) => void;
+  setInitialLocation: (location: { lat: number; lng: number }) => void; // Updated this part
 }
 
 const MapModal = ({
@@ -21,20 +22,16 @@ const MapModal = ({
     _map,
     clickEvent: { latLng: { lat: () => number; lng: () => number } },
   ) => {
-    // Ensure that clickEvent and its properties are defined
     if (clickEvent?.latLng) {
-      // Extract latitude and longitude from clickEvent.latLng
       const lat = clickEvent.latLng.lat();
       const lng = clickEvent.latLng.lng();
-
-      // Update the selected location state
       setInitialLocation({ lat, lng });
     }
   };
 
   const onMarkerDragend = (
-    _blah: any,
-    _blady: any,
+    _event: any,
+    _map: any,
     coord: { latLng: { lat: () => number; lng: () => number } },
   ) => {
     const newLocation = {
@@ -49,25 +46,24 @@ const MapModal = ({
     onSave(initialLocation, radius);
   };
 
-  console.log("selected", initialLocation);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="relative w-11/12 max-w-4xl space-y-8 rounded-lg bg-white p-10">
-        {/* <button
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="relative w-full max-w-4xl space-y-8 rounded-lg bg-white p-6 sm:p-10">
+        <button
           onClick={() => setOpen(false)}
           className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
         >
-        </button> */}
+          <span className="sr-only">Close</span>✕
+        </button>
         <div className="text-center">
-          <div className="mb-1 text-2xl font-extrabold">
+          <div className="mb-1 text-xl sm:text-2xl font-extrabold">
             Have a specific part of town you want to stay in?
           </div>
-          <div className="mb-4 text-2xl font-extrabold text-green-900">
+          <div className="mb-4 text-xl sm:text-2xl font-extrabold text-green-900">
             Drop a pin and let us know!
           </div>
         </div>
-        <div className="relative h-96 overflow-hidden rounded-lg border">
+        <div className="relative h-[300px] sm:h-[400px] overflow-hidden rounded-lg border">
           {initialLocation && (
             <Map
               google={google}
@@ -107,7 +103,7 @@ const MapModal = ({
             className="mt-2 w-full"
           />
         </div>
-        <div className="flex justify-center space-x-4 pt-4">
+        <div className="flex flex-col sm:flex-row justify-center sm:justify-end space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
           <button
             onClick={() => setOpen(false)}
             className="rounded-lg border border-gray-300 px-6 py-3 text-gray-800 hover:bg-gray-100"
@@ -127,3 +123,4 @@ const MapModal = ({
 };
 
 export default MapModal;
+

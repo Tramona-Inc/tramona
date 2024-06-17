@@ -1,6 +1,6 @@
 import { FormField, FormItem, FormMessage } from "../ui/form";
 import { useState } from "react";
-import { InputButton } from "../ui/input-button";
+import { InputButtonMap } from "../ui/input-button-map";
 import { type InputVariant } from "../ui/input";
 import { cn } from "@/utils/utils";
 import { api } from "@/utils/api";
@@ -37,11 +37,6 @@ export default function PlacesInput({
         <FormItem
           className={cn(
             "relative",
-            "p-2",
-            "bg-white",
-            "border",
-            "border-[#d9d6d1ff]",
-            "rounded-lg",
             className,
           )}
         >
@@ -64,7 +59,7 @@ export default function PlacesInput({
                 }}
                 className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
                 trigger={({ value }) => (
-                  <InputButton
+                  <InputButtonMap
                     withClearBtn
                     variant={variant}
                     label={formLabel}
@@ -75,34 +70,16 @@ export default function PlacesInput({
                     role="combobox"
                     icon={icon}
                     className="bg-white"
+                    onSave={onSave}
+                    initialLocation={initialLocation}
+                    setInitialLocation={setInitialLocation}
                   >
                     {value ? value : "Enter your destination"}
-                  </InputButton>
+                  </InputButtonMap>
                 )}
               />
               <FormMessage />
             </div>
-
-            <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
-              <DialogTrigger asChild>
-                <>
-                  <button
-                    onClick={() => setIsMapOpen(true)}
-                    className="ml-2 rounded-lg border border-[#d9d6d1ff] bg-[#f2f1efff] p-2"
-                  >
-                    <LocateFixed />
-                  </button>
-                </>
-              </DialogTrigger>
-              <DialogContent>
-                <MapModal
-                  initialLocation={initialLocation}
-                  setInitialLocation={setInitialLocation}
-                  setOpen={setIsMapOpen}
-                  onSave={onSave}
-                />
-              </DialogContent>
-            </Dialog>
           </div>
         </FormItem>
       )}
