@@ -19,6 +19,7 @@ import { Pencil, PlusIcon } from "lucide-react";
 import HostProperties from "./HostProperties";
 import Link from "next/link";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { api } from "@/utils/api";
 
 export default function HostPropertiesLayout({
   children,
@@ -82,6 +83,8 @@ export default function HostPropertiesLayout({
       setOtherHouseRules("");
   }
 
+  const { data: properties } = api.properties.getHostProperties.useQuery();
+
   return (
     <div className="flex">
       <div className="sticky top-20 h-screen-minus-header-n-footer w-96 overflow-auto border-r px-4 py-8">
@@ -103,7 +106,7 @@ export default function HostPropertiesLayout({
           </div>
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="listed">
-              <AccordionTrigger>Listed</AccordionTrigger>
+              <AccordionTrigger>Listed {properties?.length}</AccordionTrigger>
               <AccordionContent>
                 <HostProperties />
               </AccordionContent>
