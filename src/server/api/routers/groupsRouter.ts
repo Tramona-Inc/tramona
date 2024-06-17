@@ -92,6 +92,15 @@ export const groupsRouter = createTRPCRouter({
             });
           }
         });
+        
+        await sendEmail({
+          to: input.email,
+          subject: "You've been invited to a request on Tramona",
+          content: GroupInviteEmail({
+            email: ctx.user.email,
+            name: ctx.user.name,
+          }),
+        });
 
       return { status: "added user" as const, inviteeName: invitee.name };
     }),
@@ -210,7 +219,7 @@ export const groupsRouter = createTRPCRouter({
       return await ctx.db.query.groupMembers
         .findMany({
           columns: {},
-          with: { user: { columns: { phoneNumber: true, isWhatsApp: true } } },
+          with: { user: { columns: { phoneNumber: true, isWhatsApp: true, email: true, name: true, } } },
           where: eq(groupMembers.groupId, groupId),
         })
         .then((res) => res.map((member) => member.user));

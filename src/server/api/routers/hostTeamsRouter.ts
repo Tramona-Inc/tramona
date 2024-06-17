@@ -49,14 +49,14 @@ export const hostTeamsRouter = createTRPCRouter({
             },
           });
 
-        // await sendEmail({
-        //   to: input.email,
-        //   subject: "You've been invited to a request on Tramona",
-        //   content: HostTeamInviteEmail({
-        //     email: ctx.user.email,
-        //     name: ctx.user.name,
-        //   }),
-        // });
+        await sendEmail({
+          to: input.email,
+          subject: "You've been invited to a request on Tramona",
+          content: HostTeamInviteEmail({
+            email: ctx.user.email,
+            name: ctx.user.name,
+          }),
+        });
 
         return { status: "sent invite" as const };
       }

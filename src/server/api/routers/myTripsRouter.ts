@@ -12,6 +12,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, inArray, isNotNull } from "drizzle-orm";
 import { z } from "zod";
+import { sendEmail } from "@/server/server-utils";
 
 const getAllAcceptedOffers = async (userId: string) => {
   const result = await db

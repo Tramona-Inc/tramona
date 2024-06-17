@@ -3,7 +3,7 @@ import { Layout } from "./EmailComponents";
 
 interface BookingModificationEmailProps {
   userName: string;
-  confirmationNumber: string;
+  // confirmationNumber: string;
   property: string;
   previousDates: { from: string, to: string };
   changedDates: { from: string, to: string };
@@ -11,7 +11,7 @@ interface BookingModificationEmailProps {
 
 export default function BookingModificationEmail({
   userName = "User",
-  confirmationNumber = "ABC123456",
+  // confirmationNumber = "ABC123456",
   property = "Property",
   previousDates = { from: '06-01-2024', to: '06-02-2024' },
   changedDates = { from: '06-03-2024', to: '06-04-2024' },
@@ -29,7 +29,8 @@ export default function BookingModificationEmail({
         </div>
         <div className="my-4 mx-auto w-full" style={{ borderBottom: '2px solid #e0e0e0' }}></div>
         <Text className="text-3xl text-left mb-8">
-          Hi, there was a modification made to your booking {confirmationNumber}
+          {/* Hi, there was a modification made to your booking {confirmationNumber} */}
+          Hi, there was a modification made to your booking
         </Text>
         <Text className="text-left mb-4">
           Hi {userName},

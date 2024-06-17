@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { env } from "@/env";
+import { CronJob, CronTime } from 'cron';
 import {
   createConversationWithAdmin,
   fetchConversationWithAdmin,
@@ -15,6 +16,8 @@ import {
 } from "@/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
+import { sendEmail } from "@/server/server-utils";
+import PostStayEmail from "packages/transactional/emails/PostStayEmail";
 import { type NextApiRequest, type NextApiResponse } from "next";
 
 // ! Necessary for stripe
@@ -231,6 +234,53 @@ export default async function webhook(
             .where(eq(offers.id, listing_id));
 
           console.log("Checkout session was successful!");
+
+          const postStayInfo = await db.query.offers.findFirst({
+            where: eq(offers.checkoutSessionId, checkoutSessionCompleted.id),
+            with:{
+              property : { columns : { propertyType: true, name: true }},
+              request: { columns : {checkOut : true},
+                with : { madeByGroup: {
+                with: {
+                  members: {
+                    with: {
+                      user: {
+                        columns: {
+                          name: true,
+                          email: true,
+                          image: true,
+                          phoneNumber: true,
+                          id: true,
+                        },
+                      },
+                    },
+                  },
+                  invites: true,
+                },
+              }}}
+            } 
+          })
+          const newDate = postStayInfo?.request.checkOut
+          const add2days = new Date(newDate?.setDate(newDate.getDate() + 2) ?? "")
+          const members = postStayInfo?.request.madeByGroup.members
+          for(const member of members ?? []){
+            const job = new CronJob(
+              add2days,
+              function () {
+                sendEmail({
+                  to: member.user.email,
+                  subject: "How was your stay?",
+                  content: PostStayEmail({
+                    userName: member.user.name ?? "",
+                    property: postStayInfo?.property.name ?? "",
+                    house: postStayInfo?.property.propertyType ?? "",
+                  })
+                })
+              },
+              null,
+              true,
+          )
+          }
         } else {
           // console.error("Metadata or listing_id is null or undefined");
         }

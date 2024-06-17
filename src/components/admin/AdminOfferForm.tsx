@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { ALL_PROPERTY_TYPES, type Request } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
-import { capitalize, plural } from "@/utils/utils";
+import { capitalize, plural, getDiscountPercentage } from "@/utils/utils";
 import {
   optional,
   zodInteger,
@@ -154,6 +154,7 @@ export default function AdminOfferForm({
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
   // const getOwnerMutation = api.groups.getGroupOwner.useMutation();
   const getMembersMutation = api.groups.getGroupMembers.useMutation();
+  const twilioEmailMutation = api.offers.sendByEmail.useMutation();
 
   async function onSubmit(data: FormSchema) {
     let url: string | null = null;
@@ -254,6 +255,28 @@ export default function AdminOfferForm({
             msg: "You have a new match for a request in your Tramona account!",
           });
         }
+      }
+
+      if(traveler.email){
+        await twilioEmailMutation.mutateAsync({
+          // to: traveler.email,
+          // originalPrice: propertyData.originalNightlyPriceUSD, 
+          // tramonaPrice: offer?.totalPrice ?? 10, 
+          // offerDescription: propertyData.about, 
+          // propertyImageLink: propertyData.airbnbHostImageUrl ?? "" , 
+          // countdown: {days: 2, hours: 12, minutes: 30, seconds: 45 }, 
+          // offerLink: request.airbnbLink ?? ""})
+          to: traveler.email ?? "",
+          userName: traveler.name ?? "",
+          property: propertyData.propertyName,
+          airbnbPrice: propertyData.originalNightlyPriceUSD,
+          ourPrice: offer?.totalPrice ?? 100,
+          discountPercentage: getDiscountPercentage(propertyData.originalNightlyPriceUSD, propertyData.offeredPriceUSD ?? 0),
+          nights: getNumNights(request.checkIn, request.checkOut),
+          adults: request.numGuests,
+          checkInDateTime: request.checkIn,
+          checkOutDateTime: request.checkOut,
+        })
       }
     }
 

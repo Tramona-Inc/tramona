@@ -30,7 +30,7 @@ export const reservations = pgTable("reservations", {
   superhogReservationId: varchar("superhog_reservation_id", {
     length: 100,
   }).notNull(),
-  superhogStatus: superhogStatusEnum("superhog_status"),
+  superhogStatus: superhogStatusEnum("superhog_status").notNull(),
   nameOfVerifiedUser: varchar("name_of_verified_user", {
     length: 100,
   }).notNull(),

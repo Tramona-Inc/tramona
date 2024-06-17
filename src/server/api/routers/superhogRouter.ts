@@ -6,6 +6,9 @@ import { db } from "@/server/db";
 import { reservations } from "../../db/schema/tables/reservations";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { sendEmail } from "@/server/server-utils";
+import { properties, users } from "@/server/db/schema";
+import BookingModificationEmail from "packages/transactional/emails/BookingModificationEmail";
 
 export interface ReservationInterface {
   id: number;
@@ -114,8 +117,8 @@ export const superhogRouter = createTRPCRouter({
       }
 
       await db.insert(reservations).values({
-        checkIn: input.reservation.checkIn,
-        checkOut: input.reservation.checkOut,
+        checkIn: new Date(input.reservation.checkIn),
+        checkOut: new Date(input.reservation.checkOut),
         echoToken: input.metadata.echoToken,
         propertyAddress: input.listing.address.addressLine1,
         propertyTown: input.listing.address.town,
@@ -194,6 +197,13 @@ export const superhogRouter = createTRPCRouter({
         );
         console.log(response.data);
         console.log("it worked ");
+        const previousDates = await db.query.reservations.findFirst({
+          where: eq(reservations.superhogReservationId, input.reservation.reservationId),
+          columns: {
+            checkIn: true,
+            checkOut: true,
+          }
+        })
         await db
           .update(reservations)
           .set({
@@ -206,6 +216,39 @@ export const superhogRouter = createTRPCRouter({
               input.verification.verificationId,
             ),
           );
+          const valuesFromReservation = await db.query.reservations.findFirst({
+            where: eq(reservations.superhogReservationId, input.reservation.reservationId),
+            columns: {
+              nameOfVerifiedUser: true,
+              propertyId: true,
+              userId: true
+            }
+          })
+          const propertyInfo= await db.query.properties.findFirst({
+            where: eq(properties.id, valuesFromReservation?.propertyId ?? 0),
+            columns: {
+              name: true,
+            }
+          })
+  
+          const userInfo = await db.query.users.findFirst({
+            where: eq(users.id, valuesFromReservation?.userId?.toString() ?? ""),
+            columns: {
+              email: true,
+              name: true,
+            }
+          })
+          sendEmail({
+            to: userInfo?.email ?? "",
+            subject: 'there was a modification made to your booking',
+            content: BookingModificationEmail({
+              userName: userInfo?.name ?? "",
+                // confirmationNumber: string;
+                property: propertyInfo?.name ?? "",
+                previousDates: { from: previousDates?.checkIn ?? "", to: previousDates?.checkOut ?? "" },
+                changedDates: { from: input.reservation.checkIn, to: input.reservation.checkOut },
+            })
+          })
       } catch (error) {
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
