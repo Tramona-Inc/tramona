@@ -48,10 +48,10 @@ export default function DirectBookDialog(
   const totalSavings = originalTotalPrice - totalPrice;
 
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
-  // const sendByMail = api.offers.bookingConfirmationEmail.useMutation();
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
   const session = useSession({ required: true });
+  const sendByMail = api.offers.bookingConfirmationEmail.useMutation();
 
   const discountPercentage = getDiscountPercentage(
     originalNightlyPrice,
@@ -88,29 +88,29 @@ export default function DirectBookDialog(
 
     const stripe = await stripePromise;
 
-    if (stripe !== null) {
+    if (stripe !== null && response) {
       await stripe.redirectToCheckout({
         sessionId: response.id,
       });
     }
 
-    // if(response.payment_status === "paid"){
-    //   sendByMail.mutateAsync({
-    //    to: user.email,
-    //    userName: user.name ?? "",
-    //    placeName: offer.property.name,
-    //    startDate: offer.request.checkIn,
-    //    endDate: offer.request.checkOut,
-    //    address: offer.property.address,
-    //    propertyImageLink: offer.property.imageUrls[0] ?? "",
-    //    tripDetailLink: "https://www.tramona.com/",
-    //    originalPrice: offer.property.originalNightlyPrice ?? 100,
-    //    tramonaPrice: offer.tramonaFee,
-    //    offerLink: "http://tramona/offers/{offer.id}",
-    //    numOfNights: getNumNights(offer.request.checkIn, offer.request.checkOut),
-    //    tramonaServiceFee,
-    //   }) 
-    //  }
+    if(response.payment_status === "paid"){
+      sendByMail.mutateAsync({
+       to: user.email,
+       userName: user.name ?? "",
+       placeName: offer.property.name,
+       startDate: offer.request.checkIn,
+       endDate: offer.request.checkOut,
+       address: offer.property.address,
+       propertyImageLink: offer.property.imageUrls[0] ?? "",
+       tripDetailLink: "https://www.tramona.com/",
+       originalPrice: offer.property.originalNightlyPrice ?? 100,
+       tramonaPrice: offer.tramonaFee,
+       offerLink: "http://tramona/offers/{offer.id}",
+       numOfNights: getNumNights(offer.request.checkIn, offer.request.checkOut),
+       tramonaServiceFee,
+      }) 
+     }
   }
 
   

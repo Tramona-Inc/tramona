@@ -62,6 +62,10 @@ export default function AirbnbBookDialog(
   const cancelUrl = usePathname();
 
   const session = useSession({ required: true });
+  const sendByMail = api.offers.bookingConfirmationEmail.useMutation();
+
+  const tramonaServiceFee = offer.tramonaFee;
+
 
   async function checkout() {
     const user = session.data?.user;
@@ -88,6 +92,24 @@ export default function AirbnbBookDialog(
         sessionId: response.id,
       });
     }
+
+    if(response.payment_status === "paid"){
+      sendByMail.mutateAsync({
+       to: user.email,
+       userName: user.name ?? "",
+       placeName: offer.property.name,
+       startDate: offer.request.checkIn,
+       endDate: offer.request.checkOut,
+       address: offer.property.address,
+       propertyImageLink: offer.property.imageUrls[0] ?? "",
+       tripDetailLink: "https://www.tramona.com/",
+       originalPrice: offer.property.originalNightlyPrice ?? 100,
+       tramonaPrice: offer.tramonaFee,
+       offerLink: "http://tramona/offers/{offer.id}",
+       numOfNights: getNumNights(offer.request.checkIn, offer.request.checkOut),
+       tramonaServiceFee,
+      }) 
+     }
   }
 
   return (
