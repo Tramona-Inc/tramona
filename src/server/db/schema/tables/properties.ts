@@ -139,6 +139,12 @@ export const propertySafetyItemsEnum = pgEnum(
   ALL_PROPERTY_SAFETY_ITEMS,
 );
 
+export const propertyStatusEnum = pgEnum("property_status", [
+  "Listed",
+  "Drafted",
+  "Archived",
+]);
+
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
@@ -195,7 +201,7 @@ export const properties = pgTable("properties", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
   priceRestriction: integer("price_restriction"),
-  status: varchar("status", { length: 255 }),
+  propertyStatus: propertyStatusEnum("property_status").notNull(),
 });
 
 export type Property = typeof properties.$inferSelect;
