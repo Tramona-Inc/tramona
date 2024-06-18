@@ -196,6 +196,9 @@ export const properties = pgTable("properties", {
   isPrivate: boolean("is_private").notNull().default(false),
   priceRestriction: integer("price_restriction"),
   status: varchar("status", { length: 255 }),
+  airbnbBookUrl: varchar("airbnb_book_url"),
+  hostImageUrl: varchar("host_image_url"),
+  pricingScreenUrl: varchar("pricing_screen_url"),
 });
 
 export type Property = typeof properties.$inferSelect;
