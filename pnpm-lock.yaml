@@ -122,6 +122,12 @@ importers:
       '@slack/web-api':
         specifier: ^7.0.2
         version: 7.1.0
+      '@stripe/connect-js':
+        specifier: ^3.3.6
+        version: 3.3.6
+      '@stripe/react-connect-js':
+        specifier: ^3.3.8
+        version: 3.3.8(@stripe/connect-js@3.3.6)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@stripe/react-stripe-js':
         specifier: ^2.4.0
         version: 2.7.1(@stripe/stripe-js@2.4.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3511,6 +3517,16 @@ packages:
 
   '@storybook/types@7.6.19':
     resolution: {integrity: sha512-DeGYrRPRMGTVfT7o2rEZtRzyLT2yKTI2exgpnxbwPWEFAduZCSfzBrcBXZ/nb5B0pjA9tUNWls1YzGkJGlkhpg==}
+
+  '@stripe/connect-js@3.3.6':
+    resolution: {integrity: sha512-Y1NFI+5cQMgX8kD1MSuHeuY3Ocsz4/Y2c0S3/U9S+TUoY1VHEcIwFW1mpgDdl/rS5hMtlPLIkEScmwOd0Ka4lg==}
+
+  '@stripe/react-connect-js@3.3.8':
+    resolution: {integrity: sha512-ypf/tlq9EVUHpJSFS91ctwK+7lItwF4t7bz+jBXuHg4xqGKZ6crZaAuJL+Ivsl4Cl0Sk7tSwrrmW7Mty7jclQA==}
+    peerDependencies:
+      '@stripe/connect-js': '>=3.3.5'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@stripe/react-stripe-js@2.7.1':
     resolution: {integrity: sha512-/i13alp27HaSBbMM6kW0jhy8KqdtOL1T/EcRjFjfhvt+CBtMEg8TD7y28W3oZG0+OBDdCyGGnXgNgrKPYQH40g==}
@@ -14412,6 +14428,14 @@ snapshots:
       '@types/express': 4.17.21
       file-system-cache: 2.3.0
 
+  '@stripe/connect-js@3.3.6': {}
+
+  '@stripe/react-connect-js@3.3.8(@stripe/connect-js@3.3.6)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@stripe/connect-js': 3.3.6
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
   '@stripe/react-stripe-js@2.7.1(@stripe/stripe-js@2.4.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@stripe/stripe-js': 2.4.0
@@ -18116,7 +18140,7 @@ snapshots:
       temp: 0.8.4
       write-file-atomic: 2.4.3
     optionalDependencies:
-      '@babel/preset-env': 7.24.7(@babel/core@7.24.5)
+      '@babel/preset-env': 7.24.7(@babel/core@7.24.7)
     transitivePeerDependencies:
       - supports-color
 

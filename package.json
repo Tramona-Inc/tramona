@@ -62,6 +62,8 @@
     "@react-google-maps/api": "^2.19.3",
     "@sendgrid/mail": "^8.1.0",
     "@slack/web-api": "^7.0.2",
+    "@stripe/connect-js": "^3.3.6",
+    "@stripe/react-connect-js": "^3.3.8",
     "@stripe/react-stripe-js": "^2.4.0",
     "@stripe/stripe-js": "^2.4.0",
     "@supabase/supabase-js": "^2.39.7",

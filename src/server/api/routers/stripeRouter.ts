@@ -3,17 +3,23 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import Stripe from "stripe"
+import Stripe from "stripe";
 import { z } from "zod";
 import { hostProfiles } from "@/server/db/schema";
+
+const isProduction = process.env.NODE_ENV === "production";
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
-
+// these two are the same stripe objects, some stripe require the secret key and some require the restricted key
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
+  apiVersion: "2023-10-16",
+});
+
+export const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
 
@@ -376,6 +382,7 @@ export const stripeRouter = createTRPCRouter({
       };
     }),
 
+  //stripe connect account
   createStripeConnectAccount: protectedProcedure.mutation(async ({ ctx }) => {
     const res = await ctx.db.query.hostProfiles.findFirst({
       columns: {
@@ -384,13 +391,9 @@ export const stripeRouter = createTRPCRouter({
       },
       where: eq(hostProfiles.userId, ctx.user.id),
     });
-
-    if (
-      ctx.user.role === "host" &&
-      !res?.stripeAccountId &&
-      !res?.chargesEnabled
-    ) {
-      const stripeAccount = await stripe.accounts.create({
+    console.log("ummm");
+    if (ctx.user.role === "host" && !res?.stripeAccountId) {
+      const stripeAccount = await stripeWithSecretKey.accounts.create({
         type: "express",
         country: "US",
         email: ctx.user.email,
@@ -404,17 +407,65 @@ export const stripeRouter = createTRPCRouter({
           email: ctx.user.email,
         },
       });
-
       await ctx.db
         .update(hostProfiles)
         .set({ stripeAccountId: stripeAccount.id })
         .where(eq(hostProfiles.userId, ctx.user.id));
-    }
 
-    // await stripe.accountLinks.create(
-    //   account: current_user.stripe
-    // )
+      const accountLink = await stripe.accountLinks.create({
+        account: stripeAccount.id,
+        refresh_url: isProduction
+          ? "https://tramona.com/host/payout"
+          : "http://localhost:3000/host/payout",
+        return_url: isProduction
+          ? "https://tramona.com/host/payout"
+          : "http://localhost:3000/host/payout",
+        type: "account_onboarding",
+      });
+      //console.log(stripeAccount);
+
+      //figure out how to get the accountSession.client_secret
+      //stripeAccount.client_secret has the secrete
+      return { accountLinkUrl: accountLink.url, stripeAccount: stripeAccount };
+    } else {
+      new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Stripe account already created",
+      });
+    }
   }),
+  //we need this to create embedded connet account
+  createStripeAccountSession: protectedProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const accountId = input;
+      const accountSession = await stripeWithSecretKey.accountSessions.create({
+        account: accountId,
+        components: {
+          account_onboarding: {
+            enabled: true,
+          },
+          payments: {
+            enabled: true,
+          },
+          payouts: {
+            enabled: true,
+          },
+          // balances: {
+          //   enabled: true,
+          // },
+        },
+      });
+      if (!accountSession) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Stripe account not found",
+        });
+      }
+
+      //console.log(accountSession);
+      return accountSession;
+    }),
 
   createVerificationSession: protectedProcedure.query(async ({ ctx }) => {
     const verificationSession =

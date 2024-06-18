@@ -50,4 +50,13 @@ export const hostRouter = createTRPCRouter({
   getUserHostInfo: protectedProcedure.query(async ({ ctx }) => {
     return fetchIndividualHostInfo(ctx.user.id);
   }),
+
+  getStripeAccountId: protectedProcedure.query(async ({ ctx }) => {
+    const stripeAccountIdNumber = await db.query.hostProfiles.findFirst({
+      columns: { stripeAccountId: true },
+      where: eq(hostProfiles.userId, ctx.user.id),
+    });
+    console.log(stripeAccountIdNumber);
+    return stripeAccountIdNumber;
+  }),
 });
