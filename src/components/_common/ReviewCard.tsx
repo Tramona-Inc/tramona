@@ -30,7 +30,7 @@ export default function ReviewCard({
   }, []);
 
   return (
-    <Card className="flex flex-col gap-4 p-4 sm:flex-row">
+    <div className="flex flex-col gap-4 p-4 sm:flex-row">
       <Avatar className="h-12 w-12">
         <AvatarImage src={profilePic} alt={name} />
         <AvatarFallback>
@@ -40,7 +40,7 @@ export default function ReviewCard({
             .join("")}
         </AvatarFallback>
       </Avatar>
-      <CardContent className="space-y-2">
+      <div className="">
         <div className="flex items-center gap-2">
           <p className="text-lg font-bold text-black">{name}</p>
         </div>
@@ -69,7 +69,7 @@ export default function ReviewCard({
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

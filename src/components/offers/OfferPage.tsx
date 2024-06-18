@@ -313,7 +313,7 @@ export default function OfferPage({
               <h1 className="text-lg font-semibold md:text-xl">Reviews</h1>
               <div className="py-2">
                 {property.reviews.map((review, index) => (
-                  <div key={index} className="py-2">
+                  <div key={index} className="">
                     <ReviewCard
                       name={review.name}
                       profilePic={review.profilePic}
