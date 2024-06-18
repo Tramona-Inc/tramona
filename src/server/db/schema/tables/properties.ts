@@ -139,6 +139,12 @@ export const propertySafetyItemsEnum = pgEnum(
   ALL_PROPERTY_SAFETY_ITEMS,
 );
 
+export const propertyStatusEnum = pgEnum("property_status", [
+  "Listed",
+  "Drafted",
+  "Archived",
+]);
+
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
