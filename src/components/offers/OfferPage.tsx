@@ -92,7 +92,7 @@ export default function OfferPage({
               </DialogTrigger>
             </div>
           ) : (
-            property.imageUrls.slice(0, 5).map((imageUrl, index) => (
+            property.imageUrls.slice(0, 5).map((imageUrl: string, index) => (
               <div
                 key={index}
                 className={`relative col-span-1 row-span-1 ${

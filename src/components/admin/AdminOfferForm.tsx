@@ -259,13 +259,6 @@ export default function AdminOfferForm({
 
       if(traveler.email){
         await twilioEmailMutation.mutateAsync({
-          // to: traveler.email,
-          // originalPrice: propertyData.originalNightlyPriceUSD, 
-          // tramonaPrice: offer?.totalPrice ?? 10, 
-          // offerDescription: propertyData.about, 
-          // propertyImageLink: propertyData.airbnbHostImageUrl ?? "" , 
-          // countdown: {days: 2, hours: 12, minutes: 30, seconds: 45 }, 
-          // offerLink: request.airbnbLink ?? ""})
           to: traveler.email ?? "",
           userName: traveler.name ?? "",
           property: propertyData.propertyName,

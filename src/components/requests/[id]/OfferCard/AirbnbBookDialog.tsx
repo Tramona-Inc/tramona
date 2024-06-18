@@ -93,7 +93,7 @@ export default function AirbnbBookDialog(
       });
     }
 
-    if(response.payment_status === "paid"){
+    if(isBooked){
       sendByMail.mutateAsync({
        to: user.email,
        userName: user.name ?? "",

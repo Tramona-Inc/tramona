@@ -15,10 +15,10 @@ import { Text, Section, Hr, Row, Column } from "@react-email/components";
 interface BookingConfirmationEmailProps {
   userName: string;
   placeName: string;
-  hostName: string;
-  hostImageUrl: string;
-  startDate: string;
-  endDate: string;
+  // hostName: string;
+  // hostImageUrl: string;
+  startDate: Date;
+  endDate: Date;
   address: string;
   propertyImageLink: string;
   tripDetailLink: string;
@@ -30,17 +30,17 @@ interface BookingConfirmationEmailProps {
 }
 
 export default function BookingConfirmationEmail({
-  userName = "User",
-  placeName = "Tropical getaway in Mexico",
-  startDate = "Nov 6",
-  endDate = "Nov 11, 2024",
-  address = "101 Street Planet Earth",
-  propertyImageLink = "https://via.placeholder.com/600x300",
-  tripDetailLink = "https://www.tramona.com/",
-  originalPrice = 1000,
-  tramonaPrice = 500,
-  offerLink = "http://tramona/offers{offer.id}",
-  numOfNights = 3,
+  userName ,
+  placeName,
+  startDate,
+  endDate,
+  address,
+  propertyImageLink,
+  tripDetailLink,
+  originalPrice,
+  tramonaPrice,
+  offerLink,
+  numOfNights,
   tramonaServiceFee,
 }: BookingConfirmationEmailProps) {
   return (

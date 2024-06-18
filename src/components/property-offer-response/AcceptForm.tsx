@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { api } from "@/utils/api";
-import { formatCurrency, formatDateRange } from "@/utils/utils";
+import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
@@ -35,6 +35,9 @@ export default function AcceptForm({
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
   const slackMutation = api.twilio.sendSlack.useMutation();
+  const sendByMail = api.offers.bookingConfirmationEmail.useMutation();
+
+
 
   const { data: offer } = api.biddings.getBidInfo.useQuery({
     bidId: offerId,
@@ -92,6 +95,23 @@ export default function AcceptForm({
               msg: `Tramona: Congratulations! Your ${nightlyPrice}/night offer for ${property.name} from ${formatDateRange(offer.checkIn, offer.checkOut)} has been accepted by the host and your stay has been booked. Please visit the My Trips page at Tramona.com to view `,
             });
           }
+        }
+        if(traveler.email){
+          sendByMail.mutateAsync({
+            to: traveler.email,
+            userName: traveler.name ?? "",
+            placeName: property.name,
+            startDate: offer.checkIn,
+            endDate: offer.checkOut,
+            address: property.address,
+            propertyImageLink: property.imageUrls[0] ?? "",
+            tripDetailLink: "https://www.tramona.com/",
+            originalPrice: property.originalNightlyPrice ?? 100,
+            tramonaPrice: offer.amount,
+            offerLink: "http://tramona/offers/{offer.id}",
+            numOfNights: getNumNights(offer.checkIn, offer.checkOut),
+            tramonaServiceFee: 0,
+          })
         }
       }
     }
