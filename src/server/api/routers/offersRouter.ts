@@ -81,20 +81,20 @@ export const offersRouter = createTRPCRouter({
 
           // update referralCode
           ctx.user.referralCodeUsed &&
-            tx
-              .update(referralCodes)
-              .set({
-                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
-              })
-              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+          tx
+            .update(referralCodes)
+            .set({
+              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
+            })
+            .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 
           ctx.user.referralCodeUsed &&
-            tx
-              .update(referralCodes)
-              .set({
-                numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
-              })
-              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+          tx
+            .update(referralCodes)
+            .set({
+              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
+            })
+            .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
         ]);
 
         if (results.some((result) => result.status === "rejected")) {
@@ -249,6 +249,15 @@ export const offersRouter = createTRPCRouter({
             with: {
               host: {
                 columns: { id: true, name: true, email: true, image: true },
+              },
+              reviews: {
+                columns: {
+                  id: true,
+                  rating: true,
+                  review: true,
+                  profilePic: true,
+                  name: true,
+                },
               },
             },
           },
@@ -609,22 +618,22 @@ export const offersRouter = createTRPCRouter({
           if (member.isWhatsApp) {
             memberHasOtherOffers
               ? void sendWhatsApp({
-                  templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
-                  to: member.phoneNumber,
-                  propertyName: property.name,
-                  propertyAddress: request.location, //??can this be null
-                  checkIn: request.checkIn,
-                  checkOut: request.checkOut,
-                  url: url,
-                })
+                templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
+                to: member.phoneNumber,
+                propertyName: property.name,
+                propertyAddress: request.location, //??can this be null
+                checkIn: request.checkIn,
+                checkOut: request.checkOut,
+                url: url,
+              })
               : void sendWhatsApp({
-                  templateId: "HXb293923af34665e7eefc81be0579e5db",
-                  to: member.phoneNumber,
-                  propertyName: property.name,
-                  propertyAddress: request.location,
-                  checkIn: request.checkIn,
-                  checkOut: request.checkOut,
-                });
+                templateId: "HXb293923af34665e7eefc81be0579e5db",
+                to: member.phoneNumber,
+                propertyName: property.name,
+                propertyAddress: request.location,
+                checkIn: request.checkIn,
+                checkOut: request.checkOut,
+              });
           } else {
             void sendText({
               to: member.phoneNumber,

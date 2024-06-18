@@ -2,6 +2,7 @@ import { useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import ReviewCard from "@/components/_common/ReviewCard";
 import {
   Dialog,
   DialogContent,
@@ -199,6 +200,11 @@ export default function OfferPage({
             House rules
           </a>
         )}
+        {property.reviews.length > 0 && (
+          <a href="#reviews" className="text-gray-600 hover:text-gray-800">
+            Reviews
+          </a>
+        )}
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
@@ -232,7 +238,7 @@ export default function OfferPage({
               <UserAvatar
                 name={hostName}
                 email={property.host?.email}
-                image={property.host?.image}
+                image={property.hostProfilePic}
               />
               <div className="-space-y-1.5">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
@@ -300,6 +306,20 @@ export default function OfferPage({
                 {property.cancellationPolicy ??
                   "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
               </p>
+            </div>
+          </section>
+          <section id="reviews" className="scroll-mt-36">
+            <h1 className="text-lg font-semibold md:text-xl">Reviews</h1>
+            <div className="py-2">
+              {property.reviews.map((review, index) => (
+                <ReviewCard
+                  key={index}
+                  name={review.name}
+                  profilePic={review.profilePic}
+                  review={review.review}
+                  rating={review.rating}
+                />
+              ))}
             </div>
           </section>
         </div>
