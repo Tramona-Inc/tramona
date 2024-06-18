@@ -85,6 +85,16 @@ export default function HostPropertiesLayout({
 
   const { data: properties } = api.properties.getHostProperties.useQuery();
 
+  const listedProperties = properties?.filter(
+    (property) => property.propertyStatus === "Listed",
+  );
+  const archivedProperties = properties?.filter(
+    (property) => property.propertyStatus === "Archived",
+  );
+  const draftedProperties = properties?.filter(
+    (property) => property.propertyStatus === "Drafted",
+  );
+
   return (
     <div className="flex">
       <div className="sticky top-20 h-screen-minus-header-n-footer w-96 overflow-auto border-r px-4 py-8">
@@ -106,21 +116,27 @@ export default function HostPropertiesLayout({
           </div>
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="listed">
-              <AccordionTrigger>Listed {properties?.length}</AccordionTrigger>
+              <AccordionTrigger>
+                Listed {listedProperties?.length}
+              </AccordionTrigger>
               <AccordionContent>
-                <HostProperties />
+                <HostProperties properties={listedProperties ?? null} />
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="drafts">
-              <AccordionTrigger>Drafts</AccordionTrigger>
+              <AccordionTrigger>
+                Drafts {draftedProperties?.length}
+              </AccordionTrigger>
               <AccordionContent>
-                <p>Drafts stuff</p>
+                <HostProperties properties={draftedProperties ?? null} />
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="archive">
-              <AccordionTrigger>Archives</AccordionTrigger>
+              <AccordionTrigger>
+                Archives {archivedProperties?.length}
+              </AccordionTrigger>
               <AccordionContent>
-                <p>Archives stuff</p>
+                <HostProperties properties={archivedProperties ?? null} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>

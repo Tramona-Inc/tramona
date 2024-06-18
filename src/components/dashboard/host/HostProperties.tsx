@@ -33,12 +33,12 @@ import { NewPropertyBtn } from "./HostPropertiesLayout";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/router";
 
-export default function HostProperties() {
+export default function HostProperties({
+  properties,
+}: {
+  properties: Property[] | null;
+}) {
   const [open, setOpen] = useState(false);
-
-  const { data: properties } = api.properties.getHostProperties.useQuery({
-    limit: 20,
-  });
 
   return (
     <div>
