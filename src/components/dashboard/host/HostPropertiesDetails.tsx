@@ -219,7 +219,17 @@ export default function HostPropertiesDetails({
               </AlertDialogContent>
             </AlertDialog>
 
-            <Button variant="secondary">
+            <Button
+              variant="secondary"
+              onClick={() =>
+                updateProperty({
+                  ...property,
+                  propertyStatus: "Archived",
+                  checkInTime: convertTo24HourFormat(checkIn),
+                  checkOutTime: convertTo24HourFormat(checkOut),
+                })
+              }
+            >
               <PackageOpen />
               Archive
             </Button>
