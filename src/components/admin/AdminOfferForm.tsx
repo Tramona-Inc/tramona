@@ -80,7 +80,7 @@ const formSchema = z.object({
       .object({
         profilePic: zodUrl(),
         name: zodString(),
-        review: zodString(),
+        review: zodString({ maxLen: Infinity }),
         rating: zodNumber({ min: 1, max: 5 }),
       })
       .array(),
@@ -416,7 +416,7 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="tramonaFee"

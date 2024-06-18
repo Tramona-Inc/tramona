@@ -308,20 +308,23 @@ export default function OfferPage({
               </p>
             </div>
           </section>
-          <section id="reviews" className="scroll-mt-36">
-            <h1 className="text-lg font-semibold md:text-xl">Reviews</h1>
-            <div className="py-2">
-              {property.reviews.map((review, index) => (
-                <ReviewCard
-                  key={index}
-                  name={review.name}
-                  profilePic={review.profilePic}
-                  review={review.review}
-                  rating={review.rating}
-                />
-              ))}
-            </div>
-          </section>
+          {property.reviews.length > 0 && (
+            <section id="reviews" className="scroll-mt-36">
+              <h1 className="text-lg font-semibold md:text-xl">Reviews</h1>
+              <div className="py-2">
+                {property.reviews.map((review, index) => (
+                  <div key={index} className="py-2">
+                    <ReviewCard
+                      name={review.name}
+                      profilePic={review.profilePic}
+                      review={review.review}
+                      rating={review.rating}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
         <div className="flex-1">
           <Card>
