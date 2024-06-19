@@ -359,19 +359,24 @@ export default function OfferPage({
                     {formatCurrency(tramonaServiceFee)}
                   </p>
                 </div>
+
               </div>
             </div>
             <hr className="h-px bg-gray-300 py-0" />
-            <div className="flex justify-between">
-              <div>
-                <p className="text-xl font-bold">Total</p>
+            <div>
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-xl font-bold">Total</p>
+                </div>
+                <p className="text-xl font-bold">
+                  {formatCurrency(
+                    offerNightlyPrice * numNights + tramonaServiceFee,
+                  )}
+                </p>
               </div>
-              <p className="text-xl font-bold">
-                {formatCurrency(
-                  offerNightlyPrice * numNights + tramonaServiceFee,
-                )}
-              </p>
+              <div className="py-0 text-xs text-gray-500">Taxes included in total price</div>
             </div>
+
             {status === "authenticated" ? (
               isLoading ? (
                 <Spinner />
