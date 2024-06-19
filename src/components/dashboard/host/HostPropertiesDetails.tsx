@@ -1,7 +1,14 @@
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { type Property } from "@/server/db/schema/tables/properties";
 import { capitalize } from "@/utils/utils";
-import { Dot, MapPin, PackageOpen, PencilLine, Trash2 } from "lucide-react";
+import {
+  Dot,
+  MapPin,
+  PackageOpen,
+  PencilLine,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import Image from "next/image";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { convertTo12HourFormat, convertTo24HourFormat } from "@/utils/utils";
@@ -219,24 +226,38 @@ export default function HostPropertiesDetails({
               </AlertDialogContent>
             </AlertDialog>
 
-            <Button
-              variant="secondary"
-              onClick={() =>
-                updateProperty({
-                  ...property,
-                  propertyStatus: "Archived",
-                  checkInTime: convertTo24HourFormat(checkIn),
-                  checkOutTime: convertTo24HourFormat(checkOut),
-                })
-              }
-            >
-              <PackageOpen />
-              Archive
-            </Button>
-            <Button variant="secondary">
-              <PencilLine />
-              Move to drafts
-            </Button>
+            {property.propertyStatus !== "Archived" && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  updateProperty({
+                    ...property,
+                    propertyStatus: "Archived",
+                    checkInTime: convertTo24HourFormat(checkIn),
+                    checkOutTime: convertTo24HourFormat(checkOut),
+                  })
+                }
+              >
+                <PackageOpen />
+                Archive
+              </Button>
+            )}
+            {property.propertyStatus !== "Listed" && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  updateProperty({
+                    ...property,
+                    propertyStatus: "Listed",
+                    checkInTime: convertTo24HourFormat(checkIn),
+                    checkOutTime: convertTo24HourFormat(checkOut),
+                  })
+                }
+              >
+                <Upload />
+                List property
+              </Button>
+            )}
           </div>
         )}
         <div className="flex-1 text-end">

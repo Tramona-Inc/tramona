@@ -8,7 +8,7 @@ export default function SaveAndExit() {
     <div className="container mt-5 flex w-full justify-end">
       <Button
         onClick={() => {
-          void router.push("/host");
+          void router.push("/host/properties");
         }}
         variant={"outlineLight"}
       >
