@@ -52,6 +52,7 @@ export const ALL_PROPERTY_TYPES = [
   "Home",
   "Hotels",
   "Alternative",
+  "house",
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
@@ -138,6 +139,12 @@ export const propertySafetyItemsEnum = pgEnum(
   ALL_PROPERTY_SAFETY_ITEMS,
 );
 
+export const propertyStatusEnum = pgEnum("property_status", [
+  "Listed",
+  "Drafted",
+  "Archived",
+]);
+
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
@@ -150,7 +157,7 @@ export const properties = pgTable("properties", {
   maxNumGuests: smallint("max_num_guests").notNull(),
   numBeds: smallint("num_beds").notNull(),
   numBedrooms: smallint("num_bedrooms").notNull(),
-  numBathrooms: doublePrecision("num_bathrooms"),
+  numBathrooms: smallint("num_bathrooms").notNull(),
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
@@ -193,6 +200,11 @@ export const properties = pgTable("properties", {
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
+  priceRestriction: integer("price_restriction"),
+  propertyStatus: propertyStatusEnum("property_status").default("Listed"),
+  airbnbBookUrl: varchar("airbnb_book_url"),
+  hostImageUrl: varchar("host_image_url"),
+  pricingScreenUrl: varchar("pricing_screen_url"),
 });
 
 export type Property = typeof properties.$inferSelect;
