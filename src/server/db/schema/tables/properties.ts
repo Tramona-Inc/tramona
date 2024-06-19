@@ -157,7 +157,7 @@ export const properties = pgTable("properties", {
   maxNumGuests: smallint("max_num_guests").notNull(),
   numBeds: smallint("num_beds").notNull(),
   numBedrooms: smallint("num_bedrooms").notNull(),
-  numBathrooms: doublePrecision("num_bathrooms"),
+  numBathrooms: smallint("num_bathrooms").notNull(),
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
