@@ -253,7 +253,12 @@ export default function AdminOfferForm({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: "You have a new match for a request in your Tramona account!",
+            msg: `Tramona: You have a new match for a request in your Tramona account!\nTramona price: $${data.offeredNightlyPriceUSD}, Airbnb price: $${data.originalNightlyPriceUSD}.\n\nCheck it out now!`
+          });
+
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: `https://www.tramona.com/requests/${request.id}`,
           });
         }
       }
