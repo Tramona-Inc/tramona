@@ -176,6 +176,36 @@ export default function HostPropertiesDetails({
     zipcode: property.address.split(", ")[2]?.split(" ")[1] ?? "",
   };
 
+  function isAddressValid() {
+    if (location.apt) {
+      return (
+        addressWithApt.street !== "" &&
+        addressWithApt.apt !== "" &&
+        addressWithApt.city !== "" &&
+        addressWithApt.state !== "" &&
+        addressWithApt.zipcode !== "" &&
+        addressWithApt.country !== ""
+      );
+    } else {
+      return (
+        addressWithoutApt.street !== "" &&
+        addressWithoutApt.city !== "" &&
+        addressWithoutApt.state !== "" &&
+        addressWithoutApt.zipcode !== "" &&
+        addressWithoutApt.country !== ""
+      );
+    }
+  }
+
+  function isDraftValid() {
+    return (
+      isAddressValid() &&
+      property.imageUrls.length !== 0 &&
+      property.name !== "" &&
+      property.about !== ""
+    );
+  }
+
   useEffect(() => {
     setPropertyType(property.propertyType);
     setMaxGuests(property.maxNumGuests);
@@ -242,7 +272,23 @@ export default function HostPropertiesDetails({
                 Archive
               </Button>
             )}
-            {property.propertyStatus !== "Listed" && (
+            {property.propertyStatus === "Archived" && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  updateProperty({
+                    ...property,
+                    propertyStatus: "Listed",
+                    checkInTime: convertTo24HourFormat(checkIn),
+                    checkOutTime: convertTo24HourFormat(checkOut),
+                  })
+                }
+              >
+                <Upload />
+                List property
+              </Button>
+            )}
+            {property.propertyStatus === "Drafted" && isDraftValid() && (
               <Button
                 variant="secondary"
                 onClick={() =>
