@@ -214,8 +214,12 @@ export default function OfferPage({
             <span>{property.propertyType}</span>
             <span className="mx-2">·</span>
             <span>{plural(property.numBeds, "bed")}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBathrooms, "bath")}</span>
+            {property.numBathrooms && (
+              <>
+                <span className="mx-2">·</span>
+                <span>{plural(property.numBathrooms, "bath")}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
