@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -52,6 +52,16 @@ export default function OfferPage({
 
   const isAirbnb =
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
+
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  useEffect(() => {
+    const aboutElement = aboutRef.current;
+    if (aboutElement) {
+      setIsOverflowing(aboutElement.scrollHeight > aboutElement.clientHeight);
+    }
+  }, []);
 
   // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
@@ -252,24 +262,26 @@ export default function OfferPage({
               About this property
             </h1>
             <div className="z-20 max-w-2xl py-2 text-zinc-700">
-              <div className="line-clamp-5 break-words">{property.about}</div>
-              <div className="flex justify-start py-2">
-                <Dialog>
-                  <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
-                    Show more
-                    <ChevronRight className="ml-2" />
-                  </DialogTrigger>
+              <div ref={aboutRef} className="line-clamp-5 break-words">{property.about}</div>
+              {isOverflowing && (
+                <div className="flex justify-start py-2">
+                  <Dialog>
+                    <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
+                      Show more
+                      <ChevronRight className="ml-2" />
+                    </DialogTrigger>
 
-                  <DialogContent className="max-w-3xl p-8">
-                    <DialogHeader>
-                      <DialogTitle>About this property</DialogTitle>
-                    </DialogHeader>
-                    <p className="whitespace-break-spaces break-words text-base">
-                      {property.about}
-                    </p>
-                  </DialogContent>
-                </Dialog>
-              </div>
+                    <DialogContent className="max-w-3xl p-8">
+                      <DialogHeader>
+                        <DialogTitle>About this property</DialogTitle>
+                      </DialogHeader>
+                      <p className="whitespace-break-spaces break-words text-base">
+                        {property.about}
+                      </p>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
             </div>
           </section>
           <hr className="h-px border-0 bg-gray-300" />
