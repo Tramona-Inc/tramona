@@ -1,19 +1,12 @@
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { type Property } from "@/server/db/schema/tables/properties";
 import { capitalize } from "@/utils/utils";
-import {
-  Dot,
-  MapPin,
-  PackageOpen,
-  PencilLine,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { Dot, MapPin, PackageOpen, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { convertTo12HourFormat, convertTo24HourFormat } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -56,70 +49,31 @@ export default function HostPropertiesDetails({
   const router = useRouter();
 
   const propertyType = useHostOnboarding((state) => state.listing.propertyType);
-  const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
-
   const maxGuests = useHostOnboarding((state) => state.listing.maxGuests);
-  const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
-
   const bedrooms = useHostOnboarding((state) => state.listing.bedrooms);
-  const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
-
   const beds = useHostOnboarding((state) => state.listing.beds);
-  const setBeds = useHostOnboarding((state) => state.setBeds);
-
   const bathrooms = useHostOnboarding((state) => state.listing.bathrooms);
-  const setBathrooms = useHostOnboarding((state) => state.setBathrooms);
-
   const spaceType = useHostOnboarding((state) => state.listing.spaceType);
-  const setSpaceType = useHostOnboarding((state) => state.setSpaceType);
-
   const location = useHostOnboarding((state) => state.listing.location);
   const address = `${location.street}, ${location.apt && location.apt + ", "}${location.city}, ${location.state} ${location.zipcode}, ${location.country}`;
-  const setLocation = useHostOnboarding((state) => state.setLocation);
-
   const checkInType = useHostOnboarding((state) => state.listing.checkInType);
-  const setCheckInType = useHostOnboarding((state) => state.setCheckInType);
-
   const checkIn = useHostOnboarding((state) => state.listing.checkIn);
-  const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
-
   const checkOut = useHostOnboarding((state) => state.listing.checkOut);
-  const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
-
   const amenities: string[] = useHostOnboarding(
     (state) => state.listing.amenities,
   );
-  const setAmenities = useHostOnboarding((state) => state.setAmenities);
   const otherAmenities: string[] = useHostOnboarding(
     (state) => state.listing.otherAmenities,
   );
-  const setOtherAmenities = useHostOnboarding(
-    (state) => state.setOtherAmenities,
-  );
-
   const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
-  const setImageUrls = useHostOnboarding((state) => state.setImageUrls);
-
   const title = useHostOnboarding((state) => state.listing.title);
-  const setTitle = useHostOnboarding((state) => state.setTitle);
-
   const description = useHostOnboarding((state) => state.listing.description);
-  const setDescription = useHostOnboarding((state) => state.setDescription);
-
   const petsAllowed = useHostOnboarding((state) => state.listing.petsAllowed);
   const smokingAllowed = useHostOnboarding(
     (state) => state.listing.smokingAllowed,
   );
   const otherHouseRules = useHostOnboarding(
     (state) => state.listing.otherHouseRules,
-  );
-
-  const setPetsAllowed = useHostOnboarding((state) => state.setPetsAllowed);
-  const setSmokingAllowed = useHostOnboarding(
-    (state) => state.setSmokingAllowed,
-  );
-  const setOtherHouseRules = useHostOnboarding(
-    (state) => state.setOtherHouseRules,
   );
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
@@ -177,7 +131,7 @@ export default function HostPropertiesDetails({
   };
 
   function isAddressValid() {
-    if (location.apt) {
+    if (property.address.split(", ").length > 4) {
       return (
         addressWithApt.street !== "" &&
         addressWithApt.apt !== "" &&
@@ -205,27 +159,6 @@ export default function HostPropertiesDetails({
       property.about !== ""
     );
   }
-
-  useEffect(() => {
-    setPropertyType(property.propertyType);
-    setMaxGuests(property.maxNumGuests);
-    setBedrooms(property.numBedrooms);
-    setBeds(property.numBeds);
-    property.numBathrooms && setBathrooms(property.numBathrooms);
-    setSpaceType(property.roomType);
-    setLocation(location.apt ? addressWithApt : addressWithoutApt);
-    setCheckInType(property.checkInInfo ?? "");
-    setCheckIn(property.checkInTime ?? "");
-    setCheckOut(property.checkOutTime ?? "");
-    setAmenities(property.amenities ?? []);
-    setOtherAmenities(property.otherAmenities);
-    setImageUrls(property.imageUrls);
-    setTitle(property.name);
-    setDescription(property.about);
-    setPetsAllowed(property.petsAllowed ?? false);
-    setSmokingAllowed(property.smokingAllowed ?? false);
-    setOtherHouseRules(property.otherHouseRules ?? "");
-  }, [property]);
 
   return (
     <div className="my-6">
@@ -311,6 +244,7 @@ export default function HostPropertiesDetails({
             editing={editing}
             setEditing={setEditing}
             onSubmit={handleFormSubmit}
+            property={property}
           />
         </div>
       </div>
