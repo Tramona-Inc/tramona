@@ -59,6 +59,7 @@ const formSchema = z.object({
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
+  numBathrooms: zodInteger({ min: 1 }),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
   originalNightlyPriceUSD: zodNumber(),
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
@@ -117,6 +118,7 @@ export default function AdminOfferForm({
             maxNumGuests: offer.property.maxNumGuests,
             numBeds: offer.property.numBeds,
             numBedrooms: offer.property.numBedrooms,
+            numBathrooms: offer.property.numBathrooms,
             propertyType: offer.property.propertyType,
             avgRating: offer.property.avgRating,
             numRatings: offer.property.numRatings,
@@ -462,6 +464,20 @@ export default function AdminOfferForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Bedrooms</FormLabel>
+              <FormControl>
+                <Input {...field} inputMode="numeric" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="numBathrooms"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bathrooms</FormLabel>
               <FormControl>
                 <Input {...field} inputMode="numeric" />
               </FormControl>
