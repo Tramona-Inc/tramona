@@ -6,7 +6,7 @@ import Image from "next/image";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { convertTo12HourFormat, convertTo24HourFormat } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -159,6 +159,12 @@ export default function HostPropertiesDetails({
       property.about !== ""
     );
   }
+
+  const propertyId = property.id;
+
+  useEffect(() => {
+    setEditing(false);
+  }, [propertyId]);
 
   return (
     <div className="my-6">
