@@ -49,7 +49,7 @@ export const stripeRouter = createTRPCRouter({
         phone_number: input.phoneNumber,
         // host_id: input.hostId,
       };
-
+      
       return stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
@@ -62,14 +62,14 @@ export const stripeRouter = createTRPCRouter({
                 name: input.name,
                 description: input.description,
                 metadata: metadata,
-                images: input.images,
+                // images: input.images,
               },
             },
             quantity: 1,
           },
         ],
-        // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
-        success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`,
+        success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
+        // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`,
         cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
         metadata: metadata, // metadata access for checkout session
         payment_intent_data: {

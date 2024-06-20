@@ -322,11 +322,11 @@
 
 //   let propertyNumber = 0;
 
-//   // const propertyData: {
-//   //   images: (string | null)[];
-//   //   text: (string | undefined)[];
-//   //   dates: string[][];
-//   // }[] = [];
+//   const propertyData: {
+//     images: (string | null)[];
+//     text: (string | undefined)[];
+//     dates: string[][];
+//   }[] = [];
 
 //   const handleNewPage = async (newPage: Page, propertyNumber: number) => {
 //     await delay(3000);

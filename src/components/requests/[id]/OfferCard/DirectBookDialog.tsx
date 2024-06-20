@@ -86,6 +86,7 @@ export default function DirectBookDialog(
       userId: user.id,
     });
 
+    console.log(response)
     const stripe = await stripePromise;
 
     if (stripe !== null && response) {

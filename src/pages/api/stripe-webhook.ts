@@ -225,7 +225,7 @@ export default async function webhook(
           const listing_id = parseInt(
             checkoutSessionCompleted.metadata.listing_id!,
           );
-
+          
           await db
             .update(offers)
             .set({
