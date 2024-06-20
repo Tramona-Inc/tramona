@@ -13,9 +13,13 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         <ChevronLeft />
       </Link>
       <div>
-        <h1 className="text-2xl font-bold">{property.name}</h1>
+        <h1 className="text-2xl font-bold">
+          {property.name === "" ? "No property name provided" : property.name}
+        </h1>
         <p className="font-semibold text-muted-foreground">
-          {property.address}
+          {property.address === ", ,   , "
+            ? "No address provided"
+            : property.address}
         </p>
       </div>
       <Tabs defaultValue="details">

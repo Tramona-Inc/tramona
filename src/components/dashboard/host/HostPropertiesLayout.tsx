@@ -30,8 +30,6 @@ export default function HostPropertiesLayout({
 }: React.PropsWithChildren) {
   // const [open, setOpen] = useState(false);
 
-  const setProgress = useHostOnboarding((state) => state.setProgress);
-
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
   const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
@@ -115,7 +113,6 @@ export default function HostPropertiesLayout({
                 className="font-semi bg-white"
                 onClick={() => {
                   setStatesDefault();
-                  setProgress(0);
                 }}
               >
                 <PlusIcon />

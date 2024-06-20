@@ -90,13 +90,19 @@ function PropertyCard({ property }: { property: Property }) {
           />
         </div>
         <div className="flex-1">
-          <p className="font-bold text-primary">{property.name}</p>
-          <p className="text-sm text-muted-foreground">{property.address}</p>
+          <p className="font-bold text-primary">
+            {property.name === "" ? "No property name provided" : property.name}
+          </p>
           <p className="text-sm text-muted-foreground">
+            {property.address === ", ,   , "
+              ? "No address provided"
+              : property.address}
+          </p>
+          {/* <p className="text-sm text-muted-foreground">
             {[property.roomType, plural(property.maxNumGuests, "guest")]
               .filter(Boolean)
               .join(" · ")}
-          </p>
+          </p> */}
         </div>
         {/* <div className="p-1">
         <DropdownMenu>

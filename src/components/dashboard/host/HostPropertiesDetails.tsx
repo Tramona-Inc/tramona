@@ -350,7 +350,13 @@ export default function HostPropertiesDetails({
           <div className="flex items-center gap-2">
             <MapPin />
             <p className="text-muted-foreground">
-              {editing ? address : property.address}
+              {editing
+                ? address === ", ,   , "
+                  ? "Please enter a valid address"
+                  : address
+                : property.address === ", ,   , "
+                  ? "Please enter a valid address"
+                  : property.address}
             </p>
           </div>
           <div className="relative mb-10 h-[400px]">
