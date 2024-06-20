@@ -1,13 +1,22 @@
 import { useState } from "react";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
+import { type Property } from "@/server/db/schema";
 
-export default function HostPropertiesCancellation() {
+export default function HostPropertiesCancellation({
+  property,
+}: {
+  property: Property;
+}) {
   const [editing, setEditing] = useState(false);
 
   return (
     <div className="my-6">
       <div className="text-end">
-        <HostPropertyEditBtn editing={editing} setEditing={setEditing} />
+        <HostPropertyEditBtn
+          editing={editing}
+          setEditing={setEditing}
+          property={property}
+        />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-bold">Your policy</h2>

@@ -49,13 +49,13 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           <HostPropertiesDetails property={property} />
         </TabsContent>
         <TabsContent value="price">
-          <HostPropertiesPriceRestriction />
+          <HostPropertiesPriceRestriction property={property} />
         </TabsContent>
         <TabsContent value="availability">
           <p>Availability stuff</p>
         </TabsContent>
         <TabsContent value="cancellation">
-          <HostPropertiesCancellation />
+          <HostPropertiesCancellation property={property} />
         </TabsContent>
       </Tabs>
     </div>
