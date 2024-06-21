@@ -19,3 +19,4 @@ export * from "./tables/hostTeams";
 export * from "./tables/bids";
 export * from "./tables/reservations";
 export * from "./tables/bucketList";
+export * from "./tables/reviews";
