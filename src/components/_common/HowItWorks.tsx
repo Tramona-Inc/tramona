@@ -3,7 +3,7 @@ import React from "react";
 interface FeatureProps {
   number: string;
   title: string;
-  description: string;
+  description: React.ReactNode;
 }
 
 const Feature: React.FC<FeatureProps> = ({ number, title, description }) => {

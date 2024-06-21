@@ -29,22 +29,22 @@ import {
 
 const DamageProtection = () => {
   return (
-    <section className="space-y-10 bg-white px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="text-center text-3xl font-bold sm:text-4xl">
+    <section className="space-y-10 bg-white px-4 py-10 md:px-6 lg:px-8">
+      <h1 className="text-center text-3xl font-bold md:text-4xl">
         Your home, protected
       </h1>
       <div className="mx-auto flex max-w-7xl flex-col-reverse items-center md:flex-row">
         <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl lg:text-5xl">
+          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl lg:text-5xl">
             Damage Protection for Hosts
           </h2>
-          <p className="text-lg text-gray-700 sm:text-xl">
+          <p className="text-lg text-gray-700 md:text-xl">
             Discovering damages can be stressful, and your peace of mind is our
             top priority. That&apos;s why we have partnered with Superhog to
             provide all our hosts/property managers with damage protection up to
             $50,000.
           </p>
-          <p className="text-lg text-gray-700 sm:text-xl">
+          <p className="text-lg text-gray-700 md:text-xl">
             Our collaboration with Superhog ensures a seamless experience for
             you. They specialize in handling incidents and will take charge of
             the process from here.
@@ -97,14 +97,14 @@ const contents: Tabs[] = [
 
 function IntroSection() {
   return (
-    <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:sm:px-16">
+    <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:md:px-16">
       <section className="relative bg-white">
         <div className="flex flex-col-reverse items-center lg:flex-row lg:space-x-10 xl:space-x-20">
           <div className="max-w-xl space-y-5 lg:space-y-10">
-            <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
+            <h2 className="text-4xl font-bold tracking-tight md:text-6xl">
               Welcome Hosts!
             </h2>
-            <p className="text-lg tracking-tight sm:text-2xl">
+            <p className="text-lg tracking-tight md:text-2xl">
               Tramona is a travel service built specifically to decrease your
               vacancies and increase your month-over-month profit.
             </p>
@@ -158,11 +158,11 @@ function Partners() {
   ];
 
   return (
-    <section className="space-y-12 text-center">
-      <h1 className="text-4xl font-bold">
+    <section className="space-y-8 text-center md:space-y-12">
+      <h1 className="text-3xl font-bold md:text-4xl">
         We work with industry leading partners
       </h1>
-      <div className="flex flex-wrap items-center justify-evenly">
+      <div className="flex flex-col flex-wrap items-center justify-evenly gap-10 md:flex-row md:gap-0">
         {partners.map((partner) => (
           <div key={partner.name}>
             <Image
@@ -183,12 +183,12 @@ function Partners() {
 
 function SafetyHotline() {
   return (
-    <section className="mx-8 rounded-xl bg-zinc-50 px-2 py-8 sm:mx-24 sm:py-14">
-      <div className="space-y-4 text-center">
-        <h1 className="text-xl font-bold sm:text-4xl ">
+    <section className="mx-8 rounded-xl bg-zinc-50 px-1 py-8 md:mx-24 md:py-14">
+      <div className="space-y-4 text-balance text-center">
+        <h1 className="text-2xl font-bold md:text-4xl">
           Tramona has a 24-safety line for hosts and Travelers
         </h1>
-        <p className="text-sm text-muted-foreground sm:text-base">
+        <p className="text-sm text-muted-foreground md:text-base">
           Call our support line at any time, with any questions you may have.
         </p>
       </div>
@@ -222,7 +222,7 @@ function FAQ() {
   return (
     <section className="mx-8 grid grid-cols-1 gap-6 md:mx-24 md:grid-cols-3">
       <div>
-        <h1 className="text-3xl font-bold sm:text-4xl">
+        <h1 className="text-3xl font-bold md:text-4xl">
           Frequently asked questions
         </h1>
       </div>
@@ -271,24 +271,24 @@ function WhyPartnerWithUs() {
   ];
 
   return (
-    <section className="mx-8 space-y-8 sm:mx-24 sm:space-y-16">
-      <h1 className="text-center text-3xl font-bold sm:text-4xl">
+    <section className="mx-8 space-y-8 md:mx-24 md:space-y-16">
+      <h1 className="text-center text-3xl font-bold md:text-4xl">
         Why partner with us?
       </h1>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-10">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10">
         {reasons.map((reason, index) => (
           <div
             key={index}
-            className="space-y-4 rounded-xl bg-zinc-50 p-4 text-center sm:p-10"
+            className="space-y-4 rounded-xl bg-zinc-50 p-4 text-center md:p-10"
           >
-            <h2 className="text-3xl font-bold sm:text-4xl">{reason.title}</h2>
-            <p className="text-sm text-muted-foreground sm:text-base">
+            <h2 className="text-3xl font-bold md:text-4xl">{reason.title}</h2>
+            <p className="text-sm text-muted-foreground md:text-base">
               {reason.description}
             </p>
-            <p className="text-3xl font-bold text-teal-900 sm:text-4xl">
+            <p className="text-3xl font-bold text-teal-900 md:text-4xl">
               {reason.number}
             </p>
-            <p className="text-sm font-bold sm:text-base">
+            <p className="text-sm font-bold md:text-base">
               {reason.numberDescription}
             </p>
             <div>
@@ -353,8 +353,16 @@ export default function HostWelcome() {
     {
       number: "1",
       title: "Sign up as a host",
-      description:
-        "We work with many of the biggest PMS providers, if we don't work with yours please let us know here. If you don't have a PMS, you can also sign up normally",
+      description: (
+        <>
+          We work with many of the biggest PMS providers, if we don&apos;t work
+          with yours please let us know{" "}
+          <Link href="/help-center" className="underline">
+            here
+          </Link>
+          . If you don&apos;t have a PMS, you can also sign up normally
+        </>
+      ),
     },
     {
       number: "2",
@@ -376,11 +384,11 @@ export default function HostWelcome() {
         <title>Hosts | Tramona</title>
       </Head>
 
-      <div className="">
-        <IntroSection />
-      </div>
+      <IntroSection />
 
       <HowItWorks steps={steps} title="How does hosting with Tramona work?" />
+
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
       <Partners />
 
