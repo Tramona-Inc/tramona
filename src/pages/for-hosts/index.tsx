@@ -23,17 +23,18 @@ import HowItWorks from "@/components/_common/HowItWorks";
 
 const DamageProtection = () => {
   return (
-    <section className="bg-white px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl flex flex-col-reverse items-center md:flex-row">
+    <section className="space-y-10 bg-white px-4 py-10 sm:px-6 lg:px-8">
+      <h1 className="text-center text-4xl font-bold">Your home, protected</h1>
+      <div className="mx-auto flex max-w-7xl flex-col-reverse items-center md:flex-row">
         <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
           <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl lg:text-5xl">
             Damage Protection for Hosts
           </h2>
           <p className="text-lg text-gray-700 sm:text-xl">
-            Discovering damages can be stressful, and your peace of mind is
-            our top priority. That&apos;s why we have partnered with Superhog to
-            provide all our hosts/property managers with damage protection up
-            to $50,000.
+            Discovering damages can be stressful, and your peace of mind is our
+            top priority. That&apos;s why we have partnered with Superhog to
+            provide all our hosts/property managers with damage protection up to
+            $50,000.
           </p>
           <p className="text-lg text-gray-700 sm:text-xl">
             Our collaboration with Superhog ensures a seamless experience for
@@ -56,7 +57,6 @@ const DamageProtection = () => {
       </div>
     </section>
   );
-  
 };
 
 type Tabs = {
@@ -93,7 +93,6 @@ function IntroSection() {
       <section className="relative bg-white">
         <div className="flex flex-col-reverse items-center lg:flex-row lg:space-x-10 xl:space-x-20">
           <div className="max-w-xl space-y-5 lg:space-y-10">
-            <h1 className="font-semibold">TRAMONA HOST</h1>
             <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
               Welcome Hosts!
             </h2>
@@ -103,7 +102,10 @@ function IntroSection() {
             </p>
             <Link
               href="host/onboarding"
-              className={buttonVariants({ variant: "darkPrimary", size: "lg" })}
+              className={buttonVariants({
+                variant: "greenPrimary",
+                size: "lg",
+              })}
             >
               Sign Up Now
             </Link>
@@ -120,6 +122,54 @@ function IntroSection() {
         </div>
       </section>
     </div>
+  );
+}
+
+function Partners() {
+  const partners = [
+    {
+      name: "Hostaway",
+      image: "/assets/logos/hostaway-logo.png",
+    },
+    {
+      name: "Hostfully",
+      image: "/assets/logos/hostfully-logo.png",
+    },
+    {
+      name: "OwnerRez",
+      image: "/assets/logos/ownerRez-logo.png",
+    },
+    {
+      name: "Hospitable",
+      image: "/assets/logos/hospitable-logo.png",
+    },
+    {
+      name: "Superhog",
+      image: "/assets/logos/superhog-logo.png",
+    },
+  ];
+
+  return (
+    <section className="space-y-12 text-center">
+      <h1 className="text-4xl font-bold">
+        We work with industry leading partners
+      </h1>
+      <div className="flex flex-wrap items-center justify-evenly">
+        {partners.map((partner) => (
+          <div key={partner.name}>
+            <Image
+              src={partner.image}
+              alt={partner.name}
+              width={150}
+              height={150}
+            />
+          </div>
+        ))}
+      </div>
+      <p className="text-xl font-bold text-muted-foreground">
+        Plus more coming soon
+      </p>
+    </section>
   );
 }
 
@@ -166,21 +216,21 @@ export default function HostWelcome() {
   const steps = [
     {
       number: "1",
-      title: "Travelers Make Property Offers",
+      title: "Sign up as a host",
       description:
-        "Travelers send you offers for properties that you host on Tramona.",
+        "We work with many of the biggest PMS providers, if we don't work with yours please let ust know here. If you don't have a PMS, you can also sign up normally",
     },
     {
       number: "2",
-      title: "Travelers Send City Requests",
+      title: "Set your settings in your dashboard",
       description:
         "Travelers come to us and tell us how much they want to spend and where they want to go.",
     },
     {
       number: "3",
-      title: "Respond to Offers & Requests",
+      title: "Wait for requests to roll in",
       description:
-        "You can then respond to that traveler and accept, deny, or counter their request or offer.",
+        "Requests will be sent right to your phone and you can accept, reject, or counter offer.",
     },
   ];
 
@@ -194,13 +244,15 @@ export default function HostWelcome() {
         <IntroSection />
       </div>
 
-      <div className="">
-        <HowItWorks steps={steps} title="Hosting with Tramona" />
-      </div>
+      <HowItWorks steps={steps} title="How does hosting with Tramona work?" />
+
+      <Partners />
+
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
       <DamageProtection />
 
-      <hr className="mt-24 mx-24 mb-12 h-px border-0 bg-neutral-300"></hr>
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
       {/** Why */}
       <div className="bg-white">
@@ -321,7 +373,7 @@ export default function HostWelcome() {
               href="/profile"
               className={cn(
                 buttonVariants({ variant: "darkPrimary", size: "lg" }),
-                "px-12 py-7 text-lg bg-[#004236] font-bold transition duration-300 md:text-2xl",
+                "bg-[#004236] px-12 py-7 text-lg font-bold transition duration-300 md:text-2xl",
               )}
             >
               Invite your friends
