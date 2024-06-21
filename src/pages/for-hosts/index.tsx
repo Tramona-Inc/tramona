@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
 import { liveFeedOffers } from "@/components/offer-card/data";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -30,7 +30,9 @@ import {
 const DamageProtection = () => {
   return (
     <section className="space-y-10 bg-white px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="text-center text-4xl font-bold">Your home, protected</h1>
+      <h1 className="text-center text-3xl font-bold sm:text-4xl">
+        Your home, protected
+      </h1>
       <div className="mx-auto flex max-w-7xl flex-col-reverse items-center md:flex-row">
         <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
           <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl lg:text-5xl">
@@ -181,12 +183,12 @@ function Partners() {
 
 function SafetyHotline() {
   return (
-    <section className="mx-8 rounded-xl bg-zinc-50 py-14">
+    <section className="mx-8 rounded-xl bg-zinc-50 px-2 py-8 sm:mx-24 sm:py-14">
       <div className="space-y-4 text-center">
-        <h1 className="text-4xl font-bold ">
+        <h1 className="text-xl font-bold sm:text-4xl ">
           Tramona has a 24-safety line for hosts and Travelers
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground sm:text-base">
           Call our support line at any time, with any questions you may have.
         </p>
       </div>
@@ -237,6 +239,71 @@ function FAQ() {
             </AccordionItem>
           ))}
         </Accordion>
+      </div>
+    </section>
+  );
+}
+
+function WhyPartnerWithUs() {
+  const reasons = [
+    {
+      title: "Looking for a place?",
+      description:
+        "Tramona keeps guests safe by not only verifying them on Tramona, but also making sure they are verified on Airbnb as well.",
+      number: "300,000+",
+      numberDescription: "proprieties your matches will be coming from",
+      callToAction: {
+        name: "Submit a request",
+        href: "/",
+      },
+    },
+    {
+      title: "Listing your place",
+      description:
+        "It's as easy as making an account and connecting to a PMS if you have one. Once on, wait for requests to roll in.",
+      number: "15%",
+      numberDescription: "fewer vacancies when using Tramona",
+      callToAction: {
+        name: "List my place",
+        href: "/host/properties",
+      },
+    },
+  ];
+
+  return (
+    <section className="mx-8 space-y-8 sm:mx-24 sm:space-y-16">
+      <h1 className="text-center text-3xl font-bold sm:text-4xl">
+        Why partner with us?
+      </h1>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-10">
+        {reasons.map((reason, index) => (
+          <div
+            key={index}
+            className="space-y-4 rounded-xl bg-zinc-50 p-4 text-center sm:p-10"
+          >
+            <h2 className="text-3xl font-bold sm:text-4xl">{reason.title}</h2>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              {reason.description}
+            </p>
+            <p className="text-3xl font-bold text-teal-900 sm:text-4xl">
+              {reason.number}
+            </p>
+            <p className="text-sm font-bold sm:text-base">
+              {reason.numberDescription}
+            </p>
+            <div>
+              <Link href={reason.callToAction.href}>
+                <Button
+                  variant="greenPrimary"
+                  size="lg"
+                  className="rounded-full"
+                >
+                  {reason.callToAction.name}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -329,133 +396,11 @@ export default function HostWelcome() {
 
       <FAQ />
 
-      {/** Why */}
-      <div className="bg-white">
-        <div className="container h-fit space-y-5 py-10 md:py-20 ">
-          <h1 className="flex justify-center text-3xl font-bold sm:text-4xl md:text-5xl">
-            Why Tramona works
-          </h1>
-          {/* Tabs section */}
-          <div className="hidden md:block ">
-            {/* Image section */}
-            <div className="flex h-[50vh]  w-full justify-center">
-              {/* Image with fade transition */}
-              {selectedContent && (
-                <Image
-                  src={selectedContent.image}
-                  width={4000}
-                  height={4000}
-                  alt="Picture of the author"
-                  style={{ opacity: imageOpacity }}
-                  className="rounded-xl object-cover transition-opacity duration-300"
-                  // onTransitionEnd={handleImageTransitionEnd}
-                />
-              )}
-            </div>
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
-            <div className="flex">
-              {contents.map((content) => (
-                <button
-                  className="flex w-1/3 flex-col items-center gap-5 space-y-10 p-10 xl:space-y-0  "
-                  key={content.id}
-                  onClick={() => handleTabChange(content)}
-                >
-                  <div className="space-y-10 md:space-y-5">
-                    <h1
-                      className={cn(
-                        "rounded-md border-4 transition-colors duration-500",
-                        content.id === tab
-                          ? "border-black "
-                          : "border-[#BFDBFE] ",
-                      )}
-                    />
-                    <h1
-                      className={cn(
-                        "h-20 text-2xl font-bold transition-colors duration-1000 lg:text-3xl",
-                        content.id === tab ? "text-black" : "text-black/20",
-                      )}
-                    >
-                      {content.title}
-                    </h1>
-                  </div>
+      <WhyPartnerWithUs />
 
-                  <p
-                    className={cn(
-                      "text-lg transition-colors duration-1000 lg:text-xl",
-                      content.id === tab ? " text-black" : "text-black/20",
-                    )}
-                  >
-                    {content.info}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <Carousel
-            setApi={setApi}
-            className="w-full md:hidden"
-            plugins={[
-              Autoplay({
-                delay: 2500,
-                stopOnInteraction: true,
-              }),
-            ]}
-          >
-            <CarouselContent>
-              {contents.map((content) => (
-                <CarouselItem key={content.id}>
-                  <Image
-                    src={content.image}
-                    width={4000}
-                    height={4000}
-                    alt="Picture of the author"
-                    style={{ opacity: imageOpacity }}
-                    className="h-[35vh] rounded-t-xl object-cover transition-opacity duration-300"
-                    // onTransitionEnd={handleImageTransitionEnd}
-                  />
-                  <div
-                    className={cn(
-                      "itmes-center flex h-fit flex-col gap-5 rounded-b-xl p-10 text-left transition-colors duration-1000",
-                      content.id === tab
-                        ? "bg-[#EC4899] text-white"
-                        : "text-black",
-                    )}
-                    key={content.id}
-                    onChange={() => handleTabChange(content)}
-                  >
-                    <h1 className="text-xl font-bold ">{content.title}</h1>
-                    <p className="text-md md:text-2xl">{content.info}</p>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        </div>
-
-        {/** Invite */}
-        <div>
-          <div className="container flex flex-col items-center space-y-5 px-7 py-20 md:space-y-10 md:py-40">
-            <h1 className="text-center text-2xl font-bold md:text-4xl">
-              We&apos;re currently working with thousands of hosts
-            </h1>
-            <h2 className="font-medium md:text-3xl">
-              Think someone new might be interested?
-            </h2>
-            <Link
-              href="/profile"
-              className={cn(
-                buttonVariants({ variant: "darkPrimary", size: "lg" }),
-                "bg-[#004236] px-12 py-7 text-lg font-bold transition duration-300 md:text-2xl",
-              )}
-            >
-              Invite your friends
-            </Link>
-          </div>
-        </div>
-      </div>
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
     </MainLayout>
   );
 }
