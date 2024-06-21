@@ -35,6 +35,10 @@ class MyDocument extends Document {
               gtag('config', 'G-WBTN40GDLM');
             `}
           </Script>
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;400italic;700;700italic&display=swap"
+          />
         </Head>
         <body className={mulish.className}>
           <Main />

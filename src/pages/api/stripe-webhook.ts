@@ -368,7 +368,7 @@ export default async function webhook(
           await db
             .update(hostProfiles)
             .set({
-              chargesEnabled: account.payouts_enabled,
+              chargesEnabled: account.payouts_enabled, // fix later
             })
             .where(eq(hostProfiles.stripeAccountId, account.id));
         }

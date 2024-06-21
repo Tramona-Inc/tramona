@@ -43,6 +43,15 @@ export const stripeRouter = createTRPCRouter({
     )
     .mutation(({ ctx, input }) => {
       const currentDate = new Date(); // Get the current date and time
+      //we need the host Stripe account id to put in webhook
+      const hostStripeId = ctx.db.query.hostProfiles
+        .findFirst({
+          columns: {
+            stripeAccountId: true,
+          },
+          where: eq(hostProfiles.userId, ctx.user.id),
+        })
+        .then((res) => res?.stripeAccountId);
 
       // Object that can be access through webhook and client
       const metadata = {
@@ -54,9 +63,9 @@ export const stripeRouter = createTRPCRouter({
         total_savings: input.totalSavings,
         confirmed_at: currentDate.toISOString(),
         phone_number: input.phoneNumber,
-        // host_id: input.hostId,
+        host_stripe_id: hostStripeId,
       };
-
+      console.log("hostStripeId in the metadata is ", metadata.host_stripe_id);
       return stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
@@ -83,9 +92,10 @@ export const stripeRouter = createTRPCRouter({
           metadata: metadata, // metadata access for payment intent (webhook access)
 
           // TODO: this is where the money get's transferred
-          // transfer_data: {
-          //   destination: //stripe_account_id,
-          // }
+          transfer_data: {
+            amount: input.price,
+            destination: metadata.host_stripe_id ?? null, //stripe connect account id
+          },
         },
       });
     }),
@@ -104,7 +114,7 @@ export const stripeRouter = createTRPCRouter({
         userId: z.string(),
         phoneNumber: z.string(),
         totalSavings: z.number(),
-        // hostId: z.string(),
+        //hostId: z.string(),
       }),
     )
     .mutation(({ ctx, input }) => {
@@ -391,20 +401,40 @@ export const stripeRouter = createTRPCRouter({
       },
       where: eq(hostProfiles.userId, ctx.user.id),
     });
-    console.log("ummm");
+    console.log(" before the if statement createStripeConnectAccount");
     if (ctx.user.role === "host" && !res?.stripeAccountId) {
+      const [firstName, ...rest] = ctx.user.name!.split(" ");
+      const lastName = rest.join(" ");
       const stripeAccount = await stripeWithSecretKey.accounts.create({
-        type: "express",
-        country: "US",
+        country: "US", //we need to change this later
         email: ctx.user.email,
+        controller: {
+          losses: {
+            payments: "application",
+          },
+          fees: {
+            payer: "application",
+          },
+          stripe_dashboard: {
+            type: "express",
+          },
+        },
+        // charges_enabled: true,
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
           tax_reporting_us_1099_k: { requested: true },
         },
         business_type: "individual",
+        business_profile: {
+          url: "https://tramona.com",
+          mcc: "4722",
+          product_description: "Travel and Tourism",
+        },
         individual: {
           email: ctx.user.email,
+          first_name: firstName,
+          last_name: lastName,
         },
       });
       await ctx.db
@@ -412,8 +442,21 @@ export const stripeRouter = createTRPCRouter({
         .set({ stripeAccountId: stripeAccount.id })
         .where(eq(hostProfiles.userId, ctx.user.id));
 
+      return stripeAccount;
+    } else {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Stripe account already created",
+      });
+    }
+  }),
+
+  createStripeAccountLink: protectedProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      console.log("createStripeAccountLinkumm", input);
       const accountLink = await stripe.accountLinks.create({
-        account: stripeAccount.id,
+        account: input, //stripe account id
         refresh_url: isProduction
           ? "https://tramona.com/host/payout"
           : "http://localhost:3000/host/payout",
@@ -422,18 +465,10 @@ export const stripeRouter = createTRPCRouter({
           : "http://localhost:3000/host/payout",
         type: "account_onboarding",
       });
-      //console.log(stripeAccount);
 
-      //figure out how to get the accountSession.client_secret
-      //stripeAccount.client_secret has the secrete
-      return { accountLinkUrl: accountLink.url, stripeAccount: stripeAccount };
-    } else {
-      new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Stripe account already created",
-      });
-    }
-  }),
+      return accountLink.url;
+    }),
+
   //we need this to create embedded connet account
   createStripeAccountSession: protectedProcedure
     .input(z.string())
@@ -442,17 +477,45 @@ export const stripeRouter = createTRPCRouter({
       const accountSession = await stripeWithSecretKey.accountSessions.create({
         account: accountId,
         components: {
+          // Notification banner component (commented out for now)
+          // notification_banner: {
+          //   enabled: true,
+          //   features: {
+          //     external_account_collection: true,
+          //   },
+          // },
           account_onboarding: {
             enabled: true,
+            features: {
+              external_account_collection: true,
+            },
+          },
+          account_management: {
+            enabled: true,
+            features: {
+              external_account_collection: true,
+            },
           },
           payments: {
             enabled: true,
+            features: {
+              refund_management: true,
+              dispute_management: true,
+              capture_payments: true,
+              destination_on_behalf_of_charge_management: false,
+            },
           },
           payouts: {
             enabled: true,
+            features: {
+              instant_payouts: true, // Example feature for payouts
+            },
           },
           // balances: {
           //   enabled: true,
+          //   features: {
+          //     balance_management: true, // Example feature for balances
+          //   },
           // },
         },
       });
