@@ -20,6 +20,12 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import { cn } from "@/utils/utils";
 import Autoplay from "embla-carousel-autoplay";
 import HowItWorks from "@/components/_common/HowItWorks";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const DamageProtection = () => {
   return (
@@ -188,6 +194,54 @@ function SafetyHotline() {
   );
 }
 
+function FAQ() {
+  const accordionItems = [
+    {
+      question: "How much does it cost to sign up?",
+      answer: "Tramona is completely free to use.",
+    },
+    {
+      question: "How do I see my requests?",
+      answer:
+        "You can see requests in your dashboard, or by checking your phone. We will send you a text if there is a relevant request.",
+    },
+    {
+      question: "What happens if I don't like the price?",
+      answer:
+        "If you don't like the price you can send back a counter offer. You can even reject it if you're not interested at all.",
+    },
+    {
+      question: "How does a traveler see the match?",
+      answer:
+        "Travelers see the match in the requests tab or through their phone. We do this to make the transaction as seamless as possible.",
+    },
+  ];
+
+  return (
+    <section className="mx-8 grid grid-cols-1 gap-6 md:mx-24 md:grid-cols-3">
+      <div>
+        <h1 className="text-3xl font-bold sm:text-4xl">
+          Frequently asked questions
+        </h1>
+      </div>
+      <div className="col-span-2 border-t">
+        <Accordion type="multiple">
+          {accordionItems.map((item, index) => (
+            <AccordionItem key={index} value={`item-${index}`} className="py-4">
+              <AccordionTrigger className="font-bold">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent>
+                <p>{item.answer}</p>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </div>
+    </section>
+  );
+}
+
 export default function HostWelcome() {
   // State to track selected tab and image opacity
   const [tab, setTab] = useState<number>(0);
@@ -272,6 +326,8 @@ export default function HostWelcome() {
       <SafetyHotline />
 
       <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
+
+      <FAQ />
 
       {/** Why */}
       <div className="bg-white">
