@@ -6,6 +6,10 @@ import {
 } from "@/server/api/trpc";
 import {
   hostProfiles,
+  hostTeamMembers,
+  hostTeams,
+  properties,
+  propertyPMS,
   referralCodes,
   userUpdateSchema,
   users,
@@ -18,7 +22,10 @@ import { generateReferralCode } from "@/utils/utils";
 import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
-import { z } from "zod";
+import { number, z } from "zod";
+import axios from "axios";
+import { MaximizeIcon } from "lucide-react";
+import { check } from "drizzle-orm/mysql-core";
 
 export const usersRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -153,13 +160,101 @@ export const usersRouter = createTRPCRouter({
         .set({ phoneNumber: input.phone })
         .where(eq(users.id, input.userId));
     }),
+  isHost: protectedProcedure.query(async ({ ctx }) => {
+    const res = await ctx.db.query.hostProfiles.findFirst({
+      where: eq(hostProfiles.userId, ctx.user.id),
+    });
+    return { data: !!res };
+  }),
+
+  createHostProfile: protectedProcedure
+    .input(
+      z.object({
+        hostawayAccountId: z.string().optional(),
+        hostawayBearerToken: z.string().optional(),
+        hostawayApiKey: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const teamId = await ctx.db
+        .insert(hostTeams)
+        .values({
+          ownerId: ctx.user.id,
+          name: `${ctx.user.name ?? ctx.user.username ?? ctx.user.email}`,
+        })
+        .returning()
+        .then((res) => res[0]!.id);
+
+      // Insert Host info
+
+      await ctx.db.insert(hostTeamMembers).values({
+        hostTeamId: teamId,
+        userId: ctx.user.id,
+      });
+
+      const res = await ctx.db
+        .insert(hostProfiles)
+        .values({
+          userId: ctx.user.id,
+          curTeamId: teamId,
+          hostawayApiKey: input.hostawayApiKey,
+          hostawayAccountId: input.hostawayAccountId,
+          hostawayBearerToken: input.hostawayBearerToken
+        })
+        .returning();
+
+
+
+      // if(input.hostawayBearerToken) {
+      //   const hostawayProperties = await axios.get(
+      //     `https://api.hostaway.com/v1/listings`,
+      //     {
+      //       headers: {
+      //         Authorization: `Bearer ${input.hostawayBearerToken}`,
+      //       },
+      //     },
+      //   )
+      //   .then((res) => res.result);
+
+      //   await ctx.db.insert(properties).values(
+      //     hostawayProperties.map((property: any) => ({
+      //       hostId: ctx.user.id,
+      //       propertyType: "other",
+      //       roomType: property.roomType,    //need to configure theirs to ours
+      //       maxNumGuests: property.personCapacity,
+      //       numBeds: property.bedsNumber,
+      //       numBedrooms: property.bedroomsNumber,
+      //       numBathrooms: property.bathroomsNumber,
+      //       latitude: property.lat,
+      //       longitude: property.lng,
+      //       hostName: property.contactName,
+      //       checkInTime: property.checkInTimeStart,
+      //       checkOutTime: property.checkOutTime,
+      //       name: property.name,
+      //       about: property.description,
+      //       propertyPMS: "Hostaway",
+      //       address: property.address,
+      //       avgRating: property.starRating,
+      //       hostTeamId: teamId,
+      //       imageUrls: property.listingImages,
+
+      //     }))
+      //   );
+
+      // }
+
+
+
+      return res;
+    }),
+
   getHostInfo: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.hostProfiles.findMany({
       columns: {
         userId: true,
-        type: true,
+        // type: true,
         becameHostAt: true,
-        profileUrl: true,
+        // profileUrl: true,
       },
       with: {
         hostUser: {

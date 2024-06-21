@@ -7,6 +7,7 @@ import {
 } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { create } from "lodash";
 import { useRouter } from "next/router";
 import { z } from "zod";
 
@@ -31,8 +32,11 @@ export default function OnboardingFooter({
   const resetSession = useHostOnboarding((state) => state.resetSession);
   const setProgress = useHostOnboarding((state) => state.setProgress);
   const { listing } = useHostOnboarding((state) => state);
+  const { hostaway } = useHostOnboarding((state) => state);
 
   const router = useRouter();
+
+  const { createHostProfile } = api.users.createHostProfile.useMutation({});
 
   const { mutate } = api.properties.create.useMutation({
     onSuccess: () => {
@@ -47,30 +51,34 @@ export default function OnboardingFooter({
 
   function onPressNext() {
     if (progress === 9) {
-      mutate({
-        propertyType: listing.propertyType,
-        roomType: listing.spaceType,
-        maxNumGuests: listing.maxGuests,
-        numBeds: listing.beds,
-        numBedrooms: listing.bedrooms,
-        numBathrooms: listing.bathrooms,
-        address:
-          listing.location.street +
-          listing.location.city +
-          listing.location.apt +
-          listing.location.state +
-          listing.location.zipcode,
-        checkInInfo: listing.checkInType,
-        checkInTime: listing.checkIn,
-        checkOutTime: listing.checkOut,
-        amenities: listing.amenities,
-        otherAmenities: listing.otherAmenities,
-        imageUrls: listing.imageUrls,
-        name: listing.title,
-        about: listing.description,
-        petsAllowed: listing.petsAllowed,
-        smokingAllowed: listing.smokingAllowed,
-        otherHouseRules: listing.otherHouseRules ?? undefined,
+      createHostProfile({
+        onSuccess: () => {
+          mutate({
+            propertyType: listing.propertyType,
+            roomType: listing.spaceType,
+            maxNumGuests: listing.maxGuests,
+            numBeds: listing.beds,
+            numBedrooms: listing.bedrooms,
+            numBathrooms: listing.bathrooms,
+            address:
+              listing.location.street +
+              listing.location.city +
+              listing.location.apt +
+              listing.location.state +
+              listing.location.zipcode,
+            checkInInfo: listing.checkInType,
+            checkInTime: listing.checkIn,
+            checkOutTime: listing.checkOut,
+            amenities: listing.amenities,
+            otherAmenities: listing.otherAmenities,
+            imageUrls: listing.imageUrls,
+            name: listing.title,
+            about: listing.description,
+            petsAllowed: listing.petsAllowed,
+            smokingAllowed: listing.smokingAllowed,
+            otherHouseRules: listing.otherHouseRules ?? undefined,
+          });
+        },
       });
     } else {
       if (isEdit || isFormValid) {
