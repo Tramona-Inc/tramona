@@ -11,6 +11,8 @@ import {
   multiCityRequestSchema,
 } from "./schemas";
 
+// import {CongratsDialog} from './CongratsDialog'
+
 export function useCityRequestForm({
   setCurTab,
   afterSubmit,
@@ -18,6 +20,7 @@ export function useCityRequestForm({
   setCurTab: (val: number) => void;
   afterSubmit?: (madeByGroupIds?: number[]) => void; 
 }) {
+  // const [open, setOpen] = useState(true);
   const form = useZodForm({
     schema: multiCityRequestSchema,
     defaultValues: { data: [defaultSearchOrReqValues] },
@@ -29,6 +32,11 @@ export function useCityRequestForm({
     api.requests.createMultiple.useMutation();
 
   const onSubmit = form.handleSubmit(async ({ data }) => {
+    // const CongratsDialog = (): ReactElement => {
+    //   return (
+    //     <CongratsDialog />
+    //   )
+    // };
     const newRequests = data.map((request) => {
       const { date: _date, maxNightlyPriceUSD, ...restData } = request;
       const checkIn = request.date.from;
@@ -42,9 +50,15 @@ export function useCityRequestForm({
         ...restData,
       };
     });
+    // const CongratsDialog = () => (
+    //   <>
+    //   <congratsDialog />
+    //   </>
+    // );
 
     if (status === "unauthenticated") {
       localStorage.setItem("unsentRequests", JSON.stringify(newRequests));
+      localStorage.setItem("showCongratsDialog", "true")
       void router.push("/auth/signin").then(() => {
         if (newRequests.length === 1) {
           toast({

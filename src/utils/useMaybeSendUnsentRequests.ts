@@ -8,6 +8,8 @@ import { api } from "./api";
 import { errorToast, successfulRequestToast } from "./toasts";
 import { z } from "zod";
 import { toast } from "@/components/ui/use-toast";
+import router from 'next/router';
+import {type Property} from '@/pages/auth/signin';
 
 export function useMaybeSendUnsentRequests() {
   const { status } = useSession();
@@ -19,6 +21,13 @@ export function useMaybeSendUnsentRequests() {
     if (status !== "authenticated") return;
 
     const unsentRequestsJSON = localStorage.getItem("unsentRequests");
+    if(unsentRequestsJSON){
+    const requests: Property[] = JSON.parse(unsentRequestsJSON) as Property[];
+      localStorage.setItem("showCongratsDialog", "true")
+      localStorage.setItem("requestLocation", requests[0]?.location ?? "");
+      localStorage.setItem("showCongratsDialog", "true");
+      void router.push("/requests")
+    }
     if (!unsentRequestsJSON) return;
     localStorage.removeItem("unsentRequests");
 
