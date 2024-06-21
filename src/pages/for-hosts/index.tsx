@@ -173,6 +173,21 @@ function Partners() {
   );
 }
 
+function SafetyHotline() {
+  return (
+    <section className="mx-8 rounded-xl bg-zinc-50 py-14">
+      <div className="space-y-4 text-center">
+        <h1 className="text-4xl font-bold ">
+          Tramona has a 24-safety line for hosts and Travelers
+        </h1>
+        <p className="text-muted-foreground">
+          Call our support line at any time, with any questions you may have.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default function HostWelcome() {
   // State to track selected tab and image opacity
   const [tab, setTab] = useState<number>(0);
@@ -218,7 +233,7 @@ export default function HostWelcome() {
       number: "1",
       title: "Sign up as a host",
       description:
-        "We work with many of the biggest PMS providers, if we don't work with yours please let ust know here. If you don't have a PMS, you can also sign up normally",
+        "We work with many of the biggest PMS providers, if we don't work with yours please let us know here. If you don't have a PMS, you can also sign up normally",
     },
     {
       number: "2",
@@ -251,6 +266,10 @@ export default function HostWelcome() {
       <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
       <DamageProtection />
+
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
+
+      <SafetyHotline />
 
       <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
