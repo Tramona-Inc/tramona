@@ -205,6 +205,7 @@ export const properties = pgTable("properties", {
   airbnbBookUrl: varchar("airbnb_book_url"),
   hostImageUrl: varchar("host_image_url"),
   pricingScreenUrl: varchar("pricing_screen_url"),
+  hostProfilePic: varchar("host_profile_pic"),
 });
 
 export type Property = typeof properties.$inferSelect;
