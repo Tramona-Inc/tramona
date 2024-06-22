@@ -112,15 +112,15 @@ function removeTimezoneFromDate(date: Date) {
 }
 
 export function formatDateMonthDay(date: Date) {
-  return formatDate(date, "MMMM d");
+  return formatDate(removeTimezoneFromDate(date), "MMMM d");
 }
 
 export function formatDateWeekMonthDay(date: Date) {
-  return formatDate(date, "EEE MMMM d");
+  return formatDate(removeTimezoneFromDate(date), "EEE MMMM d");
 }
 
 export function formatDateMonthDayYear(date: Date) {
-  return formatDate(date, "MMMM d, yyyy");
+  return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
 }
 
 // not used right now and probably will never have to:
