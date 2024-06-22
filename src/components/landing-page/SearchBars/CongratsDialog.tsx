@@ -28,4 +28,5 @@ export function CongratsDialog({location}:CongratsDialogProps) {
               </p>
             </DialogContent>
             </Dialog>
+
     )}
