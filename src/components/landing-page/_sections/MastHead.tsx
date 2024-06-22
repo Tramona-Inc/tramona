@@ -1,5 +1,6 @@
 import landingBg from "public/assets/images/landing-bg.jpg";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 import {
   Sheet,
@@ -50,44 +51,66 @@ const infoCards = [
 
 export default function MastHead() {
   return (
-    <section className="relative bg-white p-4">
-      <div className="relative overflow-clip rounded-3xl border">
-        <Image
-          src={landingBg}
-          alt=""
-          layout="fill"
-          objectFit="cover"
-          placeholder="blur"
-          className="select-none"
-        />
-        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black"></div>
-        <div className="relative grid grid-cols-1 p-4 lg:grid-cols-2">
-          <div className="flex flex-col justify-end">
-            <div className="relative pt-32 lg:text-balance">
+    // padding for the sides? and do we want rounded corners?
+    <section className="relative bg-white py-4">
+      <div className="relative overflow-clip">
+        <div className="">
+          <Image
+            src={landingBg}
+            alt=""
+            layout="fill"
+            objectFit="cover"
+            placeholder="blur"
+            className="select-none"
+          />
+        </div>
+        {/* <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black"></div> */}
+        <div className="relative grid grid-cols-1 p-4 lg:grid-cols-1">
+          <div className="flex flex-col justify-center">
+            <div className="relative pt-10 text-center">
               {/* <div className="relative inline-block rounded-full border-t border-white/20 bg-teal-900  px-3 font-extrabold uppercase tracking-wide text-white shadow-[1px_1px_10px] shadow-teal-100/60">
                 $250k+ saved so far
               </div> */}
-              <div className="relative inline-flex items-center gap-1 rounded-full border-t border-white/30 bg-teal-50 px-3 text-sm font-extrabold uppercase tracking-wide text-teal-900 sm:text-base">
+              {/* <div className="relative inline-flex items-center gap-1 rounded-full border-t border-white/30 bg-teal-50 px-3 text-sm font-extrabold uppercase tracking-wide text-teal-900 sm:text-base">
                 $250k+ saved so far
-              </div>
-              <h1 className="text-3xl font-extrabold text-white lg:text-6xl">
+              </div> */}
+              <h1 className="mx-auto max-w-3xl text-balance text-3xl font-semibold text-gray-900 lg:text-6xl">
                 Book the same properties you see on Airbnb for less
               </h1>
-              <p className="text-xs text-white lg:pt-4 lg:text-base">
-                With Airbnb hosts averaging 60% vacancy rates year-round, hosts
-                use Tramona to fill their calendars by matching with your
-                desired price
+              <p className="mx-auto max-w-3xl text-xs font-semibold text-gray-900 lg:pt-4 lg:text-base">
+                With Airbnb hosts averaging 60% vacancy rates year-round,
+                Tramona matches you with hosts who are willing to meet your
+                price.
               </p>
+              <div className="flex items-center justify-center pt-4">
+                {/* <div className="flex h-8 w-8"> */}
+                <Avatar className="-ml-3 h-9 w-9">
+                  <AvatarImage />
+                  <AvatarFallback>BS</AvatarFallback>
+                </Avatar>
+                <Avatar className="-ml-3 h-9 w-9">
+                  <AvatarImage />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+                <Avatar className="-ml-3 h-9 w-9">
+                  <AvatarImage />
+                  <AvatarFallback>LM</AvatarFallback>
+                </Avatar>
+                {/* </div> */}
+                <p className="ml-2 text-xs font-semibold text-gray-400">
+                  Requests made in the last 2 months
+                </p>
+              </div>
             </div>
           </div>
-          <div className="ps-16">
-            <div className="hidden flex-1 rounded-2xl border bg-white p-4 lg:block">
+          <div className="flex justify-center p-10">
+            <div className="hidden rounded-2xl border bg-white p-4 shadow-2xl lg:block lg:max-w-lg lg:flex-1">
               <DesktopSearchLayout />
             </div>
           </div>
         </div>
       </div>
-      <div className="mt-4 flex-1 rounded-2xl border bg-secondary p-4 lg:hidden">
+      <div className="mt-4 flex-1 rounded-2xl border bg-secondary p-4 shadow-2xl lg:hidden">
         <DesktopSearchLayout />
       </div>
       <div className="mt-8 space-y-4 lg:mt-14 lg:space-y-8">
@@ -120,7 +143,7 @@ export default function MastHead() {
 export function DesktopSearchLayout() {
   return (
     <div className="space-y-2">
-      <p className="hidden  font-semibold  text-muted-foreground lg:block">
+      <p className="hidden font-semibold text-muted-foreground lg:block">
         Send a request to every host in{" "}
         <span className="font-bold text-teal-900">
           <Typewriter
