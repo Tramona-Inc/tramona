@@ -59,7 +59,7 @@ export default function DateRangeInput({
         />
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto p-0 backdrop-blur-md"
+        className="w-auto p-0 backdrop-blur-md rounded-3xl"
         align="start"
         side="top"
       >
@@ -73,7 +73,7 @@ export default function DateRangeInput({
             onChange(e);
           }}
           disabled={dateIsDisabled}
-          numberOfMonths={1}
+          numberOfMonths={2}
           showOutsideDays={true}
           className="h-80"
         />
