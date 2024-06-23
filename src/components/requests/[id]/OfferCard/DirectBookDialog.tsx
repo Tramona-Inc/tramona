@@ -27,7 +27,7 @@ export default function DirectBookDialog(
     checkIn: Date;
     checkOut: Date;
     offer: OfferWithProperty;
-    requestId: number;
+    requestId?: number;
   }>,
 ) {
   const {
@@ -74,7 +74,7 @@ export default function DirectBookDialog(
     const response = await createCheckout.mutateAsync({
       listingId: offer.id,
       propertyId: offer.property.id,
-      requestId: requestId,
+      requestId: requestId ?? null,
       name: offer.property.name,
       price: totalPriceWithFees, // Airbnb (tramona fee) Set's price for checkout
       description: "From: " + formatDateRange(checkIn, checkOut),
