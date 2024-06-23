@@ -24,18 +24,18 @@ export function CityRequestFiltersDialog({
   children: React.ReactNode;
 }) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Filters</DialogTitle>
-        </DialogHeader>
-        <div className="">
+    // <Dialog>
+    //   <DialogTrigger asChild>{children}</DialogTrigger>
+    //   <DialogContent>
+    //     <DialogHeader>
+    //       <DialogTitle>Filters</DialogTitle>
+    //     </DialogHeader>
+        <div className="grid grid-cols-3 gap-3">
           <FormField
             control={form.control}
             name={`data.${curTab}.minNumBeds`}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="border rounded-md pl-2">
                 <FormControl>
                   <Total
                     name="Beds"
@@ -51,7 +51,7 @@ export function CityRequestFiltersDialog({
             control={form.control}
             name={`data.${curTab}.minNumBedrooms`}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="border rounded-md pl-2">
                 <FormControl>
                   <Total
                     name="Bedrooms"
@@ -67,7 +67,7 @@ export function CityRequestFiltersDialog({
             control={form.control}
             name={`data.${curTab}.minNumBathrooms`}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="border rounded-md pl-2">
                 <FormControl>
                   <Total
                     name="Bathrooms"
@@ -80,7 +80,7 @@ export function CityRequestFiltersDialog({
             )}
           />
         </div>
-      </DialogContent>
-    </Dialog>
+    //   </DialogContent>
+    // </Dialog>
   );
 }

@@ -148,7 +148,7 @@ export function DesktopRequestDealTab() {
               name={`data.${curTab}.location`}
               formLabel="Location"
               variant="lpDesktop"
-              placeholder="Select a location"
+              placeholder="Enter your destination"
               icon={MapPinIcon}
             />
 
@@ -179,7 +179,7 @@ export function DesktopRequestDealTab() {
                   <FormControl>
                     <Input
                       {...field}
-                      label="Guests"
+                      label="Number of guests"
                       placeholder="Add guests"
                       icon={Users2Icon}
                       variant="lpDesktop"
@@ -197,11 +197,12 @@ export function DesktopRequestDealTab() {
                   <FormControl>
                     <Input
                       {...field}
-                      label="Maximum nightly price"
-                      placeholder="Price per night"
-                      suffix="/night"
+                      label="Max Price"
+                      placeholder="/ night"
+                      suffix="/ night"
                       icon={DollarSignIcon}
                       variant="lpDesktop"
+                      className="font-semibold"
                     />
                   </FormControl>
                   <FormMessage />

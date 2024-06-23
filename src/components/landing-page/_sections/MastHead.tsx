@@ -84,17 +84,21 @@ export default function MastHead() {
               </p>
               <div className="flex items-center justify-center pt-4">
                 {/* <div className="flex h-8 w-8"> */}
-                <Avatar className="-ml-3 h-9 w-9">
+                <Avatar className="-ml-3 h-8 w-8 border-2 border-white">
                   <AvatarImage />
                   <AvatarFallback>BS</AvatarFallback>
                 </Avatar>
-                <Avatar className="-ml-3 h-9 w-9">
+                <Avatar className="-ml-3 h-8 w-8 border-2 border-white">
                   <AvatarImage />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
-                <Avatar className="-ml-3 h-9 w-9">
+                <Avatar className="-ml-3 h-8 w-8 border-2 border-white">
                   <AvatarImage />
                   <AvatarFallback>LM</AvatarFallback>
+                </Avatar>
+                <Avatar className="-ml-3 h-8 w-8 border-2 border-white">
+                  <AvatarImage />
+                  <AvatarFallback>BC</AvatarFallback>
                 </Avatar>
                 {/* </div> */}
                 <p className="ml-2 text-xs font-semibold text-gray-400">
@@ -104,7 +108,7 @@ export default function MastHead() {
             </div>
           </div>
           <div className="flex justify-center p-10">
-            <div className="hidden rounded-2xl border bg-white p-4 shadow-2xl lg:block lg:max-w-lg lg:flex-1">
+            <div className="hidden rounded-2xl border bg-white p-4 shadow-2xl lg:block lg:max-w-xl lg:flex-1">
               <DesktopSearchLayout />
             </div>
           </div>
