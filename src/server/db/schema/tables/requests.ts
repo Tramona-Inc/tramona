@@ -1,6 +1,7 @@
 import {
   boolean,
   date,
+  doublePrecision,
   index,
   integer,
   pgTable,
@@ -39,6 +40,9 @@ export const requests = pgTable(
     airbnbLink: varchar("airbnb_link", { length: 512 }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     resolvedAt: timestamp("resolved_at"),
+    lat: doublePrecision("lat"),
+    lng: doublePrecision("lng"),
+    radius: doublePrecision("radius"),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),
