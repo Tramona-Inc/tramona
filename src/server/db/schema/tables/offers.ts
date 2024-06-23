@@ -36,10 +36,12 @@ export const offers = pgTable(
     checkOut: date("check_out", { mode: "date" }).notNull(),
   },
   (t) => ({
+    requestIdIdx: index().on(t.requestId),
+    propertyIdIdx: index().on(t.propertyId),
+    groupIdIdx: index().on(t.groupId),
+
     madePublicAtIndex: index().on(t.madePublicAt),
     acceptedAtIndex: index().on(t.acceptedAt),
-    requestidIdx: index().on(t.requestId),
-    propertyidIdx: index().on(t.propertyId),
   }),
 );
 
