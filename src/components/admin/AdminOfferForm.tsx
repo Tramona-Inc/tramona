@@ -76,14 +76,16 @@ const formSchema = z.object({
   checkOutTime: optional(zodTime),
   cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
-  reviews: optional(z
-    .object({
-      profilePic: zodUrl(),
-      name: zodString(),
-      review: zodString(),
-      rating: zodNumber(),
-    })
-    .array()),
+  reviews: optional(
+    z
+      .object({
+        profilePic: zodUrl(),
+        name: zodString(),
+        review: zodString({ maxLen: Infinity }),
+        rating: zodNumber({ min: 1, max: 5 }),
+      })
+      .array(),
+  ),
   // mapScreenshot: optional(zodString()),
 });
 
@@ -217,7 +219,6 @@ export default function AdminOfferForm({
       mapScreenshot: url,
     };
 
-
     // if offer wasnt null then this is an "update offer" form
     // so update the current property and offer...
     if (offer) {
@@ -248,7 +249,6 @@ export default function AdminOfferForm({
           isPrivate: true,
         }),
         updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
-
       ]);
       // ...otherwise its a "create offer" form so make a new property and offer
     } else {
@@ -398,20 +398,6 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
-          name="tramonaFee"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Tramona Fee</FormLabel>
-              <FormControl>
-                <Input {...field} inputMode="decimal" prefix="$" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="offeredNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
@@ -427,6 +413,20 @@ export default function AdminOfferForm({
                   prefix="$"
                   suffix="/night"
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tramonaFee"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tramona Fee</FormLabel>
+              <FormControl>
+                <Input {...field} inputMode="decimal" prefix="$" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -838,9 +838,9 @@ export default function AdminOfferForm({
                       <Input
                         {...field}
                         type="number"
-                        min="0"
+                        min="1"
                         max="5"
-                        placeholder="Rating (0-5)"
+                        placeholder="Rating (1-5)"
                       />
                     </FormControl>
                   )}
@@ -869,7 +869,7 @@ export default function AdminOfferForm({
                 reviewInputs.append({
                   profilePic: "",
                   name: "",
-                  rating: 0,
+                  rating: 1,
                   review: "",
                 })
               }
