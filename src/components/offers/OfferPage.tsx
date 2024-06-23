@@ -55,14 +55,14 @@ export default function OfferPage({
   // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
   const offerNightlyPrice =
-    offer.totalPrice / getNumNights(request.checkIn, request.checkOut);
+    offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
 
   // const discountPercentage = getDiscountPercentage(
   //   property.originalNightlyPrice ?? 0,
   //   offerNightlyPrice ?? 0,
   // );
 
-  const numNights = getNumNights(request.checkIn, request.checkOut);
+  const numNights = getNumNights(offer.checkIn, offer.checkOut);
   if (property.originalNightlyPrice === null) {
     throw new Error("originalNightlyPrice is required but was not provided.");
   }
@@ -312,19 +312,21 @@ export default function OfferPage({
                     <div>
                       <p className="text-sm text-gray-600">Check in / out</p>
                       <p className="text-base font-bold">
-                        {formatDateRange(request.checkIn, request.checkOut)}
+                        {formatDateRange(offer.checkIn, offer.checkOut)}
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="inline-flex w-full items-center rounded-full py-2 md:rounded-3xl lg:rounded-full">
-                <div>
-                  <p className="text-sm text-gray-600">Guests</p>
-                  <p className="font-bold">
-                    {plural(request.numGuests, "Guest")}
-                  </p>
-                </div>
+                {request && (
+                  <div>
+                    <p className="text-sm text-gray-600">Guests</p>
+                    <p className="font-bold">
+                      {plural(request.numGuests, "Guest")}
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="w-full rounded-full py-2 md:rounded-3xl lg:rounded-full">
                 <div>
@@ -382,9 +384,9 @@ export default function OfferPage({
                   propertyName={property.name}
                   originalNightlyPrice={property.originalNightlyPrice}
                   airbnbUrl={property.airbnbUrl ?? ""}
-                  checkIn={request.checkIn}
-                  checkOut={request.checkOut}
-                  requestId={request.id}
+                  checkIn={offer.checkIn}
+                  checkOut={offer.checkOut}
+                  requestId={request?.id}
                   offer={{ property, request, ...offer }}
                   totalPrice={offer.totalPrice}
                   offerNightlyPrice={offerNightlyPrice}
