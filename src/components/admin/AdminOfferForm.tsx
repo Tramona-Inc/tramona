@@ -118,7 +118,7 @@ export default function AdminOfferForm({
             maxNumGuests: offer.property.maxNumGuests,
             numBeds: offer.property.numBeds,
             numBedrooms: offer.property.numBedrooms,
-            numBathrooms: offer.property.numBathrooms,
+            numBathrooms: offer.property.numBathrooms ?? undefined,
             propertyType: offer.property.propertyType,
             avgRating: offer.property.avgRating,
             numRatings: offer.property.numRatings,
@@ -231,6 +231,9 @@ export default function AdminOfferForm({
         propertyId,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
+        checkIn: request.checkIn,
+        checkOut: request.checkOut,
+        groupId: request.madeByGroupId,
       };
 
       await createOffersMutation
@@ -244,7 +247,7 @@ export default function AdminOfferForm({
     );
 
     for (const traveler of travelers) {
-      if (traveler?.phoneNumber) {
+      if (traveler.phoneNumber) {
         if (traveler.isWhatsApp) {
           await twilioWhatsAppMutation.mutateAsync({
             templateId: "HXfeb90955f0801d551e95a6170a5cc015",

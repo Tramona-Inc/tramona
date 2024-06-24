@@ -6,6 +6,7 @@ import { db } from "@/server/db";
 import {
   ALL_HOST_TYPES,
   hostProfiles,
+  hostTeamMembers,
   hostTeams,
   referralCodes,
   users,

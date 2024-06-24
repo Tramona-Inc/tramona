@@ -62,7 +62,7 @@ export const pmsRouter = createTRPCRouter({
 
         console.log("Hostaway bearer token response:", response.data.access_token);
 
-        return {bearerToken: response.data.access_token};
+        return { bearerToken: response.data.access_token };
 
       } catch (error) {
         console.error("Error generating Hostaway bearer token:", error);
@@ -70,4 +70,64 @@ export const pmsRouter = createTRPCRouter({
       }
 
     }),
+
+  getHostawayCalendar: publicProcedure
+    .input(z.object({ bearerToken: z.string(), listingId: z.string() }))
+    .mutation(async ({ input }) => {
+
+      interface CalendarEntry {
+        id: number;
+        date: string;
+        isAvailable: number;
+        isProcessed: number;
+        status: string;
+        price: number;
+        minimumStay: number;
+        maximumStay: number;
+        closedOnArrival: string | null;
+        closedOnDeparture: string | null;
+        note: string | null;
+        countAvailableUnits: number;
+        availableUnitsToSell: number;
+        countPendingUnits: number;
+        countBlockingReservations: string | null;
+        countBlockedUnits: number;
+        countReservedUnits: string | null;
+        desiredUnitsToSell: string | null;
+        reservations: any[];
+      }
+
+      interface CalendarResponse {
+        status: string;
+        result: CalendarEntry[];
+      }
+      const { bearerToken, listingId } = input;
+
+      try {
+        const calendar: CalendarEntry[] = await axios.get<CalendarResponse>(
+          `https://api.hostaway.com/v1/listings/${listingId}/calendar`,
+          {
+            headers: {
+              Authorization: `Bearer ${bearerToken}`,
+            },
+          }
+        ).then((response) => {
+          console.log("Hostaway calendar response:", response.data);
+          return response.data.result;
+        });
+
+        return calendar.map((entry) => ({
+          date: entry.date,
+          status: entry.status,
+        }));
+
+
+
+      } catch (error) {
+        console.error("Error fetching Hostaway calendar:", error);
+        throw new Error("Failed to fetch Hostaway calendar");
+      }
+
+    }),
+
 })
