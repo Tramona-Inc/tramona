@@ -17,6 +17,7 @@ import { usersRouter } from "./routers/usersRouter";
 import { hostTeamsRouter } from "./routers/hostTeamsRouter";
 import { profileRouter } from "./routers/profileRouter";
 import { superhogRouter } from "./routers/superhogRouter";
+import { reviewsRouter } from "./routers/reviewsRouter";
 
 /**
  * This is the primary router for your server.
@@ -42,6 +43,7 @@ export const appRouter = createTRPCRouter({
   hostTeams: hostTeamsRouter,
   profile: profileRouter,
   superhog: superhogRouter,
+  reviews: reviewsRouter,
 });
 
 // export type definition of API

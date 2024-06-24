@@ -1,4 +1,6 @@
-import { NextRequest } from "next/server";
+/* eslint-disable no-console */
+/* eslint-disable @next/next/no-img-element */
+import { type NextRequest } from "next/server";
 import { ImageResponse } from "@vercel/og";
 
 export const config = {
@@ -40,6 +42,7 @@ export default function handler(req: NextRequest) {
       >
         <img
           src={coverUrl}
+          alt=""
           style={{
             position: "absolute",
             top: 0,

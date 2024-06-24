@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { type Property } from "@/server/db/schema";
-import { api, type RouterOutputs } from "@/utils/api";
+import { api } from "@/utils/api";
 import { plural } from "@/utils/utils";
 import "leaflet/dist/leaflet.css";
 import {
@@ -30,8 +30,6 @@ import AmenitiesComponent from "../offers/CategorizedAmenities";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { useRouter } from "next/router";
 
-export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
-
 export default function PropertyPage({ property }: { property: Property }) {
   // const isBooked = false;
 
@@ -39,10 +37,13 @@ export default function PropertyPage({ property }: { property: Property }) {
   //   location: property.address,
   // });
 
-  const { data: addressData } = api.offers.getCity.useQuery({
-    latitude: property.latitude!,
-    longitude: property.longitude!,
-  });
+  const city =
+    property.latitude &&
+    property.longitude &&
+    api.offers.getCity.useQuery({
+      lat: property.latitude,
+      lng: property.longitude,
+    }).data;
 
   const isMobile = useMediaQuery("(max-width: 640px)");
 
@@ -290,12 +291,10 @@ export default function PropertyPage({ property }: { property: Property }) {
       <hr className="h-px border-0 bg-gray-300" />
       <section id="location" className="scroll-mt-36 space-y-1">
         <h3 className="text-lg font-semibold md:text-xl">Location</h3>
-        {addressData && (
+        {city && (
           <div className="inline-flex items-center justify-center py-2 text-base">
             <MapPin className="mr-2" />
-            <p>
-              {addressData.city}, {addressData.state}
-            </p>
+            <p>{city}</p>
           </div>
         )}
         {property.latitude && property.longitude && (
