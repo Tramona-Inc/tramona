@@ -60,7 +60,7 @@ export default function TripDetailsPage() {
         checkOut: trip.checkOut,
         numGuests: trip.request!.numGuests,
         location: trip.request?.location ?? null,
-        madeByGroup: trip.group,
+        madeByGroup: trip.request?.madeByGroup,
         property: trip.property,
       };
     } else if (isBidsTrip(trip, tripType)) {

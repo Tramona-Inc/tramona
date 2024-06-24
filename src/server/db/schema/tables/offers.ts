@@ -10,15 +10,11 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 import { requests } from "./requests";
-import { groups } from "./groups";
 
 export const offers = pgTable(
   "offers",
   {
     id: serial("id").primaryKey(),
-    groupId: integer("group_id")
-      .notNull()
-      .references(() => groups.id, { onDelete: "cascade" }),
     requestId: integer("request_id").references(() => requests.id, {
       onDelete: "set null",
     }),
@@ -38,8 +34,6 @@ export const offers = pgTable(
   (t) => ({
     requestIdIdx: index().on(t.requestId),
     propertyIdIdx: index().on(t.propertyId),
-    groupIdIdx: index().on(t.groupId),
-
     madePublicAtIndex: index().on(t.madePublicAt),
     acceptedAtIndex: index().on(t.acceptedAt),
   }),
@@ -68,14 +62,11 @@ export const offerUpdateSchema = offerInsertSchema.partial().required({
 // import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 // import { properties } from "./properties";
 // import { requests } from "./requests";
-// import { groups } from "./groups";
 
 // export const offers = pgTable(
 //   "offers",
 //   {
 //     id: serial("id").primaryKey(),
-//     groupId: integer("group_id")
-//       .references(() => groups.id, { onDelete: "cascade" }),
 //     requestId: integer("request_id").references(() => requests.id, {
 //       onDelete: "set null",
 //     }),
