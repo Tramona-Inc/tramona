@@ -10,22 +10,22 @@ const FAQ = () => {
   const items = [
     {
       question: "How much does it cost to sign up?",
-      answer:
-        "Tramona is a platform that allows you to book vacation rentals, homes, hotels, and more. We have over 300,000 properties worldwide.",
+      answer: "Tramona is completely free to sign up and use.",
     },
     {
       question: "How exactly does it work?",
       answer:
-        "You can book a property by searching for the location you want to stay in, selecting the dates you want to stay, and then clicking the 'Book Now' button.",
+        "The traveler submits the price they want with some other details about their travels, and that request gets sent out to the hosts. Hosts send matches or counter offers back, and the traveler gets to choose which one fits for them.",
     },
     {
       question: "What happens if I don't like the price?",
       answer:
-        "You can become a host by signing up on our website and listing your property. Once your property is listed, guests can book it through our platform.",
+        "If you dont like the prices, submit another offer! We dont need your credit card until you purchase your trip so there is no harm in sending a request.",
     },
     {
       question: "When do I have to put my credit card in?",
-      answer: "You can get in touch with customer service by emailing us at",
+      answer:
+        "We only ask for your credit card when you are ready to pay. Make a request, it's easy.",
     },
   ];
 
