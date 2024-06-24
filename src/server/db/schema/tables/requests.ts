@@ -22,7 +22,6 @@ export const requests = pgTable(
     id: serial("id").primaryKey(),
     madeByGroupId: integer("made_by_group_id")
       .notNull()
-      // for this onDelete cascade to do anything, well need to delete groups with no members
       .references(() => groups.id, { onDelete: "cascade" }),
     requestGroupId: integer("request_group_id")
       .notNull()

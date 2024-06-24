@@ -2,14 +2,14 @@ import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
 import { NextSeo } from "next-seo";
-import { GetServerSideProps } from "next";
+import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
 import { and, eq } from "drizzle-orm";
-import { OfferWithDetails } from "@/components/property/PropertyPage";
+import { type OfferWithDetails } from "@/components/offers/OfferPage";
 
 type PageProps = {
   offer: OfferWithDetails; // Replace with a more specific type if you have one
@@ -20,8 +20,7 @@ type PageProps = {
 
 const Page = ({ offer, firstImage, baseUrl }: PageProps) => {
   const router = useRouter();
-  console.log("First image", firstImage);
-  if (router.isFallback || !offer) {
+  if (router.isFallback) {
     return <Spinner />;
   }
 
@@ -29,9 +28,7 @@ const Page = ({ offer, firstImage, baseUrl }: PageProps) => {
     ? offer.property.name
     : "Check out this offer on Tramona.";
 
-  const metaDescription = offer.request.location
-    ? `Check out this offer in ${offer.request.location}!`
-    : "Check out this offer! | Tramona";
+  const metaDescription = "Check out this offer! | Tramona";
 
   return (
     <DashboadLayout type="guest">
@@ -98,18 +95,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       createdAt: true,
       totalPrice: true,
       acceptedAt: true,
-      id: true,
       tramonaFee: true,
+      checkIn: true,
+      checkOut: true,
+      id: true,
     },
     with: {
       request: {
-        columns: {
-          checkIn: true,
-          checkOut: true,
-          numGuests: true,
-          location: true,
-          id: true,
-        },
+        columns: { numGuests: true, location: true, id: true },
       },
       property: {
         with: {
@@ -127,27 +120,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const firstImage = offer.property.imageUrls?.[0] ?? "";
+  const firstImage = offer.property.imageUrls[0] ?? "";
 
   // Convert Date objects to strings
   const serializedOffer = {
     ...offer,
-    createdAt: offer.createdAt ? offer.createdAt.toISOString() : null,
+    createdAt: offer.createdAt.toISOString(),
     acceptedAt: offer.acceptedAt ? offer.acceptedAt.toISOString() : null,
-    request: {
-      ...offer.request,
-      checkIn: offer.request.checkIn
-        ? offer.request.checkIn.toISOString()
-        : null,
-      checkOut: offer.request.checkOut
-        ? offer.request.checkOut.toISOString()
-        : null,
-    },
+    checkIn: offer.checkIn.toISOString(),
+    checkOut: offer.checkOut.toISOString(),
+    request: offer.request,
     property: {
       ...offer.property,
-      createdAt: offer.property.createdAt
-        ? offer.property.createdAt.toISOString()
-        : null,
+      createdAt: offer.property.createdAt.toISOString(),
     },
   };
 
