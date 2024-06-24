@@ -73,7 +73,7 @@ export default function TravelerPage({
         <VerificationBanner />
         <MastHead />
         <section className="space-y-4 p-4">
-          <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
+          {/* <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
             Explore popular destinations
           </h2>
           <p className="text-center text-lg">
@@ -92,7 +92,7 @@ export default function TravelerPage({
             <Button asChild size="lg" variant="secondary">
               <Link href="/explore">View all properties</Link>
             </Button>
-          </div>
+          </div> */}
 
           <NewToTramona />
         </section>

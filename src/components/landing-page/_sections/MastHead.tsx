@@ -1,6 +1,7 @@
 import landingBg from "public/assets/images/landing-bg.jpg";
+import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "@/components/_common/UserAvatar";
 import { useState } from "react";
 import {
   Sheet,
@@ -15,12 +16,16 @@ import {
   Home,
   MapPin,
   SearchIcon,
+  ShieldIcon,
+  TableProperties,
 } from "lucide-react";
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
+import { TestimonialCarousel } from "./TestimonialCarousel";
 import Typewriter from "typewriter-effect";
 import Image from "next/image";
+import CompletedRequestsSection from "./CompletedRequests";
 
 const infoCards = [
   {
@@ -83,24 +88,19 @@ export default function MastHead() {
                 price.
               </p>
               <div className="flex items-center justify-center pt-4">
-                {/* <div className="flex h-8 w-8"> */}
-                <Avatar className="-ml-3 h-8 w-8 border-2 border-white">
-                  <AvatarImage />
-                  <AvatarFallback>BS</AvatarFallback>
-                </Avatar>
-                <Avatar className="-ml-3 h-8 w-8 border-2 border-white">
-                  <AvatarImage />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-                <Avatar className="-ml-3 h-8 w-8 border-2 border-white">
-                  <AvatarImage />
-                  <AvatarFallback>LM</AvatarFallback>
-                </Avatar>
-                <Avatar className="-ml-3 h-8 w-8 border-2 border-white">
-                  <AvatarImage />
-                  <AvatarFallback>BC</AvatarFallback>
-                </Avatar>
-                {/* </div> */}
+                {/* separate component, white borders? */}
+                <div className="-ml-3">
+                  <UserAvatar size={"sm"} />
+                </div>
+                <div className="-ml-3">
+                  <UserAvatar size={"sm"} />
+                </div>
+                <div className="-ml-3">
+                  <UserAvatar size={"sm"} />
+                </div>
+                <div className="-ml-3">
+                  <UserAvatar size={"sm"} />
+                </div>
                 <p className="ml-2 text-xs font-semibold text-gray-400">
                   Requests made in the last 2 months
                 </p>
@@ -117,7 +117,139 @@ export default function MastHead() {
       <div className="mt-4 flex-1 rounded-2xl border bg-secondary p-4 shadow-2xl lg:hidden">
         <DesktopSearchLayout />
       </div>
-      <div className="mt-8 space-y-4 lg:mt-14 lg:space-y-8">
+
+      <div className="mt-8 flex justify-center space-y-4 lg:mt-16 lg:space-y-8">
+        <TestimonialCarousel />
+      </div>
+
+      <div className="mt-8 space-y-4 lg:mt-24 lg:space-y-12">
+        <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
+          <span className="text-teal-900">How?</span> Negotiation, No fees. No
+          markups.
+        </h2>
+        <div className="flex justify-center">
+          <div className="grid grid-cols-2 gap-32">
+            <div>
+              <Image
+                src={priceComparison}
+                alt=""
+                height={250}
+                placeholder="blur"
+                className="select-none"
+              />
+              <div className="mt-2 text-center text-sm font-extrabold text-red-400 lg:text-lg">
+                Airbnb
+              </div>
+              <div className="text-center text-xl font-extrabold text-red-400 lg:text-2xl">
+                $300/night
+              </div>
+            </div>
+            <div>
+              <Image
+                src={priceComparison}
+                alt=""
+                height={250}
+                placeholder="blur"
+                className="select-none"
+              />
+              <div className="mt-2 text-center text-sm font-extrabold text-teal-900 lg:text-lg">
+                Tramona
+              </div>
+              <div className="text-center text-xl font-extrabold text-teal-900 lg:text-2xl">
+                $250/night
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center">
+        <div className="mt-28 grid grid-cols-2 gap-24">
+          <div className="mr-24 flex flex-col justify-center space-y-4">
+            <h2 className="text-2xl font-extrabold lg:text-4xl">
+              See completed requests
+            </h2>
+            <div className="text-sm font-semibold text-muted-foreground">
+              Check out our feed to see recent deals
+            </div>
+            <div>
+              <Button className="rounded-full bg-teal-900 hover:bg-teal-950">
+                View deals
+              </Button>
+            </div>
+          </div>
+          <div>
+            <CompletedRequestsSection />
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto mt-8 max-w-7xl justify-center space-y-4 lg:mt-28 lg:mb-20 lg:space-y-8">
+        <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
+          Why use Tramona?
+        </h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="rounded-lg bg-green-100 p-2">
+                <ShieldIcon className="h-6 w-6 text-teal-900" />
+              </div>
+              <h3 className="text-lg font-bold">Safety</h3>
+            </div>
+            <p className="text-sm">
+              Every host we work with <strong>also lists on Airbnb</strong>. We
+              give you the link to see the property before you book with us.
+            </p>
+          </div>
+          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="rounded-lg bg-green-100 p-2">
+                <CircleDollarSign className="h-6 w-6 text-teal-900" />
+              </div>
+              <h3 className="text-lg font-bold">Price Transparency</h3>
+            </div>
+            <p className="text-sm">
+              We have <strong>$0 fees for travelers</strong> and show you the
+              listing on Airbnb to encourage you to check pricing on the same
+              property.
+            </p>
+          </div>
+          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="rounded-lg bg-green-100 p-2">
+                <TableProperties className="h-6 w-6 text-teal-900" />
+              </div>
+              <h3 className="text-lg font-bold">Submitting a Request</h3>
+            </div>
+            <p className="text-sm">
+              Send your travel details to all hosts in your destination city.
+              They'll respond by offering you{" "}
+              <strong>
+                properties outside of your budget on Airbnb, in your budget on
+                Tramona
+              </strong>
+              .
+            </p>
+          </div>
+          <div className="flex flex-col items-start gap-3 rounded-lg p-4 lg:-mt-1">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="rounded-lg bg-green-100 p-2">
+                <Handshake className="h-6 w-6 text-teal-900" />
+              </div>
+              <h3 className="text-lg font-bold leading-tight">
+                Before you book, check Tramona
+              </h3>
+            </div>
+            <p className="text-sm">
+              Tramona is <strong>completely free to use</strong>, and we think
+              you'll like it. Before you book, check Tramona to see{" "}
+              <strong>which special deals hosts will offer you</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* <div className="mt-8 space-y-4 lg:mt-14 lg:space-y-8">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           How Tramona Works
         </h2>
@@ -138,6 +270,39 @@ export default function MastHead() {
               ))}
             </div>
           </div>
+        </div>
+      </div> */}
+
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 md:flex-row lg:mb-20">
+        <div className="flex flex-1 flex-col items-center rounded-lg bg-gray-100 p-6 text-center">
+          <h3 className="mb-4 text-2xl font-bold">Looking for a place?</h3>
+          <p className="mb-6 text-sm text-gray-600">
+            Tramona keeps guests safe by not only verifying them on Tramona, but
+            also making sure they are verified on Airbnb as well.
+          </p>
+          <div className="mb-2 text-4xl font-bold text-teal-900">300,000+</div>
+          <p className="mb-6 text-sm text-gray-600">
+            properties your matches will be coming from
+          </p>
+          <button className="rounded-full bg-teal-900 px-6 py-2 text-white transition-colors hover:bg-teal-950">
+            Submit a request
+          </button>
+        </div>
+
+        <div className="flex flex-1 flex-col items-center rounded-lg bg-gray-100 p-6 text-center">
+          <h3 className="mb-4 text-2xl font-bold">Listing your place</h3>
+          <p className="mb-6 text-sm text-gray-600">
+            It's as easy as making an account, and signing up has a host. We
+            have API access from the biggest PMS, or you can upload manually.
+            Once on, wait for requests to roll in.
+          </p>
+          <div className="mb-2 text-4xl font-bold text-teal-900">15%</div>
+          <p className="mb-6 text-sm text-gray-600">
+            increase in occupancy when using Tramona
+          </p>
+          <button className="rounded-full bg-teal-900 px-6 py-2 text-white transition-colors hover:bg-teal-950">
+            List my place
+          </button>
         </div>
       </div>
     </section>

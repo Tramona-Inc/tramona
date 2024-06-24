@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import {
   CalendarIcon,
   DollarSignIcon,
-  FilterIcon,
+  ListFilter,
   Link2,
   MapPinIcon,
   Plus,
@@ -31,6 +31,7 @@ import { useCityRequestForm } from "./useCityRequestForm";
 import Link from "next/link";
 import Confetti from "react-confetti";
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
+import { OptionalFilter } from "./OptionalFilter";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
@@ -209,16 +210,29 @@ export function DesktopRequestDealTab() {
                 </FormItem>
               )}
             />
-
+            
             <div className="flex items-center gap-2 text-teal-900">
-              <CityRequestFiltersDialog form={form} curTab={curTab}>
+              <OptionalFilter form={form} curTab={curTab}>
                 <Button
                   variant="ghost"
                   type="button"
                   className="px-2 text-teal-900 hover:bg-teal-900/15"
                 >
-                  <FilterIcon />
+                  <ListFilter />
                   More filters
+                </Button>
+              </OptionalFilter>
+            </div>
+
+            <div className="-mt-1 mb-1">
+              <CityRequestFiltersDialog form={form} curTab={curTab}>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="px-2 text-teal-700 font-bold hover:bg-teal-900/15"
+                >
+                  <ListFilter className="h-5"/>
+                  <div className="-ml-1">Additional filters</div>
                 </Button>
               </CityRequestFiltersDialog>
             </div>
