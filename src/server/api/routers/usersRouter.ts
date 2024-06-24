@@ -6,6 +6,7 @@ import {
 } from "@/server/api/trpc";
 import {
   ALL_PROPERTY_TYPES,
+  bookedDates,
   hostProfiles,
   hostTeamMembers,
   hostTeams,
@@ -289,7 +290,7 @@ export const usersRouter = createTRPCRouter({
         // googleExportStatus: string | null;
         // allowSameDayBooking: number;
         // sameDayBookingLeadTime: number;
-        // contactName: string | null;
+        contactName: string | null;
         // contactSurName: string | null;
         // contactPhone1: string | null;
         // contactPhone2: string | null;
@@ -369,6 +370,33 @@ export const usersRouter = createTRPCRouter({
         offset: number | null;
       }
 
+      interface CalendarEntry {
+        id: number;
+        date: string;
+        isAvailable: number;
+        isProcessed: number;
+        status: string;
+        price: number;
+        minimumStay: number;
+        maximumStay: number;
+        closedOnArrival: string | null;
+        closedOnDeparture: string | null;
+        note: string | null;
+        countAvailableUnits: number;
+        availableUnitsToSell: number;
+        countPendingUnits: number;
+        countBlockingReservations: string | null;
+        countBlockedUnits: number;
+        countReservedUnits: string | null;
+        desiredUnitsToSell: string | null;
+        reservations: any[];
+      }
+
+      interface CalendarResponse {
+        status: string;
+        result: CalendarEntry[];
+      }
+
 
       if (input.hostawayBearerToken) {
 
@@ -413,7 +441,7 @@ export const usersRouter = createTRPCRouter({
 
         try {
 
-          await ctx.db.insert(properties).values(
+          const insertedProperties = await ctx.db.insert(properties).values(
             listings.map((property) => ({
               hostId: ctx.user.id,
               propertyType: z.enum(ALL_PROPERTY_TYPES).catch("Other").parse(propertyTypeMap[property.propertyTypeId]),
@@ -437,7 +465,28 @@ export const usersRouter = createTRPCRouter({
               imageUrls: property.listingImages,
               amenities: property.listingAmenities.map((amenity) => amenity.amenityName), // Keep amenities as an array
             }))
-          ).then(() => { console.log('done inserting') });
+          ).returning(["id", "hostawayListingId"]);
+
+          for (const property of insertedProperties) {
+            const calendarResponse: CalendarResponse = await axios.get<CalendarResponse>(
+              `https://api.hostaway.com/v1/listings/${property.hostawayListingId}/calendar`,
+              {
+                headers: {
+                  Authorization: `Bearer ${input.hostawayBearerToken}`,
+                },
+              },
+            ).then((res) => res.data);
+
+            const nonAvailableDates = calendarResponse.result.filter(entry => entry.status !== "available");
+
+            await ctx.db.insert(bookedDates).values(
+              nonAvailableDates.map(dateEntry => ({
+                propertyId: property.id,
+                date: dateEntry.date,
+              })),
+            );
+          }
+
         } catch (err) {
           console.log(err);
         }
