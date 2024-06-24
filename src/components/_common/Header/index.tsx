@@ -1,4 +1,4 @@
-import { MenuIcon } from "lucide-react";
+import { Menu, MenuIcon } from "lucide-react";
 import Link from "next/link";
 import HeaderTopRight from "./HeaderTopRight";
 
@@ -12,6 +12,12 @@ import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
 import { SupportBtn } from "./SupportBtn";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type HeaderProps =
   | {
@@ -33,11 +39,50 @@ export default function Header(props: HeaderProps) {
   );
 }
 
-const headerLinks = [
+const headerLinks1 = [
+  { name: "Link Input", href: "/link-input" },
+  { name: "Unclaimed Offers", href: "/unclaimed-offers" },
+  { name: "Recent Deals", href: "/exclusive-offers" },
+];
+
+const headerLinks2 = [
   { name: "How it works", href: "/how-it-works" },
+  { name: "24/7 Support", href: "/help-center" },
+  { name: "Become a host", href: "/host-onboarding" },
+];
+
+const hamburgerLinksDesktop = [
   { name: "FAQ", href: "/faq" },
   { name: "Contact", href: "/support" },
 ];
+
+const hamburgerLinksMobile = [
+  { name: "Become a host", href: "/host-onboarding" },
+  { name: "Unclaimed Offers", href: "/unclaimed-offers" },
+  { name: "Recent Deals", href: "/exclusive-offers" },
+  { name: "Link Input", href: "/link-input" },
+];
+
+function HamburgerMenu({ links }: { links: { name: string; href: string }[] }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <div className="pl-2">
+          <MenuIcon />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {links.map((link) => (
+          <Link key={link.href} href={link.href}>
+            <DropdownMenuItem className="px-2 font-bold">
+              {link.name}
+            </DropdownMenuItem>
+          </Link>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 function LargeHeader(props: HeaderProps) {
   const { status, data: session } = useSession();
@@ -46,22 +91,22 @@ function LargeHeader(props: HeaderProps) {
 
   return (
     <header className=" sticky top-0 z-50 flex h-header-height items-center border-b bg-white p-4 lg:px-24">
-      <div className="flex flex-1 gap-4">
+      <div className="pr-10">
         <TramonaLogo />
       </div>
 
-      <div className="flex items-center justify-center gap-8">
+      <div className="flex items-center justify-center gap-8 text-muted-foreground">
         {props.type === "marketing" && (
           <>
             {status !== "authenticated" &&
-              headerLinks.map((link) => (
+              headerLinks1.map((link) => (
                 <NavLink
                   key={link.href}
                   href={link.href}
                   render={({ selected }) => (
                     <span
                       className={cn(
-                        "font-semibold",
+                        "font-bold",
                         selected && "underline underline-offset-2",
                       )}
                     >
@@ -74,8 +119,16 @@ function LargeHeader(props: HeaderProps) {
         )}
       </div>
 
-      <div className="flex flex-1 justify-end gap-2">
-        <SupportBtn />
+      <div className="flex flex-1 items-center justify-end gap-2">
+        {headerLinks2.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="rounded-full border bg-white px-4 py-2 text-sm font-bold text-teal-900"
+          >
+            {link.name}
+          </Link>
+        ))}
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (
@@ -85,17 +138,20 @@ function LargeHeader(props: HeaderProps) {
             )}
           </Button>
         ) : (
-          <Button asChild variant="secondary">
+          <Button asChild variant="ghost" className="font-bold">
             <Link href="/auth/signin">
               {status === "authenticated" ? "Switch to Dashboard" : "Log in"}
             </Link>
           </Button>
         )}
         {status !== "authenticated" && (
-          <Button asChild variant="greenPrimary">
+          <Button asChild variant="greenPrimary" className="font-bold">
             <Link href="/auth/signup">Sign Up</Link>
           </Button>
         )}
+
+        <HamburgerMenu links={hamburgerLinksDesktop} />
+
         {status == "authenticated" && (
           <>
             <Button
@@ -153,7 +209,6 @@ function SmallHeader(props: HeaderProps) {
       <TramonaLogo />
 
       <div className="flex flex-1 items-center justify-end gap-2">
-        <SupportBtn />
         {props.type === "marketing" && (
           <>
             {status === "authenticated" && (
@@ -166,7 +221,7 @@ function SmallHeader(props: HeaderProps) {
             </Button>
           </>
         )}
-
+        <HamburgerMenu links={hamburgerLinksMobile} />
         {/* <HeaderTopRight /> */}
       </div>
     </header>
