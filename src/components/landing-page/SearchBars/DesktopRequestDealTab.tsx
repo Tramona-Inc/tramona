@@ -44,10 +44,16 @@ export function DesktopRequestDealTab() {
     setOpen(true);
   }
 
-  // open RequestSuccessDialog if there are unsent requests
+  // handle unsent if there are any, then display RequestSuccessDialog
   useEffect(() => {
     if (localStorage.getItem("unsentRequests")) {
-      afterSubmit(madeByGroupIds);
+      const storedMadeByGroupIds = localStorage.getItem("madeByGroupIds");
+      const madeByGroupIdsList = storedMadeByGroupIds
+        ? JSON.parse(storedMadeByGroupIds)
+        : null;
+      if (madeByGroupIdsList) {
+        afterSubmit(madeByGroupIdsList as number[]);
+      }
     }
   }, []);
 

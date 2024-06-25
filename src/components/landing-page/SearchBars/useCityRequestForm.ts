@@ -61,7 +61,10 @@ export function useCityRequestForm({
     } else {
       await createRequests(newRequests)
         .then((result) => {
-          
+          if (result.madeByGroupIds && result.madeByGroupIds.length > 0) {
+            localStorage.setItem("madeByGroupIds", JSON.stringify(result.madeByGroupIds));
+          }
+
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
           form.reset();

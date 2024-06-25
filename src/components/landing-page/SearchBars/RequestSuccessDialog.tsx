@@ -14,22 +14,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  CalendarIcon,
-  DollarSignIcon,
-  FilterIcon,
-  Link2,
-  MapPinIcon,
   Plus,
-  Users2Icon,
   CircleCheckBig,
   LinkIcon,
   Sparkles,
   MinusIcon,
   ShareIcon,
-  ContactRoundIcon,
   MailIcon,
 } from "lucide-react";
-import { CityRequestForm } from "./useCityRequestForm";
 
 export function RequestSuccessDialog({
   open,
