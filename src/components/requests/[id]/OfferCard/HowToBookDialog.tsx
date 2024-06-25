@@ -14,7 +14,7 @@ export default function HowToBookDialog(
     checkIn: Date;
     checkOut: Date;
     offer: OfferWithProperty;
-    requestId: number;
+    requestId?: number;
     isAirbnb: boolean;
   }>,
 ) {

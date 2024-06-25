@@ -17,3 +17,4 @@ export * from "./tables/requests";
 export * from "./tables/requestsToProperties";
 export * from "./tables/reservations";
 export * from "./tables/users";
+export * from "./tables/reviews";

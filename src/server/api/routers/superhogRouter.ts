@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { createTRPCRouter, roleRestrictedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import { env } from "@/env";
@@ -120,7 +121,8 @@ export const superhogRouter = createTRPCRouter({
         propertyAddress: input.listing.address.addressLine1,
         propertyTown: input.listing.address.town,
         propertyCountryIso: input.listing.address.countryIso,
-        superhogStatus: verification.status,
+        superhogStatus:
+          verification.status === "null" ? null : verification.status,
         superhogVerificationId: verification.verificationId,
         superhogReservationId: input.reservation.reservationId,
         nameOfVerifiedUser: `${input.guest.firstName} ${input.guest.lastName}`,
