@@ -1,4 +1,15 @@
-import { MenuIcon } from "lucide-react";
+import {
+  BadgeInfo,
+  BadgePercent,
+  DoorOpen,
+  Home,
+  Link2,
+  Menu,
+  MenuIcon,
+  MessageCircleQuestion,
+  Tag,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import HeaderTopRight from "./HeaderTopRight";
 
@@ -12,6 +23,16 @@ import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
 import { SupportBtn } from "./SupportBtn";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Icon } from "@/components/_icons/icons";
+import { useState } from "react";
 
 type HeaderProps =
   | {
@@ -33,11 +54,75 @@ export default function Header(props: HeaderProps) {
   );
 }
 
-const headerLinks = [
-  { name: "How it works", href: "/how-it-works" },
-  { name: "FAQ", href: "/faq" },
-  { name: "Contact", href: "/support" },
+const headerLinks1 = [
+  { name: "Link Input", href: "/link-input" },
+  { name: "Unclaimed Offers", href: "/unclaimed-offers" },
+  { name: "Recent Deals", href: "/exclusive-offers" },
 ];
+
+const headerLinks2 = [
+  { name: "How it works", href: "/how-it-works" },
+  { name: "24/7 Support", href: "/help-center" },
+  { name: "Become a host", href: "/host-onboarding" },
+];
+
+const hamburgerLinksDesktop = [
+  { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
+  { name: "Contact", href: "/support", icon: <BadgeInfo /> },
+  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
+];
+
+const hamburgerLinksMobile = [
+  { name: "Become a host", href: "/host-onboarding", icon: <Home /> },
+  { name: "Unclaimed Offers", href: "/unclaimed-offers", icon: <Tag /> },
+  { name: "Recent Deals", href: "/exclusive-offers", icon: <BadgePercent /> },
+  { name: "Link Input", href: "/link-input", icon: <Link2 /> },
+  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
+];
+
+function HamburgerMenu({
+  links,
+}: {
+  links: {
+    name: string;
+    href: string;
+    icon: React.ReactNode;
+  }[];
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger>
+        <div className="pl-2">
+          <MenuIcon />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="bg-white">
+        <DropdownMenuLabel className="text-xl font-bold text-teal-900">
+          <div className="flex items-center gap-3">
+            <button
+              className="rounded-full border border-teal-900 bg-zinc-200 p-2"
+              onClick={() => setOpen(!open)}
+            >
+              <X size={20} />
+            </button>
+            <h3>Tramona</h3>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {links.map((link) => (
+          <Link key={link.href} href={link.href}>
+            <DropdownMenuItem className="my-2 px-2 py-6 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
+              <div className="rounded-full bg-zinc-200 p-2">{link.icon}</div>
+              {link.name}
+            </DropdownMenuItem>
+          </Link>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 function LargeHeader(props: HeaderProps) {
   const { status, data: session } = useSession();
@@ -46,22 +131,22 @@ function LargeHeader(props: HeaderProps) {
 
   return (
     <header className=" sticky top-0 z-50 flex h-header-height items-center border-b bg-white p-4 lg:px-24">
-      <div className="flex flex-1 gap-4">
+      <div className="pr-10">
         <TramonaLogo />
       </div>
 
-      <div className="flex items-center justify-center gap-8">
+      <div className="flex items-center justify-center gap-8 text-muted-foreground">
         {props.type === "marketing" && (
           <>
             {status !== "authenticated" &&
-              headerLinks.map((link) => (
+              headerLinks1.map((link) => (
                 <NavLink
                   key={link.href}
                   href={link.href}
                   render={({ selected }) => (
                     <span
                       className={cn(
-                        "font-semibold",
+                        "font-bold",
                         selected && "underline underline-offset-2",
                       )}
                     >
@@ -74,8 +159,16 @@ function LargeHeader(props: HeaderProps) {
         )}
       </div>
 
-      <div className="flex flex-1 justify-end gap-2">
-        <SupportBtn />
+      <div className="flex flex-1 items-center justify-end gap-2">
+        {headerLinks2.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="rounded-full border bg-white px-4 py-2 text-sm font-bold text-teal-900"
+          >
+            {link.name}
+          </Link>
+        ))}
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (
@@ -85,17 +178,20 @@ function LargeHeader(props: HeaderProps) {
             )}
           </Button>
         ) : (
-          <Button asChild variant="secondary">
+          <Button asChild variant="ghost" className="font-bold">
             <Link href="/auth/signin">
               {status === "authenticated" ? "Switch to Dashboard" : "Log in"}
             </Link>
           </Button>
         )}
         {status !== "authenticated" && (
-          <Button asChild variant="greenPrimary">
+          <Button asChild variant="greenPrimary" className="font-bold">
             <Link href="/auth/signup">Sign Up</Link>
           </Button>
         )}
+
+        <HamburgerMenu links={hamburgerLinksDesktop} />
+
         {status == "authenticated" && (
           <>
             <Button
@@ -153,7 +249,6 @@ function SmallHeader(props: HeaderProps) {
       <TramonaLogo />
 
       <div className="flex flex-1 items-center justify-end gap-2">
-        <SupportBtn />
         {props.type === "marketing" && (
           <>
             {status === "authenticated" && (
@@ -166,7 +261,7 @@ function SmallHeader(props: HeaderProps) {
             </Button>
           </>
         )}
-
+        <HamburgerMenu links={hamburgerLinksMobile} />
         {/* <HeaderTopRight /> */}
       </div>
     </header>
