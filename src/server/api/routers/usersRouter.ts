@@ -464,12 +464,16 @@ export const usersRouter = createTRPCRouter({
               hostTeamId: teamId,
               imageUrls: property.listingImages,
               amenities: property.listingAmenities.map((amenity) => amenity.amenityName), // Keep amenities as an array
+              cancellationPolicy: property.cancellationPolicy,
             }))
-          ).returning(["id", "hostawayListingId"]);
+          ).returning({id: properties.id, listingId: properties.hostawayListingId});
+
+          const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
 
           for (const property of insertedProperties) {
             const calendarResponse: CalendarResponse = await axios.get<CalendarResponse>(
-              `https://api.hostaway.com/v1/listings/${property.hostawayListingId}/calendar`,
+              `https://api.hostaway.com/v1/listings/${property.listingId}/calendar`,
               {
                 headers: {
                   Authorization: `Bearer ${input.hostawayBearerToken}`,
@@ -477,12 +481,12 @@ export const usersRouter = createTRPCRouter({
               },
             ).then((res) => res.data);
 
-            const nonAvailableDates = calendarResponse.result.filter(entry => entry.status !== "available");
+            const nonAvailableDates = calendarResponse.result.filter(entry => entry.status !== "available" && entry.date >= today!);
 
             await ctx.db.insert(bookedDates).values(
               nonAvailableDates.map(dateEntry => ({
                 propertyId: property.id,
-                date: dateEntry.date,
+                date: new Date(dateEntry.date),
               })),
             );
           }
