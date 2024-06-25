@@ -1,7 +1,12 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { hostProfiles } from "@/server/db/schema";
+import { hostProfiles, properties } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 export async function fetchIndividualHostInfo(userId: string) {
   return await db.query.hostProfiles.findFirst({
@@ -56,7 +61,34 @@ export const hostRouter = createTRPCRouter({
       columns: { stripeAccountId: true },
       where: eq(hostProfiles.userId, ctx.user.id),
     });
-    console.log(stripeAccountIdNumber);
     return stripeAccountIdNumber;
   }),
+
+  getHostInfoByPropertyId: publicProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const hostIDIfExist = await db.query.properties.findFirst({
+        columns: { hostId: true },
+        where: eq(properties.id, input),
+      });
+
+      const hostId = hostIDIfExist ? hostIDIfExist.hostId : null;
+
+      if (!hostId) {
+        // Handle the case where the hostId is not found
+        return null;
+      }
+
+      return await db.query.hostProfiles.findFirst({
+        columns: {
+          userId: true,
+          type: true,
+          becameHostAt: true,
+          profileUrl: true,
+          stripeAccountId: true,
+          chargesEnabled: true,
+        },
+        where: eq(hostProfiles.userId, hostId),
+      });
+    }),
 });

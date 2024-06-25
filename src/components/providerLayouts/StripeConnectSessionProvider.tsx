@@ -6,7 +6,6 @@ import {
   ConnectComponentsProvider,
   ConnectPayments,
 } from "@stripe/react-connect-js";
-import { connect } from "http2";
 import { Loader } from "lucide-react";
 import Spinner from "../_common/Spinner";
 import { env } from "@/env";
@@ -70,7 +69,7 @@ const StripeConnectSessionProvider = ({
             // This is your test publishable API key.
             publishableKey: env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
             fetchClientSecret: () =>
-              Promise.resolve(accountSession!.client_secret),
+              Promise.resolve(accountSession.client_secret),
             appearance: {
               // See all possible variables below
               overlays: "dialog",

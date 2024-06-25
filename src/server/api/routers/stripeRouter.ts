@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { users } from "@/server/db/schema";
+import { properties, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
@@ -31,27 +31,21 @@ export const stripeRouter = createTRPCRouter({
         propertyId: z.number(),
         requestId: z.number(),
         name: z.string(),
-        price: z.number(),
+        price: z.number(), // Total price included tramona fee
+        tramonaServiceFee: z.number(),
         description: z.string(),
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
         userId: z.string(),
         phoneNumber: z.string(),
         totalSavings: z.number(),
-        // hostId: z.string(),
+        hostStripeId: z.string().nullable(),
       }),
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const currentDate = new Date(); // Get the current date and time
       //we need the host Stripe account id to put in webhook
-      const hostStripeId = ctx.db.query.hostProfiles
-        .findFirst({
-          columns: {
-            stripeAccountId: true,
-          },
-          where: eq(hostProfiles.userId, ctx.user.id),
-        })
-        .then((res) => res?.stripeAccountId);
+      //get hostID from the property
 
       // Object that can be access through webhook and client
       const metadata = {
@@ -59,13 +53,24 @@ export const stripeRouter = createTRPCRouter({
         listing_id: input.listingId,
         property_id: input.propertyId,
         request_id: input.requestId,
-        price: input.price,
+        price: input.price, // Total price included tramona fee
+        tramonaServiceFee: input.tramonaServiceFee,
         total_savings: input.totalSavings,
         confirmed_at: currentDate.toISOString(),
         phone_number: input.phoneNumber,
-        host_stripe_id: hostStripeId,
+        host_stripe_id: input.hostStripeId ?? "",
       };
-      console.log("hostStripeId in the metadata is ", metadata.host_stripe_id);
+      console.log(metadata.host_stripe_id);
+      const paymentIntentData: Stripe.Checkout.SessionCreateParams.PaymentIntentData =
+        {
+          metadata: metadata, // metadata access for payment intent (webhook access)
+          ...(metadata.host_stripe_id && {
+            transfer_data: {
+              amount: input.price - input.tramonaServiceFee,
+              destination: metadata.host_stripe_id,
+            },
+          }),
+        };
       return stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
@@ -88,15 +93,7 @@ export const stripeRouter = createTRPCRouter({
         success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`,
         cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
         metadata: metadata, // metadata access for checkout session
-        payment_intent_data: {
-          metadata: metadata, // metadata access for payment intent (webhook access)
-
-          // TODO: this is where the money get's transferred
-          transfer_data: {
-            amount: input.price,
-            destination: metadata.host_stripe_id ?? null, //stripe connect account id
-          },
-        },
+        payment_intent_data: paymentIntentData,
       });
     }),
 
@@ -408,6 +405,7 @@ export const stripeRouter = createTRPCRouter({
       const stripeAccount = await stripeWithSecretKey.accounts.create({
         country: "US", //we need to change this later
         email: ctx.user.email,
+        type: "express",
         controller: {
           losses: {
             payments: "application",
@@ -472,7 +470,7 @@ export const stripeRouter = createTRPCRouter({
   //we need this to create embedded connet account
   createStripeAccountSession: protectedProcedure
     .input(z.string())
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const accountId = input;
       const accountSession = await stripeWithSecretKey.accountSessions.create({
         account: accountId,
@@ -528,6 +526,35 @@ export const stripeRouter = createTRPCRouter({
 
       //console.log(accountSession);
       return accountSession;
+    }),
+
+  checkStripeConnectAcountBalance: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const accountId = "acct_1PTvljDFLE1caQNh";
+      console.log("this is the account id");
+      console.log(accountId);
+      const balance = await stripeWithSecretKey.balance.retrieve({
+        stripeAccount: accountId,
+      });
+      console.log("this is the balance");
+      console.log(balance);
+
+      return balance;
+    }),
+
+  getConnectedExternalBank: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const accountId = input;
+      const externalAccounts = await stripe.accounts.listExternalAccounts(
+        accountId,
+        {
+          object: "bank_account",
+        },
+      );
+
+      return externalAccounts.data;
     }),
 
   createVerificationSession: protectedProcedure.query(async ({ ctx }) => {

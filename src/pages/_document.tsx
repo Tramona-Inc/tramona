@@ -2,7 +2,7 @@ import { env } from "@/env";
 import Document, { Head, Html, Main, NextScript } from "next/document";
 import Script from "next/script";
 import { mulish } from "./_app";
-
+const isProduction = process.env.NODE_ENV === "production";
 class MyDocument extends Document {
   render() {
     return (
@@ -38,6 +38,10 @@ class MyDocument extends Document {
           <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;400italic;700;700italic&display=swap"
+          />
+          <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src * self blob: data: gap:; style-src * self 'unsafe-inline' blob: data: gap:; script-src * 'self' 'unsafe-eval' 'unsafe-inline' blob: data: gap:; object-src * 'self' blob: data: gap:; img-src * self 'unsafe-inline' blob: data: gap:; connect-src self * 'unsafe-inline' blob: data: gap:; frame-src * self blob: data: gap:;"
           />
         </Head>
         <body className={mulish.className}>
