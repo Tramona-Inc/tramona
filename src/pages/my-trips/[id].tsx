@@ -56,11 +56,11 @@ export default function TripDetailsPage() {
         acceptedAt: trip.acceptedAt,
         id: trip.id,
         tramonaFee: trip.tramonaFee,
-        checkIn: trip.request.checkIn,
-        checkOut: trip.request.checkOut,
-        numGuests: trip.request.numGuests,
-        location: trip.request.location,
-        madeByGroup: trip.request.madeByGroup,
+        checkIn: trip.checkIn,
+        checkOut: trip.checkOut,
+        numGuests: trip.request!.numGuests,
+        location: trip.request?.location ?? null,
+        madeByGroup: trip.request?.madeByGroup,
         property: trip.property,
       };
     } else if (isBidsTrip(trip, tripType)) {
