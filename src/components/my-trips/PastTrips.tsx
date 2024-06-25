@@ -3,7 +3,7 @@ import PastTripCard from "@/components/my-trips/PastTripCard";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
 
-import { RouterOutputs } from "@/utils/api";
+import { type RouterOutputs } from "@/utils/api";
 
 type MyTripsType<T> = T extends (infer U)[] ? U : never;
 
