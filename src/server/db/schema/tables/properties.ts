@@ -182,9 +182,7 @@ export const properties = pgTable("properties", {
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
   hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
-  propertyType: propertyTypeEnum("property_type")
-    .notNull()
-    .default("Apartment"),
+  propertyType: propertyTypeEnum("property_type").notNull(),
   roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
 
   // how many guests does this property accomodate at most?
