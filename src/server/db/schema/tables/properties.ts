@@ -206,11 +206,14 @@ export const properties = pgTable("properties", {
   checkOutTime: time("check_out_time"),
 
   // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
-  amenities: varchar("amenities").array(),
-  otherAmenities: varchar("other_amenities")
+  amenities: varchar("amenities")
     .array()
     .notNull()
     .default(sql`'{}'`), // .default([]) doesnt work, you gotta do this
+  otherAmenities: varchar("other_amenities")
+    .array()
+    .notNull()
+    .default(sql`'{}'`),
 
   imageUrls: varchar("image_url").array().notNull(),
 
