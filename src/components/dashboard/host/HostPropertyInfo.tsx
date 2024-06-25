@@ -30,12 +30,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           >
             Listing details
           </TabsTrigger>
-          <TabsTrigger
+          {/* <TabsTrigger
             value="price"
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
             Price restriction
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger
             value="availability"
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
