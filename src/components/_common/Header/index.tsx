@@ -1,6 +1,7 @@
 import {
   BadgeInfo,
   BadgePercent,
+  DoorOpen,
   Home,
   Link2,
   Menu,
@@ -68,6 +69,7 @@ const headerLinks2 = [
 const hamburgerLinksDesktop = [
   { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
   { name: "Contact", href: "/support", icon: <BadgeInfo /> },
+  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
 ];
 
 const hamburgerLinksMobile = [
@@ -75,6 +77,7 @@ const hamburgerLinksMobile = [
   { name: "Unclaimed Offers", href: "/unclaimed-offers", icon: <Tag /> },
   { name: "Recent Deals", href: "/exclusive-offers", icon: <BadgePercent /> },
   { name: "Link Input", href: "/link-input", icon: <Link2 /> },
+  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
 ];
 
 function HamburgerMenu({
