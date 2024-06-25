@@ -171,10 +171,6 @@ export const offersRelations = relations(offers, ({ one }) => ({
     fields: [offers.requestId],
     references: [requests.id],
   }),
-  group: one(groups, {
-    fields: [offers.groupId],
-    references: [groups.id],
-  }),
 }));
 
 export const earningsRelations = relations(referralEarnings, ({ one }) => ({

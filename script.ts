@@ -15,7 +15,6 @@ for (const offer of allOffers) {
     .set({
       checkIn: offer.request.checkIn,
       checkOut: offer.request.checkOut,
-      groupId: offer.request.madeByGroupId,
     })
     .where(eq(offers.id, offer.id));
 

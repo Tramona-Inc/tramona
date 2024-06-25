@@ -39,3 +39,4 @@ export const hostProfiles = pgTable(
 );
 
 export type HostProfile = typeof hostProfiles.$inferSelect;
+
