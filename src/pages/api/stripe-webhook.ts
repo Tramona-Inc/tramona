@@ -76,17 +76,13 @@ export default async function webhook(
                 ),
               );
 
-            await db
-              .update(requests)
-              .set({
-                resolvedAt: confirmedDate,
-              })
-              .where(
-                eq(
-                  requests.id,
-                  parseInt(paymentIntentSucceeded.metadata.request_id!),
-                ),
-              );
+            const requestId = paymentIntentSucceeded.metadata.request_id;
+            if (requestId && !isNaN(parseInt(requestId))) {
+              await db
+                .update(requests)
+                .set({ resolvedAt: confirmedDate })
+                .where(eq(requests.id, parseInt(requestId)));
+            }
           } else {
             // Handle case where confirmed_at is missing or invalid
             console.error("Confirmed_at is missing or invalid.");

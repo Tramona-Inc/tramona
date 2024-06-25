@@ -31,28 +31,57 @@ export const ALL_PROPERTY_TYPES = [
   "Camper/RV",
   "Chalet",
   "Bed & Breakfast",
-  "Villa",
+  "Castle",
   "Tent",
   "Cabin",
   "Townhouse",
   "Bungalow",
   "Hut",
-  "Studio",
+  "Dorm",
   "Aparthotel",
   "Hotel",
   "Yurt",
   "Treehouse",
   "Cottage",
-  "Guest suite",
-  "Tiny house",
-  "Bed & breakfast",
-  "Camper/rv",
+  "Guest Suite",
+  "Tiny House",
+  "Plane",
+  "Igloo",
   "Serviced apartment",
   "Other",
-  "Home",
-  "Hotels",
-  "Alternative",
-  "house",
+  "Lighthouse",
+  "Tipi",
+  "Cave",
+  "Island",
+  "Earth House",
+  "Train",
+  "Boutique hotel",
+  "Nature lodge",
+  "Hostel",
+  "Timeshare",
+  "Minsu (Taiwan)",
+  "Ryokan (Japan)",
+  "Pension (Korea)",
+  "Heritage hotel (India)",
+  "Barn",
+  "Campsite",
+  "Casa Particular (Cuba)",
+  "Cycladic House",
+  "Dammusi",
+  "Dome House",
+  "Farm Stay",
+  "Holiday Park",
+  "Houseboat",
+  "Kezhan",
+  "Ranch",
+  "Religious Building",
+  "Riad",
+  "Shipping Container",
+  "Tower",
+  "Trullo",
+  "Windmill",
+  "Shepherd’s Hut",
+  "Villa",
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
@@ -145,12 +174,17 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Archived",
 ]);
 
+export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
+
+export const propertyPMS = pgEnum("property_pms", ALL_PROPERTY_PMS);
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
   hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
-  propertyType: propertyTypeEnum("property_type").notNull(),
+  propertyType: propertyTypeEnum("property_type")
+    .notNull()
+    .default("Apartment"),
   roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
 
   // how many guests does this property accomodate at most?
@@ -158,6 +192,7 @@ export const properties = pgTable("properties", {
   numBeds: smallint("num_beds").notNull(),
   numBedrooms: smallint("num_bedrooms").notNull(),
   numBathrooms: doublePrecision("num_bathrooms"),
+  // propertyPMS: propertyPMS("property_pms"),
 
   // for when blake/preju manually upload, otherwise get the host's name via hostId
   hostName: varchar("host_name", { length: 255 }),
@@ -200,11 +235,13 @@ export const properties = pgTable("properties", {
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
-  priceRestriction: integer("price_restriction"),
+  // priceRestriction: integer("price_restriction"),
   propertyStatus: propertyStatusEnum("property_status").default("Listed"),
   airbnbBookUrl: varchar("airbnb_book_url"),
   hostImageUrl: varchar("host_image_url"),
   pricingScreenUrl: varchar("pricing_screen_url"),
+  hostProfilePic: varchar("host_profile_pic"),
+  hostawayListingId: integer("hostaway_listing_id"),
 });
 
 export type Property = typeof properties.$inferSelect;

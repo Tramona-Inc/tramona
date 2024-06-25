@@ -29,7 +29,7 @@ export const stripeRouter = createTRPCRouter({
       z.object({
         listingId: z.number(),
         propertyId: z.number(),
-        requestId: z.number(),
+        requestId: z.number().nullable(),
         name: z.string(),
         price: z.number(), // Total price included tramona fee
         tramonaServiceFee: z.number(),
