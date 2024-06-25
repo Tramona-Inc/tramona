@@ -1,4 +1,5 @@
 import {
+  BadgeHelp,
   BadgeInfo,
   BadgePercent,
   DoorOpen,
@@ -73,10 +74,14 @@ const hamburgerLinksDesktop = [
 ];
 
 const hamburgerLinksMobile = [
-  { name: "Become a host", href: "/host-onboarding", icon: <Home /> },
+  { name: "Link Input", href: "/link-input", icon: <Link2 /> },
   { name: "Unclaimed Offers", href: "/unclaimed-offers", icon: <Tag /> },
   { name: "Recent Deals", href: "/exclusive-offers", icon: <BadgePercent /> },
-  { name: "Link Input", href: "/link-input", icon: <Link2 /> },
+  { name: "How it works", href: "/how-it-works", icon: <Menu /> },
+  { name: "24/7 Support", href: "/help-center", icon: <BadgeHelp /> },
+  { name: "Become a host", href: "/host-onboarding", icon: <Home /> },
+  { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
+  { name: "Contact", href: "/support", icon: <BadgeInfo /> },
   { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
 ];
 
@@ -160,15 +165,19 @@ function LargeHeader(props: HeaderProps) {
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-2">
-        {headerLinks2.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="rounded-full border bg-white px-4 py-2 text-sm font-bold text-teal-900"
-          >
-            {link.name}
-          </Link>
-        ))}
+        {status !== "authenticated" && (
+          <>
+            {headerLinks2.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-full border bg-white px-4 py-2 text-sm font-bold text-teal-900"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </>
+        )}
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname === "/host" ? (
@@ -185,12 +194,13 @@ function LargeHeader(props: HeaderProps) {
           </Button>
         )}
         {status !== "authenticated" && (
-          <Button asChild variant="greenPrimary" className="font-bold">
-            <Link href="/auth/signup">Sign Up</Link>
-          </Button>
+          <>
+            <Button asChild variant="greenPrimary" className="font-bold">
+              <Link href="/auth/signup">Sign Up</Link>
+            </Button>
+            <HamburgerMenu links={hamburgerLinksDesktop} />
+          </>
         )}
-
-        <HamburgerMenu links={hamburgerLinksDesktop} />
 
         {status == "authenticated" && (
           <>
@@ -256,12 +266,17 @@ function SmallHeader(props: HeaderProps) {
                 <Link href="/auth/signin">Dashboard</Link>
               </Button>
             )}
-            <Button size="sm" asChild variant="greenPrimary">
-              <Link href="/auth/signup">Sign up</Link>
-            </Button>
+            {status !== "authenticated" && (
+              <>
+                <Button size="sm" asChild variant="greenPrimary">
+                  <Link href="/auth/signup">Sign up</Link>
+                </Button>
+                <HamburgerMenu links={hamburgerLinksMobile} />
+              </>
+            )}
           </>
         )}
-        <HamburgerMenu links={hamburgerLinksMobile} />
+
         {/* <HeaderTopRight /> */}
       </div>
     </header>
