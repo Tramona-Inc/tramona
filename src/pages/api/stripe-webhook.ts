@@ -94,7 +94,7 @@ export default async function webhook(
                   where: eq(offers.id, offerId),
                 });
 
-                if (offer && offer.request) {
+                if (offer?.request) {
                   await db.insert(trips).values({
                     checkIn: offer.checkIn,
                     checkOut: offer.checkOut,
