@@ -48,7 +48,7 @@ export const hostMobileNavLinks = [
 
 export const hostNavLinks = [
   ...hostMobileNavLinks,
-  { href: "/host/payout", name: "Payout", icon: DollarSign },
+  { href: "/host/finances", name: "Finances", icon: DollarSign },
 ];
 
 export const guestMobileNavLinks = [

@@ -27,6 +27,7 @@
     --border: var(--zinc-200);
     --input: var(--zinc-300);
     --ring: var(--black);
+    --primary-green: var(--teal-900);
     --radius: 0.5rem;
     --mobile-header-height: 74px;
     --header-height: 56px;

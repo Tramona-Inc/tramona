@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { properties, users } from "@/server/db/schema";
+import { users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
@@ -16,12 +16,13 @@ export const config = {
 };
 // these two are the same stripe objects, some stripe require the secret key and some require the restricted key
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2024-06-20",
 });
 
 export const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2024-06-20",
 });
+// change the apiVersion
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
@@ -456,11 +457,11 @@ export const stripeRouter = createTRPCRouter({
       const accountLink = await stripe.accountLinks.create({
         account: input, //stripe account id
         refresh_url: isProduction
-          ? "https://tramona.com/host/payout"
-          : "http://localhost:3000/host/payout",
+          ? "https://tramona.com/host/finances"
+          : "http://localhost:3000/host/finances",
         return_url: isProduction
-          ? "https://tramona.com/host/payout"
-          : "http://localhost:3000/host/payout",
+          ? "https://tramona.com/host/finances"
+          : "http://localhost:3000/host/finances",
         type: "account_onboarding",
       });
 
@@ -475,13 +476,6 @@ export const stripeRouter = createTRPCRouter({
       const accountSession = await stripeWithSecretKey.accountSessions.create({
         account: accountId,
         components: {
-          // Notification banner component (commented out for now)
-          // notification_banner: {
-          //   enabled: true,
-          //   features: {
-          //     external_account_collection: true,
-          //   },
-          // },
           account_onboarding: {
             enabled: true,
             features: {
@@ -506,13 +500,26 @@ export const stripeRouter = createTRPCRouter({
           payouts: {
             enabled: true,
             features: {
-              instant_payouts: true, // Example feature for payouts
+              instant_payouts: true,
+              standard_payouts: true,
+              edit_payout_schedule: true,
             },
           },
+          // payouts_list: {
+          //   enabled: true,
+          // },
+          // notification_banner: {
+          //   enabled: true,
+          //   features: {
+          //     external_account_collection: true,
+          //   },
+          // },
           // balances: {
           //   enabled: true,
           //   features: {
-          //     balance_management: true, // Example feature for balances
+          //     instant_payouts: true,
+          //     standard_payouts: true,
+          //     edit_payout_schedule: true,
           //   },
           // },
         },
@@ -524,10 +531,8 @@ export const stripeRouter = createTRPCRouter({
         });
       }
 
-      //console.log(accountSession);
       return accountSession;
     }),
-
   checkStripeConnectAcountBalance: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
@@ -541,6 +546,17 @@ export const stripeRouter = createTRPCRouter({
       console.log(balance);
 
       return balance;
+    }),
+
+  listAllStripePayouts: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const accountId = input;
+      const payout = await stripe.payouts.list({
+        stripeAccount: accountId,
+      });
+      console.log(payout.data);
+      return payout.data;
     }),
 
   getConnectedExternalBank: protectedProcedure

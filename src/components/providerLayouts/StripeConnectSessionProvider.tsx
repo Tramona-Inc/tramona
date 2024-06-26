@@ -1,19 +1,15 @@
-import React, { ReactElement, SetStateAction, useEffect } from "react";
-import stripe from "stripe";
+import React, { type ReactElement, useEffect } from "react";
+
 import { useState } from "react";
 import { api } from "@/utils/api";
-import {
-  ConnectComponentsProvider,
-  ConnectPayments,
-} from "@stripe/react-connect-js";
-import { Loader } from "lucide-react";
-import Spinner from "../_common/Spinner";
+import { ConnectComponentsProvider } from "@stripe/react-connect-js";
+
 import { env } from "@/env";
 import {
   loadConnectAndInitialize,
-  StripeConnectInstance,
+  type StripeConnectInstance,
 } from "@stripe/connect-js";
-import { set } from "lodash";
+
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 
 //we need to use zustand, so when the the instance for the provider is ready, we can use it in the children
