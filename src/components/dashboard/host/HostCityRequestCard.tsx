@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { type Property } from "@/server/db/schema";
 import { type RouterOutputs } from "@/utils/api";
 import {
   formatCurrency,
@@ -14,9 +15,8 @@ import {
   plural,
 } from "@/utils/utils";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
-import AcceptCityRequestDialog from "./AcceptCityRequestDialog";
-import { type Property } from "@/server/db/schema";
 import { useState } from "react";
+import AcceptCityRequestDialog from "./AcceptCityRequestDialog";
 
 export default function HostCityRequestCard({
   request,
