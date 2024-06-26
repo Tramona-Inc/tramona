@@ -101,7 +101,7 @@ export default function HostPropertiesLayout({
 
   return (
     <div className="flex">
-      <div className="sticky top-20 h-screen-minus-header-n-footer w-96 overflow-auto border-r px-4 py-8">
+      <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
         <ScrollArea>
           <h1 className="text-3xl font-bold">Properties</h1>
           <p className="text-muted-foreground">24% currently vacant</p>
@@ -148,7 +148,7 @@ export default function HostPropertiesLayout({
           </Accordion>
         </ScrollArea>
       </div>
-      <div className="flex-1">
+      <div className="hidden flex-1 xl:block">
         {children ? (
           <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-4xl rounded-2xl border">
             <div className="grid grid-cols-1">{children}</div>
