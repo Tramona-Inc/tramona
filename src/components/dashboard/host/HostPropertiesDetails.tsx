@@ -195,7 +195,7 @@ export default function HostPropertiesDetails({
               </AlertDialogContent>
             </AlertDialog>
 
-            {property.propertyStatus !== "Archived" && (
+            {property.propertyStatus === "Listed" && (
               <Button
                 variant="secondary"
                 onClick={() =>
