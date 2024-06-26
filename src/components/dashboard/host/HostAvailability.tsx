@@ -60,7 +60,7 @@ export default function HostAvailability({ property }: { property: Property }) {
           {daysOfWeek.map((day) => (
             <div
               key={day}
-              className="mb-1 text-center text-xs font-medium text-gray-500"
+              className="mb-1 text-center text-xs font-bold text-gray-500"
             >
               {day.toUpperCase()}
             </div>
@@ -68,8 +68,8 @@ export default function HostAvailability({ property }: { property: Property }) {
           {monthDays.map((day, index) => (
             <div
               key={index}
-              className={`flex h-8 items-center justify-center border border-transparent text-sm
-                ${day ? "cursor-pointer hover:border-gray-300" : ""} 
+              className={`flex h-8 items-center justify-center border text-sm
+                ${day ? "cursor-pointer border-gray-300" : "border-transparent"} 
                 ${
                   day &&
                   monthDate.getFullYear() === currentDate.getFullYear() &&
@@ -113,27 +113,27 @@ export default function HostAvailability({ property }: { property: Property }) {
       <div className="mx-auto max-w-4xl">
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="relative basis-1/2 text-center">
               <button
                 onClick={goToPreviousMonth}
-                className="mr-2 rounded border border-gray-300 p-1 text-gray-400 transition-colors duration-150 hover:text-gray-600"
+                className="absolute left-0 top-0 mr-2 rounded border border-gray-300 p-1 text-gray-400 transition-colors duration-150 hover:text-gray-600"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <h3 className="text-lg font-semibold text-gray-800">
-                {months[currentDate.getMonth()]} {currentDate.getFullYear()}
+                {months[calendarDate.getMonth()]} {calendarDate.getFullYear()}
               </h3>
             </div>
-            <div className="flex items-center">
+            <div className="relative basis-1/2 text-center">
               <h3 className="text-lg font-semibold text-gray-800">
-                {months[(currentDate.getMonth() + 1) % 12]}{" "}
-                {currentDate.getMonth() === 11
-                  ? currentDate.getFullYear() + 1
-                  : currentDate.getFullYear()}
+                {months[(calendarDate.getMonth() + 1) % 12]}{" "}
+                {calendarDate.getMonth() === 11
+                  ? calendarDate.getFullYear() + 1
+                  : calendarDate.getFullYear()}
               </h3>
               <button
                 onClick={goToNextMonth}
-                className="ml-2 rounded border border-gray-300 p-1 text-gray-400 transition-colors duration-150 hover:text-gray-600"
+                className="absolute right-0 top-0 ml-2 rounded border border-gray-300 p-1 text-gray-400 transition-colors duration-150 hover:text-gray-600"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
