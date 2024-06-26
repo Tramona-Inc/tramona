@@ -23,7 +23,6 @@ import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
 import router from "next/router";
-
 import { useSession } from "next-auth/react";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 import { formatDateRange } from "@/utils/utils";
@@ -269,27 +268,23 @@ export default function OfferPage({
           <hr className="h-px border-0 bg-gray-300" />
           <section id="amenities" className="scroll-mt-36">
             <h1 className="text-lg font-semibold md:text-xl">Amenitites</h1>
-            <PropertyAmenities amenities={property.amenities ?? []} />
-            {property.amenities && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    Show all amenities
-                  </Button>
-                </DialogTrigger>
+            <PropertyAmenities amenities={property.amenities} />
 
-                <DialogContent className="max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle>Amenities</DialogTitle>
-                  </DialogHeader>
-                  <div className="max-h-96 overflow-y-auto">
-                    <AmenitiesComponent
-                      propertyAmenities={property.amenities}
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Show all amenities
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>Amenities</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-96 overflow-y-auto">
+                  <AmenitiesComponent propertyAmenities={property.amenities} />
+                </div>
+              </DialogContent>
+            </Dialog>
           </section>
           <section id="cancellation" className="scroll-mt-36">
             <h1 className="text-lg font-semibold md:text-xl">

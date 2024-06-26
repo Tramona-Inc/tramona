@@ -182,9 +182,7 @@ export const properties = pgTable("properties", {
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
   hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
-  propertyType: propertyTypeEnum("property_type")
-    .notNull()
-    .default("Apartment"),
+  propertyType: propertyTypeEnum("property_type").notNull(),
   roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
 
   // how many guests does this property accomodate at most?
@@ -208,11 +206,14 @@ export const properties = pgTable("properties", {
   checkOutTime: time("check_out_time"),
 
   // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
-  amenities: varchar("amenities").array(),
-  otherAmenities: varchar("other_amenities")
+  amenities: varchar("amenities")
     .array()
     .notNull()
     .default(sql`'{}'`), // .default([]) doesnt work, you gotta do this
+  otherAmenities: varchar("other_amenities")
+    .array()
+    .notNull()
+    .default(sql`'{}'`),
 
   imageUrls: varchar("image_url").array().notNull(),
 
