@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormField,
@@ -31,16 +30,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { useZodForm } from "@/utils/useZodForm";
-import { zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
-
-import { accounts, ALL_PROPERTY_PMS } from "@/server/db/schema";
-import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
+
 export default function Onboarding1({
   onPressNext,
 }: {
@@ -100,20 +96,21 @@ export default function Onboarding1({
     }),
   });
 
+  const { mutateAsync: generateBearerToken } =
+    api.pms.generateHostawayBearerToken.useMutation({
+      onSuccess: () => {
+        closeModal();
+      },
+    });
 
-  const { mutateAsync: generateBearerToken } = api.pms.generateHostawayBearerToken.useMutation({
-    onSuccess: () => {
-      closeModal();
-    },
-  });
-
-  const { mutateAsync: createHostProfile } = api.users.createHostProfile.useMutation({});
-
+  const { mutateAsync: createHostProfile } =
+    api.users.createHostProfile.useMutation({});
 
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
-    const {bearerToken} = await generateBearerToken({ accountId, apiKey });
+    const { bearerToken } = await generateBearerToken({ accountId, apiKey });
     console.log(bearerToken);
-    createHostProfile({
+
+    await createHostProfile({
       hostawayApiKey: apiKey,
       hostawayAccountId: accountId,
       hostawayBearerToken: bearerToken,

@@ -10,9 +10,10 @@ import {
   hostProfiles,
   hostTeamMembers,
   hostTeams,
-  properties, referralCodes,
+  properties,
+  referralCodes,
   userUpdateSchema,
-  users
+  users,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -162,7 +163,7 @@ export const usersRouter = createTRPCRouter({
     const res = await ctx.db.query.hostProfiles.findFirst({
       where: eq(hostProfiles.userId, ctx.user.id),
     });
-    return { data: !!res };
+    return !!res;
   }),
 
   createHostProfile: protectedProcedure
@@ -197,10 +198,9 @@ export const usersRouter = createTRPCRouter({
           curTeamId: teamId,
           hostawayApiKey: input.hostawayApiKey,
           hostawayAccountId: input.hostawayAccountId,
-          hostawayBearerToken: input.hostawayBearerToken
+          hostawayBearerToken: input.hostawayBearerToken,
         })
         .returning();
-
 
       interface PropertyType {
         id: number;
@@ -259,7 +259,7 @@ export const usersRouter = createTRPCRouter({
         checkOutTime: number;
         cancellationPolicy: string;
         squareMeters: number | null;
-        roomType: 'entire_home' | 'private_room' | 'shared_room';
+        roomType: "entire_home" | "private_room" | "shared_room";
         bathroomType: string;
         bedroomsNumber: number;
         bedsNumber: number;
@@ -397,100 +397,113 @@ export const usersRouter = createTRPCRouter({
         result: CalendarEntry[];
       }
 
-
       if (input.hostawayBearerToken) {
-
         const roomTypeMapping = {
-          entire_home: 'Entire place',
-          private_room: 'Private room',
-          shared_room: 'Shared room',
+          entire_home: "Entire place",
+          private_room: "Private room",
+          shared_room: "Shared room",
         } as const;
 
         const convertToTimeString = (time: number) => {
           const hours = Math.floor(time / 100);
           const minutes = time % 100;
-          return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-        }
+          return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`;
+        };
 
-        const propertyTypes = await axios.get<HostawayPropertyTypesResponse>(
-          `https://api.hostaway.com/v1/propertyTypes`,
-          {
-            headers: {
-              Authorization: `Bearer ${input.hostawayBearerToken}`,
+        const propertyTypes = await axios
+          .get<HostawayPropertyTypesResponse>(
+            `https://api.hostaway.com/v1/propertyTypes`,
+            {
+              headers: {
+                Authorization: `Bearer ${input.hostawayBearerToken}`,
+              },
             },
-          },
-        ).then((res) => res.data.result);
+          )
+          .then((res) => res.data.result);
 
         // Create a map of propertyType ids to names
-        const propertyTypeMap = propertyTypes.reduce<Record<number, string>>((acc, type) => {
-          acc[type.id] = type.name;
-          return acc;
-        }, {});
+        const propertyTypeMap = propertyTypes.reduce<Record<number, string>>(
+          (acc, type) => {
+            acc[type.id] = type.name;
+            return acc;
+          },
+          {},
+        );
 
-        const hostawayProperties: ListingsResponse = await axios.get<ListingsResponse>(
-          `https://api.hostaway.com/v1/listings`,
-          {
+        const hostawayProperties: ListingsResponse = await axios
+          .get<ListingsResponse>(`https://api.hostaway.com/v1/listings`, {
             headers: {
               Authorization: `Bearer ${input.hostawayBearerToken}`,
             },
-          },
-        ).then((res) => res.data);
+          })
+          .then((res) => res.data);
 
         const listings: Listing[] = hostawayProperties.result;
 
-
         try {
+          const insertedProperties = await ctx.db
+            .insert(properties)
+            .values(
+              listings.map((property) => ({
+                hostId: ctx.user.id,
+                propertyType: z
+                  .enum(ALL_PROPERTY_TYPES)
+                  .catch("Other")
+                  .parse(propertyTypeMap[property.propertyTypeId]),
+                roomType: roomTypeMapping[property.roomType],
+                maxNumGuests: property.personCapacity,
+                numBeds: property.bedsNumber,
+                numBedrooms: property.bedroomsNumber,
+                numBathrooms: property.bathroomsNumber,
+                latitude: property.lat,
+                longitude: property.lng,
+                hostName: property.contactName,
+                hostawayListingId: property.id,
+                checkInTime: convertToTimeString(property.checkInTimeStart),
+                checkOutTime: convertToTimeString(property.checkOutTime),
+                name: property.name,
+                about: property.description,
+                propertyPMS: "Hostaway",
+                address: property.address,
+                avgRating: property.starRating ?? 0,
+                hostTeamId: teamId,
+                imageUrls: property.listingImages,
+                amenities: property.listingAmenities.map(
+                  (amenity) => amenity.amenityName,
+                ), // Keep amenities as an array
+                cancellationPolicy: property.cancellationPolicy,
+              })),
+            )
+            .returning({
+              id: properties.id,
+              listingId: properties.hostawayListingId,
+            });
 
-          const insertedProperties = await ctx.db.insert(properties).values(
-            listings.map((property) => ({
-              hostId: ctx.user.id,
-              propertyType: z.enum(ALL_PROPERTY_TYPES).catch("Other").parse(propertyTypeMap[property.propertyTypeId]),
-              roomType: roomTypeMapping[property.roomType],
-              maxNumGuests: property.personCapacity,
-              numBeds: property.bedsNumber,
-              numBedrooms: property.bedroomsNumber,
-              numBathrooms: property.bathroomsNumber,
-              latitude: property.lat,
-              longitude: property.lng,
-              hostName: property.contactName,
-              hostawayListingId: property.id,
-              checkInTime: convertToTimeString(property.checkInTimeStart),
-              checkOutTime: convertToTimeString(property.checkOutTime),
-              name: property.name,
-              about: property.description,
-              propertyPMS: "Hostaway",
-              address: property.address,
-              avgRating: property.starRating ?? 0,
-              hostTeamId: teamId,
-              imageUrls: property.listingImages,
-              amenities: property.listingAmenities.map((amenity) => amenity.amenityName), // Keep amenities as an array
-              cancellationPolicy: property.cancellationPolicy,
-            }))
-          ).returning({id: properties.id, listingId: properties.hostawayListingId});
-
-          const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-
+          const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
 
           for (const property of insertedProperties) {
-            const calendarResponse: CalendarResponse = await axios.get<CalendarResponse>(
-              `https://api.hostaway.com/v1/listings/${property.listingId}/calendar`,
-              {
-                headers: {
-                  Authorization: `Bearer ${input.hostawayBearerToken}`,
+            const calendarResponse: CalendarResponse = await axios
+              .get<CalendarResponse>(
+                `https://api.hostaway.com/v1/listings/${property.listingId}/calendar`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${input.hostawayBearerToken}`,
+                  },
                 },
-              },
-            ).then((res) => res.data);
+              )
+              .then((res) => res.data);
 
-            const nonAvailableDates = calendarResponse.result.filter(entry => entry.status !== "available" && entry.date >= today!);
+            const nonAvailableDates = calendarResponse.result.filter(
+              (entry) => entry.status !== "available" && entry.date >= today!,
+            );
 
             await ctx.db.insert(bookedDates).values(
-              nonAvailableDates.map(dateEntry => ({
+              nonAvailableDates.map((dateEntry) => ({
                 propertyId: property.id,
                 date: new Date(dateEntry.date),
               })),
             );
           }
-
         } catch (err) {
           console.log(err);
         }
