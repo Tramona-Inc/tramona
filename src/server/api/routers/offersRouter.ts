@@ -49,20 +49,20 @@ export const offersRouter = createTRPCRouter({
         },
       });
 
-      // request must still exist
-      if (!offerDetails?.request) {
+      if (!offerDetails) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      // only the owner of the group can accept offers
-      if (offerDetails.request.madeByGroup.ownerId !== ctx.user.id) {
+      // if the offer comes from a request, only the owner of the group can accept offers
+      // otherwise, anyone can
+      if (offerDetails.request?.madeByGroup.ownerId !== ctx.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       await ctx.db.transaction(async (tx) => {
         const results = await Promise.allSettled([
           offerDetails.request &&
-            // resolve the request
+            // resolve the request if it exists
             tx
               .update(requests)
               .set({ resolvedAt: new Date() })
@@ -149,8 +149,10 @@ export const offersRouter = createTRPCRouter({
           id: true,
         },
         with: {
-          group: { with: { members: true } },
           request: {
+            with: {
+              madeByGroup: { with: { members: true } },
+            },
             columns: { numGuests: true, location: true, id: true },
           },
           property: {
@@ -194,8 +196,10 @@ export const offersRouter = createTRPCRouter({
           id: true,
         },
         with: {
-          group: { with: { members: true } },
           request: {
+            with: {
+              madeByGroup: { with: { members: true } },
+            },
             columns: {
               numGuests: true,
               location: true,
@@ -216,10 +220,14 @@ export const offersRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      const memberIds = offer.group.members.map((member) => member.userId);
+      if (offer.request) {
+        const memberIds = offer.request.madeByGroup.members.map(
+          (member) => member.userId,
+        );
 
-      if (!memberIds.includes(ctx.user.id) && ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+        if (!memberIds.includes(ctx.user.id) && ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
       }
 
       return offer;
@@ -411,7 +419,6 @@ export const offersRouter = createTRPCRouter({
 
       await ctx.db.insert(offers).values({
         ...input,
-        groupId: requestDetails.madeByGroupId,
         checkIn: requestDetails.checkIn,
         checkOut: requestDetails.checkOut,
       });
@@ -488,17 +495,25 @@ export const offersRouter = createTRPCRouter({
           property: {
             columns: { hostId: true, name: true, address: true },
           },
-          request: { columns: { location: true } },
-          group: {
+          request: {
             with: {
-              members: {
+              madeByGroup: {
                 with: {
-                  user: {
-                    columns: { phoneNumber: true, isWhatsApp: true, id: true },
+                  members: {
+                    with: {
+                      user: {
+                        columns: {
+                          phoneNumber: true,
+                          isWhatsApp: true,
+                          id: true,
+                        },
+                      },
+                    },
                   },
                 },
               },
             },
+            columns: { location: true },
           },
         },
       });
@@ -517,7 +532,8 @@ export const offersRouter = createTRPCRouter({
 
       const { request, property } = offer;
 
-      const members = offer.group.members.map((m) => m.user);
+      const members =
+        offer.request?.madeByGroup.members.map((m) => m.user) ?? [];
 
       for (const member of members) {
         const memberHasOtherOffers = await ctx.db.query.groupMembers

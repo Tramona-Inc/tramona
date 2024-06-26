@@ -10,7 +10,10 @@ export function SupportBtn() {
         </Button>
       </div>
       <div className="hidden sm:block">
-        <Button variant="ghost" asChild>
+        <Button
+          className="rounded-full border bg-white font-bold text-teal-900"
+          asChild
+        >
           <Link href="/help-center">24/7 Support</Link>
         </Button>
       </div>

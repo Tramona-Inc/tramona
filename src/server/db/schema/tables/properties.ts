@@ -80,7 +80,7 @@ export const ALL_PROPERTY_TYPES = [
   "Tower",
   "Trullo",
   "Windmill",
-  "Shepherd's Hut",
+  "Shepherd’s Hut",
   "Villa",
 ] as const;
 
@@ -182,7 +182,7 @@ export const properties = pgTable("properties", {
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
   hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
-  propertyType: propertyTypeEnum("property_type").notNull().default("Apartment"),
+  propertyType: propertyTypeEnum("property_type").notNull(),
   roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
 
   // how many guests does this property accomodate at most?
@@ -206,11 +206,14 @@ export const properties = pgTable("properties", {
   checkOutTime: time("check_out_time"),
 
   // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
-  amenities: varchar("amenities").array(),
-  otherAmenities: varchar("other_amenities")
+  amenities: varchar("amenities")
     .array()
     .notNull()
     .default(sql`'{}'`), // .default([]) doesnt work, you gotta do this
+  otherAmenities: varchar("other_amenities")
+    .array()
+    .notNull()
+    .default(sql`'{}'`),
 
   imageUrls: varchar("image_url").array().notNull(),
 
@@ -233,7 +236,7 @@ export const properties = pgTable("properties", {
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
-  priceRestriction: integer("price_restriction"),
+  // priceRestriction: integer("price_restriction"),
   propertyStatus: propertyStatusEnum("property_status").default("Listed"),
   airbnbBookUrl: varchar("airbnb_book_url"),
   hostImageUrl: varchar("host_image_url"),

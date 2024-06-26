@@ -6,7 +6,6 @@ import { db } from "@/server/db";
 import {
   ALL_HOST_TYPES,
   hostProfiles,
-  hostTeamMembers,
   hostTeams,
   referralCodes,
   users,
@@ -254,8 +253,6 @@ export const authRouter = createTRPCRouter({
           // Insert Host info
           await ctx.db.insert(hostProfiles).values({
             userId: user.id,
-            type: input.hostType,
-            profileUrl: input.profileUrl,
             curTeamId: teamId,
           });
 
@@ -329,7 +326,7 @@ export const authRouter = createTRPCRouter({
           message: "User with this email does not exist",
         });
 
-      if (user && !user.password)
+      if (!user.password)
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "User created with an auth provider (passwordless)",
@@ -382,7 +379,7 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      if (user && !user.password) {
+      if (!user.password) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "User created with an auth provider (passwordless)",
@@ -419,7 +416,7 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      if (user && !user.password) {
+      if (!user.password) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "User created with google auth",
@@ -437,7 +434,7 @@ export const authRouter = createTRPCRouter({
 
       const isPasswordSame = await bycrypt.compare(
         input.newPassword,
-        user.password!,
+        user.password,
       );
 
       if (isPasswordSame) {
