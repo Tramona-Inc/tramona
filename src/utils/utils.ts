@@ -268,6 +268,36 @@ export const generateTimeStamp = () => {
   return formattedTimestamp;
 };
 
+export function convertTo12HourFormat(time24: string) {
+  // Split the input time into hours and minutes
+  const [hourStr, minuteStr] = time24.split(":");
+  let hours = parseInt(hourStr ?? "", 10);
+  const minutes = parseInt(minuteStr ?? "", 10);
+
+  // Determine the period (AM/PM)
+  const period = hours >= 12 ? "PM" : "AM";
+
+  // Convert hours from 24-hour format to 12-hour format
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+
+  // Format the minutes to always be two digits
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  // Combine the hours, minutes, and period
+  const time12 = `${hours}:${formattedMinutes} ${period}`;
+
+  return time12;
+}
+
+export function convertTo24HourFormat(time: string): string {
+  // Assuming input format is HH:mm:ss
+  const [hour, minute] = time.split(":");
+  const formattedHour = (hour ?? "").padStart(2, "0");
+  const formattedMinute = (minute ?? "").padStart(2, "0");
+  return `${formattedHour}:${formattedMinute}`;
+}
+
 export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
 

@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { cn } from "@/utils/utils";
+import { cn, convertTo12HourFormat } from "@/utils/utils";
 import { Dot } from "lucide-react";
 import { useState } from "react";
 
@@ -129,7 +129,8 @@ export default function Summary4() {
           </div>
         ) : (
           <p className="flex flex-row">
-            Check in: {listing.checkIn} <Dot /> Check-out: {listing.checkOut}
+            Check in: {convertTo12HourFormat(listing.checkIn)} <Dot />{" "}
+            Check-out: {convertTo12HourFormat(listing.checkOut)}
           </p>
         )}
       </div>
