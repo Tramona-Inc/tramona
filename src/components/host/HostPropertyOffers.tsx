@@ -3,7 +3,6 @@ import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import PropertyOffersEmptySvg from "../_common/EmptyStateSvg/PropertyOffersEmptySvg";
 import Spinner from "../_common/Spinner";
 import HostPropertyOfferCard from "./HostPropertyOfferCard";
-
 export default function HostPropertyOffers() {
   const { data: offers } = api.biddings.getAllHostPending.useQuery();
 

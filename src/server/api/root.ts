@@ -6,7 +6,7 @@ import { filesRouter } from "./routers/filesRouter";
 import { groupsRouter } from "./routers/groupsRouter";
 import { messagesRouter } from "./routers/messagesRouter";
 import { miscRouter } from "./routers/miscRouter";
-import { myTripsRouter } from "./routers/myTripsRouter";
+import { tripsRouter } from "./routers/tripsRouter";
 import { offersRouter } from "./routers/offersRouter";
 import { propertiesRouter } from "./routers/propertiesRouter";
 import { referralCodesRouter } from "./routers/referralCodesRouter";
@@ -33,7 +33,7 @@ export const appRouter = createTRPCRouter({
   offers: offersRouter,
   stripe: stripeRouter,
   auth: authRouter,
-  myTrips: myTripsRouter,
+  trips: tripsRouter,
   twilio: twilioRouter,
   messages: messagesRouter,
   files: filesRouter,

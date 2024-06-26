@@ -31,6 +31,7 @@ import {
   CrossIcon,
   AlarmSmokeIcon,
 } from "lucide-react";
+import { useIsSm } from "@/utils/utils";
 
 type LucideIcon = FunctionComponent<SVGProps<SVGSVGElement>>;
 type AmenityIcons = Record<string, LucideIcon>;
@@ -100,19 +101,7 @@ const amenityPriorityOrder = [
   "Bathtub",
 ];
 
-type PropertyAmenitiesProps = {
-  amenities: string[];
-};
-
-const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
-  amenities = [],
-}) => {
-  const isMobile = useMediaQuery("(max-width: 640px)");
-
-  if (!Array.isArray(amenities) || amenities.length === 0) {
-    return <p>No amenities to display.</p>;
-  }
-
+const PropertyAmenities = ({ amenities }: { amenities: string[] }) => {
   const sortedAmenities = amenities.sort((a, b) => {
     const indexA = amenityPriorityOrder.indexOf(a);
     const indexB = amenityPriorityOrder.indexOf(b);
@@ -121,10 +110,9 @@ const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
     );
   });
 
-  let toDisplay = 9;
-  if (isMobile) {
-    toDisplay = 5;
-  }
+  const isMobile = !useIsSm();
+  const toDisplay = isMobile ? 5 : 9;
+
   const topAmenities = sortedAmenities
     .filter((amenity) => amenityIcons[amenity])
     .slice(0, toDisplay);
@@ -138,4 +126,4 @@ const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
   );
 };
 
-export default PropertyAmenities; 
+export default PropertyAmenities;
