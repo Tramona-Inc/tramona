@@ -13,63 +13,57 @@ import UserAvatar from "@/components/_common/UserAvatar";
 const testimonials = [
     {
       quote:
-        "With close to 10 million properties on Airbnb its hard to get people to find my property. Tramona gives me an equal chance to get my property in front of travelers",
-      author: "Cathy W.",
-      age: "25",
+        "Tramona has been very easy for me. All i did is sign up and now i get requests directly to my phone.",
+      author: "Shawn P.",
+      age: "49",
+      role: "Host",
+      superhost: true,
+      image: "/assets/images/fake-reviews/shawnp.jpg"
     },
     {
       quote:
-        "Tramona has significantly increased my bookings. The platform's user-friendly interface makes it easy for travelers to discover my property.",
-      author: "Michael S.",
-      age: "25",
+        "The 0 fees are really great. I like knowing the price wont double at the last second",
+      author: "Bianca R.",
+      age: "24",
+      role: "Traveler",
+      superhost: false,
+      image: "/assets/images/fake-reviews/biancar.jpg"
     },
     {
       quote:
-        "As a new host, I was struggling to get visibility. Tramona leveled the playing field and helped me compete with established properties.",
-      author: "Emma L.",
-      age: "25",
+        "With close to 10 million properties on Airbnb its hard to get people to find my property, Tramona gives me an equal chance to get my property in front of travelers”",
+      author: "Lamar F.",
+      age: "31",
+      role: "Host",
+      superhost: false,
+      image: "/assets/images/fake-reviews/lamarf.jpg"
     },
     {
       quote:
-        "The analytics provided by Tramona have been invaluable in optimizing my listing and pricing strategy.",
-      author: "David R.",
-      age: "25",
+        "The biggest thing for me when traveling has always been price. Now i can afford properties i usually could never afford",
+      author: "Susan L.",
+      age: "28",
+      role: "Traveler",
+      superhost: false,
+      image: "/assets/images/fake-reviews/susanl.jpg"
     },
     {
       quote:
-        "I appreciate how Tramona focuses on showcasing unique aspects of each property, helping mine stand out in a crowded market.",
-      author: "Sophie T.",
-      age: "25",
+        "I mean, if my property is vacant, ill always take something over nothing",
+      author: "Chaz W.",
+      age: "32",
+      role: "Host",
+      superhost: false,
+      image: "/assets/images/fake-reviews/chazw.jpg"
     },
     {
       quote:
-        "The customer support team at Tramona is exceptional. They've been incredibly helpful in maximizing my property's potential.",
-      author: "James B.",
-      age: "25",
-    },
-    {
-      quote:
-        "Tramona's marketing tools have helped me reach a wider audience and attract guests I wouldn't have found otherwise.",
-      author: "Olivia M.",
-      age: "25",
-    },
-    {
-      quote:
-        "The seamless booking process on Tramona has reduced my administrative workload, allowing me to focus on providing great experiences for my guests.",
-      author: "Daniel K.",
-      age: "25",
-    },
-    {
-      quote:
-        "As an international host, I love how Tramona caters to a global audience, bringing diverse travelers to my doorstep.",
-      author: "Yuki H.",
-      age: "25",
-    },
-    {
-      quote:
-        "Tramona's commitment to fair visibility has been a game-changer for my small, unique property in a competitive urban market.",
-      author: "Alexandra P.",
-      age: "25",
+        "Tramona is very convenient, i just submit a request and wait. That’s it. Next thing i know i have 10 matches.",
+      author: "Kim W.",
+      age: "30",
+      role: "Traveler",
+      superhost: false,
+      image: "/assets/images/fake-reviews/kimw.jpg"
     },
   ];
   
@@ -126,7 +120,7 @@ export function TestimonialCarousel() {
           {testimonials.concat(testimonials).map((testimonial, index) => (
             <CarouselItem
               key={index}
-              className="pl-4 transition-opacity duration-300 md:basis-1/2 lg:basis-1/4"
+              className="pl-4 transition-opacity duration-300 sm:basis-1/2 lg:basis-1/4"
             >
               <div className="h-[300px] w-full"> {/* Fixed size container */}
                 <Card
@@ -137,21 +131,21 @@ export function TestimonialCarousel() {
                 >
                   <CardContent className="flex flex-col p-6 h-full">
                     <div className="mb-4">
-                      <QuoteIcon fill="teal" className="text-teal-700"/>
+                      <QuoteIcon style={{ fill: "#004236", color: "#004236"}} className="text-[#004236]"/>
                     </div>
                     <blockquote className="mb-4 flex-grow text-sm font-medium overflow-y-auto">
                       {testimonial.quote}"
                     </blockquote>
                     <div className="flex items-center rounded-full mt-auto">
                       <div className="mr-2 flex-shrink-0">
-                        <UserAvatar size={"sm"} />
+                        <UserAvatar size={"sm"} image={testimonial.image}/>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-semibold truncate">
                           {testimonial.author}
                         </div>
                         <div className="text-xs text-gray-500 truncate">
-                          Traveler • {testimonial.age} years old
+                          {testimonial.role} • {testimonial.age} years old {testimonial.superhost ? "• Airbnb Superhost" : ""}
                         </div>
                       </div>
                     </div>

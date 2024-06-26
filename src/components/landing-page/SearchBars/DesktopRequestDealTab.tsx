@@ -35,6 +35,8 @@ import { OptionalFilter } from "./OptionalFilter";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
+import UserAvatarMastHead from "@/components/_common/UserAvatarMasthead";
+import { Avatar } from "@radix-ui/react-avatar";
 
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
@@ -152,66 +154,132 @@ export function DesktopRequestDealTab() {
               placeholder="Enter your destination"
               icon={MapPinIcon}
             />
+            <div className="hidden lg:block">
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.date`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <DateRangeInput
+                        {...field}
+                        label="Check in/out"
+                        icon={CalendarIcon}
+                        variant="lpDesktop"
+                        disablePast
+                        className="bg-white"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="hidden lg:block">
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.numGuests`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        label="Number of guests"
+                        placeholder="Add guests"
+                        icon={Users2Icon}
+                        variant="lpDesktop"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="lg:hidden">
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.maxNightlyPriceUSD`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        label="Max price per night"
+                        placeholder="/ night"
+                        suffix="/ night"
+                        icon={DollarSignIcon}
+                        variant="lpDesktop"
+                        className="font-semibold"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2 lg:hidden">
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.date`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <DateRangeInput
+                        {...field}
+                        label="Check in/out"
+                        icon={CalendarIcon}
+                        variant="lpDesktop"
+                        disablePast
+                        className="bg-white"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.numGuests`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        label="Number of guests"
+                        placeholder="Add guests"
+                        icon={Users2Icon}
+                        variant="lpDesktop"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="hidden lg:block">
+              <FormField
+                control={form.control}
+                name={`data.${curTab}.maxNightlyPriceUSD`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        label="Max price per night"
+                        placeholder="/ night"
+                        suffix="/ night"
+                        icon={DollarSignIcon}
+                        variant="lpDesktop"
+                        className="font-semibold"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            <FormField
-              control={form.control}
-              name={`data.${curTab}.date`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <DateRangeInput
-                      {...field}
-                      label="Check in/out"
-                      icon={CalendarIcon}
-                      variant="lpDesktop"
-                      disablePast
-                      className="bg-white"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`data.${curTab}.numGuests`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      label="Number of guests"
-                      placeholder="Add guests"
-                      icon={Users2Icon}
-                      variant="lpDesktop"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`data.${curTab}.maxNightlyPriceUSD`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      label="Max Price"
-                      placeholder="/ night"
-                      suffix="/ night"
-                      icon={DollarSignIcon}
-                      variant="lpDesktop"
-                      className="font-semibold"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex items-center gap-2 text-teal-900">
+            <div className="hidden items-center gap-2 lg:flex">
               <OptionalFilter form={form} curTab={curTab}>
                 <Button
                   variant="ghost"
@@ -219,74 +287,49 @@ export function DesktopRequestDealTab() {
                   className="px-2 text-teal-900 hover:bg-teal-900/15"
                 >
                   <ListFilter />
-                  More filters
                 </Button>
               </OptionalFilter>
             </div>
 
-            <div className="-mt-1 mb-1">
+            <div className="mt-1 -mb-1">
               <CityRequestFiltersDialog form={form} curTab={curTab}>
                 <Button
                   variant="ghost"
                   type="button"
-                  className="px-2 text-teal-700 font-bold hover:bg-teal-900/15"
+                  className="px-2 font-bold text-[#004236] hover:bg-teal-900/15"
                 >
-                  <ListFilter className="h-5"/>
-                  <div className="-ml-1">Additional filters</div>
+                  <ListFilter className="h-5" />
+                  <div className="-ml-1 font-extrabold">Additional filters</div>
                 </Button>
               </CityRequestFiltersDialog>
             </div>
 
-            <div className="space-y-1">
+            <div className="hidden space-y-1 lg:block">
               <p className="text-sm">
                 Have a property you like? We&apos;ll send your request directly
                 to the host.
               </p>
-              {!link && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setLink(!link)}
-                >
-                  <Plus size={20} />
-                  Add link
-                </Button>
-              )}
-              {link && (
-                <div className="flex">
-                  <div className="basis-full">
-                    <FormField
-                      control={form.control}
-                      name={`data.${curTab}.airbnbLink`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Paste property link here (optional)"
-                              className="w-full"
-                              icon={Link2}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <Button
-                    variant="link"
-                    type="button"
-                    onClick={() => {
-                      setLink(!link);
-                      form.setValue(`data.${curTab}.airbnbLink`, "");
-                    }}
-                    className="font-bold text-teal-900"
-                  >
-                    Cancel
-                  </Button>
+              <div className="flex">
+                <div className="basis-full">
+                  <FormField
+                    control={form.control}
+                    name={`data.${curTab}.airbnbLink`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Paste property link here (optional)"
+                            className="w-full"
+                            icon={Link2}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              )}
+              </div>
             </div>
             <div className="flex justify-end sm:justify-start">
               <Button
@@ -297,6 +340,46 @@ export function DesktopRequestDealTab() {
               >
                 Submit Request
               </Button>
+            </div>
+            <div className="flex flex-col items-center justify-center pt-4 lg:hidden">
+              <div className="flex flex-row">
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/shawnp.jpg"
+                  />
+                </div>
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/biancar.jpg"
+                  />
+                </div>
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/lamarf.jpg"
+                  />
+                </div>
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/susanl.jpg"
+                  />
+                </div>
+                <div className="-ml-2 z-10">
+                  <Avatar
+                    className="flex items-center justify-center size-10 rounded-full border-2 border-white bg-teal-900 text-xs font-semibold text-white"
+                  >
+                    +450
+                  </Avatar>
+                </div>
+              </div>
+              <div>
+                <p className="ml-2 text-xs font-semibold text-[#7E7564]">
+                  Requests made in the last 2 months
+                </p>
+              </div>
             </div>
           </div>
 
@@ -416,7 +499,9 @@ export function DesktopRequestDealTab() {
                           }
                         } catch (error: unknown) {
                           const errorMessage =
-                            error instanceof Error ? error.message : "Unknown error";
+                            error instanceof Error
+                              ? error.message
+                              : "Unknown error";
                           toast({
                             title: "Error sharing link",
                             description: errorMessage,

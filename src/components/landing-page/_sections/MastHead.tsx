@@ -1,7 +1,8 @@
 import landingBg from "public/assets/images/landing-bg.jpg";
 import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
-import UserAvatar from "@/components/_common/UserAvatar";
+import UserAvatarMastHead from "@/components/_common/UserAvatarMasthead";
+import { Avatar } from "@/components/ui/avatar";
 import { useState } from "react";
 import {
   Sheet,
@@ -57,13 +58,13 @@ const infoCards = [
 export default function MastHead() {
   return (
     // padding for the sides? and do we want rounded corners?
-    <section className="relative bg-white py-4">
-      <div className="relative overflow-clip">
+    <section className="relative bg-white pb-4">
+      <div className="relative overflow-hidden">
         <div className="">
           <Image
             src={landingBg}
             alt=""
-            layout="fill"
+            fill={true}
             objectFit="cover"
             placeholder="blur"
             className="select-none"
@@ -79,29 +80,49 @@ export default function MastHead() {
               {/* <div className="relative inline-flex items-center gap-1 rounded-full border-t border-white/30 bg-teal-50 px-3 text-sm font-extrabold uppercase tracking-wide text-teal-900 sm:text-base">
                 $250k+ saved so far
               </div> */}
-              <h1 className="mx-auto max-w-3xl text-balance text-3xl font-semibold text-gray-900 lg:text-6xl">
+              <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-gray-900 lg:text-3xl">
                 Book the same properties you see on Airbnb for less
               </h1>
-              <p className="mx-auto max-w-3xl text-xs font-semibold text-gray-900 lg:pt-4 lg:text-base">
+              <p className="mx-auto max-w-3xl text-xs font-semibold text-gray-900 pt-4 lg:pt-4 lg:text-base">
                 With Airbnb hosts averaging 60% vacancy rates year-round,
                 Tramona matches you with hosts who are willing to meet your
                 price.
               </p>
-              <div className="flex items-center justify-center pt-4">
+              <div className="hidden items-center justify-center pt-4 lg:flex">
                 {/* separate component, white borders? */}
-                <div className="-ml-3">
-                  <UserAvatar size={"sm"} />
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/shawnp.jpg"
+                  />
                 </div>
-                <div className="-ml-3">
-                  <UserAvatar size={"sm"} />
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/biancar.jpg"
+                  />
                 </div>
-                <div className="-ml-3">
-                  <UserAvatar size={"sm"} />
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/lamarf.jpg"
+                  />
                 </div>
-                <div className="-ml-3">
-                  <UserAvatar size={"sm"} />
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/susanl.jpg"
+                  />
                 </div>
-                <p className="ml-2 text-xs font-semibold text-gray-400">
+                <div className="-ml-2">
+                  <Avatar
+                    size={"md"}
+                    className="flex items-center justify-center border-2 border-white bg-teal-900 text-xs font-semibold text-white"
+                  >
+                    +450
+                  </Avatar>
+                </div>
+                <p className="ml-2 text-xs font-semibold text-[#7E7564]">
                   Requests made in the last 2 months
                 </p>
               </div>
@@ -114,44 +135,68 @@ export default function MastHead() {
           </div>
         </div>
       </div>
-      <div className="mt-4 flex-1 rounded-2xl border bg-secondary p-4 shadow-2xl lg:hidden">
-        <DesktopSearchLayout />
+      <div className="flex justify-center p-4">
+        <div className="mt-4 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:hidden">
+          <DesktopSearchLayout />
+        </div>
       </div>
 
       <div className="mt-8 flex justify-center space-y-4 lg:mt-16 lg:space-y-8">
         <TestimonialCarousel />
       </div>
 
-      <div className="mt-8 space-y-4 lg:mt-24 lg:space-y-12">
+      <div className="mt-20 space-y-4 lg:mt-24 lg:space-y-12">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           <span className="text-teal-900">How?</span> Negotiation, No fees. No
           markups.
         </h2>
         <div className="flex justify-center">
-          <div className="grid grid-cols-2 gap-32">
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-32">
             <div>
-              <Image
-                src={priceComparison}
-                alt=""
-                height={250}
-                placeholder="blur"
-                className="select-none"
-              />
-              <div className="mt-2 text-center text-sm font-extrabold text-red-400 lg:text-lg">
+              <div className="hidden lg:block">
+                <Image
+                  src={priceComparison}
+                  alt=""
+                  height={250}
+                  placeholder="blur"
+                  className="select-none"
+                />
+              </div>
+              <div className="lg:hidden">
+                <Image
+                  src={priceComparison}
+                  alt=""
+                  width={350}
+                  placeholder="blur"
+                  className="select-none"
+                />
+              </div>
+              <div className="mt-2 text-center text-sm font-extrabold text-[#FF0000] lg:text-lg">
                 Airbnb
               </div>
-              <div className="text-center text-xl font-extrabold text-red-400 lg:text-2xl">
+              <div className="text-center text-xl font-extrabold text-[#FF0000] lg:text-2xl">
                 $300/night
               </div>
             </div>
             <div>
-              <Image
-                src={priceComparison}
-                alt=""
-                height={250}
-                placeholder="blur"
-                className="select-none"
-              />
+              <div className="hidden lg:block">
+                <Image
+                  src={priceComparison}
+                  alt=""
+                  height={250}
+                  placeholder="blur"
+                  className="select-none"
+                />
+              </div>
+              <div className="lg:hidden">
+                <Image
+                  src={priceComparison}
+                  alt=""
+                  width={350}
+                  placeholder="blur"
+                  className="select-none"
+                />
+              </div>
               <div className="mt-2 text-center text-sm font-extrabold text-teal-900 lg:text-lg">
                 Tramona
               </div>
@@ -164,67 +209,76 @@ export default function MastHead() {
       </div>
 
       <div className="flex justify-center">
-        <div className="mt-28 grid grid-cols-2 gap-24">
-          <div className="mr-24 flex flex-col justify-center space-y-4">
+        <div className="mt-20 lg:grid lg:grid-cols-2 lg:gap-24">
+          <div className="flex flex-col space-y-1 pb-6 text-left lg:mr-24 lg:flex lg:flex-col lg:justify-center lg:space-y-4">
             <h2 className="text-2xl font-extrabold lg:text-4xl">
               See completed requests
             </h2>
-            <div className="text-sm font-semibold text-muted-foreground">
+            <div className="text-sm font-semibold text-[#7E7564]">
               Check out our feed to see recent deals
             </div>
-            <div>
+            <div className="hidden lg:block">
               <Button className="rounded-full bg-teal-900 hover:bg-teal-950">
                 View deals
               </Button>
             </div>
           </div>
-          <div>
+          <div className="flex items-center justify-center">
             <CompletedRequestsSection />
+          </div>
+          <div className="flex justify-center pt-8 lg:hidden">
+            <Button className="w-80 rounded-full bg-teal-900 hover:bg-teal-950">
+              View deals
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto mt-8 max-w-7xl justify-center space-y-4 lg:mt-28 lg:mb-20 lg:space-y-8">
+      <div className="mt-20 mx-auto max-w-7xl justify-center space-y-4 lg:mb-20 lg:mt-28 lg:space-y-8">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           Why use Tramona?
         </h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col items-start gap-3 rounded-lg p-4">
             <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-green-100 p-2">
+              <div className="rounded-lg bg-[#D8E5E3] p-2">
                 <ShieldIcon className="h-6 w-6 text-teal-900" />
               </div>
               <h3 className="text-lg font-bold">Safety</h3>
             </div>
-            <p className="text-sm">
-              Every host we work with <strong>also lists on Airbnb</strong>. We
-              give you the link to see the property before you book with us.
+            <p className="text-sm text-[#584F3E]">
+              Every host we work with{" "}
+              <strong className="font-extrabold text-black">
+                also lists on Airbnb
+              </strong>
+              . We give you the link to see the property before you book with
+              us.
             </p>
           </div>
           <div className="flex flex-col items-start gap-3 rounded-lg p-4">
             <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-green-100 p-2">
+              <div className="rounded-lg bg-[#D8E5E3] p-2">
                 <CircleDollarSign className="h-6 w-6 text-teal-900" />
               </div>
               <h3 className="text-lg font-bold">Price Transparency</h3>
             </div>
-            <p className="text-sm">
-              We have <strong>$0 fees for travelers</strong> and show you the
+            <p className="text-sm text-[#584F3E]">
+              We have <strong className="font-extrabold text-black">$0 fees for travelers</strong> and show you the
               listing on Airbnb to encourage you to check pricing on the same
               property.
             </p>
           </div>
           <div className="flex flex-col items-start gap-3 rounded-lg p-4">
             <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-green-100 p-2">
+              <div className="rounded-lg bg-[#D8E5E3] p-2">
                 <TableProperties className="h-6 w-6 text-teal-900" />
               </div>
               <h3 className="text-lg font-bold">Submitting a Request</h3>
             </div>
-            <p className="text-sm">
+            <p className="text-sm text-[#584F3E]">
               Send your travel details to all hosts in your destination city.
               They'll respond by offering you{" "}
-              <strong>
+              <strong className="font-extrabold text-black">
                 properties outside of your budget on Airbnb, in your budget on
                 Tramona
               </strong>
@@ -233,17 +287,17 @@ export default function MastHead() {
           </div>
           <div className="flex flex-col items-start gap-3 rounded-lg p-4 lg:-mt-1">
             <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-green-100 p-2">
+              <div className="rounded-lg bg-[#D8E5E3] p-2">
                 <Handshake className="h-6 w-6 text-teal-900" />
               </div>
               <h3 className="text-lg font-bold leading-tight">
                 Before you book, check Tramona
               </h3>
             </div>
-            <p className="text-sm">
-              Tramona is <strong>completely free to use</strong>, and we think
+            <p className="text-sm text-[#584F3E]">
+              Tramona is <strong className="font-extrabold text-black">completely free to use</strong>, and we think
               you'll like it. Before you book, check Tramona to see{" "}
-              <strong>which special deals hosts will offer you</strong>.
+              <strong className="font-extrabold text-black">which special deals hosts will offer you</strong>.
             </p>
           </div>
         </div>
@@ -273,7 +327,7 @@ export default function MastHead() {
         </div>
       </div> */}
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 md:flex-row lg:mb-20">
+      <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-8 md:flex-row lg:mb-20">
         <div className="flex flex-1 flex-col items-center rounded-lg bg-gray-100 p-6 text-center">
           <h3 className="mb-4 text-2xl font-bold">Looking for a place?</h3>
           <p className="mb-6 text-sm text-gray-600">
@@ -312,8 +366,8 @@ export default function MastHead() {
 export function DesktopSearchLayout() {
   return (
     <div className="space-y-2">
-      <p className="hidden font-semibold text-muted-foreground lg:block">
-        Send a request to every host in{" "}
+      <p className="font-semibold text-muted-foreground lg:block">
+        Send a request to every host in <br className="lg:hidden" />
         <span className="font-bold text-teal-900">
           <Typewriter
             component={"span"}
@@ -325,7 +379,6 @@ export function DesktopSearchLayout() {
           />
         </span>
       </p>
-
       <DesktopRequestDealTab />
     </div>
   );

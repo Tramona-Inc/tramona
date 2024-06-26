@@ -25,13 +25,13 @@ import {
   }) {
     return (
       <div className="flex flex-col">
-        <div className="pb-1 text-xs font-semibold">Optional</div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="hidden lg:flex pb-1 text-xs font-semibold">Optional</div>
+        <div className="grid lg:grid-cols-3 gap-3">
           <FormField
             control={form.control}
             name={`data.${curTab}.minNumBeds`}
             render={({ field }) => (
-              <FormItem className="rounded-md border border-input pl-2">
+              <FormItem className="rounded-md border pl-2 bg-white">
                 <FormControl>
                   <Total
                     name="Beds"
@@ -47,7 +47,7 @@ import {
             control={form.control}
             name={`data.${curTab}.minNumBedrooms`}
             render={({ field }) => (
-              <FormItem className="rounded-md border border-input pl-2">
+              <FormItem className="rounded-md border pl-2 bg-white">
                 <FormControl>
                   <Total
                     name="Bedrooms"
@@ -63,7 +63,7 @@ import {
             control={form.control}
             name={`data.${curTab}.minNumBathrooms`}
             render={({ field }) => (
-              <FormItem className="rounded-md border border-input pl-2">
+              <FormItem className="rounded-md border pl-2 bg-white">
                 <FormControl>
                   <Total
                     name="Bathrooms"

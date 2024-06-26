@@ -112,7 +112,7 @@ const VerificationBanner = () => {
 };
 
 const NewToTramona = () => (
-  <div className="rounded-xl bg-teal-700/15 px-4 py-8">
+  <div className="lg:rounded-xl bg-teal-700/15 px-4 py-8">
     <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
       <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
         New To Tramona?
