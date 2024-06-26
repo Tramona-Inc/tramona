@@ -10,6 +10,7 @@ import Summary4 from "./Summary4";
 import Summary7 from "./Summary7";
 import Summary8 from "./Summary8";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import { capitalize } from "@/utils/utils";
 
 function Heading({
   title,
@@ -55,6 +56,10 @@ export default function Onboarding10() {
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: address,
   });
+
+  const lat = coordinateData?.coordinates.location?.lat;
+  const lng = coordinateData?.coordinates.location?.lng;
+
   return (
     <>
       <div className="container my-10 flex-grow sm:px-32">
@@ -80,10 +85,7 @@ export default function Onboarding10() {
             {coordinateData && (
               <div className="relative mt-4 h-[400px]">
                 <div className="absolute inset-0 z-0">
-                  <SingleLocationMap
-                    lat={coordinateData.coordinates.location!.lat}
-                    lng={coordinateData.coordinates.location!.lng}
-                  />
+                  <SingleLocationMap lat={lat ?? 0} lng={lng ?? 0} />
                 </div>
               </div>
             )}
@@ -94,6 +96,14 @@ export default function Onboarding10() {
               {listing.amenities.map((amenity, index) => (
                 <p key={index} className="flex items-center">
                   {amenity}
+                </p>
+              ))}
+              <div className="col-span-full">
+                <p className="font-semibold text-primary">Other Amenities</p>
+              </div>
+              {listing.otherAmenities.map((amenity, index) => (
+                <p key={index} className="flex items-center">
+                  {capitalize(amenity)}
                 </p>
               ))}
             </div>

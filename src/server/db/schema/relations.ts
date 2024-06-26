@@ -89,6 +89,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   }),
   offers: many(offers),
   requestsToProperties: many(requestsToProperties),
+  bids: many(bids),
   bookedDates: many(bookedDates),
   reservations: many(reservations),
   reviews: many(reviews),

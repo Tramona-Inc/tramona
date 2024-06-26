@@ -15,6 +15,7 @@ import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
 import { useState } from "react";
+import { cn } from "@/utils/utils";
 
 export const options = [
   {
@@ -51,7 +52,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function Onboarding2() {
+export default function Onboarding2({ editing = false }) {
   const propertyType = useHostOnboarding((state) => state.listing.propertyType);
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const [error, setError] = useState(false);
@@ -75,9 +76,11 @@ export default function Onboarding2() {
 
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
-        <h1 className="text-4xl font-bold">
+        <h1
+          className={`text-4xl font-bold ${cn(editing && "text-center text-xl")}`}
+        >
           Which of these describes your property?
         </h1>
         {error && <p className="text-red-500">Please select a property type</p>}
@@ -107,12 +110,14 @@ export default function Onboarding2() {
           />
         </Form>
       </div>
-      <OnboardingFooter
-        handleNext={form.handleSubmit(handleFormSubmit)}
-        isFormValid={propertyType !== "Other"}
-        isForm={true}
-        handleError={handleError}
-      />
+      {!editing && (
+        <OnboardingFooter
+          handleNext={form.handleSubmit(handleFormSubmit)}
+          isFormValid={propertyType !== "Other"}
+          isForm={true}
+          handleError={handleError}
+        />
+      )}
     </>
   );
 }

@@ -1,15 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/use-toast";
-import {
-  ALL_PROPERTY_ROOM_TYPES,
-  ALL_PROPERTY_TYPES,
-} from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { create } from "lodash";
 import { useRouter } from "next/router";
-import { z } from "zod";
 
 type OnboardingFooterProps = {
   handleNext?: () => void;
@@ -42,9 +37,10 @@ export default function OnboardingFooter({
     onSuccess: () => {
       resetSession();
       toast({
-        title: "First property listed!",
-        description: "Your first property successfully listed",
+        title: "Property listed!",
+        description: "Your property was successfully listed",
       });
+      setProgress(0);
       void router.push("/host/properties");
     },
   });
@@ -62,10 +58,16 @@ export default function OnboardingFooter({
             numBathrooms: listing.bathrooms,
             address:
               listing.location.street +
+              ", " +
               listing.location.city +
+              ", " +
               listing.location.apt +
+              " " +
               listing.location.state +
-              listing.location.zipcode,
+              " " +
+              listing.location.zipcode +
+              ", " +
+              listing.location.country,
             checkInInfo: listing.checkInType,
             checkInTime: listing.checkIn,
             checkOutTime: listing.checkOut,
@@ -81,22 +83,30 @@ export default function OnboardingFooter({
         },
       });
     } else {
-      if (isEdit || isFormValid) {
-        handleNext && handleNext(); // Call handleNext only if it exists
-        setIsEdit(false);
-        setProgress(9);
-      } else if (isFormValid) {
-        handleNext && handleNext(); // Call handleNext only if it exists
-        setProgress(progress + 1);
+      if (isEdit) {
+        if (isForm) {
+          if (isFormValid) {
+            handleNext && handleNext();
+            setIsEdit(false);
+            setProgress(9);
+          } else {
+            handleError && handleError();
+          }
+        } else {
+          setIsEdit(false);
+          setProgress(9);
+        }
       } else {
-        handleError && handleError();
-      }
-
-      if (!isForm && isEdit) {
-        setIsEdit(false);
-        setProgress(9);
-      } else {
-        setProgress(progress + 1);
+        if (isForm) {
+          if (isFormValid) {
+            handleNext && handleNext();
+            setProgress(progress + 1);
+          } else {
+            handleError && handleError();
+          }
+        } else {
+          setProgress(progress + 1);
+        }
       }
     }
   }
