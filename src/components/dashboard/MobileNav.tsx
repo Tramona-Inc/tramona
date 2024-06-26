@@ -32,13 +32,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { NavBarLink } from "./NavBarLink";
+import { api } from "@/utils/api";
 
 function LoggedInMenu({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const currentYear = new Date().getFullYear();
 
-  const { data: session } = useSession();
-  const isHost = session?.user.role === "host";
+  const {data: isHost} = api.users.isHost.useQuery();
+
   const pathname = usePathname();
 
   return (

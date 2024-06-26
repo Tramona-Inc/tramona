@@ -65,7 +65,7 @@ const formSchema = z.object({
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
-  amenities: z.string().array().nullable(),
+  amenities: z.string().array(),
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
@@ -256,7 +256,12 @@ export default function AdminOfferForm({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: "You have a new match for a request in your Tramona account!",
+            msg: `Tramona: You have a new match for a request in your Tramona account!\nTramona price: $${data.offeredNightlyPriceUSD}, Airbnb price: $${data.originalNightlyPriceUSD}.\n\nCheck it out now!`
+          });
+
+          await twilioMutation.mutateAsync({
+            to: traveler.phoneNumber,
+            msg: `https://www.tramona.com/requests/${request.id}`,
           });
         }
       }

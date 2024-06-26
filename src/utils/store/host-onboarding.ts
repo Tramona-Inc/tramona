@@ -55,6 +55,8 @@ type HostOnboardingState = {
   setOtherCheckInType: (otherCheckInType: boolean) => void;
   setCheckIn: (checkIn: string) => void; // Add this line
   setCheckOut: (checkOut: string) => void; // Add this line
+  setAmenities: (amenities: string[]) => void;
+  setOtherAmenities: (otherAmenities: string[]) => void;
   setAmenity: (amenity: string) => void;
   removeAmenity: (amenity: string) => void;
   setOtherAmenity: (amenity: string) => void;
@@ -207,6 +209,15 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           },
         }));
       },
+      setAmenities: (amenities: string[]) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            amenities,
+          },
+        }));
+      },
       setAmenity: (amenity: string) => {
         set((state) => ({
           ...state,
@@ -224,6 +235,15 @@ export const useHostOnboarding = create<HostOnboardingState>()(
             amenities: state.listing.amenities.filter(
               (item) => item !== amenity,
             ),
+          },
+        }));
+      },
+      setOtherAmenities: (otherAmenities: string[]) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            otherAmenities,
           },
         }));
       },

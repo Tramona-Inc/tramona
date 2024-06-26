@@ -25,6 +25,7 @@ import { requestGroups, requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
 import { reservations } from "./tables/reservations";
 import { referralCodes, referralEarnings, users } from "./tables/users";
+import { trips } from "./tables/trips";
 import { reviews } from "./tables/reviews";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -89,6 +90,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   }),
   offers: many(offers),
   requestsToProperties: many(requestsToProperties),
+  bids: many(bids),
   bookedDates: many(bookedDates),
   reservations: many(reservations),
   reviews: many(reviews),
@@ -319,3 +321,22 @@ export const bucketListPropertiesRelations = relations(
     }),
   }),
 );
+
+export const tripsRelations = relations(trips, ({ one }) => ({
+  group: one(groups, {
+    fields: [trips.groupId],
+    references: [groups.id],
+  }),
+  property: one(properties, {
+    fields: [trips.propertyId],
+    references: [properties.id],
+  }),
+  offer: one(offers, {
+    fields: [trips.offerId],
+    references: [offers.id],
+  }),
+  bid: one(bids, {
+    fields: [trips.bidId],
+    references: [bids.id],
+  }),
+}));
