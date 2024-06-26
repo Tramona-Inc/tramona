@@ -589,6 +589,7 @@ export const biddingRouter = createTRPCRouter({
               address: true,
               imageUrls: true,
               originalNightlyPrice: true,
+              originalListingUrl: true,
               longitude: true,
               latitude: true,
             },

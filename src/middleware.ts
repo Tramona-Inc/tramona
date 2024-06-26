@@ -79,9 +79,9 @@ export default withAuth(
           return token?.role === "admin";
         }
 
-        if (path.startsWith("/host")) {
-          return token?.role === "host" || token?.role === "admin";
-        }
+        // if (path.startsWith("/host")) {
+        //   return token?.role === "host" || token?.role === "admin";
+        // }
 
         // By default return true only if the token is not null
         // (this forces the users to be signed in to access the page)
