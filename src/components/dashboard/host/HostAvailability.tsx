@@ -61,7 +61,7 @@ export default function HostAvailability({ property }: { property: Property }) {
     const monthDays = generateCalendarDays(monthDate.getMonth());
 
     return (
-      <div className="w-1/2 px-2">
+      <div className="w-full sm:w-1/2">
         <div className="grid grid-cols-7 gap-2">
           {daysOfWeek.map((day) => (
             <div
@@ -108,7 +108,7 @@ export default function HostAvailability({ property }: { property: Property }) {
   };
 
   return (
-    <div className=" min-h-screen-minus-header-n-footer  space-y-10">
+    <div className="mb-16 mt-6 space-y-10">
       <div className="text-end">
         <HostPropertyEditBtn
           editing={editing}
@@ -119,7 +119,7 @@ export default function HostAvailability({ property }: { property: Property }) {
       <div className="mx-auto max-w-4xl">
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <div className="relative basis-1/2 text-center">
+            <div className="relative basis-full text-center sm:basis-1/2">
               <button
                 onClick={goToPreviousMonth}
                 className="absolute left-0 top-0 mr-2 rounded border border-gray-300 p-2 text-gray-400 transition-colors duration-150 hover:text-gray-600"
@@ -129,8 +129,14 @@ export default function HostAvailability({ property }: { property: Property }) {
               <h3 className="text-xl font-bold text-gray-800">
                 {months[calendarDate.getMonth()]} {calendarDate.getFullYear()}
               </h3>
+              <button
+                onClick={goToNextMonth}
+                className="absolute right-0 top-0 ml-2 rounded border border-gray-300 p-2 text-gray-400 transition-colors duration-150 hover:text-gray-600 sm:hidden"
+              >
+                <MoveRight className="h-4 w-4" />
+              </button>
             </div>
-            <div className="relative basis-1/2 text-center">
+            <div className="relative hidden basis-1/2 text-center sm:block">
               <h3 className="text-xl font-bold text-gray-800">
                 {months[(calendarDate.getMonth() + 1) % 12]}{" "}
                 {calendarDate.getMonth() === 11
@@ -145,10 +151,11 @@ export default function HostAvailability({ property }: { property: Property }) {
               </button>
             </div>
           </div>
-          <div className="-mx-2 flex">
+          <div className="hidden gap-12 sm:flex">
             {renderMonth(0)}
             {renderMonth(1)}
           </div>
+          <div className="sm:hidden">{renderMonth(0)}</div>
           <div className="mt-12 flex flex-col space-y-2 text-sm">
             <div className="flex items-center">
               <div className="mr-2 h-6 w-6 bg-zinc-50"></div>

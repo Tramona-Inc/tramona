@@ -10,7 +10,7 @@ import HostAvailability from "./HostAvailability";
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
     <div className="space-y-4 p-4 sm:p-6">
-      <Link href="/host/properties" className="sm:hidden">
+      <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
       <div>
