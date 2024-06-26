@@ -23,7 +23,7 @@ const cityRequestSchema = z
     location: zodString(),
     date: z.object({ from: z.date(), to: z.date() }),
     numGuests: zodInteger({ min: 1 }),
-    maxNightlyPriceUSD: zodNumber({ min: 0 }),
+    maxNightlyPriceUSD: zodNumber({ min: 0 }).optional(),
     // roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER]).optional(),
     minNumBedrooms: z.number().optional(),
     minNumBeds: z.number().optional(),

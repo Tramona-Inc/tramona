@@ -84,7 +84,7 @@ export function CityRequestFiltersDialog({
               </Button>
             </OptionalFilter>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             <FilterCheckbox label="Pool" />
             <FilterCheckbox label="Hot tub" />
             <FilterCheckbox label="A/C" />

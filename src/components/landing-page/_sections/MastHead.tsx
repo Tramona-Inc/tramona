@@ -343,7 +343,7 @@ export default function MastHead() {
         </div>
       </div> */}
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-8 md:flex-row lg:mb-20">
+      <div className="mx-auto flex max-w-7xl flex-col gap-10 px-3 py-8 md:flex-row lg:mb-20">
         <div className="flex flex-1 flex-col items-center rounded-lg bg-gray-100 p-6 text-center">
           <h3 className="mb-4 text-2xl font-bold">Looking for a place?</h3>
           <p className="mb-6 text-sm text-gray-600">
@@ -381,9 +381,9 @@ export default function MastHead() {
 
 export function DesktopSearchLayout() {
   return (
-    <div className="space-y-2">
-      <p className="font-semibold text-muted-foreground lg:block">
-        Send a request to every host in <br className="lg:hidden" />
+    <div className="space-y-3">
+      <p className="text-sm font-semibold text-muted-foreground lg:block">
+        Send a request to every host in&nbsp;
         <span className="font-bold text-teal-900">
           <Typewriter
             component={"span"}
