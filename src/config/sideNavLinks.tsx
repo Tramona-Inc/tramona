@@ -38,12 +38,12 @@ export const adminNavLinks = [
 export const hostMobileNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
   {
-    href: "/host/incoming-requests",
+    href: "/host/requests",
     name: "Requests",
     icon: BadgePercent,
   },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/host/properties", name: "stays", icon: Briefcase },
+  { href: "/host/properties", name: "Properties", icon: HomeIcon },
 ];
 
 export const hostNavLinks = [
