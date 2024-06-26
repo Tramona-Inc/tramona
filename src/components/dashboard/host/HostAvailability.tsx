@@ -1,7 +1,13 @@
 import { type Property } from "@/server/db/schema/tables/properties";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Edit2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  MoveLeft,
+  MoveRight,
+} from "lucide-react";
 
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
@@ -68,8 +74,8 @@ export default function HostAvailability({ property }: { property: Property }) {
           {monthDays.map((day, index) => (
             <div
               key={index}
-              className={`flex h-8 items-center justify-center border text-sm
-                ${day ? "cursor-pointer border-gray-300" : "border-transparent"} 
+              className={`flex h-12 flex-1 items-center justify-center text-sm
+                ${day ? "cursor-pointer bg-zinc-50" : ""} 
                 ${
                   day &&
                   monthDate.getFullYear() === currentDate.getFullYear() &&
@@ -116,16 +122,16 @@ export default function HostAvailability({ property }: { property: Property }) {
             <div className="relative basis-1/2 text-center">
               <button
                 onClick={goToPreviousMonth}
-                className="absolute left-0 top-0 mr-2 rounded border border-gray-300 p-1 text-gray-400 transition-colors duration-150 hover:text-gray-600"
+                className="absolute left-0 top-0 mr-2 rounded border border-gray-300 p-2 text-gray-400 transition-colors duration-150 hover:text-gray-600"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <MoveLeft className="h-4 w-4" />
               </button>
-              <h3 className="text-lg font-semibold text-gray-800">
+              <h3 className="text-xl font-bold text-gray-800">
                 {months[calendarDate.getMonth()]} {calendarDate.getFullYear()}
               </h3>
             </div>
             <div className="relative basis-1/2 text-center">
-              <h3 className="text-lg font-semibold text-gray-800">
+              <h3 className="text-xl font-bold text-gray-800">
                 {months[(calendarDate.getMonth() + 1) % 12]}{" "}
                 {calendarDate.getMonth() === 11
                   ? calendarDate.getFullYear() + 1
@@ -133,9 +139,9 @@ export default function HostAvailability({ property }: { property: Property }) {
               </h3>
               <button
                 onClick={goToNextMonth}
-                className="absolute right-0 top-0 ml-2 rounded border border-gray-300 p-1 text-gray-400 transition-colors duration-150 hover:text-gray-600"
+                className="absolute right-0 top-0 ml-2 rounded border border-gray-300 p-2 text-gray-400 transition-colors duration-150 hover:text-gray-600"
               >
-                <ChevronRight className="h-4 w-4" />
+                <MoveRight className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -145,18 +151,23 @@ export default function HostAvailability({ property }: { property: Property }) {
           </div>
           <div className="mt-4 flex flex-col space-y-2 text-sm">
             <div className="flex items-center">
-              <div className="mr-2 h-4 w-4 border border-gray-300 bg-white"></div>
+              <div className="mr-2 h-4 w-4 bg-zinc-50"></div>
               <span className="text-gray-600">Vacant</span>
             </div>
             <div className="flex items-center">
-              <div className="mr-2 h-4 w-4 border border-gray-300 bg-gray-100"></div>
+              <div
+                className="mr-2 h-4 w-4  bg-gray-200"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
+                }}
+              ></div>
               <span className="text-gray-600">Blocked dates</span>
             </div>
             <div className="flex items-center">
-              <div className="mr-2 h-4 w-4 border border-blue-300 bg-blue-100"></div>
+              <div className="mr-2 h-4 w-4  bg-blue-100"></div>
               <span className="text-gray-600">Booked on Tramona</span>
             </div>
-            <div>{currentDate.toString()}</div>
           </div>
         </div>
       </div>
