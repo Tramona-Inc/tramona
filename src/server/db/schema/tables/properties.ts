@@ -177,6 +177,7 @@ export const propertyStatusEnum = pgEnum("property_status", [
 export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
 
 export const propertyPMS = pgEnum("property_pms", ALL_PROPERTY_PMS);
+
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
