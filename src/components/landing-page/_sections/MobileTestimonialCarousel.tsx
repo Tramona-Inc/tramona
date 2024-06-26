@@ -68,7 +68,7 @@ const testimonials = [
   ];
   
 
-export function TestimonialCarousel() {
+export function MobileTestimonialCarousel() {
   const [api, setApi] = useState<any>();
   const [, forceUpdate] = useState({});
   const currentIndexRef = useRef(0);
@@ -110,7 +110,7 @@ export function TestimonialCarousel() {
         setApi={setApi}
         className="mx-auto w-full max-w-screen-2xl"
         opts={{
-          align: "center",
+          align: "start",
           loop: true,
           skipSnaps: false,
           containScroll: false,

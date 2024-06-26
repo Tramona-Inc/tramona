@@ -27,6 +27,7 @@ import { TestimonialCarousel } from "./TestimonialCarousel";
 import Typewriter from "typewriter-effect";
 import Image from "next/image";
 import CompletedRequestsSection from "./CompletedRequests";
+import { MobileTestimonialCarousel } from "./MobileTestimonialCarousel";
 
 const infoCards = [
   {
@@ -59,19 +60,19 @@ export default function MastHead() {
   return (
     // padding for the sides? and do we want rounded corners?
     <section className="relative bg-white pb-4">
-      <div className="relative overflow-hidden">
-        <div className="">
+      <div className="relative h-[500px] lg:h-[700px]">
+        <div className="absolute inset-0">
           <Image
             src={landingBg}
             alt=""
-            fill={true}
+            layout="fill"
             objectFit="cover"
             placeholder="blur"
             className="select-none"
           />
         </div>
         {/* <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black"></div> */}
-        <div className="relative grid grid-cols-1 p-4 lg:grid-cols-1">
+        <div className="relative grid h-full grid-cols-1 p-4 lg:grid-cols-1">
           <div className="flex flex-col justify-center">
             <div className="relative pt-10 text-center">
               {/* <div className="relative inline-block rounded-full border-t border-white/20 bg-teal-900  px-3 font-extrabold uppercase tracking-wide text-white shadow-[1px_1px_10px] shadow-teal-100/60">
@@ -80,10 +81,10 @@ export default function MastHead() {
               {/* <div className="relative inline-flex items-center gap-1 rounded-full border-t border-white/30 bg-teal-50 px-3 text-sm font-extrabold uppercase tracking-wide text-teal-900 sm:text-base">
                 $250k+ saved so far
               </div> */}
-              <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-gray-900 lg:text-3xl">
+              <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-gray-900 lg:text-5xl">
                 Book the same properties you see on Airbnb for less
               </h1>
-              <p className="mx-auto max-w-3xl text-xs font-semibold text-gray-900 pt-4 lg:pt-4 lg:text-base">
+              <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold text-gray-900 lg:pt-4 lg:text-base">
                 With Airbnb hosts averaging 60% vacancy rates year-round,
                 Tramona matches you with hosts who are willing to meet your
                 price.
@@ -133,16 +134,21 @@ export default function MastHead() {
               <DesktopSearchLayout />
             </div>
           </div>
-        </div>
-      </div>
-      <div className="flex justify-center p-4">
-        <div className="mt-4 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:hidden">
-          <DesktopSearchLayout />
+            <div className="flex justify-center">
+              <div className="-mt-12 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:hidden">
+                <DesktopSearchLayout />
+              </div>
+            </div>
         </div>
       </div>
 
-      <div className="mt-8 flex justify-center space-y-4 lg:mt-16 lg:space-y-8">
+      <div className="h-72 lg:h-60"></div>
+
+      <div className="hidden lg:flex mt-8 mx-4 justify-center space-y-4 lg:mt-16 lg:space-y-8 lg:mx-0">
         <TestimonialCarousel />
+      </div>
+      <div className="lg:hidden mt-8 mx-4 flex justify-center space-y-4 lg:mt-16 lg:space-y-8 lg:mx-0">
+        <MobileTestimonialCarousel />
       </div>
 
       <div className="mt-20 space-y-4 lg:mt-24 lg:space-y-12">
@@ -234,7 +240,7 @@ export default function MastHead() {
         </div>
       </div>
 
-      <div className="mt-20 mx-auto max-w-7xl justify-center space-y-4 lg:mb-20 lg:mt-28 lg:space-y-8">
+      <div className="mx-auto mt-20 max-w-7xl justify-center space-y-4 lg:mb-20 lg:mt-28 lg:space-y-8">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           Why use Tramona?
         </h2>
@@ -263,9 +269,12 @@ export default function MastHead() {
               <h3 className="text-lg font-bold">Price Transparency</h3>
             </div>
             <p className="text-sm text-[#584F3E]">
-              We have <strong className="font-extrabold text-black">$0 fees for travelers</strong> and show you the
-              listing on Airbnb to encourage you to check pricing on the same
-              property.
+              We have{" "}
+              <strong className="font-extrabold text-black">
+                $0 fees for travelers
+              </strong>{" "}
+              and show you the listing on Airbnb to encourage you to check
+              pricing on the same property.
             </p>
           </div>
           <div className="flex flex-col items-start gap-3 rounded-lg p-4">
@@ -295,9 +304,16 @@ export default function MastHead() {
               </h3>
             </div>
             <p className="text-sm text-[#584F3E]">
-              Tramona is <strong className="font-extrabold text-black">completely free to use</strong>, and we think
-              you'll like it. Before you book, check Tramona to see{" "}
-              <strong className="font-extrabold text-black">which special deals hosts will offer you</strong>.
+              Tramona is{" "}
+              <strong className="font-extrabold text-black">
+                completely free to use
+              </strong>
+              , and we think you'll like it. Before you book, check Tramona to
+              see{" "}
+              <strong className="font-extrabold text-black">
+                which special deals hosts will offer you
+              </strong>
+              .
             </p>
           </div>
         </div>
