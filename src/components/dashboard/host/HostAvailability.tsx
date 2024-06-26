@@ -1,11 +1,12 @@
 import { type Property } from "@/server/db/schema/tables/properties";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Edit2 } from "lucide-react";
 
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
-  const [currentDate, setCurrentDate] = useState<Date>(new Date(2024, 3, 1)); // April 2024
+  const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -23,8 +24,15 @@ export default function HostAvailability({ property }: { property: Property }) {
     "December",
   ];
 
+  useEffect(() => {
+    const today = new Date();
+    console.log(today.toString());
+    setCurrentDate(today);
+    setCalendarDate(today);
+  }, []);
+
   const generateCalendarDays = (month: number): (number | null)[] => {
-    const year = currentDate.getFullYear();
+    const year = calendarDate.getFullYear();
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -40,8 +48,8 @@ export default function HostAvailability({ property }: { property: Property }) {
 
   const renderMonth = (monthOffset: number) => {
     const monthDate = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + monthOffset,
+      calendarDate.getFullYear(),
+      calendarDate.getMonth() + monthOffset,
       1,
     );
     const monthDays = generateCalendarDays(monthDate.getMonth());
@@ -62,7 +70,14 @@ export default function HostAvailability({ property }: { property: Property }) {
               key={index}
               className={`flex h-8 items-center justify-center border border-transparent text-sm
                 ${day ? "cursor-pointer hover:border-gray-300" : ""} 
-                ${day === 1 ? "font-semibold text-blue-600" : "text-gray-700"}`}
+                ${
+                  day &&
+                  monthDate.getFullYear() === currentDate.getFullYear() &&
+                  monthDate.getMonth() === currentDate.getMonth() &&
+                  day === currentDate.getDate()
+                    ? "font-semibold text-blue-600"
+                    : "text-gray-700"
+                }`}
             >
               {day}
             </div>
@@ -73,14 +88,14 @@ export default function HostAvailability({ property }: { property: Property }) {
   };
 
   const goToPreviousMonth = () => {
-    setCurrentDate(
+    setCalendarDate(
       (prevDate) =>
         new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1),
     );
   };
 
   const goToNextMonth = () => {
-    setCurrentDate(
+    setCalendarDate(
       (prevDate) =>
         new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1),
     );
@@ -128,7 +143,7 @@ export default function HostAvailability({ property }: { property: Property }) {
             {renderMonth(0)}
             {renderMonth(1)}
           </div>
-          <div className="mt-4 flex space-x-6 text-sm">
+          <div className="mt-4 flex flex-col space-y-2 text-sm">
             <div className="flex items-center">
               <div className="mr-2 h-4 w-4 border border-gray-300 bg-white"></div>
               <span className="text-gray-600">Vacant</span>
@@ -141,6 +156,7 @@ export default function HostAvailability({ property }: { property: Property }) {
               <div className="mr-2 h-4 w-4 border border-blue-300 bg-blue-100"></div>
               <span className="text-gray-600">Booked on Tramona</span>
             </div>
+            <div>{currentDate.toString()}</div>
           </div>
         </div>
       </div>
