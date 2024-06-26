@@ -29,7 +29,7 @@ export default function AirbnbBookDialog(
     checkIn: Date;
     checkOut: Date;
     offer: OfferWithProperty;
-    requestId: number;
+    requestId?: number;
   }>,
 ) {
   const {
@@ -74,7 +74,7 @@ export default function AirbnbBookDialog(
     const response = await createCheckout.mutateAsync({
       listingId: offer.id,
       propertyId: offer.property.id,
-      requestId: requestId,
+      requestId: requestId ?? null,
       name: offer.property.name,
       price: offer.tramonaFee, // Airbnb (tramona fee) Set's price for checkout
       description: "From: " + formatDateRange(checkIn, checkOut),

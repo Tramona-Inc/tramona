@@ -5,6 +5,7 @@ import UserAvatar from "../_common/UserAvatar";
 import { type PastTrip } from "./PastTrips";
 
 import { formatDateRange } from "@/utils/utils";
+import Image from "next/image";
 
 export default function PastTripCard({ trip }: { trip: PastTrip }) {
   return (
@@ -17,7 +18,12 @@ export default function PastTripCard({ trip }: { trip: PastTrip }) {
           >
             Past Trip
           </Badge>
-          <img src={trip.property.imageUrls[0]} width={400} height={400} />
+          <Image
+            src={trip.property.imageUrls[0]!}
+            alt=""
+            width={400}
+            height={400}
+          />
         </div>
 
         <div className="flex w-full flex-col gap-2 px-5 py-3 md:gap-4 md:p-5">
@@ -46,8 +52,7 @@ export default function PastTripCard({ trip }: { trip: PastTrip }) {
           <div className="space-y-2">
             <h3 className="text-base font-bold md:text-xl">Trip details</h3>
             <p className="text-sm md:text-base">
-              Check-in/Check-out:{" "}
-              {formatDateRange(trip.request.checkIn, trip.request.checkOut)}
+              Check-in/Check-out: {formatDateRange(trip.checkIn, trip.checkOut)}
             </p>
             <Link
               href={`/my-trips/${trip.id}`}

@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import ShareButton from "@/components/_common/ShareLink/ShareButton";
-import { type OfferWithDetails } from "@/components/property/PropertyPage";
+import { type OfferWithDetails } from "@/components/offers/OfferPage";
 
 import { NextSeo } from "next-seo";
 import { type GetServerSideProps } from "next";
@@ -130,7 +130,7 @@ function Page({
                   <ShareButton
                     id={request.id}
                     isRequest={true}
-                    propertyName={offers[0]!.request.location}
+                    propertyName={offers[0]!.property.name}
                   />
                 </div>
               </TabsList>

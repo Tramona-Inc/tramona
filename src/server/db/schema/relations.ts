@@ -89,6 +89,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   }),
   offers: many(offers),
   requestsToProperties: many(requestsToProperties),
+  bids: many(bids),
   bookedDates: many(bookedDates),
   reservations: many(reservations),
   reviews: many(reviews),
@@ -222,6 +223,7 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   members: many(groupMembers),
   invites: many(groupInvites),
   requests: many(requests),
+  offers: many(offers),
   bids: many(bids),
 }));
 

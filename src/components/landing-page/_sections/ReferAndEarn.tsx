@@ -14,7 +14,7 @@ const ReferAndEarn = () => {
               height={300}
               unoptimized
               alt=""
-              className="h-full w-full md:rounded-lg object-cover object-center"
+              className="h-full w-full object-cover object-center md:rounded-lg"
             />
           </div>
         </div>
@@ -24,11 +24,11 @@ const ReferAndEarn = () => {
               Refer and earn
             </h2>
             <p className="mb-6 break-normal text-lg text-black md:text-lg lg:mb-4 lg:text-xl">
-              We know we are only as good as our people. Because of that,
-              we&apos;ve created one of the most generous partnership programs.
+              Know someone who is traveling? Refer them to Tramona, when they
+              book, you get $30 dollars.
             </p>
             <Link href="/program">
-              <button className="rounded-lg bg-white px-6 py-3 border-2 border-black text-black hover:bg-[#e5e5e5]">
+              <button className="rounded-lg border-2 border-black bg-white px-6 py-3 text-black hover:bg-[#e5e5e5]">
                 Learn more
               </button>
             </Link>

@@ -7,7 +7,6 @@ import { type DetailedRequest } from "./RequestCard";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
 import { getRequestWithGroupDetails } from "./RequestGroupAvatars";
-import RequestRefreshDialog from "./RequestRefreshDialog";
 
 export function RequestCardAction({ request }: { request: DetailedRequest }) {
   const { data: session } = useSession({ required: true });
@@ -24,7 +23,7 @@ export function RequestCardAction({ request }: { request: DetailedRequest }) {
         !isEveryoneInvited &&
         userIsOwner && (
           <GroupDetailsDialog request={request}>
-            <Button className="rounded-md">
+            <Button>
               <UserPlusIcon />
               Invite people
             </Button>
@@ -33,7 +32,7 @@ export function RequestCardAction({ request }: { request: DetailedRequest }) {
       );
     case "accepted":
       return (
-        <Button asChild className="rounded-full pr-3">
+        <Button asChild className="pr-3">
           <Link href={`/requests/${request.id}`}>
             View {plural(request.numOffers, "offer")}
             <ArrowRightIcon />
