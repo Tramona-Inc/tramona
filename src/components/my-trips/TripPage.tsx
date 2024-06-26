@@ -2,7 +2,6 @@ import Image from "next/image";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
-
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,48 +12,26 @@ import {
   ChevronRight,
   MessageCircle,
 } from "lucide-react";
-
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { formatCurrency, plural } from "@/utils/utils";
 import { api } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
+import Spinner from "../_common/Spinner";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-type Trip = {
-  id: number;
-  property: {
-    id: number;
-    name: string;
-    imageUrls: string[];
-    address: string;
-    checkInInfo: string | null;
-    hostName: string | null;
-    host: {
-      image: string | null;
-      name: string | null;
-      id: string;
-      email: string;
-    } | null;
-  };
-  checkIn: Date;
-  checkOut: Date;
-  numGuests: number;
-  totalPrice: number;
-  acceptedAt: Date | null;
-  createdAt: Date | null;
-  tramonaFee: number | null;
-  location: string | null;
-};
-
-export default function TripPage({ trip }: { trip: Trip }) {
+export default function TripPage({ tripId }: { tripId: number }) {
   const chatWithAdmin = useChatWithAdmin();
 
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: trip.property.address,
+  const { data } = api.trips.getMyTripsPageDetails.useQuery({
+    tripId,
   });
+
+  if (!data) return <Spinner />;
+
+  const { trip, tripPrice, coordinates } = data;
 
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
 
@@ -176,11 +153,11 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 <p>Los Angeles, CA, USA</p> */}
                 <p>{trip.property.address}</p>
 
-                {coordinateData && (
+                {coordinates && (
                   <div className="relative z-10 my-3 overflow-clip rounded-lg">
                     <SingleLocationMap
-                      lat={coordinateData.coordinates.location!.lat}
-                      lng={coordinateData.coordinates.location!.lng}
+                      lat={coordinates.location!.lat}
+                      lng={coordinates.location!.lng}
                     />
                   </div>
                 )}
@@ -199,17 +176,17 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 <div className="flex justify-between">
                   <p className="font-bold">Total cost</p>
                   <p className="text-sm text-muted-foreground">
-                    Paid {dayjs(trip.acceptedAt).format("MMM D")}
+                    Paid {dayjs(trip.createdAt).format("MMM D")}
                   </p>
                 </div>
-                <p>{formatCurrency(trip.totalPrice)}</p>
+                <p>{formatCurrency(tripPrice)}</p>
 
-                <Link
+                {/* <Link
                   href={`/`}
                   className="flex justify-between py-5 font-semibold hover:underline"
                 >
                   View payment details <ChevronRight />
-                </Link>
+                </Link> */}
               </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
@@ -281,10 +258,10 @@ export default function TripPage({ trip }: { trip: Trip }) {
           </div>
         </div>
         <div className="sticky top-[100px] z-10 hidden h-[700px] overflow-clip rounded-lg lg:block">
-          {coordinateData && (
+          {coordinates && (
             <SingleLocationMap
-              lat={coordinateData.coordinates.location!.lat}
-              lng={coordinateData.coordinates.location!.lng}
+              lat={coordinates.location!.lat}
+              lng={coordinates.location!.lng}
             />
           )}
         </div>

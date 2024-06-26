@@ -1,10 +1,13 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Link from "next/link";
-
 import { HelpCircleIcon, InfoIcon, MessageCircle } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { formatDateRange } from "@/utils/utils";
+import Image from "next/image";
+import UserAvatar from "../_common/UserAvatar";
+import MapPin from "../_icons/MapPin";
 import {
   Sheet,
   SheetClose,
@@ -14,27 +17,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
-
-import { formatDateRange } from "@/utils/utils";
-import UserAvatar from "../_common/UserAvatar";
-import MapPin from "../_icons/MapPin";
-import { type UpcomingTrip } from "./UpcomingTrips";
-import Image from "next/image";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import { TripCardDetails } from "./PastTrips";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
+export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   const chatWithAdmin = useChatWithAdmin();
 
   return (
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
-        <Link
-          href={`/my-trips/${trip.id}?type=${trip.type}`}
-          className="relative w-96"
-        >
+        <Link href={`/my-trips/${trip.id}`} className="relative w-96">
           <Image
             fill
             alt=""
@@ -42,7 +37,7 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
             src={trip.property.imageUrls[0]!}
           />
           <Badge variant="lightGray" className="absolute left-4 top-4">
-            Trip {dayjs(trip.request.checkIn).fromNow()}
+            Trip {dayjs(trip.checkIn).fromNow()}
           </Badge>
         </Link>
 
@@ -80,11 +75,9 @@ export default function UpcomingTripCard({ trip }: { trip: UpcomingTrip }) {
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold">Check-in details</h3>
-              <p>
-                {formatDateRange(trip.request.checkIn, trip.request.checkOut)}
-              </p>
+              <p>{formatDateRange(trip.checkIn, trip.checkOut)}</p>
               <Link
-                href={`/my-trips/${trip.id}?type=${trip.type}`}
+                href={`/my-trips/${trip.id}`}
                 className="text-sm font-bold underline underline-offset-4"
               >
                 View more

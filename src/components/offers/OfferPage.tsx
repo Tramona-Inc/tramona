@@ -9,12 +9,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { api, type RouterOutputs } from "@/utils/api";
+import { type RouterOutputs } from "@/utils/api";
 import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { CheckIcon, ImagesIcon, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import OfferPhotos from "./OfferPhotos";
@@ -35,21 +34,12 @@ export default function OfferPage({
   offer: OfferWithDetails;
 }) {
   const { status } = useSession();
-  let isBooked = false;
-
-  const { data, isLoading } =
-    api.offers.getStripePaymentIntentAndCheckoutSessionId.useQuery({
-      id: offer.id,
-    });
-
-  if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
-    isBooked = true;
-  }
-
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const isAirbnb =
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
+
+  const isBooked = !!offer.acceptedAt;
 
   // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
@@ -370,35 +360,31 @@ export default function OfferPage({
               </p>
             </div>
             {status === "authenticated" ? (
-              isLoading ? (
-                <Spinner />
-              ) : (
-                <HowToBookDialog
-                  isBooked={isBooked}
-                  listingId={offer.id}
-                  propertyName={property.name}
-                  originalNightlyPrice={property.originalNightlyPrice}
-                  airbnbUrl={property.airbnbUrl ?? ""}
-                  checkIn={offer.checkIn}
-                  checkOut={offer.checkOut}
-                  requestId={request?.id}
-                  offer={{ property, request, ...offer }}
-                  totalPrice={offer.totalPrice}
-                  offerNightlyPrice={offerNightlyPrice}
-                  isAirbnb={isAirbnb}
-                >
-                  <Button size="lg" variant="greenPrimary" disabled={isBooked}>
-                    {isBooked ? (
-                      <>
-                        <CheckIcon className="size-5" />
-                        Booked
-                      </>
-                    ) : (
-                      <>Confirm Booking</>
-                    )}
-                  </Button>
-                </HowToBookDialog>
-              )
+              <HowToBookDialog
+                isBooked={isBooked}
+                listingId={offer.id}
+                propertyName={property.name}
+                originalNightlyPrice={property.originalNightlyPrice}
+                airbnbUrl={property.airbnbUrl ?? ""}
+                checkIn={offer.checkIn}
+                checkOut={offer.checkOut}
+                requestId={request?.id}
+                offer={{ property, request, ...offer }}
+                totalPrice={offer.totalPrice}
+                offerNightlyPrice={offerNightlyPrice}
+                isAirbnb={isAirbnb}
+              >
+                <Button size="lg" variant="greenPrimary" disabled={isBooked}>
+                  {isBooked ? (
+                    <>
+                      <CheckIcon className="size-5" />
+                      Booked
+                    </>
+                  ) : (
+                    <>Confirm Booking</>
+                  )}
+                </Button>
+              </HowToBookDialog>
             ) : (
               <Button
                 onClick={() => {
