@@ -82,7 +82,7 @@ const formSchema = z.object({
         profilePic: zodUrl(),
         name: zodString(),
         review: zodString({ maxLen: Infinity }),
-        rating: zodNumber({ min: 1, max: 5 }),
+        rating: zodInteger({ min: 1, max: 5 }),
       })
       .array(),
   ),
