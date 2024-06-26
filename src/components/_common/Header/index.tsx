@@ -180,7 +180,7 @@ function LargeHeader(props: HeaderProps) {
         )}
         {props.type === "dashboard" ? (
           <Button asChild variant="ghost" className="rounded-full">
-            {session?.user.role === "host" && pathname === "/host" ? (
+            {session?.user.role === "host" && pathname.includes("/host") ? (
               <Link href="/">Switch to Traveler</Link>
             ) : session?.user.role !== "host" ? null : ( // <Link href="/host-onboarding">Become a host</Link>
               <Link href="/host">Switch to Host</Link>

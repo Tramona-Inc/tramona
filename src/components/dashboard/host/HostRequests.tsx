@@ -1,11 +1,11 @@
+import { Badge } from "@/components/ui/badge";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
-import { useRouter } from "next/router";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import { plural } from "@/utils/utils";
-import HostCityRequestCard from "./HostCityRequestCard";
+import Image from "next/image";
+import { useRouter } from "next/router";
 import HostBidCard from "./HostBidCard";
+import HostCityRequestCard from "./HostCityRequestCard";
 
 export default function HostRequests() {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function HostRequests() {
             {property?.address ?? <SkeletonText className="w-1/4" />}
           </div>
           {property ? (
-            <Badge>{plural(property.numRequests, "request")}</Badge>
+            <Badge>{plural(property.numBids, "request")}</Badge>
           ) : (
             <Badge variant="skeleton" className="w-20" />
           )}

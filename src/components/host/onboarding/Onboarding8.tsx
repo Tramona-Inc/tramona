@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
   propertyName: zodString(),
@@ -25,7 +25,13 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function Onboarding8() {
+export default function Onboarding8({
+  editing = false,
+  setHandleOnboarding,
+}: {
+  editing?: boolean;
+  setHandleOnboarding?: (handle: () => void) => void;
+}) {
   const title = useHostOnboarding((state) => state.listing.title);
   const setTitle = useHostOnboarding((state) => state.setTitle);
 
@@ -52,11 +58,16 @@ export default function Onboarding8() {
     setError(true);
   }
 
+  useEffect(() => {
+    setHandleOnboarding &&
+      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+  }, [form.formState]);
+
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="container my-10 flex flex-grow flex-col justify-center">
-        <h1 className="mb-8 text-3xl font-bold">Describe your listing</h1>
+        <h1 className="mb-3 text-3xl font-bold">Describe your listing</h1>
         {error && (
           <p className="text-red-500">Please fill out all required fields</p>
         )}
@@ -102,12 +113,14 @@ export default function Onboarding8() {
         </Form>
       </div>
 
-      <OnboardingFooter
-        handleNext={form.handleSubmit(handleFormSubmit)}
-        isFormValid={form.formState.isValid}
-        isForm={true}
-        handleError={handleError}
-      />
+      {!editing && (
+        <OnboardingFooter
+          handleNext={form.handleSubmit(handleFormSubmit)}
+          isFormValid={form.formState.isValid}
+          isForm={true}
+          handleError={handleError}
+        />
+      )}
     </>
   );
 }
