@@ -4,7 +4,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { Input } from "@/components/ui/input";
-
+import { useRouter } from "next/router";
 import Link from "next/link";
 import Confetti from "react-confetti";
 import {
@@ -43,7 +43,7 @@ export function RequestSuccessDialog({
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const showConfetti = true;
-
+  const router = useRouter();
   const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
     { groupId: groupId! },
     { enabled: groupId !== null },
@@ -54,6 +54,13 @@ export function RequestSuccessDialog({
       setInviteLink(inviteLinkQuery.data.link);
     }
   }, [inviteLinkQuery.data]);
+
+  const handleDialogClose = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      router.push("/requests");
+    }
+  };
 
   const handleCopyToClipboard = () => {
     if (inviteLink) {
@@ -115,7 +122,7 @@ export function RequestSuccessDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent>
         <div className="mb-4 flex flex-row items-center text-center text-2xl font-bold">
           <CircleCheckBig color="#528456" className="mr-2" /> Request sent!
