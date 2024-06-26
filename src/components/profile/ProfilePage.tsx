@@ -14,16 +14,20 @@ import {
   MessageCircleMore,
   MessagesSquare,
   Plus,
+  Pencil,
   Twitter,
   Youtube,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
+import {Dialog, DialogContent, DialogTrigger} from '../ui/dialog';
+import { useState } from 'react'
 import UserAvatar from "../_common/UserAvatar";
 import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
+import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,8 +42,15 @@ import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
 import EmptyBagSvg from "../_common/EmptyStateSvg/EmptyBagSvg";
+import ProfilePicSelection  from './profile-pic-selection-v7';
+import ProfilePicSelectionMobile from './nextjs-mobile-profile-pic-v3';
+
 
 export default function ProfilePage() {
+
+  // const [dialogOpen, setDialogOpen] = useState(false);
+  const [picture, setPicture]= useState("/assets/images/profile-avatars/Avatar_2.png")
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const { data: session } = useSession({ required: true });
 
   const { data } = api.users.myReferralCode.useQuery();
@@ -83,6 +94,7 @@ export default function ProfilePage() {
   ];
 
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
+  console.log(profileInfo);
 
   const { data: bucketListProperties } =
     api.profile.getAllPropertiesWithDetails.useQuery();
@@ -100,6 +112,7 @@ export default function ProfilePage() {
   const editProfileDialogState = useDialogState();
   const editBLDestinationDialogState = useDialogState();
   const addBLDestinationDialogState = useDialogState();
+  const editProfilePicDialogState = useDialogState()
 
   const deleteBLDDialogState = useDialogState();
 
@@ -107,21 +120,54 @@ export default function ProfilePage() {
     <div className="mx-auto mb-5 min-h-screen-minus-header max-w-4xl space-y-3">
       {/* Profile Header */}
       <section className="rounded-lg border">
-        <div className="relative h-40 bg-teal-900 lg:h-52">
+         <div className="relative h-40 bg-teal-900 lg:h-52">
           {/* <Button className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-primary/20 p-0 lg:w-auto lg:rounded-lg lg:px-3">
             <Camera />
             <p className="hidden lg:block">Edit Cover Photo</p>
           </Button> */}
         </div>
         <div className="relative grid grid-cols-1 gap-4 p-5 lg:grid-cols-4 lg:gap-0 lg:p-4">
-          <UserAvatar
-            size="huge"
-            name={profileInfo?.name}
-            email={profileInfo?.email}
-            image={profileInfo?.image}
-          />
+          {/* <Link > */}
+          <div className="relative inline-block">
+          {/* {!isMobile ?  */}
+            {/* <> */}
+            <UserAvatar
+              size="xl"
+              name={profileInfo?.name}
+              email={profileInfo?.email}
+              image={picture}
+              className="border border-black"
+            />
+            {/* <button>
+            <Pencil className="absolute bottom-7 right-28 bg-white rounded-full border p-1 cursor-pointer" onClick={() => editProfilePicDialogState.setState("open")}/>
+          </button> */}
+          {/* </> :
+          <>
+            <Dialog>
+              <DialogTrigger>
+              <UserAvatar
+                size="xl"
+                name={profileInfo?.name}
+                email={profileInfo?.email}
+                image={picture}
+                className="border border-black"
+              />
+              </DialogTrigger>
+              <DialogContent>
+                <ProfilePicSelectionMobile picture={setPicture} />
+              </DialogContent>
+            </Dialog>
+            </>
+          } */}
+          </div>
+          {/* <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogContent> */}
+            {/* <ProfilePicSelection state={editProfilePicDialogState} picture={setPicture}/> */}
+            {/* </DialogContent>
+          </Dialog> */}
+
           <div className="mt-7 flex flex-col gap-1 lg:col-span-2 lg:col-start-2 lg:-ml-4 lg:mt-0">
-            <div className="lg:-translate-x-20">
+            <div className="h-full lg:-translate-x-20">
               <div className="flex items-center gap-x-2">
                 <h2 className="text-xl font-bold lg:text-2xl">
                   {profileInfo?.name}
@@ -178,6 +224,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
+
       {/* pop up if no verified */}
       {verificationStatus?.isIdentityVerified == "false" && (
         <section className="flex flex-col justify-center gap-x-2 rounded-lg border border-red-200 p-4">
