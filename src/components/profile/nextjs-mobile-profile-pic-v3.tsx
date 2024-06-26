@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { DialogClose } from '@/components/ui/dialog';
+import { useRouter } from 'next/router'
 
 const profilePics = [
   '/assets/images/profile-avatars/Avatar_2.png',
@@ -15,14 +15,14 @@ const profilePics = [
   '/assets/images/profile-avatars/Avatar_11.png',
 ];
 
-type picProps = {
-  picture: React.Dispatch<React.SetStateAction<string>>
-}
-
-export default function ProfilePicSelectionMobile({
-  picture,
-}: picProps) {
+const ProfilePicSelectionMobile: React.FC = () => {
   const [selectedPic, setSelectedPic] = useState(0);
+  const router = useRouter();
+
+  const handleOnClick = (selectedPic: number) => {
+    console.log('Selected avatar:', selectedPic)
+    void router.push("/auth/signin");
+  }
 
   const nextPic = () => setSelectedPic((prev) => (prev + 1) % profilePics.length);
   const prevPic = () => setSelectedPic((prev) => (prev - 1 + profilePics.length) % profilePics.length);
@@ -60,16 +60,12 @@ export default function ProfilePicSelectionMobile({
         </div>
 
         <div className="w-full space-y-3">
-          <DialogClose asChild>
           <button
             className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-600 transition-colors duration-200"
-            onClick={() => {console.log('Selected avatar:', selectedPic);
-              picture(profilePics[selectedPic ?? 0] ?? "");
-            }}
+            onClick={() => handleOnClick(selectedPic)}
           >
             Confirm
           </button>
-          </DialogClose>
           <button className="w-full bg-white text-blue-500 py-3 px-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 shadow-md">
             Skip
           </button>
@@ -79,3 +75,4 @@ export default function ProfilePicSelectionMobile({
   );
 };
 
+export default ProfilePicSelectionMobile;

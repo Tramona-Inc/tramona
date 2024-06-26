@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import {type DialogState} from '@/utils/dialog'
-import {Dialog, DialogContent} from '@/components/ui/dialog'
-
+import { useRouter } from 'next/router';
+import { api } from '@/utils/api';
+import {useSession} from 'next-auth/react';
 const profilePics = [
   '/assets/images/profile-avatars/Avatar_2.png',
   '/assets/images/profile-avatars/Avatar_3.png',
@@ -15,14 +15,20 @@ const profilePics = [
   '/assets/images/profile-avatars/Avatar_10.png',
   '/assets/images/profile-avatars/Avatar_11.png',
 ];
-// type picProps = {
-//   state: DialogState,
-//   picture: React.Dispatch<React.SetStateAction<string>>
-// }
 
-export default function ProfilePicSelection() {
+const ProfilePicSelection: React.FC = () => {
   const [selectedPic, setSelectedPic] = useState<number | null>(null);
   const [hoverPic, setHoverPic] = useState<number | null>(null);
+  const router = useRouter();
+
+  const {data: session} = useSession();
+  const {mutateAsync: addAvatar} = api.users.insertAvatar.useMutation();
+
+  const handleOnClick = async (selectedPic: number) => {
+    console.log('Selected avatar:', selectedPic)
+    await addAvatar({userId: session?.user.id ?? "", avatar: profilePics[selectedPic] ?? "",})
+    void router.push("/auth/signin");
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-10 bg-white shadow-lg rounded-xl">
@@ -76,10 +82,7 @@ export default function ProfilePicSelection() {
           </button>
           <button
             className="bg-indigo-600 text-white py-2 px-6 rounded text-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => {console.log('Selected avatar:', selectedPic);
-              // picture(profilePics[selectedPic ?? 0] ?? "");
-              // state.setState("closed")
-            }}
+            onClick={() => handleOnClick(selectedPic ?? 0)}
             disabled={selectedPic === null}
           >
             Confirm Selection
@@ -108,4 +111,4 @@ export default function ProfilePicSelection() {
   );
 };
 
-// export default ProfilePicSelection;
+export default ProfilePicSelection;

@@ -15,7 +15,7 @@ export default function Referral() {
   useEffect(() => {
     if (!open) {
       try {
-        void router.push("/");
+        void router.push("/profile");
       } catch (error: any) {
         toast({
           title: "Error",
