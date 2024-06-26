@@ -39,9 +39,6 @@ type Trip = {
       email: string;
     } | null;
   };
-  madeByGroup: {
-    members: Object[];
-  };
   checkIn: Date;
   checkOut: Date;
   numGuests: number;

@@ -213,6 +213,7 @@ export const propertiesRouter = createTRPCRouter({
         .from(properties)
         .where(
           and(
+            eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
             input.lat &&
               input.long &&
@@ -347,6 +348,7 @@ export const propertiesRouter = createTRPCRouter({
         .from(properties)
         .where(
           and(
+            eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
@@ -448,6 +450,9 @@ export const propertiesRouter = createTRPCRouter({
         })
         .then((res) => res?.curTeamId);
 
+      console.log("USER ID", ctx.user.id);
+      console.log("CURR ID", curTeamId);
+
       if (!curTeamId) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
@@ -456,15 +461,16 @@ export const propertiesRouter = createTRPCRouter({
         .findMany({
           columns: { id: true, imageUrls: true, name: true, address: true },
           where: eq(properties.hostTeamId, curTeamId),
-          with: { requestsToProperties: true },
+          with: { requestsToProperties: true, bids: true },
         })
         .then((res) =>
           res
             .map((p) => {
-              const { requestsToProperties, ...rest } = p;
+              const { requestsToProperties, bids, ...rest } = p;
               return {
                 ...rest,
                 numRequests: requestsToProperties.length,
+                numBids: bids.length,
               };
             })
             .sort((a, b) => b.numRequests - a.numRequests),

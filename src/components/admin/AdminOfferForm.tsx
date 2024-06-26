@@ -66,7 +66,7 @@ const formSchema = z.object({
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
-  amenities: z.string().array().nullable(),
+  amenities: z.string().array(),
   about: zodString({ maxLen: Infinity }),
   airbnbUrl: optional(zodUrl()),
   airbnbMessageUrl: optional(zodUrl()),
@@ -131,7 +131,7 @@ export default function AdminOfferForm({
             maxNumGuests: offer.property.maxNumGuests,
             numBeds: offer.property.numBeds,
             numBedrooms: offer.property.numBedrooms,
-            numBathrooms: offer.property.numBathrooms,
+            numBathrooms: offer.property.numBathrooms ?? undefined,
             propertyType: offer.property.propertyType,
             avgRating: offer.property.avgRating,
             numRatings: offer.property.numRatings,
@@ -268,6 +268,9 @@ export default function AdminOfferForm({
         propertyId,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
+        checkIn: request.checkIn,
+        checkOut: request.checkOut,
+        groupId: request.madeByGroupId,
       };
 
       if (propertyData.reviews && propertyData.reviews.length > 0) {
@@ -293,7 +296,7 @@ export default function AdminOfferForm({
     );
 
     for (const traveler of travelers) {
-      if (traveler?.phoneNumber) {
+      if (traveler.phoneNumber) {
         if (traveler.isWhatsApp) {
           await twilioWhatsAppMutation.mutateAsync({
             templateId: "HXfeb90955f0801d551e95a6170a5cc015",

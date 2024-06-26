@@ -90,7 +90,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       images: properties.imageUrls,
     })
     .from(properties)
-    .where(eq(properties.id, serverPropertyId));
+    .where(
+      and(
+        eq(properties.propertyStatus, "Listed"),
+        eq(properties.id, serverPropertyId),
+      ),
+    );
 
   return {
     props: {

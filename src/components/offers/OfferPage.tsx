@@ -24,7 +24,6 @@ import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
 import router from "next/router";
-
 import { useSession } from "next-auth/react";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 import { formatDateRange } from "@/utils/utils";
@@ -66,14 +65,14 @@ export default function OfferPage({
   // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
   const offerNightlyPrice =
-    offer.totalPrice / getNumNights(request.checkIn, request.checkOut);
+    offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
 
   // const discountPercentage = getDiscountPercentage(
   //   property.originalNightlyPrice ?? 0,
   //   offerNightlyPrice ?? 0,
   // );
 
-  const numNights = getNumNights(request.checkIn, request.checkOut);
+  const numNights = getNumNights(offer.checkIn, offer.checkOut);
   if (property.originalNightlyPrice === null) {
     throw new Error("originalNightlyPrice is required but was not provided.");
   }
@@ -287,27 +286,23 @@ export default function OfferPage({
           <hr className="h-px border-0 bg-gray-300" />
           <section id="amenities" className="scroll-mt-36">
             <h1 className="text-lg font-semibold md:text-xl">Amenitites</h1>
-            <PropertyAmenities amenities={property.amenities ?? []} />
-            {property.amenities && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    Show all amenities
-                  </Button>
-                </DialogTrigger>
+            <PropertyAmenities amenities={property.amenities} />
 
-                <DialogContent className="max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle>Amenities</DialogTitle>
-                  </DialogHeader>
-                  <div className="max-h-96 overflow-y-auto">
-                    <AmenitiesComponent
-                      propertyAmenities={property.amenities}
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Show all amenities
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>Amenities</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-96 overflow-y-auto">
+                  <AmenitiesComponent propertyAmenities={property.amenities} />
+                </div>
+              </DialogContent>
+            </Dialog>
           </section>
           <section id="cancellation" className="scroll-mt-36">
             <h1 className="text-lg font-semibold md:text-xl">
@@ -347,19 +342,21 @@ export default function OfferPage({
                     <div>
                       <p className="text-sm text-gray-600">Check in / out</p>
                       <p className="text-base font-bold">
-                        {formatDateRange(request.checkIn, request.checkOut)}
+                        {formatDateRange(offer.checkIn, offer.checkOut)}
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="inline-flex w-full items-center rounded-full py-2 md:rounded-3xl lg:rounded-full">
-                <div>
-                  <p className="text-sm text-gray-600">Guests</p>
-                  <p className="font-bold">
-                    {plural(request.numGuests, "Guest")}
-                  </p>
-                </div>
+                {request && (
+                  <div>
+                    <p className="text-sm text-gray-600">Guests</p>
+                    <p className="font-bold">
+                      {plural(request.numGuests, "Guest")}
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="w-full rounded-full py-2 md:rounded-3xl lg:rounded-full">
                 <div>
@@ -417,9 +414,9 @@ export default function OfferPage({
                   propertyName={property.name}
                   originalNightlyPrice={property.originalNightlyPrice}
                   airbnbUrl={property.airbnbUrl ?? ""}
-                  checkIn={request.checkIn}
-                  checkOut={request.checkOut}
-                  requestId={request.id}
+                  checkIn={offer.checkIn}
+                  checkOut={offer.checkOut}
+                  requestId={request?.id}
                   offer={{ property, request, ...offer }}
                   totalPrice={offer.totalPrice}
                   offerNightlyPrice={offerNightlyPrice}

@@ -61,27 +61,27 @@ const HowItWorks: React.FC = () => {
             <Step
               number={1}
               title="Specify travel plans"
-              description="Tell us your destination, dates, and budget. Submit an offer on a specific property or a request for a city."
+              description="Tell us your destination, dates, and budget."
             />
             <Step
               number={2}
-              title="Sending your offer/request"
-              description="We send your offer to the property host or to all hosts who own a property in the requested city."
+              title="That request goes out"
+              description="Your request gets sent to every host with a vacant property your requested city."
             />
             <Step
               number={3}
               title="Host response"
-              description="Hosts may accept, deny, or counter your offer for their property. With city requests, you'll hear back from agreeing hosts!"
+              description="Hosts may accept, deny, or counter your request. If it is a match, you will get a text and it will show up in your requests tab."
             />
             <Step
               number={4}
-              title="Seal the deal"
-              description="Once accepted, the unique deal is created, a price that can't be found anywhere else."
+              title="Choose a match you like"
+              description="Choose between all the matches hosts have sent. Get ready to travel!"
             />
             <Step
               number={5}
               title="Book and enjoy!"
-              description="Get ready to embark on a memorable journey, tailored just for you."
+              description="Book and enjoy!"
               isLast={true}
             />
           </div>

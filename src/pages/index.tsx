@@ -30,6 +30,7 @@ export async function getStaticProps() {
         eq(properties.isPrivate, false),
         lte(t.vacancyCount, 10),
         lte(properties.originalNightlyPrice, 20000),
+        eq(properties.propertyStatus, "Listed"),
       ),
     )
     .limit(15);

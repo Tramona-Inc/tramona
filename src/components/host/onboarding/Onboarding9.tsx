@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   pets: z.string(),
@@ -24,7 +25,13 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function Onboarding9() {
+export default function Onboarding9({
+  editing = false,
+  setHandleOnboarding,
+}: {
+  editing?: boolean;
+  setHandleOnboarding?: (handle: () => void) => void;
+}) {
   const petsAllowed = useHostOnboarding((state) => state.listing.petsAllowed);
   const smokingAllowed = useHostOnboarding(
     (state) => state.listing.smokingAllowed,
@@ -56,9 +63,14 @@ export default function Onboarding9() {
     setOtherHouseRules(values.additionalComments ?? "");
   }
 
+  useEffect(() => {
+    setHandleOnboarding &&
+      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+  }, [form.formState]);
+
   return (
     <>
-      <SaveAndExit />
+      {!editing && <SaveAndExit />}
       <div className="container my-10 flex flex-grow flex-col justify-center">
         <h1 className="mb-8 text-3xl font-bold">Any house rules?</h1>
         <Form {...form}>
@@ -147,11 +159,13 @@ export default function Onboarding9() {
           </div>
         </Form>
       </div>
-      <OnboardingFooter
-        isForm={true}
-        handleNext={form.handleSubmit(handleFormSubmit)}
-        isFormValid={form.formState.isValid}
-      />
+      {!editing && (
+        <OnboardingFooter
+          isForm={true}
+          handleNext={form.handleSubmit(handleFormSubmit)}
+          isFormValid={form.formState.isValid}
+        />
+      )}
     </>
   );
 }
