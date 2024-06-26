@@ -17,6 +17,7 @@ import { usersRouter } from "./routers/usersRouter";
 import { hostTeamsRouter } from "./routers/hostTeamsRouter";
 import { profileRouter } from "./routers/profileRouter";
 import { superhogRouter } from "./routers/superhogRouter";
+import { pmsRouter } from "./routers/pmsRouter";
 import { reviewsRouter } from "./routers/reviewsRouter";
 
 /**
@@ -43,6 +44,7 @@ export const appRouter = createTRPCRouter({
   hostTeams: hostTeamsRouter,
   profile: profileRouter,
   superhog: superhogRouter,
+  pms: pmsRouter,
   reviews: reviewsRouter,
 });
 

@@ -32,17 +32,23 @@ export const ALL_PROPERTY_TYPES = [
   "Chalet",
   "Bed & Breakfast",
   "Castle",
+  "Castle",
   "Tent",
   "Cabin",
   "Townhouse",
   "Bungalow",
   "Hut",
   "Dorm",
+  "Dorm",
   "Aparthotel",
   "Hotel",
   "Yurt",
   "Treehouse",
   "Cottage",
+  "Guest Suite",
+  "Tiny House",
+  "Plane",
+  "Igloo",
   "Guest Suite",
   "Tiny House",
   "Plane",
@@ -80,7 +86,7 @@ export const ALL_PROPERTY_TYPES = [
   "Tower",
   "Trullo",
   "Windmill",
-  "Shepherd’s Hut",
+  "Shepherd's Hut",
   "Villa",
 ] as const;
 
@@ -177,12 +183,13 @@ export const propertyStatusEnum = pgEnum("property_status", [
 export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
 
 export const propertyPMS = pgEnum("property_pms", ALL_PROPERTY_PMS);
+
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
   hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
-  propertyType: propertyTypeEnum("property_type").notNull(),
+  propertyType: propertyTypeEnum("property_type").notNull().default("Apartment"),
   roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
 
   // how many guests does this property accomodate at most?
