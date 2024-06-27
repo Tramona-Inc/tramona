@@ -99,7 +99,6 @@ export default function Onboarding2({ editing = false }) {
                       text={item.text}
                       onClick={() => setPropertyType(item.id)}
                       isSelected={propertyType === item.id}
-                      hover={true}
                     >
                       {item.icon}
                     </CardSelect>
