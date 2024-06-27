@@ -135,7 +135,7 @@ export default function ProfilePage() {
               size="xl"
               name={profileInfo?.name}
               email={profileInfo?.email}
-              image={picture}
+              image={profileInfo?.avatar}
               className="border border-black"
             />
             {/* <button>

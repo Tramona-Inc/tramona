@@ -52,6 +52,7 @@ function DropdownTop({ session }: { session: Session }) {
 export default function AvatarDropdown({ session }: { session: Session }) {
   const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
+  const { data: profileInfo} = api.profile.getProfileInfo.useQuery();
   const pathname = usePathname();
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
@@ -63,7 +64,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
           <UserAvatar
             name={session.user.name}
             email={session.user.email}
-            image={session.user.image}
+            image={profileInfo?.avatar ?? session.user.image}
           />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80 py-4 font-medium">

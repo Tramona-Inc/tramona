@@ -105,7 +105,7 @@ export const usersRouter = createTRPCRouter({
       avatar: z.string(),
     }))
     .mutation(async ({ctx, input}) => {
-      const insertProfilePicture = await ctx.db
+      await ctx.db
       .update(users)
       .set({avatar: input.avatar})
       .where(eq(users.id, input.userId))

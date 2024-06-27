@@ -19,19 +19,29 @@ const profilePics = [
 const ProfilePicSelection: React.FC = () => {
   const [selectedPic, setSelectedPic] = useState<number | null>(null);
   const [hoverPic, setHoverPic] = useState<number | null>(null);
-  const router = useRouter();
-
-  const {data: session} = useSession();
-  const {mutateAsync: addAvatar} = api.users.insertAvatar.useMutation();
+  const router = useRouter()
+  const userId = localStorage.getItem("userId");
+  console.log(userId);
+  // const {data: session} = useSession();
+  const {mutateAsync: addAvatar} = api.users.insertAvatar.useMutation({
+    onSuccess: () => {
+      console.log("avatar inserted");
+    },
+    onError: () => {
+      console.log("something went wrong ", userId)
+    }
+  });
 
   const handleOnClick = async (selectedPic: number) => {
     console.log('Selected avatar:', selectedPic)
-    await addAvatar({userId: session?.user.id ?? "", avatar: profilePics[selectedPic] ?? "",})
+    console.log(userId)
+    await addAvatar({userId: userId ?? "", avatar: profilePics[selectedPic] ?? "",})
+    localStorage.removeItem("userId");
     void router.push("/auth/signin");
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-10 bg-white shadow-lg rounded-xl">
+    <div className="max-w-2xl mx-auto my-10 p-10 bg-white shadow-lg rounded-xl">
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-gray-800 mb-2">Choose an avatar to be your profile picture</h1>
         <p className="text-gray-600">This avatar will be visible to people in the feed and in your profile</p>
