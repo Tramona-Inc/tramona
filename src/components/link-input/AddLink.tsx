@@ -12,8 +12,8 @@ export function AddAirbnbLink({
   curTab: number;
 }) {
   return (
-    <div className="flex space-x-2">
-      <div className="flex-grow">
+    <div className="grid grid-rows-2 gap-2 lg:flex lg:flex-row lg:space-x-1">
+      <div className="lg:flex-grow">
         <FormField
           control={form.control}
           name={`data.${curTab}.airbnbLink`}
@@ -22,8 +22,8 @@ export function AddAirbnbLink({
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="Paste property link here (optional)"
-                  className="w-full"
+                  placeholder="Paste property link here"
+                  className="h-11 w-full"
                   icon={Link2}
                 />
               </FormControl>
@@ -32,9 +32,18 @@ export function AddAirbnbLink({
           )}
         />
       </div>
-      <Button type="submit" className="bg-[#004236] text-white">
-        Submit
-      </Button>
+      <div className="">
+        <div className="hidden lg:block">
+          <Button size="lg" type="submit" className="bg-[#004236] text-white">
+            Submit
+          </Button>
+        </div>
+        <div className="lg:hidden">
+          <Button type="submit" className="w-full bg-[#004236] hover:bg-teal-950 text-white">
+            Submit Request
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

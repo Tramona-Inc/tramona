@@ -40,6 +40,21 @@ export default function Page() {
     await onSubmit(event);
   };
 
+  const handleEnterLink = (event: { preventDefault: () => void; }) => {
+    event.preventDefault(); // Prevent default form submission behavior
+    // Submit form data using form.onSubmit or other logic here
+
+    const scrollToTop = () => {
+      const c = document.documentElement.scrollTop || document.body.scrollTop;
+      if (c > 0) {
+        window.requestAnimationFrame(scrollToTop);
+        window.scrollTo(0, c - c / 16);
+      }
+    };
+    scrollToTop();
+  };
+
+
   return (
     <MainLayout>
       <section className="relative bg-white pb-4">
@@ -62,7 +77,7 @@ export default function Page() {
                   Already have a property you like?
                 </h1>
                 <p className="mx-auto max-w-[38rem] pt-4 text-[14px] font-bold text-[#584F3E] lg:pt-4 lg:text-base">
-                  Let us get you the same property, or their next door neighbor
+                  Let us get you the same property, or their next door neighbor,
                   for a better price
                 </p>
                 <div className="mx-auto mt-8 max-w-3xl">
@@ -183,6 +198,7 @@ export default function Page() {
           </p>
           <Button
             type="submit"
+            onClick={handleEnterLink}
             className="text-md w-[294px] h-[62px] text-[24px] rounded-full bg-[#004236] font-semibold text-white"
           >
             Enter Link
@@ -190,15 +206,15 @@ export default function Page() {
         </div>
 
         {/* How it works */}
-        <h2 className="mt-28 text-center text-2xl font-bold lg:text-4xl">
-          How it works
+        <h2 className="mt-28 text-center text-[40px] font-bold lg:text-4xl">
+          What people are saying
         </h2>
 
         {/* testimonial carousel */}
         <div className="mx-4 mt-10 hidden justify-center space-y-4 lg:mx-0 lg:mt-16 lg:flex lg:space-y-8">
           <TestimonialCarousel />
         </div>
-        <div className="mx-4 mt-10 flex justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
+        <div className="mx-4 mt-20 flex justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
           <MobileTestimonialCarousel />
         </div>
       </section>
