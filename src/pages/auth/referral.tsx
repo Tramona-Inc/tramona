@@ -15,7 +15,7 @@ export default function Referral() {
   useEffect(() => {
     if (!open) {
       try {
-        void router.push("/profile");
+        void router.push("/profile/avatar-selection");
       } catch (error: any) {
         toast({
           title: "Error",
