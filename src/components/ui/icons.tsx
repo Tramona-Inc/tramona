@@ -150,7 +150,7 @@ const iconComponents: Icons = {
   },
 };
 
-const NoIconFound: React.FC = () => {
+const NoIconFound: React.FC<{ className?: string }> = () => {
   return null;
 };
 

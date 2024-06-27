@@ -1,4 +1,4 @@
-//for an accepted property that needs to be withdrawn due to scheduling mistake by host
+// for an accepted property that needs to be withdrawn due to scheduling mistake by host
 
 import { api } from "@/utils/api";
 import { Button } from "../ui/button";
@@ -11,7 +11,6 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { toast } from "../ui/use-toast";
-import { useSession } from "next-auth/react";
 import { formatCurrency, formatDateRange } from "@/utils/utils";
 
 export default function PropertyDeleteDialog({
@@ -27,11 +26,10 @@ export default function PropertyDeleteDialog({
   originalNightlyBiddingOffer: number;
   counterNightlyPrice: number;
 }) {
-  const { data: session } = useSession();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
-  const { data, isLoading } = api.biddings.getBidInfo.useQuery({
+  const { data } = api.biddings.getBidInfo.useQuery({
     bidId: offerId,
   });
 
@@ -43,7 +41,6 @@ export default function PropertyDeleteDialog({
   // const getTraveler = api.groups.getGroupOwner.useMutation();
   const getTravelers = api.groups.getGroupMembers.useMutation();
 
-
   const { mutate } = api.biddings.cancel.useMutation({
     onSuccess: async () => {
       toast({
@@ -53,9 +50,9 @@ export default function PropertyDeleteDialog({
       if (!data || !property) return;
 
       // const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
-      const travelers = await getTravelers.mutateAsync(data?.madeByGroupId);
+      const travelers = await getTravelers.mutateAsync(data.madeByGroupId);
       for (const traveler of travelers) {
-        if (traveler?.phoneNumber) {
+        if (traveler.phoneNumber) {
           const nightlyPrice =
             counterNightlyPrice > 0
               ? formatCurrency(counterNightlyPrice)
@@ -65,8 +62,8 @@ export default function PropertyDeleteDialog({
               templateId: "HXd7d55b299c2170bd5af4cef76e058d78",
               to: traveler.phoneNumber,
               cost: nightlyPrice,
-              name: property?.name,
-              dates: formatDateRange(data?.checkIn, data?.checkOut),
+              name: property.name,
+              dates: formatDateRange(data.checkIn, data.checkOut),
             });
           } else {
             await twilioMutation.mutateAsync({

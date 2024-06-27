@@ -1,55 +1,30 @@
-import Spinner from "@/components/_common/Spinner";
-import PastTripCard from "@/components/my-trips/PastTripCard";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
+import Spinner from "@/components/_common/Spinner";
+import PastTripCard from "@/components/my-trips/PastTripCard";
+import { api, type RouterOutputs } from "@/utils/api";
 
-import { type RouterOutputs } from "@/utils/api";
+export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
-type MyTripsType<T> = T extends (infer U)[] ? U : never;
+export default function PastTrips() {
+  const { data: allTrips } = api.trips.getMyTrips.useQuery();
+  if (allTrips === undefined) return <Spinner />;
+  const pastTrips = allTrips.filter((trip) => trip.checkIn <= new Date());
 
-export type PastTrip = MyTripsType<
-  RouterOutputs["myTrips"]["getPreviousTrips"]
->;
-
-export default function PastTrips({
-  pastTrips,
-  isLoading,
-}: {
-  pastTrips: PastTrip[] | undefined;
-  isLoading: boolean;
-}) {
-  if (isLoading) {
-    return <Spinner />;
-  }
-
-  return (
-    <>
-      {pastTrips && (
-        <>
-          {pastTrips.length !== 0 ? (
-            <>
-              {pastTrips.map((trip: PastTrip) => (
-                <PastTripCard key={trip.id} trip={trip} />
-              ))}
-            </>
-          ) : (
-            <>
-              <div className="col-span-2">
-                <EmptyStateValue
-                  title={"You have no past trips"}
-                  description={
-                    "Properties you've booked previously will show up here."
-                  }
-                  redirectTitle={"Start Searching"}
-                  href={"/"}
-                >
-                  <MyTripsEmptySvg />
-                </EmptyStateValue>
-              </div>
-            </>
-          )}
-        </>
-      )}
-    </>
+  return pastTrips.length !== 0 ? (
+    <div className="grid grid-cols-1 gap-4 pt-8 xl:grid-cols-2">
+      {pastTrips.map((trip) => (
+        <PastTripCard key={trip.id} trip={trip} />
+      ))}
+    </div>
+  ) : (
+    <EmptyStateValue
+      title="You have no past trips"
+      description="Trips you've completed will show up here."
+      redirectTitle="Start Searching"
+      href="/"
+    >
+      <MyTripsEmptySvg />
+    </EmptyStateValue>
   );
 }
