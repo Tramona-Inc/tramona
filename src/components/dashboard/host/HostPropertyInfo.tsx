@@ -5,11 +5,12 @@ import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import HostAvailability from "./HostAvailability";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
     <div className="space-y-4 p-4 sm:p-6">
-      <Link href="/host/properties" className="sm:hidden">
+      <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
       <div>
@@ -52,11 +53,11 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         <TabsContent value="details">
           <HostPropertiesDetails property={property} />
         </TabsContent>
-        <TabsContent value="price">
+        {/* <TabsContent value="price">
           <HostPropertiesPriceRestriction property={property} />
-        </TabsContent>
+        </TabsContent> */}
         <TabsContent value="availability">
-          <p>Availability stuff</p>
+          <HostAvailability property={property} />
         </TabsContent>
         <TabsContent value="cancellation">
           <HostPropertiesCancellation property={property} />
