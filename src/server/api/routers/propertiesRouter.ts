@@ -35,6 +35,7 @@ import {
   bookedDates,
   properties,
 } from "./../../db/schema/tables/properties";
+import { addProperty } from "@/server/server-utils";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -44,22 +45,10 @@ export const propertiesRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      if ((!input.latitude || !input.longitude) && input.address) {
-        const { location } = await getCoordinates(input.address);
-        if (location) {
-          input.latitude = location.lat;
-          input.longitude = location.lng;
-        }
-      }
+      const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
 
-      return await ctx.db
-        .insert(properties)
-        .values({
-          ...input,
-          hostId: ctx.user.role === "admin" ? null : ctx.user.id,
-        })
-        .returning({ id: properties.id })
-        .then((res) => res[0]!.id);
+      const id = await addProperty({property: input, hostId});
+      return id;
     }),
 
   // uses the hostId passed in the input instead of the admin's user id
@@ -203,10 +192,10 @@ export const propertiesRouter = createTRPCRouter({
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
-            (SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            (SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
           `,
         })
@@ -261,10 +250,10 @@ export const propertiesRouter = createTRPCRouter({
                   ),
                 ),
             ),
-            sql`(SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            sql`(SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
 
             northeastLat && northeastLng && southwestLat && southwestLng
@@ -338,10 +327,10 @@ export const propertiesRouter = createTRPCRouter({
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
-            (SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            (SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
           `,
         })
@@ -396,10 +385,10 @@ export const propertiesRouter = createTRPCRouter({
                   ),
                 ),
             ),
-            sql`(SELECT COUNT(booked_dates.property_id) 
-              FROM booked_dates 
-              WHERE booked_dates.property_id = properties.id 
-                AND booked_dates.date >= CURRENT_DATE 
+            sql`(SELECT COUNT(booked_dates.property_id)
+              FROM booked_dates
+              WHERE booked_dates.property_id = properties.id
+                AND booked_dates.date >= CURRENT_DATE
                 AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
