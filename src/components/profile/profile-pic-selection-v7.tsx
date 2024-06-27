@@ -20,22 +20,19 @@ const ProfilePicSelection: React.FC = () => {
   const [selectedPic, setSelectedPic] = useState<number | null>(null);
   const [hoverPic, setHoverPic] = useState<number | null>(null);
   const router = useRouter()
-  const userId = localStorage.getItem("userId");
-  console.log(userId);
-  // const {data: session} = useSession();
+  const {data: session} = useSession();
   const {mutateAsync: addAvatar} = api.users.insertAvatar.useMutation({
     onSuccess: () => {
       console.log("avatar inserted");
     },
     onError: () => {
-      console.log("something went wrong ", userId)
+      console.log("something went wrong ")
     }
   });
 
   const handleOnClick = async (selectedPic: number) => {
-    console.log('Selected avatar:', selectedPic)
-    console.log(userId)
-    await addAvatar({userId: userId ?? "", avatar: profilePics[selectedPic] ?? "",})
+    console.log('Selected avatar:', profilePics[selectedPic])
+    await addAvatar({userId: session?.user.id ?? "", avatar: profilePics[selectedPic] ?? "",})
     localStorage.removeItem("userId");
     void router.push("/auth/signin");
   }

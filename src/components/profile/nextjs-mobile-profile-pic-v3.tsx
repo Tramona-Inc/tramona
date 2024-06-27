@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router'
+import { useSession } from 'next-auth/react';
+import { api } from '@/utils/api';
 
 const profilePics = [
   '/assets/images/profile-avatars/Avatar_2.png',
@@ -19,8 +21,20 @@ const ProfilePicSelectionMobile: React.FC = () => {
   const [selectedPic, setSelectedPic] = useState(0);
   const router = useRouter();
 
-  const handleOnClick = (selectedPic: number) => {
-    console.log('Selected avatar:', selectedPic)
+  const {data: session} = useSession();
+  const {mutateAsync: addAvatar} = api.users.insertAvatar.useMutation({
+    onSuccess: () => {
+      console.log("avatar inserted");
+    },
+    onError: () => {
+      console.log("something went wrong ")
+    }
+  });
+
+  const handleOnClick = async (selectedPic: number) => {
+    console.log('Selected avatar:', profilePics[selectedPic])
+    await addAvatar({userId: session?.user.id ?? "", avatar: profilePics[selectedPic] ?? "",})
+    localStorage.removeItem("userId");
     void router.push("/auth/signin");
   }
 
