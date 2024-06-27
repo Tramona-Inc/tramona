@@ -4,10 +4,10 @@ import HostStaysCards from "./HostStaysCards";
 export default function HostStays() {
   return (
     <div>
-      <h1 className="mb-10 text-4xl font-bold">Stays</h1>
+      <h1 className="mb-2 text-3xl font-bold md:mb-10 md:text-4xl">Stays</h1>
       <Tabs defaultValue="currently hosting">
-        <TabsList>
-          <TabsTrigger value="currently hosting">Currently Hosting</TabsTrigger>
+        <TabsList className="mb-4 md:mb-8">
+          <TabsTrigger value="currently hosting">Currently hosting</TabsTrigger>
           <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
           <TabsTrigger value="accepted">Accepted</TabsTrigger>
           <TabsTrigger value="checking out">Checking out</TabsTrigger>
@@ -19,9 +19,7 @@ export default function HostStays() {
           </div>
         </TabsList>
         <TabsContent value="currently hosting">
-          <div className="mt-8">
-            <HostStaysCards />
-          </div>
+          <HostStaysCards />
         </TabsContent>
       </Tabs>
     </div>

@@ -4,7 +4,7 @@ import HostStays from "@/components/host/HostStays";
 export default function Page() {
   return (
     <DashboardLayout type="host">
-      <div className="mx-auto mt-16 max-w-6xl">
+      <div className="mx-auto mt-4 max-w-6xl px-4 md:mt-16">
         <HostStays />
       </div>
     </DashboardLayout>
