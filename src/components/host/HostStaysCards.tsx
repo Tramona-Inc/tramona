@@ -37,7 +37,7 @@ export default function HostStaysCards() {
             className="grid grid-cols-1 items-center gap-4 overflow-hidden rounded-xl border md:grid-cols-7 md:rounded-2xl"
             key={index}
           >
-            <div className=" h-40 md:h-28">
+            <div className="h-40 md:h-28">
               <Image
                 src={stay.propertyImg}
                 alt={stay.propertyName}

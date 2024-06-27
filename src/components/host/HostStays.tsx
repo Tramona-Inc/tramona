@@ -21,6 +21,18 @@ export default function HostStays() {
         <TabsContent value="currently hosting">
           <HostStaysCards />
         </TabsContent>
+        <TabsContent value="upcoming">
+          <HostStaysCards />
+        </TabsContent>
+        <TabsContent value="accepted">
+          <HostStaysCards />
+        </TabsContent>
+        <TabsContent value="checking out">
+          <HostStaysCards />
+        </TabsContent>
+        <TabsContent value="history">
+          <HostStaysCards />
+        </TabsContent>
       </Tabs>
     </div>
   );
