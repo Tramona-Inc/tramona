@@ -70,13 +70,15 @@ const StripeConnectSessionProvider = ({
               // See all possible variables below
               overlays: "dialog",
               variables: {
-                colorPrimary: "#FF0000",
+                colorPrimary: "#134E4A",
+                buttonPrimaryColorBackground: "#134E4A",
+                fontFamily: "Helvetica Neue",
               },
             },
             fonts: [
               {
-                family: "Mulish",
-                src: "https://fonts.googleapis.com/css2?family=Mulish:wght@400;400italic;700;700italic&display=swap",
+                cssSrc:
+                  "https://fonts.googleapis.com/css2?family=Mulish:wght@400;400italic;700;700italic&display=swap",
               },
             ],
           }),

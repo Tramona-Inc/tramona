@@ -19,6 +19,9 @@ module.exports = {
     extend: {
       fontSize: {
         "8xl": "4.6rem",
+        fontFamily: {
+          mulish: ["Mulish", "sans-serif"],
+        },
       },
       spacing: {
         "screen-minus-header-n-footer": "var(--screen-minus-header-n-footer)",
