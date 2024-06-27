@@ -204,12 +204,12 @@ export default function TripPage({ trip }: { trip: Trip }) {
                 </div>
                 <p>{formatCurrency(trip.totalPrice)}</p>
 
-                <Link
+                {/* <Link
                   href={`/`}
                   className="flex justify-between py-5 font-semibold hover:underline"
                 >
                   View payment details <ChevronRight />
-                </Link>
+                </Link> */}
               </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
