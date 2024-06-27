@@ -14,6 +14,7 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
+  trips,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
@@ -38,35 +39,49 @@ export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
-      const offerDetails = await ctx.db.query.offers.findFirst({
+      const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: { totalPrice: true },
+        columns: { totalPrice: true, propertyId: true },
         with: {
           request: {
-            columns: { id: true },
-            with: { madeByGroup: { columns: { ownerId: true } } },
+            columns: {
+              id: true,
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+            },
+            with: { madeByGroup: { columns: { ownerId: true, id: true } } },
           },
         },
       });
 
-      if (!offerDetails) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+      if (!offer) throw new TRPCError({ code: "NOT_FOUND" });
 
       // if the offer comes from a request, only the owner of the group can accept offers
       // otherwise, anyone can
-      if (offerDetails.request?.madeByGroup.ownerId !== ctx.user.id) {
+      if (offer.request?.madeByGroup.ownerId !== ctx.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       await ctx.db.transaction(async (tx) => {
         const results = await Promise.allSettled([
-          offerDetails.request &&
+          offer.request &&
             // resolve the request if it exists
             tx
               .update(requests)
               .set({ resolvedAt: new Date() })
-              .where(eq(offers.id, offerDetails.request.id)),
+              .where(eq(offers.id, offer.request.id)),
+
+          offer.request &&
+            // add a trip
+            tx.insert(trips).values({
+              offerId: input.id,
+              checkIn: offer.request.checkIn,
+              checkOut: offer.request.checkOut,
+              numGuests: offer.request.numGuests,
+              groupId: offer.request.madeByGroup.id,
+              propertyId: offer.propertyId,
+            }),
 
           // mark the offer as accepted
           tx
@@ -79,7 +94,7 @@ export const offersRouter = createTRPCRouter({
             tx
               .update(referralCodes)
               .set({
-                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
               })
               .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 

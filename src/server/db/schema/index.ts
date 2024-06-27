@@ -18,3 +18,4 @@ export * from "./tables/requestsToProperties";
 export * from "./tables/reservations";
 export * from "./tables/users";
 export * from "./tables/reviews";
+export * from "./tables/trips";
