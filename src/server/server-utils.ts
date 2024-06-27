@@ -219,3 +219,4 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
     })
     .then((res) => res?.ownerId);
 }
+

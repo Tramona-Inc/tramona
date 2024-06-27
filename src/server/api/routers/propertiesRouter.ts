@@ -12,6 +12,9 @@ import {
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
+  Request,
+  requests,
+  requestsToProperties,
   users,
 } from "@/server/db/schema";
 import { getCoordinates } from "@/server/google-maps";
@@ -33,8 +36,11 @@ import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
+  NewProperty,
   properties,
+  Property,
 } from "./../../db/schema/tables/properties";
+import { on } from "events";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -203,10 +209,10 @@ export const propertiesRouter = createTRPCRouter({
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
-            (SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            (SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
           `,
         })
@@ -261,10 +267,10 @@ export const propertiesRouter = createTRPCRouter({
                   ),
                 ),
             ),
-            sql`(SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            sql`(SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
 
             northeastLat && northeastLng && southwestLat && southwestLng
@@ -338,10 +344,10 @@ export const propertiesRouter = createTRPCRouter({
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
-            (SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            (SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
           `,
         })
@@ -396,10 +402,10 @@ export const propertiesRouter = createTRPCRouter({
                   ),
                 ),
             ),
-            sql`(SELECT COUNT(booked_dates.property_id) 
-              FROM booked_dates 
-              WHERE booked_dates.property_id = properties.id 
-                AND booked_dates.date >= CURRENT_DATE 
+            sql`(SELECT COUNT(booked_dates.property_id)
+              FROM booked_dates
+              WHERE booked_dates.property_id = properties.id
+                AND booked_dates.date >= CURRENT_DATE
                 AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
@@ -441,41 +447,132 @@ export const propertiesRouter = createTRPCRouter({
         limit: input?.limit,
       });
     }),
-  getHostRequestsSidebar: roleRestrictedProcedure(["host"]).query(
+  getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
-      const curTeamId = await ctx.db.query.hostProfiles
-        .findFirst({
-          where: eq(hostProfiles.userId, ctx.user.id),
-          columns: { curTeamId: true },
-        })
-        .then((res) => res?.curTeamId);
 
-      console.log("USER ID", ctx.user.id);
-      console.log("CURR ID", curTeamId);
 
-      if (!curTeamId) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
+      // Then, when you fetch rawData, ensure it's typed correctly:
+      const rawData = await ctx.db.execute(sql`
+        WITH host_properties AS (
+          SELECT
+            *,
+            CASE
+              WHEN array_length(string_to_array(address, ','), 1) >= 3 THEN
+                trim(
+                  split_part(address, ',', array_length(string_to_array(address, ','), 1) - 2) || ', ' ||
+                  split_part(address, ',', array_length(string_to_array(address, ','), 1) - 1) || ', ' ||
+                  split_part(address, ',', array_length(string_to_array(address, ','), 1))
+                )
+              WHEN array_length(string_to_array(address, ','), 1) = 2 THEN
+                trim(
+                  split_part(address, ',', array_length(string_to_array(address, ','), 1) - 1) || ', ' ||
+                  split_part(address, ',', array_length(string_to_array(address, ','), 1))
+                )
+              ELSE
+                trim(address)
+            END AS city
+          FROM ${properties}
+          WHERE host_id = ${ctx.user.id}
+        )
+        SELECT
+          hp.city,
+          r.*,
+          hp.id AS property_id,
+          r.id AS request_id,
+          hp.*
+        FROM host_properties hp
+        JOIN ${requestsToProperties} rtp ON hp.id = rtp.property_id
+        JOIN ${requests} r ON rtp.request_id = r.id
+        ORDER BY hp.city, r.id, hp.id
+      `);
+
+      interface CityData {
+        city: string;
+        requests: {
+          request: Request;
+          properties: Property[];
+        }[];
       }
 
-      return await ctx.db.query.properties
-        .findMany({
-          columns: { id: true, imageUrls: true, name: true, address: true },
-          where: eq(properties.hostTeamId, curTeamId),
-          with: { requestsToProperties: true, bids: true },
-        })
-        .then((res) =>
-          res
-            .map((p) => {
-              const { requestsToProperties, bids, ...rest } = p;
-              return {
-                ...rest,
-                numRequests: requestsToProperties.length,
-                numBids: bids.length,
-              };
-            })
-            .sort((a, b) => b.numRequests - a.numRequests),
-        );
+      const organizedData: CityData[] = [];
+
+      let currentCity: string | null = null;
+      let currentRequest: { request: Request; properties: Property[] } | null = null;
+
+      for (const row of rawData) {
+        console.log(row);
+        const property: NewProperty= {
+          id: row.property_id,
+          hostId: row.host_id,
+          hostTeamId: row.host_team_id,
+          propertyType: row.property_type,
+          address: row.address,
+          city: row.city,
+          roomType: row.room_type ,
+          maxNumGuests: row.max_num_guests,
+          numBeds: row.num_beds,
+          numBedrooms: row.num_bedrooms,
+          numBathrooms: row.num_bathrooms,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          checkInTime: row.check_in_time,
+          checkOutTime: row.check_out_time,
+          amenities: row.amenities,
+          imageUrls: row.image_urls,
+          name: row.name,
+          about: row.about,
+          avgRating: row.avg_rating,
+          numRatings: row.num_ratings,
+          cancellationPolicy: row.cancellation_policy,
+          createdAt: row.created_at,
+          isPrivate: row.is_private,
+          hostProfilePic: row.host_profile_pic,
+          hostawayListingId: row.hostaway_listing_id,
+          hostName: row.host_name,
+          // Add other property fields here
+        };
+
+        const request = {
+          id: row.request_id,
+          madeByGroupId: row.made_by_group_id,
+          requestGroupId: row.request_group_id,
+          maxTotalPrice: row.max_total_price,
+          location: row.location,
+          checkIn: row.check_in,
+          checkOut: row.check_out,
+          numGuests: row.num_guests,
+          minNumBeds: row.min_num_beds,
+          minNumBedrooms: row.min_num_bedrooms,
+          minNumBathrooms: row.min_num_bathrooms,
+          propertyType: row.property_type,
+          note: row.note,
+          airbnbLink: row.airbnb_link,
+          createdAt: row.request_created_at,
+          resolvedAt: row.resolved_at,
+          lat: row.lat,
+          lng: row.lng,
+          radius: row.radius,
+          // Add other request fields here
+        } as Request;
+
+        if (row.city !== currentCity) {
+          currentCity = row.city as string;
+          organizedData.push({ city: currentCity, requests: [] });
+        }
+
+        if (!currentRequest || row.request_id !== currentRequest.request.id) {
+          currentRequest = {
+            request: request,
+            properties: []
+          };
+          organizedData[organizedData.length - 1]?.requests.push(currentRequest);
+        }
+
+        currentRequest?.properties.push(property);
+      }
+      return organizedData;
     },
+
   ),
   hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)

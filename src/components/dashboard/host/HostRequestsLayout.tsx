@@ -22,7 +22,9 @@ type HostRequestsSidebarProperty =
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
-  const { data: properties } = api.properties.getHostRequestsSidebar.useQuery();
+  const { data: properties } = api.properties.getHostPropertiesWithRequests.useQuery();
+
+  console.log(properties);
 
   const citiesTotal = 0;
   const propertiesTotal = 0;
