@@ -23,12 +23,12 @@ export default function Page() {
       <Head>
         <title>Properties | Tramona</title>
       </Head>
-      <div className="hidden sm:block">
+      <div className="hidden xl:block">
         <HostPropertiesLayout>
           {property && <HostPropertyInfo property={property} />}
         </HostPropertiesLayout>
       </div>
-      <div className="sm:hidden">
+      <div className="xl:hidden">
         <div className="mb-6">
           {property && <HostPropertyInfo property={property} />}
         </div>
