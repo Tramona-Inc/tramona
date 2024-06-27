@@ -12,6 +12,7 @@ import {
   referralCodes,
   referralEarnings,
   requests,
+  trips,
   users,
 } from "@/server/db/schema";
 import { eq, sql } from "drizzle-orm";
@@ -52,10 +53,16 @@ export default async function webhook(
       return;
     }
 
+    console.log("event:", event);
+
     // * You can add other event types to catch
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
+        const offerId =
+          paymentIntentSucceeded.metadata.listing_id === undefined
+            ? undefined
+            : parseInt(paymentIntentSucceeded.metadata.listing_id);
 
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
@@ -83,6 +90,24 @@ export default async function webhook(
                 .update(requests)
                 .set({ resolvedAt: confirmedDate })
                 .where(eq(requests.id, parseInt(requestId)));
+
+              if (offerId) {
+                const offer = await db.query.offers.findFirst({
+                  with: { request: true },
+                  where: eq(offers.id, offerId),
+                });
+
+                if (offer?.request) {
+                  await db.insert(trips).values({
+                    checkIn: offer.checkIn,
+                    checkOut: offer.checkOut,
+                    numGuests: offer.request.numGuests,
+                    groupId: offer.request.madeByGroupId,
+                    propertyId: offer.propertyId,
+                    offerId: offer.id,
+                  });
+                }
+              }
             }
           } else {
             // Handle case where confirmed_at is missing or invalid
