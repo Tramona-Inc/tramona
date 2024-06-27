@@ -11,7 +11,12 @@ export default function HostStays() {
           <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
           <TabsTrigger value="accepted">Accepted</TabsTrigger>
           <TabsTrigger value="checking out">Checking out</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <div className="w-5/6 border-b-4" />
+          <div className="flex w-1/6 justify-end ">
+            <TabsTrigger value="history" className="w-full">
+              History
+            </TabsTrigger>
+          </div>
         </TabsList>
         <TabsContent value="currently hosting">
           <div className="mt-8">
