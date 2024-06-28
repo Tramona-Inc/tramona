@@ -2,7 +2,7 @@ import { api } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
 
 import type Stripe from "stripe";
-import SummaryChart from "@/components/host/finances/SummaryChart";
+import SummaryChart from "@/components/host/finances/summary/SummaryChart";
 import BalanceSummary from "@/components/host/finances/BalanceSummary";
 import AccountBalanceCard from "@/components/host/finances/summary/AccountBalanceCard";
 import { useEffect, useState } from "react";
@@ -51,7 +51,10 @@ export default function FinanceSummary({
   return (
     <div className="mt-2 flex w-full flex-col justify-around gap-y-3">
       <div className="flex flex-col-reverse gap-x-5 lg:flex-row">
-        <SummaryChart becameHostAt={becameHostAt} />
+        <SummaryChart
+          becameHostAt={becameHostAt}
+          hostStripeAccountId={hostStripeAccountId}
+        />
         <div className="flex w-full flex-col gap-y-3">
           <BalanceSummary
             balance={totalCurrentBalance}

@@ -1,6 +1,7 @@
 import Spinner from "@/components/_common/Spinner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { formatCurrency } from "@/utils/utils";
 import {
   ConnectAccountManagement,
   ConnectPayouts,
@@ -61,7 +62,7 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
         </Dialog>
       </div>
       <div className="font-semibol my-2 text-center text-4xl">
-        ${balance ? balance.toFixed(2) : "0.01"}
+        {balance ? formatCurrency(balance) : "0.00"}
       </div>
       <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
         <DialogTrigger>

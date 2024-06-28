@@ -1,7 +1,7 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 
-import EarningsDashboard from "@/components/host/finances/EarningsDashboard";
 import PaymentHistory from "@/components/host/finances/payment-history/PaymentHistory";
+import PropertiesEarningsDashboard from "@/components/host/finances/PropertiesEarningsDashboard";
 import SpinnerButton from "@/components/_icons/SpinnerButton";
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +11,7 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { RouterOutputs } from "@/utils/api";
 import {
   ConnectAccountOnboarding,
@@ -26,22 +26,33 @@ import FinanceSummary from "@/components/host/finances/FinancesSummary";
 export type StripeConnectAccountAndURl =
   RouterOutputs["stripe"]["createStripeConnectAccount"];
 
-export default function Payout() {
+export default function Page() {
   useSession({ required: true });
   //get the accound Id from the store
-  const { isStripeConnectInstanceReady, setStripeConnectInstanceReady } =
-    useIsStripeConnectInstanceReady();
+  const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
 
   const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
-  const utils = api.useUtils();
 
   //we have create an account
   const { mutate: createStripeConnectAccount, isLoading } =
     api.stripe.createStripeConnectAccount.useMutation({
       onSuccess: () => {
-        void utils.invalidate();
+        console.log("Stripe account created");
       },
     });
+
+  const handleCreateStripeConnectAccount = useCallback(() => {
+    if (!hostInfo?.stripeAccountId) {
+      createStripeConnectAccount();
+      console.log("Just ran mutation");
+    } else {
+      console.log("Stripe account already exists did not run mutation");
+    }
+  }, [hostInfo?.stripeAccountId, createStripeConnectAccount]);
+
+  useEffect(() => {
+    handleCreateStripeConnectAccount();
+  }, [handleCreateStripeConnectAccount]);
 
   //Now create a link (a new link is created every session reguardless of account)
   //we dont want to call it if accont link does not exist
@@ -79,7 +90,7 @@ export default function Payout() {
         <title>Host Finances | Tramona</title>
       </Head>
 
-      <main className="container flex h-screen w-11/12 flex-col gap-y-3">
+      <main className="container mb-24 flex w-11/12 flex-col gap-y-3">
         <h2 className="fond-extrabold ml-4 mt-7 text-left text-4xl">
           Finances
         </h2>
@@ -118,7 +129,7 @@ export default function Payout() {
             />
           </TabsContent>
           <TabsContent value="properties">
-            <EarningsDashboard />
+            <PropertiesEarningsDashboard />
           </TabsContent>
           <TabsContent value="Settings">
             {hostInfo?.stripeAccountId && (

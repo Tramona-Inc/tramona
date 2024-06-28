@@ -51,7 +51,7 @@ const StripeConnectSessionProvider = ({
 
   const { data: accountSession } =
     api.stripe.createStripeAccountSession.useQuery(stripeAccountId!, {
-      enabled: stripeAccountId ? true : false,
+      enabled: stripeAccountId && !isStripeConnectInstanceReady ? true : false,
       onSuccess: () => {
         console.log("accountSession before return ");
         if (!accountSession) return;
@@ -76,14 +76,16 @@ const StripeConnectSessionProvider = ({
               },
             },
             fonts: [
-              {
-                cssSrc:
-                  "https://fonts.googleapis.com/css2?family=Mulish:wght@400;400italic;700;700italic&display=swap",
-              },
+              //have to figure out cors issue before adding mullish font
+              // {
+              //   cssSrc:
+              //     "https://fonts.googleapis.com/css2?family=Mulish:wght@400;400italic;700;700italic&display=swap",
+              // },
             ],
           }),
         );
       },
+      refetchInterval: 1000, // Refetch every second i know this is kinda gnarly but i need stripe to load faster but it doesnt call more then 2 times so were good.
     });
 
   return (

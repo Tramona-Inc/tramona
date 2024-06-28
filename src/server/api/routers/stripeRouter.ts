@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 import { hostProfiles } from "@/server/db/schema";
+import { gte } from "lodash";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -503,17 +504,18 @@ export const stripeRouter = createTRPCRouter({
               instant_payouts: true,
               standard_payouts: true,
               edit_payout_schedule: true,
+              external_account_collection: true,
             },
           },
           // payouts_list: {
           //   enabled: true,
           // },
-          // notification_banner: {
-          //   enabled: true,
-          //   features: {
-          //     external_account_collection: true,
-          //   },
-          // },
+          notification_banner: {
+            enabled: true,
+            features: {
+              external_account_collection: true,
+            },
+          },
           // balances: {
           //   enabled: true,
           //   features: {
@@ -571,6 +573,82 @@ export const stripeRouter = createTRPCRouter({
       );
 
       return externalAccounts.data;
+    }),
+
+  getAllTransactionPayments: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      let hasMore = true;
+      let startingAfter: string | null = null;
+      const allTransactions: Stripe.BalanceTransaction[] = [];
+
+      while (hasMore) {
+        const params: { limit: number; type: string; starting_after?: string } =
+          {
+            limit: 100,
+            type: "payment",
+            ...(startingAfter && { starting_after: startingAfter }),
+          };
+
+        const response = await stripe.balanceTransactions.list(params, {
+          stripeAccount: input,
+        });
+
+        if (response.data.length > 0) {
+          allTransactions.push(...response.data);
+          hasMore = response.has_more;
+          startingAfter = response.data[response.data.length - 1]?.id ?? null;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allTransactions;
+    }),
+
+  getAllTransactionPaymentsWithinInterval: protectedProcedure
+    .input(
+      z.object({
+        stripeAccountId: z.string(),
+        startDate: z.number(),
+        endDate: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      let hasMore = true;
+      let startingAfter: string | null = null;
+      const allTransactions: Stripe.BalanceTransaction[] = [];
+
+      while (hasMore) {
+        const params: {
+          limit: number;
+          type: string;
+          starting_after?: string;
+          created: { gte: number; lte: number };
+        } = {
+          limit: 100,
+          type: "payment",
+          created: {
+            gte: input.startDate, //takes unix timestamps
+            lte: input.endDate,
+          },
+          ...(startingAfter && { starting_after: startingAfter }),
+        };
+
+        const response = await stripe.balanceTransactions.list(params, {
+          stripeAccount: input.stripeAccountId,
+        });
+
+        if (response.data.length > 0) {
+          allTransactions.push(...response.data);
+          hasMore = response.has_more;
+          startingAfter = response.data[response.data.length - 1]?.id ?? null;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allTransactions;
     }),
 
   createVerificationSession: protectedProcedure.query(async ({ ctx }) => {

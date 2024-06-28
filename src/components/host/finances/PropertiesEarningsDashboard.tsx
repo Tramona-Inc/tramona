@@ -60,7 +60,7 @@ const BarChart = ({ data }) => (
   </div>
 );
 
-const EarningsDashboard = () => {
+const PropertiesEarningsDashboard = () => {
   const [selectedProperty, setSelectedProperty] = useState(properties[0]);
   const [timePeriod, setTimePeriod] = useState("month");
 
@@ -155,4 +155,4 @@ const EarningsDashboard = () => {
   );
 };
 
-export default EarningsDashboard;
+export default PropertiesEarningsDashboard;
