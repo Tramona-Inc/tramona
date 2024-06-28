@@ -224,24 +224,35 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
 }
 
 export async function addProperty({
-  hostId, property,
+  hostId,
+  property,
 }: {
-  hostId: string | null;
-  property: Omit<NewProperty, "id" | "city">;
+  hostId?: string | null;
+  property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
+    latitude?: number;
+    longitude?: number;
+  };
 }) {
-  if ((!property.latitude || !property.longitude) && !property.address) {
+  let lat = property.latitude;
+  let lng = property.longitude;
+
+  if (!lat || !lng) {
     const { location } = await getCoordinates(property.address);
     if (!location) throw new Error("Could not get coordinates for address");
-    property.latitude = location.lat;
-    property.longitude = location.lng;
+    lat = location.lat;
+    lng = location.lng;
   }
 
-  const [insertedProperty] = await db.insert(properties).values({
-    hostId,
-    ...property,
-    city: await getCity({ lat: property.latitude, lng: property.longitude }),
-
-  }).returning({id: properties.id});
+  const [insertedProperty] = await db
+    .insert(properties)
+    .values({
+      ...property,
+      hostId,
+      latitude: lat,
+      longitude: lng,
+      city: await getCity({ lat, lng }),
+    })
+    .returning({ id: properties.id });
 
   return insertedProperty!.id;
 }
