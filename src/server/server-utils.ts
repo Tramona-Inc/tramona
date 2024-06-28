@@ -6,14 +6,17 @@ import { Twilio } from "twilio";
 import { db } from "./db";
 import { and, eq, inArray } from "drizzle-orm";
 import {
+  NewProperty,
   type User,
   groupInvites,
   groupMembers,
   groups,
   hostTeamInvites,
   hostTeamMembers,
+  properties,
   users,
 } from "./db/schema";
+import { getCity, getCoordinates } from "./google-maps";
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -220,3 +223,25 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
     .then((res) => res?.ownerId);
 }
 
+export async function addProperty({
+  hostId, property,
+}: {
+  hostId: string | null;
+  property: Omit<NewProperty, "id" | "city">;
+}) {
+  if ((!property.latitude || !property.longitude) && !property.address) {
+    const { location } = await getCoordinates(property.address);
+    if (!location) throw new Error("Could not get coordinates for address");
+    property.latitude = location.lat;
+    property.longitude = location.lng;
+  }
+
+  const [insertedProperty] = await db.insert(properties).values({
+    hostId,
+    ...property,
+    city: await getCity({ lat: property.latitude, lng: property.longitude }),
+
+  }).returning({id: properties.id});
+
+  return insertedProperty!.id;
+}

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonText } from "@/components/ui/skeleton";
+import { Property } from "@/server/db/schema/tables/properties";
 import { api, type RouterOutputs } from "@/utils/api";
 import { cn, plural } from "@/utils/utils";
 import { range } from "lodash";
@@ -19,6 +20,13 @@ import { usePathname } from "next/navigation";
 type HostRequestsSidebarProperty =
   RouterOutputs["properties"]["getHostRequestsSidebar"][number];
 
+  interface CityData {
+    city: string;
+    requests: {
+      request: Request;
+      properties: Property[];
+    }[];
+  }
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
@@ -26,32 +34,28 @@ export default function HostRequestsLayout({
 
   console.log(properties);
 
-  const citiesTotal = 0;
-  const propertiesTotal = 0;
+  const citiesTotal = properties ? properties.length : 0;
+
 
   return (
     <div className="flex">
-      <ScrollArea className="sticky inset-y-0 h-screen-minus-header w-96 border-r px-4 py-8">
-        <h1 className="text-2xl font-bold">Offers & Requests</h1>
-        <div className="flex flex-row gap-2">
-          <Button variant={"secondaryLight"} className="rounded-full">
-            Cities {citiesTotal}
-          </Button>
-          <Button variant={"greenPrimaryOutline"} className="rounded-full">
-            Properties {propertiesTotal}
-          </Button>
+      <ScrollArea className="sticky inset-y-0 h-screen-minus-header w-80 border-r px-4 py-8 bg-white">
+        <div className="pb-4">
+          <h1 className="text-3xl font-bold">Requests</h1>
+          <div className="flex flex-row gap-2 mt-4">
+            <Button variant={"secondaryLight"} className="rounded-full">
+              Cities {citiesTotal}
+            </Button>
+          </div>
         </div>
         <div className="pt-4">
           {properties ? (
             properties.length > 0 ? (
-              properties.map((property) => (
-                <SidebarProperty key={property.id} property={property} />
+              properties.map((cityData) => (
+                <SidebarCity key={cityData.city} cityData={cityData} />
               ))
             ) : (
-              <EmptyState
-                icon={HandshakeIcon}
-                className="h-[calc(100vh-280px)]"
-              >
+              <EmptyState icon={HandshakeIcon} className="h-[calc(100vh-280px)]">
                 <EmptyStateTitle>No requests yet</EmptyStateTitle>
                 <EmptyStateDescription>
                   Properties with requests will show up here
@@ -85,10 +89,24 @@ export default function HostRequestsLayout({
   );
 }
 
+function SidebarCity({ cityData }: { cityData: CityData }) {
+  return (
+    <div>
+      {cityData.requests.length > 0 && (
+        cityData.requests.map((property) => (
+          <SidebarProperty key={property.id} cityData={cityData} property={property} />
+        ))
+      )}
+    </div>
+  );
+}
+
 function SidebarProperty({
   property,
+  cityData,
 }: {
   property: HostRequestsSidebarProperty;
+  cityData: CityData;
 }) {
   const href = `/host/requests/${property.id}`;
   const pathname = usePathname();
@@ -103,18 +121,10 @@ function SidebarProperty({
         isSelected ? "bg-accent/60" : "hover:bg-muted",
       )}
     >
-      <div className="relative h-16 w-16 overflow-clip rounded-md bg-accent">
-        <Image
-          src={property.imageUrls[0]!}
-          className="object-cover object-center"
-          alt=""
-          fill
-        />
-      </div>
+
       <div className="flex-1 text-sm">
-        <p className="line-clamp-1 font-medium">{property.name}</p>
-        <p className="line-clamp-1 text-muted-foreground">{property.address}</p>
-        <Badge size="sm">{plural(property.numBids, "request")}</Badge>
+        <h3 className="font-semibold">{cityData.city}</h3>
+        <Badge size="sm">{plural(cityData.requests.length, "request")}</Badge>
       </div>
     </Link>
   );

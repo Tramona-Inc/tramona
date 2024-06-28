@@ -12,7 +12,7 @@ import {
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
-  Request,
+  type Request,
   requests,
   requestsToProperties,
   users,
@@ -36,11 +36,12 @@ import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
-  NewProperty,
+  type NewProperty,
   properties,
-  Property,
+  type Property,
 } from "./../../db/schema/tables/properties";
 import { on } from "events";
+import { addProperty } from "@/server/server-utils";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -50,22 +51,10 @@ export const propertiesRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      if ((!input.latitude || !input.longitude) && input.address) {
-        const { location } = await getCoordinates(input.address);
-        if (location) {
-          input.latitude = location.lat;
-          input.longitude = location.lng;
-        }
-      }
+      const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
 
-      return await ctx.db
-        .insert(properties)
-        .values({
-          ...input,
-          hostId: ctx.user.role === "admin" ? null : ctx.user.id,
-        })
-        .returning({ id: properties.id })
-        .then((res) => res[0]!.id);
+      const id = await addProperty({ property: input, hostId });
+      return id;
     }),
 
   // uses the hostId passed in the input instead of the admin's user id
@@ -358,11 +347,11 @@ export const propertiesRouter = createTRPCRouter({
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
-                  lte(properties.latitude, boundaries.north),
-                  gte(properties.latitude, boundaries.south),
-                  lte(properties.longitude, boundaries.east),
-                  gte(properties.longitude, boundaries.west),
-                )
+                lte(properties.latitude, boundaries.north),
+                gte(properties.latitude, boundaries.south),
+                lte(properties.longitude, boundaries.east),
+                gte(properties.longitude, boundaries.west),
+              )
               : sql`TRUE`,
             input.lat && input.long && !boundaries
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
@@ -449,42 +438,32 @@ export const propertiesRouter = createTRPCRouter({
     }),
   getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
-
-
-      // Then, when you fetch rawData, ensure it's typed correctly:
       const rawData = await ctx.db.execute(sql`
-        WITH host_properties AS (
+          WITH host_properties AS (
+            SELECT
+              p.*,
+              rp.request_id
+            FROM ${properties} p
+            JOIN ${requestsToProperties} rp ON p.id = rp.property_id
+            WHERE p.host_id = ${ctx.user.id}
+          ),
+          city_requests AS (
+            SELECT
+              hp.request_id,
+              hp.city
+            FROM host_properties hp
+            JOIN ${requests} r ON hp.request_id = r.id
+            GROUP BY hp.city, hp.request_id
+          )
           SELECT
-            *,
-            CASE
-              WHEN array_length(string_to_array(address, ','), 1) >= 3 THEN
-                trim(
-                  split_part(address, ',', array_length(string_to_array(address, ','), 1) - 2) || ', ' ||
-                  split_part(address, ',', array_length(string_to_array(address, ','), 1) - 1) || ', ' ||
-                  split_part(address, ',', array_length(string_to_array(address, ','), 1))
-                )
-              WHEN array_length(string_to_array(address, ','), 1) = 2 THEN
-                trim(
-                  split_part(address, ',', array_length(string_to_array(address, ','), 1) - 1) || ', ' ||
-                  split_part(address, ',', array_length(string_to_array(address, ','), 1))
-                )
-              ELSE
-                trim(address)
-            END AS city
-          FROM ${properties}
-          WHERE host_id = ${ctx.user.id}
-        )
-        SELECT
-          hp.city,
-          r.*,
-          hp.id AS property_id,
-          r.id AS request_id,
-          hp.*
-        FROM host_properties hp
-        JOIN ${requestsToProperties} rtp ON hp.id = rtp.property_id
-        JOIN ${requests} r ON rtp.request_id = r.id
-        ORDER BY hp.city, r.id, hp.id
-      `);
+            cr.city AS property_city,
+            r.*,
+            p.*
+          FROM city_requests cr
+          JOIN ${requests} r ON cr.request_id = r.id
+          JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
+          ORDER BY cr.city, r.id, p.id
+        `);
 
       interface CityData {
         city: string;
@@ -501,14 +480,14 @@ export const propertiesRouter = createTRPCRouter({
 
       for (const row of rawData) {
         console.log(row);
-        const property: NewProperty= {
+        const property = {
           id: row.property_id,
           hostId: row.host_id,
           hostTeamId: row.host_team_id,
           propertyType: row.property_type,
           address: row.address,
-          city: row.city,
-          roomType: row.room_type ,
+          city: row.property_city,
+          roomType: row.room_type,
           maxNumGuests: row.max_num_guests,
           numBeds: row.num_beds,
           numBedrooms: row.num_bedrooms,
@@ -530,7 +509,7 @@ export const propertiesRouter = createTRPCRouter({
           hostawayListingId: row.hostaway_listing_id,
           hostName: row.host_name,
           // Add other property fields here
-        };
+        } as NewProperty;
 
         const request = {
           id: row.request_id,
@@ -555,8 +534,8 @@ export const propertiesRouter = createTRPCRouter({
           // Add other request fields here
         } as Request;
 
-        if (row.city !== currentCity) {
-          currentCity = row.city as string;
+        if (row.property_city !== currentCity) {
+          currentCity = row.property_city as string;
           organizedData.push({ city: currentCity, requests: [] });
         }
 
@@ -568,12 +547,12 @@ export const propertiesRouter = createTRPCRouter({
           organizedData[organizedData.length - 1]?.requests.push(currentRequest);
         }
 
-        currentRequest?.properties.push(property);
+        currentRequest.properties.push(property);
       }
       return organizedData;
-    },
-
+    }
   ),
+
   hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
     .input(hostPropertyFormSchema)
     .mutation(async ({ ctx, input }) => {
