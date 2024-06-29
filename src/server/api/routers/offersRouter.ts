@@ -632,7 +632,6 @@ export const offersRouter = createTRPCRouter({
         ),
       ),
       with: {
-        request: { columns: { checkIn: true, checkOut: true } },
         property: {
           columns: {
             name: true,
