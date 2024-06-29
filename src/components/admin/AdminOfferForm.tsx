@@ -15,14 +15,15 @@ import { capitalize, plural } from "@/utils/utils";
 import {
   optional,
   zodInteger,
+  zodMMDDYYYY,
   zodNumber,
   zodString,
   zodUrl,
 } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+import { number, z } from "zod";
 import TagSelect from "../_common/TagSelect";
 import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 import {
@@ -61,6 +62,8 @@ const formSchema = z.object({
   numBedrooms: zodInteger({ min: 1 }),
   numBathrooms: zodInteger({ min: 1 }),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
+  checkInDate: zodString(),
+  checkOutDate: zodString(),
   originalNightlyPriceUSD: zodNumber(),
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
@@ -89,9 +92,11 @@ export default function AdminOfferForm({
 }: {
   afterSubmit?: () => void;
   offer?: OfferWithProperty;
-  request: Request;
+  request?: Request;
 }) {
-  const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+  let numberOfNights = request
+    ? getNumNights(request.checkIn, request.checkOut)
+    : 1;
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
     : 1;
@@ -141,6 +146,10 @@ export default function AdminOfferForm({
         : {}),
     },
   });
+
+  const { checkInDate, checkOutDate } = form.watch();
+
+  numberOfNights = getNumNights(checkInDate, checkOutDate);
 
   const imageUrlInputs = useFieldArray({
     name: "imageUrls",
@@ -199,7 +208,7 @@ export default function AdminOfferForm({
     if (offer) {
       const newOffer = {
         id: offer.id,
-        requestId: request.id,
+        requestId: request ? request.id : null,
         propertyId: offer.property.id,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
@@ -227,21 +236,21 @@ export default function AdminOfferForm({
       }
 
       const newOffer = {
-        requestId: request.id,
+        requestId: request ? request.id : null,
         propertyId,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
-        checkIn: request.checkIn,
-        checkOut: request.checkOut,
+        checkIn: request ? request.checkIn : new Date(checkInDate),
+        checkOut: request ? request.checkOut : new Date(checkOutDate),
       };
 
       await createOfferMutation.mutateAsync(newOffer).catch(() => errorToast());
     }
 
     //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
-    const travelers = await getMembersMutation.mutateAsync(
-      request.madeByGroupId,
-    );
+    const travelers = request
+      ? await getMembersMutation.mutateAsync(request.madeByGroupId)
+      : [];
 
     for (const traveler of travelers) {
       if (traveler.phoneNumber) {
@@ -258,7 +267,7 @@ export default function AdminOfferForm({
 
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `https://www.tramona.com/requests/${request.id}`,
+            msg: `https://www.tramona.com/requests/${request ? request.id : ""}`,
           });
         }
       }
@@ -267,8 +276,8 @@ export default function AdminOfferForm({
     successfulAdminOfferToast({
       propertyName: newProperty.name,
       totalPrice,
-      checkIn: request.checkIn,
-      checkOut: request.checkOut,
+      checkIn: request ? request.checkIn : new Date(checkInDate),
+      checkOut: request ? request.checkOut : new Date(checkOutDate),
       isUpdate: !!offer,
     });
 
@@ -351,6 +360,38 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
+
+        {!request && (
+          <>
+            <FormField
+              control={form.control}
+              name="checkInDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Check In Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="date" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="checkOutDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Check Out Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="date" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
 
         <FormField
           control={form.control}

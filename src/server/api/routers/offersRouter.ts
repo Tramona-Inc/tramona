@@ -29,6 +29,7 @@ import {
   isNull,
   lt,
   notInArray,
+  or,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -622,9 +623,12 @@ export const offersRouter = createTRPCRouter({
     const unMatchedOffers = await ctx.db.query.offers.findMany({
       where: and(
         isNull(offers.acceptedAt),
-        notInArray(
-          offers.requestId,
-          completedRequests.map((req) => req.id),
+        or(
+          isNull(offers.requestId),
+          notInArray(
+            offers.requestId,
+            completedRequests.map((req) => req.id),
+          ),
         ),
       ),
       with: {

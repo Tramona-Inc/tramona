@@ -10,7 +10,9 @@ export default function AddUnclaimedOffer() {
         <p>Add new offer</p>
         <PlusIcon />
       </DialogTrigger>
-      <DialogContent>{/* <AdminOfferForm /> */}</DialogContent>
+      <DialogContent>
+        <AdminOfferForm />
+      </DialogContent>
     </Dialog>
   );
 }
