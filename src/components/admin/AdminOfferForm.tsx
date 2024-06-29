@@ -149,7 +149,7 @@ export default function AdminOfferForm({
 
   const { checkInDate, checkOutDate } = form.watch();
 
-  numberOfNights = getNumNights(checkInDate, checkOutDate);
+  !request && (numberOfNights = getNumNights(checkInDate, checkOutDate));
 
   const imageUrlInputs = useFieldArray({
     name: "imageUrls",
