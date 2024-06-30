@@ -62,8 +62,8 @@ const formSchema = z.object({
   numBedrooms: zodInteger({ min: 1 }),
   numBathrooms: zodInteger({ min: 1 }),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
-  checkInDate: zodString(),
-  checkOutDate: zodString(),
+  checkInDate: optional(zodString()),
+  checkOutDate: optional(zodString()),
   originalNightlyPriceUSD: zodNumber(),
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
@@ -149,7 +149,7 @@ export default function AdminOfferForm({
 
   const { checkInDate, checkOutDate } = form.watch();
 
-  !request && (numberOfNights = getNumNights(checkInDate, checkOutDate));
+  !request && (numberOfNights = getNumNights(checkInDate!, checkOutDate!));
 
   const imageUrlInputs = useFieldArray({
     name: "imageUrls",
@@ -240,8 +240,8 @@ export default function AdminOfferForm({
         propertyId,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
-        checkIn: request ? request.checkIn : new Date(checkInDate),
-        checkOut: request ? request.checkOut : new Date(checkOutDate),
+        checkIn: request ? request.checkIn : new Date(checkInDate!),
+        checkOut: request ? request.checkOut : new Date(checkOutDate!),
       };
 
       await createOfferMutation.mutateAsync(newOffer).catch(() => errorToast());
@@ -276,8 +276,8 @@ export default function AdminOfferForm({
     successfulAdminOfferToast({
       propertyName: newProperty.name,
       totalPrice,
-      checkIn: request ? request.checkIn : new Date(checkInDate),
-      checkOut: request ? request.checkOut : new Date(checkOutDate),
+      checkIn: request ? request.checkIn : new Date(checkInDate!),
+      checkOut: request ? request.checkOut : new Date(checkOutDate!),
       isUpdate: !!offer,
     });
 
@@ -296,6 +296,8 @@ export default function AdminOfferForm({
   return (
     <Form {...form}>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
+      {JSON.stringify(form.formState.errors, null, 2)} to check for form state
+      errors
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-4 md:grid-cols-2"
