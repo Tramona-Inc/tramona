@@ -44,12 +44,10 @@ export const hostMobileNavLinks = [
   },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
   { href: "/host/properties", name: "Properties", icon: HomeIcon },
-];
-
-export const hostNavLinks = [
-  ...hostMobileNavLinks,
   { href: "/host/finances", name: "Finances", icon: DollarSign },
 ];
+
+export const hostNavLinks = [...hostMobileNavLinks];
 
 export const guestMobileNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },

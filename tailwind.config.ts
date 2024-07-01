@@ -43,7 +43,8 @@ module.exports = {
         },
         primaryGreen: {
           DEFAULT: "hsl(var(--primary-green))",
-          foreground: "hsl(var(--primary-foreground))",
+          background: "hsl(var(--primary-green-background))",
+          hover: "hsl(var(--primary-green-hover))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -69,6 +70,9 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      borderWidth: {
+        custom: "2px",
       },
       borderRadius: {
         lg: "var(--radius)",

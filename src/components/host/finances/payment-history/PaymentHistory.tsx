@@ -25,7 +25,7 @@ function PaymentHistory({
 
   return (
     <div className="mx-2 flex flex-col gap-y-4">
-      <div className="mt-4 flex flex-col justify-between gap-x-4 gap-y-3 lg:flex-row">
+      <div className="flex flex-col justify-between gap-x-4 gap-y-3 lg:flex-row">
         <Card className="lg:w-1/2">
           <CardHeader className="text-xl font-bold">
             Transferred funds

@@ -405,9 +405,7 @@ export const stripeRouter = createTRPCRouter({
       const [firstName, ...rest] = ctx.user.name!.split(" ");
       const lastName = rest.join(" ");
       const stripeAccount = await stripeWithSecretKey.accounts.create({
-        country: "US", //we need to change this later
         email: ctx.user.email,
-        type: "express",
         controller: {
           losses: {
             payments: "application",

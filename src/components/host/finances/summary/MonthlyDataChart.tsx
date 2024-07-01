@@ -9,15 +9,12 @@ import { formatCurrency } from "@/utils/utils";
 
 const MonthlyDataChart = ({
   hostStripeAccountId,
-  becameHostYear,
-  becameHostMonth,
 }: {
   hostStripeAccountId: string | null;
-  becameHostYear: number;
-  becameHostMonth: number;
 }) => {
   const currentYear = new Date().getFullYear();
-  const [selectedMonth, setSelectedMonth] = useState<number>(becameHostMonth);
+  const currentMonth = new Date().getMonth() + 1;
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
   const [monthlyData, setMonthlyData] = useState<
     { date: string; Earnings: number }[]
   >([]);
@@ -26,12 +23,11 @@ const MonthlyDataChart = ({
     api.stripe.getAllTransactionPaymentsWithinInterval.useQuery(
       {
         stripeAccountId: hostStripeAccountId!,
-        startDate:
-          new Date(becameHostYear, selectedMonth - 1, 1).getTime() / 1000,
-        endDate: new Date(becameHostYear, selectedMonth, 0).getTime() / 1000,
+        startDate: new Date(currentYear, selectedMonth - 1, 1).getTime() / 1000,
+        endDate: new Date(currentYear, selectedMonth, 0).getTime() / 1000,
       },
       {
-        enabled: !!hostStripeAccountId && selectedMonth !== null,
+        enabled: !!hostStripeAccountId,
       },
     );
 
@@ -39,12 +35,12 @@ const MonthlyDataChart = ({
     if (allPayments && selectedMonth) {
       const transformedData = transformPaymentsToDailyChartData(
         allPayments,
-        becameHostYear,
+        currentYear,
         selectedMonth,
       );
       setMonthlyData(transformedData);
     }
-  }, [allPayments, selectedMonth]);
+  }, [allPayments, selectedMonth, currentYear]);
 
   const transformPaymentsToDailyChartData = (
     payments: Stripe.BalanceTransaction[],
@@ -58,17 +54,21 @@ const MonthlyDataChart = ({
     const dailyData = days.map((day) => {
       const dayString = format(day, "dd MMM");
       const totalEarnings = payments
-        .filter(
-          (payment) =>
-            format(new Date(payment.created * 1000), "yyyy-MM-dd") ===
-            format(day, "yyyy-MM-dd"),
-        )
+        .filter((payment) => {
+          const paymentDate = format(
+            new Date(payment.created * 1000),
+            "yyyy-MM-dd",
+          );
+          const currentDate = format(day, "yyyy-MM-dd");
+          return paymentDate === currentDate;
+        })
         .reduce((sum, payment) => sum + payment.amount, 0);
       return {
         date: dayString,
         Earnings: totalEarnings,
       };
     });
+
     return dailyData;
   };
 
@@ -78,10 +78,10 @@ const MonthlyDataChart = ({
 
   return (
     <div className="flex h-full w-full flex-col sm:w-[600px] xl:w-[800px] 2xl:w-[1100px]">
-      <div className="flex items-center justify-between">
-        <p className="left-2 top-6 text-start text-2xl lg:absolute">
+      <div className="flex items-center justify-center">
+        <p className="left-14 top-4 mb-1 mt-4 text-start text-2xl lg:absolute">
           <strong>
-            {monthlyData && monthlyData.length > 0
+            {monthlyData.length > 0
               ? formatCurrency(
                   monthlyData.reduce((sum, day) => sum + day.Earnings, 0),
                 )
@@ -102,7 +102,7 @@ const MonthlyDataChart = ({
             onClick={() => handleMonthChange(index + 1)}
             size="sm"
             variant="outlineMinimal"
-            className={`mr-2 inline-flex rounded-full px-4 py-2 text-white ${
+            className={`mr-2 inline-flex rounded-full px-4 py-2 ${
               selectedMonth === index + 1
                 ? "bg-teal-800 text-white"
                 : "text-black"

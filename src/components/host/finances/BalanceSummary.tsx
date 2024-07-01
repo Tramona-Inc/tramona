@@ -28,23 +28,19 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
   if (!isClient) return null;
 
   return (
-    <div className="items-between mx-auto flex w-full flex-col rounded-lg bg-white p-6 shadow-md">
+    <div className="items-between mx-auto flex w-full flex-col rounded-xl border border-border bg-white p-6">
       <div className="flex w-full flex-row justify-between">
         <p className="text-base text-gray-700 xl:whitespace-nowrap">
           Current balance
         </p>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger>
-            <Button
-              className="rounded-full border-primaryGreen text-primaryGreen"
-              size="sm"
-              variant="outline"
-            >
+            <div className="rounded-full border border-primaryGreen px-3 hover:bg-zinc-100">
               Transfer
-            </Button>
+            </div>
           </DialogTrigger>
           <DialogContent className="min-h-84">
-            <div>
+            <div className="">
               <h1 className="my-3 text-center text-2xl font-bold">
                 {" "}
                 Transfer{" "}
@@ -66,12 +62,9 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
       </div>
       <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
         <DialogTrigger>
-          <Button
-            className="text-sm text-gray-500 underline hover:text-gray-700"
-            variant="link"
-          >
-            Manage Payouts
-          </Button>
+          <div className="underline underline-offset-2">
+            Manage payout accounts
+          </div>
         </DialogTrigger>
         <DialogContent>
           <div className="">

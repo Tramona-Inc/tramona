@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* I have to for stripe embedded components */
-@import url("https://fonts.googleapis.com/css2?family=Mulish:wght@400;400italic;700;700italic&display=swap");
-
 body {
   font-family: "Mulish", sans-serif;
 }
@@ -34,8 +31,10 @@ body {
     --border: var(--zinc-200);
     --input: var(--zinc-300);
     --ring: var(--black);
-    --primary-green: var(--teal-900);
-    --radius: 0.5rem;
+    --primary-green: var(--primaryGreen-900);
+    --primary-green-background: var(--primaryGreen-200);
+    --primary-green-hover: var(--primaryGreen-100);
+    --secondary-green: var(--primaryGreen-200);
     --mobile-header-height: 74px;
     --header-height: 56px;
     --footer-height: var(--mobile-header-height);
@@ -94,10 +93,17 @@ body {
   }
 }
 
+@layer components {
+}
+
 @layer utilities {
   .paused {
     animation-play-state: paused;
   }
+}
+
+.custom-tabs-trigger {
+  @apply border-b-2 transition-colors hover:border-[#2F5BF6] hover:text-[#2F5BF6];
 }
 
 .ellipsis {

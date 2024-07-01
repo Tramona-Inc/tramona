@@ -1,20 +1,9 @@
-import React, { useState, useEffect, SetStateAction } from "react";
-import {
-  eachDayOfInterval,
-  format,
-  startOfMonth,
-  endOfMonth,
-  eachMonthOfInterval,
-  startOfYear,
-  endOfYear,
-  eachYearOfInterval,
-} from "date-fns";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
+import { format, eachYearOfInterval } from "date-fns";
 import ChartComponent from "../ChartComponent";
-import { months } from "@/utils/constants";
 import { api } from "@/utils/api";
-import Stripe from "stripe";
 import { formatCurrency } from "@/utils/utils";
+import type Stripe from "stripe";
 
 const AllTimeDataChart = ({
   hostStripeAccountId,
@@ -73,17 +62,33 @@ const AllTimeDataChart = ({
   };
 
   return (
+    // <Tabs
+    //   defaultValue="earnings"
+    //   className="mt-10 flex h-full w-full flex-col gap-y-5 sm:w-[600px] md:-mt-[50px] xl:w-[800px] 2xl:w-[1100px]"
+    // >
+    //   <TabsList className="md:self-start">
+    //     <TabsTrigger value="earnings" className="text-sm">
+    //       Earnings
+    //     </TabsTrigger>
+    //     <TabsTrigger value="bookings">Bookings</TabsTrigger>{" "}
+    //   </TabsList>
+
+    //<TabsContent value="earnings" className="h-full w-full flex-col">
+
+    //when we bring the earning and booking tabs back, we will need to wrap this in a TabsContent
     <div className="flex h-full w-full flex-col sm:w-[600px] xl:w-[800px] 2xl:w-[1100px]">
-      <p className="top-6 text-start text-2xl lg:absolute xl:left-4">
-        <strong>
-          {allTimeData && allTimeData.length > 0
-            ? formatCurrency(
-                allTimeData.reduce((sum, year) => sum + year.Earnings, 0),
-              )
-            : "0.00"}
-        </strong>{" "}
-        all time
-      </p>
+      <div className="flex items-center justify-center">
+        <p className="left-14 top-4 mb-1 mt-4 text-start text-2xl lg:absolute">
+          <strong>
+            {allTimeData && allTimeData.length > 0
+              ? formatCurrency(
+                  allTimeData.reduce((sum, year) => sum + year.Earnings, 0),
+                )
+              : "0.00"}
+          </strong>{" "}
+          all time
+        </p>
+      </div>
       {allTimeData && (
         <ChartComponent
           data={allTimeData}
@@ -92,6 +97,8 @@ const AllTimeDataChart = ({
         />
       )}
     </div>
+    // </TabsContent>
+    //</Tabs>
   );
 };
 

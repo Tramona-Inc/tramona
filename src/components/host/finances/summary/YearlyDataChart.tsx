@@ -71,8 +71,8 @@ const YearlyDataChart = ({
     return monthlyData;
   };
 
-  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedYear(Number(event.target.value));
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
   };
 
   const availableYears = Array.from(
@@ -81,9 +81,9 @@ const YearlyDataChart = ({
   );
 
   return (
-    <div className="flex h-full w-full flex-col sm:w-[600px] xl:w-[800px] 2xl:w-[1100px]">
-      <div className="flex items-center justify-between">
-        <p className="left-2 top-6 text-start text-2xl lg:absolute">
+    <div className="flex h-full w-full flex-col items-center sm:w-[600px] xl:w-[800px] 2xl:w-[1100px]">
+      <div className="flex items-center justify-center">
+        <p className="left-14 top-4 mb-1 mt-4 text-start text-2xl lg:absolute">
           <strong>
             {monthlyData && monthlyData.length > 0
               ? formatCurrency(
@@ -93,17 +93,6 @@ const YearlyDataChart = ({
           </strong>{" "}
           this year
         </p>
-        <select
-          value={selectedYear}
-          onChange={handleYearChange}
-          className="rounded border p-2"
-        >
-          {availableYears.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
       </div>
       {monthlyData && (
         <ChartComponent
@@ -112,6 +101,21 @@ const YearlyDataChart = ({
           xAxisDataKey="date"
         />
       )}
+      <div className="my-3">
+        {availableYears.map((year) => (
+          <Button
+            key={year}
+            onClick={() => handleYearChange(year)}
+            size="sm"
+            variant="outlineMinimal"
+            className={`mr-2 inline-flex rounded-full px-4 py-2 ${
+              selectedYear === year ? "bg-teal-800 text-white" : "text-black"
+            }`}
+          >
+            {year}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 };

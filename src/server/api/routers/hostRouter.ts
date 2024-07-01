@@ -56,11 +56,28 @@ export const hostRouter = createTRPCRouter({
     return fetchIndividualHostInfo(ctx.user.id);
   }),
 
+  getAllHostProperties: protectedProcedure.query(async ({ ctx }) => {
+    const hostProperties = await db.query.properties.findMany({
+      columns: {
+        id: true,
+        name: true,
+        hostId: true,
+        imageUrls: true,
+        latitude: true,
+        longitude: true,
+      },
+      where: eq(properties.hostId, ctx.user.id),
+    });
+    return hostProperties;
+  }),
+
   getStripeAccountId: protectedProcedure.query(async ({ ctx }) => {
     const stripeAccountIdNumber = await db.query.hostProfiles.findFirst({
       columns: { stripeAccountId: true },
       where: eq(hostProfiles.userId, ctx.user.id),
     });
+    console.log("Why is undefined");
+    console.log(ctx.user.id, stripeAccountIdNumber);
     return stripeAccountIdNumber;
   }),
 

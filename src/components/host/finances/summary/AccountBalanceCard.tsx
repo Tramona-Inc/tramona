@@ -61,7 +61,7 @@ const AccountBalanceCard = ({
   externalBanks,
 }: AccountBalanceCardProps) => {
   return (
-    <Card className="w-full shadow">
+    <Card className="w-full border border-border shadow-none">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-bold text-primary">
           Account Balance
