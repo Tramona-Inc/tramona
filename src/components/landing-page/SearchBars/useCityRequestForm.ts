@@ -18,7 +18,7 @@ export function useCityRequestForm({
   afterSubmit,
 }: {
   setCurTab: (val: number) => void;
-  afterSubmit?: (madeByGroupIds?: number[]) => void; 
+  afterSubmit?: (madeByGroupIds?: number[]) => void;
 }) {
   // const [open, setOpen] = useState(true);
   const form = useZodForm({
@@ -75,7 +75,7 @@ export function useCityRequestForm({
     } else {
       await createRequests(newRequests)
         .then((result) => {
-          
+
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
           form.reset();
@@ -87,6 +87,8 @@ export function useCityRequestForm({
           afterSubmit?.(result.madeByGroupIds);
         })
         .catch(() => errorToast());
+
+        //figure out which hosts to send the request to
     }
   });
 

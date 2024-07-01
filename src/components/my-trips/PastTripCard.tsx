@@ -55,7 +55,7 @@ export default function PastTripCard({ trip }: { trip: TripCardDetails }) {
               Check-in/Check-out: {formatDateRange(trip.checkIn, trip.checkOut)}
             </p>
             <Link
-              href={`/my-trips/${trip.id}`}
+              href={`/my-trips/${trip.id}?type=request`}
               className="text-sm underline underline-offset-4"
             >
               View more
