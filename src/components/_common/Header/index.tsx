@@ -12,8 +12,10 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import HeaderTopRight from "./HeaderTopRight";
-
+import HamburgerMenuMobile from "./HamburgerMenuMobile";
+import { Separator } from '@/components/ui/separator'
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -34,6 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/_icons/icons";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type HeaderProps =
   | {
@@ -77,12 +80,18 @@ const hamburgerLinksMobile = [
   { name: "Link Input", href: "/link-input", icon: <Link2 /> },
   { name: "Unclaimed Offers", href: "/unclaimed-offers", icon: <Tag /> },
   { name: "Recent Deals", href: "/exclusive-offers", icon: <BadgePercent /> },
-  { name: "How it works", href: "/how-it-works", icon: <Menu /> },
-  { name: "24/7 Support", href: "/help-center", icon: <BadgeHelp /> },
   { name: "Become a host", href: "/host-onboarding", icon: <Home /> },
-  { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
-  { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
+  // { name: "How it works", href: "/how-it-works", icon: <Menu /> },
+  { name: "How it works", href: "/how-it-works" },
+  // { name: "24/7 Support", href: "/help-center", icon: <BadgeHelp /> },
+  { name: "24/7 Support", href: "/help-center" },
+  // { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
+  { name: "FAQ", href: "/faq" },
+  // { name: "Contact", href: "/support", icon: <BadgeInfo /> },
+  { name: "Contact", href: "/support"},
+  // { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
+  { name: "For Hosts", href: "/for-hosts" },
+
 ];
 
 function HamburgerMenu({
@@ -91,19 +100,65 @@ function HamburgerMenu({
   links: {
     name: string;
     href: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode | null;
   }[];
 }) {
+  const isMobile = useMediaQuery("(max-width:810px)")
   const [open, setOpen] = useState(false);
 
   return (
+    // <Dialog open={open} onOpenChange={setOpen}>
+    //   <DialogTrigger>
+    //   <div className="pl-2">
+    //       <MenuIcon />
+    //     </div>
+    //   </DialogTrigger>
+    //   <DialogContent className="min-w-full h-screen">
+    //     <DialogTitle>
+    //     <div className="flex items-center gap-3">
+    //         <button
+    //           className="rounded-full border border-teal-900 bg-zinc-200 p-2"
+    //           onClick={() => setOpen(!open)}
+    //         >
+    //           <X size={20} />
+    //         </button>
+    //         <h3>Tramona</h3>
+    //       </div>
+    //     </DialogTitle>
+    //     <DropdownMenuSeparator className="mt-3"/>
+    //     {links.map((link) => (
+    //       <Link key={link.href} href={link.href}>
+    //           {link.icon ? 
+    //           <>
+    //           <div className="flex flex-row my-1 px-2 py-4 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
+    //           <div className="flex p-1">{link.icon}</div>
+    //           <div className="flex p-1">{link.name}</div>
+    //         </div>
+    //           <Separator className=""/>
+    //           </>
+    //           : 
+    //           <>
+    //           <div className="px-2 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
+    //           <div className="p-2">
+    //             {link.name}
+    //           </div>
+    //         </div>
+    //         <Separator />
+    //         </>
+    //           }
+    //       </Link>
+    //     ))}
+    //   </DialogContent>
+    // </Dialog>
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger>
-        <div className="pl-2">
-          <MenuIcon />
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-white">
+       <DropdownMenuTrigger>
+         <div className="pl-2">
+           <MenuIcon />
+         </div>
+       </DropdownMenuTrigger>
+        {/* <DropdownMenuPortal container={document.body}> */}
+        {isMobile ? 
+        <DropdownMenuContent className="fixed -top-[3rem] -right-12 w-screen h-screen bg-white z-50 p-4 overflow-y-auto">
         <DropdownMenuLabel className="text-xl font-bold text-teal-900">
           <div className="flex items-center gap-3">
             <button
@@ -118,14 +173,67 @@ function HamburgerMenu({
         <DropdownMenuSeparator />
         {links.map((link) => (
           <Link key={link.href} href={link.href}>
-            <DropdownMenuItem className="my-2 px-2 py-6 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
-              <div className="rounded-full bg-zinc-200 p-2">{link.icon}</div>
-              {link.name}
+              {link.icon ? 
+              <>
+                <DropdownMenuItem className="my-2 px-2 py-4 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
+              <div className="p-1">{link.icon}</div>
+              <div>{link.name}</div>
             </DropdownMenuItem>
+              <Separator />
+              </>
+              : 
+              <>
+              <DropdownMenuItem className="px-2 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
+              <div className="p-2">
+                {link.name}
+              </div>
+            </DropdownMenuItem>
+            <Separator />
+            </>
+              }
           </Link>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+          :
+          <DropdownMenuContent className="bg-white">
+            <DropdownMenuLabel className="text-xl font-bold text-teal-900">
+          <div className="flex items-center gap-3">
+            <button
+              className="rounded-full border border-teal-900 bg-zinc-200 p-2"
+              onClick={() => setOpen(!open)}
+            >
+              <X size={20} />
+            </button>
+            <h3>Tramona</h3>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {links.map((link) => (
+          <Link key={link.href} href={link.href}>
+              {link.icon ? 
+              <>
+                <DropdownMenuItem className="my-2 px-2 py-4 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
+              <div className="p-1">{link.icon}</div>
+              <div>{link.name}</div>
+            </DropdownMenuItem>
+              <Separator />
+              </>
+              : 
+              <>
+              <DropdownMenuItem className="px-2 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
+              <div className="p-2">
+                {link.name}
+              </div>
+            </DropdownMenuItem>
+            <Separator />
+            </>
+              }
+          </Link>
+        ))}
+        </DropdownMenuContent>
+        }
+        {/* </DropdownMenuPortal> */}
+      </DropdownMenu> 
   );
 }
 
