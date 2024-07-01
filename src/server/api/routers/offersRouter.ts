@@ -7,7 +7,6 @@ import {
 } from "@/server/api/trpc";
 import {
   groupMembers,
-  groups,
   offerInsertSchema,
   offerSelectSchema,
   offerUpdateSchema,
@@ -15,8 +14,9 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
+  trips,
 } from "@/server/db/schema";
-import { getAddress, getCoordinates } from "@/server/google-maps";
+import { getCity, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
 
@@ -25,51 +25,63 @@ import {
   and,
   desc,
   eq,
-  exists,
   isNotNull,
   isNull,
   lt,
-  ne,
   notInArray,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
-import { reservationSelectSchema } from "../../db/schema/tables/reservations";
 import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
-      const offerDetails = await ctx.db.query.offers.findFirst({
+      const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: { totalPrice: true },
+        columns: { totalPrice: true, propertyId: true },
         with: {
           request: {
-            columns: { id: true },
-            with: { madeByGroup: { columns: { ownerId: true } } },
+            columns: {
+              id: true,
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+            },
+            with: { madeByGroup: { columns: { ownerId: true, id: true } } },
           },
         },
       });
 
-      // request must still exist
-      if (!offerDetails?.request) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+      if (!offer) throw new TRPCError({ code: "NOT_FOUND" });
 
-      // only the owner of the group can accept offers
-      if (offerDetails.request.madeByGroup.ownerId !== ctx.user.id) {
+      // if the offer comes from a request, only the owner of the group can accept offers
+      // otherwise, anyone can
+      if (offer.request?.madeByGroup.ownerId !== ctx.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       await ctx.db.transaction(async (tx) => {
         const results = await Promise.allSettled([
-          // resolve the request
-          tx
-            .update(requests)
-            .set({ resolvedAt: new Date() })
-            .where(eq(offers.id, offerDetails.request.id)),
+          offer.request &&
+            // resolve the request if it exists
+            tx
+              .update(requests)
+              .set({ resolvedAt: new Date() })
+              .where(eq(offers.id, offer.request.id)),
+
+          offer.request &&
+            // add a trip
+            tx.insert(trips).values({
+              offerId: input.id,
+              checkIn: offer.request.checkIn,
+              checkOut: offer.request.checkOut,
+              numGuests: offer.request.numGuests,
+              groupId: offer.request.madeByGroup.id,
+              propertyId: offer.propertyId,
+            }),
 
           // mark the offer as accepted
           tx
@@ -82,7 +94,7 @@ export const offersRouter = createTRPCRouter({
             tx
               .update(referralCodes)
               .set({
-                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
               })
               .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 
@@ -145,21 +157,18 @@ export const offersRouter = createTRPCRouter({
         columns: {
           createdAt: true,
           totalPrice: true,
-          id: true,
           acceptedAt: true,
           tramonaFee: true,
+          checkIn: true,
+          checkOut: true,
+          id: true,
         },
-
         with: {
           request: {
-            columns: {
-              checkIn: true,
-              checkOut: true,
-              numGuests: true,
-              location: true,
-              id: true,
+            with: {
+              madeByGroup: { with: { members: true } },
             },
-            with: { madeByGroup: { with: { members: true } } },
+            columns: { numGuests: true, location: true, id: true },
           },
           property: {
             with: {
@@ -182,33 +191,9 @@ export const offersRouter = createTRPCRouter({
     }),
 
   getCity: publicProcedure
-    .input(
-      z.object({
-        latitude: z.number(),
-        longitude: z.number(),
-      }),
-    )
+    .input(z.object({ lat: z.number(), lng: z.number() }))
     .query(async ({ input }) => {
-      const { latitude, longitude } = input;
-
-      const addressComponents = await getAddress({
-        lat: latitude,
-        lng: longitude,
-      });
-
-      if (!addressComponents) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      const city = addressComponents.find((component) =>
-        component.types.includes("locality"),
-      )?.long_name;
-
-      const state = addressComponents.find((component) =>
-        component.types.includes("administrative_area_level_1"),
-      )?.short_name;
-
-      return { city, state };
+      return await getCity(input);
     }),
 
   getByIdWithDetails: protectedProcedure
@@ -217,22 +202,24 @@ export const offersRouter = createTRPCRouter({
       const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
         columns: {
+          checkIn: true,
+          checkOut: true,
           createdAt: true,
           totalPrice: true,
           acceptedAt: true,
-          id: true,
           tramonaFee: true,
+          id: true,
         },
         with: {
           request: {
+            with: {
+              madeByGroup: { with: { members: true } },
+            },
             columns: {
-              checkIn: true,
-              checkOut: true,
               numGuests: true,
               location: true,
               id: true,
             },
-            with: { madeByGroup: { with: { members: true } } },
           },
           property: {
             with: {
@@ -248,12 +235,14 @@ export const offersRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      const memberIds = offer.request.madeByGroup.members.map(
-        (member) => member.userId,
-      );
+      if (offer.request) {
+        const memberIds = offer.request.madeByGroup.members.map(
+          (member) => member.userId,
+        );
 
-      if (!memberIds.includes(ctx.user.id) && ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+        if (!memberIds.includes(ctx.user.id) && ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
       }
 
       return offer;
@@ -293,7 +282,7 @@ export const offersRouter = createTRPCRouter({
           },
         },
       });
-      console.log("this is offer router offer", offer);
+
       if (!offer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
@@ -405,10 +394,10 @@ export const offersRouter = createTRPCRouter({
 
   acceptCityRequest: protectedProcedure
     .input(
-      offerInsertSchema.pick({
-        requestId: true,
-        propertyId: true,
-        totalPrice: true,
+      z.object({
+        requestId: z.number(),
+        propertyId: z.number(),
+        totalPrice: z.number().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -434,7 +423,20 @@ export const offersRouter = createTRPCRouter({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      await ctx.db.insert(offers).values(input);
+      const requestDetails = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.requestId),
+        columns: { checkIn: true, checkOut: true, madeByGroupId: true },
+      });
+
+      if (!requestDetails) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      await ctx.db.insert(offers).values({
+        ...input,
+        checkIn: requestDetails.checkIn,
+        checkOut: requestDetails.checkOut,
+      });
 
       await ctx.db
         .delete(requestsToProperties)
@@ -500,29 +502,33 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: {},
+        columns: {
+          checkIn: true,
+          checkOut: true,
+        },
         with: {
-          property: { columns: { hostId: true, name: true } },
+          property: {
+            columns: { hostId: true, name: true, address: true },
+          },
           request: {
-            columns: {
-              checkIn: true,
-              checkOut: true,
-              id: true,
-              location: true,
-            },
             with: {
               madeByGroup: {
                 with: {
                   members: {
                     with: {
                       user: {
-                        columns: { phoneNumber: true, isWhatsApp: true },
+                        columns: {
+                          phoneNumber: true,
+                          isWhatsApp: true,
+                          id: true,
+                        },
                       },
                     },
                   },
                 },
               },
             },
+            columns: { location: true },
           },
         },
       });
@@ -541,30 +547,8 @@ export const offersRouter = createTRPCRouter({
 
       const { request, property } = offer;
 
-      // const groupOwner = await ctx.db.query.groups
-      //   .findFirst({
-      //     where: eq(groups.id, request.madeByGroup.id),
-      //     with: {
-      //       owner: {
-      //         columns: { id: true, phoneNumber: true, isWhatsApp: true },
-      //       },
-      //     },
-      //   })
-      //   .then((res) => res?.owner);
-
-      const members = await ctx.db.query.groupMembers
-        .findMany({
-          columns: {},
-          with: {
-            user: {
-              columns: { phoneNumber: true, isWhatsApp: true, id: true },
-            },
-          },
-          where: eq(groupMembers.groupId, request.madeByGroup.id),
-        })
-        .then((res) => res.map((member) => member.user));
-
-      if (!members) return;
+      const members =
+        offer.request?.madeByGroup.members.map((m) => m.user) ?? [];
 
       for (const member of members) {
         const memberHasOtherOffers = await ctx.db.query.groupMembers
@@ -588,11 +572,12 @@ export const offersRouter = createTRPCRouter({
               res && res.group.requests.some((req) => req.offers.length > 0),
           );
 
-        const fmtdDateRange = formatDateRange(
-          request.checkIn,
-          request.checkOut,
-        );
+        const fmtdDateRange = formatDateRange(offer.checkIn, offer.checkOut);
         const url = `${env.NEXTAUTH_URL}/requests`;
+
+        const location = await getCoordinates(property.address).then((res) =>
+          res.location ? getCity(res.location) : "[Unknown location]",
+        );
 
         if (member.phoneNumber) {
           if (member.isWhatsApp) {
@@ -601,23 +586,23 @@ export const offersRouter = createTRPCRouter({
                   templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
                   to: member.phoneNumber,
                   propertyName: property.name,
-                  propertyAddress: request.location, //??can this be null
-                  checkIn: request.checkIn,
-                  checkOut: request.checkOut,
+                  propertyAddress: request?.location, //??can this be null
+                  checkIn: offer.checkIn,
+                  checkOut: offer.checkOut,
                   url: url,
                 })
               : void sendWhatsApp({
                   templateId: "HXb293923af34665e7eefc81be0579e5db",
                   to: member.phoneNumber,
                   propertyName: property.name,
-                  propertyAddress: request.location,
-                  checkIn: request.checkIn,
-                  checkOut: request.checkOut,
+                  propertyAddress: request?.location,
+                  checkIn: offer.checkIn,
+                  checkOut: offer.checkOut,
                 });
           } else {
             void sendText({
               to: member.phoneNumber,
-              content: `Tramona: Hello, your ${property.name} in ${request.location} offer from ${fmtdDateRange} has expired.${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
+              content: `Tramona: Hello, your ${property.name} in ${location} offer from ${fmtdDateRange} has expired. ${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
             });
           }
         }
@@ -633,7 +618,7 @@ export const offersRouter = createTRPCRouter({
     const completedRequests = await ctx.db.query.requests.findMany({
       where: isNotNull(requests.resolvedAt),
     });
-    console.log(completedRequests);
+
     const unMatchedOffers = await ctx.db.query.offers.findMany({
       where: and(
         isNull(offers.acceptedAt),
@@ -643,6 +628,7 @@ export const offersRouter = createTRPCRouter({
         ),
       ),
       with: {
+        request: { columns: { checkIn: true, checkOut: true } },
         property: {
           columns: {
             name: true,
@@ -651,12 +637,6 @@ export const offersRouter = createTRPCRouter({
             id: true,
             maxNumGuests: true,
             numBedrooms: true,
-          },
-        },
-        request: {
-          columns: {
-            checkIn: true,
-            checkOut: true,
           },
         },
       },

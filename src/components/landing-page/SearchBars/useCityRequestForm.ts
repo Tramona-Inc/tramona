@@ -75,6 +75,8 @@ export function useCityRequestForm({
           afterSubmit?.(result.madeByGroupIds);
         })
         .catch(() => errorToast());
+
+        //figure out which hosts to send the request to
     }
   });
 

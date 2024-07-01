@@ -165,9 +165,13 @@ export const roleRestrictedProcedure = <
 
     const role = data?.role ?? "guest";
 
-    if (!allowedRoles.includes(role)) {
+    if (
+      allowedRoles.length === 1 &&
+      allowedRoles[0] === "admin" &&
+      role !== "admin"
+    ) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
+    };
 
     return next({
       ctx: {

@@ -67,7 +67,12 @@ export const profileRouter = createTRPCRouter({
           originalNightlyPrice: properties.originalNightlyPrice,
         })
         .from(properties)
-        .where(inArray(properties.id, myPropertyIds));
+        .where(
+          and(
+            eq(properties.propertyStatus, "Listed"),
+            inArray(properties.id, myPropertyIds),
+          ),
+        );
 
       const fullBucketListProperties = data
         .map((property) => {
