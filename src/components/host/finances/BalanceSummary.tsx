@@ -35,16 +35,13 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
         </p>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger>
-            <div className="rounded-full border border-primaryGreen px-3 hover:bg-zinc-100">
+            <div className="rounded-full border border-primaryGreen px-4 tracking-tight hover:bg-zinc-100">
               Transfer
             </div>
           </DialogTrigger>
           <DialogContent className="min-h-84">
             <div className="">
-              <h1 className="my-3 text-center text-2xl font-bold">
-                {" "}
-                Transfer{" "}
-              </h1>
+              <h1 className="my-3text-center text-2xl font-bold"> Transfer </h1>
               {isStripeConnectInstanceReady ? (
                 <ConnectPayouts />
               ) : (
@@ -62,7 +59,7 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
       </div>
       <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
         <DialogTrigger>
-          <div className="underline underline-offset-2">
+          <div className="text-[#7E7564] underline underline-offset-4">
             Manage payout accounts
           </div>
         </DialogTrigger>

@@ -47,7 +47,7 @@ export default function Page() {
       </Head>
 
       <main className="container mb-24 flex w-11/12 flex-col gap-y-3">
-        <h2 className="fond-extrabold ml-4 mt-7 text-left text-4xl">
+        <h2 className="fond-extrabold ml-4 mt-7 text-left text-4xl tracking-tight">
           Finances
         </h2>
         {isStripeConnectInstanceReady && (
