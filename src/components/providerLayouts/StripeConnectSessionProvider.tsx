@@ -9,7 +9,7 @@ import {
   loadConnectAndInitialize,
   type StripeConnectInstance,
 } from "@stripe/connect-js";
-
+import { useSession } from "next-auth/react";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 
 //we need to use zustand, so when the the instance for the provider is ready, we can use it in the children
@@ -19,9 +19,15 @@ const StripeConnectSessionProvider = ({
 }: {
   children: ReactElement;
 }) => {
+  const { data: session } = useSession();
+  const userRole = session?.user.role;
   //we can get the stripe account id from the host profile
-  const { data: stripeAccountIdNumber } =
-    api.host.getStripeAccountId.useQuery();
+  const { data: stripeAccountIdNumber } = api.host.getStripeAccountId.useQuery(
+    undefined,
+    {
+      enabled: userRole == "host" ? true : false,
+    },
+  );
 
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
 
