@@ -13,7 +13,7 @@ import {
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
-import { zodString } from "@/utils/zod-utils";
+import { zodNumber, zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -25,7 +25,7 @@ export const feedRouter = createTRPCRouter({
     getFeed: publicProcedure
         .input(
             z.object({
-                userId: zodString().optional(),
+                atLeastNumOfEntries: zodNumber().optional(),
             }),
         )
         .query(async ({ ctx, input }) => {
@@ -43,37 +43,54 @@ export const feedRouter = createTRPCRouter({
               },
               with: {
                 requestGroup: {// TODO: change this to group (supabase uses group but this dev branch uses requestGroup)
-                    columns: {
-                        createdByUserId: true, // TODO: change this to ownerId
-                    },
+                    columns: {},
+                    with: {
+                        createdByUser: {
+                            columns: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            }
+                        },
+                    }
                 }
               },
-              limit: 50,
+              limit: input.atLeastNumOfEntries ?? 30,
+              orderBy: (requests, { desc }) => [desc(requests.createdAt)],
             })
-            // 1.2. sort by created time (this is moved to fronted)
-            // .then((requests) =>
-            //   requests
-            //     .sort(
-            //       (a, b) =>
-            //         b.createdAt.getTime() - a.createdAt.getTime(),
-            //     ),
-            // )
       
             // 2. get the matches(offers) for these requests
             // use property_id to join the properties table and extract imageUrls
-            const requestIds = groupedRequests.map((request) => request.id);
             const matches = await ctx.db.query.offers.findMany({
-                where: inArray(offers.requestId, requestIds),
                 columns: {
                     id: true,
                     propertyId: true,
+                    requestId: true,
                     totalPrice: true,
                     createdAt: true,
                 },
                 with: {
                     property: {columns: {imageUrls: true, originalNightlyPrice: true}},
+                    request: {
+                        columns: {},
+                        with:{
+                            requestGroup: {// TODO: change this to group (supabase uses group but this dev branch uses requestGroup)
+                                columns: {},
+                                with: {
+                                    createdByUser: {
+                                        columns: {
+                                            id: true,
+                                            name: true,
+                                            image: true,
+                                        }
+                                    },
+                                }
+                            }
+                        }
+                    }
                 },
-                
+                limit: input.atLeastNumOfEntries ?? 30,
+                orderBy: (offers, { desc }) => [desc(offers.createdAt)],
             })
 
             // 3. get bookings TODO

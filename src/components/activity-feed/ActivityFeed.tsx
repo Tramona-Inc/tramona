@@ -11,15 +11,24 @@ export type RequestCardDataType = {
   checkIn: Date;
   checkOut: Date;
   createdAt: Date;
+  requestGroup: {
+    createdByUser: { id: string; name: string | null; image: string | null };
+  };
 };
 
 export type OfferCardDataType = {
   uniqueId: string;
   id: number;
   createdAt: Date;
+  requestId: number | null;
   propertyId: number;
   totalPrice: number;
   property: { imageUrls: string[]; originalNightlyPrice: number | null };
+  request: {
+    requestGroup: {
+      createdByUser: { id: string; name: string | null; image: string | null };
+    };
+  } | null;
 };
 
 type MergedDataType = RequestCardDataType | OfferCardDataType | null;
