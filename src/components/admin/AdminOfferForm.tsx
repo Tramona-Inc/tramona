@@ -88,8 +88,8 @@ export default function AdminOfferForm({
   offer,
 }: {
   afterSubmit?: () => void;
-  request: Request;
   offer?: OfferWithProperty;
+  request: Request;
 }) {
   const numberOfNights = getNumNights(request.checkIn, request.checkOut);
   const offeredNightlyPriceUSD = offer
@@ -147,10 +147,10 @@ export default function AdminOfferForm({
     control: form.control,
   });
 
-  const updatePropertiesMutation = api.properties.update.useMutation();
-  const updateOffersMutation = api.offers.update.useMutation();
-  const createPropertiesMutation = api.properties.create.useMutation();
-  const createOffersMutation = api.offers.create.useMutation();
+  const updatePropertyMutation = api.properties.update.useMutation();
+  const updateOfferMutation = api.offers.update.useMutation();
+  const createPropertyMutation = api.properties.create.useMutation();
+  const createOfferMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
@@ -206,16 +206,16 @@ export default function AdminOfferForm({
       };
 
       await Promise.all([
-        updatePropertiesMutation.mutateAsync({
+        updatePropertyMutation.mutateAsync({
           ...newProperty,
           id: offer.property.id,
           isPrivate: true,
         }),
-        updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
+        updateOfferMutation.mutateAsync(newOffer).catch(() => errorToast()),
       ]);
       // ...otherwise its a "create offer" form so make a new property and offer
     } else {
-      const propertyId = await createPropertiesMutation
+      const propertyId = await createPropertyMutation
         .mutateAsync({ ...newProperty, isPrivate: true })
         .catch(() => errorToast());
 
@@ -233,12 +233,9 @@ export default function AdminOfferForm({
         tramonaFee: data.tramonaFee * 100,
         checkIn: request.checkIn,
         checkOut: request.checkOut,
-        groupId: request.madeByGroupId,
       };
 
-      await createOffersMutation
-        .mutateAsync(newOffer)
-        .catch(() => errorToast());
+      await createOfferMutation.mutateAsync(newOffer).catch(() => errorToast());
     }
 
     //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
@@ -256,7 +253,7 @@ export default function AdminOfferForm({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `Tramona: You have a new match for a request in your Tramona account!\nTramona price: $${data.offeredNightlyPriceUSD}, Airbnb price: $${data.originalNightlyPriceUSD}.\n\nCheck it out now!`
+            msg: `Tramona: You have a new match for a request in your Tramona account!\nTramona price: $${data.offeredNightlyPriceUSD}, Airbnb price: $${data.originalNightlyPriceUSD}.\n\nCheck it out now!`,
           });
 
           await twilioMutation.mutateAsync({
