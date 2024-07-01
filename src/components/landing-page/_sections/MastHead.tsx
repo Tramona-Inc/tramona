@@ -18,8 +18,6 @@ import {
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
-import { WelcomeBanner } from "../WelcomeBanner";
-import MapModal from "@/components/map-modal";
 import Typewriter from "typewriter-effect";
 import Image from "next/image";
 
@@ -51,18 +49,6 @@ const infoCards = [
 ];
 
 export default function MastHead() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [initialLocation, setInitialLocation] = useState(null);
-
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
-  const handleModalSave = (location, radius) => {
-
-    // Handle the location save logic here
-    console.log("Location saved:", location, radius);
-    closeModal();
-  };
   return (
     <section className="relative bg-white p-4">
       <div className="relative overflow-clip rounded-3xl border">
@@ -94,15 +80,15 @@ export default function MastHead() {
               </p>
             </div>
           </div>
-          {/* <div className="ps-16">
+          <div className="ps-16">
             <div className="hidden flex-1 rounded-2xl border bg-white p-4 lg:block">
               <DesktopSearchLayout />
             </div>
-          </div> */}
-          <div className="mt-4 flex-1 rounded-2xl border bg-secondary p-4 lg:hidden">
-            <DesktopSearchLayout />
           </div>
         </div>
+      </div>
+      <div className="mt-4 flex-1 rounded-2xl border bg-secondary p-4 lg:hidden">
+        <DesktopSearchLayout />
       </div>
       <div className="mt-8 space-y-4 lg:mt-14 lg:space-y-8">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
@@ -131,10 +117,10 @@ export default function MastHead() {
   );
 }
 
-export function DesktopSearchLayout({openModal, setInitialLocation}) {
+export function DesktopSearchLayout() {
   return (
     <div className="space-y-2">
-      <p className="hidden  font-semibold  text-muted-foreground lg:block">
+      <p className="hidden font-semibold text-muted-foreground lg:block">
         Send a request to every host in{" "}
         <span className="font-bold text-teal-900">
           <Typewriter

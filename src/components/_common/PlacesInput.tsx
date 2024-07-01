@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import PlacesPopover from "./PlacesPopover";
 import MapModal from "@/components/map-modal";
 import { LocateFixed } from "lucide-react";
+import { Button } from "../ui/button";
 
 export default function PlacesInput({
   className,
@@ -28,7 +29,10 @@ export default function PlacesInput({
   const [open, setOpen] = useState(false);
   const utils = api.useUtils();
   const [isMapOpen, setIsMapOpen] = useState(false);
-  const [initialLocation, setInitialLocation] = useState({lat: 0, lng: 0});
+  const [initialLocation, setInitialLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   return (
     <FormField
@@ -73,25 +77,28 @@ export default function PlacesInput({
               <FormMessage />
             </div>
             <div className="absolute right-2 top-1/2 -translate-y-1/2 transform">
-              <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
-                <DialogTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center rounded-lg border border-[#d9d6d1ff] bg-[#f2f1efff] p-2 hover:bg-gray-200"
-                    onClick={() => setIsMapOpen(true)}
-                  >
-                    <LocateFixed className="h-4 w-4 text-gray-700" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent>
-                  <MapModal
-                    initialLocation={initialLocation}
-                    setInitialLocation={setInitialLocation}
-                    setOpen={setIsMapOpen}
-                    onSave={onSave}
-                  />
-                </DialogContent>
-              </Dialog>
+              {initialLocation && (
+                <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      onClick={() => setIsMapOpen(true)}
+                    >
+                      <LocateFixed className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <MapModal
+                      initialLocation={initialLocation}
+                      setInitialLocation={setInitialLocation}
+                      setOpen={setIsMapOpen}
+                      onSave={onSave}
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           </div>
         </FormItem>
