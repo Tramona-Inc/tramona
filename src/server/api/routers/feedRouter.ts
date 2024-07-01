@@ -94,9 +94,43 @@ export const feedRouter = createTRPCRouter({
             })
 
             // 3. get bookings TODO
-            // const bookings = await ctx.db.query.trips.findMany({
+            const bookings = await ctx.db.query.trips.findMany({
+                columns: {
+                    id: true,
+                    createdAt: true,
+                },
+                with: {
+                    group: {
+                        columns: {},
+                            with: {
+                                owner: {
+                                    columns: {
+                                        id: true,
+                                        name: true,
+                                        image: true,
+                                    }
+                                },
+                            }
+                    },
+                    offer: {
+                        columns:{
+                            totalPrice: true,
+                        }
+                    },
+                    property: {
+                        columns: {
+                            originalNightlyPrice: true,
+                            city: true,
+                            imageUrls: true,
+                        }
+                    }
+                },
+                limit: input.atLeastNumOfEntries ?? 30,
+                orderBy: (trips, { desc }) => [desc(trips.createdAt)],
+            })
 
-          return {groupedRequests, matches};
+
+          return {groupedRequests, matches, bookings};
         }),
 
     });

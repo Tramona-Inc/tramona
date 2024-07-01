@@ -31,7 +31,25 @@ export type OfferCardDataType = {
   } | null;
 };
 
-type MergedDataType = RequestCardDataType | OfferCardDataType | null;
+export type BookingCardDataType = {
+  uniqueId: string;
+  id: number;
+  createdAt: Date;
+  group: {
+    owner: { id: string; name: string | null; image: string | null };
+  };
+  offer: { totalPrice: number } | null;
+  property: {
+    imageUrls: string[];
+    originalNightlyPrice: number | null;
+    city: string;
+  };
+};
+type MergedDataType =
+  | RequestCardDataType
+  | OfferCardDataType
+  | BookingCardDataType
+  | null;
 
 export default function ActivityFeed() {
   const { data: feed, isLoading: loadingFeed } = api.feed.getFeed.useQuery({});
@@ -48,7 +66,10 @@ export default function ActivityFeed() {
           ...item,
           uniqueId: `off-${item.id}`,
         })),
-        // ...feed.bookings?.map((item) => ({ ...item, uniqueId: `book-${item.id}` })),
+        ...feed.bookings?.map((item) => ({
+          ...item,
+          uniqueId: `boo-${item.id}`,
+        })),
       ];
       mergedData.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       console.log("mergedData: ", mergedData);
