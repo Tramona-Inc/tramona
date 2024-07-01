@@ -42,7 +42,7 @@ export const feedRouter = createTRPCRouter({
                 createdAt: true,
               },
               with: {
-                requestGroup: {// TODO: change this to group (supabase uses group but this dev branch uses requestGroup)
+                requestGroup: {
                     columns: {},
                     with: {
                         createdByUser: {
@@ -74,7 +74,7 @@ export const feedRouter = createTRPCRouter({
                     request: {
                         columns: {},
                         with:{
-                            requestGroup: {// TODO: change this to group (supabase uses group but this dev branch uses requestGroup)
+                            requestGroup: {
                                 columns: {},
                                 with: {
                                     createdByUser: {
@@ -94,6 +94,7 @@ export const feedRouter = createTRPCRouter({
             })
 
             // 3. get bookings TODO
+            // const bookings = await ctx.db.query.trips.findMany({
 
           return {groupedRequests, matches};
         }),
