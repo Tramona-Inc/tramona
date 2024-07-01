@@ -11,8 +11,8 @@ export type RequestCardDataType = {
   checkIn: Date;
   checkOut: Date;
   createdAt: Date;
-  requestGroup: {
-    createdByUser: { id: string; name: string | null; image: string | null };
+  madeByGroup: {
+    owner: { id: string; name: string | null; image: string | null };
   };
 };
 
@@ -25,8 +25,8 @@ export type OfferCardDataType = {
   totalPrice: number;
   property: { imageUrls: string[]; originalNightlyPrice: number | null };
   request: {
-    requestGroup: {
-      createdByUser: { id: string; name: string | null; image: string | null };
+    madeByGroup: {
+      owner: { id: string; name: string | null; image: string | null };
     };
   } | null;
 };

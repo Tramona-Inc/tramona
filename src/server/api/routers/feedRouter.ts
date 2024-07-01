@@ -42,10 +42,10 @@ export const feedRouter = createTRPCRouter({
                 createdAt: true,
               },
               with: {
-                requestGroup: {
+                madeByGroup: {
                     columns: {},
                     with: {
-                        createdByUser: {
+                        owner: {
                             columns: {
                                 id: true,
                                 name: true,
@@ -74,10 +74,10 @@ export const feedRouter = createTRPCRouter({
                     request: {
                         columns: {},
                         with:{
-                            requestGroup: {
+                            madeByGroup: {
                                 columns: {},
                                 with: {
-                                    createdByUser: {
+                                    owner: {
                                         columns: {
                                             id: true,
                                             name: true,

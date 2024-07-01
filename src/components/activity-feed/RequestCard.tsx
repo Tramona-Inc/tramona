@@ -29,12 +29,12 @@ export default function FeedRequestCard({
       <div className="flex items-center gap-4">
         <UserAvatar
           size="md"
-          name={request.requestGroup.createdByUser.name}
-          image={request.requestGroup.createdByUser.image}
+          name={request.madeByGroup.owner.name}
+          image={request.madeByGroup.owner.image}
         />
         <div className="min-w-0 flex-1  font-medium">
           <div className="truncate">
-            {getDisplayedName(request.requestGroup.createdByUser.name) ?? ""}
+            {getDisplayedName(request.madeByGroup.owner.name) ?? ""}
           </div>
           <p className="truncate text-sm text-muted-foreground">
             {elapsedTime}
