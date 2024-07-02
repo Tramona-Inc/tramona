@@ -15,6 +15,102 @@ export default function Checkout() {
     router.back();
   };
 
+  const items = [
+    {
+      title: "$2,085 x 5 nights",
+      price: 10423,
+    },
+    {
+      title: "Cleaning fee",
+      price: "Included",
+    },
+    {
+      title: "Tramona service fee",
+      price: 0,
+    },
+    {
+      title: "Taxes",
+      price: 93.72,
+    },
+  ];
+
+  function CheckoutSummary() {
+    return (
+      <div>
+        <div className="rounded-t-xl border border-b-0  p-3">
+          <div className="flex items-center gap-2">
+            <div className="overflow-hidden rounded-xl">
+              <Image
+                src="/assets/images/landing-bg.jpg"
+                width={100}
+                height={100}
+                alt=""
+              />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold">
+                Entire Cabin in Gold Bar, Washington
+              </h3>
+              <p className="text-xs">Apartment</p>
+              <div className="flex items-center gap-1">
+                <Star size={10} />
+                <p className="text-xs">4.89 (147 reviews)</p>
+              </div>
+            </div>
+          </div>
+          <Separator className="my-4" />
+          <div className="space-y-2 text-sm">
+            <h3 className="font-bold">Included with Tramona</h3>
+            <div className="space-y-1 text-muted-foreground">
+              <p>Lowest fees on the market</p>
+              <p>24/7 concierge support</p>
+              <p>Lowest price on the market</p>
+              <p>No worries or hassles</p>
+            </div>
+          </div>
+          <Separator className="my-4" />
+          <div className="space-y-4">
+            {items.map((item, index) => (
+              <div
+                className="flex items-center justify-between text-sm font-semibold"
+                key={index}
+              >
+                <p className="underline">{item.title}</p>
+                <p>${item.price}</p>
+              </div>
+            ))}
+          </div>
+          <Separator className="my-4" />
+          <div className="flex items-center justify-between text-sm font-semibold">
+            <p>Total (USD)</p>
+            <p>$957.25</p>
+          </div>
+        </div>
+        <div className="rounded-b-xl bg-teal-900">
+          <h2 className="py-2 text-center text-lg font-semibold text-white">
+            15% Off
+          </h2>
+        </div>
+      </div>
+    );
+  }
+
+  function CustomerReview() {
+    return (
+      <div className="w-full overflow-hidden rounded-xl">
+        <div>
+          <Image
+            src="/assets/images/host-onboarding.png"
+            width={300}
+            height={300}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-8">
@@ -27,9 +123,9 @@ export default function Checkout() {
       </div>
       <div className="grid grid-cols-2">
         <div>
-          <div className="rounded-lg border border-teal-900 p-3 text-sm">
+          <div className="rounded-lg border border-teal-900 bg-zinc-100 p-3 text-sm">
             <h3 className="font-bold">Best price</h3>
-            <p className="text-muted-foreground">
+            <p className="font-semibold text-muted-foreground">
               This is an exclusive price only available on Tramona.
             </p>
           </div>
@@ -57,7 +153,7 @@ export default function Checkout() {
           <div>insert stripe checkout form here</div>
           <Separator className="my-4" />
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Contact information</h3>
+            <h3 className="text-lg font-semibold">Contact Information</h3>
             <p className="text-sm text-muted-foreground">
               We encourage every traveler to have the travel details in case of
               emergencies.
@@ -89,29 +185,9 @@ export default function Checkout() {
             </p>
           </div>
         </div>
-        <div className=" pl-16">
-          <div className="rounded-xl border p-2">
-            <div className="flex gap-2">
-              <div className="overflow-hidden rounded-xl">
-                <Image
-                  src="/assets/images/landing-bg.jpg"
-                  width={100}
-                  height={100}
-                  alt=""
-                />
-              </div>
-              <div>
-                <h3 className="font-semibold">
-                  Entire Cabin in Gold Bar, Washington
-                </h3>
-                <p className="text-sm">Apartment</p>
-                <div className="flex items-center gap-1">
-                  <Star />
-                  <p className="text-sm">4.89 (147 reviews)</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="space-y-10 pl-16">
+          <CheckoutSummary />
+          <CustomerReview />
         </div>
       </div>
     </div>
