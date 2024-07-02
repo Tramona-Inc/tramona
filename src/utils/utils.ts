@@ -123,6 +123,10 @@ export function formatDateMonthDayYear(date: Date) {
   return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
 }
 
+export function formatShortDate(date: Date) {
+  return format(removeTimezoneFromDate(date), "M/d/yyyy");
+}
+
 // not used right now and probably will never have to:
 
 // export function formatDateRangeFromStrs(from: string, to?: string) {

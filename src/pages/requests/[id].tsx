@@ -1,10 +1,10 @@
-import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -19,6 +19,8 @@ import { requests } from "@/server/db/schema/tables/requests";
 import { and, eq } from "drizzle-orm";
 
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import { useMediaQuery } from "@uidotdev/usehooks";
+import MobileOfferPage from "@/components/offers/MobileOfferPage";
 
 type PageProps = {
   offer: OfferWithDetails; // Replace with a more specific type if you have one
@@ -39,6 +41,7 @@ function Page({
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
   const [selectedOfferId, setSelectedOfferId] = useState("");
+  const [applyOverflowHidden, setApplyOverflowHidden] = useState(false);
   const [mapCenter, setMapCenter] = useState({
     lat: 37.774929,
     lng: -122.419416,
@@ -83,7 +86,7 @@ function Page({
   }
 
   return (
-    <DashboadLayout type="guest">
+    <DashboardLayout type="guest">
       <NextSeo
         title={serverFirstPropertyName}
         description={`Check out your tramona offers in ${serverRequestLocation}`}
@@ -105,61 +108,68 @@ function Page({
           site_name: "Tramona",
         }}
       />
-      {request && offers ? (
-        <div>
-          <div className="p-4">
-            <Button asChild variant="ghost" className="rounded-full">
-              <Link href="/requests">
-                <ArrowLeftIcon /> Back to all requests
-              </Link>
-            </Button>
-          </div>
-          <div className="px-4 pb-32">
-            <Tabs
-              defaultValue={`${offers[0]?.id}`}
-              value={selectedOfferId}
-              onValueChange={setSelectedOfferId}
-            >
-              <TabsList className="w-max">
-                {offers.map((offer, i) => (
-                  <TabsTrigger key={offer.id} value={`${offer.id}`}>
-                    Offer {i + 1}
-                  </TabsTrigger>
-                ))}
-                <div className="mx-4  mt-5 flex h-full items-center justify-center">
-                  <ShareButton
-                    id={request.id}
-                    isRequest={true}
-                    propertyName={offers[0]!.property.name}
-                  />
-                </div>
-              </TabsList>
+      <div className="flex justify-center max-w-full overflow-x-hidden lg:overflow-x-visible lg:px-0">
+        {request && offers ? (
+          <div className="min-h-screen-minus-header lg:px-4 pb-footer-height pt-5">
+            <div className="mx-auto w-[360px] lg:max-w-7xl">
+              <div className="flex items-center justify-center lg:justify-center">
+                <div className="px-4 lg:mx-16">
+                  <div className="hidden lg:block">
+                    <Button asChild variant="ghost" className="rounded-full">
+                      <Link href="/requests">
+                        <ArrowLeftIcon /> Back to requests
+                      </Link>
+                    </Button>
+                  </div>
+                  <div className="lg:hidden">
+                    <Button asChild variant="ghost" className="rounded-full">
+                      <Link href="/requests">
+                        <ChevronLeft className="-mx-1"/>
+                        <div className="font-semibold">Requests</div>
+                      </Link>
+                    </Button>
+                  </div>
+                  <div className="px-4 pb-32">
+                    <Tabs
+                      defaultValue={`${offers[0]?.id}`}
+                      value={selectedOfferId}
+                      onValueChange={setSelectedOfferId}
+                    >
+                      <div className="relative w-full mt-5">
+                      <TabsList className="w-max">
+                        {offers.map((offer, i) => (
+                          <TabsTrigger key={offer.id} value={`${offer.id}`}>
+                            Offer {i + 1}
+                          </TabsTrigger>
+                        ))}
+                        <div className="hidden lg:block absolute top-0 right-0">
+                          <ShareButton
+                            id={request.id}
+                            isRequest={true}
+                            propertyName={offers[0]!.property.name}
+                          />
+                        </div>
+                      </TabsList>
+                      </div>
 
-              <div className="flex flex-col lg:flex-row lg:space-x-10">
-                <div className="flex-1">
-                  {offers.map((offer) => (
-                    <TabsContent key={offer.id} value={`${offer.id}`}>
-                      <OfferPage offer={offer} />
-                    </TabsContent>
-                  ))}
-                </div>
-                <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
-                  <div className="relative h-screen lg:h-full">
-                    <SingleLocationMap
-                      key={`${mapCenter.lat}-${mapCenter.lng}`} // Unique key to force re-render
-                      lat={mapCenter.lat}
-                      lng={mapCenter.lng}
-                    />
+                      <div className="flex flex-col lg:flex-col">
+                        {offers.map((offer) => (
+                          <TabsContent key={offer.id} value={`${offer.id}`}>
+                            <OfferPage offer={offer} mapCenter={mapCenter} />
+                          </TabsContent>
+                        ))}
+                      </div>
+                    </Tabs>
                   </div>
                 </div>
               </div>
-            </Tabs>
+            </div>
           </div>
-        </div>
-      ) : (
-        <Spinner />
-      )}
-    </DashboadLayout>
+        ) : (
+          <Spinner />
+        )}
+      </div>
+    </DashboardLayout>
   );
 }
 

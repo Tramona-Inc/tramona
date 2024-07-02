@@ -80,8 +80,8 @@ const AmenityItem: React.FC<AmenityItemProps> = ({ name }) => {
   const IconComponent = amenityIcons[name];
   if (!IconComponent) return null;
   return (
-    <div className="flex items-center space-x-2 py-2 md:py-6">
-      {IconComponent && <IconComponent className="h-5 w-5" />}
+    <div className="flex items-center space-x-2 py-2 lg:py-6">
+      {IconComponent && <IconComponent className="h-7 w-7 bg-[#EEEEEE] rounded-full p-1" />}
       <span>{name}</span>
     </div>
   );
@@ -118,7 +118,7 @@ const PropertyAmenities = ({ amenities }: { amenities: string[] }) => {
     .slice(0, toDisplay);
 
   return (
-    <div className="gap-4 py-6 md:grid md:grid-cols-3">
+    <div className="gap-4 py-6 grid grid-cols-1 lg:grid lg:grid-cols-3">
       {topAmenities.map((amenity, index) => (
         <AmenityItem key={index} name={amenity} />
       ))}
