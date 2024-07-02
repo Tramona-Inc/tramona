@@ -16,16 +16,16 @@ export default function EmptyStateValue(props: EmptyStateProps) {
       {props.children}
       <div>
         {props.title && (
-          <h2 className="text-center font-bold">{props.title}</h2>
+          <h2 className="text-center text-lg font-bold">{props.title}</h2>
         )}
         {props.description && (
-          <p className="max-w-[350px] text-center font-medium text-muted-foreground">
+          <p className="max-w-80 text-center font-medium text-muted-foreground">
             {props.description}
           </p>
         )}
       </div>
       {props.href && (
-        <Button className="px-8 font-bold" asChild>
+        <Button variant="greenPrimary" asChild>
           <Link href={props.href}>{props.redirectTitle}</Link>
         </Button>
       )}
