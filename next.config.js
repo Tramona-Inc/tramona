@@ -26,81 +26,8 @@ const config = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "a0.muscache.com",
-        port: "",
-        pathname: "/im/pictures/**",
-      },
-      {
-        // protocol: "https",
-        hostname: "archziner.com",
-        // port: "",
-        // pathname: "/im/pictures/**",
-      },
-
-      {
-        hostname: "www.iwantthatdoor.com",
-        // port: "",
-        // pathname: "/im/pictures/**",
-      },
-      {
-        protocol: "https",
-        hostname: "trpc-test.s3.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "www.vrbo.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.trvl-media.com",
-      },
-      {
-        protocol: "https",
-        hostname: "orbirental-images.s3.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "hallson.co",
-      },
-      {
-        protocol: "https",
-        hostname: "www.killingtongroup.com",
-      },
-      {
-        protocol: "https",
-        hostname: "tramona-map-screenshots.s3.us-east-1.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "www.airbnb.com",
-      },
-      {
-        protocol: "https",
-        hostname: "guesty-listing-images.s3.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "guestybookings.s3.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "assets.guesty.com",
-      },
-      {
-        protocol: "https",
-        hostname: "dx577khz83dc.cloudfront.net",
-      },
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-      },
-      {
-        protocol: "https",
-        hostname: "tramona-images.s3.amazonaws.com",
+        hostname: "**",
+        pathname: "**",
       },
     ],
   },
@@ -112,3 +39,83 @@ const config = {
 export default NextBundleAnalyzer({ enabled: process.env.ANALYZE === "true" })(
   config,
 );
+
+// old remote patterns
+
+// {
+//   protocol: "https",
+//   hostname: "a0.muscache.com",
+//   port: "",
+//   pathname: "/im/pictures/**",
+// },
+// {
+//   // protocol: "https",
+//   hostname: "archziner.com",
+//   // port: "",
+//   // pathname: "/im/pictures/**",
+// },
+// {
+//   hostname: "www.iwantthatdoor.com",
+//   // port: "",
+//   // pathname: "/im/pictures/**",
+// },
+// {
+//   protocol: "https",
+//   hostname: "trpc-test.s3.amazonaws.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "www.vrbo.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "images.trvl-media.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "orbirental-images.s3.amazonaws.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "hallson.co",
+// },
+// {
+//   protocol: "https",
+//   hostname: "www.killingtongroup.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "tramona-map-screenshots.s3.us-east-1.amazonaws.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "www.airbnb.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "guesty-listing-images.s3.amazonaws.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "guestybookings.s3.amazonaws.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "assets.guesty.com",
+// },
+// {
+//   protocol: "https",
+//   hostname: "dx577khz83dc.cloudfront.net",
+// },
+// {
+//   protocol: "https",
+//   hostname: "res.cloudinary.com",
+// },
+// {
+//   protocol: "http",
+//   hostname: "localhost",
+// },
+// {
+//   protocol: "https",
+//   hostname: "tramona-images.s3.amazonaws.com",
+// },

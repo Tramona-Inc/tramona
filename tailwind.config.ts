@@ -19,6 +19,9 @@ module.exports = {
     extend: {
       fontSize: {
         "8xl": "4.6rem",
+        fontFamily: {
+          mulish: ["Mulish", "sans-serif"],
+        },
       },
       spacing: {
         "screen-minus-header-n-footer": "var(--screen-minus-header-n-footer)",
@@ -37,6 +40,11 @@ module.exports = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+        },
+        primaryGreen: {
+          DEFAULT: "hsl(var(--primary-green))",
+          background: "hsl(var(--primary-green-background))",
+          hover: "hsl(var(--primary-green-hover))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -62,6 +70,9 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      borderWidth: {
+        custom: "2px",
       },
       borderRadius: {
         lg: "var(--radius)",
