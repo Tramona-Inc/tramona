@@ -13,6 +13,7 @@ import { referralCodesRouter } from "./routers/referralCodesRouter";
 import { requestsRouter } from "./routers/requestsRouter";
 import { stripeRouter } from "./routers/stripeRouter";
 import { twilioRouter } from "./routers/twilioRouter";
+import { hostRouter } from "./routers/hostRouter";
 import { usersRouter } from "./routers/usersRouter";
 import { hostTeamsRouter } from "./routers/hostTeamsRouter";
 import { profileRouter } from "./routers/profileRouter";
@@ -35,6 +36,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   trips: tripsRouter,
   twilio: twilioRouter,
+  host: hostRouter,
   messages: messagesRouter,
   files: filesRouter,
   misc: miscRouter,

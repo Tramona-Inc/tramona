@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: "Mulish", sans-serif;
+}
+
 @layer base {
   @import url(./tailwind-colors.css);
 }
@@ -27,7 +31,10 @@
     --border: var(--zinc-200);
     --input: var(--zinc-300);
     --ring: var(--black);
-    --radius: 0.5rem;
+    --primary-green: var(--primaryGreen-900);
+    --primary-green-background: var(--primaryGreen-200);
+    --primary-green-hover: var(--primaryGreen-100);
+    --secondary-green: var(--primaryGreen-200);
     --mobile-header-height: 74px;
     --header-height: 56px;
     --footer-height: var(--mobile-header-height);
@@ -86,10 +93,17 @@
   }
 }
 
+@layer components {
+}
+
 @layer utilities {
   .paused {
     animation-play-state: paused;
   }
+}
+
+.custom-tabs-trigger {
+  @apply border-b-2 transition-colors hover:border-[#2F5BF6] hover:text-[#2F5BF6];
 }
 
 .ellipsis {

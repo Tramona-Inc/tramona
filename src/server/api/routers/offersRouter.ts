@@ -42,7 +42,7 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: { totalPrice: true, propertyId: true },
+        columns: { totalPrice: true, propertyId: true, paymentIntentId: true },
         with: {
           request: {
             columns: {
@@ -82,6 +82,7 @@ export const offersRouter = createTRPCRouter({
               numGuests: offer.request.numGuests,
               groupId: offer.request.madeByGroup.id,
               propertyId: offer.propertyId,
+              paymentIntentId: offer.paymentIntentId, //testing maybe this will get populatated first
             }),
 
           // mark the offer as accepted
