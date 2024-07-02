@@ -62,7 +62,7 @@ export const stripeRouter = createTRPCRouter({
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
       };
-      console.log(metadata.host_stripe_id);
+
       const paymentIntentData: Stripe.Checkout.SessionCreateParams.PaymentIntentData =
         {
           metadata: metadata, // metadata access for payment intent (webhook access)
@@ -400,11 +400,11 @@ export const stripeRouter = createTRPCRouter({
       },
       where: eq(hostProfiles.userId, ctx.user.id),
     });
-    console.log(" before the if statement createStripeConnectAccount");
     if (ctx.user.role === "host" && !res?.stripeAccountId) {
       const [firstName, ...rest] = ctx.user.name!.split(" ");
       const lastName = rest.join(" ");
       const stripeAccount = await stripeWithSecretKey.accounts.create({
+        country: "US", //change this to the user country later
         email: ctx.user.email,
         controller: {
           losses: {
@@ -417,7 +417,7 @@ export const stripeRouter = createTRPCRouter({
             type: "express",
           },
         },
-        // charges_enabled: true,
+        //charges_enabled: true,
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
@@ -448,24 +448,6 @@ export const stripeRouter = createTRPCRouter({
       });
     }
   }),
-
-  createStripeAccountLink: protectedProcedure
-    .input(z.string())
-    .query(async ({ ctx, input }) => {
-      console.log("createStripeAccountLinkumm", input);
-      const accountLink = await stripe.accountLinks.create({
-        account: input, //stripe account id
-        refresh_url: isProduction
-          ? "https://tramona.com/host/finances"
-          : "http://localhost:3000/host/finances",
-        return_url: isProduction
-          ? "https://tramona.com/host/finances"
-          : "http://localhost:3000/host/finances",
-        type: "account_onboarding",
-      });
-
-      return accountLink.url;
-    }),
 
   //we need this to create embedded connet account
   createStripeAccountSession: protectedProcedure
@@ -536,14 +518,10 @@ export const stripeRouter = createTRPCRouter({
   checkStripeConnectAcountBalance: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      const accountId = "acct_1PTvljDFLE1caQNh";
-      console.log("this is the account id");
-      console.log(accountId);
+      const accountId = input;
       const balance = await stripeWithSecretKey.balance.retrieve({
         stripeAccount: accountId,
       });
-      console.log("this is the balance");
-      console.log(balance);
 
       return balance;
     }),
@@ -555,7 +533,6 @@ export const stripeRouter = createTRPCRouter({
       const payout = await stripe.payouts.list({
         stripeAccount: accountId,
       });
-      console.log(payout.data);
       return payout.data;
     }),
 
