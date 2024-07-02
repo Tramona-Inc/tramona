@@ -7,7 +7,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useCallback, useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+
 import {
   ConnectAccountOnboarding,
   ConnectNotificationBanner,
@@ -95,7 +95,7 @@ export default function Page() {
           </TabsContent>
           <TabsContent value="Settings">
             <div className="flex justify-around">
-              {hostInfo?.stripeAccountId && hostInfo?.chargesEnabled ? (
+              {hostInfo?.stripeAccountId && hostInfo.chargesEnabled ? (
                 isStripeConnectInstanceReady ? (
                   <div className="relative my-3 flex w-full flex-row items-center justify-around gap-x-10">
                     <ConnectAccountManagement
@@ -118,7 +118,7 @@ export default function Page() {
                   {isStripeConnectInstanceReady && (
                     <ConnectAccountOnboarding
                       onExit={() => {
-                        console.log("onExit");
+                        window.location.reload(); //default behavior we should change if ugly
                       }}
                     />
                   )}

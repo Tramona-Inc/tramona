@@ -7,9 +7,9 @@ import type { RouterOutputs } from "@/utils/api";
 export type HostProperties =
   RouterOutputs["host"]["getAllHostProperties"][number];
 
-function City({ lat, lng }) {
+function City({ lat, lng }: { lat: number; lng: number }) {
   const { data: city } = api.offers.getCity.useQuery({ lat, lng });
-  return <span>{city || "Loading..."}</span>;
+  return <span>{city ?? "Loading..."}</span>;
 }
 
 export default function PropertyFinanceList({
@@ -23,7 +23,7 @@ export default function PropertyFinanceList({
 
   useEffect(() => {
     if (properties && properties.length > 0 && !selectedProperty) {
-      onSelectProperty(properties[0]);
+      onSelectProperty(properties[0]!);
     }
   }, [properties, selectedProperty, onSelectProperty]);
 
@@ -41,14 +41,14 @@ export default function PropertyFinanceList({
                   key={property.id}
                   className={`flex transform cursor-pointer items-center space-x-4 rounded p-2 transition-transform hover:bg-gray-50 ${
                     selectedProperty?.id === property.id
-                      ? "bg-primaryGreen-hover hover:bg-primaryGreen-hover translate-x-2"
+                      ? "translate-x-2 bg-primaryGreen-hover hover:bg-primaryGreen-hover"
                       : ""
                   }`}
                   onClick={() => onSelectProperty(property)}
                 >
                   <div className="relative h-16 w-16 overflow-hidden rounded-lg">
                     <Image
-                      src={property.imageUrls[0]}
+                      src={property.imageUrls[0]!}
                       alt="Property image"
                       layout="fill"
                       objectFit="cover"

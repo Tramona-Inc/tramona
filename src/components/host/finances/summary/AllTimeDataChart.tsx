@@ -5,6 +5,19 @@ import { api } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
 import type Stripe from "stripe";
 
+// Helper function to generate initial yearly data
+const generateInitialYearlyData = (startYear: number, endYear: number) => {
+  const extendedEndYear = endYear + 2;
+  const years = eachYearOfInterval({
+    start: new Date(startYear, 0, 1),
+    end: new Date(extendedEndYear, 11, 31),
+  });
+  return years.map((year) => ({
+    date: format(year, "yyyy"),
+    Earnings: 0,
+  }));
+};
+
 const AllTimeDataChart = ({
   hostStripeAccountId,
   becameHostYear,
@@ -14,8 +27,8 @@ const AllTimeDataChart = ({
 }) => {
   const currentYear = new Date().getFullYear();
   const [allTimeData, setAllTimeData] = useState<
-    { date: string; Earnings: number }[] | undefined
-  >();
+    { date: string; Earnings: number }[]
+  >(generateInitialYearlyData(becameHostYear, currentYear));
 
   const { data: allPayments } = api.stripe.getAllTransactionPayments.useQuery(
     hostStripeAccountId!,
@@ -62,20 +75,6 @@ const AllTimeDataChart = ({
   };
 
   return (
-    // <Tabs
-    //   defaultValue="earnings"
-    //   className="mt-10 flex h-full w-full flex-col gap-y-5 sm:w-[600px] md:-mt-[50px] xl:w-[800px] 2xl:w-[1100px]"
-    // >
-    //   <TabsList className="md:self-start">
-    //     <TabsTrigger value="earnings" className="text-sm">
-    //       Earnings
-    //     </TabsTrigger>
-    //     <TabsTrigger value="bookings">Bookings</TabsTrigger>{" "}
-    //   </TabsList>
-
-    //<TabsContent value="earnings" className="h-full w-full flex-col">
-
-    //when we bring the earning and booking tabs back, we will need to wrap this in a TabsContent
     <div className="flex h-full w-full flex-col sm:w-[600px] xl:w-[800px] 2xl:w-[1100px]">
       <div className="flex items-center justify-center">
         <p className="left-14 top-4 mb-1 mt-4 text-start text-2xl lg:absolute">
@@ -97,8 +96,6 @@ const AllTimeDataChart = ({
         />
       )}
     </div>
-    // </TabsContent>
-    //</Tabs>
   );
 };
 

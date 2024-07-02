@@ -10,18 +10,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatCurrency } from "@/utils/utils";
+import CustomTooltip from "./CustomTooltip"; // Update the import path if needed
 
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="rounded border border-gray-200 bg-white p-2 shadow">
-        <p className="label">{`${label}`}</p>
-        <p className="intro">{`Earnings: ${formatCurrency(payload[0].value)}`}</p>
-      </div>
-    );
-  }
-  return null;
-};
 interface ChartComponentProps {
   data: { date: string; Earnings: number }[];
   dataKey: string;

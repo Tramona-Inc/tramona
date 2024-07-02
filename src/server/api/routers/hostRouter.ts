@@ -12,9 +12,9 @@ export async function fetchIndividualHostInfo(userId: string) {
   return await db.query.hostProfiles.findFirst({
     columns: {
       userId: true,
-      type: true,
+      //type: true,
       becameHostAt: true,
-      profileUrl: true,
+      //profileUrl: true,
       stripeAccountId: true,
       chargesEnabled: true,
     },
@@ -27,9 +27,9 @@ export const hostRouter = createTRPCRouter({
     const res = await ctx.db.query.hostProfiles.findMany({
       columns: {
         userId: true,
-        type: true,
+        //type: true,
         becameHostAt: true,
-        profileUrl: true,
+        //profileUrl: true,
       },
       with: {
         hostUser: {
@@ -76,8 +76,6 @@ export const hostRouter = createTRPCRouter({
       columns: { stripeAccountId: true },
       where: eq(hostProfiles.userId, ctx.user.id),
     });
-    console.log("Why is undefined");
-    console.log(ctx.user.id, stripeAccountIdNumber);
     return stripeAccountIdNumber;
   }),
 
@@ -99,9 +97,9 @@ export const hostRouter = createTRPCRouter({
       return await db.query.hostProfiles.findFirst({
         columns: {
           userId: true,
-          type: true,
+          //type: true,
           becameHostAt: true,
-          profileUrl: true,
+          //profileUrl: true,
           stripeAccountId: true,
           chargesEnabled: true,
         },

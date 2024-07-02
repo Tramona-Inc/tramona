@@ -8,18 +8,24 @@ import {
 } from "@/components/ui/green-button-tab";
 import { Button } from "@/components/ui/button";
 import ChartComponent from "@/components/host/finances/ChartComponent";
-import { api } from "@/utils/api";
+
+// Define the types for the properties
+interface EarningsData {
+  date: string;
+  Earnings: number;
+}
+
+interface SelectedProperty {
+  earnings: number;
+  data: EarningsData[];
+}
 
 export default function PropertiesEarningsChartOverview({
   selectedProperty,
-  isStripeConnectInstanceReady,
-  becameHostAt,
 }: {
-  selectedProperty: any; // Replace 'any' with the appropriate type
-  isStripeConnectInstanceReady: boolean;
-  becameHostAt: Date | undefined;
+  selectedProperty: SelectedProperty | undefined; // Use the defined type here
 }) {
-  const dummyData = Array.from({ length: 5 }, (_, i) => ({
+  const dummyData: EarningsData[] = Array.from({ length: 5 }, (_, i) => ({
     date: `Week ${i + 1}`,
     Earnings: Math.floor(Math.random() * 100), // Random earnings value
   }));
@@ -64,7 +70,7 @@ export default function PropertiesEarningsChartOverview({
 
                 <div className="2xl:w-[1100px]flex flex h-full w-full flex-col gap-y-5 sm:w-[600px] md:-mt-[50px] xl:w-[800px] 2xl:w-[1100px]">
                   <ChartComponent
-                    data={selectedProperty?.data || dummyData}
+                    data={selectedProperty?.data ?? dummyData}
                     dataKey="Earnings"
                     xAxisDataKey="date"
                   />

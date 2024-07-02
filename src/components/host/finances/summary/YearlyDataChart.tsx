@@ -4,12 +4,26 @@ import {
   eachMonthOfInterval,
   startOfMonth,
   endOfMonth,
+  startOfYear,
+  endOfYear,
 } from "date-fns";
 import { Button } from "@/components/ui/button";
 import ChartComponent from "../ChartComponent";
 import { api } from "@/utils/api";
 import type Stripe from "stripe";
 import { formatCurrency } from "@/utils/utils";
+
+// Helper function to generate initial monthly data
+const generateInitialMonthlyData = (year: number) => {
+  const months = eachMonthOfInterval({
+    start: startOfYear(new Date(year, 0, 1)),
+    end: endOfYear(new Date(year, 11, 31)),
+  });
+  return months.map((month) => ({
+    date: format(month, "MMM"),
+    Earnings: 0,
+  }));
+};
 
 const YearlyDataChart = ({
   hostStripeAccountId,
@@ -21,8 +35,8 @@ const YearlyDataChart = ({
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [monthlyData, setMonthlyData] = useState<
-    { date: string; Earnings: number }[] | undefined
-  >();
+    { date: string; Earnings: number }[]
+  >(generateInitialMonthlyData(currentYear));
 
   const { data: allPayments } =
     api.stripe.getAllTransactionPaymentsWithinInterval.useQuery(
@@ -73,6 +87,7 @@ const YearlyDataChart = ({
 
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
+    setMonthlyData(generateInitialMonthlyData(year)); // Reset monthly data when the year changes
   };
 
   const availableYears = Array.from(
@@ -94,13 +109,13 @@ const YearlyDataChart = ({
           this year
         </p>
       </div>
-      {monthlyData && (
-        <ChartComponent
-          data={monthlyData}
-          dataKey="Earnings"
-          xAxisDataKey="date"
-        />
-      )}
+
+      <ChartComponent
+        data={monthlyData}
+        dataKey="Earnings"
+        xAxisDataKey="date"
+      />
+
       <div className="my-3">
         {availableYears.map((year) => (
           <Button
