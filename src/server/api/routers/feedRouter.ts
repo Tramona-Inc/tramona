@@ -29,7 +29,7 @@ export const feedRouter = createTRPCRouter({
             }),
         )
         .query(async ({ ctx, input }) => {
-            // 1. get the requests made by this user's group
+            // 1. get the requests
             const groupedRequests = await ctx.db.query.requests
             .findMany({
               columns: {
@@ -59,8 +59,7 @@ export const feedRouter = createTRPCRouter({
               orderBy: (requests, { desc }) => [desc(requests.createdAt)],
             })
       
-            // 2. get the matches(offers) for these requests
-            // use property_id to join the properties table and extract imageUrls
+            // 2. get the matches(offers) 
             const matches = await ctx.db.query.offers.findMany({
                 columns: {
                     id: true,
@@ -68,9 +67,11 @@ export const feedRouter = createTRPCRouter({
                     requestId: true,
                     totalPrice: true,
                     createdAt: true,
+                    checkIn: true,
+                    checkOut: true,
                 },
                 with: {
-                    property: {columns: {imageUrls: true, originalNightlyPrice: true}},
+                    property: {columns: {id: true, imageUrls: true, originalNightlyPrice: true}},
                     request: {
                         columns: {},
                         with:{
@@ -93,11 +94,13 @@ export const feedRouter = createTRPCRouter({
                 orderBy: (offers, { desc }) => [desc(offers.createdAt)],
             })
 
-            // 3. get bookings TODO
+            // 3. get bookings 
             const bookings = await ctx.db.query.trips.findMany({
                 columns: {
                     id: true,
                     createdAt: true,
+                    checkIn: true,
+                    checkOut: true,
                 },
                 with: {
                     group: {
@@ -119,6 +122,7 @@ export const feedRouter = createTRPCRouter({
                     },
                     property: {
                         columns: {
+                            id: true,
                             originalNightlyPrice: true,
                             city: true,
                             imageUrls: true,
@@ -130,7 +134,26 @@ export const feedRouter = createTRPCRouter({
             })
 
 
-          return {groupedRequests, matches, bookings};
+          // Merge and sort the data
+          const mergedData = [
+            ...groupedRequests.map(item => ({
+                ...item,
+                uniqueId: `req-${item.id}`,
+                type: 'request' as const,
+            })),
+            ...matches.map(item => ({
+                ...item,
+                uniqueId: `off-${item.id}`,
+                type: 'offer' as const,
+            })),
+            ...bookings.map(item => ({
+                ...item,
+                uniqueId: `boo-${item.id}`,
+                type: 'booking' as const,
+            })),
+        ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+        return { mergedData };
         }),
 
     });
