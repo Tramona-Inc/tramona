@@ -17,7 +17,7 @@ export default function HostFinancesOverview({
           <CardTitle>Finances</CardTitle>
           <div className="flex-1" />
           <Button variant="ghost" asChild>
-            <Link href="/host/payout">
+            <Link href="/host/finances">
               See all
               <ArrowRightIcon />
             </Link>

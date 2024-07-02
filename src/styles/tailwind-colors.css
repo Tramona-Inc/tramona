@@ -2,7 +2,12 @@
   --white: 0 0% 100%;
   --black: 0 0% 0%;
 
-  /* Slate */
+  /* primaryGreen */
+  --primaryGreen-100: 180 17% 95%;
+  --primaryGreen-200: 171 20% 87%;
+  --primaryGreen-900: 169 100% 13%;
+
+  /* slate */
   --slate-50: 210 40% 98%;
   --slate-100: 210 40% 96.1%;
   --slate-200: 214.3 31.8% 91.4%;
