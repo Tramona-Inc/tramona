@@ -197,8 +197,9 @@ export const properties = pgTable("properties", {
   hostName: varchar("host_name", { length: 255 }),
 
   address: varchar("address", { length: 1000 }).notNull(),
-  latitude: doublePrecision("latitude"),
-  longitude: doublePrecision("longitude"),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+  city: varchar("city", { length: 255 }).notNull(),
 
   originalListingUrl: varchar("url"),
 
@@ -235,7 +236,9 @@ export const properties = pgTable("properties", {
   mapScreenshot: text("map_screenshot"),
   cancellationPolicy: text("cancellation_policy"),
 
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
   // priceRestriction: integer("price_restriction"),
   propertyStatus: propertyStatusEnum("property_status").default("Listed"),

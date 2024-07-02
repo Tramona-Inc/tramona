@@ -132,7 +132,7 @@ export function formatDateMonthDayYear(date: Date) {
 //   return formatDateRange(fromDate, toDate);
 // }
 
-// todo fix hacky
+// TODO: fix hacky
 export function getNumNights(from: Date | string, to: Date | string) {
   return Math.round(
     (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),

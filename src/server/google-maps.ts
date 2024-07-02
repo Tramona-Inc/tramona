@@ -50,8 +50,6 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
     component.types.includes("administrative_area_level_1"),
   )?.short_name;
 
-  console.log({ city, country, state });
-
   if (!country || !city) return "[Unknown location]";
 
   if (country.short_name === "US") {

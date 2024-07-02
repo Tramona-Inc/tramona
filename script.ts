@@ -21,4 +21,6 @@ for (const offer of allOffers) {
   console.log(`Updated offer ${offer.id}`);
 }
 
+
+
 process.exit(0);

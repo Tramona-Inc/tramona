@@ -6,7 +6,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import { Icons } from "@/components/_icons/icons";
+import SpinnerButton from "@/components/_icons/SpinnerButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form";
 import { type Country, isValidPhoneNumber } from "react-phone-number-input";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
-
+import { Icons } from "@/components/_icons/icons";
 // feel free to refactor this lol
 
 export default function Onboarding() {

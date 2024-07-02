@@ -5,6 +5,7 @@ import {
   pgTable,
   serial,
   timestamp,
+  varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -33,8 +34,11 @@ export const trips = pgTable(
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
     numGuests: integer("num_guests").notNull(),
-
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    paymentIntentId: varchar("payment_intent_id"),
+    checkoutSessionId: varchar("checkout_session_id"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),
