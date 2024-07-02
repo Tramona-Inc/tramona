@@ -8,6 +8,7 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
+  conversationsRelations,
   hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
@@ -457,6 +458,7 @@ export const propertiesRouter = createTRPCRouter({
           )
           SELECT
             cr.city AS property_city,
+            cr.request_id,
             r.*,
             p.*
           FROM city_requests cr
@@ -474,14 +476,12 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       const organizedData: CityData[] = [];
+      const cityMap = new Map<string, CityData>();
 
-      let currentCity: string | null = null;
-      let currentRequest: { request: Request; properties: Property[] } | null = null;
 
       for (const row of rawData) {
-        console.log(row);
         const property = {
-          id: row.property_id,
+          id: row.id,
           hostId: row.host_id,
           hostTeamId: row.host_team_id,
           propertyType: row.property_type,
@@ -497,7 +497,7 @@ export const propertiesRouter = createTRPCRouter({
           checkInTime: row.check_in_time,
           checkOutTime: row.check_out_time,
           amenities: row.amenities,
-          imageUrls: row.image_urls,
+          imageUrls: row.image_url,
           name: row.name,
           about: row.about,
           avgRating: row.avg_rating,
@@ -534,20 +534,27 @@ export const propertiesRouter = createTRPCRouter({
           // Add other request fields here
         } as Request;
 
-        if (row.property_city !== currentCity) {
-          currentCity = row.property_city as string;
-          organizedData.push({ city: currentCity, requests: [] });
+        const city = row.property_city as string;
+
+        if (!cityMap.has(city)) {
+          const newCityData: CityData = { city, requests: [] };
+          cityMap.set(city, newCityData);
+          organizedData.push(newCityData);
         }
 
-        if (!currentRequest || row.request_id !== currentRequest.request.id) {
-          currentRequest = {
-            request: request,
-            properties: []
-          };
-          organizedData[organizedData.length - 1]?.requests.push(currentRequest);
+
+        const cityData = cityMap.get(city)!;
+        let requestData = cityData.requests.find(r => r.request.id === request.id);
+
+        if (!requestData) {
+          requestData = { request, properties: [] };
+          cityData.requests.push(requestData);
         }
 
-        currentRequest.properties.push(property);
+        // Check if the property is not already in the properties array
+        if (!requestData.properties.some(p => p.id === property.id)) {
+          requestData.properties.push(property);
+        }
       }
       return organizedData;
     }

@@ -8,34 +8,26 @@ import {
 } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonText } from "@/components/ui/skeleton";
-import { Property } from "@/server/db/schema/tables/properties";
-import { api, type RouterOutputs } from "@/utils/api";
-import { cn, plural } from "@/utils/utils";
+import { type Property } from "@/server/db/schema/tables/properties";
+import { api } from "@/utils/api";
+import { plural } from "@/utils/utils";
 import { range } from "lodash";
 import { HandshakeIcon } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
-type HostRequestsSidebarProperty =
-  RouterOutputs["properties"]["getHostRequestsSidebar"][number];
+import { MapPinIcon } from "lucide-react";
 
-  interface CityData {
-    city: string;
-    requests: {
-      request: Request;
-      properties: Property[];
-    }[];
-  }
-export default function HostRequestsLayout({
-  children,
-}: React.PropsWithChildren) {
+interface CityData {
+  city: string;
+  requests: {
+    request: Request;
+    properties: Property[];
+  }[];
+}
+
+export default function HostRequestsLayout({ children }: React.PropsWithChildren) {
   const { data: properties } = api.properties.getHostPropertiesWithRequests.useQuery();
-
-  console.log(properties);
-
   const citiesTotal = properties ? properties.length : 0;
-
 
   return (
     <div className="flex">
@@ -80,7 +72,7 @@ export default function HostRequestsLayout({
         ) : (
           <div className="grid h-screen-minus-header flex-1 place-items-center">
             <p className="font-medium text-muted-foreground">
-              Select a property to view its requests
+              Select a city to view its requests
             </p>
           </div>
         )}
@@ -90,41 +82,15 @@ export default function HostRequestsLayout({
 }
 
 function SidebarCity({ cityData }: { cityData: CityData }) {
+  const href = `/host/requests/${cityData.city}`;
   return (
-    <div>
-      {cityData.requests.length > 0 && (
-        cityData.requests.map((property) => (
-          <SidebarProperty key={property.id} cityData={cityData} property={property} />
-        ))
-      )}
-    </div>
-  );
-}
-
-function SidebarProperty({
-  property,
-  cityData,
-}: {
-  property: HostRequestsSidebarProperty;
-  cityData: CityData;
-}) {
-  const href = `/host/requests/${property.id}`;
-  const pathname = usePathname();
-  const isSelected = pathname.startsWith(href);
-
-  return (
-    <Link
-      key={property.id}
-      href={href}
-      className={cn(
-        "flex gap-2 rounded-lg p-2",
-        isSelected ? "bg-accent/60" : "hover:bg-muted",
-      )}
-    >
-
-      <div className="flex-1 text-sm">
-        <h3 className="font-semibold">{cityData.city}</h3>
-        <Badge size="sm">{plural(cityData.requests.length, "request")}</Badge>
+    <Link href={href} className="block mb-4">
+      <div className="flex gap-2 rounded-lg p-2 hover:bg-muted">
+        <MapPinIcon className="h-5 w-5 text-gray-600" />
+        <div className="flex-1 text-sm">
+          <h3 className="font-semibold">{cityData.city}</h3>
+          <Badge size="sm">{plural(cityData.requests.length, "request")}</Badge>
+        </div>
       </div>
     </Link>
   );

@@ -66,22 +66,22 @@ export const offersRouter = createTRPCRouter({
       await ctx.db.transaction(async (tx) => {
         const results = await Promise.allSettled([
           offer.request &&
-            // resolve the request if it exists
-            tx
-              .update(requests)
-              .set({ resolvedAt: new Date() })
-              .where(eq(offers.id, offer.request.id)),
+          // resolve the request if it exists
+          tx
+            .update(requests)
+            .set({ resolvedAt: new Date() })
+            .where(eq(offers.id, offer.request.id)),
 
           offer.request &&
-            // add a trip
-            tx.insert(trips).values({
-              offerId: input.id,
-              checkIn: offer.request.checkIn,
-              checkOut: offer.request.checkOut,
-              numGuests: offer.request.numGuests,
-              groupId: offer.request.madeByGroup.id,
-              propertyId: offer.propertyId,
-            }),
+          // add a trip
+          tx.insert(trips).values({
+            offerId: input.id,
+            checkIn: offer.request.checkIn,
+            checkOut: offer.request.checkOut,
+            numGuests: offer.request.numGuests,
+            groupId: offer.request.madeByGroup.id,
+            propertyId: offer.propertyId,
+          }),
 
           // mark the offer as accepted
           tx
@@ -91,20 +91,20 @@ export const offersRouter = createTRPCRouter({
 
           // update referralCode
           ctx.user.referralCodeUsed &&
-            tx
-              .update(referralCodes)
-              .set({
-                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
-              })
-              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+          tx
+            .update(referralCodes)
+            .set({
+              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
+            })
+            .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 
           ctx.user.referralCodeUsed &&
-            tx
-              .update(referralCodes)
-              .set({
-                numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
-              })
-              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+          tx
+            .update(referralCodes)
+            .set({
+              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
+            })
+            .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
         ]);
 
         if (results.some((result) => result.status === "rejected")) {
@@ -392,7 +392,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-  acceptCityRequest: protectedProcedure
+  create: protectedProcedure
     .input(
       z.object({
         requestId: z.number(),
@@ -448,22 +448,22 @@ export const offersRouter = createTRPCRouter({
         );
     }),
 
-  create: roleRestrictedProcedure(["admin", "host"])
-    .input(offerInsertSchema)
-    .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "host") {
-        const property = await ctx.db.query.properties.findFirst({
-          where: eq(properties.id, input.propertyId),
-          columns: { hostId: true },
-        });
+  // create: roleRestrictedProcedure(["admin", "host"])
+  //   .input(offerInsertSchema)
+  //   .mutation(async ({ ctx, input }) => {
+  //     if (ctx.user.role === "host") {
+  //       const property = await ctx.db.query.properties.findFirst({
+  //         where: eq(properties.id, input.propertyId),
+  //         columns: { hostId: true },
+  //       });
 
-        if (property?.hostId !== ctx.user.id) {
-          throw new TRPCError({ code: "UNAUTHORIZED" });
-        }
-      }
+  //       if (property?.hostId !== ctx.user.id) {
+  //         throw new TRPCError({ code: "UNAUTHORIZED" });
+  //       }
+  //     }
 
-      await ctx.db.insert(offers).values(input);
-    }),
+  //     await ctx.db.insert(offers).values(input);
+  //   }),
 
   update: roleRestrictedProcedure(["admin", "host"])
     .input(offerUpdateSchema)
@@ -583,22 +583,22 @@ export const offersRouter = createTRPCRouter({
           if (member.isWhatsApp) {
             memberHasOtherOffers
               ? void sendWhatsApp({
-                  templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
-                  to: member.phoneNumber,
-                  propertyName: property.name,
-                  propertyAddress: request?.location, //??can this be null
-                  checkIn: offer.checkIn,
-                  checkOut: offer.checkOut,
-                  url: url,
-                })
+                templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
+                to: member.phoneNumber,
+                propertyName: property.name,
+                propertyAddress: request?.location, //??can this be null
+                checkIn: offer.checkIn,
+                checkOut: offer.checkOut,
+                url: url,
+              })
               : void sendWhatsApp({
-                  templateId: "HXb293923af34665e7eefc81be0579e5db",
-                  to: member.phoneNumber,
-                  propertyName: property.name,
-                  propertyAddress: request?.location,
-                  checkIn: offer.checkIn,
-                  checkOut: offer.checkOut,
-                });
+                templateId: "HXb293923af34665e7eefc81be0579e5db",
+                to: member.phoneNumber,
+                propertyName: property.name,
+                propertyAddress: request?.location,
+                checkIn: offer.checkIn,
+                checkOut: offer.checkOut,
+              });
           } else {
             void sendText({
               to: member.phoneNumber,

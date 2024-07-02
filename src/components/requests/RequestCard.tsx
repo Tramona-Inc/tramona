@@ -92,12 +92,12 @@ export default function RequestCard({
           </Tooltip>
         )} */}
         <div className="absolute right-2 top-0 flex items-center gap-2">
-          {showAvatars && (
+          {/* {showAvatars && (
             <RequestGroupAvatars
               request={request}
               isAdminDashboard={isAdminDashboard}
             />
-          )}
+          )} */}
           {!isAdminDashboard && !request.resolvedAt && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
