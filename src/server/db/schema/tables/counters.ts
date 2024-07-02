@@ -38,10 +38,14 @@ export const counters = pgTable(
         onDelete: "cascade",
       }),
     counterAmount: integer("counter_amount").notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     status: counterStatusEnum("status").notNull().default("Pending"),
-    statusUpdatedAt: timestamp("status_updated_at"),
+    statusUpdatedAt: timestamp("status_updated_at", { withTimezone: true }),
   },
   (t) => ({
     bidId: index().on(t.bidId),

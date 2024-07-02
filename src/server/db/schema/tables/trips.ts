@@ -34,7 +34,9 @@ export const trips = pgTable(
     checkOut: date("check_out", { mode: "date" }).notNull(),
     numGuests: integer("num_guests").notNull(),
 
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),
