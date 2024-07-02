@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
+import { Avatar, AvatarImage } from "../ui/avatar";
+import { cn } from "@/utils/utils";
 
 export default function Checkout() {
   const router = useRouter();
@@ -75,8 +77,11 @@ export default function Checkout() {
                 className="flex items-center justify-between text-sm font-semibold"
                 key={index}
               >
-                <p className="underline">{item.title}</p>
-                <p>${item.price}</p>
+                <p className={cn(index !== 3 && "underline")}>{item.title}</p>
+                <p>
+                  {index !== 1 ? "$" : ""}
+                  {item.price}
+                </p>
               </div>
             ))}
           </div>
@@ -97,8 +102,8 @@ export default function Checkout() {
 
   function CustomerReview() {
     return (
-      <div className="w-full overflow-hidden rounded-xl">
-        <div>
+      <div className="relative w-full overflow-hidden rounded-xl">
+        <div className="h-96">
           <Image
             src="/assets/images/host-onboarding.png"
             width={300}
@@ -106,6 +111,22 @@ export default function Checkout() {
             alt=""
             className="h-full w-full object-cover"
           />
+        </div>
+        <div className="absolute inset-x-0 bottom-0 m-4">
+          <div className="space-y-2 rounded-xl bg-primary/60 p-3 text-sm text-white">
+            <p>
+              &quot;My experience with Tramona has been wonderful. Any questions
+              i have i hear back instantly, and the prices are truly unbeatable.
+              Every time a friend is thinking of traveling i always recommend
+              Tramona.&quot;
+            </p>
+            <div className="flex items-center gap-2">
+              <Avatar>
+                <AvatarImage src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVAA8woXUTaDHekpxmgY9WhjfvbP9DWtycbg&s" />
+              </Avatar>
+              <p>Jack P from San Diego, CA</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -185,9 +206,19 @@ export default function Checkout() {
             </p>
           </div>
         </div>
-        <div className="space-y-10 pl-16">
-          <CheckoutSummary />
-          <CustomerReview />
+        <div className="space-y-2 pl-16">
+          <div className="space-y-10">
+            <CheckoutSummary />
+            <CustomerReview />
+          </div>
+          <div>
+            <p className="text-sm">
+              Questions?{" "}
+              <span className="text-teal-900 underline">
+                <Link href="/">Chat with host</Link>
+              </span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
