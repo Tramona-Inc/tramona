@@ -54,8 +54,11 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * ```
  */
 export function formatCurrency(cents: number, { round = false } = {}) {
-  if (cents % 100 === 0 || round) return `$${Math.round(cents / 100)}`;
-  return `$${(cents / 100).toFixed(2)}`;
+  const dollars = round ? Math.round(cents / 100) : cents / 100;
+  return dollars.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 }
 
 /**
