@@ -17,6 +17,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { cn } from "@/utils/utils";
 
 export default function FeedofferCard({
   offer,
@@ -27,6 +28,15 @@ export default function FeedofferCard({
   const userName = offer.request?.madeByGroup.owner.name ?? "";
   const userImage = offer.request?.madeByGroup.owner.image ?? "";
   const numOfNights = getNumNights(offer.checkIn, offer.checkOut);
+  const discount = offer.property.originalNightlyPrice
+    ? Math.round(
+        (1 -
+          offer.totalPrice /
+            numOfNights /
+            offer.property.originalNightlyPrice) *
+          100,
+      )
+    : 0;
 
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -46,59 +56,71 @@ export default function FeedofferCard({
 
   return (
     <BaseCard item={offer} userName={userName} userImage={userImage}>
-      <div>
-        <p>Recieved a match</p>
-        <p>
-          Tramona Price:{" "}
-          <span className="font-bold text-green-600">
-            {formatCurrency(offer.totalPrice / numOfNights)}
-          </span>
-        </p>
-        {offer.property.originalNightlyPrice && (
+      <div className="grid">
+        <div>
+          <p>Recieved a match</p>
           <p>
-            Airbnb Price: {formatCurrency(offer.property.originalNightlyPrice)}
+            Tramona Price:{" "}
+            <span className="font-bold text-green-700">
+              {formatCurrency(offer.totalPrice / numOfNights)}
+            </span>
           </p>
-        )}
+          {offer.property.originalNightlyPrice && (
+            <p>
+              Airbnb Price:{" "}
+              <span className="line-through">
+                {formatCurrency(offer.property.originalNightlyPrice)}
+              </span>
+            </p>
+          )}
+        </div>
       </div>
-      <Carousel
-        setApi={setCarouselApi}
-        className="w-full"
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-      >
-        <CarouselContent className="-ml-2 md:-ml-4">
-          {offer.property.imageUrls.slice(0, 5).map((photo, index) => (
-            <CarouselItem
-              key={index}
-              className="basis-1/2 pl-2 md:basis-1/3 md:pl-4 lg:basis-1/4"
-            >
-              <Link
-                href={`/property/${offer.property.id}`}
-                className="relative block aspect-[4/3] overflow-clip rounded-xl"
+      <div className="relative">
+        <Carousel
+          setApi={setCarouselApi}
+          className={cn("w-full", discount > 0 ? "mb-10" : "mb-0")}
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {offer.property.imageUrls.slice(0, 5).map((photo, index) => (
+              <CarouselItem
+                key={index}
+                className="basis-1/2 pl-2 md:basis-1/3 md:pl-4"
               >
-                <Image
-                  src={photo}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-                  alt=""
-                  className="object-cover"
-                />
-              </Link>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious
-          className="absolute left-2 top-1/2 size-6 -translate-y-1/2"
-          variant={"white"}
-        />
-        <CarouselNext
-          className="absolute right-2 top-1/2 size-6 -translate-y-1/2"
-          variant={"white"}
-        />
-        <CarouselDots count={count} current={current} />
-      </Carousel>
+                <Link
+                  href={`/property/${offer.property.id}`}
+                  className="relative block aspect-[4/3] overflow-clip rounded-xl"
+                >
+                  <Image
+                    src={photo}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                    alt=""
+                    className="object-cover"
+                  />
+                </Link>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious
+            className="absolute left-2 top-1/2 size-6 -translate-y-1/2"
+            variant={"white"}
+          />
+          <CarouselNext
+            className="absolute right-2 top-1/2 size-6 -translate-y-1/2"
+            variant={"white"}
+          />
+          <CarouselDots count={count} current={current} />
+        </Carousel>
+      </div>
+      {discount > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 overflow-hidden rounded-b-lg bg-green-700 px-4 py-2 text-center font-bold text-white">
+          {`${discount}% off`}
+        </div>
+      )}
     </BaseCard>
   );
 }
