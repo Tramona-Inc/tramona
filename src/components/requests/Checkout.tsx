@@ -6,6 +6,7 @@ import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { cn } from "@/utils/utils";
+import Stripe from "stripe";
 
 export default function Checkout() {
   const router = useRouter();
@@ -35,6 +36,85 @@ export default function Checkout() {
       price: 93.72,
     },
   ];
+
+  function TripDetails() {
+    return (
+      <>
+        <div className="rounded-lg border border-teal-900 bg-zinc-100 p-3 text-sm">
+          <h3 className="font-bold">Best price</h3>
+          <p className="font-semibold text-muted-foreground">
+            This is an exclusive price only available on Tramona.
+          </p>
+        </div>
+        <div className="my-8 space-y-2">
+          <h2 className="text-lg font-semibold">Your trip details</h2>
+          <div className="text-sm">
+            <p>Dates</p>
+            <p className="font-bold">July 1 - Aug 5</p>
+          </div>
+          <div className="text-sm">
+            <p>Guests</p>
+            <p className="font-bold">2 guests</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  function CancellationPolicy() {
+    return (
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Cancellation Policy</h3>
+        <p className="text-sm font-semibold leading-5 text-muted-foreground">
+          This is an exclusive price only available on Tramona. This is an
+          exclusive price only available on Tramona. This is an exclusive price
+          only available on Tramona.
+        </p>
+      </div>
+    );
+  }
+
+  function StripePaymentInfo() {
+    return <div>insert stripe checkout form here</div>;
+  }
+
+  function ContactInfo() {
+    return (
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Contact Information</h3>
+        <p className="text-sm text-muted-foreground">
+          We encourage every traveler to have the travel details in case of
+          emergencies.
+        </p>
+        <p>insert contact form here</p>
+      </div>
+    );
+  }
+
+  function TermsAndSubmit() {
+    return (
+      <div className="mt-8">
+        <div className="mb-8 space-y-4 text-muted-foreground">
+          <p className="text-sm font-semibold leading-5">
+            On behalf of Tramona we ask that you please follow the house rules
+            and treat the house as if it were your own
+          </p>
+          <p className="text-xs">
+            By selecting the button, I agree to the booking terms. I also agree
+            to the Terms of Service, Payment Terms of Service and I acknowledge
+            the Privacy Policy
+          </p>
+        </div>
+        <Button variant="greenPrimary" className="my-2 w-full font-semibold">
+          Confirm and pay
+        </Button>
+        <p className="text-center text-xs font-semibold text-muted-foreground">
+          As soon as you book you will get an email and text confirmation with
+          all booking details
+        </p>
+      </div>
+    );
+  }
 
   function CheckoutSummary() {
     return (
@@ -142,69 +222,17 @@ export default function Checkout() {
           </div>
         </Link>
       </div>
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2">
         <div>
-          <div className="rounded-lg border border-teal-900 bg-zinc-100 p-3 text-sm">
-            <h3 className="font-bold">Best price</h3>
-            <p className="font-semibold text-muted-foreground">
-              This is an exclusive price only available on Tramona.
-            </p>
-          </div>
-          <div className="my-8 space-y-2">
-            <h2 className="text-lg font-semibold">Your trip details</h2>
-            <div className="text-sm">
-              <p>Dates</p>
-              <p className="font-bold">July 1 - Aug 5</p>
-            </div>
-            <div className="text-sm">
-              <p>Guests</p>
-              <p className="font-bold">2 guests</p>
-            </div>
-          </div>
+          <TripDetails />
           <Separator className="my-4" />
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Cancellation Policy</h3>
-            <p className="text-sm font-semibold leading-5 text-muted-foreground">
-              This is an exclusive price only available on Tramona. This is an
-              exclusive price only available on Tramona. This is an exclusive
-              price only available on Tramona.
-            </p>
-          </div>
+          <CancellationPolicy />
           <Separator className="my-4" />
-          <div>insert stripe checkout form here</div>
+          <StripePaymentInfo />
           <Separator className="my-4" />
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Contact Information</h3>
-            <p className="text-sm text-muted-foreground">
-              We encourage every traveler to have the travel details in case of
-              emergencies.
-            </p>
-            <p>insert contact form here</p>
-          </div>
+          <ContactInfo />
           <Separator className="my-4" />
-          <div className="mt-8">
-            <div className="mb-8 space-y-4 text-muted-foreground">
-              <p className="text-sm font-semibold leading-5">
-                On behalf of Tramona we ask that you please follow the house
-                rules and treat the house as if it were your own
-              </p>
-              <p className="text-xs">
-                By selecting the button, I agree to the booking terms. I also
-                agree to the Terms of Service, Payment Terms of Service and I
-                acknowledge the Privacy Policy
-              </p>
-            </div>
-            <Button
-              variant="greenPrimary"
-              className="my-2 w-full font-semibold"
-            >
-              Confirm and pay
-            </Button>
-            <p className="text-center text-xs font-semibold text-muted-foreground">
-              As soon as you book you will get an email and text confirmation
-              with all booking details
-            </p>
-          </div>
+          <TermsAndSubmit />
         </div>
         <div className="space-y-2 pl-16">
           <div className="space-y-10">
