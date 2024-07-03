@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type OfferWithDetails } from "../offers/OfferPage";
+import { formatDateMonthDay, plural } from "@/utils/utils";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -71,11 +72,16 @@ export default function Checkout({
           <h2 className="text-lg font-semibold">Your trip details</h2>
           <div className="text-sm">
             <p>Dates</p>
-            <p className="font-bold">July 1 - Aug 5</p>
+            <p className="font-bold">
+              {formatDateMonthDay(offer.checkIn)} -{" "}
+              {formatDateMonthDay(offer.checkOut)}
+            </p>
           </div>
           <div className="text-sm">
             <p>Guests</p>
-            <p className="font-bold">2 guests</p>
+            <p className="font-bold">
+              {request && plural(request.numGuests, "guest")}
+            </p>
           </div>
         </div>
       </>
