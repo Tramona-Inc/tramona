@@ -6,7 +6,6 @@ import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { cn } from "@/utils/utils";
-import Stripe from "stripe";
 import {
   Form,
   FormControl,
@@ -63,7 +62,7 @@ export default function Checkout() {
   function TripDetails() {
     return (
       <>
-        <div className="space-y-2 sm:my-8">
+        <div className="space-y-2 md:my-8">
           <h2 className="text-lg font-semibold">Your trip details</h2>
           <div className="text-sm">
             <p>Dates</p>
@@ -120,7 +119,7 @@ export default function Checkout() {
               <FormItem className="col-span-full">
                 <FormLabel>Email address</FormLabel>
                 <FormControl>
-                  <Input {...field} autoFocus />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,7 +132,7 @@ export default function Checkout() {
               <FormItem className="col-span-full">
                 <FormLabel>Phone number</FormLabel>
                 <FormControl>
-                  <Input {...field} autoFocus />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -146,13 +145,13 @@ export default function Checkout() {
 
   function TermsAndSubmit() {
     return (
-      <div className="sm:mt-8">
+      <div className="md:mt-8">
         <div className="mb-8 space-y-4 text-muted-foreground">
           <p className="text-sm font-semibold leading-5">
             On behalf of Tramona we ask that you please follow the house rules
             and treat the house as if it were your own
           </p>
-          <p className="px-2 text-xs sm:px-0">
+          <p className="px-2 text-xs md:px-0">
             By selecting the button, I agree to the booking terms. I also agree
             to the Terms of Service, Payment Terms of Service and I acknowledge
             the Privacy Policy
@@ -161,7 +160,7 @@ export default function Checkout() {
         <Button variant="greenPrimary" className="my-2 w-full font-semibold">
           Confirm and pay
         </Button>
-        <p className="my-4 text-center text-xs font-semibold text-muted-foreground sm:my-0">
+        <p className="my-4 text-center text-xs font-semibold text-muted-foreground md:my-0">
           As soon as you book you will get an email and text confirmation with
           all booking details
         </p>
@@ -172,11 +171,11 @@ export default function Checkout() {
   function CheckoutSummary() {
     return (
       <div>
-        <div className="sm:rounded-t-xl sm:border sm:border-b-0 sm:p-3">
-          <h2 className="mb-4 text-lg font-semibold sm:hidden">
+        <div className="md:rounded-t-xl md:border md:border-b-0 md:p-3">
+          <h2 className="mb-4 text-lg font-semibold md:hidden">
             Price Details
           </h2>
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <div className="flex items-center gap-2">
               <div className="overflow-hidden rounded-xl">
                 <Image
@@ -223,16 +222,16 @@ export default function Checkout() {
               </div>
             ))}
           </div>
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <Separator className="my-4" />
           </div>
-          <div className="my-4 flex items-center justify-between text-sm font-bold sm:my-0 sm:font-semibold">
+          <div className="my-4 flex items-center justify-between text-sm font-bold md:my-0 md:font-semibold">
             <p>Total (USD)</p>
             <p>$957.25</p>
           </div>
         </div>
-        <div className="rounded-lg bg-teal-900 sm:rounded-b-xl sm:rounded-t-none">
-          <h2 className="py-1 text-center text-lg font-semibold text-white sm:py-2">
+        <div className="rounded-lg bg-teal-900 md:rounded-b-xl md:rounded-t-none">
+          <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
             15% Off
           </h2>
         </div>
@@ -273,8 +272,8 @@ export default function Checkout() {
   }
 
   return (
-    <div className="px-4 sm:px-3">
-      <div className="mb-4 sm:mb-8">
+    <div className="px-4 md:px-3">
+      <div className="mb-4 md:mb-8">
         <Link href="#" onClick={handleBackClick}>
           <div className="flex items-center gap-2">
             <ChevronLeft />
@@ -282,8 +281,8 @@ export default function Checkout() {
           </div>
         </Link>
       </div>
-      <div className="grid grid-cols-1 gap-20 sm:grid-cols-2">
-        <div className="hidden sm:block">
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">
+        <div className="hidden md:block">
           <BestPriceCard />
           <TripDetails />
           <Separator className="my-4" />
@@ -295,7 +294,7 @@ export default function Checkout() {
           <Separator className="my-4" />
           <TermsAndSubmit />
         </div>
-        <div className="sm:hidden">
+        <div className="md:hidden">
           <BestPriceCard />
           <Separator className="my-6" />
           <TripDetails />
@@ -319,7 +318,7 @@ export default function Checkout() {
             </p>
           </div>
         </div>
-        <div className="hidden space-y-2 sm:block sm:pl-20">
+        <div className="hidden space-y-2 md:block md:pl-10 xl:pl-20">
           <div className="space-y-10">
             <CheckoutSummary />
             <CustomerReview />
