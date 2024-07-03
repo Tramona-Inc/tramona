@@ -146,13 +146,13 @@ export default function Checkout() {
 
   function TermsAndSubmit() {
     return (
-      <div className="mt-8">
+      <div className="sm:mt-8">
         <div className="mb-8 space-y-4 text-muted-foreground">
           <p className="text-sm font-semibold leading-5">
             On behalf of Tramona we ask that you please follow the house rules
             and treat the house as if it were your own
           </p>
-          <p className="text-xs">
+          <p className="px-2 text-xs sm:px-0">
             By selecting the button, I agree to the booking terms. I also agree
             to the Terms of Service, Payment Terms of Service and I acknowledge
             the Privacy Policy
@@ -161,7 +161,7 @@ export default function Checkout() {
         <Button variant="greenPrimary" className="my-2 w-full font-semibold">
           Confirm and pay
         </Button>
-        <p className="text-center text-xs font-semibold text-muted-foreground">
+        <p className="my-4 text-center text-xs font-semibold text-muted-foreground sm:my-0">
           As soon as you book you will get an email and text confirmation with
           all booking details
         </p>
@@ -310,7 +310,7 @@ export default function Checkout() {
           <Separator className="my-6" />
           <TermsAndSubmit />
           <CustomerReview />
-          <div>
+          <div className="mt-4">
             <p className="text-sm">
               Questions?{" "}
               <span className="text-teal-900 underline">
