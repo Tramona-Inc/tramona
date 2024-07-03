@@ -370,9 +370,7 @@ export default function OfferPage({
                 <Button
                   variant="greenPrimary"
                   className="w-full font-bold"
-                  onClick={() =>
-                    router.push(`/requests/${request?.id.toString()}/checkout`)
-                  }
+                  onClick={() => router.push(`/offer-checkout/${offer.id}`)}
                 >
                   Confirm Booking
                 </Button>

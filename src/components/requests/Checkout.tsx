@@ -18,8 +18,13 @@ import { Input } from "../ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { type OfferWithDetails } from "../offers/OfferPage";
 
-export default function Checkout() {
+export default function Checkout({
+  offer: { property, request, ...offer },
+}: {
+  offer: OfferWithDetails;
+}) {
   const router = useRouter();
 
   const handleBackClick = (
