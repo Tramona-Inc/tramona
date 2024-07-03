@@ -6,17 +6,20 @@ import { filesRouter } from "./routers/filesRouter";
 import { groupsRouter } from "./routers/groupsRouter";
 import { messagesRouter } from "./routers/messagesRouter";
 import { miscRouter } from "./routers/miscRouter";
-import { myTripsRouter } from "./routers/myTripsRouter";
+import { tripsRouter } from "./routers/tripsRouter";
 import { offersRouter } from "./routers/offersRouter";
 import { propertiesRouter } from "./routers/propertiesRouter";
 import { referralCodesRouter } from "./routers/referralCodesRouter";
 import { requestsRouter } from "./routers/requestsRouter";
 import { stripeRouter } from "./routers/stripeRouter";
 import { twilioRouter } from "./routers/twilioRouter";
+import { hostRouter } from "./routers/hostRouter";
 import { usersRouter } from "./routers/usersRouter";
 import { hostTeamsRouter } from "./routers/hostTeamsRouter";
 import { profileRouter } from "./routers/profileRouter";
 import { superhogRouter } from "./routers/superhogRouter";
+import { pmsRouter } from "./routers/pmsRouter";
+import { reviewsRouter } from "./routers/reviewsRouter";
 
 /**
  * This is the primary router for your server.
@@ -31,8 +34,9 @@ export const appRouter = createTRPCRouter({
   offers: offersRouter,
   stripe: stripeRouter,
   auth: authRouter,
-  myTrips: myTripsRouter,
+  trips: tripsRouter,
   twilio: twilioRouter,
+  host: hostRouter,
   messages: messagesRouter,
   files: filesRouter,
   misc: miscRouter,
@@ -42,6 +46,8 @@ export const appRouter = createTRPCRouter({
   hostTeams: hostTeamsRouter,
   profile: profileRouter,
   superhog: superhogRouter,
+  pms: pmsRouter,
+  reviews: reviewsRouter,
 });
 
 // export type definition of API

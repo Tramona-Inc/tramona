@@ -3,18 +3,27 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import Stripe from "stripe"
+import Stripe from "stripe";
 import { z } from "zod";
+import { hostProfiles } from "@/server/db/schema";
+import { gte } from "lodash";
+
+const isProduction = process.env.NODE_ENV === "production";
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
-
+// these two are the same stripe objects, some stripe require the secret key and some require the restricted key
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2024-06-20",
 });
+
+export const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
+  apiVersion: "2024-06-20",
+});
+// change the apiVersion
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
@@ -22,20 +31,23 @@ export const stripeRouter = createTRPCRouter({
       z.object({
         listingId: z.number(),
         propertyId: z.number(),
-        requestId: z.number(),
+        requestId: z.number().nullable(),
         name: z.string(),
-        price: z.number(),
+        price: z.number(), // Total price included tramona fee
+        tramonaServiceFee: z.number(),
         description: z.string(),
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
         userId: z.string(),
         phoneNumber: z.string(),
         totalSavings: z.number(),
-        // hostId: z.string(),
+        hostStripeId: z.string().nullable(),
       }),
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const currentDate = new Date(); // Get the current date and time
+      //we need the host Stripe account id to put in webhook
+      //get hostID from the property
 
       // Object that can be access through webhook and client
       const metadata = {
@@ -43,13 +55,24 @@ export const stripeRouter = createTRPCRouter({
         listing_id: input.listingId,
         property_id: input.propertyId,
         request_id: input.requestId,
-        price: input.price,
+        price: input.price, // Total price included tramona fee
+        tramonaServiceFee: input.tramonaServiceFee,
         total_savings: input.totalSavings,
         confirmed_at: currentDate.toISOString(),
         phone_number: input.phoneNumber,
-        // host_id: input.hostId,
+        host_stripe_id: input.hostStripeId ?? "",
       };
 
+      const paymentIntentData: Stripe.Checkout.SessionCreateParams.PaymentIntentData =
+        {
+          metadata: metadata, // metadata access for payment intent (webhook access)
+          ...(metadata.host_stripe_id && {
+            transfer_data: {
+              amount: input.price - input.tramonaServiceFee,
+              destination: metadata.host_stripe_id,
+            },
+          }),
+        };
       return stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
@@ -72,9 +95,7 @@ export const stripeRouter = createTRPCRouter({
         success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`,
         cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
         metadata: metadata, // metadata access for checkout session
-        payment_intent_data: {
-          metadata: metadata, // metadata access for payment intent (webhook access)
-        },
+        payment_intent_data: paymentIntentData,
       });
     }),
 
@@ -92,7 +113,7 @@ export const stripeRouter = createTRPCRouter({
         userId: z.string(),
         phoneNumber: z.string(),
         totalSavings: z.number(),
-        // hostId: z.string(),
+        //hostId: z.string(),
       }),
     )
     .mutation(({ ctx, input }) => {
@@ -369,6 +390,242 @@ export const stripeRouter = createTRPCRouter({
         },
       };
     }),
+
+  //stripe connect account
+  createStripeConnectAccount: protectedProcedure.mutation(async ({ ctx }) => {
+    const res = await ctx.db.query.hostProfiles.findFirst({
+      columns: {
+        stripeAccountId: true,
+        chargesEnabled: true,
+      },
+      where: eq(hostProfiles.userId, ctx.user.id),
+    });
+    if (ctx.user.role === "host" && !res?.stripeAccountId) {
+      const [firstName, ...rest] = ctx.user.name!.split(" ");
+      const lastName = rest.join(" ");
+      const stripeAccount = await stripeWithSecretKey.accounts.create({
+        country: "US", //change this to the user country later
+        email: ctx.user.email,
+        controller: {
+          losses: {
+            payments: "application",
+          },
+          fees: {
+            payer: "application",
+          },
+          stripe_dashboard: {
+            type: "express",
+          },
+        },
+        //charges_enabled: true,
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+          tax_reporting_us_1099_k: { requested: true },
+        },
+        business_type: "individual",
+        business_profile: {
+          url: "https://tramona.com",
+          mcc: "4722",
+          product_description: "Travel and Tourism",
+        },
+        individual: {
+          email: ctx.user.email,
+          first_name: firstName,
+          last_name: lastName,
+        },
+      });
+      await ctx.db
+        .update(hostProfiles)
+        .set({ stripeAccountId: stripeAccount.id })
+        .where(eq(hostProfiles.userId, ctx.user.id));
+
+      return stripeAccount;
+    } else {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Stripe account already created",
+      });
+    }
+  }),
+
+  //we need this to create embedded connet account
+  createStripeAccountSession: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const accountId = input;
+      const accountSession = await stripeWithSecretKey.accountSessions.create({
+        account: accountId,
+        components: {
+          account_onboarding: {
+            enabled: true,
+            features: {
+              external_account_collection: true,
+            },
+          },
+          account_management: {
+            enabled: true,
+            features: {
+              external_account_collection: true,
+            },
+          },
+          payments: {
+            enabled: true,
+            features: {
+              refund_management: true,
+              dispute_management: true,
+              capture_payments: true,
+              destination_on_behalf_of_charge_management: false,
+            },
+          },
+          payouts: {
+            enabled: true,
+            features: {
+              instant_payouts: true,
+              standard_payouts: true,
+              edit_payout_schedule: true,
+              external_account_collection: true,
+            },
+          },
+          // payouts_list: {
+          //   enabled: true,
+          // },
+          notification_banner: {
+            enabled: true,
+            features: {
+              external_account_collection: true,
+            },
+          },
+          // balances: {
+          //   enabled: true,
+          //   features: {
+          //     instant_payouts: true,
+          //     standard_payouts: true,
+          //     edit_payout_schedule: true,
+          //   },
+          // },
+        },
+      });
+      if (!accountSession) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Stripe account not found",
+        });
+      }
+
+      return accountSession;
+    }),
+  checkStripeConnectAcountBalance: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const accountId = input;
+      const balance = await stripeWithSecretKey.balance.retrieve({
+        stripeAccount: accountId,
+      });
+
+      return balance;
+    }),
+
+  listAllStripePayouts: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const accountId = input;
+      const payout = await stripe.payouts.list({
+        stripeAccount: accountId,
+      });
+      return payout.data;
+    }),
+
+  getConnectedExternalBank: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const accountId = input;
+      const externalAccounts = await stripe.accounts.listExternalAccounts(
+        accountId,
+        {
+          object: "bank_account",
+        },
+      );
+
+      return externalAccounts.data;
+    }),
+
+  getAllTransactionPayments: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      let hasMore = true;
+      let startingAfter: string | null = null;
+      const allTransactions: Stripe.BalanceTransaction[] = [];
+
+      while (hasMore) {
+        const params: { limit: number; type: string; starting_after?: string } =
+          {
+            limit: 100,
+            type: "payment",
+            ...(startingAfter && { starting_after: startingAfter }),
+          };
+
+        const response = await stripe.balanceTransactions.list(params, {
+          stripeAccount: input,
+        });
+
+        if (response.data.length > 0) {
+          allTransactions.push(...response.data);
+          hasMore = response.has_more;
+          startingAfter = response.data[response.data.length - 1]?.id ?? null;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allTransactions;
+    }),
+
+  getAllTransactionPaymentsWithinInterval: protectedProcedure
+    .input(
+      z.object({
+        stripeAccountId: z.string(),
+        startDate: z.number(),
+        endDate: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      let hasMore = true;
+      let startingAfter: string | null = null;
+      const allTransactions: Stripe.BalanceTransaction[] = [];
+
+      while (hasMore) {
+        const params: {
+          limit: number;
+          type: string;
+          starting_after?: string;
+          created: { gte: number; lte: number };
+        } = {
+          limit: 100,
+          type: "payment",
+          created: {
+            gte: input.startDate, //takes unix timestamps
+            lte: input.endDate,
+          },
+          ...(startingAfter && { starting_after: startingAfter }),
+        };
+
+        const response = await stripe.balanceTransactions.list(params, {
+          stripeAccount: input.stripeAccountId,
+        });
+
+        if (response.data.length > 0) {
+          allTransactions.push(...response.data);
+          hasMore = response.has_more;
+          startingAfter = response.data[response.data.length - 1]?.id ?? null;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allTransactions;
+    }),
+
   createVerificationSession: protectedProcedure.query(async ({ ctx }) => {
     const verificationSession =
       await stripe.identity.verificationSessions.create({

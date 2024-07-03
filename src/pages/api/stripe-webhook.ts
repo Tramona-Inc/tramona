@@ -8,12 +8,15 @@ import {
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
+  hostProfiles,
   offers,
   referralCodes,
   referralEarnings,
   requests,
+  trips,
   users,
 } from "@/server/db/schema";
+import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { sendEmail } from "@/server/server-utils";
@@ -52,10 +55,16 @@ export default async function webhook(
       return;
     }
 
+    console.log("event:", event);
+
     // * You can add other event types to catch
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
+        const offerId =
+          paymentIntentSucceeded.metadata.listing_id === undefined
+            ? undefined
+            : parseInt(paymentIntentSucceeded.metadata.listing_id);
 
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
@@ -78,16 +87,44 @@ export default async function webhook(
               );
 
             await db
-              .update(requests)
+              .update(trips)
               .set({
-                resolvedAt: confirmedDate,
+                paymentIntentId: paymentIntentSucceeded.id,
+                checkoutSessionId:
+                  paymentIntentSucceeded.metadata.checkout_session_id,
               })
               .where(
                 eq(
-                  requests.id,
-                  parseInt(paymentIntentSucceeded.metadata.request_id!),
+                  trips.offerId,
+                  parseInt(paymentIntentSucceeded.metadata.listing_id!),
                 ),
-              );
+              ); // setting the paymentIntentId in the trips table
+
+            const requestId = paymentIntentSucceeded.metadata.request_id;
+            if (requestId && !isNaN(parseInt(requestId))) {
+              await db
+                .update(requests)
+                .set({ resolvedAt: confirmedDate })
+                .where(eq(requests.id, parseInt(requestId)));
+
+              if (offerId) {
+                const offer = await db.query.offers.findFirst({
+                  with: { request: true },
+                  where: eq(offers.id, offerId),
+                });
+
+                if (offer?.request) {
+                  await db.insert(trips).values({
+                    checkIn: offer.checkIn,
+                    checkOut: offer.checkOut,
+                    numGuests: offer.request.numGuests,
+                    groupId: offer.request.madeByGroupId,
+                    propertyId: offer.propertyId,
+                    offerId: offer.id,
+                  });
+                }
+              }
+            }
           } else {
             // Handle case where confirmed_at is missing or invalid
             console.error("Confirmed_at is missing or invalid.");
@@ -227,7 +264,7 @@ export default async function webhook(
           );
 
           await db
-            .update(offers)
+            .update(trips)
             .set({
               checkoutSessionId: checkoutSessionCompleted.id,
             })
@@ -408,6 +445,25 @@ export default async function webhook(
           }
         }
       }
+
+      case "account.external_account.created":
+        //"use this for when you want an event to trigger after onboarding",
+
+        break;
+
+      case "account.updated":
+        const account = event.data.object;
+
+        if (account.id) {
+          const stripeAccount = await stripe.accounts.retrieve(account.id);
+          await db
+            .update(hostProfiles)
+            .set({
+              chargesEnabled: stripeAccount.payouts_enabled, // fix later or true
+            })
+            .where(eq(hostProfiles.stripeAccountId, account.id));
+        }
+        break;
 
       default:
       // console.log(`Unhandled event type ${event.type}`);

@@ -27,7 +27,7 @@ export default function DirectBookDialog(
     checkIn: Date;
     checkOut: Date;
     offer: OfferWithProperty;
-    requestId: number;
+    requestId?: number;
   }>,
 ) {
   const {
@@ -48,6 +48,9 @@ export default function DirectBookDialog(
   const totalSavings = originalTotalPrice - totalPrice;
 
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
+  const { data: hostInfo } = api.host.getHostInfoByPropertyId.useQuery(
+    offer.property.id,
+  );
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
   const session = useSession({ required: true });
@@ -75,15 +78,17 @@ export default function DirectBookDialog(
     const response = await createCheckout.mutateAsync({
       listingId: offer.id,
       propertyId: offer.property.id,
-      requestId: requestId,
+      requestId: requestId ?? null,
       name: offer.property.name,
       price: totalPriceWithFees, // Airbnb (tramona fee) Set's price for checkout
+      tramonaServiceFee: tramonaServiceFee,
       description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
       images: offer.property.imageUrls,
       totalSavings,
       phoneNumber: session.data?.user.phoneNumber ?? "",
       userId: user.id,
+      hostStripeId: hostInfo?.stripeAccountId ?? null,
     });
 
     const stripe = await stripePromise;

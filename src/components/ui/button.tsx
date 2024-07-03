@@ -47,6 +47,8 @@ const buttonVariants = cva(
         greenPrimary: "bg-teal-900 hover:bg-teal-950 text-white",
         secondaryLight:
           "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
+        greenPrimaryOutline:
+          "border-2 border-[#004236] bg-[#D8E5E3] text-black",
       },
     },
     defaultVariants: {

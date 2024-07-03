@@ -5,9 +5,9 @@ import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { formatDateRange, formatCurrency } from "@/utils/utils";
-import { DeleteIcon, InfoIcon, ShareIcon, TrashIcon } from "lucide-react";
+import { InfoIcon, TrashIcon } from "lucide-react";
 import { Separator } from "../ui/separator";
-import { Skeleton, SkeletonText } from "../ui/skeleton";
+import { Skeleton } from "../ui/skeleton";
 import { useState } from "react";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 import { useSession } from "next-auth/react";
@@ -33,7 +33,7 @@ export default function UnclaimedOfferCard() {
               How it works
             </Link>
           </div>
-          {session && session?.user.role === "admin" && <AddUnclaimedOffer />}
+          {session && session.user.role === "admin" && <AddUnclaimedOffer />}
         </div>
         <div className="relative">
           <div className="sticky top-0 grid grid-cols-10 gap-x-2 bg-white text-center font-bold">
@@ -49,7 +49,7 @@ export default function UnclaimedOfferCard() {
       </div>
       {!isLoading ? (
         unMatchedOffers ? (
-          unMatchedOffers.map((offer, index) => (
+          unMatchedOffers.map((offer) => (
             <div key={offer.property.id}>
               <UnMatchedPropertyCard offer={offer} />
             </div>
@@ -80,6 +80,7 @@ export default function UnclaimedOfferCard() {
 
 function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
   const { data: session } = useSession();
+  const { mutateAsync: deleteOffer } = api.offers.delete.useMutation();
 
   const handleButtonClick = (
     event: React.MouseEvent<HTMLDivElement | HTMLButtonElement>,
@@ -87,8 +88,12 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
     event.stopPropagation();
   };
 
+  const handleRemoveProperty = async (offerId: number) => {
+    await deleteOffer({ id: offerId });
+  };
+
   return (
-    <Link href={`/public-offer/${offer.id}`} className="">
+    <>
       <div className="grid grid-cols-10 items-center gap-x-2 rounded-xl border text-center">
         <Image
           src={offer.property.imageUrls[0] ?? ""}
@@ -109,7 +114,7 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
           {formatCurrency(offer.property.originalNightlyPrice!)}
         </div>
         <div className="col-span-1 flex items-center justify-center font-semibold">
-          {formatDateRange(offer.request.checkIn, offer.request.checkOut)}
+          {formatDateRange(offer.checkIn, offer.checkOut)}
         </div>
         <div className="col-span-1 flex items-center justify-center font-semibold">
           {offer.property.maxNumGuests}
@@ -122,8 +127,7 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
             href={`/public-offer/${offer.id}`}
             className="font-semibold text-teal-800 underline underline-offset-4"
           >
-            {" "}
-            Property Info{" "}
+            Property Info
           </Link>
         </div>
         <Button
@@ -148,13 +152,18 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
               />
             </div>
           </Button>
-          {session && session?.user.role === "admin" && (
-            <Button size="icon" variant="ghost" className="text-red-600">
+          {session?.user.role === "admin" && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-red-600"
+              onClick={() => handleRemoveProperty(offer.id)}
+            >
               <TrashIcon />
             </Button>
           )}
         </div>
       </div>
-    </Link>
+    </>
   );
 }

@@ -54,8 +54,11 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * ```
  */
 export function formatCurrency(cents: number, { round = false } = {}) {
-  if (cents % 100 === 0 || round) return `$${Math.round(cents / 100)}`;
-  return `$${(cents / 100).toFixed(2)}`;
+  const dollars = round ? Math.round(cents / 100) : cents / 100;
+  return dollars.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 }
 
 /**
@@ -112,15 +115,15 @@ function removeTimezoneFromDate(date: Date) {
 }
 
 export function formatDateMonthDay(date: Date) {
-  return formatDate(date, "MMMM d");
+  return formatDate(removeTimezoneFromDate(date), "MMMM d");
 }
 
 export function formatDateWeekMonthDay(date: Date) {
-  return formatDate(date, "EEE MMMM d");
+  return formatDate(removeTimezoneFromDate(date), "EEE MMMM d");
 }
 
 export function formatDateMonthDayYear(date: Date) {
-  return formatDate(date, "MMMM d, yyyy");
+  return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
 }
 
 // not used right now and probably will never have to:
@@ -132,7 +135,7 @@ export function formatDateMonthDayYear(date: Date) {
 //   return formatDateRange(fromDate, toDate);
 // }
 
-// todo fix hacky
+// TODO: fix hacky
 export function getNumNights(from: Date | string, to: Date | string) {
   return Math.round(
     (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),
@@ -267,6 +270,36 @@ export const generateTimeStamp = () => {
 
   return formattedTimestamp;
 };
+
+export function convertTo12HourFormat(time24: string) {
+  // Split the input time into hours and minutes
+  const [hourStr, minuteStr] = time24.split(":");
+  let hours = parseInt(hourStr ?? "", 10);
+  const minutes = parseInt(minuteStr ?? "", 10);
+
+  // Determine the period (AM/PM)
+  const period = hours >= 12 ? "PM" : "AM";
+
+  // Convert hours from 24-hour format to 12-hour format
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+
+  // Format the minutes to always be two digits
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  // Combine the hours, minutes, and period
+  const time12 = `${hours}:${formattedMinutes} ${period}`;
+
+  return time12;
+}
+
+export function convertTo24HourFormat(time: string): string {
+  // Assuming input format is HH:mm:ss
+  const [hour, minute] = time.split(":");
+  const formattedHour = (hour ?? "").padStart(2, "0");
+  const formattedMinute = (minute ?? "").padStart(2, "0");
+  return `${formattedHour}:${formattedMinute}`;
+}
 
 export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);

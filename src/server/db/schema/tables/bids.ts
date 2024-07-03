@@ -36,7 +36,7 @@ export const bids = pgTable(
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
 
-    acceptedAt: timestamp("accepted_at"),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
     paymentIntentId: varchar("payment_intent_id"),
     setupIntentId: varchar("setup_intent_id"),
     paymentMethodId: varchar("payment_method_id"),
@@ -44,9 +44,15 @@ export const bids = pgTable(
     numGuests: integer("num_guests").notNull().default(1),
     amount: integer("amount").notNull(),
     status: bidStatusEnum("status").notNull().default("Pending"),
-    statusUpdatedAt: timestamp("status_updated_at").notNull().defaultNow(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    statusUpdatedAt: timestamp("status_updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     dialogShown: boolean("dialog_shown").notNull().default(false),
   },
   (t) => ({

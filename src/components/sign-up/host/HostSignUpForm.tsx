@@ -43,7 +43,7 @@ const formSchema = z
     password: zodPassword(),
     confirm: z.string(),
     hostType: z.enum(ALL_HOST_TYPES),
-    profileUrl: zodUrl(),
+    //profileUrl: zodUrl(),
   })
   .refine((data) => data.password === data.confirm, {
     message: "Passwords don't match",
@@ -119,7 +119,7 @@ export default function HostSignUpForm() {
         password: newUser.password,
         // confirm: newUser.confirm,
         hostType: newUser.hostType,
-        profileUrl: newUser.profileUrl,
+        //profileUrl: newUser.profileUrl,
         conversationId: query.conversationId as string,
       };
 

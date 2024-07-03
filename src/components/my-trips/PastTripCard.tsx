@@ -1,12 +1,11 @@
 import Link from "next/link";
-
 import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
-import { type PastTrip } from "./PastTrips";
-
 import { formatDateRange } from "@/utils/utils";
+import Image from "next/image";
+import { type TripCardDetails } from "./PastTrips";
 
-export default function PastTripCard({ trip }: { trip: PastTrip }) {
+export default function PastTripCard({ trip }: { trip: TripCardDetails }) {
   return (
     <div className="w-full">
       <div className="flex overflow-clip rounded-lg border">
@@ -17,7 +16,12 @@ export default function PastTripCard({ trip }: { trip: PastTrip }) {
           >
             Past Trip
           </Badge>
-          <img src={trip.property.imageUrls[0]} width={400} height={400} />
+          <Image
+            src={trip.property.imageUrls[0]!}
+            alt=""
+            width={400}
+            height={400}
+          />
         </div>
 
         <div className="flex w-full flex-col gap-2 px-5 py-3 md:gap-4 md:p-5">
@@ -25,20 +29,22 @@ export default function PastTripCard({ trip }: { trip: PastTrip }) {
             <h2 className="text-lg font-bold md:text-2xl">
               {trip.property.name}
             </h2>
-            <div className="flex gap-2">
-              <UserAvatar
-                name={trip.property.host?.name}
-                image={trip.property.host?.image}
-              />
-              <div>
-                <p className="text-xs text-muted-foreground md:text-sm">
-                  Hosted by
-                </p>
-                <p className="text-sm md:text-base">
-                  {trip.property.host?.name}
-                </p>
+            {trip.property.host && (
+              <div className="flex gap-2">
+                <UserAvatar
+                  name={trip.property.host.name}
+                  image={trip.property.host.image}
+                />
+                <div>
+                  <p className="text-xs text-muted-foreground md:text-sm">
+                    Hosted by
+                  </p>
+                  <p className="text-sm md:text-base">
+                    {trip.property.host.name}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="h-[2px] rounded-full bg-gray-200"></div>
@@ -46,11 +52,10 @@ export default function PastTripCard({ trip }: { trip: PastTrip }) {
           <div className="space-y-2">
             <h3 className="text-base font-bold md:text-xl">Trip details</h3>
             <p className="text-sm md:text-base">
-              Check-in/Check-out:{" "}
-              {formatDateRange(trip.request.checkIn, trip.request.checkOut)}
+              Check-in/Check-out: {formatDateRange(trip.checkIn, trip.checkOut)}
             </p>
             <Link
-              href={`/my-trips/${trip.id}`}
+              href={`/my-trips/${trip.id}?type=request`}
               className="text-sm underline underline-offset-4"
             >
               View more

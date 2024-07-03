@@ -1,4 +1,3 @@
-import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import {
   createTRPCRouter,
   optionallyAuthedProcedure,
@@ -14,7 +13,6 @@ import {
   propertyUpdateSchema,
   users,
 } from "@/server/db/schema";
-import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
 import {
@@ -28,43 +26,42 @@ import {
   notExists,
   sql,
 } from "drizzle-orm";
-
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
   properties,
 } from "./../../db/schema/tables/properties";
+import { addProperty } from "@/server/server-utils";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyInsertSchema.omit({ hostId: true }))
+    .input(
+      propertyInsertSchema.omit({
+        hostId: true,
+        city: true,
+        latitude: true,
+        longitude: true,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "admin" && !input.hostName) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      if ((!input.latitude || !input.longitude) && input.address) {
-        const { location } = await getCoordinates(input.address);
-        if (location) {
-          input.latitude = location.lat;
-          input.longitude = location.lng;
-        }
-      }
+      const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
 
-      return await ctx.db
-        .insert(properties)
-        .values({
-          ...input,
-          hostId: ctx.user.role === "admin" ? null : ctx.user.id,
-        })
-        .returning({ id: properties.id })
-        .then((res) => res[0]!.id);
+      const id = await addProperty({ property: input, hostId });
+      return id;
     }),
 
   // uses the hostId passed in the input instead of the admin's user id
   createForHost: roleRestrictedProcedure(["admin"])
-    .input(propertyInsertSchema.extend({ hostId: z.string() })) // make hostid required
+    .input(
+      propertyInsertSchema
+        .omit({ city: true, latitude: true, longitude: true })
+        .extend({ hostId: z.string() }),
+    ) // make hostid required
     .mutation(async ({ ctx, input }) => {
       const host = await ctx.db.query.users.findFirst({
         columns: { name: true, role: true },
@@ -78,7 +75,7 @@ export const propertiesRouter = createTRPCRouter({
         return { status: "user not a host" } as const;
       }
 
-      await ctx.db.insert(properties).values(input);
+      await addProperty({ property: input, hostId: input.hostId });
 
       return {
         status: "success",
@@ -203,16 +200,17 @@ export const propertiesRouter = createTRPCRouter({
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
-            (SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            (SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
           `,
         })
         .from(properties)
         .where(
           and(
+            eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
             input.lat &&
               input.long &&
@@ -260,10 +258,10 @@ export const propertiesRouter = createTRPCRouter({
                   ),
                 ),
             ),
-            sql`(SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            sql`(SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
 
             northeastLat && northeastLng && southwestLat && southwestLng
@@ -337,16 +335,17 @@ export const propertiesRouter = createTRPCRouter({
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
-            (SELECT COUNT(booked_dates.property_id) 
-            FROM booked_dates 
-            WHERE booked_dates.property_id = properties.id 
-              AND booked_dates.date >= CURRENT_DATE 
+            (SELECT COUNT(booked_dates.property_id)
+            FROM booked_dates
+            WHERE booked_dates.property_id = properties.id
+              AND booked_dates.date >= CURRENT_DATE
               AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
           `,
         })
         .from(properties)
         .where(
           and(
+            eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
@@ -394,10 +393,10 @@ export const propertiesRouter = createTRPCRouter({
                   ),
                 ),
             ),
-            sql`(SELECT COUNT(booked_dates.property_id) 
-              FROM booked_dates 
-              WHERE booked_dates.property_id = properties.id 
-                AND booked_dates.date >= CURRENT_DATE 
+            sql`(SELECT COUNT(booked_dates.property_id)
+              FROM booked_dates
+              WHERE booked_dates.property_id = properties.id
+                AND booked_dates.date >= CURRENT_DATE
                 AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
@@ -448,6 +447,9 @@ export const propertiesRouter = createTRPCRouter({
         })
         .then((res) => res?.curTeamId);
 
+      console.log("USER ID", ctx.user.id);
+      console.log("CURR ID", curTeamId);
+
       if (!curTeamId) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
@@ -456,31 +458,32 @@ export const propertiesRouter = createTRPCRouter({
         .findMany({
           columns: { id: true, imageUrls: true, name: true, address: true },
           where: eq(properties.hostTeamId, curTeamId),
-          with: { requestsToProperties: true },
+          with: { requestsToProperties: true, bids: true },
         })
         .then((res) =>
           res
             .map((p) => {
-              const { requestsToProperties, ...rest } = p;
+              const { requestsToProperties, bids, ...rest } = p;
               return {
                 ...rest,
                 numRequests: requestsToProperties.length,
+                numBids: bids.length,
               };
             })
             .sort((a, b) => b.numRequests - a.numRequests),
         );
     },
   ),
-  hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
-    .input(hostPropertyFormSchema)
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.db.insert(properties).values({
-        ...input,
-        hostId: ctx.user.id,
-        hostName: ctx.user.name,
-        imageUrls: input.imageUrls,
-      });
-    }),
+  // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
+  //   .input(hostPropertyFormSchema)
+  //   .mutation(async ({ ctx, input }) => {
+  //     return await ctx.db.insert(properties).values({
+  //       ...input,
+  //       hostId: ctx.user.id,
+  //       hostName: ctx.user.name,
+  //       imageUrls: input.imageUrls,
+  //     });
+  //   }),
   getBlockedDates: protectedProcedure
     .input(z.object({ propertyId: z.number() }))
     .query(async ({ ctx, input }) => {

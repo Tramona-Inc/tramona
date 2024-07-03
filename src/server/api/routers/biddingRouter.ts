@@ -9,6 +9,7 @@ import {
   groups,
   hostTeamMembers,
   properties,
+  trips,
   users,
 } from "@/server/db/schema";
 import {
@@ -19,7 +20,7 @@ import { getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
-import { and, desc, eq, exists } from "drizzle-orm";
+import { and, desc, eq, exists, inArray } from "drizzle-orm";
 import { random } from "lodash";
 import { z } from "zod";
 import {
@@ -151,28 +152,29 @@ export const biddingRouter = createTRPCRouter({
     .input(bidInsertSchema.omit({ madeByGroupId: true }))
     .mutation(async ({ ctx, input }) => {
       // Check if already exists
-      const bidExist = await ctx.db.query.bids.findMany({
-        where: exists(
-          ctx.db
-            .select()
-            .from(groupMembers)
-            .where(
-              and(
-                eq(groupMembers.groupId, bids.madeByGroupId),
-                eq(groupMembers.userId, ctx.user.id),
-                eq(bids.propertyId, input.propertyId),
-              ),
-            ),
-        ),
-        columns: {
-          propertyId: true,
-        },
-      });
+      // const bidExist = await ctx.db.query.bids.findMany({
+      //   where: exists(
+      //     ctx.db
+      //       .select()
+      //       .from(groupMembers)
+      //       .where(
+      //         and(
+      //           eq(groupMembers.groupId, bids.madeByGroupId),
+      //           eq(groupMembers.userId, ctx.user.id),
+      //           eq(bids.propertyId, input.propertyId),
+      //         ),
+      //       ),
+      //   ),
+      //   columns: {
+      //     propertyId: true,
+      //   },
+      // });
 
       // ! uncomment to prevent duplicate bids
       // if (bidExist.length > 0) {
       //   throw new TRPCError({ code: "BAD_REQUEST" });
       // } else {
+
       const madeByGroupId = await ctx.db
         .insert(groups)
         .values({ ownerId: ctx.user.id })
@@ -186,8 +188,8 @@ export const biddingRouter = createTRPCRouter({
 
       await ctx.db
         .insert(bids)
-        .values({ ...input, madeByGroupId: madeByGroupId });
-      // }
+        .values({ ...input, madeByGroupId: madeByGroupId })
+        .returning({ id: bids.id });
     }),
   update: protectedProcedure
     .input(bidInsertSchema)
@@ -284,6 +286,19 @@ export const biddingRouter = createTRPCRouter({
 
       return await ctx.db.query.bids.findMany({
         where: and(eq(bids.propertyId, propertyId), eq(bids.status, "Pending")),
+        with: {
+          counters: {
+            orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+            limit: 2,
+            columns: {
+              id: true,
+              counterAmount: true,
+              createdAt: true,
+              status: true,
+              userId: true,
+            },
+          },
+        },
       });
     }),
 
@@ -432,11 +447,11 @@ export const biddingRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const user = await db.query.users.findFirst({
+      const groupOwner = await db.query.users.findFirst({
         where: eq(users.id, bidInfo.madeByGroup.ownerId),
       });
 
-      if (!user) {
+      if (!groupOwner) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
@@ -446,7 +461,7 @@ export const biddingRouter = createTRPCRouter({
         confirmed_at: new Date().toUTCString(),
       };
 
-      if (user.stripeCustomerId && bidInfo.paymentMethodId) {
+      if (groupOwner.stripeCustomerId && bidInfo.paymentMethodId) {
         // Create payment intent
         const pi = await stripe.paymentIntents.create({
           payment_method: bidInfo.paymentMethodId,
@@ -454,21 +469,26 @@ export const biddingRouter = createTRPCRouter({
           currency: "usd",
           capture_method: "automatic", // Change capture_method to automatic
           metadata: metadata, // metadata access for checkout session
-          customer: user.stripeCustomerId, // Add null check for 'user' variable
+          customer: groupOwner.stripeCustomerId, // Add null check for 'user' variable
           return_url: `${env.NEXTAUTH_URL}/my-trips`, // Specify return_url here
           confirm: true,
         });
 
         if (pi.status === "succeeded") {
-          // if (!userIsWithBid) {
-          //   throw new TRPCError({ code: "UNAUTHORIZED" });
-          // } else {
           await updateBidStatus({
             id: input.bidId,
             status: "Accepted",
             paymentIntentId: pi.id,
           });
-          // }
+
+          await db.insert(trips).values({
+            checkIn: bidInfo.checkIn,
+            checkOut: bidInfo.checkOut,
+            numGuests: bidInfo.numGuests,
+            propertyId: bidInfo.propertyId,
+            groupId: bidInfo.madeByGroupId,
+            bidId: input.bidId,
+          });
         }
       }
       // TODO: email travllers
@@ -545,4 +565,55 @@ export const biddingRouter = createTRPCRouter({
       numGuests: random(1, 5),
     });
   }),
+
+  getAllHostPending: roleRestrictedProcedure(["host"]).query(
+    async ({ ctx }) => {
+      const allHostProperties = (
+        await db.query.properties.findMany({
+          where: eq(properties.hostId, ctx.user.id),
+          columns: {
+            id: true,
+          },
+        })
+      ).map((property) => property.id);
+
+      const allActiveBids = await db.query.bids.findMany({
+        with: {
+          madeByGroup: {
+            with: { members: { with: { user: true } }, invites: true },
+          },
+          property: {
+            columns: {
+              id: true,
+              name: true,
+              address: true,
+              imageUrls: true,
+              originalNightlyPrice: true,
+              originalListingUrl: true,
+              longitude: true,
+              latitude: true,
+            },
+          },
+          counters: {
+            orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+            limit: 1,
+            columns: {
+              id: true,
+              counterAmount: true,
+              createdAt: true,
+              status: true,
+              userId: true,
+            },
+          },
+        },
+        where: and(
+          eq(bids.status, "Pending"),
+          inArray(bids.propertyId, allHostProperties),
+        ),
+        orderBy: desc(bids.createdAt),
+      });
+
+      return allActiveBids;
+    },
+  ),
 });

@@ -9,6 +9,7 @@ import "@/styles/globals.css";
 import TailwindIndicator from "@/components/_common/TailwindIndicator";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import StripeConnectSessionProvider from "@/components/providerLayouts/StripeConnectSessionProvider";
 import Head from "next/head";
 import SEO from "../../next-seo.config";
 import { Mulish } from "next/font/google";
@@ -40,7 +41,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
               content="width=device-width, initial-scale=1, maximum-scale=1"
             />
           </Head>
-          <Component {...pageProps} />
+          <StripeConnectSessionProvider>
+            <Component {...pageProps} />
+          </StripeConnectSessionProvider>
 
           {/* Helps display screen size (Only in developer mode) */}
           <TailwindIndicator />
