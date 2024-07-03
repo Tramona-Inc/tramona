@@ -92,7 +92,7 @@ export const miscRouter = createTRPCRouter({
   scrapeUsingLink: publicProcedure
     .input(
       z.object({
-        url: zodString({ maxLen: 500 }),
+        url: zodString({ maxLen: 1000 }),
       }),
     )
     .query(async ({ input }) => {
@@ -179,7 +179,12 @@ export const miscRouter = createTRPCRouter({
         const totalPrice = Number(
           priceItems.slice(-1)[0]?.replace("$", "").replace(",", "").trim(),
         );
-        const numDays = Number(priceItems[0]?.split(" ")[2]);
+        // Extract numDays safely
+        const numDaysStr = priceItems[0]?.split(" ")[0]; // Get the number of nights
+        const numDays = Number(numDaysStr);
+        if (isNaN(numDays)) {
+          throw new Error("Failed to extract number of days from price items");
+        }
         const nightlyPrice = totalPrice / numDays;
         const propertyName =
           listingCardTextContent[0]?.substring(0, 255) ?? "Airbnb Property";

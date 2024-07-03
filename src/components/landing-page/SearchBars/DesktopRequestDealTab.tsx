@@ -24,7 +24,6 @@ import {
   Sparkles,
   MinusIcon,
   ShareIcon,
-  ContactRoundIcon,
   MailIcon,
 } from "lucide-react";
 import { useCityRequestForm } from "./useCityRequestForm";
@@ -33,8 +32,17 @@ import Confetti from "react-confetti";
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
+import { TRPCError } from "@trpc/server";
 import Spinner from "@/components/_common/Spinner";
+import { Separator } from "@/components/ui/separator";
 
+export type ScrapedProperty = {
+  nightlyPrice: number;
+  propertyName: string;
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number;
+};
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
   const [open, setOpen] = useState(false);
@@ -46,6 +54,9 @@ export function DesktopRequestDealTab() {
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailFormVisible, setIsEmailFormVisible] = useState(false);
+  const [scrapedPropertyData, setScrapedPropertyData] = useState<
+    ScrapedProperty | undefined
+  >();
 
   const { form, onSubmit } = useCityRequestForm({ setCurTab, afterSubmit });
 
@@ -127,6 +138,49 @@ export function DesktopRequestDealTab() {
       setIsLoading(false);
     }
   };
+
+  //link scrape logic
+  //get link
+  const airbnbLink = form.getValues(`data.${curTab}.airbnbLink`);
+  //once we get link we need to scrape it
+  //the query will trigger after the useEffect
+  const {
+    data: scrapedProperty,
+    isStale: scrapeIsLoading,
+    refetch: refetchScrape,
+    error: scrapeError,
+  } = api.misc.scrapeUsingLink.useQuery(
+    { url: airbnbLink! },
+    {
+      enabled: false,
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Be sure it is a valid Airbnb property link.",
+          description: error.message || "An error occurred please try again.",
+        });
+      },
+    },
+  );
+  //when the airbnb Link changes, we need trigger a refetch
+  useEffect(() => {
+    if (airbnbLink) {
+      refetchScrape().catch((error: Error) => {
+        toast({
+          variant: "destructive",
+          title: "Be sure it is a valid Airbnb property link.",
+          description: error.message || "An error occurred please try again.",
+        });
+      });
+    }
+  }, [airbnbLink, refetchScrape]);
+  //now we need to set the data
+  useEffect(() => {
+    if (scrapedProperty && !(scrapedProperty instanceof TRPCError)) {
+      setScrapedPropertyData(scrapedProperty);
+      console.log(scrapedPropertyData);
+    }
+  }, [scrapedProperty, scrapeError, scrapedPropertyData]);
 
   return (
     <>
@@ -221,7 +275,11 @@ export function DesktopRequestDealTab() {
                 </Button>
               </CityRequestFiltersDialog>
             </div>
-
+            <div className="flex flex-row items-center justify-center gap-x-4 text-zinc-400">
+              <Separator className="w-2/5 bg-zinc-400" />
+              <p> or </p>
+              <Separator className="w-2/5 bg-zinc-400" />
+            </div>
             <div className="space-y-1">
               <p className="text-sm">
                 Have a property you like? We&apos;ll send your request directly
@@ -268,7 +326,7 @@ export function DesktopRequestDealTab() {
                     }}
                     className="font-bold text-teal-900"
                   >
-                    Cancel
+                    {scrapeIsLoading ? "Cancel" : <Spinner />}
                   </Button>
                 </div>
               )}
@@ -401,7 +459,9 @@ export function DesktopRequestDealTab() {
                           }
                         } catch (error: unknown) {
                           const errorMessage =
-                            error instanceof Error ? error.message : "Unknown error";
+                            error instanceof Error
+                              ? error.message
+                              : "Unknown error";
                           toast({
                             title: "Error sharing link",
                             description: errorMessage,
@@ -424,7 +484,7 @@ export function DesktopRequestDealTab() {
                   </Button> */}
                   <div className="inline-flex w-full items-center justify-center">
                     <hr className="my-8 h-px w-64 border-0 bg-gray-200 dark:bg-gray-700" />
-                    <span className="absolute left-1/2 -translate-x-1/2 bg-background px-3 font-medium text-gray-900 ">
+                    <span className="absolute left-1/2 -translate-x-1/2 bg-background px-3 font-medium text-gray-900">
                       or
                     </span>
                   </div>
