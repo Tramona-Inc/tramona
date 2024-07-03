@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import {
   Body,
   Column,
@@ -70,7 +71,7 @@ interface EmailConfirmationCardProps {
 
 export const TramonaLogo = () => {
   return (
-    <div className="flex items-center gap-2 text-lg font-bold text-brand bg-white">
+    <div className="text-brand flex items-center gap-2 bg-white text-lg font-bold">
       <img
         src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
         alt="Tramona Logo"
@@ -110,7 +111,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
       >
         <Head />
         <Body
-          className="text-base font-sans flex justify-center items-center"
+          className="flex items-center justify-center font-sans text-base"
           style={main}
         >
           <Container className="bg-white" style={{ backgroundColor: "white" }}>
@@ -125,13 +126,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
 export const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
     <>
-      <div className="mt-4 ml-6">
+      <div className="ml-6 mt-4">
         <TramonaLogo />
       </div>
-      <div className="inline-flex items-center justify-center w-full">
-        <Hr className="w-11/12 h-px bg-gray-400 border-0 " />
+      <div className="inline-flex w-full items-center justify-center">
+        <Hr className="h-px w-11/12 border-0 bg-gray-400" />
       </div>
-      <Heading className="text-left my-0 leading-8 text-lg ml-6 mt-4">
+      <Heading className="my-0 ml-6 mt-4 text-left text-lg leading-8">
         <strong className="text-brand">{title}</strong>
       </Heading>
     </>
@@ -140,8 +141,8 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
 
 export const BottomHr = () => {
   return (
-    <div className="inline-flex items-center justify-center w-full">
-      <Hr className="w-11/12 h-px bg-gray-400 border-0  mt-8" />
+    <div className="inline-flex w-full items-center justify-center">
+      <Hr className="mt-8 h-px w-11/12 border-0 bg-gray-400" />
     </div>
   );
 };
@@ -150,13 +151,13 @@ export const Info = () => {
   return (
     <div className="pb-6">
       <div className="text-left font-light">
-        <Text className="text-xs text-brand font-light mx-6">
+        <Text className="text-brand mx-6 text-xs font-light">
           Update your email preferences to choose which emails you get or
           unsubscribe from this type of email.
         </Text>
       </div>
       <Row>
-        <Column className="text-center px-20">
+        <Column className="px-20 text-center">
           {/* <Link className="text-grey text-xs mr-2">Unsubscribe</Link> */}
           {/* <Link className="text-grey text-xs underline">View in the browser</Link> */}
         </Column>
@@ -172,7 +173,7 @@ export const CustomButton: React.FC<ButtonProps> = ({ title, link }) => {
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block bg-brand text-white text-base font-semibold rounded-full px-3 py-3 w-11/12 mx-auto whitespace-nowrap"
+        className="bg-brand mx-auto inline-block w-11/12 whitespace-nowrap rounded-full px-3 py-3 text-base font-semibold text-white"
         style={{
           textDecoration: "none",
         }}
@@ -189,7 +190,7 @@ export const CustomButtonOutline: React.FC<ButtonProps> = ({ title, link }) => {
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block bg-white border-brand text-brand text-base font-semibold rounded-full px-5 py-3 w-11/12 mx-auto whitespace-nowrap"
+        className="border-brand text-brand mx-auto inline-block w-11/12 whitespace-nowrap rounded-full bg-white px-5 py-3 text-base font-semibold"
         style={{
           textDecoration: "none",
         }}
@@ -203,9 +204,9 @@ export const CustomButtonOutline: React.FC<ButtonProps> = ({ title, link }) => {
 export const Footer = () => {
   return (
     <Row>
-      <Column className="mt-2 mb-0 ">
-        <Text className="text-left text-xs text-black ml-6 mb-0">Tramona</Text>
-        <Text className="text-left text-xs text-black ml-6 mt-0">
+      <Column className="mb-0 mt-2">
+        <Text className="mb-0 ml-6 text-left text-xs text-black">Tramona</Text>
+        <Text className="ml-6 mt-0 text-left text-xs text-black">
           2314 236th AVE NE Sammamish WA 98074
         </Text>
       </Column>
