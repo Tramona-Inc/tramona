@@ -63,7 +63,7 @@ export default function Checkout() {
   function TripDetails() {
     return (
       <>
-        <div className="my-8 space-y-2">
+        <div className="space-y-2 sm:my-8">
           <h2 className="text-lg font-semibold">Your trip details</h2>
           <div className="text-sm">
             <p>Dates</p>
@@ -172,38 +172,43 @@ export default function Checkout() {
   function CheckoutSummary() {
     return (
       <div>
-        <div className="rounded-t-xl border border-b-0  p-3">
-          <div className="flex items-center gap-2">
-            <div className="overflow-hidden rounded-xl">
-              <Image
-                src="/assets/images/landing-bg.jpg"
-                width={100}
-                height={100}
-                alt=""
-              />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold">
-                Entire Cabin in Gold Bar, Washington
-              </h3>
-              <p className="text-xs">Apartment</p>
-              <div className="flex items-center gap-1">
-                <Star size={10} />
-                <p className="text-xs">4.89 (147 reviews)</p>
+        <div className="sm:rounded-t-xl sm:border sm:border-b-0 sm:p-3">
+          <h2 className="mb-4 text-lg font-semibold sm:hidden">
+            Price Details
+          </h2>
+          <div className="hidden sm:block">
+            <div className="flex items-center gap-2">
+              <div className="overflow-hidden rounded-xl">
+                <Image
+                  src="/assets/images/landing-bg.jpg"
+                  width={100}
+                  height={100}
+                  alt=""
+                />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold">
+                  Entire Cabin in Gold Bar, Washington
+                </h3>
+                <p className="text-xs">Apartment</p>
+                <div className="flex items-center gap-1">
+                  <Star size={10} />
+                  <p className="text-xs">4.89 (147 reviews)</p>
+                </div>
               </div>
             </div>
-          </div>
-          <Separator className="my-4" />
-          <div className="space-y-2 text-sm">
-            <h3 className="font-bold">Included with Tramona</h3>
-            <div className="space-y-1 text-muted-foreground">
-              <p>Lowest fees on the market</p>
-              <p>24/7 concierge support</p>
-              <p>Lowest price on the market</p>
-              <p>No worries or hassles</p>
+            <Separator className="my-4" />
+            <div className="space-y-2 text-sm">
+              <h3 className="font-bold">Included with Tramona</h3>
+              <div className="space-y-1 text-muted-foreground">
+                <p>Lowest fees on the market</p>
+                <p>24/7 concierge support</p>
+                <p>Lowest price on the market</p>
+                <p>No worries or hassles</p>
+              </div>
             </div>
+            <Separator className="my-4" />
           </div>
-          <Separator className="my-4" />
           <div className="space-y-4">
             {items.map((item, index) => (
               <div
@@ -218,14 +223,16 @@ export default function Checkout() {
               </div>
             ))}
           </div>
-          <Separator className="my-4" />
-          <div className="flex items-center justify-between text-sm font-semibold">
+          <div className="hidden sm:block">
+            <Separator className="my-4" />
+          </div>
+          <div className="my-4 flex items-center justify-between text-sm font-bold sm:my-0 sm:font-semibold">
             <p>Total (USD)</p>
             <p>$957.25</p>
           </div>
         </div>
-        <div className="rounded-b-xl bg-teal-900">
-          <h2 className="py-2 text-center text-lg font-semibold text-white">
+        <div className="rounded-lg bg-teal-900 sm:rounded-b-xl sm:rounded-t-none">
+          <h2 className="py-1 text-center text-lg font-semibold text-white sm:py-2">
             15% Off
           </h2>
         </div>
@@ -266,8 +273,8 @@ export default function Checkout() {
   }
 
   return (
-    <div className="px-3 sm:px-0">
-      <div className="mb-8">
+    <div className="px-4 sm:px-3">
+      <div className="mb-4 sm:mb-8">
         <Link href="#" onClick={handleBackClick}>
           <div className="flex items-center gap-2">
             <ChevronLeft />
@@ -275,8 +282,8 @@ export default function Checkout() {
           </div>
         </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2">
-        <div>
+      <div className="grid grid-cols-1 gap-20 sm:grid-cols-2">
+        <div className="hidden sm:block">
           <BestPriceCard />
           <TripDetails />
           <Separator className="my-4" />
@@ -288,7 +295,31 @@ export default function Checkout() {
           <Separator className="my-4" />
           <TermsAndSubmit />
         </div>
-        <div className="space-y-2 sm:pl-16">
+        <div className="sm:hidden">
+          <BestPriceCard />
+          <Separator className="my-6" />
+          <TripDetails />
+          <Separator className="my-6" />
+          <CheckoutSummary />
+          <Separator className="my-6" />
+          <StripePaymentInfo />
+          <Separator className="my-6" />
+          <CancellationPolicy />
+          <Separator className="my-6" />
+          <ContactInfo />
+          <Separator className="my-6" />
+          <TermsAndSubmit />
+          <CustomerReview />
+          <div>
+            <p className="text-sm">
+              Questions?{" "}
+              <span className="text-teal-900 underline">
+                <Link href="/">Chat with host</Link>
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="hidden space-y-2 sm:block sm:pl-20">
           <div className="space-y-10">
             <CheckoutSummary />
             <CustomerReview />
