@@ -5,7 +5,12 @@ import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { cn } from "@/utils/utils";
+import {
+  cn,
+  formatCurrency,
+  getDiscountPercentage,
+  getNumNights,
+} from "@/utils/utils";
 import {
   Form,
   FormControl,
@@ -20,6 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
+import { TAX_PERCENTAGE } from "@/utils/constants";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -35,10 +41,15 @@ export default function Checkout({
     router.back();
   };
 
+  const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
+  const nightlyPrice = offer.totalPrice / numberOfNights;
+  const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
+  const total = offer.totalPrice + offer.tramonaFee + tax;
+
   const items = [
     {
-      title: "$2,085 x 5 nights",
-      price: 10423,
+      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
+      price: `${formatCurrency(offer.totalPrice)}`,
     },
     {
       title: "Cleaning fee",
@@ -46,11 +57,11 @@ export default function Checkout({
     },
     {
       title: "Tramona service fee",
-      price: 0,
+      price: `${formatCurrency(offer.tramonaFee)}`,
     },
     {
       title: "Taxes",
-      price: 93.72,
+      price: `${formatCurrency(tax)}`,
     },
   ];
 
@@ -168,7 +179,7 @@ export default function Checkout({
             the Privacy Policy
           </p>
         </div>
-        <Button variant="greenPrimary" className="my-2 w-full font-semibold">
+        <Button variant="greenPrimary" className="w-full font-semibold sm:my-2">
           Confirm and pay
         </Button>
         <p className="my-4 text-center text-xs font-semibold text-muted-foreground md:my-0">
@@ -190,20 +201,21 @@ export default function Checkout({
             <div className="flex items-center gap-2">
               <div className="overflow-hidden rounded-xl">
                 <Image
-                  src="/assets/images/landing-bg.jpg"
+                  src={property.imageUrls[0]!}
                   width={100}
                   height={100}
                   alt=""
                 />
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-bold">
-                  Entire Cabin in Gold Bar, Washington
-                </h3>
-                <p className="text-xs">Apartment</p>
+                <h3 className="text-sm font-bold">{property.name}</h3>
+                <p className="text-xs">{property.propertyType}</p>
                 <div className="flex items-center gap-1">
                   <Star size={10} />
-                  <p className="text-xs">4.89 (147 reviews)</p>
+                  <p className="text-xs">
+                    {property.avgRating} (
+                    {plural(property.numRatings, "review")})
+                  </p>
                 </div>
               </div>
             </div>
@@ -226,10 +238,7 @@ export default function Checkout({
                 key={index}
               >
                 <p className={cn(index !== 3 && "underline")}>{item.title}</p>
-                <p>
-                  {index !== 1 ? "$" : ""}
-                  {item.price}
-                </p>
+                <p>{item.price}</p>
               </div>
             ))}
           </div>
@@ -238,12 +247,17 @@ export default function Checkout({
           </div>
           <div className="my-4 flex items-center justify-between text-sm font-bold md:my-0 md:font-semibold">
             <p>Total (USD)</p>
-            <p>$957.25</p>
+            <p>{formatCurrency(total)}</p>
           </div>
         </div>
-        <div className="rounded-lg bg-teal-900 md:rounded-b-xl md:rounded-t-none">
+        <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
           <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
-            15% Off
+            {property.originalNightlyPrice &&
+              getDiscountPercentage(
+                property.originalNightlyPrice,
+                nightlyPrice,
+              )}
+            % Off
           </h2>
         </div>
       </div>
