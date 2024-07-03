@@ -7,6 +7,18 @@ import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { cn } from "@/utils/utils";
 import Stripe from "stripe";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 export default function Checkout() {
   const router = useRouter();
@@ -37,15 +49,20 @@ export default function Checkout() {
     },
   ];
 
+  function BestPriceCard() {
+    return (
+      <div className="rounded-lg border border-teal-900 bg-zinc-100 p-3 text-sm">
+        <h3 className="font-bold">Best price</h3>
+        <p className="font-semibold text-muted-foreground">
+          This is an exclusive price only available on Tramona.
+        </p>
+      </div>
+    );
+  }
+
   function TripDetails() {
     return (
       <>
-        <div className="rounded-lg border border-teal-900 bg-zinc-100 p-3 text-sm">
-          <h3 className="font-bold">Best price</h3>
-          <p className="font-semibold text-muted-foreground">
-            This is an exclusive price only available on Tramona.
-          </p>
-        </div>
         <div className="my-8 space-y-2">
           <h2 className="text-lg font-semibold">Your trip details</h2>
           <div className="text-sm">
@@ -78,7 +95,16 @@ export default function Checkout() {
     return <div>insert stripe checkout form here</div>;
   }
 
+  const formSchema = z.object({
+    email: z.string().email(),
+    phone: z.string().min(10),
+  });
+
+  type FormSchema = z.infer<typeof formSchema>;
+
   function ContactInfo() {
+    const form = useForm<FormSchema>({ resolver: zodResolver(formSchema) });
+
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Contact Information</h3>
@@ -86,7 +112,34 @@ export default function Checkout() {
           We encourage every traveler to have the travel details in case of
           emergencies.
         </p>
-        <p>insert contact form here</p>
+        <Form {...form}>
+          <FormField
+            name="email"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>Email address</FormLabel>
+                <FormControl>
+                  <Input {...field} autoFocus />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="phone"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>Phone number</FormLabel>
+                <FormControl>
+                  <Input {...field} autoFocus />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </Form>
       </div>
     );
   }
@@ -185,7 +238,7 @@ export default function Checkout() {
       <div className="relative w-full overflow-hidden rounded-xl">
         <div className="h-96">
           <Image
-            src="/assets/images/host-onboarding.png"
+            src="/assets/images/review-image.png"
             width={300}
             height={300}
             alt=""
@@ -202,7 +255,7 @@ export default function Checkout() {
             </p>
             <div className="flex items-center gap-2">
               <Avatar>
-                <AvatarImage src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVAA8woXUTaDHekpxmgY9WhjfvbP9DWtycbg&s" />
+                <AvatarImage src="/assets/images/review-customer.png" />
               </Avatar>
               <p>Jack P from San Diego, CA</p>
             </div>
@@ -213,7 +266,7 @@ export default function Checkout() {
   }
 
   return (
-    <div>
+    <div className="px-3 sm:px-0">
       <div className="mb-8">
         <Link href="#" onClick={handleBackClick}>
           <div className="flex items-center gap-2">
@@ -224,6 +277,7 @@ export default function Checkout() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2">
         <div>
+          <BestPriceCard />
           <TripDetails />
           <Separator className="my-4" />
           <CancellationPolicy />
@@ -234,7 +288,7 @@ export default function Checkout() {
           <Separator className="my-4" />
           <TermsAndSubmit />
         </div>
-        <div className="space-y-2 pl-16">
+        <div className="space-y-2 sm:pl-16">
           <div className="space-y-10">
             <CheckoutSummary />
             <CustomerReview />
