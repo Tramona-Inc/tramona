@@ -334,28 +334,30 @@ export default function Checkout({
           <Separator className="my-6" />
           <TermsAndSubmit />
           <CustomerReview />
-          <div className="mt-4">
+          {/* TODO: add endpoint to chat with host */}
+          {/* <div className="mt-4">
             <p className="text-sm">
               Questions?{" "}
               <span className="text-teal-900 underline">
                 <Link href="/">Chat with host</Link>
               </span>
             </p>
-          </div>
+          </div> */}
         </div>
+        {/* TODO: make this sticky */}
         <div className="hidden space-y-2 md:block md:pl-10 xl:pl-20">
           <div className="space-y-10">
             <CheckoutSummary />
             <CustomerReview />
           </div>
-          <div>
+          {/* <div>
             <p className="text-sm">
               Questions?{" "}
               <span className="text-teal-900 underline">
                 <Link href="/">Chat with host</Link>
               </span>
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -23,7 +23,7 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="mx-auto my-4 min-h-screen-minus-header-n-footer max-w-6xl  sm:my-16">
+      <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">
         {offer ? <Checkout offer={offer} /> : <Spinner />}
       </div>
     </MainLayout>
