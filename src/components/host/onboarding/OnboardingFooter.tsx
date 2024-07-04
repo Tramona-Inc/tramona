@@ -1,9 +1,11 @@
+import SettingsLayout from "@/components/_common/Layout/SettingsLayout";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 type OnboardingFooterProps = {
   handleNext?: () => void;
@@ -18,6 +20,7 @@ export default function OnboardingFooter({
   isForm,
   handleError,
 }: OnboardingFooterProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const max_pages = 10;
 
   const progress = useHostOnboarding((state) => state.progress);
@@ -33,8 +36,7 @@ export default function OnboardingFooter({
   const { mutateAsync: createHostProfile } =
     api.users.createHostProfile.useMutation();
 
-    const {data: isHost} = api.users.isHost.useQuery();
-
+  const { data: isHost } = api.users.isHost.useQuery();
 
   const { mutateAsync: createProperty } = api.properties.create.useMutation({
     onSuccess: () => {
@@ -49,68 +51,73 @@ export default function OnboardingFooter({
   });
 
   async function onPressNext() {
-    if (progress === 9) {
-      if (!isHost) {
-        await createHostProfile({});
-      }
+    setIsLoading(true);
+    try {
+      if (progress === 9) {
+        if (!isHost) {
+          await createHostProfile({});
+        }
 
-      await createProperty({
-        propertyType: listing.propertyType,
-        roomType: listing.spaceType,
-        maxNumGuests: listing.maxGuests,
-        numBeds: listing.beds,
-        numBedrooms: listing.bedrooms,
-        numBathrooms: listing.bathrooms,
-        address:
-          listing.location.street +
-          ", " +
-          listing.location.city +
-          ", " +
-          listing.location.apt +
-          " " +
-          listing.location.state +
-          " " +
-          listing.location.zipcode +
-          ", " +
-          listing.location.country,
-        checkInInfo: listing.checkInType,
-        checkInTime: listing.checkIn,
-        checkOutTime: listing.checkOut,
-        amenities: listing.amenities,
-        otherAmenities: listing.otherAmenities,
-        imageUrls: listing.imageUrls,
-        name: listing.title,
-        about: listing.description,
-        petsAllowed: listing.petsAllowed,
-        smokingAllowed: listing.smokingAllowed,
-        otherHouseRules: listing.otherHouseRules ?? undefined,
-      });
-    } else {
-      if (isEdit) {
-        if (isForm) {
-          if (isFormValid) {
-            handleNext && handleNext();
+        await createProperty({
+          propertyType: listing.propertyType,
+          roomType: listing.spaceType,
+          maxNumGuests: listing.maxGuests,
+          numBeds: listing.beds,
+          numBedrooms: listing.bedrooms,
+          numBathrooms: listing.bathrooms,
+          address:
+            listing.location.street +
+            ", " +
+            listing.location.city +
+            ", " +
+            listing.location.apt +
+            " " +
+            listing.location.state +
+            " " +
+            listing.location.zipcode +
+            ", " +
+            listing.location.country,
+          checkInInfo: listing.checkInType,
+          checkInTime: listing.checkIn,
+          checkOutTime: listing.checkOut,
+          amenities: listing.amenities,
+          otherAmenities: listing.otherAmenities,
+          imageUrls: listing.imageUrls,
+          name: listing.title,
+          about: listing.description,
+          petsAllowed: listing.petsAllowed,
+          smokingAllowed: listing.smokingAllowed,
+          otherHouseRules: listing.otherHouseRules ?? undefined,
+        });
+      } else {
+        if (isEdit) {
+          if (isForm) {
+            if (isFormValid) {
+              handleNext && handleNext();
+              setIsEdit(false);
+              setProgress(9);
+            } else {
+              handleError && handleError();
+            }
+          } else {
             setIsEdit(false);
             setProgress(9);
-          } else {
-            handleError && handleError();
           }
         } else {
-          setIsEdit(false);
-          setProgress(9);
-        }
-      } else {
-        if (isForm) {
-          if (isFormValid) {
-            handleNext && handleNext();
+          if (isForm) {
+            if (isFormValid) {
+              handleNext && handleNext();
+              setProgress(progress + 1);
+            } else {
+              handleError && handleError();
+            }
+          } else {
             setProgress(progress + 1);
-          } else {
-            handleError && handleError();
           }
-        } else {
-          setProgress(progress + 1);
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -134,7 +141,7 @@ export default function OnboardingFooter({
         {isEdit ? (
           <Button onClick={onPressNext}>Back to summary</Button>
         ) : (
-          <Button onClick={onPressNext}>
+          <Button onClick={onPressNext} disabled={isLoading}>
             {progress === 0
               ? "Get Started"
               : progress === 8

@@ -468,8 +468,8 @@ export const propertiesRouter = createTRPCRouter({
           SELECT
             cr.city AS property_city,
             cr.request_id,
-            r.*,
             p.*,
+            r.*,
             u.name AS user_name,
             u.image
           FROM city_requests cr

@@ -86,6 +86,7 @@ export default function RequestCard({
       <WithdrawRequestDialog
         requestId={request.id}
         open={open}
+
         onOpenChange={setOpen}
       />
       <CardContent className="space-y-2">

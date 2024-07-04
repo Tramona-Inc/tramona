@@ -4,10 +4,20 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
-import { and, between, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
+import {
+  and,
+  between,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  lte,
+  notExists,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import {
   type NewProperty,
-  Request,
   type User,
   bookedDates,
   groupInvites,
@@ -21,6 +31,7 @@ import {
   users,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
+import { EARTH_RADIUS_MILES } from "@/utils/constants";
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -259,89 +270,144 @@ export async function addProperty({
     })
     .returning({ id: properties.id });
 
-    async function isDateAvailable(propertyId: number, checkInDate: Date, checkOutDate: Date): Promise<boolean> {
-      const overlappingBookings = await db
-        .select()
-        .from(bookedDates)
-        .where(
-          and(
-            eq(bookedDates.propertyId, propertyId),
-            between(bookedDates.date, checkInDate, checkOutDate),
-          ),
-        )
-        .limit(1);
+  const allRequests = await db.query.requests.findMany({});
 
-      return overlappingBookings.length === 0;
-    }
-
-    async function getRequestsInBounds({ lat, lng }: { lat: number, lng: number }) {
-
-        const coordinates = await getCoordinates(city);
-        console.log('coordinates:', coordinates);
-        if (!coordinates.bounds) {
-          throw new Error("Bounds are undefined");
-        }
-        const { northeast, southwest } = coordinates.bounds;
-        // Use address-based filtering
-        if (requests.lat === null || requests.lng === null) {
-          const requestCoords = await getCoordinates(requests.location);
-          
-        const requestIdsInBounds = await db.query.requests
-          .findMany({
-            where: and(
-              and(
-                and(
-                  and(
-                    gte(requests.lat, southwest.lat),
-                    lte(requests.lat, northeast.lat),
-                  ),
-                  gte(requests.lng, southwest.lng),
-                ),
-                lte(requests.lng, northeast.lng),
-              ),
-              isNull(requests.resolvedAt),
-            ),
-            columns: { id: true },
-          })
-          .then((res) => res.map((r) => r.id));
-
-      return requestIdsInBounds;
-    }
-
-    // Get all requests in the same bounds
-    const requestIdsInBounds = await getRequestsInBounds({
-      lat: lat,
-      lng: lng,
+  for (const request of allRequests) {
+    const matchingProperties = await getPropertiesForRequest({
+      id: request.id,
+      lat: request.lat,
+      lng: request.lng,
+      radius: request.radius,
+      location: request.location,
+      checkIn: request.checkIn,
+      checkOut: request.checkOut,
     });
 
-    // Filter requests to only include those with available dates
-    const validRequests = [];
-
-    console.log('requestIdsInBounds:', requestIdsInBounds);
-
-    for (const requestId of requestIdsInBounds) {
-      const request: Request = await db.query.requests.findOne({
-        where: eq(requests.id, requestId),
-        columns: { id: true, checkIn: true, checkOut: true },
+    if (matchingProperties.includes(insertedProperty!.id)) {
+      await db.insert(requestsToProperties).values({
+        requestId: request.id,
+        propertyId: insertedProperty!.id,
       });
-
-      console.log(insertedProperty.id, request.checkIn, request.checkOut);
-
-      if (request) {
-        const isAvailable = await isDateAvailable(insertedProperty?.id, request.checkIn, request.checkOut);
-        if (isAvailable) {
-          validRequests.push(request.id);
-        }
-      }
     }
-
-    console.log('valid:', validRequests);
-
-    // Insert valid requests into requestsToProperties
-    if (validRequests.length > 0) {
-      await db.insert(requestsToProperties)
-        .values(validRequests.map((requestId) => ({ requestId, propertyId: insertedProperty!.id })));
-    }
-
-    return insertedProperty!.id;
   }
+
+
+  return insertedProperty!.id;
+}
+// export async function getPropertiesForRequest(
+//   req: {
+//     lat?: number | null;
+//     lng?: number | null;
+//     radius?: number | null;
+//     location: string;
+//     checkIn: Date;
+//     checkOut: Date;
+//     id: number;
+//   },
+//   { tx = db } = {},
+// ) {
+//   let propertyIsNearRequest: SQL | undefined = sql`(
+//     ${EARTH_RADIUS_MILES} * acos(
+//       cos(radians(${req.lat})) * cos(radians(${properties.latitude})) * cos(radians(${properties.longitude}) - radians(${req.lng})) +
+//       sin(radians(${req.lat})) * sin(radians(${properties.latitude}))
+//     )
+//   ) <= ${req.radius ?? 10}`;
+
+//   if (req.radius === null || req.lat === null || req.lng === null) {
+//     const coordinates = await getCoordinates(req.location);
+//     if (coordinates.bounds) {
+//       const { northeast, southwest } = coordinates.bounds;
+
+//       propertyIsNearRequest = and(
+//         lte(properties.longitude, northeast.lng),
+//         gte(properties.longitude, southwest.lng),
+//         lte(properties.latitude, northeast.lat),
+//         gte(properties.latitude, southwest.lat),
+//       );
+//     }
+//   }
+
+//   const propertyisAvailable = notExists(
+//     tx
+//       .select()
+//       .from(bookedDates)
+//       .where(
+//         and(
+//           eq(bookedDates.propertyId, properties.id),
+//           between(bookedDates.date, req.checkIn, req.checkOut),
+//         ),
+//       ),
+//   );
+
+//   return await tx.query.properties
+//     .findMany({
+//       where: and(
+//         isNotNull(properties.hostId),
+//         propertyIsNearRequest,
+//         propertyisAvailable,
+//       ),
+//       columns: { id: true },
+//     })
+//     .then((res) => res.map((p) => p.id));
+// }
+
+export async function getPropertiesForRequest(
+  req: {
+    lat?: number | null;
+    lng?: number | null;
+    radius?: number | null;
+    location: string;
+    checkIn: Date;
+    checkOut: Date;
+    id: number;
+  },
+  { tx = db } = {},
+) {
+  let propertyIsNearRequest: SQL | undefined;
+
+  if (req.lat != null && req.lng != null && req.radius != null) {
+    // Convert radius from miles to degrees (approximate)
+    const radiusDegrees = req.radius / 69;
+
+    propertyIsNearRequest = and(
+      gte(properties.latitude, req.lat - radiusDegrees),
+      lte(properties.latitude, req.lat + radiusDegrees),
+      gte(properties.longitude, req.lng - radiusDegrees),
+      lte(properties.longitude, req.lng + radiusDegrees)
+    );
+  } else {
+    const coordinates = await getCoordinates(req.location);
+    if (coordinates.bounds) {
+      const { northeast, southwest } = coordinates.bounds;
+      propertyIsNearRequest = and(
+        lte(properties.longitude, northeast.lng),
+        gte(properties.longitude, southwest.lng),
+        lte(properties.latitude, northeast.lat),
+        gte(properties.latitude, southwest.lat),
+      );
+    }
+  }
+
+  const propertyisAvailable = notExists(
+    tx
+      .select()
+      .from(bookedDates)
+      .where(
+        and(
+          eq(bookedDates.propertyId, properties.id),
+          between(bookedDates.date, req.checkIn, req.checkOut),
+        ),
+      ),
+  );
+
+  return await tx.query.properties
+    .findMany({
+      where: and(
+        isNotNull(properties.hostId),
+        propertyIsNearRequest,
+        propertyisAvailable,
+      ),
+      columns: { id: true },
+    })
+    .then((res) => res.map((p) => p.id));
+}
