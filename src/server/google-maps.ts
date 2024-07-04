@@ -67,8 +67,6 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
     }
   }
 
-  console.log({ city, country, state });
-
   if (!country || !city) return "[Unknown location]";
 
   if (country.short_name === "US") {

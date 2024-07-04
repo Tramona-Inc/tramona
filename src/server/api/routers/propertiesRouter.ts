@@ -1,4 +1,3 @@
-import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import {
   createTRPCRouter,
   optionallyAuthedProcedure,
@@ -9,6 +8,7 @@ import {
 import { db } from "@/server/db";
 import {
   conversationsRelations,
+  groups,
   hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
@@ -18,7 +18,6 @@ import {
   requestsToProperties,
   users,
 } from "@/server/db/schema";
-import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
 import {
@@ -32,7 +31,6 @@ import {
   notExists,
   sql,
 } from "drizzle-orm";
-
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
@@ -46,7 +44,14 @@ import { addProperty } from "@/server/server-utils";
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyInsertSchema.omit({ hostId: true }))
+    .input(
+      propertyInsertSchema.omit({
+        hostId: true,
+        city: true,
+        latitude: true,
+        longitude: true,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "admin" && !input.hostName) {
         throw new TRPCError({ code: "BAD_REQUEST" });
@@ -60,7 +65,11 @@ export const propertiesRouter = createTRPCRouter({
 
   // uses the hostId passed in the input instead of the admin's user id
   createForHost: roleRestrictedProcedure(["admin"])
-    .input(propertyInsertSchema.extend({ hostId: z.string() })) // make hostid required
+    .input(
+      propertyInsertSchema
+        .omit({ city: true, latitude: true, longitude: true })
+        .extend({ hostId: z.string() }),
+    ) // make hostid required
     .mutation(async ({ ctx, input }) => {
       const host = await ctx.db.query.users.findFirst({
         columns: { name: true, role: true },
@@ -74,7 +83,7 @@ export const propertiesRouter = createTRPCRouter({
         return { status: "user not a host" } as const;
       }
 
-      await ctx.db.insert(properties).values(input);
+      await addProperty({ property: input, hostId: input.hostId });
 
       return {
         status: "success",
@@ -460,10 +469,14 @@ export const propertiesRouter = createTRPCRouter({
             cr.city AS property_city,
             cr.request_id,
             r.*,
-            p.*
+            p.*,
+            u.name AS user_name,
+            u.image
           FROM city_requests cr
           JOIN ${requests} r ON cr.request_id = r.id
           JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
+          JOIN ${groups} g ON r.made_by_group_id = g.id
+          JOIN ${users} u ON g.owner_id = u.id
           ORDER BY cr.city, r.id, p.id
         `);
 
@@ -480,6 +493,7 @@ export const propertiesRouter = createTRPCRouter({
 
 
       for (const row of rawData) {
+        console.log(row);
         const property = {
           id: row.id,
           hostId: row.host_id,
@@ -526,11 +540,13 @@ export const propertiesRouter = createTRPCRouter({
           propertyType: row.property_type,
           note: row.note,
           airbnbLink: row.airbnb_link,
-          createdAt: row.request_created_at,
+          createdAt: row.created_at,
           resolvedAt: row.resolved_at,
           lat: row.lat,
           lng: row.lng,
           radius: row.radius,
+          name: row.user_name,
+          profilePic: row.image,
           // Add other request fields here
         } as Request;
 
@@ -559,17 +575,16 @@ export const propertiesRouter = createTRPCRouter({
       return organizedData;
     }
   ),
-
-  hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
-    .input(hostPropertyFormSchema)
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.db.insert(properties).values({
-        ...input,
-        hostId: ctx.user.id,
-        hostName: ctx.user.name,
-        imageUrls: input.imageUrls,
-      });
-    }),
+  // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
+  //   .input(hostPropertyFormSchema)
+  //   .mutation(async ({ ctx, input }) => {
+  //     return await ctx.db.insert(properties).values({
+  //       ...input,
+  //       hostId: ctx.user.id,
+  //       hostName: ctx.user.name,
+  //       imageUrls: input.imageUrls,
+  //     });
+  //   }),
   getBlockedDates: protectedProcedure
     .input(z.object({ propertyId: z.number() }))
     .query(async ({ ctx, input }) => {

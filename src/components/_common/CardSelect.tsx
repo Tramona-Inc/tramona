@@ -7,22 +7,18 @@ export default function CardSelect({
   text,
   onClick,
   isSelected,
-  hover,
 }: {
   children: React.ReactNode;
   title: string;
   text: string;
   onClick?: () => void;
   isSelected?: boolean;
-  hover?: boolean;
 }) {
   return (
-    <div
+    <button
       className={cn(
-        hover && "hover:border-black",
-        `flex cursor-pointer flex-row items-center gap-5 rounded-[12px] border-[2px] p-5 transition-all sm:p-6 lg:p-7 ${
-          isSelected ? "border-black" : ""
-        }`,
+        "flex flex-row items-center gap-5 rounded-xl border-2 p-5",
+        isSelected ? "border-black" : "hover:border-zinc-400",
       )}
       onClick={onClick}
     >
@@ -31,6 +27,6 @@ export default function CardSelect({
         <p className="font-semibold md:text-xl">{title}</p>
         <p className="text-sm text-muted-foreground md:text-lg">{text}</p>
       </div>
-    </div>
+    </button>
   );
 }

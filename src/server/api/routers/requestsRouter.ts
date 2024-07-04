@@ -1,4 +1,3 @@
-import { env } from "@/env";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -31,8 +30,17 @@ import {
   plural,
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
-import { and, between, count, eq, exists, gte, isNotNull, like, lte, ne, sql } from "drizzle-orm";
-import { check } from "drizzle-orm/mysql-core";
+import {
+  and,
+  between,
+  count,
+  eq,
+  exists,
+  gte,
+  isNotNull,
+  lte,
+  sql,
+} from "drizzle-orm";
 import { groupBy } from "lodash";
 import { z } from "zod";
 
@@ -254,86 +262,136 @@ export const requestsRouter = createTRPCRouter({
             groupId: madeByGroupId,
           });
 
-          const { requestId } = await tx.insert(requests).values({
-            ...req,
-            madeByGroupId,
-            requestGroupId,
-          })
-            .returning({ requestId: requests.id })
-            .then((res) => {
-              if (!res[0]) {
-                throw new Error("Failed to insert request");
-              }
-              console.log('Inserted request with ID:', res[0].requestId);
-              return res[0];
-            });
+            const { requestId } = await tx
+              .insert(requests)
+              .values({
+                ...req,
+                madeByGroupId,
+                requestGroupId,
+              })
+              .returning({ requestId: requests.id })
+              .then((res) => res[0]!);
 
-          async function isPropertyAvailable(propertyId: number, checkInDate: Date, checkOutDate: Date): Promise<boolean> {
-            const overlappingBookings = await db
-              .select()
-              .from(bookedDates)
-              .where(
-                and(eq(bookedDates.propertyId, propertyId), between(bookedDates.date, checkInDate, checkOutDate)),
-              )
-              .limit(1);
+            async function isPropertyAvailable(
+              propertyId: number,
+              checkInDate: Date,
+              checkOutDate: Date,
+            ): Promise<boolean> {
+              const overlappingBookings = await tx
+                .select()
+                .from(bookedDates)
+                .where(
+                  and(
+                    eq(bookedDates.propertyId, propertyId),
+                    between(bookedDates.date, checkInDate, checkOutDate),
+                  ),
+                )
+                .limit(1);
 
             return overlappingBookings.length === 0;
           }
 
-          async function getPropertyIdsInLocation(input: { location: string, radius: number | null, lat: number | null, lng: number | null }) {
-            const { location, radius, lat, lng } = input;
+            async function getPropertiesInLocation(input: {
+              location: string;
+              radius: number | null;
+              lat: number | null;
+              lng: number | null;
+            }) {
+              const { location, radius, lat, lng } = input;
 
             let propertyIdsInLocation;
 
-            if (radius === null || lat === null || lng === null) {
-              const coordinates = await getCoordinates(location);
-              if (!coordinates.bounds) {
-                throw new Error('Bounds are undefined');
-              }
-              const { northeast, southwest } = coordinates.bounds;
-              propertyIdsInLocation = await db.query.properties.findMany({
-                where: and(and(and(and(gte(properties.latitude, southwest.lat), lte(properties.latitude, northeast.lat)), gte(properties.longitude, southwest.lng)), lte(properties.longitude, northeast.lng)), isNotNull(properties.hostId)),
-                columns: { id: true },
-              }).then((res) => res.map((r) => r.id));
-            } else {
-              const earthRadiusMiles = 3959; // Earth's radius in miles
+              if (radius === null || lat === null || lng === null) {
+                const coordinates = await getCoordinates(location);
+                if (!coordinates.bounds) {
+                  throw new Error("Bounds are undefined");
+                }
+                const { northeast, southwest } = coordinates.bounds;
+                // Use address-based filtering
+                propertyIdsInLocation = await tx.query.properties
+                  .findMany({
+                    where: and(
+                      and(
+                        and(
+                          and(
+                            gte(properties.latitude, southwest.lat),
+                            lte(properties.latitude, northeast.lat),
+                          ),
+                          gte(properties.longitude, southwest.lng),
+                        ),
+                        lte(properties.longitude, northeast.lng),
+                      ),
+                      isNotNull(properties.hostId),
+                    ),
+                    columns: { id: true },
+                  })
+                  .then((res) => res.map((r) => r.id));
+              } else {
+                // Use radius-based filtering
+                const earthRadiusMiles = 3959; // Earth's radius in miles
 
-              propertyIdsInLocation = await db.query.properties.findMany({
-                where: and(
-                  isNotNull(properties.hostId),
-                  sql`(
-                      ${earthRadiusMiles} * acos(
-                        cos(radians(${lat})) * cos(radians(${properties.latitude})) * cos(radians(${properties.longitude}) - radians(${lng})) +
-                        sin(radians(${lat})) * sin(radians(${properties.latitude}))
-                      )
-                    ) <= ${radius}`
-                ),
-                columns: { id: true },
-              }).then((res) => res.map((r) => r.id));
-            }
+                propertyIdsInLocation = await tx.query.properties
+                  .findMany({
+                    where: and(
+                      isNotNull(properties.hostId),
+                      sql`(
+                        ${earthRadiusMiles} * acos(
+                          cos(radians(${lat})) * cos(radians(${properties.latitude})) * cos(radians(${properties.longitude}) - radians(${lng})) +
+                          sin(radians(${lat})) * sin(radians(${properties.latitude}))
+                        )
+                      ) <= ${radius}`,
+                    ),
+                    columns: { id: true },
+                  })
+                  .then((res) => res.map((r) => r.id));
+              }
 
             return propertyIdsInLocation;
           }
 
-          const propertyIdsInLocation = await getPropertyIdsInLocation({ location: input[0]!.location, radius: input[0]!.radius ?? null, lat: input[0]!.lat ?? null, lng: input[0]!.lng ?? null });
+            const propertiesInLocation = await getPropertiesInLocation({
+              location: input[0]!.location,
+              radius: input[0]!.radius ?? null,
+              lat: input[0]!.lat ?? null,
+              lng: input[0]!.lng ?? null,
+            });
 
-          for (const propertyId of propertyIdsInLocation) {
-            const isAvailable = await isPropertyAvailable(propertyId, input[0]!.checkIn, input[0]!.checkOut);
+            for (const property of propertiesInLocation) {
+              const isAvailable = await isPropertyAvailable(
+                property,
+                input[0]!.checkIn,
+                input[0]!.checkOut,
+              );
 
-            if (isAvailable) {
-              await tx.insert(requestsToProperties).values({
-                requestId: requestId,
-                propertyId: propertyId,
-              });
+              if (isAvailable) {
+                await tx.insert(requestsToProperties).values({
+                  requestId: requestId,
+                  propertyId: property,
+                });
+              }
             }
-          }
 
           return { madeByGroupId, requestGroupId };
         }),
       );
 
-      return { madeByGroupIds: results.map(r => r.madeByGroupId), results };
-    });
+        return { madeByGroupIds: results.map((r) => r.madeByGroupId), results };
+      });
+
+      // if (ctx.user.isWhatsApp) {
+      //   void sendWhatsApp({
+      //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+      //     to: ctx.user.phoneNumber!,
+      //   });
+      // } else {
+      //   void sendText({
+      //     to: ctx.user.phoneNumber!,
+      //     content:
+      //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+      //   });
+      // }
+
+      // if (env.NODE_ENV !== "production") return;
 
     const { madeByGroupIds, results } = transactionResults;
 
@@ -347,11 +405,15 @@ export const requestsRouter = createTRPCRouter({
     } else {
       const request = input[0]!;
 
-      const pricePerNight =
-        request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
-      const fmtdPrice = formatCurrency(pricePerNight);
-      const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-      const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
+        const pricePerNight =
+          request.maxTotalPrice /
+          getNumNights(request.checkIn, request.checkOut);
+        const fmtdPrice = formatCurrency(pricePerNight);
+        const fmtdDateRange = formatDateRange(
+          request.checkIn,
+          request.checkOut,
+        );
+        const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
 
       sendSlackMessage(
         `*${name} just made a request: ${request.location}*`,

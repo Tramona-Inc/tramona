@@ -33,6 +33,9 @@ export default function OnboardingFooter({
   const { mutateAsync: createHostProfile } =
     api.users.createHostProfile.useMutation();
 
+    const {data: isHost} = api.users.isHost.useQuery();
+
+
   const { mutateAsync: createProperty } = api.properties.create.useMutation({
     onSuccess: () => {
       resetSession();
@@ -47,39 +50,41 @@ export default function OnboardingFooter({
 
   async function onPressNext() {
     if (progress === 9) {
-      await createHostProfile({}).then(() =>
-        createProperty({
-          propertyType: listing.propertyType,
-          roomType: listing.spaceType,
-          maxNumGuests: listing.maxGuests,
-          numBeds: listing.beds,
-          numBedrooms: listing.bedrooms,
-          numBathrooms: listing.bathrooms,
-          address:
-            listing.location.street +
-            ", " +
-            listing.location.city +
-            ", " +
-            listing.location.apt +
-            " " +
-            listing.location.state +
-            " " +
-            listing.location.zipcode +
-            ", " +
-            listing.location.country,
-          checkInInfo: listing.checkInType,
-          checkInTime: listing.checkIn,
-          checkOutTime: listing.checkOut,
-          amenities: listing.amenities,
-          otherAmenities: listing.otherAmenities,
-          imageUrls: listing.imageUrls,
-          name: listing.title,
-          about: listing.description,
-          petsAllowed: listing.petsAllowed,
-          smokingAllowed: listing.smokingAllowed,
-          otherHouseRules: listing.otherHouseRules ?? undefined,
-        }),
-      );
+      if (!isHost) {
+        await createHostProfile({});
+      }
+
+      await createProperty({
+        propertyType: listing.propertyType,
+        roomType: listing.spaceType,
+        maxNumGuests: listing.maxGuests,
+        numBeds: listing.beds,
+        numBedrooms: listing.bedrooms,
+        numBathrooms: listing.bathrooms,
+        address:
+          listing.location.street +
+          ", " +
+          listing.location.city +
+          ", " +
+          listing.location.apt +
+          " " +
+          listing.location.state +
+          " " +
+          listing.location.zipcode +
+          ", " +
+          listing.location.country,
+        checkInInfo: listing.checkInType,
+        checkInTime: listing.checkIn,
+        checkOutTime: listing.checkOut,
+        amenities: listing.amenities,
+        otherAmenities: listing.otherAmenities,
+        imageUrls: listing.imageUrls,
+        name: listing.title,
+        about: listing.description,
+        petsAllowed: listing.petsAllowed,
+        smokingAllowed: listing.smokingAllowed,
+        otherHouseRules: listing.otherHouseRules ?? undefined,
+      });
     } else {
       if (isEdit) {
         if (isForm) {

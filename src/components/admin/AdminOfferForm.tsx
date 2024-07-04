@@ -15,14 +15,15 @@ import { capitalize, plural } from "@/utils/utils";
 import {
   optional,
   zodInteger,
+  zodMMDDYYYY,
   zodNumber,
   zodString,
   zodUrl,
 } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+import { number, z } from "zod";
 import TagSelect from "../_common/TagSelect";
 import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 import {
@@ -61,6 +62,8 @@ const formSchema = z.object({
   numBedrooms: zodInteger({ min: 1 }),
   numBathrooms: zodInteger({ min: 1 }),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
+  checkInDate: optional(zodString()),
+  checkOutDate: optional(zodString()),
   originalNightlyPriceUSD: zodNumber(),
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
@@ -88,10 +91,12 @@ export default function AdminOfferForm({
   offer,
 }: {
   afterSubmit?: () => void;
-  request: Request;
   offer?: OfferWithProperty;
+  request?: Request;
 }) {
-  const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+  let numberOfNights = request
+    ? getNumNights(request.checkIn, request.checkOut)
+    : 1;
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
     : 1;
@@ -142,15 +147,19 @@ export default function AdminOfferForm({
     },
   });
 
+  const { checkInDate, checkOutDate } = form.watch();
+
+  !request && (numberOfNights = getNumNights(checkInDate!, checkOutDate!));
+
   const imageUrlInputs = useFieldArray({
     name: "imageUrls",
     control: form.control,
   });
 
-  const updatePropertiesMutation = api.properties.update.useMutation();
-  const updateOffersMutation = api.offers.update.useMutation();
-  const createPropertiesMutation = api.properties.create.useMutation();
-  const createOffersMutation = api.offers.create.useMutation();
+  const updatePropertyMutation = api.properties.update.useMutation();
+  const updateOfferMutation = api.offers.update.useMutation();
+  const createPropertyMutation = api.properties.create.useMutation();
+  const createOfferMutation = api.offers.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
@@ -199,23 +208,23 @@ export default function AdminOfferForm({
     if (offer) {
       const newOffer = {
         id: offer.id,
-        requestId: request.id,
+        requestId: request ? request.id : null,
         propertyId: offer.property.id,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
       };
 
       await Promise.all([
-        updatePropertiesMutation.mutateAsync({
+        updatePropertyMutation.mutateAsync({
           ...newProperty,
           id: offer.property.id,
           isPrivate: true,
         }),
-        updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
+        updateOfferMutation.mutateAsync(newOffer).catch(() => errorToast()),
       ]);
       // ...otherwise its a "create offer" form so make a new property and offer
     } else {
-      const propertyId = await createPropertiesMutation
+      const propertyId = await createPropertyMutation
         .mutateAsync({ ...newProperty, isPrivate: true })
         .catch(() => errorToast());
 
@@ -227,24 +236,21 @@ export default function AdminOfferForm({
       }
 
       const newOffer = {
-        requestId: request.id,
+        requestId: request ? request.id : null,
         propertyId,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
-        checkIn: request.checkIn,
-        checkOut: request.checkOut,
-        groupId: request.madeByGroupId,
+        checkIn: request ? request.checkIn : new Date(checkInDate!),
+        checkOut: request ? request.checkOut : new Date(checkOutDate!),
       };
 
-      await createOffersMutation
-        .mutateAsync(newOffer)
-        .catch(() => errorToast());
+      await createOfferMutation.mutateAsync(newOffer).catch(() => errorToast());
     }
 
     //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
-    const travelers = await getMembersMutation.mutateAsync(
-      request.madeByGroupId,
-    );
+    const travelers = request
+      ? await getMembersMutation.mutateAsync(request.madeByGroupId)
+      : [];
 
     for (const traveler of travelers) {
       if (traveler.phoneNumber) {
@@ -256,12 +262,12 @@ export default function AdminOfferForm({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `Tramona: You have a new match for a request in your Tramona account!\nTramona price: $${data.offeredNightlyPriceUSD}, Airbnb price: $${data.originalNightlyPriceUSD}.\n\nCheck it out now!`
+            msg: `Tramona: You have a new match for a request in your Tramona account!\nTramona price: $${data.offeredNightlyPriceUSD}, Airbnb price: $${data.originalNightlyPriceUSD}.\n\nCheck it out now!`,
           });
 
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `https://www.tramona.com/requests/${request.id}`,
+            msg: `https://www.tramona.com/requests/${request ? request.id : ""}`,
           });
         }
       }
@@ -270,8 +276,8 @@ export default function AdminOfferForm({
     successfulAdminOfferToast({
       propertyName: newProperty.name,
       totalPrice,
-      checkIn: request.checkIn,
-      checkOut: request.checkOut,
+      checkIn: request ? request.checkIn : new Date(checkInDate!),
+      checkOut: request ? request.checkOut : new Date(checkOutDate!),
       isUpdate: !!offer,
     });
 
@@ -290,6 +296,8 @@ export default function AdminOfferForm({
   return (
     <Form {...form}>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
+      {JSON.stringify(form.formState.errors, null, 2)} to check for form state
+      errors
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-4 md:grid-cols-2"
@@ -354,6 +362,38 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
+
+        {!request && (
+          <>
+            <FormField
+              control={form.control}
+              name="checkInDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Check In Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="date" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="checkOutDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Check Out Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="date" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
 
         <FormField
           control={form.control}

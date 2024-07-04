@@ -8,7 +8,7 @@ export const sessions = pgTable(
     userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
+    expires: timestamp("expires", { withTimezone: true }).notNull(),
   },
   (t) => ({
     userIdIdx: index().on(t.userId),

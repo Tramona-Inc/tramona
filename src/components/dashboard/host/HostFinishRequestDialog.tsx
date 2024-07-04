@@ -1,11 +1,13 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-} from "@/components/ui/dialog";
+/* HostFinishRequestDialog.tsx */
+import { Dialog, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { type DetailedRequest } from "@/components/requests/RequestCard";
-
+import { type HostDashboardRequest } from "@/components/requests/RequestCard";
+import {
+  EmptyState,
+  EmptyStateDescription,
+  EmptyStateTitle,
+} from "@/components/ui/empty-state";
+import { CheckCircleIcon } from "lucide-react"; // Assuming you're using Lucide icons
 
 export default function HostFinishRequestDialog({
   open,
@@ -14,15 +16,22 @@ export default function HostFinishRequestDialog({
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  request: DetailedRequest;
+  request: HostDashboardRequest;
 }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-full max-w-3xl space-y-4 p-6">
-        We&apos;ve sent your offer to the {request.location}. They have 24 hours to respond.
-
-        <DialogFooter >
-          <Button onClick={() => setOpen(false)}>Done</Button>
+      <DialogContent className="max-w-lg p-6 space-y-4">
+        <DialogClose className="absolute top-2 right-2" />
+        <EmptyState icon={CheckCircleIcon} className="mt-4 gap-4">
+          <EmptyStateTitle className="text-center">Success!</EmptyStateTitle>
+          <EmptyStateDescription className="text-center text-muted-foreground">
+            We&apos;ve sent your offer for {request.location} to {request.name}. They have 24 hours to respond.
+          </EmptyStateDescription>
+        </EmptyState>
+        <DialogFooter className="pt-6">
+          <Button onClick={() => setOpen(false)} className="w-full" variant={"greenPrimary"}>
+            Done
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

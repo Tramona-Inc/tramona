@@ -23,7 +23,9 @@ export const hostProfiles = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     // type: hostTypeEnum("type").notNull().default("other"),
     // profileUrl: varchar("profile_url", { length: 1000 }),
-    becameHostAt: timestamp("became_host_at").notNull().defaultNow(),
+    becameHostAt: timestamp("became_host_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     stripeAccountId: varchar("stripeAccountId"),
     chargesEnabled: boolean("charges_enabled").default(false),
     hostawayApiKey: varchar("hostaway_api_key"),
@@ -39,4 +41,3 @@ export const hostProfiles = pgTable(
 );
 
 export type HostProfile = typeof hostProfiles.$inferSelect;
-

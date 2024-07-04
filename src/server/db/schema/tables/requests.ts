@@ -37,8 +37,10 @@ export const requests = pgTable(
     propertyType: propertyTypeEnum("property_type"),
     note: varchar("note", { length: 255 }),
     airbnbLink: varchar("airbnb_link", { length: 512 }),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    resolvedAt: timestamp("resolved_at"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     lat: doublePrecision("lat"),
     lng: doublePrecision("lng"),
     radius: doublePrecision("radius"),
@@ -81,7 +83,9 @@ export const requestGroups = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     hasApproved: boolean("has_approved").default(false).notNull(),
-    confirmationSentAt: timestamp("confirmation_sent_at")
+    confirmationSentAt: timestamp("confirmation_sent_at", {
+      withTimezone: true,
+    })
       .notNull()
       .defaultNow(),
     haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),

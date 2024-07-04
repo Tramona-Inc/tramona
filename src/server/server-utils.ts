@@ -4,16 +4,20 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, between, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
 import {
-  NewProperty,
+  type NewProperty,
+  Request,
   type User,
+  bookedDates,
   groupInvites,
   groupMembers,
   groups,
   hostTeamInvites,
   hostTeamMembers,
   properties,
+  requests,
+  requestsToProperties,
   users,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
@@ -224,24 +228,120 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
 }
 
 export async function addProperty({
-  hostId, property,
+  hostId,
+  property,
 }: {
-  hostId: string | null;
-  property: Omit<NewProperty, "id" | "city">;
+  hostId?: string | null;
+  property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
+    latitude?: number;
+    longitude?: number;
+  };
 }) {
-  if ((!property.latitude || !property.longitude) && !property.address) {
+  let lat = property.latitude;
+  let lng = property.longitude;
+
+  if (!lat || !lng) {
     const { location } = await getCoordinates(property.address);
     if (!location) throw new Error("Could not get coordinates for address");
-    property.latitude = location.lat;
-    property.longitude = location.lng;
+    lat = location.lat;
+    lng = location.lng;
   }
+  const city = await getCity({lat, lng});
 
-  const [insertedProperty] = await db.insert(properties).values({
-    hostId,
-    ...property,
-    city: await getCity({ lat: property.latitude, lng: property.longitude }),
+  const [insertedProperty] = await db
+    .insert(properties)
+    .values({
+      ...property,
+      hostId,
+      latitude: lat,
+      longitude: lng,
+      city: city,
+    })
+    .returning({ id: properties.id });
 
-  }).returning({id: properties.id});
+    async function isDateAvailable(propertyId: number, checkInDate: Date, checkOutDate: Date): Promise<boolean> {
+      const overlappingBookings = await db
+        .select()
+        .from(bookedDates)
+        .where(
+          and(
+            eq(bookedDates.propertyId, propertyId),
+            between(bookedDates.date, checkInDate, checkOutDate),
+          ),
+        )
+        .limit(1);
 
-  return insertedProperty!.id;
-}
+      return overlappingBookings.length === 0;
+    }
+
+    async function getRequestsInBounds({ lat, lng }: { lat: number, lng: number }) {
+
+        const coordinates = await getCoordinates(city);
+        console.log('coordinates:', coordinates);
+        if (!coordinates.bounds) {
+          throw new Error("Bounds are undefined");
+        }
+        const { northeast, southwest } = coordinates.bounds;
+        // Use address-based filtering
+        if (requests.lat === null || requests.lng === null) {
+          const requestCoords = await getCoordinates(requests.location);
+          
+        const requestIdsInBounds = await db.query.requests
+          .findMany({
+            where: and(
+              and(
+                and(
+                  and(
+                    gte(requests.lat, southwest.lat),
+                    lte(requests.lat, northeast.lat),
+                  ),
+                  gte(requests.lng, southwest.lng),
+                ),
+                lte(requests.lng, northeast.lng),
+              ),
+              isNull(requests.resolvedAt),
+            ),
+            columns: { id: true },
+          })
+          .then((res) => res.map((r) => r.id));
+
+      return requestIdsInBounds;
+    }
+
+    // Get all requests in the same bounds
+    const requestIdsInBounds = await getRequestsInBounds({
+      lat: lat,
+      lng: lng,
+    });
+
+    // Filter requests to only include those with available dates
+    const validRequests = [];
+
+    console.log('requestIdsInBounds:', requestIdsInBounds);
+
+    for (const requestId of requestIdsInBounds) {
+      const request: Request = await db.query.requests.findOne({
+        where: eq(requests.id, requestId),
+        columns: { id: true, checkIn: true, checkOut: true },
+      });
+
+      console.log(insertedProperty.id, request.checkIn, request.checkOut);
+
+      if (request) {
+        const isAvailable = await isDateAvailable(insertedProperty?.id, request.checkIn, request.checkOut);
+        if (isAvailable) {
+          validRequests.push(request.id);
+        }
+      }
+    }
+
+    console.log('valid:', validRequests);
+
+    // Insert valid requests into requestsToProperties
+    if (validRequests.length > 0) {
+      await db.insert(requestsToProperties)
+        .values(validRequests.map((requestId) => ({ requestId, propertyId: insertedProperty!.id })));
+    }
+
+    return insertedProperty!.id;
+  }

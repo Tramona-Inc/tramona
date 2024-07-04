@@ -3,7 +3,7 @@ import { api } from "@/utils/api";
 import { useRouter } from "next/router";
 import HostRequestDialog from "./HostRequestDialog";
 import RequestCard, {
-  type DetailedRequest,
+  type HostDashboardRequest,
 } from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -18,7 +18,7 @@ export default function HostRequests() {
   const router = useRouter();
   const { city } = router.query;
   const [selectedRequest, setSelectedRequest] =
-    useState<DetailedRequest | null>(null);
+    useState<HostDashboardRequest | null>(null);
   const [properties, setProperties] = useState<Property[] | null>(null);
   const [step, setStep] = useState(0);
 
@@ -33,7 +33,7 @@ export default function HostRequests() {
         <div className="grid gap-4 md:grid-cols-2">
           {cityData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
-              <RequestCard request={requestData.request} isAdminDashboard>
+              <RequestCard request={requestData.request} type="host">
                 <Button variant="darkOutline" className="mt-2">
                   Reject
                 </Button>
@@ -77,7 +77,7 @@ export default function HostRequests() {
         />
       )}
       {step == 2 && (
-        <HostFinishRequestDialog request={request} open={dialogOpen} setOpen={setDialogOpen} />
+        <HostFinishRequestDialog request={selectedRequest} open={dialogOpen} setOpen={setDialogOpen} />
       )}
     </div>
   );
