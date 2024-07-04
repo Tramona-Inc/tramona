@@ -345,7 +345,7 @@ export default function Checkout({
           </div> */}
         </div>
         {/* TODO: make this sticky */}
-        <div className="hidden space-y-2 md:block md:pl-10 xl:pl-20">
+        <div className="sticky top-24 hidden h-fit space-y-2 md:block md:pl-10 xl:pl-20">
           <div className="space-y-10">
             <CheckoutSummary />
             <CustomerReview />
