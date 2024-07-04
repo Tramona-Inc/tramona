@@ -4,9 +4,9 @@ import {
   type Conversation,
 } from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
-import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
+import { formatRelative } from "date-fns";
 
 export function SidebarConversation({
   conversation,
@@ -50,31 +50,33 @@ export function SidebarConversation({
   return (
     <button
       className={cn(
-        "relative flex min-h-24 w-full items-center gap-4 border-b p-4 text-left",
-        isSelected ? "bg-zinc-100" : "hover:bg-zinc-100",
+        "relative flex min-h-20 w-full gap-4 rounded-lg p-2 text-left",
+        isSelected ? "bg-zinc-100" : "hover:bg-zinc-50",
       )}
       onClick={() => handleSelected()}
     >
-      {isSelected && (
-        <motion.div
-          layoutId="messages-sidebar-indicator"
-          transition={{ duration: 0.1, ease: "circOut" }}
-          className="absolute inset-y-0 right-0 border-[3px] border-transparent border-r-black"
-        />
-      )}
       <UserAvatar
-        email={participants[0]?.email ?? ""}
-        image={participants[0]?.image ?? ""}
-        name={participants[0]?.name ?? ""}
+        email={participants[0]?.email}
+        image={participants[0]?.image}
+        name={participants[0]?.name}
       />
 
-      <div>
-        <p className="font-semibold">{displayParticipants}</p>
+      <div className="flex-1">
+        <div className="flex">
+          <p className="line-clamp-1 flex-1 overflow-clip font-semibold">
+            {displayParticipants}
+          </p>
+          {messages[0] && (
+            <p className="text-xs text-muted-foreground">
+              {formatRelative(messages[0].createdAt, new Date())}
+            </p>
+          )}
+        </div>
         <p className="text-sm font-semibold">{name}</p>
-        <p className="line-clamp-2 text-sm text-muted-foreground">
-          {messages.length > 0 &&
-            !messages[0]?.read &&
-            messages[0]?.userId !== session?.user.id && (
+        <p className="line-clamp-2 text-xs text-muted-foreground">
+          {messages[0] &&
+            !messages[0].read &&
+            messages[0].userId !== session?.user.id && (
               <div className="mr-1 inline-block size-2 rounded-full bg-blue-500" />
             )}
           <span className="font-semibold">

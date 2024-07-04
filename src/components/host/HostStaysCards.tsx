@@ -1,37 +1,24 @@
 import Image from "next/image";
 import { Button } from "../ui/button";
+import { SkeletonText } from "@/components/ui/skeleton";
 
-export default function HostStaysCards() {
-  // this component would take in stays info from the db
+import { formatDateRange } from "@/utils/utils";
 
-  const stays = [
-    // Dummy data
-    {
-      propertyImg: "/assets/images/footer-img.png",
-      propertyName:
-        "Modern Apartment with a view and other stuff words words title title title",
-      propertyLocation: "New York, NY",
-      checkIn: "Apr 25",
-      checkOut: "Apr 30",
-      nightlyCost: 150,
-      totalCost: 600,
-      guests: ["John Doe", "Jane Doe"],
-    },
-    {
-      propertyImg: "/assets/images/footer-img.png",
-      propertyName: "Modern Apartment with a view",
-      propertyLocation: "New York, NY",
-      checkIn: "Apr 25",
-      checkOut: "Apr 30",
-      nightlyCost: 150,
-      totalCost: 600,
-      guests: ["John Doe", "Jane Doe"],
-    },
-  ];
+type Stay = {
+  propertyImg: string;
+  propertyName: string;
+  propertyLocation: string;
+  checkIn: Date;
+  checkOut: Date;
+  nightlyCost: number;
+  totalCost: number;
+  guests: string[];
+};
 
+export default function HostStaysCards(trips: Stay[]) {
   return (
     <div className="mb-36 space-y-6">
-      {stays.map((stay, index) => (
+      {trips.length > 0 ? ( trips.map((stay, index) => (
         <>
           <div
             className="grid grid-cols-1 items-center gap-4 overflow-hidden rounded-xl border md:grid-cols-7 md:rounded-2xl"
@@ -52,7 +39,7 @@ export default function HostStaysCards() {
             </div>
             <div className="px-4 md:px-0">
               <p className="font-bold">
-                {stay.checkIn} - {stay.checkOut}
+                {formatDateRange(stay.checkIn, stay.checkOut)}
               </p>
               <p className=" text-sm text-blue-600">Checks out in 2 days</p>
             </div>
@@ -82,7 +69,11 @@ export default function HostStaysCards() {
             Message
           </Button>
         </>
-      ))}
+      ))): (
+        <>
+          <SkeletonText />
+        </>
+      )}
     </div>
   );
 }

@@ -1,7 +1,37 @@
+import { api } from "@/utils/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import HostStaysCards from "./HostStaysCards";
 
 export default function HostStays() {
+  const { data: allTrips } = api.trips.getHostTrips.useQuery();
+
+  console.log(allTrips);
+  const currentDate = new Date();
+  const twoWeeksFromNow = new Date(currentDate);
+  twoWeeksFromNow.setDate(currentDate.getDate() + 14);
+
+  // Upcoming trips within the next 2 weeks
+  const upcomingTrips = allTrips?.filter(
+    (trip) => trip.checkIn > currentDate && trip.checkIn <= twoWeeksFromNow,
+  );
+
+  // Accepted trips are those with offer and bid, starting after 2 weeks from now
+  const acceptedTrips = allTrips?.filter(
+    (trip) => trip.checkIn > twoWeeksFromNow,
+  );
+
+  // Trips that are checking out today
+  const checkingOutTrips = allTrips?.filter(
+    (trip) => trip.checkOut.toDateString() === currentDate.toDateString(),
+  );
+
+  // Past trips that have already ended
+  const historyTrips = allTrips?.filter((trip) => trip.checkOut < currentDate);
+
+  // Currently hosting trips including those ending today
+  const currentlyHostingTrips = allTrips?.filter(
+    (trip) => trip.checkIn <= currentDate && trip.checkOut >= currentDate,
+  );
   return (
     <div>
       <h1 className="mb-2 text-3xl font-bold md:mb-10 md:text-4xl">Stays</h1>
@@ -19,19 +49,19 @@ export default function HostStays() {
           </div>
         </TabsList>
         <TabsContent value="currently hosting">
-          <HostStaysCards />
+          <HostStaysCards trips={currentlyHostingTrips}/>
         </TabsContent>
         <TabsContent value="upcoming">
-          <HostStaysCards />
+          <HostStaysCards trips={upcomingTrips} />
         </TabsContent>
         <TabsContent value="accepted">
-          <HostStaysCards />
+          <HostStaysCards trips={acceptedTrips} />
         </TabsContent>
         <TabsContent value="checking out">
-          <HostStaysCards />
+          <HostStaysCards trips={checkingOutTrips}/>
         </TabsContent>
         <TabsContent value="history">
-          <HostStaysCards />
+          <HostStaysCards trips={historyTrips}/>
         </TabsContent>
       </Tabs>
     </div>

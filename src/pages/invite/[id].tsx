@@ -4,10 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useInviteStore } from "@/utils/store/inviteLink";
 import { NextSeo } from "next-seo";
-import { GetServerSideProps } from "next";
-import { db } from "@/server/db";
-
-
+import { toast } from "@/components/ui/use-toast";
 
 export default function Invite() {
   const router = useRouter();
@@ -19,10 +16,10 @@ export default function Invite() {
     }
   }, [inviteLinkId, setInviteLinkId]);
 
-  useSession({required: true});
+  useSession({ required: true });
 
   // how to get this to not hit, unless it needs to
-  const { mutate: inviteUser } = api.groups.inviteUserById.useMutation();
+  const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
 
   useEffect(() => {
     if (inviteLinkId) {
@@ -30,6 +27,7 @@ export default function Invite() {
         { inviteLinkId },
         {
           onSuccess: () => {
+            toast({ title: "Successfully joined the group!" });
             void router.push(`/requests`);
           },
         },
@@ -40,17 +38,17 @@ export default function Invite() {
   return (
     <div>
       <NextSeo
-        title="Invite to group 1"
-        description="Invite link to join group 1"
+        title="Invite to group"
+        description="Invite link to join group"
         canonical={`https://www.tramona.com/invite/${inviteLinkId}`}
         openGraph={{
           url: `https://www.tramona.com/invite/${inviteLinkId}`,
           type: "website",
-          title: "Invite to group 1",
-          description: "Invite link to join group 1",
+          title: "Invite to group",
+          description: "Invite link to join group",
           images: [
             {
-              url: "https://eb50-2601-600-8e81-3180-a582-a67c-29a5-6c49.ngrok-free.app/api/og?cover=https://a0.muscache.com/im/pictures/prohost-api/Hosting-1162477721754661798/original/0c00ec02-540d-4d24-ba50-638ccd676340.jpeg?im_w=720",
+              url: "tramona.com/api/og?cover=https://a0.muscache.com/im/pictures/prohost-api/Hosting-1162477721754661798/original/0c00ec02-540d-4d24-ba50-638ccd676340.jpeg?im_w=720",
               width: 900,
               height: 800,
               alt: "Og Image Alt Second",
@@ -60,9 +58,9 @@ export default function Invite() {
           site_name: "Tramona",
         }}
       />
-      <h1>invite</h1>
+      <div className="grid h-screen place-items-center">
+        <h1 className="text-lg text-muted-foreground">Joining group...</h1>
+      </div>
     </div>
   );
 }
-
-

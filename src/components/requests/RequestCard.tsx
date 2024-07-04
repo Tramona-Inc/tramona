@@ -5,7 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
-import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
+import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,

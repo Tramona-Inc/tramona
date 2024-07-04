@@ -1,7 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { groupMembers, trips } from "@/server/db/schema";
+import { groupMembers, properties, trips } from "@/server/db/schema";
 import { getCoordinates } from "@/server/google-maps";
+import { getNumNights } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists } from "drizzle-orm";
 import { z } from "zod";
@@ -29,6 +30,66 @@ export const tripsRouter = createTRPCRouter({
         },
       },
     });
+  }),
+
+  getHostTrips: protectedProcedure.query(async ({ ctx }) => {
+    const trips = await db.query.trips.findMany({
+      where: and(
+        exists(
+          db
+            .select()
+            .from(properties)
+            .where(
+              eq(properties.hostId, ctx.user.id)
+            ),
+        ),
+      ),
+      with: {
+        property: {
+          columns: {
+            name: true,
+            imageUrls: true,
+          },
+          with: {
+            host: {
+              columns: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        offer: {
+          columns: {
+            totalPrice: true,
+            checkIn: true,
+            checkOut: true,
+          },
+          with : {
+            request: {
+              columns: {
+                location: true,
+                numGuests: true,
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const transformedTrips = trips.map((trip) => {
+      return {
+        propertyImg: trip.property.imageUrls?.[0] ?? "/default-img.png", // Fallback image if none provided
+        propertyName: trip.property.name,
+        propertyLocation: trip.offer?.request?.location ?? "Unknown location",
+        checkIn: trip.offer?.checkIn,
+        checkOut: trip.offer?.checkOut,
+        nightlyCost: trip.offer?.totalPrice / (getNumNights(trip.offer?.checkIn, trips.offer?.checkOut)), // Calculate nightly cost
+        totalCost: trip.offer?.totalPrice,
+        guests: Array(trip.offer?.request?.numGuests).fill("Guest"), // Placeholder for guests
+      };
+    });
+    return transformedTrips;
   }),
 
   getMyTripsPageDetails: protectedProcedure
