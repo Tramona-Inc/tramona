@@ -756,4 +756,12 @@ export const requestsRouter = createTRPCRouter({
         propertyLinks: deserializedPropertyLinks,
       };
     }),
+
+    rejectRequest: protectedProcedure
+    .input(z.object({ requestId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(requestsToProperties)
+        .where(eq(requestsToProperties.requestId, input.requestId));
+    }),
 });

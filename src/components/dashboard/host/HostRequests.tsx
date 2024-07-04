@@ -27,6 +27,10 @@ export default function HostRequests() {
 
   const cityData = requestsWithProperties?.find((p) => p.city === city);
 
+  const {mutate: rejectRequest} = api.requests.rejectRequest.useMutation();
+
+
+
   return (
     <div className="p-4">
       {cityData ? (
@@ -34,7 +38,9 @@ export default function HostRequests() {
           {cityData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
-                <Button variant="darkOutline" className="mt-2">
+                <Button variant="darkOutline" className="mt-2" onClick={() => {
+                  rejectRequest(requestData.request.id);
+                }}>
                   Reject
                 </Button>
                 <Button
