@@ -59,7 +59,7 @@ export default function ChatInput({
     if (session) {
       const newMessage: ChatMessageType = {
         id: nanoid(),
-        createdAt: new Date().toISOString().slice(0, -1),
+        createdAt: new Date().toISOString(),
         conversationId: conversationId,
         userId: session.user.id,
         message: values.message,

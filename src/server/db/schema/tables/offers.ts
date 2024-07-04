@@ -22,9 +22,11 @@ export const offers = pgTable(
       .notNull()
       .references(() => properties.id, { onDelete: "cascade" }),
     totalPrice: integer("total_price").notNull(), // in cents
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    madePublicAt: timestamp("made_public_at"),
-    acceptedAt: timestamp("accepted_at"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    madePublicAt: timestamp("made_public_at", { withTimezone: true }),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
     paymentIntentId: varchar("payment_intent_id"),
     checkoutSessionId: varchar("checkout_session_id"),
     tramonaFee: integer("tramona_fee").notNull().default(0), // in cents

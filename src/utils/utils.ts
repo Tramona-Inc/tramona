@@ -54,8 +54,11 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * ```
  */
 export function formatCurrency(cents: number, { round = false } = {}) {
-  if (cents % 100 === 0 || round) return `$${Math.round(cents / 100)}`;
-  return `$${(cents / 100).toFixed(2)}`;
+  const dollars = round ? Math.round(cents / 100) : cents / 100;
+  return dollars.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 }
 
 /**
@@ -132,7 +135,7 @@ export function formatDateMonthDayYear(date: Date) {
 //   return formatDateRange(fromDate, toDate);
 // }
 
-// todo fix hacky
+// TODO: fix hacky
 export function getNumNights(from: Date | string, to: Date | string) {
   return Math.round(
     (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),

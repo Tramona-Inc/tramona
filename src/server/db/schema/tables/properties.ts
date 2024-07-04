@@ -236,7 +236,9 @@ export const properties = pgTable("properties", {
   mapScreenshot: text("map_screenshot"),
   cancellationPolicy: text("cancellation_policy"),
 
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
   // priceRestriction: integer("price_restriction"),
   propertyStatus: propertyStatusEnum("property_status").default("Listed"),

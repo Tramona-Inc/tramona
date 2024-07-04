@@ -10,6 +10,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
+import { cn } from "@/utils/utils";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -43,15 +44,29 @@ function MessageDisplay() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <div className="grid h-screen-minus-header-n-footer grid-cols-1 max-lg:border-x md:grid-cols-8">
-      <MessagesSidebar
-        selectedConversation={selectedConversation}
-        setSelected={selectConversation}
-      />
-      <MessagesContent
-        selectedConversation={selectedConversation}
-        setSelected={selectConversation}
-      />
+    <div className="flex h-screen-minus-header-n-footer divide-x">
+      <div
+        className={cn(
+          "w-full md:w-96",
+          selectedConversation && "hidden md:block",
+        )}
+      >
+        <MessagesSidebar
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
+        />
+      </div>
+      <div
+        className={cn(
+          "flex h-full flex-1 items-center justify-center",
+          !selectedConversation && "hidden md:flex",
+        )}
+      >
+        <MessagesContent
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
+        />
+      </div>
     </div>
   );
 }
