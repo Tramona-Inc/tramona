@@ -26,6 +26,7 @@ import { z } from "zod";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { TAX_PERCENTAGE } from "@/utils/constants";
+import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -33,6 +34,7 @@ export default function Checkout({
   offer: OfferWithDetails;
 }) {
   const router = useRouter();
+  const chatWithAdmin = useChatWithAdmin();
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -334,30 +336,38 @@ export default function Checkout({
           <Separator className="my-6" />
           <TermsAndSubmit />
           <CustomerReview />
-          {/* TODO: add endpoint to chat with host */}
-          {/* <div className="mt-4">
+          <div className="mt-4">
             <p className="text-sm">
               Questions?{" "}
               <span className="text-teal-900 underline">
-                <Link href="/">Chat with host</Link>
+                <button
+                  onClick={() => chatWithAdmin()}
+                  className="text-blue-600 underline underline-offset-2"
+                >
+                  Chat with host
+                </button>
               </span>
             </p>
-          </div> */}
+          </div>
         </div>
-        {/* TODO: make this sticky */}
         <div className="sticky top-24 hidden h-fit space-y-2 md:block md:pl-10 xl:pl-20">
           <div className="space-y-10">
             <CheckoutSummary />
             <CustomerReview />
           </div>
-          {/* <div>
+          <div>
             <p className="text-sm">
               Questions?{" "}
               <span className="text-teal-900 underline">
-                <Link href="/">Chat with host</Link>
+                <button
+                  onClick={() => chatWithAdmin()}
+                  className="text-blue-600 underline underline-offset-2"
+                >
+                  Chat with host
+                </button>
               </span>
             </p>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
