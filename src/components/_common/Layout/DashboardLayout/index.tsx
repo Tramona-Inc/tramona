@@ -3,16 +3,20 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import { useSession } from "next-auth/react";
 import Header from "../../Header";
 import Footer from "../DesktopFooter";
-import { Button } from "@/components/ui/button";
-import { Session, Chatbox } from '@talkjs/react'
 import { useIsMd } from "@/utils/utils";
-import {MessageCircleMore} from 'lucide-react'
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { useMediaQuery } from "@/components/_utils/useMediaQuery";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import MessagesPopover from "@/components/messages/MessagesPopover";
+
+
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
   type: "admin" | "host" | "guest" | "unlogged";
 };
+
 
 export default function DashboardLayout({
   children,
@@ -20,6 +24,14 @@ export default function DashboardLayout({
 }: DashboardLayoutProps) {
   const { data: session } = useSession();
   const isMd = useIsMd();
+  const isMobile = useMediaQuery("(max-width: 684px)")
+  const formSchema = z.object({
+    message: z.string(),
+  })
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema)
+  })
   return (
     <>
       <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
@@ -36,23 +48,9 @@ export default function DashboardLayout({
           ) : (
             <MobileNav type={"unlogged"} />
           )}
-          <div className="fixed bottom-10 right-4 z-50">
-            <Popover>
-              <PopoverTrigger asChild>
-            <Button className="border rounded-full p-4 w-18 h-18">
-              <MessageCircleMore />
-            </Button>
-              </PopoverTrigger>  
-              <PopoverContent align="start" className="relative w-[22rem] h-[40rem]">
-              <Session appId="tIu0KQUE" userId="sample_user_alice">
-                <Chatbox
-                  conversationId="sample_conversation"
-                  className="w-full h-full"
-                ></Chatbox>
-              </Session>
-              </PopoverContent>            
-            </Popover>
-          </div>
+          {!isMobile && 
+          <MessagesPopover session={session}/>
+          }
           {isMd && <Footer />}
         </div>
       </div>

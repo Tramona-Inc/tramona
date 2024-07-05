@@ -1,3 +1,4 @@
+import { icon } from "leaflet";
 import {
   ArrowLeftRight,
   BadgePercent,

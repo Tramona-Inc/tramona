@@ -67,15 +67,15 @@ export default function HamburgerMenuMobile({
          </div>
        </DropdownMenuTrigger>
         {/* <DropdownMenuPortal container={document.body}> */}
-         <DropdownMenuContent className="fixed -top-[3rem] -right-12 w-screen h-screen bg-white z-50 p-4 overflow-y-auto">
-        <DropdownMenuLabel className="text-xl font-bold text-teal-900">
-          <div className="flex items-center gap-3">
-            <button
-              className="rounded-full border border-teal-900 bg-zinc-200 p-2"
-              onClick={() => setOpen(!open)}
-            >
+        <DropdownMenuContent className="fixed -top-[3rem] -right-12 w-screen h-screen bg-white z-50 p-4 overflow-y-auto">
+          <DropdownMenuLabel className="text-xl font-bold text-teal-900">
+            <div className="flex items-center gap-3">
+              <button
+                className="rounded-full border border-teal-900 bg-zinc-200 p-2"
+                onClick={() => setOpen(!open)}
+              >
               <X size={20} />
-            </button>
+              </button>
             <h3>Tramona</h3>
           </div>
         </DropdownMenuLabel>
