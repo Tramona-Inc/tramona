@@ -3,7 +3,7 @@ import { Card, CardContent } from "../ui/card";
 import {
   formatCurrency,
   formatDateRange,
-  getElapsedTime,
+  getNumNights,
   getDisplayedName,
   plural,
 } from "@/utils/utils";
@@ -18,7 +18,7 @@ export default function FeedRequestCard({
   request: RequestCardDataType;
 }>) {
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-  const fmtdPrice = formatCurrency(request.maxTotalPrice);
+  const fmtdPrice = formatCurrency(request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut)) ;
 
   const userName = request.madeByGroup.owner.name ?? "";
   const userImage = request.madeByGroup.owner.image ?? "";
