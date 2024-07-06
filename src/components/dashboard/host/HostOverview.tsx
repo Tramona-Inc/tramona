@@ -18,7 +18,7 @@ export default function HostOverview() {
       <div className="flex flex-col gap-4 lg:flex-row">
         <HostFinancesOverview className="contents flex-1 lg:flex" />
         <HostFinancesOverview className="contents basis-1/4 lg:flex" />
-        <HostMessagesOverview className="contents basis-1/4 lg:flex" />
+        <HostMessagesOverview className="contents h-96 basis-1/4 lg:flex" />
       </div>
     </div>
   );

@@ -1,8 +1,4 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowRightIcon } from "@radix-ui/react-icons";
-import Link from "next/link";
-import { EditIcon } from "lucide-react";
 import { api } from "@/utils/api";
 
 export default function HostPropertiesOverview({

@@ -98,11 +98,13 @@ export function MessageConversation({
 export type SidebarProps = {
   selectedConversation: Conversation | null;
   setSelected: (arg0: Conversation) => void;
+  isOverview?: boolean;
 };
 
 export default function MessagesSidebar({
   selectedConversation,
   setSelected,
+  isOverview,
 }: SidebarProps) {
   // Fetch only once on mount
   const { data: fetchedConversations, isLoading } =
@@ -202,9 +204,11 @@ export default function MessagesSidebar({
 
   return (
     <div>
-      <div className="flex h-[73px] items-center border-b p-4">
-        <h1 className="text-2xl font-bold">Messages</h1>
-      </div>
+      {!isOverview && (
+        <div className="flex h-[73px] items-center border-b p-4">
+          <h1 className="text-2xl font-bold">Messages</h1>
+        </div>
+      )}
 
       <ScrollArea className="h-full p-2">
         {!isLoading ? (

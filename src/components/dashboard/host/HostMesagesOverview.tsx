@@ -1,60 +1,58 @@
+import MessagesSidebar from "@/components/messages/MessagesSidebar";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
-import { MessageCircleIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ArrowRightIcon } from "@radix-ui/react-icons";
+  type Conversation,
+  useConversation,
+} from "@/utils/store/conversations";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import UserAvatar from "@/components/_common/UserAvatar";
-
-const fakeMessages = [
-  {
-    name: "Heidi",
-    message:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore tempora fugit hic natus quos",
-    id: 1,
-  },
-  {
-    name: "Heidi",
-    message:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore tempora fugit hic natus quos",
-    id: 2,
-  },
-  {
-    name: "Heidi",
-    message:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore tempora fugit hic natus quos",
-    id: 3,
-  },
-];
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 export default function HostMessagesOverview({
   className,
 }: {
   className?: string;
 }) {
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
+
+  const selectConversation = (conversation: Conversation | null) => {
+    setSelectedConversation(conversation);
+  };
+
+  // * Allows us to open message from url query
+  const [isViewed, setIsViewd] = useState(false);
+  const conversations = useConversation((state) => state.conversationList);
+  const { query } = useRouter();
+
+  useEffect(() => {
+    if (query.conversationId && conversations.length > 0 && !isViewed) {
+      const conversationIdToSelect = query.conversationId as string;
+      const conversationToSelect = conversations.find(
+        (conversation) => conversation.id === conversationIdToSelect,
+      );
+
+      if (
+        conversationToSelect &&
+        selectedConversation?.id !== conversationToSelect.id
+      ) {
+        setSelectedConversation(conversationToSelect);
+      }
+
+      setIsViewd(true);
+    }
+  }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
+
   return (
     <Card className={className}>
-      <CardContent>
-        <div className="space-y-2">
-          {fakeMessages.map((message) => (
-            <div key={message.id} className="flex items-center gap-2">
-              <div className="size-2 shrink-0 rounded-full bg-blue-500" />
-              <UserAvatar name={message.name} />
-              <div>
-                <p className="font-semibold">{message.name}</p>
-                <p className="line-clamp-1 text-sm text-muted-foreground">
-                  {message.message}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+      <CardContent className="overflow-y-auto">
+        <Link href="/messages">
+          <MessagesSidebar
+            selectedConversation={selectedConversation}
+            setSelected={selectConversation}
+            isOverview
+          />
+        </Link>
       </CardContent>
     </Card>
   );
