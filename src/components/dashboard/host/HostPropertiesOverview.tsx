@@ -24,17 +24,17 @@ export default function HostPropertiesOverview({
         <CardTitle className="text-xl font-bold">Properties</CardTitle>
       </CardHeader>
       <CardContent className="@container">
-        <div className="flex flex-col gap-4 text-lg font-semibold">
-          <div className="flex items-center justify-between rounded-lg border p-4">
+        <div className="flex flex-row gap-4 text-lg font-semibold sm:flex-col">
+          <div className="flex-1 items-center justify-between rounded-lg border p-4 sm:flex">
             <p>Listed</p>
             <p className="text-2xl font-bold">{listedProperties?.length}</p>
           </div>
-          <div className="flex items-center justify-between rounded-lg border p-4">
+          <div className="flex-1 items-center justify-between rounded-lg border p-4 sm:flex">
             <p>Drafts</p>
             <p className="text-2xl font-bold">{draftedProperties?.length}</p>
           </div>
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <p>Archive</p>
+          <div className="flex-1 items-center justify-between rounded-lg border p-4 sm:flex">
+            <p>Archived</p>
             <p className="text-2xl font-bold">{archivedProperties?.length}</p>
           </div>
         </div>

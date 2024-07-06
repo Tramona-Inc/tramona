@@ -1,5 +1,5 @@
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type Conversation,
   useConversation,
@@ -45,6 +45,9 @@ export default function HostMessagesOverview({
 
   return (
     <Card className={className}>
+      <CardHeader>
+        <CardTitle className="text-xl font-bold">Messages</CardTitle>
+      </CardHeader>
       <CardContent className="overflow-y-auto">
         <Link href="/messages">
           <MessagesSidebar
