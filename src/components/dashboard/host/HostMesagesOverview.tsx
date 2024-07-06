@@ -40,24 +40,11 @@ export default function HostMessagesOverview({
 }) {
   return (
     <Card className={className}>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <MessageCircleIcon />
-          <CardTitle>Messages</CardTitle>
-          <Badge variant="secondary">4 new</Badge>
-          <div className="flex-1" />
-          <Button variant="ghost" asChild>
-            <Link href="/messages">
-              See all
-              <ArrowRightIcon />
-            </Link>
-          </Button>
-        </div>
-      </CardHeader>
       <CardContent>
         <div className="space-y-2">
           {fakeMessages.map((message) => (
             <div key={message.id} className="flex items-center gap-2">
+              <div className="size-2 shrink-0 rounded-full bg-blue-500" />
               <UserAvatar name={message.name} />
               <div>
                 <p className="font-semibold">{message.name}</p>
@@ -65,7 +52,6 @@ export default function HostMessagesOverview({
                   {message.message}
                 </p>
               </div>
-              <div className="size-2 shrink-0 rounded-full bg-blue-500" />
             </div>
           ))}
         </div>

@@ -25,9 +25,7 @@ export default function HostPropertiesOverview({
   return (
     <Card className={className}>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-xl font-bold">Properties</CardTitle>
-        </div>
+        <CardTitle className="text-xl font-bold">Properties</CardTitle>
       </CardHeader>
       <CardContent className="@container">
         <div className="flex flex-col gap-4 text-lg font-semibold">
