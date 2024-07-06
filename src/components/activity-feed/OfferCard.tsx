@@ -56,18 +56,21 @@ export default function FeedofferCard({
 
   return (
     <BaseCard item={offer} userName={userName} userImage={userImage}>
+      <div className="flex">
+        <div className=""></div>
+      <div className="w-full space-y-2"> 
       <div className="grid">
         <div>
-          <p>Recieved a match</p>
-          <p>
+          <p className="mb-5">Recieved a match</p>
+          <p className="font-bold">
             Tramona Price:{" "}
-            <span className="font-bold text-green-700">
+            <span className="text-teal-900">
               {formatCurrency(offer.totalPrice / numOfNights)}
             </span>
           </p>
           {offer.property.originalNightlyPrice && (
             <p>
-              Airbnb Price:{" "}
+              <span className="text-muted-foreground">Airbnb Price:{" "} </span>
               <span className="line-through">
                 {formatCurrency(offer.property.originalNightlyPrice)}
               </span>
@@ -116,8 +119,10 @@ export default function FeedofferCard({
           <CarouselDots count={count} current={current} />
         </Carousel>
       </div>
+      </div>
+      </div>
       {discount > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 overflow-hidden rounded-b-lg bg-green-700 px-4 py-2 text-center font-bold text-white">
+        <div className="absolute bottom-0 left-0 right-0 overflow-hidden rounded-b-lg bg-teal-900 px-4 py-2 text-center font-bold text-white">
           {`${discount}% off`}
         </div>
       )}

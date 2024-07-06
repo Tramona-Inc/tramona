@@ -22,17 +22,19 @@ export default function BaseCard({
 }>) {
   const elapsedTime = item && getElapsedTime(new Date(item.createdAt));
   return (
-    <Card className="block">
+    <Card className="w-full">
       <div className="flex items-center gap-4">
-        <UserAvatar size="md" name={userName} image={userImage} />
-        <div className="min-w-0 flex-1  font-medium">
-          <div className="truncate">{getDisplayedName(userName) ?? ""}</div>
+        <div>
+          <UserAvatar size="md" name={userName} image={userImage} />
+        </div>
+        <div className="min-w-0 flex-1 font-medium">
+          <div className="truncate font-bold">{getDisplayedName(userName) ?? ""}</div>
           <p className="truncate text-sm text-muted-foreground">
             {elapsedTime}
           </p>
         </div>
       </div>
-      <CardContent className="space-y-2">
+      <CardContent>
         {/* <div className="absolute right-2 top-0 flex items-center gap-2">
           <div className="mx-4  mt-5 flex h-full items-center justify-center">
             <ShareButton id={item?.id} isRequest={true} propertyName="TODO" />
