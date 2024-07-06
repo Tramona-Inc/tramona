@@ -6,15 +6,17 @@ import HostRequestsOverview from "./HostRequestsOverview";
 
 export default function HostOverview() {
   return (
-    <div className="min-h-screen-minus-header space-y-4 p-4 pb-32">
+    <div className="mx-auto min-h-screen-minus-header-n-footer max-w-7xl space-y-4 py-8 pb-32">
+      <h1 className="text-4xl font-bold">At a glance</h1>
       <div className="flex flex-col gap-4 lg:flex-row">
         <HostAnalytics className="contents lg:flex lg:flex-1" />
         <HostRequestsOverview className="contents lg:flex lg:flex-1" />
+        <HostPropertiesOverview className="contents flex-1 lg:flex" />
       </div>
       <div className="flex flex-col gap-4 lg:flex-row">
-        <HostMessagesOverview className="contents flex-1 lg:flex" />
         <HostFinancesOverview className="contents flex-1 lg:flex" />
-        <HostPropertiesOverview className="contents flex-1 lg:flex" />
+        <HostFinancesOverview className="contents flex-1 lg:flex" />
+        <HostMessagesOverview className="contents flex-1 lg:flex" />
       </div>
     </div>
   );

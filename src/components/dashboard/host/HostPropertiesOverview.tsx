@@ -13,36 +13,22 @@ export default function HostPropertiesOverview({
     <Card className={className}>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <EditIcon />
-          <CardTitle>Properties</CardTitle>
-          <div className="flex-1" />
-          <Button variant="ghost" asChild>
-            <Link href="/host/properties">
-              See all
-              <ArrowRightIcon />
-            </Link>
-          </Button>
+          <CardTitle className="text-xl font-bold">Properties</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="@container">
-        <div className="grid grid-cols-2 gap-4 @sm:grid-cols-3">
-          <div className="col-span-2 rounded-lg border p-4 @sm:col-span-1">
-            <p className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              Listed
-            </p>
-            <p className="text-3xl font-bold">4</p>
+        <div className="flex flex-col gap-4 text-lg font-semibold">
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <p>Listed</p>
+            <p className="text-2xl font-bold">4</p>
           </div>
-          <div className="rounded-lg border p-4">
-            <p className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              Drafts
-            </p>
-            <p className="text-3xl font-bold">1</p>
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <p>Drafts</p>
+            <p className="text-2xl font-bold">4</p>
           </div>
-          <div className="rounded-lg border p-4">
-            <p className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              Archived
-            </p>
-            <p className="text-3xl font-bold">2</p>
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <p>Archive</p>
+            <p className="text-2xl font-bold">4</p>
           </div>
         </div>
       </CardContent>
