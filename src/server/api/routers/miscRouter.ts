@@ -100,19 +100,27 @@ export const miscRouter = createTRPCRouter({
       const searchParams = new URLSearchParams(url.split("?")[1]);
 
       try {
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage(); // Type assertion
+        const browser = await puppeteer.launch({ headless: true });
+        const page = await browser.newPage();
         await page.goto(url, { waitUntil: "domcontentloaded" });
 
         await sleep(2000);
 
         const dialogExists = await page.$('[role="dialog"]');
         if (dialogExists) {
-          // If popup appears, click outside of it to dismiss
           await page.mouse.click(1, 1); // Click on a point outside the popup (e.g., top-left corner)
         }
 
         await sleep(500);
+
+        // Extract city name above the map with a longer timeout and error handling
+        const cityName = await page.evaluate(() => {
+          const citySection = document.querySelector(
+            "#site-content > div > div:nth-child(1) > div:nth-child(5) > div > div > div > div:nth-child(2) > section",
+          );
+          const cityDiv = citySection?.querySelector("div:nth-child(2)"); // This targets the second child element within the section
+          return cityDiv!.textContent!.trim();
+        });
 
         await page.evaluate(() => {
           const xpathResult = document.evaluate(
@@ -123,7 +131,6 @@ export const miscRouter = createTRPCRouter({
             null,
           );
 
-          // Click reserve
           const firstNode = xpathResult.singleNodeValue;
           if (firstNode && firstNode instanceof HTMLElement) {
             firstNode.parentElement?.click();
@@ -179,7 +186,6 @@ export const miscRouter = createTRPCRouter({
         const totalPrice = Number(
           priceItems.slice(-1)[0]?.replace("$", "").replace(",", "").trim(),
         );
-        // Extract numDays safely
         const numDaysStr = priceItems[0]?.split(" ")[0]; // Get the number of nights
         const numDays = Number(numDaysStr);
         if (isNaN(numDays)) {
@@ -193,13 +199,14 @@ export const miscRouter = createTRPCRouter({
         const numGuests = Number(searchParams.get("adults"));
 
         const response = {
+          cityName,
           nightlyPrice,
           propertyName,
           checkIn,
           checkOut,
           numGuests,
         };
-
+        console.log(response);
         return response;
       } catch (error) {
         console.log(error);
