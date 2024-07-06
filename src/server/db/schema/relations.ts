@@ -27,6 +27,7 @@ import { reservations } from "./tables/reservations";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
 import { reviews } from "./tables/reviews";
+import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -338,5 +339,19 @@ export const tripsRelations = relations(trips, ({ one }) => ({
   bid: one(bids, {
     fields: [trips.bidId],
     references: [bids.id],
+  }),
+}));
+
+export const fillerOffersRelations = relations(fillerOffers, ({ one }) => ({
+  property: one(properties, {
+    fields: [fillerOffers.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const fillerBookingsRelations = relations(fillerBookings, ({ one }) => ({
+  property: one(properties, {
+    fields: [fillerBookings.propertyId],
+    references: [properties.id],
   }),
 }));

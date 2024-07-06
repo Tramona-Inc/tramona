@@ -3,13 +3,20 @@ import Head from "next/head";
 import Link from "next/link";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { NextSeo } from "next-seo";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import CreateRequestDialog from "@/components/activity-feed/admin/CreateRequestDialog";
+import CreateOfferDialog from "@/components/activity-feed/admin/CreateOfferDialog";
+import CreateBookingDialog from "@/components/activity-feed/admin/CreateBookingDialog";
 
 export default function ExclusiveOffersPage() {
   const isProduction = process.env.NODE_ENV === "production";
   let baseUrl = isProduction
     ? "https://www.tramona.com"
     : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
-
+    const { data: session } = useSession();
+  
+    const isAdmin = session && session.user.role === "admin";
   return (
     <>
       <NextSeo
@@ -41,6 +48,19 @@ export default function ExclusiveOffersPage() {
                 Recent Deals
               </h1>
             </div>
+            {isAdmin &&  
+            <div className="flex-col space-x-2 my-4">
+             <p> Add artificial data:</p>
+             <CreateRequestDialog>
+              <Button className="rounded-full">Request</Button>
+            </CreateRequestDialog>
+            <CreateOfferDialog>
+              <Button className="rounded-full">Offer</Button>
+            </CreateOfferDialog>
+            <CreateBookingDialog>
+              <Button className="rounded-full">Booking</Button>
+            </CreateBookingDialog>
+              </div>}
             <ActivityFeed />
           </div>
         </div>
