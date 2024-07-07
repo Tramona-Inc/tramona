@@ -30,33 +30,10 @@ export default function UnclaimedOfferCard() {
 
   return (
     <div className="w-5/6 space-y-2">
-      {/* <div className="flex flex-col gap-y-1">
-        <h2 className="text-3xl font-semibold">Amazing deals happening now!</h2>
-        <div className="flex flex-row items-center justify-between">
-          <div className="mb-10 flex flex-row items-center gap-x-1 text-teal-700">
-            <InfoIcon size={18} strokeWidth={2.4} />
-            <Link href="/how-it-works" className="underline underline-offset-2">
-              How it works
-            </Link>
-          </div>
-          {session && session.user.role === "admin" && <AddUnclaimedOffer />}
-        </div>
-        <div className="relative">
-          <div className="sticky top-0 grid grid-cols-10 gap-x-2 bg-white text-center font-bold">
-            <div className="col-span-2 text-left font-bold">Listing</div>
-            <div className="col-span-1">Airbnb Price</div>
-            <div className="col-span-1">Tramona Price</div>
-            <div className="col-span-1">Dates</div>
-            <div className="col-span-1">Guests</div>
-            <div className="col-span-1">Beds</div>
-          </div>
-          <Separator className="bg-black" />
-        </div>
-      </div> */}
       {!isLoading ? (
         unMatchedOffers ? (
           <div className="flex items-center justify-center">
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {unMatchedOffers.slice(0, displayCount).map((offer) => (
                 <div key={offer.property.id}>
                   <UnMatchedPropertyCard offer={offer} />
@@ -121,15 +98,34 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
 
   return (
     <>
-      <div className="grid h-[505px] w-[313px] grid-cols-1 rounded-xl text-[16px]">
-        <div className="flex h-[313px] items-center justify-center">
+      <div className="grid max-h-[505px] max-w-[313px] grid-cols-1 rounded-xl text-[16px]">
+        <div className="relative flex h-[313px] flex-col items-center justify-center">
           <Image
             src={offer.property.imageUrls[0] ?? ""}
             alt=""
             width={150}
             height={130}
-            className="flex max-h-[313px] w-full max-w-[313px] items-center justify-center rounded-xl"
+            className="flex h-full w-full items-center justify-center rounded-xl"
           />
+          <div className="absolute bottom-0 left-0 right-0 flex w-full items-center justify-center rounded-b-xl bg-[#2C72DC] text-[16px] text-[#FFFFFF]">
+            {!isNaN(
+              Math.floor(
+                ((offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP -
+                  offer.property.originalNightlyPrice!) /
+                  (offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP)) *
+                  100,
+              ),
+            )
+              ? Math.floor(
+                  ((offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP -
+                    offer.property.originalNightlyPrice!) /
+                    (offer.property.originalNightlyPrice! *
+                      AVG_AIRBNB_MARKUP)) *
+                    100,
+                )
+              : 0}
+            % off
+          </div>
         </div>
         <div className="mt-2 flex h-[192px] flex-col space-y-1">
           <div className="line-clamp-1 overflow-ellipsis font-bold">
@@ -154,9 +150,11 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
           </div>
           <div className="flex items-center text-center font-semibold">
             Price on Airbnb:&nbsp;
-            {formatCurrency(
-              offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP,
-            )}
+            <div className="line-through">
+              {formatCurrency(
+                offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP,
+              )}
+            </div>
             &nbsp;
             <div className="flex items-center">
               <Link
@@ -167,13 +165,19 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
               </Link>
             </div>
           </div>
+          <div className="">
+            <Link
+              href={`/public-offer/${offer.id}`}
+            >
+              <Button
+                className="w-full h-[36px] bg-[#001410] font-semibold hover:opacity-80"
+                onClick={handleButtonClick}
+              >
+                Request to book
+              </Button>
+            </Link>
+          </div>
 
-          <Button
-            className="h-[36px] bg-[#001410] font-semibold"
-            onClick={handleButtonClick}
-          >
-            Request to book
-          </Button>
           {/* <div className="flex flex-row">
           <Button
             variant="ghost"
