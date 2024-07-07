@@ -87,7 +87,7 @@ export default function OfferPage({
   const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
   return (
-    <div className="max-w-[375px] lg:max-w-7xl">
+    <div className="max-w-[375px] lg:max-w-4xl xl:max-w-6xl 2xl:max-w-7xl">
       {!isMobile ? (
         <div className="flex flex-col">
           <div className="relative mt-4 grid min-h-[624px] max-w-7xl grid-cols-4 grid-rows-2 gap-5 overflow-clip rounded-xl bg-background">
@@ -133,8 +133,8 @@ export default function OfferPage({
                   </div>
                 ))
               )}
-              <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
-                <div className="  screen-full flex justify-center">
+              <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+                <div className="screen-full flex justify-center">
                   <OfferPhotos
                     propertyImages={property.imageUrls}
                     indexOfSelectedImage={indexOfSelectedImage}
@@ -164,7 +164,7 @@ export default function OfferPage({
                         {property.imageUrls.map((imageUrl, index) => (
                           <DialogTrigger
                             key={index}
-                            className={` hover:opacity-90 ${
+                            className={`hover:opacity-90 ${
                               index === 0 || index % 3 === 0
                                 ? "col-span-2 row-span-2"
                                 : property.imageUrls.length - 1 == index &&
@@ -190,8 +190,8 @@ export default function OfferPage({
                           </DialogTrigger>
                         ))}
                       </div>
-                      <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
-                        <div className="  screen-full flex justify-center">
+                      <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+                        <div className="screen-full flex justify-center">
                           <OfferPhotos
                             propertyImages={property.imageUrls}
                             indexOfSelectedImage={indexOfSelectedImage}
@@ -317,7 +317,7 @@ export default function OfferPage({
                     </section>
                     <hr className="h-px border-0 bg-[#D9D9D9]" />
                     <section id="overview" className="scroll-mt-36">
-                      <h1 className="text-lg font-bold lg:whitespace-nowrap lg:text-[24px] ">
+                      <h1 className="text-lg font-bold lg:whitespace-nowrap lg:text-[24px]">
                         About this property
                       </h1>
                       <div className="z-20 max-w-2xl py-2 text-zinc-700">
@@ -422,11 +422,13 @@ export default function OfferPage({
                               Los Angeles, California
                             </div>
                           </div>
-                          <SingleLocationMap
-                            key={`${lat}-${lng}`} // Unique key to force re-render
-                            lat={lat}
-                            lng={lng}
-                          />
+                          <div className="focus-none h-[300px] w-[353px] rounded-lg lg:h-[774px] lg:w-[829px]">
+                            <SingleLocationMap
+                              key={`${lat}-${lng}`} // Unique key to force re-render
+                              lat={lat}
+                              lng={lng}
+                            />
+                          </div>
                         </div>
                       </div>
                     </section>
@@ -640,7 +642,7 @@ export default function OfferPage({
                               {formatCurrency(offerNightlyPrice)}
                             </div>
                           </div>
-                          <div className="col-span-1 flex items-center justify-between pl-4 ">
+                          <div className="col-span-1 flex items-center justify-between pl-4">
                             <div className="text-[14px]">Airbnb price</div>
                             <div className="text-[16px] font-bold">
                               {formatCurrency(originalTotal / numNights)}
@@ -725,7 +727,7 @@ export default function OfferPage({
         </div>
       ) : (
         <div className="max-w-full">
-          <div className="relative mt-4 grid max-w-full h-[220px] grid-cols-4 grid-rows-2 gap-5 overflow-clip rounded-xl bg-black">
+          <div className="relative mt-4 grid h-[220px] max-w-full grid-cols-4 grid-rows-2 gap-5 overflow-clip rounded-xl bg-black">
             <Dialog>
               <div>
                 <DialogTrigger
@@ -742,7 +744,7 @@ export default function OfferPage({
                   />
                 </DialogTrigger>
               </div>
-              <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
+              <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
                 <div className="screen-full flex justify-center">
                   <OfferPhotos
                     propertyImages={property.imageUrls}
@@ -773,7 +775,7 @@ export default function OfferPage({
                         {property.imageUrls.map((imageUrl, index) => (
                           <DialogTrigger
                             key={index}
-                            className={` hover:opacity-90 ${
+                            className={`hover:opacity-90 ${
                               index === 0 || index % 3 === 0
                                 ? "col-span-2 row-span-2"
                                 : property.imageUrls.length - 1 == index &&
@@ -799,7 +801,7 @@ export default function OfferPage({
                           </DialogTrigger>
                         ))}
                       </div>
-                      <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
+                      <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
                         <div className="screen-full flex justify-center">
                           <OfferPhotos
                             propertyImages={property.imageUrls}
@@ -1073,7 +1075,7 @@ export default function OfferPage({
                   {/* map section */}
                   <section>
                     <div className="mb-6 mt-4">
-                      <div className="h-auto w-full space-y-4 ">
+                      <div className="h-auto w-full space-y-4">
                         <h2 className="text-[18px] font-bold">
                           Where you'll be
                         </h2>
