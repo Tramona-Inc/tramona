@@ -325,3 +325,9 @@ export async function getPropertiesForRequest(
     })
     .then((res) => res.map((p) => p.id));
 }
+
+export async function getAdminId() {
+  return await db.query.users
+    .findFirst({ where: eq(users.email, "info@tramona.com") })
+    .then((res) => res!.id);
+}
