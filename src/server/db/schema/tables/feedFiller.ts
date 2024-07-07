@@ -15,7 +15,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
   
 export const fillerRequests = pgTable(
-    "fillerRequests",
+    "filler_requests",
     {
         id: serial("id").primaryKey(),
         maxTotalPrice: integer("max_total_price").notNull(), // in cents
@@ -40,7 +40,7 @@ export const fillerRequestUpdateSchema = fillerRequestInsertSchema.partial().req
 
 
 export const fillerOffers = pgTable(
-    "fillerOffers",
+    "filler_offers",
     {
         id: serial("id").primaryKey(),
         maxTotalPrice: integer("max_total_price").notNull(), // in cents
@@ -66,7 +66,7 @@ export const fillerOfferUpdateSchema = fillerOfferInsertSchema.partial().require
 });
 
 export const fillerBookings = pgTable(
-    "fillerBookings",
+    "filler_bookings",
     {
         id: serial("id").primaryKey(),
         maxTotalPrice: integer("max_total_price").notNull(), // in cents
