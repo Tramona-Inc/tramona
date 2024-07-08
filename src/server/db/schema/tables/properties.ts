@@ -4,6 +4,7 @@ import {
   boolean,
   date,
   doublePrecision,
+  geometry,
   index,
   integer,
   pgEnum,
@@ -247,7 +248,10 @@ export const properties = pgTable("properties", {
   pricingScreenUrl: varchar("pricing_screen_url"),
   hostProfilePic: varchar("host_profile_pic"),
   hostawayListingId: integer("hostaway_listing_id"),
-});
+  latLngPoint: geometry("lat_lng_point", { type: 'point', mode: 'xy', srid: 4326 }),
+}, (t) => ({
+  spatialIndex: index('spacial_index').using('gist', t.latLngPoint),
+}));
 
 export type Property = typeof properties.$inferSelect;
 export type NewProperty = typeof properties.$inferInsert;
