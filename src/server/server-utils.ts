@@ -240,9 +240,11 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
 
 export async function addProperty({
   hostId,
+  hostTeamId,
   property,
 }: {
   hostId?: string | null;
+  hostTeamId?: number | null;
   property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
     latitude?: number;
     longitude?: number;
@@ -257,7 +259,7 @@ export async function addProperty({
     lat = location.lat;
     lng = location.lng;
   }
-  const city = await getCity({lat, lng});
+  const city = await getCity({ lat, lng });
 
   const [insertedProperty] = await db
     .insert(properties)
@@ -267,6 +269,8 @@ export async function addProperty({
       latitude: lat,
       longitude: lng,
       city: city,
+      latLngPoint: sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
+      hostTeamId,
     })
     .returning({ id: properties.id });
 
@@ -281,6 +285,7 @@ export async function addProperty({
       location: request.location,
       checkIn: request.checkIn,
       checkOut: request.checkOut,
+      latLngPoint: request.latLngPoint,
     });
 
     if (matchingProperties.includes(insertedProperty!.id)) {
@@ -360,12 +365,14 @@ export async function getPropertiesForRequest(
     checkIn: Date;
     checkOut: Date;
     id: number;
+    latLngPoint?: { x: number; y: number; } | null;
   },
   { tx = db } = {},
 ) {
   let propertyIsNearRequest: SQL | undefined;
 
   if (req.lat != null && req.lng != null && req.radius != null) {
+    console.log('request with lat, lng ----------------------------');
     // Convert radius from miles to degrees (approximate)
     const radiusDegrees = req.radius / 69;
 
@@ -377,37 +384,50 @@ export async function getPropertiesForRequest(
     );
   } else {
     const coordinates = await getCoordinates(req.location);
+    console.log('request without lat, lng ----------------------');
     if (coordinates.bounds) {
       const { northeast, southwest } = coordinates.bounds;
-      propertyIsNearRequest = and(
-        lte(properties.longitude, northeast.lng),
-        gte(properties.longitude, southwest.lng),
-        lte(properties.latitude, northeast.lat),
-        gte(properties.latitude, southwest.lat),
-      );
+      // propertyIsNearRequest = and(
+      //   lte(properties.longitude, northeast.lng),
+      //   gte(properties.longitude, southwest.lng),
+      //   lte(properties.latitude, northeast.lat),
+      //   gte(properties.latitude, southwest.lat),
+      // );
+
+      propertyIsNearRequest = sql`
+      ST_Within(
+        lat_lng_point,
+        ST_MakeEnvelope(
+          ${southwest.lng}, ${southwest.lat},
+          ${northeast.lng}, ${northeast.lat},
+          4326
+        )
+      )
+    `;
     }
   }
 
-  const propertyisAvailable = notExists(
-    tx
-      .select()
-      .from(bookedDates)
-      .where(
-        and(
-          eq(bookedDates.propertyId, properties.id),
-          between(bookedDates.date, req.checkIn, req.checkOut),
-        ),
-      ),
-  );
 
-  return await tx.query.properties
-    .findMany({
-      where: and(
-        isNotNull(properties.hostId),
-        propertyIsNearRequest,
-        propertyisAvailable,
+const propertyisAvailable = notExists(
+  tx
+    .select()
+    .from(bookedDates)
+    .where(
+      and(
+        eq(bookedDates.propertyId, properties.id),
+        between(bookedDates.date, req.checkIn, req.checkOut),
       ),
-      columns: { id: true },
-    })
-    .then((res) => res.map((p) => p.id));
+    ),
+);
+
+return await tx.query.properties
+  .findMany({
+    where: and(
+      isNotNull(properties.hostId),
+      propertyIsNearRequest,
+      propertyisAvailable,
+    ),
+    columns: { id: true },
+  })
+  .then((res) => res.map((p) => p.id));
 }

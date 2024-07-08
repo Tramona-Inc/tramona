@@ -58,8 +58,17 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
+      const hostTeamId = await db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+        columns: { curTeamId: true },
+      })
+      .then((res) => res?.curTeamId);
 
-      const id = await addProperty({ property: input, hostId });
+      if (!hostTeamId) {
+        //logic
+      }
+
+      const id = await addProperty({ property: input, hostId, hostTeamId });
       return id;
     }),
 
