@@ -54,8 +54,11 @@ export function plural(count: number, noun: string, pluralNoun?: string) {
  * ```
  */
 export function formatCurrency(cents: number, { round = false } = {}) {
-  if (cents % 100 === 0 || round) return `$${Math.round(cents / 100)}`;
-  return `$${(cents / 100).toFixed(2)}`;
+  const dollars = round ? Math.round(cents / 100) : cents / 100;
+  return dollars.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 }
 
 /**
@@ -123,6 +126,37 @@ export function formatDateMonthDayYear(date: Date) {
   return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
 }
 
+export function getElapsedTime(createdAt: Date): string {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
+  }
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+  }
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+  }
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+}
+
+export function getDisplayedName(realname: string | null): string {
+  const userFirstName = realname?.split(" ")[0];
+  const userLastName = realname?.split(" ")[1];
+  const userLastNameInitial = userLastName
+    ? userLastName[0]?.toUpperCase() + "."
+    : "";
+  const displayedName = userFirstName + " " + userLastNameInitial;
+  return displayedName;
+}
 // not used right now and probably will never have to:
 
 // export function formatDateRangeFromStrs(from: string, to?: string) {
