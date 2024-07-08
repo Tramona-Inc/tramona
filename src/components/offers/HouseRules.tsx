@@ -7,9 +7,9 @@ import {
 
 export function HouseRules() {
   return (
-    <div className="mt-8 w-full lg:w-[1312px]">
+    <div className="mt-8 w-full md:w-[750px] lg:w-[800px] xl:w-[1150px] 2xl:w-[1280px]">
       <h2 className="mb-6 text-[24px] font-bold">House rules</h2>
-      <div className="hidden mb-6 lg:flex flex-row space-x-32">
+      <div className="hidden mb-6 lg:flex flex-row lg:space-x-12 xl:space-x-32">
         <Rule
           icon={
             <PawPrint className="size-[32px]">
@@ -45,8 +45,8 @@ export function HouseRules() {
 
       <div className="mt-10 space-y-8">
         <div>
-          <h3 className="mb-1 text-[16px] font-bold">Additional rules</h3>
-          <p className="text-[14px]">
+          <h3 className="mb-1 text-base font-bold">Additional rules</h3>
+          <p className="text-sm">
             Let's keep the noise down between 10:00 PM and 8:00 AM to be
             considerate of our neighbors, and feel free to enjoy yourselves
             responsibly during the rest of the day. While we're all for having a
@@ -60,8 +60,8 @@ export function HouseRules() {
         </div>
 
         <div>
-          <h3 className="mb-1 text-[16px] font-bold">Cancellation Policy</h3>
-          <p className="text-[14px]">
+          <h3 className="mb-1 text-base font-bold">Cancellation Policy</h3>
+          <p className="text-sm">
             Let's keep the noise down between 10:00 PM and 8:00 AM to be
             considerate of our neighbors, and feel free to enjoy yourselves
             responsibly during the rest of the day. While we're all for having a
@@ -83,8 +83,8 @@ function Rule({ icon, title, text }) {
     <div className="flex flex-row items-center space-x-4">
       <div>{icon}</div>
       <div className="flex-col">
-        <p className="text-[16px] font-bold">{title}</p>
-        <p className="text-[14px] text-gray-600">{text}</p>
+        <p className="text-base font-bold">{title}</p>
+        <p className="text-sm text-gray-600">{text}</p>
       </div>
     </div>
   );

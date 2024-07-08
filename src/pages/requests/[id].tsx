@@ -152,7 +152,7 @@ function Page({
                       </TabsList>
                       </div>
 
-                      <div className="flex flex-col lg:flex-col">
+                      <div className="flex flex-col">
                         {offers.map((offer) => (
                           <TabsContent key={offer.id} value={`${offer.id}`}>
                             <OfferPage offer={offer} mapCenter={mapCenter} />

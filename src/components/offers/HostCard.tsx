@@ -39,14 +39,14 @@ export function HostCard() {
         <h2 className="mb-6 mt-10 text-[24px] font-bold">
           Have questions about the stay?
         </h2>
-        <Button className="h-[50px] w-[258px] bg-[#004236] text-[20px]">
+        <Button className="h-[50px] w-[258px] bg-primaryGreen text-[20px]">
           Message host
         </Button>
       </div>
-      <hr className="mt-6 w-full h-px border-0 bg-[#D9D9D9]" />
+
       <div className="lg:hidden">
         <h2 className="mb-2 mt-6 text-[18px] font-bold">Questions?</h2>
-        <Button className="h-[44px] w-full border border-[#004236] bg-transparent text-[16px] font-bold text-[#004236] hover:bg-inherit hover:opacity-80">
+        <Button className="h-[44px] w-full border border-primaryGreen bg-transparent text-[16px] font-bold text-primaryGreen hover:bg-inherit hover:opacity-80">
           Message host
         </Button>
       </div>

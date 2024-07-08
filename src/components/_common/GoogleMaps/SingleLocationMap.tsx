@@ -24,7 +24,7 @@ function SingleLocationMap({ lat, lng }: MapPointerProps) {
     setLocation(center);
   }, [map]);
   return (
-    <div className="focus-none h-[300px] w-[353px] lg:h-[774px] lg:w-[829px] rounded-lg">
+    <div className="focus-none h-[100%] w-[100%] rounded-lg border shadow-lg">
       {location && (
         <Map
           mapId="9c8e46d54d7a528b"
@@ -33,7 +33,6 @@ function SingleLocationMap({ lat, lng }: MapPointerProps) {
           defaultZoom={13}
           disableDefaultUI={true}
           maxZoom={17}
-          // style={{strokeLinecap: "round", strokeLinejoin: "round"}}
         >
           <MapPointer location={location} />
         </Map>
