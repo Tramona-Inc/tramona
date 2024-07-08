@@ -21,7 +21,7 @@ import { useMediaQuery } from "../_utils/useMediaQuery";
 import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
-import router from "next/router";
+import router, { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 import { formatDateRange } from "@/utils/utils";
@@ -33,6 +33,7 @@ export default function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
+  const router = useRouter();
   const { status } = useSession();
   const isMobile = useMediaQuery("(max-width: 640px)");
 
@@ -359,7 +360,23 @@ export default function OfferPage({
                 )}
               </p>
             </div>
-            {status === "authenticated" ? (
+            <div>
+              {isBooked ? (
+                <Button variant="greenPrimary" className="w-full font-bold">
+                  <CheckIcon className="size-5" />
+                  Booked
+                </Button>
+              ) : (
+                <Button
+                  variant="greenPrimary"
+                  className="w-full font-bold"
+                  onClick={() => router.push(`/offer-checkout/${offer.id}`)}
+                >
+                  Confirm Booking
+                </Button>
+              )}
+            </div>
+            {/* {status === "authenticated" ? (
               <HowToBookDialog
                 isBooked={isBooked}
                 listingId={offer.id}
@@ -398,7 +415,7 @@ export default function OfferPage({
               >
                 Log in to Book
               </Button>
-            )}
+            )} */}
           </Card>
         </div>
       </div>
