@@ -126,6 +126,10 @@ export function formatDateMonthDayYear(date: Date) {
   return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
 }
 
+export function formatShortDate(date: Date) {
+  return format(removeTimezoneFromDate(date), "M/d/yyyy");
+}
+
 export function getElapsedTime(createdAt: Date): string {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);

@@ -376,7 +376,7 @@ export default function OfferPage({
                     {/* map section */}
                     <section>
                       <div className="mb-10 mt-5 w-full">
-                        <div className="w-full space-y-4 md:h-[300px] lg:h-[600px]">
+                        <div className="w-full space-y-4 md:h-[300px] lg:h-[450px] xl:h-[600px]">
                           <div className="flex flex-col space-y-2">
                             <h2 className="text-[24px] font-bold">
                               Where you'll be
@@ -587,14 +587,14 @@ export default function OfferPage({
                       <div className="relative w-full rounded-lg border border-[#BEBEBE] px-2">
                         <div className="grid h-[39px] grid-cols-2">
                           <div className="col-span-1 flex items-center justify-between whitespace-nowrap pr-4">
-                            <div className="text-sm">Tramona price</div>
-                            <div className="text-base font-bold">
+                            <div className="text-[12px]">Tramona price</div>
+                            <div className="text-sm font-bold">
                               {formatCurrency(offerNightlyPrice)}
                             </div>
                           </div>
                           <div className="col-span-1 flex items-center justify-between whitespace-nowrap pl-4">
-                            <div className="text-sm">Airbnb price</div>
-                            <div className="text-base font-bold">
+                            <div className="text-[12px]">Airbnb price</div>
+                            <div className="text-sm font-bold">
                               {formatCurrency(originalTotal / numNights)}
                             </div>
                           </div>
@@ -1013,20 +1013,20 @@ export default function OfferPage({
                                           <div className="relative w-full rounded-lg border border-[#BEBEBE] px-2">
                                             <div className="grid h-[39px] grid-cols-2">
                                               <div className="col-span-1 flex items-center justify-between whitespace-nowrap pr-4">
-                                                <div className="text-sm">
+                                                <div className="text-[12px]">
                                                   Tramona price
                                                 </div>
-                                                <div className="text-base font-bold">
+                                                <div className="text-sm font-bold">
                                                   {formatCurrency(
                                                     offerNightlyPrice,
                                                   )}
                                                 </div>
                                               </div>
                                               <div className="col-span-1 flex items-center justify-between whitespace-nowrap pl-4">
-                                                <div className="text-sm">
+                                                <div className="text-[12px]">
                                                   Airbnb price
                                                 </div>
-                                                <div className="text-base font-bold">
+                                                <div className="text-sm font-bold">
                                                   {formatCurrency(
                                                     originalTotal / numNights,
                                                   )}
