@@ -5,7 +5,7 @@ import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { formatDateRange, formatCurrency } from "@/utils/utils";
-import { InfoIcon, TrashIcon, ExternalLink } from "lucide-react";
+import { InfoIcon, TrashIcon, ExternalLink, CirclePlus } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
 import { useState } from "react";
@@ -178,7 +178,7 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
             </Link>
           </div>
 
-          {/* <div className="flex flex-row">
+          <div className="flex flex-row items-center">
           <Button
             variant="ghost"
             size="icon"
@@ -203,7 +203,18 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
               <TrashIcon />
             </Button>
           )}
-        </div> */}
+          {session?.user.role === "admin" && (
+            // <Button
+            //   size="icon"
+            //   variant="ghost"
+            //   className="text-red-600"
+            //   onClick={() => handleRemoveProperty(offer.id)}
+            // >
+            //   <CirclePlus />
+            // </Button>
+            <AddUnclaimedOffer />
+          )}
+        </div>
         </div>
       </div>
     </>
