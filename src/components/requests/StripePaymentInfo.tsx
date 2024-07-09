@@ -77,13 +77,20 @@ const StripePaymentInfo = ({
           console.log("Not ready");
           return;
         }
+        //@ts-expect-error ignore
         setOptions(response); // Set options directly within fetchData
       } catch (error) {
         console.error("Error creating checkout session:", error);
       }
     };
 
-    fetchData();
+    fetchData()
+      .then(() => {
+        console.log("we fetched client secret");
+      })
+      .catch((error) => {
+        console.error("Error creating checkout session:", error);
+      });
   }, [fetchClientSecret]); // Re-run useEffect when fetchClientSecret changes
 
   // useEffect(() => {

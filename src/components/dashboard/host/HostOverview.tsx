@@ -40,7 +40,6 @@ export default function HostOverview() {
         <HostFinancesOverview
           isStripeConnectInstanceReady={isStripeConnectInstanceReady}
           stripeAccountIdNumber={stripeAccountIdNumber?.stripeAccountId}
-          userRole={userRole}
           className="contents flex-1 lg:flex"
         />
         <HostPropertiesOverview className="contents flex-1 lg:flex" />

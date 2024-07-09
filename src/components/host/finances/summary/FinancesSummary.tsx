@@ -54,6 +54,7 @@ export default function FinanceSummary({
         <Separator className="h-[2px] lg:hidden" />
         <div className="flex w-full flex-col gap-y-3">
           <BalanceSummary
+            stripeAccountIdNumber={hostStripeAccountId}
             balance={totalCurrentBalance}
             isStripeConnectInstanceReady={isStripeConnectInstanceReady}
           />
