@@ -9,6 +9,7 @@ export default defineConfig({
   schema: "./src/server/db/schema/*", //separate the schemas
   dialect: "postgresql",
   verbose: true,
+  extensionsFilters: ['postgis'],
   dbCredentials: {
     url: env.DATABASE_URL,
     wranglerConfigPath: "./wrangler.toml",

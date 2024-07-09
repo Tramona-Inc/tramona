@@ -2,6 +2,7 @@ import {
   boolean,
   date,
   doublePrecision,
+  geometry,
   index,
   integer,
   pgTable,
@@ -44,10 +45,12 @@ export const requests = pgTable(
     lat: doublePrecision("lat"),
     lng: doublePrecision("lng"),
     radius: doublePrecision("radius"),
+    latLngPoint: geometry("lat_lng_point", { type: 'point', mode: 'xy', srid: 4326 }),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),
     requestGroupidIdx: index().on(t.requestGroupId),
+    requestSpatialIndex: index('request_spacial_index').using('gist', t.latLngPoint)
   }),
 );
 
