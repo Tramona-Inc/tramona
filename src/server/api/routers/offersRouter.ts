@@ -14,7 +14,6 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
-  reviews,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
@@ -34,7 +33,6 @@ import {
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
-import { columns } from "@/components/admin/view-recent-host/table/columns";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -162,15 +160,7 @@ export const offersRouter = createTRPCRouter({
               host: {
                 columns: { id: true, name: true, email: true, image: true },
               },
-              reviews: {
-                columns: {
-                  id: true,
-                  rating: true,
-                  review: true,
-                  profilePic: true,
-                  name: true,
-                },
-              },
+              reviews: true,
             },
           },
         },
@@ -222,15 +212,7 @@ export const offersRouter = createTRPCRouter({
               host: {
                 columns: { id: true, name: true, email: true, image: true },
               },
-              reviews: {
-                columns: {
-                  id: true,
-                  rating: true,
-                  review: true,
-                  profilePic: true,
-                  name: true,
-                },
-              },
+              reviews: true,
             },
           },
         },

@@ -17,10 +17,9 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { object, z } from "zod";
+import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { reviews } from "./reviews";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -242,7 +241,6 @@ export const properties = pgTable("properties", {
   airbnbBookUrl: varchar("airbnb_book_url"),
   hostImageUrl: varchar("host_image_url"),
   pricingScreenUrl: varchar("pricing_screen_url"),
-  hostProfilePic: varchar("host_profile_pic"),
   hostawayListingId: integer("hostaway_listing_id"),
 });
 

@@ -150,12 +150,7 @@ export default function AdminOfferForm({
             checkInTime: offer.property.checkInTime ?? undefined,
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
-            reviews: offer.property.reviews.map((review) => ({
-              profilePic: review.profilePic,
-              name: review.name,
-              rating: review.rating,
-              review: review.review,
-            })),
+            reviews: offer.property.reviews,
           }
         : {}),
     },
@@ -230,16 +225,11 @@ export default function AdminOfferForm({
         tramonaFee: data.tramonaFee * 100,
       };
 
-      if (propertyData.reviews && propertyData.reviews.length > 0) {
-        for (const review of propertyData.reviews) {
-          await createReviewsMutation.mutateAsync({
-            propertyId: offer.property.id,
-            name: review.name,
-            profilePic: review.profilePic,
-            rating: review.rating,
-            review: review.review,
-          });
-        }
+      if (propertyData.reviews) {
+        await createReviewsMutation.mutateAsync({
+          reviews: propertyData.reviews,
+          propertyId: offer.property.id,
+        });
       }
 
       await Promise.all([
@@ -273,16 +263,11 @@ export default function AdminOfferForm({
         groupId: request.madeByGroupId,
       };
 
-      if (propertyData.reviews && propertyData.reviews.length > 0) {
-        for (const review of propertyData.reviews) {
-          await createReviewsMutation.mutateAsync({
-            propertyId,
-            name: review.name,
-            profilePic: review.profilePic,
-            rating: review.rating,
-            review: review.review,
-          });
-        }
+      if (propertyData.reviews) {
+        await createReviewsMutation.mutateAsync({
+          reviews: propertyData.reviews,
+          propertyId,
+        });
       }
 
       await createOffersMutation
