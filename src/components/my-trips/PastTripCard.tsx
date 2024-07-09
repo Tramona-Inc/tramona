@@ -1,13 +1,11 @@
 import Link from "next/link";
-
 import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
-import { type PastTrip } from "./PastTrips";
-
 import { formatDateRange } from "@/utils/utils";
 import Image from "next/image";
+import { type TripCardDetails } from "./PastTrips";
 
-export default function PastTripCard({ trip }: { trip: PastTrip }) {
+export default function PastTripCard({ trip }: { trip: TripCardDetails }) {
   return (
     <div className="w-full">
       <div className="flex overflow-clip rounded-lg border">
@@ -31,20 +29,22 @@ export default function PastTripCard({ trip }: { trip: PastTrip }) {
             <h2 className="text-lg font-bold md:text-2xl">
               {trip.property.name}
             </h2>
-            <div className="flex gap-2">
-              <UserAvatar
-                name={trip.property.host?.name}
-                image={trip.property.host?.image}
-              />
-              <div>
-                <p className="text-xs text-muted-foreground md:text-sm">
-                  Hosted by
-                </p>
-                <p className="text-sm md:text-base">
-                  {trip.property.host?.name}
-                </p>
+            {trip.property.host && (
+              <div className="flex gap-2">
+                <UserAvatar
+                  name={trip.property.host.name}
+                  image={trip.property.host.image}
+                />
+                <div>
+                  <p className="text-xs text-muted-foreground md:text-sm">
+                    Hosted by
+                  </p>
+                  <p className="text-sm md:text-base">
+                    {trip.property.host.name}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="h-[2px] rounded-full bg-gray-200"></div>
@@ -55,7 +55,7 @@ export default function PastTripCard({ trip }: { trip: PastTrip }) {
               Check-in/Check-out: {formatDateRange(trip.checkIn, trip.checkOut)}
             </p>
             <Link
-              href={`/my-trips/${trip.id}`}
+              href={`/my-trips/${trip.id}?type=request`}
               className="text-sm underline underline-offset-4"
             >
               View more

@@ -177,6 +177,7 @@ export const propertyStatusEnum = pgEnum("property_status", [
 export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
 
 export const propertyPMS = pgEnum("property_pms", ALL_PROPERTY_PMS);
+
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
@@ -197,8 +198,9 @@ export const properties = pgTable("properties", {
   hostProfilePic: varchar("host_profile_pic"),
 
   address: varchar("address", { length: 1000 }).notNull(),
-  latitude: doublePrecision("latitude"),
-  longitude: doublePrecision("longitude"),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+  city: varchar("city", { length: 255 }).notNull(),
 
   originalListingUrl: varchar("url"),
 
@@ -234,7 +236,10 @@ export const properties = pgTable("properties", {
   areaDescription: text("area_description"),
   mapScreenshot: text("map_screenshot"),
   cancellationPolicy: text("cancellation_policy"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
   // priceRestriction: integer("price_restriction"),
   propertyStatus: propertyStatusEnum("property_status").default("Listed"),

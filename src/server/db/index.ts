@@ -9,7 +9,7 @@ import {
   type ExtractTablesWithRelations,
 } from "drizzle-orm";
 
-const client = postgres(env.DATABASE_URL, { prepare: false });
+const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
 
 export const db = drizzle(client, { schema });
 

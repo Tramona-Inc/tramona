@@ -114,7 +114,6 @@ export default function Onboarding3({ editing = false }) {
                   key={item.title}
                   title={item.title}
                   text={item.text}
-                  hover={true}
                   onClick={() => setSpaceType(item.id)}
                   isSelected={spaceType === item.id}
                 >

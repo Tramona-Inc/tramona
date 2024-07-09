@@ -1,5 +1,11 @@
 import GroupInviteEmail from "packages/transactional/emails/GroupInviteEmail";
-import { groupInvites, groupMembers, groups, users, groupInvitesLink } from "@/server/db/schema";
+import {
+  groupInvites,
+  groupMembers,
+  groups,
+  users,
+  groupInvitesLink,
+} from "@/server/db/schema";
 import { getGroupOwnerId, sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
@@ -8,30 +14,29 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const groupsRouter = createTRPCRouter({
-  generateInviteLink: protectedProcedure.input(z.object({groupId: z.number()}))
-  .query(async ({ input, ctx }) => {
-    const groupOwnerId = await getGroupOwnerId(input.groupId);
-    if (ctx.user.id !== groupOwnerId) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-    await ctx.db
-      .insert(groupInvitesLink)
-      .values({
+  generateInviteLink: protectedProcedure
+    .input(z.object({ groupId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const groupOwnerId = await getGroupOwnerId(input.groupId);
+      if (ctx.user.id !== groupOwnerId) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await ctx.db.insert(groupInvitesLink).values({
         expiresAt: add(new Date(), { hours: 24 }),
         groupId: input.groupId,
       });
 
-    const inviteLinkId = await ctx.db.query.groupInvitesLink.findFirst({
-      where: eq(groupInvitesLink.groupId, input.groupId),
-      columns: { id: true },
-    });
+      const inviteLinkId = await ctx.db.query.groupInvitesLink.findFirst({
+        where: eq(groupInvitesLink.groupId, input.groupId),
+        columns: { id: true },
+      });
 
-    if (!inviteLinkId) {
-      throw new Error('Invite link not found');
-    }
+      if (!inviteLinkId) {
+        throw new Error("Invite link not found");
+      }
 
-    return { link: `https://tramona.com/invite/${inviteLinkId.id}` };
-  }),
+      return { link: `https://tramona.com/invite/${inviteLinkId.id}` };
+    }),
 
   inviteUserByEmail: protectedProcedure
     .input(z.object({ email: z.string(), groupId: z.number() }))
@@ -96,19 +101,21 @@ export const groupsRouter = createTRPCRouter({
       return { status: "added user" as const, inviteeName: invitee.name };
     }),
 
-  inviteUserById: protectedProcedure
+  inviteCurUserToGroup: protectedProcedure
     .input(z.object({ inviteLinkId: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const groupId = await ctx.db.query.groupInvitesLink.findFirst({
-        where: eq(groupInvitesLink.id, input.inviteLinkId),
-        columns: { groupId: true },
-      }).then((res) => res?.groupId);
+      const groupId = await ctx.db.query.groupInvitesLink
+        .findFirst({
+          where: eq(groupInvitesLink.id, input.inviteLinkId),
+          columns: { groupId: true },
+        })
+        .then((res) => res?.groupId);
 
       if (groupId !== undefined) {
-        await ctx.db.insert(groupMembers).values({
-          groupId: groupId,
-          userId: ctx.user.id,
-        });
+        await ctx.db
+          .insert(groupMembers)
+          .values({ groupId: groupId, userId: ctx.user.id })
+          .onConflictDoNothing();
       } else {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
@@ -204,7 +211,7 @@ export const groupsRouter = createTRPCRouter({
         .then((res) => res?.owner);
     }),
 
-    getGroupMembers: protectedProcedure
+  getGroupMembers: protectedProcedure
     .input(z.number())
     .mutation(async ({ input: groupId, ctx }) => {
       return await ctx.db.query.groupMembers

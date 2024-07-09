@@ -10,12 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { api, type RouterOutputs } from "@/utils/api";
+import { type RouterOutputs } from "@/utils/api";
 import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { CheckIcon, ImagesIcon, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import Spinner from "../_common/Spinner";
 import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import OfferPhotos from "./OfferPhotos";
@@ -36,21 +35,12 @@ export default function OfferPage({
   offer: OfferWithDetails;
 }) {
   const { status } = useSession();
-  let isBooked = false;
-
-  const { data, isLoading } =
-    api.offers.getStripePaymentIntentAndCheckoutSessionId.useQuery({
-      id: offer.id,
-    });
-
-  if (data?.checkoutSessionId !== null && data?.paymentIntentId !== null) {
-    isBooked = true;
-  }
-
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const isAirbnb =
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
+
+  const isBooked = !!offer.acceptedAt;
 
   const aboutRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -119,8 +109,8 @@ export default function OfferPage({
               </div>
             ))
           )}
-          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
-            <div className="  screen-full flex justify-center">
+          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+            <div className="screen-full flex justify-center">
               <OfferPhotos
                 propertyImages={property.imageUrls}
                 indexOfSelectedImage={indexOfSelectedImage}
@@ -150,7 +140,7 @@ export default function OfferPage({
                     {property.imageUrls.map((imageUrl, index) => (
                       <DialogTrigger
                         key={index}
-                        className={` hover:opacity-90 ${
+                        className={`hover:opacity-90 ${
                           index === 0 || index % 3 === 0
                             ? "col-span-2 row-span-2"
                             : property.imageUrls.length - 1 == index &&
@@ -176,8 +166,8 @@ export default function OfferPage({
                       </DialogTrigger>
                     ))}
                   </div>
-                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
-                    <div className="  screen-full flex justify-center">
+                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+                    <div className="screen-full flex justify-center">
                       <OfferPhotos
                         propertyImages={property.imageUrls}
                         indexOfSelectedImage={indexOfSelectedImage}
@@ -261,7 +251,9 @@ export default function OfferPage({
               About this property
             </h1>
             <div className="z-20 max-w-2xl py-2 text-zinc-700">
-              <div ref={aboutRef} className="line-clamp-5 break-words">{property.about}</div>
+              <div ref={aboutRef} className="line-clamp-5 break-words">
+                {property.about}
+              </div>
               {isOverflowing && (
                 <div className="flex justify-start py-2">
                   <Dialog>
@@ -405,35 +397,31 @@ export default function OfferPage({
               </p>
             </div>
             {status === "authenticated" ? (
-              isLoading ? (
-                <Spinner />
-              ) : (
-                <HowToBookDialog
-                  isBooked={isBooked}
-                  listingId={offer.id}
-                  propertyName={property.name}
-                  originalNightlyPrice={property.originalNightlyPrice}
-                  airbnbUrl={property.airbnbUrl ?? ""}
-                  checkIn={offer.checkIn}
-                  checkOut={offer.checkOut}
-                  requestId={request?.id}
-                  offer={{ property, request, ...offer }}
-                  totalPrice={offer.totalPrice}
-                  offerNightlyPrice={offerNightlyPrice}
-                  isAirbnb={isAirbnb}
-                >
-                  <Button size="lg" variant="greenPrimary" disabled={isBooked}>
-                    {isBooked ? (
-                      <>
-                        <CheckIcon className="size-5" />
-                        Booked
-                      </>
-                    ) : (
-                      <>Confirm Booking</>
-                    )}
-                  </Button>
-                </HowToBookDialog>
-              )
+              <HowToBookDialog
+                isBooked={isBooked}
+                listingId={offer.id}
+                propertyName={property.name}
+                originalNightlyPrice={property.originalNightlyPrice}
+                airbnbUrl={property.airbnbUrl ?? ""}
+                checkIn={offer.checkIn}
+                checkOut={offer.checkOut}
+                requestId={request?.id}
+                offer={{ property, request, ...offer }}
+                totalPrice={offer.totalPrice}
+                offerNightlyPrice={offerNightlyPrice}
+                isAirbnb={isAirbnb}
+              >
+                <Button size="lg" variant="greenPrimary" disabled={isBooked}>
+                  {isBooked ? (
+                    <>
+                      <CheckIcon className="size-5" />
+                      Booked
+                    </>
+                  ) : (
+                    <>Confirm Booking</>
+                  )}
+                </Button>
+              </HowToBookDialog>
             ) : (
               <Button
                 onClick={() => {

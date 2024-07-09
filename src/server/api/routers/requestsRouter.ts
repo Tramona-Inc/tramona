@@ -1,4 +1,3 @@
-import { env } from "@/env";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -8,6 +7,7 @@ import {
 import { db } from "@/server/db";
 import {
   MAX_REQUEST_GROUP_SIZE,
+  Request,
   groupMembers,
   groups,
   requestGroups,
@@ -18,7 +18,11 @@ import {
   requestsToProperties,
   users,
 } from "@/server/db/schema";
-import { sendText, sendWhatsApp } from "@/server/server-utils";
+import {
+  getPropertiesForRequest,
+  sendText,
+  sendWhatsApp,
+} from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import {
@@ -250,27 +254,44 @@ export const requestsRouter = createTRPCRouter({
               groupId: madeByGroupId,
             });
 
-            await tx.insert(requests).values({
-              ...req,
-              madeByGroupId,
-              requestGroupId,
-            });
+            const { requestId } = await tx
+              .insert(requests)
+              .values({
+                ...req,
+                madeByGroupId,
+                requestGroupId,
+              })
+              .returning({ requestId: requests.id })
+              .then((res) => res[0]!);
 
-            return { madeByGroupId, requestGroupId };
+            await getPropertiesForRequest(
+              { ...req, id: requestId },
+              { tx },
+            ).then((propertyIds) =>
+              Promise.all(
+                propertyIds.map((propertyId) =>
+                  tx
+                    .insert(requestsToProperties)
+                    .values({ requestId, propertyId }),
+                ),
+              ),
+            );
+
+            return { requestId, madeByGroupId };
           }),
         );
-      //   results.forEach((result) => {
-      //     if (result.status === "rejected") {
-      //       throw new TRPCError({
-      //         code: "INTERNAL_SERVER_ERROR",
-      //         message: JSON.stringify(result.reason),
-      //       });
-      //     }
-      //   });
-      // });
+        //   results.forEach((result) => {
+        //     if (result.status === "rejected") {
+        //       throw new TRPCError({
+        //         code: "INTERNAL_SERVER_ERROR",
+        //         message: JSON.stringify(result.reason),
+        //       });
+        //     }
+        //   });
+        // });
 
-      return { madeByGroupIds: results.map(r => r.madeByGroupId), results };
-    });
+        return { madeByGroupIds: results.map((r) => r.madeByGroupId), results };
+      });
 
       // if (ctx.user.isWhatsApp) {
       //   void sendWhatsApp({
@@ -297,23 +318,27 @@ export const requestsRouter = createTRPCRouter({
           `<https://tramona.com/admin|Go to admin dashboard>`,
         );
       } else {
-      const request = input[0]!;
+        const request = input[0]!;
 
-      const pricePerNight =
-        request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
-      const fmtdPrice = formatCurrency(pricePerNight);
-      const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-      const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
+        const pricePerNight =
+          request.maxTotalPrice /
+          getNumNights(request.checkIn, request.checkOut);
+        const fmtdPrice = formatCurrency(pricePerNight);
+        const fmtdDateRange = formatDateRange(
+          request.checkIn,
+          request.checkOut,
+        );
+        const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
 
-      sendSlackMessage(
-        `*${name} just made a request: ${request.location}*`,
-        `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-        `<https://tramona.com/admin|Go to admin dashboard>`,
-      );
-    }
+        sendSlackMessage(
+          `*${name} just made a request: ${request.location}*`,
+          `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+          `<https://tramona.com/admin|Go to admin dashboard>`,
+        );
+      }
 
-    return { madeByGroupIds, results };
-  }),
+      return { madeByGroupIds, results };
+    }),
 
   // resolving a request with no offers = reject
 

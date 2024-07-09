@@ -4,16 +4,32 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
-import { and, eq, inArray } from "drizzle-orm";
 import {
+  and,
+  between,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  lte,
+  notExists,
+  sql,
+  type SQL,
+} from "drizzle-orm";
+import {
+  type NewProperty,
   type User,
+  bookedDates,
   groupInvites,
   groupMembers,
   groups,
   hostTeamInvites,
   hostTeamMembers,
+  properties,
   users,
 } from "./db/schema";
+import { getCity, getCoordinates } from "./google-maps";
+import { EARTH_RADIUS_MILES } from "@/utils/constants";
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -218,4 +234,100 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
       where: eq(groups.id, hostTeamId),
     })
     .then((res) => res?.ownerId);
+}
+
+export async function addProperty({
+  hostId,
+  property,
+}: {
+  hostId?: string | null;
+  property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
+    latitude?: number;
+    longitude?: number;
+  };
+}) {
+  let lat = property.latitude;
+  let lng = property.longitude;
+
+  if (!lat || !lng) {
+    const { location } = await getCoordinates(property.address);
+    if (!location) throw new Error("Could not get coordinates for address");
+    lat = location.lat;
+    lng = location.lng;
+  }
+
+  const [insertedProperty] = await db
+    .insert(properties)
+    .values({
+      ...property,
+      hostId,
+      latitude: lat,
+      longitude: lng,
+      city: await getCity({ lat, lng }),
+    })
+    .returning({ id: properties.id });
+
+  return insertedProperty!.id;
+}
+export async function getPropertiesForRequest(
+  req: {
+    lat?: number | null;
+    lng?: number | null;
+    radius?: number | null;
+    location: string;
+    checkIn: Date;
+    checkOut: Date;
+    id: number;
+  },
+  { tx = db } = {},
+) {
+  let propertyIsNearRequest: SQL | undefined = sql`(
+    ${EARTH_RADIUS_MILES} * acos(
+      cos(radians(${req.lat})) * cos(radians(${properties.latitude})) * cos(radians(${properties.longitude}) - radians(${req.lng})) +
+      sin(radians(${req.lat})) * sin(radians(${properties.latitude}))
+    )
+  ) <= ${req.radius ?? 10}`;
+
+  if (req.radius === null || req.lat === null || req.lng === null) {
+    const coordinates = await getCoordinates(req.location);
+    if (coordinates.bounds) {
+      const { northeast, southwest } = coordinates.bounds;
+
+      propertyIsNearRequest = and(
+        lte(properties.longitude, northeast.lng),
+        gte(properties.longitude, southwest.lng),
+        lte(properties.latitude, northeast.lat),
+        gte(properties.latitude, southwest.lat),
+      );
+    }
+  }
+
+  const propertyisAvailable = notExists(
+    tx
+      .select()
+      .from(bookedDates)
+      .where(
+        and(
+          eq(bookedDates.propertyId, properties.id),
+          between(bookedDates.date, req.checkIn, req.checkOut),
+        ),
+      ),
+  );
+
+  return await tx.query.properties
+    .findMany({
+      where: and(
+        isNotNull(properties.hostId),
+        propertyIsNearRequest,
+        propertyisAvailable,
+      ),
+      columns: { id: true },
+    })
+    .then((res) => res.map((p) => p.id));
+}
+
+export async function getAdminId() {
+  return await db.query.users
+    .findFirst({ where: eq(users.email, "info@tramona.com") })
+    .then((res) => res!.id);
 }

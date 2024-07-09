@@ -171,7 +171,7 @@ export const roleRestrictedProcedure = <
       role !== "admin"
     ) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
+    };
 
     return next({
       ctx: {

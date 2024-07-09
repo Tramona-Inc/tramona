@@ -80,6 +80,7 @@ export default function UnclaimedOfferCard() {
 
 function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
   const { data: session } = useSession();
+  const { mutateAsync: deleteOffer } = api.offers.delete.useMutation();
 
   const handleButtonClick = (
     event: React.MouseEvent<HTMLDivElement | HTMLButtonElement>,
@@ -87,8 +88,12 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
     event.stopPropagation();
   };
 
+  const handleRemoveProperty = async (offerId: number) => {
+    await deleteOffer({ id: offerId });
+  };
+
   return (
-    <Link href={`/public-offer/${offer.id}`} className="">
+    <>
       <div className="grid grid-cols-10 items-center gap-x-2 rounded-xl border text-center">
         <Image
           src={offer.property.imageUrls[0] ?? ""}
@@ -148,12 +153,17 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
             </div>
           </Button>
           {session?.user.role === "admin" && (
-            <Button size="icon" variant="ghost" className="text-red-600">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-red-600"
+              onClick={() => handleRemoveProperty(offer.id)}
+            >
               <TrashIcon />
             </Button>
           )}
         </div>
       </div>
-    </Link>
+    </>
   );
 }
