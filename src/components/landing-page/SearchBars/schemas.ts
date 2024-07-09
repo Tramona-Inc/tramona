@@ -20,20 +20,20 @@ export const defaultSearchOrReqValues: Partial<z.input<typeof searchSchema>> =
 
 const cityRequestSchema = z
   .object({
-    location: zodString().optional(),
-    date: z.object({ from: z.date(), to: z.date() }).optional(),
-    numGuests: zodInteger({ min: 1 }).optional(),
-    maxNightlyPriceUSD: zodNumber({ min: 0 }).optional(),
+    location: zodString(),
+    date: z.object({ from: z.date(), to: z.date() }),
+    numGuests: zodInteger({ min: 1 }),
+    maxNightlyPriceUSD: zodNumber({ min: 0 }),
     minNumBedrooms: z.number().optional(),
     minNumBeds: z.number().optional(),
     minNumBathrooms: z.number().optional(),
     airbnbLink: z
       .string()
-      .url()
-      .refine((url) => url.startsWith("https://www.airbnb.com/"), {
-        message: 'URL must start with "https://www.airbnb.com/"',
-      })
-      .optional(),
+      .optional()
+      .or(z.literal(""))
+      .refine((url) => !url || url.startsWith("https://www.airbnb.com/rooms"), {
+        message: 'URL must start with "https://www.airbnb.com/rooms"',
+      }),
     note: optional(zodString()),
   })
   .superRefine((data, ctx) => {
