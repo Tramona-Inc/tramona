@@ -13,7 +13,7 @@ export function NavBarLink({
   return (
     <NavLink
       href={href}
-      noChildren={["/", "/admin"].includes(href)}
+      noChildren={["/", "/admin", "/host"].includes(href)}
       render={({ selected }) => (
         <div
           className={cn(
