@@ -16,12 +16,14 @@ interface ChartComponentProps {
   data: { date: string; Earnings: number }[];
   dataKey: string;
   xAxisDataKey?: string;
+  hideYAxis?: boolean;
 }
 
 const ChartComponent = ({
   data,
   dataKey,
   xAxisDataKey = "date",
+  hideYAxis = false,
 }: ChartComponentProps) => {
   const currencyFormatter = (value: number) => formatCurrency(value);
   return (
@@ -33,7 +35,7 @@ const ChartComponent = ({
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey={xAxisDataKey} />
-          <YAxis tickFormatter={currencyFormatter} />
+          <YAxis tickFormatter={currencyFormatter} hide={hideYAxis} />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Bar dataKey={dataKey} fill="#134E4A" barSize={30} />

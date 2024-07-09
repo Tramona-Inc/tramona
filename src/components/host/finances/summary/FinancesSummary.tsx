@@ -14,7 +14,7 @@ export default function FinanceSummary({
   becameHostAt: Date | undefined;
 }) {
   const { data: accountBalance } =
-    api.stripe.checkStripeConnectAcountBalance.useQuery(hostStripeAccountId!, {
+    api.stripe.checkStripeConnectAccountBalance.useQuery(hostStripeAccountId!, {
       enabled: !!hostStripeAccountId,
     });
 

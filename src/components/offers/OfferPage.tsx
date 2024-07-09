@@ -99,8 +99,8 @@ export default function OfferPage({
               </div>
             ))
           )}
-          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
-            <div className="  screen-full flex justify-center">
+          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+            <div className="screen-full flex justify-center">
               <OfferPhotos
                 propertyImages={property.imageUrls}
                 indexOfSelectedImage={indexOfSelectedImage}
@@ -130,7 +130,7 @@ export default function OfferPage({
                     {property.imageUrls.map((imageUrl, index) => (
                       <DialogTrigger
                         key={index}
-                        className={` hover:opacity-90 ${
+                        className={`hover:opacity-90 ${
                           index === 0 || index % 3 === 0
                             ? "col-span-2 row-span-2"
                             : property.imageUrls.length - 1 == index &&
@@ -156,8 +156,8 @@ export default function OfferPage({
                       </DialogTrigger>
                     ))}
                   </div>
-                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
-                    <div className="  screen-full flex justify-center">
+                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+                    <div className="screen-full flex justify-center">
                       <OfferPhotos
                         propertyImages={property.imageUrls}
                         indexOfSelectedImage={indexOfSelectedImage}

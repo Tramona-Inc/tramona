@@ -48,7 +48,6 @@ export const stripeRouter = createTRPCRouter({
       const currentDate = new Date(); // Get the current date and time
       //we need the host Stripe account id to put in webhook
       //get hostID from the property
-
       // Object that can be access through webhook and client
       const metadata = {
         user_id: ctx.user.id,
@@ -73,7 +72,7 @@ export const stripeRouter = createTRPCRouter({
             },
           }),
         };
-      return stripe.checkout.sessions.create({
+      const session = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
         line_items: [
@@ -92,11 +91,15 @@ export const stripeRouter = createTRPCRouter({
           },
         ],
         // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
-        success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`,
-        cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
+        //success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`, //remove becuase we are now using embedded
+        //cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
+        return_url: `${env.NEXTAUTH_URL}/return?session_id={CHECKOUT_SESSION_ID}`,
         metadata: metadata, // metadata access for checkout session
         payment_intent_data: paymentIntentData,
+        ui_mode: "embedded",
       });
+      console.log("fromcheckoutsession", session);
+      return session;
     }),
 
   authorizePayment: protectedProcedure
@@ -515,7 +518,7 @@ export const stripeRouter = createTRPCRouter({
 
       return accountSession;
     }),
-  checkStripeConnectAcountBalance: protectedProcedure
+  checkStripeConnectAccountBalance: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
       const accountId = input;

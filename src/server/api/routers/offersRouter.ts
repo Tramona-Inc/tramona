@@ -211,6 +211,8 @@ export const offersRouter = createTRPCRouter({
           acceptedAt: true,
           tramonaFee: true,
           id: true,
+          propertyId: true,
+          requestId: true, //testing
         },
         with: {
           request: {
@@ -226,7 +228,19 @@ export const offersRouter = createTRPCRouter({
           property: {
             with: {
               host: {
-                columns: { id: true, name: true, email: true, image: true },
+                columns: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  image: true,
+                },
+                with: {
+                  hostProfile: {
+                    columns: {
+                      stripeAccountId: true,
+                    },
+                  },
+                },
               },
             },
           },

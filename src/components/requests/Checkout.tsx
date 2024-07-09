@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
+
 import {
   cn,
   formatCurrency,
@@ -27,6 +28,7 @@ import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import StripePaymentInfo from "./StripePaymentInfo";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -112,10 +114,6 @@ export default function Checkout({
         </p>
       </div>
     );
-  }
-
-  function StripePaymentInfo() {
-    return <div>insert stripe checkout form here</div>;
   }
 
   const formSchema = z.object({
@@ -315,7 +313,7 @@ export default function Checkout({
           <Separator className="my-4" />
           <CancellationPolicy />
           <Separator className="my-4" />
-          <StripePaymentInfo />
+          <StripePaymentInfo offer={{ property, request, ...offer }} />
           <Separator className="my-4" />
           <ContactInfo />
           <Separator className="my-4" />
@@ -328,7 +326,7 @@ export default function Checkout({
           <Separator className="my-6" />
           <CheckoutSummary />
           <Separator className="my-6" />
-          <StripePaymentInfo />
+          <StripePaymentInfo offer={{ property, request, ...offer }} />
           <Separator className="my-6" />
           <CancellationPolicy />
           <Separator className="my-6" />
