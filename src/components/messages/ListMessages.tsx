@@ -19,7 +19,12 @@ function NoMessages() {
   );
 }
 
-export default function ListMessages() {
+export default function ListMessages({
+  conversationId,
+}: {
+  conversationId: string,
+} 
+) {
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
 
   const [userScrolled, setUserScrolled] = useState(false);
@@ -31,6 +36,8 @@ export default function ListMessages() {
   const currentConversationId = useMessage(
     (state) => state.currentConversationId,
   );
+
+  // console.log(currentConversationId);
 
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,

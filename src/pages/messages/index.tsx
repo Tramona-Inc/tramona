@@ -30,6 +30,7 @@ function MessageDisplay() {
   // * Allows us to open message from url query
   const [isViewed, setIsViewd] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
+  console.log(conversations)
   const { query } = useRouter();
 
   useEffect(() => {
@@ -115,7 +116,7 @@ export default function MessagePage() {
     </Head>  */}
     <DashboardLayout type={session?.user.role ?? "guest"}>
       <div className="grid grid-rows-1 p-0 w-screen h-screen-minus-header-n-footer bg-black border  border-gray-800">
-    <div className="flex flex-col">
+      <div className="flex flex-col">
       <div className="flex flex-col w-full h-[7rem] items-center justify-start p-4 text-base font-bold text-white bg-[#1A1A1A]">
                 <UserAvatar image={session?.user.image}/>
                 <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Tramona Host</p>

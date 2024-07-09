@@ -1,22 +1,98 @@
-import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
+import {Popover, PopoverContent, PopoverTrigger} 
+from '@/components/ui/popover'
+import supabase from "@/utils/supabase-client";
 import { Button } from '../ui/button'
 import UserAvatar from '../_common/UserAvatar'
 import { Form, FormControl, FormField, FormItem } from '../ui/form'
+import { type ChatMessageType, useMessage } from "@/utils/store/messages";
+import { useConversation } from '@/utils/store/conversations';
 import { Input } from '../ui/input'
 import {MessageCircleMore, Mic, ArrowUp, SendHorizonal, Smile, X} from 'lucide-react'
 import { Session } from 'next-auth';
 import { useForm } from "react-hook-form";
+import { useEffect, useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { PopoverClose } from '@radix-ui/react-popover'
+import { api } from '@/utils/api'
+import { nanoid } from "nanoid";
+import { errorToast } from "@/utils/toasts";
+import AdminMessages from './AdminMessages';
+// import { createConversationWithAdmin } from '@/server/api/routers/messagesRouter';
 
 
 export default function MessagesPopover({session}: {
     session: Session | null,
 }) {
-    const formSchema = z.object({
+
+  const {mutateAsync: createConversation} = api.messages.createConversationWithAdmin.useMutation();
+  const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
+   uniqueId: session?.user.id ?? "",
+   session: session ? true : false })
+
+  const addMessageToConversation = useMessage( 
+    (state) => state.addMessageToConversation
+  )  
+  
+  const setConversationToTop = useConversation(
+    (state) => state.setConversationToTop,
+  );
+  
+  const removeMessageFromConversation = useMessage(
+    (state) => state.removeMessageFromConversation,
+  );
+  
+  const formSchema = z.object({
         message: z.string(),
-      })
+  })
+
+  
+  if(!session && typeof window !== "undefined")
+    {
+      const temporary_token = crypto.randomUUID();
+      localStorage.setItem("tempToken", temporary_token);
+    }
+
+  // const {data: conversation_id} = api.messages.getConversationsWithAdmin.useQuery({uniqueId: temporary_token});
+  
+  
+  const handleOnSend = async (values: z.infer<typeof formSchema>) => {
+          const conversationId = await createConversation({uniqueId: session?.user.id ?? ""});
+          
+          const newMessage: ChatMessageType = {
+            id: nanoid(),
+            createdAt: new Date().toISOString().slice(0, -1),
+            conversationId: conversationId ?? "",
+            userId: session?.user.id ?? "",
+            message: values.message,
+            read: false,
+            isEdit: false,
+          };
+    
+          const newMessageToDb = {
+            id: newMessage.id,
+            conversation_id: conversationId ?? "",
+            user_id: newMessage.userId,
+            message: newMessage.message,
+            read: newMessage.read,
+            is_edit: newMessage.isEdit,
+            created_at: new Date().toISOString(),
+          };
+
+          setConversationToTop(conversationId ?? "", newMessage);
+          addMessageToConversation(conversationId ?? "", newMessage)
+          const { error } = await supabase
+            .from("messages")
+            .insert(newMessageToDb)
+            .select("*, user(email, name, image)")
+            .single();
+
+          if (error) {
+            removeMessageFromConversation(conversationId ?? "", newMessage.id);
+            errorToast();
+          }
+          form.reset();
+        }
       
       const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema)
@@ -44,45 +120,38 @@ export default function MessagesPopover({session}: {
                   <X className='fixed top-4 left-12 text-white'/>
               </PopoverClose>
               </div>
-              <div className="grow grid grid-rows-1">
-                <div className="flex place-items-end m-1 p-1">
-                  {/* <UserAvatar className="my-2" image={session?.user.image}/> */}
-                  <p className="px-2 py-2 border-none rounded-r-xl rounded-tl-xl bg-[#2E2E2E] text-sm text-white text-background max-w-[15rem] h-max antialiased">
-                    Ask Your Question
-                  </p>
-                </div>
-              <div className="flex flex-row-reverse m-1 p-1">
-                {/* <UserAvatar image={session?.user.image}/> */}
-              <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">
-                  Hey! how are you doing? I had few questions
-                  {/* <span className='text-xs pl-4 text-right'>{`${hours}:${minutes}`}</span> */}
-                </p>
-              </div>
-              </div>
+              {/* {!session ?? 
+              <AdminMessages conversationId={conversationId} />
+
+            } */}
+              <AdminMessages conversationId={conversationId ?? ""} />
               </div>
               <div className="flex flex-row gap-2 h-max items-center p-1 border border-gray-500 rounded-full mx-4 my-2">
               <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleOnSend)} className='flex flex-row w-full'>
                 <FormField
                 control={form.control}
                 name="message"
-                render={({field}) => (
-                  <FormItem className="flex-1">
+                render={({field}) => {
+                  return (
+                  <FormItem className='flex-1'>
                     <FormControl>
                       <Input
-                      placeholder="Enter your message..."
-                      className="rounded-xl border-0 bg-transparent text-sm text-white"
+                      placeholder="Type a message..."
+                      className="flex w-full rounded-xl border-0 bg-transparent text-sm text-white"
                       {...field}
                       />
                     </FormControl>
-                  </FormItem>
-                )}
-                ></FormField>
-              </Form>
-              <Smile className='text-gray-500 text-xs font-light antialiased w-5 h-5'/>
-                <Mic className='text-gray-500 text-xs font-light antialiased w-5 h-5' />
-              <Button className='bg-[#0D4273] px-2 rounded-full '>
+                  </FormItem>)
+                }}
+                />
+              {/* <Smile className='text-gray-500 text-xs font-light antialiased w-5 h-5'/>
+                <Mic className='text-gray-500 text-xs font-light antialiased w-5 h-5' /> */}
+              <Button className='bg-[#0D4273] px-2 rounded-full' size="icon" type='submit'>
                 <ArrowUp className='text-xs antialiased'/>
               </Button>
+                </form>
+              </Form>
               </div>
               </PopoverContent>            
             </Popover>

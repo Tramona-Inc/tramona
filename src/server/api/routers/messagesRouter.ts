@@ -4,9 +4,10 @@ import { db } from "@/server/db";
 import { conversationParticipants, users } from "@/server/db/schema";
 import { zodString } from "@/utils/zod-utils";
 import { and, eq, inArray, ne } from "drizzle-orm";
-import { z } from "zod";
+import { input, z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
+
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
 
@@ -76,12 +77,15 @@ export async function fetchConversationWithAdmin(userId: string) {
     (conv) =>
       conv.conversation.participants.length === 2 &&
       conv.conversation.participants.some(
-        (participant) => participant.user.id === ADMIN_ID,
+        (participant) => participant.user?.id === ADMIN_ID,
       ),
   );
 
   return conversationWithAdmin?.conversation.id ?? null;
 }
+
+//fetchconversation if user is not logged in with tempToken
+
 
 export async function fetchConversationWithOffer(
   userId: string,
@@ -138,6 +142,20 @@ export async function createConversationWithAdmin(userId: string) {
   // Generate conversation and get id
   const createdConversationId = await generateConversation();
 
+  if(!userId && createdConversationId && typeof window !== "undefined") {
+    const temporary_token = createdConversationId
+    localStorage.setItem("tempToken", temporary_token);
+    const participantValues = [
+      { conversationId: createdConversationId, userId: temporary_token },
+      { conversationId: createdConversationId, userId: ADMIN_ID },
+    ];
+    await db.insert(conversationParticipants).values(participantValues);
+    console.log("insert into cp");
+
+    return createdConversationId;
+  }
+
+
   if (createdConversationId !== undefined) {
     // Insert participants for the user and admin
     const participantValues = [
@@ -146,7 +164,7 @@ export async function createConversationWithAdmin(userId: string) {
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
-
+    console.log("insert into cp");
     return createdConversationId;
   }
 }
@@ -194,9 +212,11 @@ export async function addTwoUserToConversation(
     const participantValues = [
       { conversationId: createdConversationId, userId: user1Id },
       { conversationId: createdConversationId, userId: user2Id },
+
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
+    console.log("inserted into cp")
   }
 }
 
@@ -209,7 +229,7 @@ export const messagesRouter = createTRPCRouter({
         ({ conversation }) => ({
           ...conversation,
           participants: conversation.participants
-            .filter((p) => p.user.id !== ctx.user.id)
+            .filter((p) => p.user?.id !== ctx.user.id)
             .map((p) => p.user)
             .filter(Boolean),
         }),
@@ -249,16 +269,36 @@ export const messagesRouter = createTRPCRouter({
     return [];
   }),
 
-  createConversationWithAdmin: protectedProcedure.mutation(async ({ ctx }) => {
-    const conversationId = await fetchConversationWithAdmin(ctx.user.id);
+  getConversationsWithAdmin: publicProcedure
+  .input(z.object({
+    uniqueId: z.string(),
+    session: z.boolean(),
+  }))
+  .query(async ({ input }) => {
+    if(!input.session && typeof window !== "undefined"){
+      const uniqueId = localStorage.getItem("tempToken")
+      const result = await fetchConversationWithAdmin(uniqueId ?? "" )
+      return result;
+    }
+    const result = await fetchConversationWithAdmin(input.uniqueId);
+    return result;
+  }),
+
+
+  createConversationWithAdmin: publicProcedure
+  .input(z.object({uniqueId: z.string()}))
+  .mutation(async ({ input }) => {
+    const conversationId = await fetchConversationWithAdmin(input.uniqueId);
 
     // Create conversation with admin if it doesn't exist
     if (!conversationId) {
-      return await createConversationWithAdmin(ctx.user.id);
+      console.log("reaching to 'createConversationWithAdmin'")
+      return await createConversationWithAdmin(input.uniqueId);
     }
 
     return conversationId;
   }),
+
 
   createConversationWithOffer: protectedProcedure
     .input(

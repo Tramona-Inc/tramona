@@ -15,6 +15,7 @@ export function groupMessages(
   }[],
 ) {
   const groups: MessageGroup[] = [];
+  console.log("I dont understand whats going on")
 
   messages.forEach(({ message, user }) => {
     const lastGroup = groups[groups.length - 1];

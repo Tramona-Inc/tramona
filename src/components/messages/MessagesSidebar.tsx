@@ -194,6 +194,8 @@ export default function MessagesSidebar({
     void fetchConversationIds();
   }, [optimisticIds, selectedConversation?.id, session, setConversationToTop]);
 
+  console.log("in Messages Sidebar");
+
   return (
     <div
       className={cn(

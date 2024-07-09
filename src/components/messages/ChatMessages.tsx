@@ -23,7 +23,7 @@ export default function ChatMessages({
 
   return (
     <>
-      <ListMessages />
+      <ListMessages conversationId={conversationId}/>
     </>
   );
 }

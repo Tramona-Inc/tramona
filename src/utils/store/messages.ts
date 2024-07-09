@@ -44,7 +44,7 @@ export const useMessage = create<MessageState>((set, get) => ({
   setCurrentConversationId: (id: string) => {
     set(() => ({
       currentConversationId: id,
-    }));
+  }));
   },
   switchConversation: (conversationId: string) => {
     set({ currentConversationId: conversationId });

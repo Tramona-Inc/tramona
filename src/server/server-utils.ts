@@ -256,3 +256,9 @@ export async function addProperty({
 
   return insertedProperty!.id;
 }
+
+export async function getAdminId() {
+  return await db.query.users
+    .findFirst({ where: eq(users.email, "info@tramona.com") })
+    .then((res) => res!.id);
+}

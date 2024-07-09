@@ -24,7 +24,9 @@ export const messages = pgTable(
     conversationId: varchar("conversation_id")
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
-    userId: text("user_id").references(() => users.id, {
+    userId: text("user_id")
+    .references(() => users.id,   //foreign key constraint will be violated if I insert into messages table w/o userId
+    {    
       onDelete: "set null",
     }),
     message: varchar("message", { length: 1500 }).notNull(),
@@ -47,8 +49,7 @@ export const conversationParticipants = pgTable(
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
     userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      // .references(() => users.id, { onDelete: "cascade" }),
   },
   (t) => ({
     compoundKey: primaryKey({ columns: [t.conversationId, t.userId] }),
