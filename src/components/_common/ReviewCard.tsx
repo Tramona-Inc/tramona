@@ -1,10 +1,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
 import Stars from "@/components/_common/Stars";
 import { ChevronRight } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useRef, useState, useEffect } from "react";
-
 
 type ReviewCardProps = {
   name: string;
@@ -30,8 +34,8 @@ export default function ReviewCard({
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 p-4 sm:flex-row">
-      <Avatar className="h-12 w-12">
+    <div className="flex flex-col gap-4 sm:flex-row">
+      <Avatar className="h-10 w-10">
         <AvatarImage src={profilePic} alt={name} />
         <AvatarFallback>
           {name
@@ -40,19 +44,21 @@ export default function ReviewCard({
             .join("")}
         </AvatarFallback>
       </Avatar>
-      <div className="">
+      <div>
         <div className="flex items-center gap-2">
-          <p className="text-lg font-bold text-black">{name}</p>
+          <p className="font-bold">{name}</p>
         </div>
         <div className="flex items-center">
-          <Stars rating={rating} size="small"/>
+          <Stars rating={rating} size="small" />
         </div>
         <div className="z-20 max-w-2xl py-2 text-zinc-700">
-          <div ref={reviewRef} className="line-clamp-3 text-sm break-words">{review}</div>
+          <div ref={reviewRef} className="line-clamp-3 break-words text-sm">
+            {review}
+          </div>
           {isOverflowing && (
             <div className="flex justify-start py-2">
               <Dialog>
-                <DialogTrigger className="inline-flex size-sm items-center justify-center text-foreground underline underline-offset-2">
+                <DialogTrigger className="size-sm inline-flex items-center justify-center text-foreground underline underline-offset-2">
                   Show more
                   <ChevronRight className="ml-2" />
                 </DialogTrigger>
