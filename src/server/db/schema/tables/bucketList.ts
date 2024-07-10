@@ -9,7 +9,7 @@ import {
 import { users } from "./users";
 import { properties } from "./properties";
 import { createSelectSchema } from "drizzle-zod";
-import { zodString } from "@/utils/zod-utils";
+import { zodNumber, zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 
 export const bucketListDestinations = pgTable("bucket_list_destinations", {
@@ -42,6 +42,7 @@ export const BucketListDestinationSelectSchema = createSelectSchema(
 
 export const ProfileInfoSchema = z.object({
   name: zodString(),
+  age: zodNumber({ min: 1 }),
   about: zodString({ maxLen: 1000 }),
   location: zodString(),
   facebook_link: z

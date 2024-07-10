@@ -3,8 +3,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
 import { type DialogState } from "@/utils/dialog";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import PlacesInput from "../_common/PlacesInput";
@@ -15,18 +28,14 @@ import React from "react";
 type Props = {
   state: DialogState;
   profileInfo: z.infer<typeof ProfileInfoSchema>;
-}
+};
 
 const FormSchema = ProfileInfoSchema;
 
-export default function EditProfileDialog({
-  state,
-  profileInfo
-}: Props) {
-
+export default function EditProfileDialog({ state, profileInfo }: Props) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: profileInfo
+    defaultValues: profileInfo,
   });
 
   // React.useEffect(() => {
@@ -34,19 +43,23 @@ export default function EditProfileDialog({
   //   form.reset(profileInfo);
   // }, [profileInfo]);
 
-  const { mutate: updateProfileInfo } = api.profile.updateProfileInfo.useMutation({
-    onSuccess: () => {
-      state.setState("closed")
-    }
-  })
+  const { mutate: updateProfileInfo } =
+    api.profile.updateProfileInfo.useMutation({
+      onSuccess: () => {
+        state.setState("closed");
+      },
+    });
 
   function onSubmit(values: z.infer<typeof FormSchema>) {
-    console.log(values)
+    console.log(values);
     updateProfileInfo(values);
   }
 
   return (
-    <Dialog open={state.state === "open" ? true : false} onOpenChange={(open) => !open && state.setState("closed")}>
+    <Dialog
+      open={state.state === "open" ? true : false}
+      onOpenChange={(open) => !open && state.setState("closed")}
+    >
       <DialogContent>
         <DialogHeader className="border-b-2 pb-4">
           <DialogTitle>
@@ -72,6 +85,20 @@ export default function EditProfileDialog({
               />
 
               <FormField
+                name="age"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Age</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="number" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
                 name="about"
                 control={form.control}
                 render={({ field }) => (
@@ -79,8 +106,8 @@ export default function EditProfileDialog({
                     <FormLabel>About</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Tell us a little about yourself" 
-                        className="resize-none" 
+                        placeholder="Tell us a little about yourself"
+                        className="resize-none"
                         {...field}
                       />
                     </FormControl>
@@ -154,7 +181,10 @@ export default function EditProfileDialog({
               <div className="h-1"></div>
 
               <DialogFooter className="border-t-2 pt-4">
-                <Button type="submit" className="w-full bg-teal-800/90 hover:bg-teal-800 text-base">
+                <Button
+                  type="submit"
+                  className="w-full bg-teal-800/90 text-base hover:bg-teal-800"
+                >
                   Save
                 </Button>
               </DialogFooter>
@@ -163,5 +193,5 @@ export default function EditProfileDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
