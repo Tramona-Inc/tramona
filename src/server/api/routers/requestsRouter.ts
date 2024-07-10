@@ -34,7 +34,6 @@ import { TRPCError } from "@trpc/server";
 import { and, count, eq, exists } from "drizzle-orm";
 import { groupBy } from "lodash";
 import { z } from "zod";
-import { waitUntil } from '@vercel/functions';
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -228,7 +227,7 @@ export const requestsRouter = createTRPCRouter({
   createMultiple: protectedProcedure
     .input(
       requestInsertSchema
-        .omit({ madeByGroupId: true, requestGroupId: true })
+        .omit({ madeByGroupId: true, requestGroupId: true, latLngPoint: true })
         .array()
         .min(1)
         .max(MAX_REQUEST_GROUP_SIZE),
@@ -264,11 +263,14 @@ export const requestsRouter = createTRPCRouter({
               .returning({ requestId: requests.id })
               .then((res) => res[0]!);
 
+
+
+
+
             await getPropertiesForRequest(
-              { ...req, id: requestId },
+              { ...req, id: requestId, },
               { tx },
             ).then((propertyIds) => {
-              console.log('Property IDs:', propertyIds);
 
               return Promise.all(
                 propertyIds.map((propertyId) =>
@@ -676,7 +678,7 @@ export const requestsRouter = createTRPCRouter({
 
   getByPropertyId: protectedProcedure
     .input(z.number())
-    .query(async ({ ctx, input: propertyId }) => {
+    .query(async ({ input: propertyId }) => {
       // const hostId = await db.query.properties
       //   .findFirst({
       //     columns: { hostId: true },
@@ -757,7 +759,7 @@ export const requestsRouter = createTRPCRouter({
       };
     }),
 
-    rejectRequest: protectedProcedure
+  rejectRequest: protectedProcedure
     .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db

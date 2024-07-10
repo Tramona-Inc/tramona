@@ -39,7 +39,7 @@ export default function HostRequests() {
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
                 <Button variant="darkOutline" className="mt-2" onClick={() => {
-                  rejectRequest(requestData.request.id);
+                  rejectRequest({requestId: requestData.request.id});
                 }}>
                   Reject
                 </Button>
