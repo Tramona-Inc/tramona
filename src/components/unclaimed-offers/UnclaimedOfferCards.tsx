@@ -32,7 +32,7 @@ export default function UnclaimedOfferCard() {
     <div className="w-5/6 space-y-2">
       {!isLoading ? (
         unMatchedOffers ? (
-          <div className="flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {unMatchedOffers.slice(0, displayCount).map((offer) => (
                 <div key={offer.property.id}>
@@ -40,6 +40,11 @@ export default function UnclaimedOfferCard() {
                 </div>
               ))}
             </div>
+            {session?.user.role === "admin" && (
+              <div className="mt-20 border-4 rounded-xl p-4">
+              <AddUnclaimedOffer />
+              </div>
+            )}
           </div>
         ) : (
           <div>Sorry, we currently don&apos;t have any unmatched offers.</div>
@@ -107,7 +112,7 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
             height={130}
             className="flex h-full w-full items-center justify-center rounded-xl"
           />
-          <div className="absolute bottom-0 left-0 right-0 flex w-full items-center justify-center rounded-b-xl bg-[#2C72DC] text-[16px] text-[#FFFFFF]">
+          <div className="absolute bottom-0 left-0 right-0 flex w-full items-center justify-center rounded-b-xl bg-blue-500 text-[16px] text-[#FFFFFF]">
             {!isNaN(
               Math.floor(
                 ((offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP -
@@ -166,11 +171,9 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
             </div>
           </div>
           <div className="">
-            <Link
-              href={`/public-offer/${offer.id}`}
-            >
+            <Link href={`/public-offer/${offer.id}`}>
               <Button
-                className="w-full h-[36px] bg-[#001410] font-semibold hover:opacity-80"
+                className="h-[36px] w-full bg-[#001410] font-semibold hover:opacity-80"
                 onClick={handleButtonClick}
               >
                 Request to book
@@ -179,42 +182,31 @@ function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
           </div>
 
           <div className="flex flex-row items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="col-span-1 font-semibold"
-            onClick={handleButtonClick}
-          >
-            <div onClick={handleButtonClick}>
-              <ShareOfferDialog
-                id={offer.id}
-                isRequest={false}
-                propertyName={offer.property.name}
-              />
-            </div>
-          </Button>
-          {session?.user.role === "admin" && (
             <Button
-              size="icon"
               variant="ghost"
-              className="text-red-600"
-              onClick={() => handleRemoveProperty(offer.id)}
+              size="icon"
+              className="col-span-1 font-semibold"
+              onClick={handleButtonClick}
             >
-              <TrashIcon />
+              <div onClick={handleButtonClick}>
+                <ShareOfferDialog
+                  id={offer.id}
+                  isRequest={false}
+                  propertyName={offer.property.name}
+                />
+              </div>
             </Button>
-          )}
-          {session?.user.role === "admin" && (
-            // <Button
-            //   size="icon"
-            //   variant="ghost"
-            //   className="text-red-600"
-            //   onClick={() => handleRemoveProperty(offer.id)}
-            // >
-            //   <CirclePlus />
-            // </Button>
-            <AddUnclaimedOffer />
-          )}
-        </div>
+            {session?.user.role === "admin" && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="text-red-600"
+                onClick={() => handleRemoveProperty(offer.id)}
+              >
+                <TrashIcon />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </>
