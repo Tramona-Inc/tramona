@@ -17,9 +17,13 @@ import { z } from "zod";
 import { convertDateFormat } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import ErrorMsg from "@/components/ui/ErrorMsg";
 
 export default function DateOfBirth() {
   const { data: session } = useSession();
+  const router = useRouter();
+
   const formSchema = z.object({
     dob: z.string(),
   });
@@ -31,10 +35,14 @@ export default function DateOfBirth() {
     defaultValues: { dob: "" },
   });
 
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
+    onSuccess: () => {
+      void router.push("/auth/referral");
+    },
+  });
 
   async function onDobSubmit({ dob }: FormValues) {
-    if (session?.user.id) {
+    if (session?.user.id && dob) {
       await updateProfile({
         id: session.user.id,
         dateOfBirth: convertDateFormat(dob),
@@ -55,6 +63,7 @@ export default function DateOfBirth() {
         <Card className="mx-auto max-w-md">
           <CardContent>
             <Form {...form}>
+              <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
               <form onSubmit={form.handleSubmit(onDobSubmit)}>
                 <FormField
                   name="dob"
@@ -62,7 +71,7 @@ export default function DateOfBirth() {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input {...field} type="date" />
+                        <Input {...field} type="date" autoFocus />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
