@@ -373,7 +373,6 @@ export default function ProfilePage() {
           state={editProfileDialogState}
           profileInfo={{
             name: profileInfo.name ?? session?.user.username ?? "",
-            age: profileInfo.age ?? 1,
             about:
               profileInfo.about ??
               "Joined Tramona at " +

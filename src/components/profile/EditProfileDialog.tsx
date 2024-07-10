@@ -83,21 +83,6 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
                   </FormItem>
                 )}
               />
-
-              <FormField
-                name="age"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Age</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="number" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 name="about"
                 control={form.control}

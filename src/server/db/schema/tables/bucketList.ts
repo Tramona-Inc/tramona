@@ -42,7 +42,6 @@ export const BucketListDestinationSelectSchema = createSelectSchema(
 
 export const ProfileInfoSchema = z.object({
   name: zodString(),
-  age: zodNumber({ min: 1 }),
   about: zodString({ maxLen: 1000 }),
   location: zodString(),
   facebook_link: z
