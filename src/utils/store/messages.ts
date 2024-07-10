@@ -4,7 +4,7 @@ import { create } from "zustand";
 import supabase from "../supabase-client";
 import { errorToast } from "../toasts";
 
-export type ChatMessageType = MessageType & { userId: string }; // make userId non-null
+export type ChatMessageType = MessageType; // make userId non-null
 
 type ConversationsState = Record<
   string,
@@ -136,12 +136,24 @@ export const useMessage = create<MessageState>((set, get) => ({
     }
 
     try {
-      const { data, error } = await supabase
+      // const { data, error } = await supabase
+      //   .from("messages")
+      //   .select(
+      //     `
+      //       *,
+      //       user(name, image, email)
+      //     `,
+      //   )
+      //   .range(0, LIMIT_MESSAGE)
+      //   .eq("conversation_id", conversationId)
+      //   .order("created_at", { ascending: false });
+
+        const { data, error } = await supabase
         .from("messages")
         .select(
           `
             *,
-            user(name, image, email)
+            user(name, email, image)
           `,
         )
         .range(0, LIMIT_MESSAGE)
@@ -158,15 +170,26 @@ export const useMessage = create<MessageState>((set, get) => ({
           createdAt: message.created_at,
           conversationId: message.conversation_id,
           userId: message.user_id,
+          userToken: message.user_token,
           message: message.message,
           read: message.read ?? false, // since fetched means it's read
           isEdit: message.is_edit ?? false, // Provide a default value if needed
-          user: {
-            name: message.user?.name ?? "",
-            image: message.user?.image ?? "",
-            email: message.user?.email ?? "",
-          },
+          // user: {
+          //   name: message.user?.name ?? "",
+          //   image: message.user?.image ?? "",
+          //   email: message.user?.email ?? "",
+          // },
         }));
+        // const chatMessages: ChatMessageType[] = data.map((message) => ({
+        //   id: message.id,
+        //   createdAt: message.created_at,
+        //   conversationId: message.conversation_id,
+        //   userId: message.user_id,
+        //   userToken: message. userToken,
+        //   message: message.message,
+        //   read: message.read ?? false, // since fetched means it's read
+        //   isEdit: message.is_edit ?? false, // Provide a default value if needed
+        // }));
 
         const hasMore = chatMessages.length >= LIMIT_MESSAGE;
 

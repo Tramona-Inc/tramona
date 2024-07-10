@@ -20,16 +20,21 @@ import { errorToast } from "@/utils/toasts";
 import AdminMessages from './AdminMessages';
 // import { createConversationWithAdmin } from '@/server/api/routers/messagesRouter';
 
+let tempToken: string;
 
 export default function MessagesPopover({session}: {
     session: Session | null,
 }) {
 
   const {mutateAsync: createConversation} = api.messages.createConversationWithAdmin.useMutation();
-  const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
-   uniqueId: session?.user.id ?? "",
-   session: session ? true : false })
 
+  // const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
+  //  uniqueId: session?.user.id ?? "",
+  //  session: session ? true : false })
+
+  //  const { fetchInitialMessages } = useMessage()
+  // void fetchInitialMessages(conversationId ?? "")
+  
   const addMessageToConversation = useMessage( 
     (state) => state.addMessageToConversation
   )  
@@ -45,55 +50,66 @@ export default function MessagesPopover({session}: {
   const formSchema = z.object({
         message: z.string(),
   })
-
   
-  if(!session && typeof window !== "undefined")
-    {
-      const temporary_token = crypto.randomUUID();
-      localStorage.setItem("tempToken", temporary_token);
+  if (!session && typeof window !== "undefined") {
+    tempToken = localStorage.getItem("tempToken") ?? "";
+    if (!tempToken) {
+      tempToken = crypto.randomUUID();
+      localStorage.setItem("tempToken", tempToken);
     }
+  }
 
   // const {data: conversation_id} = api.messages.getConversationsWithAdmin.useQuery({uniqueId: temporary_token});
   
-  
   const handleOnSend = async (values: z.infer<typeof formSchema>) => {
-          const conversationId = await createConversation({uniqueId: session?.user.id ?? ""});
-          
-          const newMessage: ChatMessageType = {
-            id: nanoid(),
-            createdAt: new Date().toISOString().slice(0, -1),
-            conversationId: conversationId ?? "",
-            userId: session?.user.id ?? "",
-            message: values.message,
-            read: false,
-            isEdit: false,
-          };
+
+      //create conversation id if it doesnot exist
+      const conversationId = await createConversation({
+        uniqueId: session?.user.id ??  tempToken ?? "",
+        session: session ? true : false,
+      });
+      console.log(conversationId)
+
+      const newMessage: ChatMessageType = {
+        id: nanoid(),
+        createdAt: new Date().toISOString().slice(0, -1),
+        conversationId: conversationId ?? "",
+        userId: session?.user.id ?? "", //user is logged in
+        userToken: tempToken, //user has not logged in
+        message: values.message,
+        read: false,
+        isEdit: false,
+      };
+
+      const newMessageToDb = {
+        id: newMessage.id,
+        conversation_id: conversationId ?? "",
+        user_id: newMessage.userId,
+        message: newMessage.message,
+        userToken: newMessage.userToken,
+        read: newMessage.read,
+        is_edit: newMessage.isEdit,
+        created_at: new Date().toISOString(),
+      };
+
+      setConversationToTop(conversationId ?? "", newMessage);
+      addMessageToConversation(conversationId ?? "", newMessage)
+      const { error } = await supabase
+        .from("messages")
+        .insert(newMessageToDb)
+        .select("*, user(email, name, image)")
+        // .select("*")
+        .single();
+
+      if (error) {
+        removeMessageFromConversation(conversationId ?? "", newMessage.id);
+        errorToast();
+      }
+      form.reset();
     
-          const newMessageToDb = {
-            id: newMessage.id,
-            conversation_id: conversationId ?? "",
-            user_id: newMessage.userId,
-            message: newMessage.message,
-            read: newMessage.read,
-            is_edit: newMessage.isEdit,
-            created_at: new Date().toISOString(),
-          };
-
-          setConversationToTop(conversationId ?? "", newMessage);
-          addMessageToConversation(conversationId ?? "", newMessage)
-          const { error } = await supabase
-            .from("messages")
-            .insert(newMessageToDb)
-            .select("*, user(email, name, image)")
-            .single();
-
-          if (error) {
-            removeMessageFromConversation(conversationId ?? "", newMessage.id);
-            errorToast();
-          }
-          form.reset();
-        }
-      
+    
+        
+      }
       const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema)
       })
@@ -124,7 +140,8 @@ export default function MessagesPopover({session}: {
               <AdminMessages conversationId={conversationId} />
 
             } */}
-              <AdminMessages conversationId={conversationId ?? ""} />
+              {/* <AdminMessages conversationId={conversationId ?? ""} /> */}
+              <AdminMessages />
               </div>
               <div className="flex flex-row gap-2 h-max items-center p-1 border border-gray-500 rounded-full mx-4 my-2">
               <Form {...form}>

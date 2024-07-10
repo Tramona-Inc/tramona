@@ -45,7 +45,7 @@ export const groupInvites = pgTable(
       .notNull()
       .references(() => groups.id, { onDelete: "cascade" }),
     inviteeEmail: text("invitee_email").notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.groupId, vt.inviteeEmail] }),
@@ -57,5 +57,5 @@ export const groupInvitesLink = pgTable("group_invites_link", {
   groupId: integer("group_id")
     .notNull()
     .references(() => groups.id, { onDelete: "cascade" }),
-  expiresAt: timestamp("expires_at").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });

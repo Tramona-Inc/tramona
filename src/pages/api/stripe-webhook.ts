@@ -8,6 +8,7 @@ import {
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
+  hostProfiles,
   offers,
   referralCodes,
   referralEarnings,
@@ -15,6 +16,7 @@ import {
   trips,
   users,
 } from "@/server/db/schema";
+import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { sendEmail } from "@/server/server-utils";
@@ -83,6 +85,20 @@ export default async function webhook(
                   parseInt(paymentIntentSucceeded.metadata.listing_id!),
                 ),
               );
+
+            await db
+              .update(trips)
+              .set({
+                paymentIntentId: paymentIntentSucceeded.id,
+                checkoutSessionId:
+                  paymentIntentSucceeded.metadata.checkout_session_id,
+              })
+              .where(
+                eq(
+                  trips.offerId,
+                  parseInt(paymentIntentSucceeded.metadata.listing_id!),
+                ),
+              ); // setting the paymentIntentId in the trips table
 
             const requestId = paymentIntentSucceeded.metadata.request_id;
             if (requestId && !isNaN(parseInt(requestId))) {
@@ -248,7 +264,7 @@ export default async function webhook(
           );
           
           await db
-            .update(offers)
+            .update(trips)
             .set({
               checkoutSessionId: checkoutSessionCompleted.id,
             })
@@ -429,6 +445,25 @@ export default async function webhook(
           }
         }
       }
+
+      case "account.external_account.created":
+        //"use this for when you want an event to trigger after onboarding",
+
+        break;
+
+      case "account.updated":
+        const account = event.data.object;
+
+        if (account.id) {
+          const stripeAccount = await stripe.accounts.retrieve(account.id);
+          await db
+            .update(hostProfiles)
+            .set({
+              chargesEnabled: stripeAccount.payouts_enabled, // fix later or true
+            })
+            .where(eq(hostProfiles.stripeAccountId, account.id));
+        }
+        break;
 
       default:
       // console.log(`Unhandled event type ${event.type}`);

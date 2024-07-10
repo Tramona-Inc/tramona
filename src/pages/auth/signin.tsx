@@ -76,12 +76,11 @@ export default function SignIn({
 
   const { query } = useRouter();
   const [inviteLinkId] = useInviteStore((state) => [state.inviteLinkId]);
-  const { mutate: inviteUser } = api.groups.inviteUserById.useMutation();
+  // const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
   const { status } = useSession();
   const router = useRouter();
   const [openCongratsDialog, setOpenCongratsDialog] = useState(false);
   const[location, setLocation] = useState("")
-
 
 
   const handleSubmit = async ({
@@ -104,12 +103,11 @@ export default function SignIn({
       //     <CongratsDialog location={location} />
       //   })
       // }
-      if (inviteLinkId) {
-        void inviteUser({inviteLinkId});
-      }
+      // if (inviteLinkId) {
+      //   void inviteUser({ inviteLinkId });
+      // }
     });
   };
-
 
   useEffect(() => {
     if (query.error) {
@@ -269,10 +267,8 @@ export default function SignIn({
 }
 
 export async function getStaticProps() {
-  const providers = await getProviders();
-
   return {
-    props: { providers: providers ?? [] },
+    props: { providers: await getProviders() },
   };
 }
 

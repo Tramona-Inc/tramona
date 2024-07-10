@@ -46,6 +46,7 @@ export const useConversation = create<ConversationListState>((set) => ({
             {
               id: newMessage.id,
               userId: newMessage.userId,
+              userToken: newMessage.userToken,
               createdAt: newMessage.createdAt,
               conversationId: newMessage.conversationId,
               message: newMessage.message,

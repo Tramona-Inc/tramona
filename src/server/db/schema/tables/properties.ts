@@ -4,6 +4,7 @@ import {
   boolean,
   date,
   doublePrecision,
+  geometry,
   index,
   integer,
   pgEnum,
@@ -31,13 +32,13 @@ export const ALL_PROPERTY_TYPES = [
   "Camper/RV",
   "Chalet",
   "Bed & Breakfast",
-  "Castle",
+  // "Castle",
   "Tent",
   "Cabin",
   "Townhouse",
   "Bungalow",
   "Hut",
-  "Dorm",
+  // "Dorm",
   "Aparthotel",
   "Hotel",
   "Yurt",
@@ -47,8 +48,8 @@ export const ALL_PROPERTY_TYPES = [
   "Tiny House",
   "Plane",
   "Igloo",
-  "Serviced apartment",
-  "Other",
+  // "Serviced apartment",
+  // "Other",
   "Lighthouse",
   "Tipi",
   "Cave",
@@ -81,7 +82,7 @@ export const ALL_PROPERTY_TYPES = [
   "Trullo",
   "Windmill",
   "Shepherd’s Hut",
-  "Villa",
+  // "Villa",
 ] as const;
 
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
@@ -236,7 +237,9 @@ export const properties = pgTable("properties", {
   mapScreenshot: text("map_screenshot"),
   cancellationPolicy: text("cancellation_policy"),
 
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   isPrivate: boolean("is_private").notNull().default(false),
   // priceRestriction: integer("price_restriction"),
   propertyStatus: propertyStatusEnum("property_status").default("Listed"),
@@ -245,7 +248,10 @@ export const properties = pgTable("properties", {
   pricingScreenUrl: varchar("pricing_screen_url"),
   hostProfilePic: varchar("host_profile_pic"),
   hostawayListingId: integer("hostaway_listing_id"),
-});
+  latLngPoint: geometry("lat_lng_point", { type: 'point', mode: 'xy', srid: 4326 }),
+}, (t) => ({
+  spatialIndex: index('spacial_index').using('gist', t.latLngPoint),
+}));
 
 export type Property = typeof properties.$inferSelect;
 export type NewProperty = typeof properties.$inferInsert;

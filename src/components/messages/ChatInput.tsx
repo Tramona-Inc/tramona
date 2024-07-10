@@ -59,9 +59,10 @@ export default function ChatInput({
     if (session) {
       const newMessage: ChatMessageType = {
         id: nanoid(),
-        createdAt: new Date().toISOString().slice(0, -1),
+        createdAt: new Date().toISOString(),
         conversationId: conversationId,
         userId: session.user.id,
+        userToken: "",
         message: values.message,
         read: false,
         isEdit: false,
@@ -72,6 +73,7 @@ export default function ChatInput({
         created_at: new Date().toISOString(),
         conversation_id: conversationId,
         user_id: newMessage.userId,
+        userToken: newMessage.userToken,
         message: newMessage.message,
         read: newMessage.read,
         is_edit: newMessage.isEdit,

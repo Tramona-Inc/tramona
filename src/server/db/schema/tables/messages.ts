@@ -13,7 +13,9 @@ import { users } from "./users";
 export const conversations = pgTable("conversations", {
   id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
   name: varchar("name", { length: 255 }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   offerId: varchar("offer_id"),
 });
 
@@ -24,15 +26,18 @@ export const messages = pgTable(
     conversationId: varchar("conversation_id")
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-    .references(() => users.id,   //foreign key constraint will be violated if I insert into messages table w/o userId
-    {    
-      onDelete: "set null",
-    }),
+      userId: text("user_id").references(() => users.id, {
+        onDelete: "set null",
+      }),
+    userToken: text("user_token")
+    .references(() => conversationParticipants.userToken),
     message: varchar("message", { length: 1500 }).notNull(),
     read: boolean("read").default(false),
     isEdit: boolean("is_edit").default(false),
-    createdAt: timestamp("created_at", { mode: "string" })
+    createdAt: timestamp(
+      "created_at",
+      { withTimezone: true, mode: "string" },
+    )
       .notNull()
       .defaultNow(),
   },
@@ -49,7 +54,8 @@ export const conversationParticipants = pgTable(
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
     userId: text("user_id")
-      // .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
+    userToken: text("user_token").unique(),
   },
   (t) => ({
     compoundKey: primaryKey({ columns: [t.conversationId, t.userId] }),

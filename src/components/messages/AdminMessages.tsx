@@ -5,18 +5,34 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useConversation } from "@/utils/store/conversations";
 import { useEffect } from "react";
 
-export default function AdminMessages ({conversationId}:{
-  conversationId: string | null
-}) {
-  
-  const {data: session} = useSession()
-  
+// export default function AdminMessages ({conversationId}:{
+//   conversationId: string | null
+// }) {
+  export default function AdminMessages (){  
+  const {data: session} = useSession();
+  let tempToken: string = "";
+  if(!session && typeof window !== undefined){
+    tempToken = localStorage.getItem("tempToken") ?? "";
+  }
+  console.log(tempToken)
+  const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
+    uniqueId: session?.user.id ?? tempToken ?? "",
+    session: session ? true : false,
+  })
+  console.log(conversationId)
 
+
+  const { fetchInitialMessages } = useMessage()
+  void fetchInitialMessages(conversationId ?? "")
   const { conversations } = useMessage()
+  
   const optimisticIds = useMessage((state) => state.optimisticIds);
     const messages = conversationId 
     ? conversations[conversationId]?.messages ?? []
     : [];
+
+    console.log(messages)
+
     return(
     <>
               {/* <div className="grow grid grid-rows-1 overflow-y-scroll"> */}
@@ -46,7 +62,7 @@ export default function AdminMessages ({conversationId}:{
                     {/* </p>
                     </div> */}
                   {/* } */}
-                  {messages.map((message, index) => ( message.userId === session?.user.id ?
+                  {messages.map((message, index) => ( message.userId === session?.user.id || message.userId === tempToken ?
                     <>
                     <div className="flex flex-row-reverse m-1 p-1" key={index}>
                       <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">

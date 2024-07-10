@@ -75,7 +75,7 @@ export default function ListMessages({
       const { error } = await supabase
         .from("user")
         .select("name, email, image")
-        .eq("id", payload.new.user_id)
+        .eq("id", payload.new.user_id ?? "")
         .single();
       if (error) {
         errorToast();
@@ -83,8 +83,9 @@ export default function ListMessages({
         const newMessage: ChatMessageType = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
-          userId: payload.new.user_id,
+          userId: payload.new.user_id ?? "",
           message: payload.new.message,
+          userToken: "",
           isEdit: payload.new.is_edit,
           createdAt: payload.new.created_at,
           read: payload.new.read,

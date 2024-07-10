@@ -7,6 +7,7 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import { input, z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
+import { columns } from "@/components/admin/view-recent-host/table/columns";
 
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
@@ -73,6 +74,7 @@ export async function fetchConversationWithAdmin(userId: string) {
 
   // Check if conversation contains two participants
   // and check if admin id is in there
+  console.log(result)
   const conversationWithAdmin = result?.conversations.find(
     (conv) =>
       conv.conversation.participants.length === 2 &&
@@ -80,12 +82,18 @@ export async function fetchConversationWithAdmin(userId: string) {
         (participant) => participant.user?.id === ADMIN_ID,
       ),
   );
-
+  console.log("conversation Id", conversationWithAdmin?.conversation.id)
   return conversationWithAdmin?.conversation.id ?? null;
 }
 
-//fetchconversation if user is not logged in with tempToken
+//fetchconversation, if user is not logged in, with tempToken
+export async function fetchConversationWithAdminWithoutUser(userToken: string){
+  const result = await db.query.conversationParticipants.findFirst({
+    where: eq(conversationParticipants.userToken, userToken),
+})
 
+  return result?.conversationId
+}
 
 export async function fetchConversationWithOffer(
   userId: string,
@@ -138,23 +146,18 @@ async function generateConversation(
   return createdConversation?.id;
 }
 
-export async function createConversationWithAdmin(userId: string) {
+export async function createConversationWithAdmin(userId: string | null, userToken: string | null) {
   // Generate conversation and get id
   const createdConversationId = await generateConversation();
-
-  if(!userId && createdConversationId && typeof window !== "undefined") {
-    const temporary_token = createdConversationId
-    localStorage.setItem("tempToken", temporary_token);
+  if(!userId && createdConversationId !== undefined){
     const participantValues = [
-      { conversationId: createdConversationId, userId: temporary_token },
+      { conversationId: createdConversationId, userToken: userToken },
       { conversationId: createdConversationId, userId: ADMIN_ID },
     ];
     await db.insert(conversationParticipants).values(participantValues);
     console.log("insert into cp");
-
     return createdConversationId;
   }
-
 
   if (createdConversationId !== undefined) {
     // Insert participants for the user and admin
@@ -216,7 +219,6 @@ export async function addTwoUserToConversation(
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
-    console.log("inserted into cp")
   }
 }
 
@@ -275,29 +277,53 @@ export const messagesRouter = createTRPCRouter({
     session: z.boolean(),
   }))
   .query(async ({ input }) => {
-    if(!input.session && typeof window !== "undefined"){
-      const uniqueId = localStorage.getItem("tempToken")
-      const result = await fetchConversationWithAdmin(uniqueId ?? "" )
+    if(!input.session){
+      const result = await fetchConversationWithAdminWithoutUser(input.uniqueId);
+      return result
+    }
+    else{
+      const result = await fetchConversationWithAdmin(input.uniqueId);
+      console.log("reaching here")
       return result;
     }
-    const result = await fetchConversationWithAdmin(input.uniqueId);
-    return result;
   }),
 
 
-  createConversationWithAdmin: publicProcedure
-  .input(z.object({uniqueId: z.string()}))
+   createConversationWithAdmin: publicProcedure
+  .input(z.object({
+    uniqueId: z.string(),
+    session: z.boolean(),
+  }))
   .mutation(async ({ input }) => {
-    const conversationId = await fetchConversationWithAdmin(input.uniqueId);
-
-    // Create conversation with admin if it doesn't exist
-    if (!conversationId) {
-      console.log("reaching to 'createConversationWithAdmin'")
-      return await createConversationWithAdmin(input.uniqueId);
+    console.log(input.session)
+    //user has not signed in
+    if(!input.session){
+      const conversationId = await fetchConversationWithAdminWithoutUser(input.uniqueId);
+      if(!conversationId){ 
+        console.log("reaching to 'createConversationWithAdmin'")
+        return await createConversationWithAdmin("", input.uniqueId);
+      }
+      console.log(conversationId)
+      return conversationId;
     }
-
-    return conversationId;
+    else{
+      //user has signed in
+      const conversationId = await fetchConversationWithAdmin(input.uniqueId);
+  
+      // Create conversation with admin if it doesn't exist
+      if (!conversationId) {
+        console.log("reaching to 'createConversationWithAdmin'")
+        return await createConversationWithAdmin(input.uniqueId, "");
+      }
+      console.log(conversationId)
+      return conversationId;
+    }
   }),
+
+  // createConversationWithAdminWithoutUser: publicProcedure
+  // .mutation( async () => {
+    
+  // } )
 
 
   createConversationWithOffer: protectedProcedure

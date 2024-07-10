@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {MessageCircleMore, Mic, ArrowUp, SendHorizonal, Smile, X} from 'lucide-react'
+import {cn} from '@/utils/utils';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -52,15 +53,29 @@ function MessageDisplay() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <div className="grid h-screen-minus-header-n-footer grid-cols-1 max-lg:border-x md:grid-cols-8">
-      <MessagesSidebar
-        selectedConversation={selectedConversation}
-        setSelected={selectConversation}
-      />
-      <MessagesContent
-        selectedConversation={selectedConversation}
-        setSelected={selectConversation}
-      />
+    <div className="flex h-screen-minus-header-n-footer divide-x">
+      <div
+        className={cn(
+          "w-full md:w-96",
+          selectedConversation && "hidden md:block",
+        )}
+      >
+        <MessagesSidebar
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
+        />
+      </div>
+      <div
+        className={cn(
+          "flex h-full flex-1 items-center justify-center",
+          !selectedConversation && "hidden md:flex",
+        )}
+      >
+        <MessagesContent
+          selectedConversation={selectedConversation}
+          setSelected={selectConversation}
+        />
+      </div>
     </div>
   );
 }

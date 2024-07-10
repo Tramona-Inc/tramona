@@ -18,6 +18,7 @@ import {
   getRequestWithGroupDetails,
   type RequestWithGroup,
 } from "../RequestGroupAvatars";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({ email: zodEmail() });
 type FormValues = z.infer<typeof formSchema>;
@@ -58,21 +59,21 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
           });
         })
         .catch((err) => {
-          console.error("Failed to copy: ", err);
+          errorToast(`Failed to copy: ${err}`);
         });
     }
   };
 
   const handleShare = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (inviteLink && navigator.share) {
-      navigator
+      void navigator
         .share({
           title: "Join my request",
           text: "Check out this request on our website!",
           url: inviteLink.link,
         })
-        .then(() => console.log("Successful share"))
-        .catch((error) => console.log("Error sharing", error));
+        .catch(() => errorToast("Couldn't share, please try again"));
     }
   };
 
@@ -87,7 +88,7 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
             title: `Emailed an invite to ${email}`,
             description: "The invite will expire in 24 hours",
           });
-        } else if (status === "added user") {
+        } else {
           toast({
             title: `Successfully added ${inviteeName ?? "member"} to the group`,
           });
@@ -145,7 +146,9 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
               <Button onClick={handleCopyToClipboard}>Copy</Button>
             </>
           ) : (
-            <Button className="flex-1 w-100" onClick={handleShare}>Add other travelers</Button>
+            <Button className="w-100 flex-1" onClick={handleShare}>
+              Add other travelers
+            </Button>
           )}
         </div>
       )}
