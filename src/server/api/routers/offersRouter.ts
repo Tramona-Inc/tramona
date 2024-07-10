@@ -7,7 +7,6 @@ import {
 } from "@/server/api/trpc";
 import {
   groupMembers,
-  offerInsertSchema,
   offerSelectSchema,
   offerUpdateSchema,
   offers,
@@ -173,6 +172,9 @@ export const offersRouter = createTRPCRouter({
             columns: { numGuests: true, location: true, id: true },
           },
           property: {
+            columns: {
+              latLngPoint: false,
+            },
             with: {
               host: {
                 columns: { id: true, name: true, email: true, image: true },

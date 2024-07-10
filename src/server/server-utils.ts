@@ -4,6 +4,8 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
+import { waitUntil } from '@vercel/functions';
+
 import {
   and,
   between,
@@ -26,12 +28,11 @@ import {
   hostTeamInvites,
   hostTeamMembers,
   properties,
-  requests,
   requestsToProperties,
   users,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
-import { EARTH_RADIUS_MILES } from "@/utils/constants";
+
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -272,8 +273,14 @@ export async function addProperty({
       latLngPoint: sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
       hostTeamId,
     })
-    .returning({ id: properties.id });
+    .returning({ id: properties.id, latLngPoint: properties.latLngPoint });
 
+  waitUntil(processRequests(insertedProperty!));
+
+  return insertedProperty!.id;
+}
+
+async function processRequests(insertedProperty: { id: number, latLngPoint: any }) {
   const allRequests = await db.query.requests.findMany({});
 
   for (const request of allRequests) {
@@ -286,75 +293,17 @@ export async function addProperty({
       checkIn: request.checkIn,
       checkOut: request.checkOut,
       latLngPoint: request.latLngPoint,
+      propertyLatLngPoint: insertedProperty.latLngPoint,
     });
 
-    if (matchingProperties.includes(insertedProperty!.id)) {
+    if (matchingProperties.includes(insertedProperty.id)) {
       await db.insert(requestsToProperties).values({
         requestId: request.id,
-        propertyId: insertedProperty!.id,
+        propertyId: insertedProperty.id,
       });
     }
   }
-
-
-  return insertedProperty!.id;
 }
-// export async function getPropertiesForRequest(
-//   req: {
-//     lat?: number | null;
-//     lng?: number | null;
-//     radius?: number | null;
-//     location: string;
-//     checkIn: Date;
-//     checkOut: Date;
-//     id: number;
-//   },
-//   { tx = db } = {},
-// ) {
-//   let propertyIsNearRequest: SQL | undefined = sql`(
-//     ${EARTH_RADIUS_MILES} * acos(
-//       cos(radians(${req.lat})) * cos(radians(${properties.latitude})) * cos(radians(${properties.longitude}) - radians(${req.lng})) +
-//       sin(radians(${req.lat})) * sin(radians(${properties.latitude}))
-//     )
-//   ) <= ${req.radius ?? 10}`;
-
-//   if (req.radius === null || req.lat === null || req.lng === null) {
-//     const coordinates = await getCoordinates(req.location);
-//     if (coordinates.bounds) {
-//       const { northeast, southwest } = coordinates.bounds;
-
-//       propertyIsNearRequest = and(
-//         lte(properties.longitude, northeast.lng),
-//         gte(properties.longitude, southwest.lng),
-//         lte(properties.latitude, northeast.lat),
-//         gte(properties.latitude, southwest.lat),
-//       );
-//     }
-//   }
-
-//   const propertyisAvailable = notExists(
-//     tx
-//       .select()
-//       .from(bookedDates)
-//       .where(
-//         and(
-//           eq(bookedDates.propertyId, properties.id),
-//           between(bookedDates.date, req.checkIn, req.checkOut),
-//         ),
-//       ),
-//   );
-
-//   return await tx.query.properties
-//     .findMany({
-//       where: and(
-//         isNotNull(properties.hostId),
-//         propertyIsNearRequest,
-//         propertyisAvailable,
-//       ),
-//       columns: { id: true },
-//     })
-//     .then((res) => res.map((p) => p.id));
-// }
 
 export async function getPropertiesForRequest(
   req: {
@@ -366,13 +315,14 @@ export async function getPropertiesForRequest(
     checkOut: Date;
     id: number;
     latLngPoint?: { x: number; y: number; } | null;
+    propertyLatLngPoint?: { x: number; y: number; } | null;
   },
   { tx = db } = {},
 ) {
-  let propertyIsNearRequest: SQL | undefined;
+  let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
 
+  //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
   if (req.lat != null && req.lng != null && req.radius != null) {
-    console.log('request with lat, lng ----------------------------');
     // Convert radius from miles to degrees (approximate)
     const radiusDegrees = req.radius / 69;
 
@@ -384,50 +334,41 @@ export async function getPropertiesForRequest(
     );
   } else {
     const coordinates = await getCoordinates(req.location);
-    console.log('request without lat, lng ----------------------');
     if (coordinates.bounds) {
       const { northeast, southwest } = coordinates.bounds;
-      // propertyIsNearRequest = and(
-      //   lte(properties.longitude, northeast.lng),
-      //   gte(properties.longitude, southwest.lng),
-      //   lte(properties.latitude, northeast.lat),
-      //   gte(properties.latitude, southwest.lat),
-      // );
-
       propertyIsNearRequest = sql`
-      ST_Within(
-        lat_lng_point,
-        ST_MakeEnvelope(
-          ${southwest.lng}, ${southwest.lat},
-          ${northeast.lng}, ${northeast.lat},
-          4326
+        ST_Within(
+          properties.lat_lng_point,
+          ST_MakeEnvelope(
+            ${southwest.lng}, ${southwest.lat},
+            ${northeast.lng}, ${northeast.lat},
+            4326
+          )
         )
-      )
-    `;
+      `;
     }
   }
 
-
-const propertyisAvailable = notExists(
-  tx
-    .select()
-    .from(bookedDates)
-    .where(
-      and(
-        eq(bookedDates.propertyId, properties.id),
-        between(bookedDates.date, req.checkIn, req.checkOut),
+  const propertyisAvailable = notExists(
+    tx
+      .select()
+      .from(bookedDates)
+      .where(
+        and(
+          eq(bookedDates.propertyId, properties.id),
+          between(bookedDates.date, req.checkIn, req.checkOut),
+        ),
       ),
-    ),
-);
+  );
 
-return await tx.query.properties
-  .findMany({
+  const result = await tx.query.properties.findMany({
     where: and(
       isNotNull(properties.hostId),
       propertyIsNearRequest,
       propertyisAvailable,
     ),
-    columns: { id: true },
-  })
-  .then((res) => res.map((p) => p.id));
+    columns: { id: true, city: true, latitude: true, longitude: true },
+  });
+
+  return result.map(p => p.id);
 }

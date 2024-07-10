@@ -16,6 +16,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { propertyTypeEnum } from "./properties";
 import { users } from "./users";
+import { z } from "zod";
 
 export const requests = pgTable(
   "requests",
@@ -53,11 +54,12 @@ export const requests = pgTable(
     requestSpatialIndex: index('request_spacial_index').using('gist', t.latLngPoint)
   }),
 );
-
 export type Request = typeof requests.$inferSelect;
 export type NewRequest = typeof requests.$inferInsert;
 export const requestSelectSchema = createSelectSchema(requests);
-export const requestInsertSchema = createInsertSchema(requests);
+export const requestInsertSchema = createInsertSchema(requests, {
+  latLngPoint: z.object({x:z.number(), y:z.number()})
+});
 
 export const MAX_REQUEST_GROUP_SIZE = 10;
 

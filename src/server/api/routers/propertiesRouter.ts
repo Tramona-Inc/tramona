@@ -477,6 +477,7 @@ export const propertiesRouter = createTRPCRouter({
           SELECT
             cr.city AS property_city,
             cr.request_id,
+            p.id AS property_id,
             p.*,
             r.*,
             u.name AS user_name,
@@ -502,9 +503,8 @@ export const propertiesRouter = createTRPCRouter({
 
 
       for (const row of rawData) {
-        console.log(row);
         const property = {
-          id: row.id,
+          id: row.property_id,
           hostId: row.host_id,
           hostTeamId: row.host_team_id,
           propertyType: row.property_type,
