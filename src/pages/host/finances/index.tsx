@@ -7,7 +7,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useCallback, useEffect, useState } from "react";
-
+import NoStripeAccount from "@/components/host/finances/NoStripeAccount";
 import {
   ConnectAccountOnboarding,
   ConnectNotificationBanner,
@@ -110,11 +110,7 @@ export default function Page() {
                 )
               ) : (
                 <div className="flex flex-col items-center">
-                  {!hostInfo?.stripeAccountId && (
-                    <Button onClick={handleCreateStripeConnectAccount}>
-                      Create Stripe Account
-                    </Button>
-                  )}
+                  {!hostInfo?.stripeAccountId && <NoStripeAccount />}
                   {isStripeConnectInstanceReady && (
                     <ConnectAccountOnboarding
                       onExit={() => {
