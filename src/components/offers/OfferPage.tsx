@@ -14,7 +14,7 @@ import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { CheckIcon, ImagesIcon, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
+//import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";

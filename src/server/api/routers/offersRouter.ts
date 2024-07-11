@@ -248,7 +248,6 @@ export const offersRouter = createTRPCRouter({
           },
         },
       });
-
       if (!offer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
@@ -262,7 +261,6 @@ export const offersRouter = createTRPCRouter({
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
-
       return offer;
     }),
 
@@ -304,7 +302,6 @@ export const offersRouter = createTRPCRouter({
       if (!offer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
-
       return offer;
     }),
 

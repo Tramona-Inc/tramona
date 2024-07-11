@@ -106,12 +106,17 @@ export const miscRouter = createTRPCRouter({
 
         await sleep(2000);
 
-        const dialogExists = await page.$('[role="dialog"]');
+        // const dialogExists = await page.$('[role="dialog"]');
+        // if (dialogExists) {
+        //   await page.mouse.click(1, 1); // Click on a point outside the popup (e.g., top-left corner)
+        // }
+        const dialogExists = await page.$(`[role=“dialog”]`);
         if (dialogExists) {
-          await page.mouse.click(1, 1); // Click on a point outside the popup (e.g., top-left corner)
+          // If popup appears, click outside of it to dismiss
+          await page.mouse.click(10, 10); // Click on a point outside the popup
         }
 
-        await sleep(500);
+        await sleep(1000);
 
         // Extract city name above the map with a longer timeout and error handling
         const cityName = await page.evaluate(() => {

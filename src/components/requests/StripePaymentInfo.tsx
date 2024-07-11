@@ -11,12 +11,11 @@ import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/OfferPage";
 import type Stripe from "stripe";
-type StripeOptions =    ["options"];
 
 interface StripeOptions {
-  clientSecret?: string | null | undefined;
-  fetchClientSecret?: (() => Promise<string>) | null | undefined;
-  onComplete?: (() => void) | undefined;
+  clientSecret?: string | null;
+  fetchClientSecret?: (() => Promise<string>) | null;
+  onComplete?: () => void;
 }
 
 const StripePaymentInfo = ({
@@ -47,12 +46,11 @@ const StripePaymentInfo = ({
     [offer.totalPrice, offer.tramonaFee, tax],
   );
 
-  const [options, setOptions] = useState<StripeOptions>();
+  const [options, setOptions] = useState<StripeOptions | null>(null);
   const [checkoutReady, setCheckoutReady] = useState(false);
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
 
   const fetchClientSecret = useCallback(async () => {
-    console.log("fetching client secret");
     if (!session.data?.user) return;
     try {
       const response = await createCheckout.mutateAsync({
@@ -66,9 +64,9 @@ const StripePaymentInfo = ({
         cancelUrl: cancelUrl,
         images: property.imageUrls,
         totalSavings: originalTotal - (total + tax),
-        phoneNumber: session.data?.user.phoneNumber ?? "",
+        phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
-        hostStripeId: property.host?.hostProfile?.stripeAccountId ?? null,
+        hostStripeId: property.host?.hostProfile?.stripeAccountId ?? "",
       });
       return response;
     } catch (error) {
@@ -98,18 +96,11 @@ const StripePaymentInfo = ({
       .catch((error) => {
         console.error("Error creating checkout session:", error);
       });
-  }, [fetchClientSecret]); // Re-run useEffect when fetchClientSecret changes
-
-  // useEffect(() => {
-  //   if (options) {
-  //     console.log("we fetched client secret");
-  //     console.log(options);
-  //   }
-  // }, [options]);
+  }, []); // Re-run useEffect when fetchClientSecret changes
 
   return (
     <div id="checkout">
-      {checkoutReady && (
+      {options && checkoutReady && (
         <EmbeddedCheckoutProvider
           stripe={stripePromise}
           options={options}

@@ -316,11 +316,11 @@ export default function Checkout({
             <Separator className="my-4" />
             <CancellationPolicy />
             <Separator className="my-4" />
-            <StripePaymentInfo offer={{ property, request, ...offer }} />
-            <Separator className="my-4" />
             <ContactInfo />
+            {/* <Separator className="my-4" />
+            <TermsAndSubmit /> */}
             <Separator className="my-4" />
-            <TermsAndSubmit />
+            <StripePaymentInfo offer={{ property, request, ...offer }} />
           </div>
         ) : (
           <div className="md:hidden">
@@ -330,13 +330,13 @@ export default function Checkout({
             <Separator className="my-6" />
             <CheckoutSummary />
             <Separator className="my-6" />
-            <StripePaymentInfo offer={{ property, request, ...offer }} />
-            <Separator className="my-6" />
             <CancellationPolicy />
             <Separator className="my-6" />
             <ContactInfo />
             <Separator className="my-6" />
-            <TermsAndSubmit />
+            {/* <TermsAndSubmit /> */}
+            <Separator className="my-6" />
+            <StripePaymentInfo offer={{ property, request, ...offer }} />
             <CustomerReview />
             <div className="mt-4">
               <p className="text-sm">

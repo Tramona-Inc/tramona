@@ -58,20 +58,22 @@ export const stripeRouter = createTRPCRouter({
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
       };
-
+      console.log("this is host stripe id inside of the metadata");
+      console.log(metadata.host_stripe_id);
       const paymentIntentData: Stripe.Checkout.SessionCreateParams.PaymentIntentData =
         {
           metadata: metadata, // metadata access for payment intent (webhook access)
-          ...(metadata.host_stripe_id && {
-            transfer_data: {
-              amount: input.price - input.tramonaServiceFee,
-              destination: metadata.host_stripe_id,
-            },
-          }),
+
+          transfer_data: {
+            amount: input.price - input.tramonaServiceFee,
+            destination: metadata.host_stripe_id,
+          },
         };
+
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
+        submit_type: "book",
         line_items: [
           {
             price_data: {
@@ -90,12 +92,12 @@ export const stripeRouter = createTRPCRouter({
         // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
         //success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`, //remove becuase we are now using embedded
         //cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
-        return_url: `${env.NEXTAUTH_URL}/return?session_id={CHECKOUT_SESSION_ID}`,
+        return_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}`,
         metadata: metadata, // metadata access for checkout session
         payment_intent_data: paymentIntentData,
         ui_mode: "embedded",
       });
-      console.log("fromcheckoutsession", session.client_secret);
+      console.log("This is the host stripe id ", metadata.host_stripe_id);
       return { clientSecret: session.client_secret };
     }),
 
