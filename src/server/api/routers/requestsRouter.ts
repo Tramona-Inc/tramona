@@ -264,18 +264,18 @@ export const requestsRouter = createTRPCRouter({
               .returning({ requestId: requests.id })
               .then((res) => res[0]!);
 
-            await getPropertiesForRequest(
-              { ...req, id: requestId },
-              { tx },
-            ).then((propertyIds) =>
-              Promise.all(
-                propertyIds.map((propertyId) =>
-                  tx
-                    .insert(requestsToProperties)
-                    .values({ requestId, propertyId }),
-                ),
-              ),
-            );
+            // TODO: fix
+
+            // await getPropertiesForRequest(
+            //   { ...req, id: requestId },
+            //   { tx },
+            // ).then((propertyIds) =>
+            //   tx
+            //     .insert(requestsToProperties)
+            //     .values(
+            //       propertyIds.map((propertyId) => ({ requestId, propertyId })),
+            //     ),
+            // );
 
             return { requestId, madeByGroupId };
           }),
