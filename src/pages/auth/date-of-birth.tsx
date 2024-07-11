@@ -47,6 +47,11 @@ export default function DateOfBirth() {
         id: session.user.id,
         dateOfBirth: convertDateFormat(dob),
       });
+    } else {
+      form.setError("root", {
+        type: "manual",
+        message: "Please enter your date of birth.",
+      });
     }
   }
 
