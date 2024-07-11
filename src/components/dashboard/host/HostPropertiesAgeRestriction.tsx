@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { zodNumber } from "@/utils/zod-utils";
 import ErrorMsg from "@/components/ui/ErrorMsg";
+import { api } from "@/utils/api";
 
 export default function HostPropertiesAgeRestriction({
   property,
@@ -32,6 +33,13 @@ export default function HostPropertiesAgeRestriction({
     resolver: zodResolver(formSchema),
     // defaultValues: { age: property.ageRestriction },
   });
+
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+
+  async function onSubmit({ age }: FormValues) {
+    const newProperty = { ...property, ageRestriction: age };
+    await updateProperty(newProperty);
+  }
 
   return (
     <div className="my-6">
@@ -54,7 +62,7 @@ export default function HostPropertiesAgeRestriction({
           <div>
             <Form {...form}>
               <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-              <form>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                   name="age"
                   control={form.control}
