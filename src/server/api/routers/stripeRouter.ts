@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 import { hostProfiles } from "@/server/db/schema";
-import { gte } from "lodash";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -16,12 +15,10 @@ export const config = {
   },
 };
 // these two are the same stripe objects, some stripe require the secret key and some require the restricted key
-export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL, {
-  apiVersion: "2024-06-20",
-});
+export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL);
 
 export const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-06-20",
+  typescript: true,
 });
 // change the apiVersion
 
@@ -98,8 +95,8 @@ export const stripeRouter = createTRPCRouter({
         payment_intent_data: paymentIntentData,
         ui_mode: "embedded",
       });
-      console.log("fromcheckoutsession", session);
-      return session;
+      console.log("fromcheckoutsession", session.client_secret);
+      return { clientSecret: session.client_secret };
     }),
 
   authorizePayment: protectedProcedure
@@ -487,7 +484,6 @@ export const stripeRouter = createTRPCRouter({
               instant_payouts: true,
               standard_payouts: true,
               edit_payout_schedule: true,
-              external_account_collection: true,
             },
           },
           // payouts_list: {

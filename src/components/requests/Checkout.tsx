@@ -29,12 +29,14 @@ import { formatDateMonthDay, plural } from "@/utils/utils";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "./StripePaymentInfo";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 
 export default function Checkout({
   offer: { property, request, ...offer },
 }: {
   offer: OfferWithDetails;
 }) {
+  const isMediumScreen = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
   const chatWithAdmin = useChatWithAdmin();
 
@@ -307,47 +309,50 @@ export default function Checkout({
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">
-        <div className="hidden md:block">
-          <BestPriceCard />
-          <TripDetails />
-          <Separator className="my-4" />
-          <CancellationPolicy />
-          <Separator className="my-4" />
-          <StripePaymentInfo offer={{ property, request, ...offer }} />
-          <Separator className="my-4" />
-          <ContactInfo />
-          <Separator className="my-4" />
-          <TermsAndSubmit />
-        </div>
-        <div className="md:hidden">
-          <BestPriceCard />
-          <Separator className="my-6" />
-          <TripDetails />
-          <Separator className="my-6" />
-          <CheckoutSummary />
-          <Separator className="my-6" />
-          <StripePaymentInfo offer={{ property, request, ...offer }} />
-          <Separator className="my-6" />
-          <CancellationPolicy />
-          <Separator className="my-6" />
-          <ContactInfo />
-          <Separator className="my-6" />
-          <TermsAndSubmit />
-          <CustomerReview />
-          <div className="mt-4">
-            <p className="text-sm">
-              Questions?{" "}
-              <span className="text-teal-900 underline">
-                <button
-                  onClick={() => chatWithAdmin()}
-                  className="text-blue-600 underline underline-offset-2"
-                >
-                  Chat with host
-                </button>
-              </span>
-            </p>
+        {isMediumScreen ? (
+          <div className="hidden md:block">
+            <BestPriceCard />
+            <TripDetails />
+            <Separator className="my-4" />
+            <CancellationPolicy />
+            <Separator className="my-4" />
+            <StripePaymentInfo offer={{ property, request, ...offer }} />
+            <Separator className="my-4" />
+            <ContactInfo />
+            <Separator className="my-4" />
+            <TermsAndSubmit />
           </div>
-        </div>
+        ) : (
+          <div className="md:hidden">
+            <BestPriceCard />
+            <Separator className="my-6" />
+            <TripDetails />
+            <Separator className="my-6" />
+            <CheckoutSummary />
+            <Separator className="my-6" />
+            <StripePaymentInfo offer={{ property, request, ...offer }} />
+            <Separator className="my-6" />
+            <CancellationPolicy />
+            <Separator className="my-6" />
+            <ContactInfo />
+            <Separator className="my-6" />
+            <TermsAndSubmit />
+            <CustomerReview />
+            <div className="mt-4">
+              <p className="text-sm">
+                Questions?{" "}
+                <span className="text-teal-900 underline">
+                  <button
+                    onClick={() => chatWithAdmin()}
+                    className="text-blue-600 underline underline-offset-2"
+                  >
+                    Chat with host
+                  </button>
+                </span>
+              </p>
+            </div>
+          </div>
+        )}
         <div className="sticky top-24 hidden h-fit space-y-2 md:block md:pl-10 xl:pl-20">
           <div className="space-y-10">
             <CheckoutSummary />

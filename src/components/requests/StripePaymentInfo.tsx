@@ -11,7 +11,13 @@ import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/OfferPage";
 import type Stripe from "stripe";
-import { OptionalObjectAttributes } from "@aws-sdk/client-s3";
+type StripeOptions =    ["options"];
+
+interface StripeOptions {
+  clientSecret?: string | null | undefined;
+  fetchClientSecret?: (() => Promise<string>) | null | undefined;
+  onComplete?: (() => void) | undefined;
+}
 
 const StripePaymentInfo = ({
   offer: { property, request, ...offer },
@@ -41,7 +47,8 @@ const StripePaymentInfo = ({
     [offer.totalPrice, offer.tramonaFee, tax],
   );
 
-  const [options, setOptions] = useState();
+  const [options, setOptions] = useState<StripeOptions>();
+  const [checkoutReady, setCheckoutReady] = useState(false);
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
 
   const fetchClientSecret = useCallback(async () => {
@@ -77,8 +84,8 @@ const StripePaymentInfo = ({
           console.log("Not ready");
           return;
         }
-        //@ts-expect-error ignore
         setOptions(response); // Set options directly within fetchData
+        setCheckoutReady(true); // Set checkoutReady to true when options are set
       } catch (error) {
         console.error("Error creating checkout session:", error);
       }
@@ -102,13 +109,11 @@ const StripePaymentInfo = ({
 
   return (
     <div id="checkout">
-      {!options && (
+      {checkoutReady && (
         <EmbeddedCheckoutProvider
           stripe={stripePromise}
-          options={{
-            clientSecret:
-              "cs_test_a1bNb1p5TtnKlQvktWKRssLbCHntlsRL17ZxtFZIvvLfxwcsRj1USm3UWc_secret_fidwbEhqYWAnPydgaGdgYWFgYScpJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ3dgYWx3YGZxSmtGamh1aWBxbGprJz8nZGlyZHx2J3gl",
-          }}
+          options={options}
+          key={options.clientSecret}
         >
           <EmbeddedCheckout />
         </EmbeddedCheckoutProvider>
