@@ -37,8 +37,7 @@ export default function AcceptCityRequestDialog({
   request: Pick<Request, "id" | "checkIn" | "checkOut" | "maxTotalPrice">;
   property: Pick<Property, "id">;
 }) {
-  const { mutateAsync: createOffer } =
-    api.offers.acceptCityRequest.useMutation();
+  const { mutateAsync: createOffer } = api.offers.create.useMutation();
 
   const form = useZodForm({
     schema: z.object({ price: zodNumber() }),
