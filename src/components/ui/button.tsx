@@ -6,7 +6,7 @@ import { cn } from "@/utils/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 const buttonVariants = cva(
-  "inline-flex items-center gap-2 text-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+  "inline-flex items-center gap-2 text-center justify-center whitespace-nowrap rounded-md text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       size: {

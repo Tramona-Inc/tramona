@@ -81,7 +81,7 @@ export default function HostAnalytics({ className }: { className?: string }) {
               </p>
               <p
                 className={cn(
-                  "text-xl font-medium",
+                  "text-xl font-bold",
                   isSelected ? "text-primary" : "text-muted-foreground",
                 )}
               >

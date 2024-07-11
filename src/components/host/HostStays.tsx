@@ -1,14 +1,13 @@
 import { api } from "@/utils/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import HostStaysCards from "./HostStaysCards";
+import { addWeeks, isSameDay } from "date-fns";
 
 export default function HostStays() {
   const { data: allTrips } = api.trips.getHostTrips.useQuery();
 
-  console.log(allTrips);
   const currentDate = new Date();
-  const twoWeeksFromNow = new Date(currentDate);
-  twoWeeksFromNow.setDate(currentDate.getDate() + 14);
+  const twoWeeksFromNow = addWeeks(currentDate, 2);
 
   // Upcoming trips within the next 2 weeks
   const upcomingTrips = allTrips?.filter(
@@ -21,8 +20,8 @@ export default function HostStays() {
   );
 
   // Trips that are checking out today
-  const checkingOutTrips = allTrips?.filter(
-    (trip) => trip.checkOut.toDateString() === currentDate.toDateString(),
+  const checkingOutTrips = allTrips?.filter((trip) =>
+    isSameDay(trip.checkOut, currentDate),
   );
 
   // Past trips that have already ended
@@ -36,20 +35,20 @@ export default function HostStays() {
     <div>
       <h1 className="mb-2 text-3xl font-bold md:mb-10 md:text-4xl">Stays</h1>
       <Tabs defaultValue="currently hosting">
-        <TabsList className="mb-4 md:mb-8">
+        <TabsList className="mb-4">
           <TabsTrigger value="currently hosting">Currently hosting</TabsTrigger>
           <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
           <TabsTrigger value="accepted">Accepted</TabsTrigger>
           <TabsTrigger value="checking out">Checking out</TabsTrigger>
           <div className="w-5/6 border-b-4" />
-          <div className="flex w-1/6 justify-end ">
+          <div className="flex w-1/6 justify-end">
             <TabsTrigger value="history" className="w-full">
               History
             </TabsTrigger>
           </div>
         </TabsList>
         <TabsContent value="currently hosting">
-          <HostStaysCards trips={currentlyHostingTrips}/>
+          <HostStaysCards trips={currentlyHostingTrips} />
         </TabsContent>
         <TabsContent value="upcoming">
           <HostStaysCards trips={upcomingTrips} />
@@ -58,10 +57,11 @@ export default function HostStays() {
           <HostStaysCards trips={acceptedTrips} />
         </TabsContent>
         <TabsContent value="checking out">
-          <HostStaysCards trips={checkingOutTrips}/>
+          <HostStaysCards trips={checkingOutTrips} />
         </TabsContent>
+
         <TabsContent value="history">
-          <HostStaysCards trips={historyTrips}/>
+          <HostStaysCards trips={historyTrips} />
         </TabsContent>
       </Tabs>
     </div>

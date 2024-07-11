@@ -1,79 +1,95 @@
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { SkeletonText } from "@/components/ui/skeleton";
 
-import { formatDateRange } from "@/utils/utils";
+import {
+  formatCurrency,
+  formatDateRange,
+  getNumNights,
+  plural,
+} from "@/utils/utils";
+import { type RouterOutputs } from "@/utils/api";
+import { formatDistanceToNowStrict } from "date-fns";
 
-type Stay = {
-  propertyImg: string;
-  propertyName: string;
-  propertyLocation: string;
-  checkIn: Date;
-  checkOut: Date;
-  nightlyCost: number;
-  totalCost: number;
-  guests: string[];
-};
+export default function HostStaysCards({
+  trips,
+}: {
+  trips?: RouterOutputs["trips"]["getHostTrips"];
+}) {
+  if (!trips) return null;
+  if (trips.length === 0)
+    return (
+      <p className="mt-32 text-center text-muted-foreground">
+        No trips to show
+      </p>
+    );
 
-export default function HostStaysCards(trips: Stay[]) {
   return (
     <div className="mb-36 space-y-6">
-      {trips.length > 0 ? ( trips.map((stay, index) => (
-        <>
-          <div
-            className="grid grid-cols-1 items-center gap-4 overflow-hidden rounded-xl border md:grid-cols-7 md:rounded-2xl"
-            key={index}
-          >
-            <div className="h-40 md:h-28">
-              <Image
-                src={stay.propertyImg}
-                alt={stay.propertyName}
-                width={200}
-                height={200}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="px-4 md:col-span-2 md:px-0">
-              <h1 className="text-balance font-bold">{stay.propertyName}</h1>
-              <p className="text-muted-foreground">{stay.propertyLocation}</p>
-            </div>
-            <div className="px-4 md:px-0">
-              <p className="font-bold">
-                {formatDateRange(stay.checkIn, stay.checkOut)}
+      {trips.map((trip) => {
+        const numNights = getNumNights(trip.checkIn, trip.checkOut);
+        const totalPrice = trip.offer?.totalPrice ?? null;
+
+        return (
+          <>
+            <div
+              className="grid grid-cols-1 items-center gap-4 overflow-hidden rounded-xl border md:grid-cols-7 md:rounded-2xl"
+              key={trip.id}
+            >
+              <div className="relative h-40 md:h-28">
+                <Image
+                  src={trip.property.imageUrls[0]!}
+                  alt={trip.property.name}
+                  layout="fill"
+                  className="object-cover"
+                />
+              </div>
+              <div className="px-4 md:col-span-2 md:px-0">
+                <h1 className="text-balance font-bold">{trip.property.name}</h1>
+                <p className="text-muted-foreground">{trip.property.city}</p>
+              </div>
+              <div className="px-4 md:px-0">
+                <p className="font-bold">
+                  {formatDateRange(trip.checkIn, trip.checkOut)}
+                </p>
+                {
+                  <p className="text-sm text-blue-600">
+                    Checks out{" "}
+                    {formatDistanceToNowStrict(trip.checkOut, {
+                      addSuffix: true,
+                    })}
+                  </p>
+                }
+              </div>
+              {totalPrice && (
+                <div className="px-4 md:px-0">
+                  <p className="font-bold">
+                    {formatCurrency(totalPrice / numNights)}/night
+                  </p>
+                  <p className="text-muted-foreground">
+                    {formatCurrency(totalPrice)} total
+                  </p>
+                </div>
+              )}
+              <p className="mb-4 px-4 md:mb-0 md:px-0">
+                <span className="underline">
+                  {trip.offer?.request?.madeByGroup.owner.name}
+                </span>{" "}
+                {trip.numGuests > 1 && (
+                  <span className="text-muted-foreground">
+                    + {plural(trip.numGuests - 1, "guest")}
+                  </span>
+                )}
               </p>
-              <p className=" text-sm text-blue-600">Checks out in 2 days</p>
+              <div className="mr-4 hidden text-end md:block">
+                <Button variant="secondary">Message</Button>
+              </div>
             </div>
-            <div className="px-4 md:px-0">
-              <p className="font-bold">${stay.nightlyCost} / night</p>
-              <p className="text-muted-foreground">${stay.totalCost} total</p>
-            </div>
-            <div className="mb-4 px-4 md:mb-0 md:px-0">
-              <p>
-                <span className="underline">{stay.guests[0]}</span>{" "}
-                <span className="text-muted-foreground">
-                  + {stay.guests.length - 1}{" "}
-                  {stay.guests.length - 1 > 1 ? "guests" : "guest"}
-                </span>
-              </p>
-            </div>
-            <div className="mr-4 hidden text-end md:block">
-              <Button variant="secondary" className="border-none font-bold">
-                Message
-              </Button>
-            </div>
-          </div>
-          <Button
-            variant="secondary"
-            className="w-full border-none font-bold md:hidden"
-          >
-            Message
-          </Button>
-        </>
-      ))): (
-        <>
-          <SkeletonText />
-        </>
-      )}
+            <Button variant="secondary" className="w-full md:hidden">
+              Message
+            </Button>
+          </>
+        );
+      })}
     </div>
   );
 }
