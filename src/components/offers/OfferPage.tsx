@@ -52,9 +52,10 @@ export default function OfferPage({
   // );
 
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
-  if (property.originalNightlyPrice === null) {
-    throw new Error("originalNightlyPrice is required but was not provided.");
-  }
+  // COMMENTED OUT FOR NOW 
+  // if (property.originalNightlyPrice === null) {
+  //   throw new Error("originalNightlyPrice is required but was not provided.");
+  // }
   const originalTotal = property.originalNightlyPrice * numNights;
 
   const tramonaServiceFee = offer.tramonaFee;
