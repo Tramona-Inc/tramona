@@ -4,16 +4,35 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
-import { and, eq, inArray } from "drizzle-orm";
+import { waitUntil } from '@vercel/functions';
+
 import {
+  and,
+  between,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  lte,
+  notExists,
+  sql,
+  type SQL,
+} from "drizzle-orm";
+import {
+  type NewProperty,
   type User,
+  bookedDates,
   groupInvites,
   groupMembers,
   groups,
   hostTeamInvites,
   hostTeamMembers,
+  properties,
+  requestsToProperties,
   users,
 } from "./db/schema";
+import { getCity, getCoordinates } from "./google-maps";
+
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -218,4 +237,144 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
       where: eq(groups.id, hostTeamId),
     })
     .then((res) => res?.ownerId);
+}
+
+export async function addProperty({
+  hostId,
+  hostTeamId,
+  property,
+}: {
+  hostId?: string | null;
+  hostTeamId?: number | null;
+  property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
+    latitude?: number;
+    longitude?: number;
+  };
+}) {
+  let lat = property.latitude;
+  let lng = property.longitude;
+
+  if (!lat || !lng) {
+    const { location } = await getCoordinates(property.address);
+    if (!location) throw new Error("Could not get coordinates for address");
+    lat = location.lat;
+    lng = location.lng;
+  }
+  const city = await getCity({ lat, lng });
+
+  const [insertedProperty] = await db
+    .insert(properties)
+    .values({
+      ...property,
+      hostId,
+      latitude: lat,
+      longitude: lng,
+      city: city,
+      latLngPoint: sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
+      hostTeamId,
+    })
+    .returning({ id: properties.id, latLngPoint: properties.latLngPoint });
+
+  waitUntil(processRequests(insertedProperty!));
+
+  return insertedProperty!.id;
+}
+
+async function processRequests(insertedProperty: { id: number, latLngPoint: any }) {
+  const allRequests = await db.query.requests.findMany({});
+
+  for (const request of allRequests) {
+    const matchingProperties = await getPropertiesForRequest({
+      id: request.id,
+      lat: request.lat,
+      lng: request.lng,
+      radius: request.radius,
+      location: request.location,
+      checkIn: request.checkIn,
+      checkOut: request.checkOut,
+      latLngPoint: request.latLngPoint,
+      propertyLatLngPoint: insertedProperty.latLngPoint,
+    });
+
+    if (matchingProperties.includes(insertedProperty.id)) {
+      await db.insert(requestsToProperties).values({
+        requestId: request.id,
+        propertyId: insertedProperty.id,
+      });
+    }
+  }
+}
+
+export async function getPropertiesForRequest(
+  req: {
+    lat?: number | null;
+    lng?: number | null;
+    radius?: number | null;
+    location: string;
+    checkIn: Date;
+    checkOut: Date;
+    id: number;
+    latLngPoint?: { x: number; y: number; } | null;
+    propertyLatLngPoint?: { x: number; y: number; } | null;
+  },
+  { tx = db } = {},
+) {
+  let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
+
+  //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
+  if (req.lat != null && req.lng != null && req.radius != null) {
+    // Convert radius from miles to degrees (approximate)
+    const radiusDegrees = req.radius / 69;
+
+    propertyIsNearRequest = and(
+      gte(properties.latitude, req.lat - radiusDegrees),
+      lte(properties.latitude, req.lat + radiusDegrees),
+      gte(properties.longitude, req.lng - radiusDegrees),
+      lte(properties.longitude, req.lng + radiusDegrees)
+    );
+  } else {
+    const coordinates = await getCoordinates(req.location);
+    if (coordinates.bounds) {
+      const { northeast, southwest } = coordinates.bounds;
+      propertyIsNearRequest = sql`
+        ST_Within(
+          properties.lat_lng_point,
+          ST_MakeEnvelope(
+            ${southwest.lng}, ${southwest.lat},
+            ${northeast.lng}, ${northeast.lat},
+            4326
+          )
+        )
+      `;
+    }
+  }
+
+  const propertyisAvailable = notExists(
+    tx
+      .select()
+      .from(bookedDates)
+      .where(
+        and(
+          eq(bookedDates.propertyId, properties.id),
+          between(bookedDates.date, req.checkIn, req.checkOut),
+        ),
+      ),
+  );
+
+  const result = await tx.query.properties.findMany({
+    where: and(
+      isNotNull(properties.hostId),
+      propertyIsNearRequest,
+      propertyisAvailable,
+    ),
+    columns: { id: true, city: true, latitude: true, longitude: true },
+  });
+
+  return result.map(p => p.id);
+}
+
+export async function getAdminId() {
+  return await db.query.users
+    .findFirst({ where: eq(users.email, "info@tramona.com") })
+    .then((res) => res!.id);
 }

@@ -4,6 +4,7 @@ import {
   boolean,
   date,
   doublePrecision,
+  geometry,
   index,
   integer,
   pgEnum,
@@ -177,72 +178,90 @@ export const propertyStatusEnum = pgEnum("property_status", [
 export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
 
 export const propertyPMS = pgEnum("property_pms", ALL_PROPERTY_PMS);
-export const properties = pgTable("properties", {
-  id: serial("id").primaryKey(),
-  hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-  hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
-  propertyType: propertyTypeEnum("property_type")
-    .notNull()
-    .default("Apartment"),
-  roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
+export const properties = pgTable(
+  "properties",
+  {
+    id: serial("id").primaryKey(),
+    hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
+    hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
-  // how many guests does this property accomodate at most?
-  maxNumGuests: smallint("max_num_guests").notNull(),
-  numBeds: smallint("num_beds").notNull(),
-  numBedrooms: smallint("num_bedrooms").notNull(),
-  numBathrooms: doublePrecision("num_bathrooms"),
-  // propertyPMS: propertyPMS("property_pms"),
+    propertyType: propertyTypeEnum("property_type").notNull(),
+    roomType: propertyRoomTypeEnum("room_type")
+      .notNull()
+      .default("Entire place"),
 
-  // for when blake/preju manually upload, otherwise get the host's name via hostId
-  hostName: varchar("host_name", { length: 255 }),
+    // how many guests does this property accomodate at most?
+    maxNumGuests: smallint("max_num_guests").notNull(),
+    numBeds: smallint("num_beds").notNull(),
+    numBedrooms: smallint("num_bedrooms").notNull(),
+    numBathrooms: doublePrecision("num_bathrooms"),
+    // propertyPMS: propertyPMS("property_pms"),
 
-  address: varchar("address", { length: 1000 }).notNull(),
-  latitude: doublePrecision("latitude"),
-  longitude: doublePrecision("longitude"),
+    // for when blake/preju manually upload, otherwise get the host's name via hostId
+    hostName: varchar("host_name", { length: 255 }),
 
-  originalListingUrl: varchar("url"),
+    address: varchar("address", { length: 1000 }).notNull(),
+    latitude: doublePrecision("latitude").notNull(),
+    longitude: doublePrecision("longitude").notNull(),
+    city: varchar("city", { length: 255 }).notNull(),
 
-  checkInInfo: varchar("check_in_info"),
-  checkInTime: time("check_in_time"),
-  checkOutTime: time("check_out_time"),
+    originalListingUrl: varchar("url"),
 
-  // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
-  amenities: varchar("amenities").array(),
-  otherAmenities: varchar("other_amenities")
-    .array()
-    .notNull()
-    .default(sql`'{}'`), // .default([]) doesnt work, you gotta do this
+    checkInInfo: varchar("check_in_info"),
+    checkInTime: time("check_in_time"),
+    checkOutTime: time("check_out_time"),
 
-  imageUrls: varchar("image_url").array().notNull(),
+    // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
+    amenities: varchar("amenities")
+      .array()
+      .notNull()
+      .default(sql`'{}'`), // .default([]) doesnt work, you gotta do this
+    otherAmenities: varchar("other_amenities")
+      .array()
+      .notNull()
+      .default(sql`'{}'`),
 
-  name: varchar("name", { length: 255 }).notNull(),
-  about: text("about").notNull(),
+    imageUrls: varchar("image_url").array().notNull(),
 
-  petsAllowed: boolean("pets_allowed"),
-  smokingAllowed: boolean("smoking_allowed"),
+    name: varchar("name", { length: 255 }).notNull(),
+    about: text("about").notNull(),
 
-  otherHouseRules: varchar("other_house_rules", { length: 1000 }),
+    petsAllowed: boolean("pets_allowed"),
+    smokingAllowed: boolean("smoking_allowed"),
 
-  avgRating: doublePrecision("avg_rating").notNull().default(0),
-  numRatings: integer("num_ratings").notNull().default(0),
-  airbnbUrl: varchar("airbnb_url"),
-  airbnbMessageUrl: varchar("airbnb_message_url"),
-  originalNightlyPrice: integer("original_nightly_price"), // in cents
-  areaDescription: text("area_description"),
-  mapScreenshot: text("map_screenshot"),
-  cancellationPolicy: text("cancellation_policy"),
+    otherHouseRules: varchar("other_house_rules", { length: 1000 }),
 
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  isPrivate: boolean("is_private").notNull().default(false),
-  // priceRestriction: integer("price_restriction"),
-  propertyStatus: propertyStatusEnum("property_status").default("Listed"),
-  airbnbBookUrl: varchar("airbnb_book_url"),
-  hostImageUrl: varchar("host_image_url"),
-  pricingScreenUrl: varchar("pricing_screen_url"),
-  hostProfilePic: varchar("host_profile_pic"),
-  hostawayListingId: integer("hostaway_listing_id"),
-});
+    avgRating: doublePrecision("avg_rating").notNull().default(0),
+    numRatings: integer("num_ratings").notNull().default(0),
+    airbnbUrl: varchar("airbnb_url"),
+    airbnbMessageUrl: varchar("airbnb_message_url"),
+    originalNightlyPrice: integer("original_nightly_price"), // in cents
+    areaDescription: text("area_description"),
+    mapScreenshot: text("map_screenshot"),
+    cancellationPolicy: text("cancellation_policy"),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    isPrivate: boolean("is_private").notNull().default(false),
+    ageRestriction: integer("age_restriction"),
+    propertyStatus: propertyStatusEnum("property_status").default("Listed"),
+    airbnbBookUrl: varchar("airbnb_book_url"),
+    hostImageUrl: varchar("host_image_url"),
+    pricingScreenUrl: varchar("pricing_screen_url"),
+    hostProfilePic: varchar("host_profile_pic"),
+    hostawayListingId: integer("hostaway_listing_id"),
+    latLngPoint: geometry("lat_lng_point", {
+      type: "point",
+      mode: "xy",
+      srid: 4326,
+    }),
+  },
+  (t) => ({
+    spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
+  }),
+);
 
 export type Property = typeof properties.$inferSelect;
 export type NewProperty = typeof properties.$inferInsert;

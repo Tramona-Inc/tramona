@@ -5,14 +5,21 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
-import { getFmtdFilters, getRequestStatus } from "@/utils/formatters";
+import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
+  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { EllipsisIcon, MapPinIcon, TrashIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  EllipsisIcon,
+  MapPinIcon,
+  TrashIcon,
+  Users2Icon,
+} from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import RequestCardBadge from "./RequestCardBadge";
@@ -22,6 +29,8 @@ import WithdrawRequestDialog from "./WithdrawRequestDialog";
 
 import MobileSimilarProperties from "./MobileSimilarProperties";
 import { Separator } from "../ui/separator";
+import UserAvatar from "../_common/UserAvatar";
+import { getTime } from "date-fns";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -31,20 +40,28 @@ export type RequestWithUser = RouterOutputs["requests"]["getAll"][
   | "incomingRequests"
   | "pastRequests"][number];
 
+export type HostDashboardRequest =
+  RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["request"];
+
 export default function RequestCard({
   request,
   isSelected,
-  isAdminDashboard,
+  type,
   children,
 }: React.PropsWithChildren<
   | {
       request: DetailedRequest;
-      isAdminDashboard?: false | undefined;
+      type: "guest";
       isSelected?: boolean;
     }
   | {
       request: RequestWithUser;
-      isAdminDashboard: true;
+      type: "admin";
+      isSelected?: boolean;
+    }
+  | {
+      request: HostDashboardRequest;
+      type: "host";
       isSelected?: boolean;
     }
 >) {
@@ -59,7 +76,8 @@ export default function RequestCard({
     excludeDefaults: true,
   });
 
-  const showAvatars = request.numGuests > 1 || isAdminDashboard;
+  const showAvatars =
+    (request.numGuests > 1 && type !== "host") || type === "admin";
 
   const [open, setOpen] = useState(false);
 
@@ -68,13 +86,21 @@ export default function RequestCard({
       <WithdrawRequestDialog
         requestId={request.id}
         open={open}
+
         onOpenChange={setOpen}
       />
       <CardContent className="space-y-2">
         {/* <p className="font-mono text-xs uppercase text-muted-foreground">
           Id: {request.id} · Request group Id: {request.requestGroupId}
         </p> */}
-        <RequestCardBadge request={request} />
+        {type !== "host" && <RequestCardBadge request={request} />}
+        {type === "host" && (
+          <div className="flex gap-2 items-center">
+            <UserAvatar size="sm" name={request.name} image={request.image} />
+            {request.name} &middot;{" "}
+            {formatInterval(Date.now() - getTime(request.createdAt))} ago
+          </div>
+        )}
         {/* {request.requestGroup.hasApproved ? (
           <RequestCardBadge request={request} />
         ) : (
@@ -95,10 +121,10 @@ export default function RequestCard({
           {showAvatars && (
             <RequestGroupAvatars
               request={request}
-              isAdminDashboard={isAdminDashboard}
+              isAdminDashboard={type === "admin"}
             />
           )}
-          {!isAdminDashboard && !request.resolvedAt && (
+          {type === "guest" && !request.resolvedAt && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
@@ -122,9 +148,19 @@ export default function RequestCard({
         </div>
         <div>
           <p>Requested {fmtdPrice}/night</p>
-          <p>{fmtdDateRange}</p>
-          {fmtdFilters && <p>{fmtdFilters} &middot;</p>}
-          <p>{fmtdNumGuests}</p>
+          <p className="flex items-center gap-2">
+            <span className="flex items-center gap-1">
+              <CalendarIcon className="size-4" />
+              {fmtdDateRange}
+            </span>
+            &middot;
+            <span className="flex items-center gap-1">
+              <Users2Icon className="size-4" />
+              {fmtdNumGuests}
+            </span>
+          </p>
+
+          {fmtdFilters && <p>{fmtdFilters} </p>}
           {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
           {request.airbnbLink && (
             <a className="underline" href={request.airbnbLink}>

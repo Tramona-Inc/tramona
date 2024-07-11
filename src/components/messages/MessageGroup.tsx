@@ -11,11 +11,6 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   const firstMessage = messages[0];
   if (!firstMessage || !session) return null;
 
-  // Helps convert UTC time to local time offset
-  const utcTime = new Date(firstMessage.createdAt);
-  const localOffset = utcTime.getTimezoneOffset();
-  const localTime = new Date(utcTime.getTime() - localOffset * 60000); // Adjust for local time zone offset
-
   return (
     <div className="flex items-start gap-2">
       {user ? <UserAvatar {...user} /> : <AnonymousAvatar />}
@@ -27,7 +22,7 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
             <p className="leading-none text-muted-foreground">[deleted user]</p>
           )}
           <p className="text-xs text-muted-foreground">
-            {formatRelative(localTime, new Date())}
+            {formatRelative(firstMessage.createdAt, new Date())}
             {session.user.id === firstMessage.userId && firstMessage.read && (
               <> · read</>
             )}

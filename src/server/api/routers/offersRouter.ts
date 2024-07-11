@@ -7,13 +7,13 @@ import {
 } from "@/server/api/trpc";
 import {
   groupMembers,
-  offerInsertSchema,
   offerSelectSchema,
   offerUpdateSchema,
   offers,
   properties,
   referralCodes,
   requestSelectSchema,
+  trips,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
@@ -28,6 +28,7 @@ import {
   isNull,
   lt,
   notInArray,
+  or,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -38,35 +39,50 @@ export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
-      const offerDetails = await ctx.db.query.offers.findFirst({
+      const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: { totalPrice: true },
+        columns: { totalPrice: true, propertyId: true, paymentIntentId: true },
         with: {
           request: {
-            columns: { id: true },
-            with: { madeByGroup: { columns: { ownerId: true } } },
+            columns: {
+              id: true,
+              checkIn: true,
+              checkOut: true,
+              numGuests: true,
+            },
+            with: { madeByGroup: { columns: { ownerId: true, id: true } } },
           },
         },
       });
 
-      if (!offerDetails) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+      if (!offer) throw new TRPCError({ code: "NOT_FOUND" });
 
       // if the offer comes from a request, only the owner of the group can accept offers
       // otherwise, anyone can
-      if (offerDetails.request?.madeByGroup.ownerId !== ctx.user.id) {
+      if (offer.request?.madeByGroup.ownerId !== ctx.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       await ctx.db.transaction(async (tx) => {
         const results = await Promise.allSettled([
-          offerDetails.request &&
+          offer.request &&
             // resolve the request if it exists
             tx
               .update(requests)
               .set({ resolvedAt: new Date() })
-              .where(eq(offers.id, offerDetails.request.id)),
+              .where(eq(offers.id, offer.request.id)),
+
+          offer.request &&
+            // add a trip
+            tx.insert(trips).values({
+              offerId: input.id,
+              checkIn: offer.request.checkIn,
+              checkOut: offer.request.checkOut,
+              numGuests: offer.request.numGuests,
+              groupId: offer.request.madeByGroup.id,
+              propertyId: offer.propertyId,
+              paymentIntentId: offer.paymentIntentId, //testing maybe this will get populatated first
+            }),
 
           // mark the offer as accepted
           tx
@@ -79,7 +95,7 @@ export const offersRouter = createTRPCRouter({
             tx
               .update(referralCodes)
               .set({
-                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offerDetails.totalPrice}`,
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
               })
               .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 
@@ -156,6 +172,9 @@ export const offersRouter = createTRPCRouter({
             columns: { numGuests: true, location: true, id: true },
           },
           property: {
+            columns: {
+              latLngPoint: false,
+            },
             with: {
               host: {
                 columns: { id: true, name: true, email: true, image: true },
@@ -377,13 +396,23 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-  acceptCityRequest: protectedProcedure
+  create: protectedProcedure
     .input(
-      z.object({
-        requestId: z.number(),
-        propertyId: z.number(),
-        totalPrice: z.number().min(1),
-      }),
+      z
+        .object({
+          propertyId: z.number(),
+          totalPrice: z.number().min(1),
+        })
+        .and(
+          z.union([
+            z.object({ requestId: z.number() }),
+            z.object({
+              requestId: z.undefined(),
+              checkIn: z.date(),
+              checkOut: z.date(),
+            }),
+          ]),
+        ),
     )
     .mutation(async ({ ctx, input }) => {
       const propertyHostTeam = await ctx.db.query.properties
@@ -408,47 +437,53 @@ export const offersRouter = createTRPCRouter({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      const requestDetails = await ctx.db.query.requests.findFirst({
-        where: eq(requests.id, input.requestId),
-        columns: { checkIn: true, checkOut: true, madeByGroupId: true },
-      });
-
-      if (!requestDetails) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-
-      await ctx.db.insert(offers).values({
-        ...input,
-        checkIn: requestDetails.checkIn,
-        checkOut: requestDetails.checkOut,
-      });
-
-      await ctx.db
-        .delete(requestsToProperties)
-        .where(
-          and(
-            eq(requestsToProperties.propertyId, input.propertyId),
-            eq(requestsToProperties.requestId, input.requestId),
-          ),
-        );
-    }),
-
-  create: roleRestrictedProcedure(["admin", "host"])
-    .input(offerInsertSchema)
-    .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "host") {
-        const property = await ctx.db.query.properties.findFirst({
-          where: eq(properties.id, input.propertyId),
-          columns: { hostId: true },
+      if (input.requestId !== undefined) {
+        const requestDetails = await ctx.db.query.requests.findFirst({
+          where: eq(requests.id, input.requestId),
+          columns: { checkIn: true, checkOut: true, madeByGroupId: true },
         });
 
-        if (property?.hostId !== ctx.user.id) {
-          throw new TRPCError({ code: "UNAUTHORIZED" });
-        }
-      }
+        if (!requestDetails) throw new TRPCError({ code: "BAD_REQUEST" });
 
-      await ctx.db.insert(offers).values(input);
+        await ctx.db.insert(offers).values({
+          ...input,
+          checkIn: requestDetails.checkIn,
+          checkOut: requestDetails.checkOut,
+        });
+
+        await ctx.db
+          .delete(requestsToProperties)
+          .where(
+            and(
+              eq(requestsToProperties.propertyId, input.propertyId),
+              eq(requestsToProperties.requestId, input.requestId),
+            ),
+          );
+      } else {
+        await ctx.db.insert(offers).values({
+          ...input,
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+        });
+      }
     }),
+
+  // create: roleRestrictedProcedure(["admin", "host"])
+  //   .input(offerInsertSchema)
+  //   .mutation(async ({ ctx, input }) => {
+  //     if (ctx.user.role === "host") {
+  //       const property = await ctx.db.query.properties.findFirst({
+  //         where: eq(properties.id, input.propertyId),
+  //         columns: { hostId: true },
+  //       });
+
+  //       if (property?.hostId !== ctx.user.id) {
+  //         throw new TRPCError({ code: "UNAUTHORIZED" });
+  //       }
+  //     }
+
+  //     await ctx.db.insert(offers).values(input);
+  //   }),
 
   update: roleRestrictedProcedure(["admin", "host"])
     .input(offerUpdateSchema)
@@ -607,13 +642,15 @@ export const offersRouter = createTRPCRouter({
     const unMatchedOffers = await ctx.db.query.offers.findMany({
       where: and(
         isNull(offers.acceptedAt),
-        notInArray(
-          offers.requestId,
-          completedRequests.map((req) => req.id),
+        or(
+          isNull(offers.requestId),
+          notInArray(
+            offers.requestId,
+            completedRequests.map((req) => req.id),
+          ),
         ),
       ),
       with: {
-        request: { columns: { checkIn: true, checkOut: true } },
         property: {
           columns: {
             name: true,

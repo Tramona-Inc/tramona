@@ -58,6 +58,13 @@ export default function AirbnbBookDialog(
   )} and I'd like to book it at that price.`;
 
   const createCheckout = api.stripe.createCheckoutSession.useMutation();
+  const { data: hostInfo } = api.host.getHostInfoByPropertyId.useQuery(
+    offer.property.id,
+  );
+  console.log(
+    `this is the hostInfo stripeaccount, ${hostInfo?.stripeAccountId}`,
+  );
+
   const stripePromise = useStripe();
   const cancelUrl = usePathname();
 
@@ -73,17 +80,19 @@ export default function AirbnbBookDialog(
       requestId: requestId ?? null,
       name: offer.property.name,
       price: offer.tramonaFee, // Airbnb (tramona fee) Set's price for checkout
+      tramonaServiceFee: offer.tramonaFee,
       description: "From: " + formatDateRange(checkIn, checkOut),
       cancelUrl: cancelUrl,
       images: offer.property.imageUrls,
       totalSavings,
       phoneNumber: user.phoneNumber ?? "",
       userId: user.id,
+      hostStripeId: hostInfo?.stripeAccountId ?? null,
     });
 
     const stripe = await stripePromise;
 
-    if (stripe !== null && response) {
+    if (stripe !== null) {
       await stripe.redirectToCheckout({
         sessionId: response.id,
       });
