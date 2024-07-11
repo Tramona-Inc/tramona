@@ -66,11 +66,11 @@ export const offersRouter = createTRPCRouter({
       await ctx.db.transaction(async (tx) => {
         const results = await Promise.allSettled([
           offer.request &&
-          // resolve the request if it exists
-          tx
-            .update(requests)
-            .set({ resolvedAt: new Date() })
-            .where(eq(offers.id, offer.request.id)),
+            // resolve the request if it exists
+            tx
+              .update(requests)
+              .set({ resolvedAt: new Date() })
+              .where(eq(offers.id, offer.request.id)),
 
           offer.request &&
             // add a trip
@@ -92,20 +92,20 @@ export const offersRouter = createTRPCRouter({
 
           // update referralCode
           ctx.user.referralCodeUsed &&
-          tx
-            .update(referralCodes)
-            .set({
-              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
-            })
-            .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+            tx
+              .update(referralCodes)
+              .set({
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
+              })
+              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 
           ctx.user.referralCodeUsed &&
-          tx
-            .update(referralCodes)
-            .set({
-              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
-            })
-            .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
+            tx
+              .update(referralCodes)
+              .set({
+                numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + 1`,
+              })
+              .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
         ]);
 
         if (results.some((result) => result.status === "rejected")) {
@@ -398,11 +398,21 @@ export const offersRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(
-      z.object({
-        requestId: z.number(),
-        propertyId: z.number(),
-        totalPrice: z.number().min(1),
-      }),
+      z
+        .object({
+          propertyId: z.number(),
+          totalPrice: z.number().min(1),
+        })
+        .and(
+          z.union([
+            z.object({ requestId: z.number() }),
+            z.object({
+              requestId: z.undefined(),
+              checkIn: z.date(),
+              checkOut: z.date(),
+            }),
+          ]),
+        ),
     )
     .mutation(async ({ ctx, input }) => {
       const propertyHostTeam = await ctx.db.query.properties
@@ -427,29 +437,35 @@ export const offersRouter = createTRPCRouter({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      const requestDetails = await ctx.db.query.requests.findFirst({
-        where: eq(requests.id, input.requestId),
-        columns: { checkIn: true, checkOut: true, madeByGroupId: true },
-      });
+      if (input.requestId !== undefined) {
+        const requestDetails = await ctx.db.query.requests.findFirst({
+          where: eq(requests.id, input.requestId),
+          columns: { checkIn: true, checkOut: true, madeByGroupId: true },
+        });
 
-      if (!requestDetails) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
+        if (!requestDetails) throw new TRPCError({ code: "BAD_REQUEST" });
+
+        await ctx.db.insert(offers).values({
+          ...input,
+          checkIn: requestDetails.checkIn,
+          checkOut: requestDetails.checkOut,
+        });
+
+        await ctx.db
+          .delete(requestsToProperties)
+          .where(
+            and(
+              eq(requestsToProperties.propertyId, input.propertyId),
+              eq(requestsToProperties.requestId, input.requestId),
+            ),
+          );
+      } else {
+        await ctx.db.insert(offers).values({
+          ...input,
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+        });
       }
-
-      await ctx.db.insert(offers).values({
-        ...input,
-        checkIn: requestDetails.checkIn,
-        checkOut: requestDetails.checkOut,
-      });
-
-      await ctx.db
-        .delete(requestsToProperties)
-        .where(
-          and(
-            eq(requestsToProperties.propertyId, input.propertyId),
-            eq(requestsToProperties.requestId, input.requestId),
-          ),
-        );
     }),
 
   // create: roleRestrictedProcedure(["admin", "host"])
@@ -587,22 +603,22 @@ export const offersRouter = createTRPCRouter({
           if (member.isWhatsApp) {
             memberHasOtherOffers
               ? void sendWhatsApp({
-                templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
-                to: member.phoneNumber,
-                propertyName: property.name,
-                propertyAddress: request?.location, //??can this be null
-                checkIn: offer.checkIn,
-                checkOut: offer.checkOut,
-                url: url,
-              })
+                  templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
+                  to: member.phoneNumber,
+                  propertyName: property.name,
+                  propertyAddress: request?.location, //??can this be null
+                  checkIn: offer.checkIn,
+                  checkOut: offer.checkOut,
+                  url: url,
+                })
               : void sendWhatsApp({
-                templateId: "HXb293923af34665e7eefc81be0579e5db",
-                to: member.phoneNumber,
-                propertyName: property.name,
-                propertyAddress: request?.location,
-                checkIn: offer.checkIn,
-                checkOut: offer.checkOut,
-              });
+                  templateId: "HXb293923af34665e7eefc81be0579e5db",
+                  to: member.phoneNumber,
+                  propertyName: property.name,
+                  propertyAddress: request?.location,
+                  checkIn: offer.checkIn,
+                  checkOut: offer.checkOut,
+                });
           } else {
             void sendText({
               to: member.phoneNumber,

@@ -7,7 +7,6 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  conversationsRelations,
   groups,
   hostProfiles,
   propertyInsertSchema,
@@ -39,7 +38,6 @@ import {
   properties,
   type Property,
 } from "./../../db/schema/tables/properties";
-import { on } from "events";
 import { addProperty } from "@/server/server-utils";
 
 export const propertiesRouter = createTRPCRouter({
@@ -50,6 +48,7 @@ export const propertiesRouter = createTRPCRouter({
         city: true,
         latitude: true,
         longitude: true,
+        latLngPoint: true,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -58,11 +57,12 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
-      const hostTeamId = await db.query.hostProfiles.findFirst({
-        where: eq(hostProfiles.userId, ctx.user.id),
-        columns: { curTeamId: true },
-      })
-      .then((res) => res?.curTeamId);
+      const hostTeamId = await db.query.hostProfiles
+        .findFirst({
+          where: eq(hostProfiles.userId, ctx.user.id),
+          columns: { curTeamId: true },
+        })
+        .then((res) => res?.curTeamId);
 
       if (!hostTeamId) {
         //logic
@@ -76,7 +76,12 @@ export const propertiesRouter = createTRPCRouter({
   createForHost: roleRestrictedProcedure(["admin"])
     .input(
       propertyInsertSchema
-        .omit({ city: true, latitude: true, longitude: true })
+        .omit({
+          city: true,
+          latitude: true,
+          longitude: true,
+          latLngPoint: true,
+        })
         .extend({ hostId: z.string() }),
     ) // make hostid required
     .mutation(async ({ ctx, input }) => {
@@ -101,7 +106,7 @@ export const propertiesRouter = createTRPCRouter({
     }),
 
   update: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyUpdateSchema.omit({ hostId: true }))
+    .input(propertyUpdateSchema.omit({ hostId: true, latLngPoint: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "admin" && !input.hostName) {
         throw new TRPCError({ code: "BAD_REQUEST" });
@@ -366,11 +371,11 @@ export const propertiesRouter = createTRPCRouter({
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
-                lte(properties.latitude, boundaries.north),
-                gte(properties.latitude, boundaries.south),
-                lte(properties.longitude, boundaries.east),
-                gte(properties.longitude, boundaries.west),
-              )
+                  lte(properties.latitude, boundaries.north),
+                  gte(properties.latitude, boundaries.south),
+                  lte(properties.longitude, boundaries.east),
+                  gte(properties.longitude, boundaries.west),
+                )
               : sql`TRUE`,
             input.lat && input.long && !boundaries
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
@@ -501,7 +506,6 @@ export const propertiesRouter = createTRPCRouter({
       const organizedData: CityData[] = [];
       const cityMap = new Map<string, CityData>();
 
-
       for (const row of rawData) {
         const property = {
           id: row.property_id,
@@ -553,6 +557,7 @@ export const propertiesRouter = createTRPCRouter({
           resolvedAt: row.resolved_at,
           lat: row.lat,
           lng: row.lng,
+          latLngPoint: row.lat_lng_point,
           radius: row.radius,
           name: row.user_name,
           profilePic: row.image,
@@ -567,9 +572,10 @@ export const propertiesRouter = createTRPCRouter({
           organizedData.push(newCityData);
         }
 
-
         const cityData = cityMap.get(city)!;
-        let requestData = cityData.requests.find(r => r.request.id === request.id);
+        let requestData = cityData.requests.find(
+          (r) => r.request.id === request.id,
+        );
 
         if (!requestData) {
           requestData = { request, properties: [] };
@@ -577,12 +583,15 @@ export const propertiesRouter = createTRPCRouter({
         }
 
         // Check if the property is not already in the properties array
-        if (!requestData.properties.some(p => p.id === property.id)) {
+        if (
+          property.id !== undefined &&
+          !requestData.properties.some((p) => p.id === property.id)
+        ) {
           requestData.properties.push(property);
         }
       }
       return organizedData;
-    }
+    },
   ),
   // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
   //   .input(hostPropertyFormSchema)
