@@ -1,8 +1,19 @@
 import { Input } from "@/components/ui/input";
-import { DollarSign, Info } from "lucide-react";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { useState } from "react";
 import { type Property } from "@/server/db/schema";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { zodNumber } from "@/utils/zod-utils";
+import ErrorMsg from "@/components/ui/ErrorMsg";
 
 export default function HostPropertiesAgeRestriction({
   property,
@@ -10,6 +21,17 @@ export default function HostPropertiesAgeRestriction({
   property: Property;
 }) {
   const [editing, setEditing] = useState(false);
+
+  const formSchema = z.object({
+    age: zodNumber({ min: 18 }),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    // defaultValues: { age: property.ageRestriction },
+  });
 
   return (
     <div className="my-6">
@@ -30,18 +52,25 @@ export default function HostPropertiesAgeRestriction({
             </p>
           </div>
           <div>
-            <Input className="w-full" />
-            {/* <p className="mt-1 text-sm text-muted-foreground">
-              Includes all additional fees you normally charge
-            </p> */}
+            <Form {...form}>
+              <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
+              <form>
+                <FormField
+                  name="age"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...field} className="w-full" autoFocus />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
           </div>
         </div>
-        {/* <div className="flex items-center gap-2 rounded-xl bg-zinc-100 p-2">
-          <Info className="text-blue-500" />
-          <p className="text-xs font-semibold sm:text-base">
-            Remember you can counteroffer a low offer.
-          </p>
-        </div> */}
       </div>
     </div>
   );
