@@ -263,23 +263,18 @@ export const requestsRouter = createTRPCRouter({
               .returning({ requestId: requests.id })
               .then((res) => res[0]!);
 
+            // TODO: fix
 
-
-
-
-            await getPropertiesForRequest(
-              { ...req, id: requestId, },
-              { tx },
-            ).then((propertyIds) => {
-
-              return Promise.all(
-                propertyIds.map((propertyId) =>
-                  tx
-                    .insert(requestsToProperties)
-                    .values({ requestId, propertyId }),
-                ),
-              );
-            });
+            // await getPropertiesForRequest(
+            //   { ...req, id: requestId },
+            //   { tx },
+            // ).then((propertyIds) =>
+            //   tx
+            //     .insert(requestsToProperties)
+            //     .values(
+            //       propertyIds.map((propertyId) => ({ requestId, propertyId })),
+            //     ),
+            // );
 
             return { requestId, madeByGroupId };
           }),
@@ -344,7 +339,6 @@ export const requestsRouter = createTRPCRouter({
       return { madeByGroupIds, results };
     }),
 
-
   // createMultiple: protectedProcedure
   //   .input(
   //     requestInsertSchema
@@ -387,7 +381,6 @@ export const requestsRouter = createTRPCRouter({
   //               return res[0];
   //             });
 
-
   //           async function isPropertyAvailable(propertyId: number, checkInDate: Date, checkOutDate: Date): Promise<boolean> {
   //             const overlappingBookings = await db
   //               .select()
@@ -399,7 +392,6 @@ export const requestsRouter = createTRPCRouter({
 
   //             return overlappingBookings.length === 0;
   //           }
-
 
   //           async function getPropertyIdsInLocation(input: { location: string, radius: number | null, lat: number | null, lng: number | null }) {
   //             const { location, radius, lat, lng } = input;
