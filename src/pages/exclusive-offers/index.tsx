@@ -1,48 +1,50 @@
+import ActivityFeed from "@/components/activity-feed/ActivityFeed";
 import Head from "next/head";
-
-// import { Button } from "@/components/ui/button";
-// import SpecialDealsCard from "@/components/exclusive-offers/special-deals-card";
-
-// import { api } from "@/utils/api";
+import Link from "next/link";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import { NextSeo } from "next-seo";
 
 export default function ExclusiveOffersPage() {
-  // const { data: deals, isLoading } = api.offers.getAllOffers.useQuery();
+  const isProduction = process.env.NODE_ENV === "production";
+  let baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
 
   return (
     <>
-      <Head>
-        <title>Exclusive Offers | Tramona</title>
-      </Head>
-
-      <section className="container pt-10">
-        <h1 className="pb-5 text-4xl font-bold lg:text-5xl">
-          Today&apos;s <mark className="bg-gold px-2">Special Deals</mark>
-        </h1>
-        <p className="text-pretty pb-10 pt-2 text-xl font-semibold tracking-tight lg:tracking-normal">
-          Welcome to our exclusive offers. These are deals from our host network
-          that you won&apos;t find anywhere else. Book these before they expire!
-        </p>
-
-        <p className="text-3xl font-bold lg:text-4xl">Coming soon!</p>
-      </section>
-
-      {/* <div className="grid grid-cols-1 place-items-center gap-5 px-5 md:grid-cols-2 md:px-7 lg:grid-cols-3 2xl:grid-cols-4 2xl:px-10">
-        {isLoading ? (
-          <Button variant="ghost" isLoading disabled>
-            Loading...
-          </Button>
-        ) : (
-          <>
-            {deals?.length ? (
-              deals.map((deal) => {
-                return <SpecialDealsCard key={deal.id} deal={deal} />;
-              })
-            ) : (
-              <h2 className="text-xl">No offers to show</h2>
-            )}
-          </>
-        )}
-      </div> */}
+      <NextSeo
+        title="Feed"
+        description="Peek at who is getting great deals."
+        canonical={`${baseUrl}/activity-feed`}
+        openGraph={{
+          url: `${baseUrl}/activity-feed`,
+          type: "website",
+          title: "Feed",
+          description: "Peek at who is getting great deals.",
+          images: [
+            {
+              url: `https://www.tramona.com/assets/images/landing-page/main.png`,
+              width: 900,
+              height: 800,
+              alt: "Tramona",
+              type: "image/jpeg",
+            },
+          ],
+          site_name: "Tramona",
+        }}
+      />
+      <DashboardLayout type="guest">
+        <div className="flex min-h-screen-minus-header items-center justify-center  px-4 pb-footer-height pt-5">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-center">
+              <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">
+                Recent Deals
+              </h1>
+            </div>
+            <ActivityFeed />
+          </div>
+        </div>
+      </DashboardLayout>
     </>
   );
 }

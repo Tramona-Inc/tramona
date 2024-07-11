@@ -1,62 +1,90 @@
-import { Badge } from "@/components/ui/badge";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
-import { plural } from "@/utils/utils";
-import Image from "next/image";
 import { useRouter } from "next/router";
-import HostBidCard from "./HostBidCard";
-import HostCityRequestCard from "./HostCityRequestCard";
-
+import HostRequestDialog from "./HostRequestDialog";
+import RequestCard, {
+  type HostDashboardRequest,
+} from "@/components/requests/RequestCard";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { type Property } from "@/server/db/schema";
+import HostConfirmRequestDialog from "./HostConfirmRequestDialog";
+import HostFinishRequestDialog from "./HostFinishRequestDialog";
 export default function HostRequests() {
+  const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
+    {},
+  );
+  const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const propertyId = parseInt(router.query.id as string);
+  const { city } = router.query;
+  const [selectedRequest, setSelectedRequest] =
+    useState<HostDashboardRequest | null>(null);
+  const [properties, setProperties] = useState<Property[] | null>(null);
+  const [step, setStep] = useState(0);
 
-  const { data: requests } = api.requests.getByPropertyId.useQuery(propertyId);
-  const { data: bids } = api.biddings.getByPropertyId.useQuery(propertyId);
-  const { data: properties } = api.properties.getHostRequestsSidebar.useQuery();
-  const property = properties?.find((p) => p.id === propertyId);
+  const { data: requestsWithProperties } =
+    api.properties.getHostPropertiesWithRequests.useQuery();
+
+  const cityData = requestsWithProperties?.find((p) => p.city === city);
+
+  const {mutate: rejectRequest} = api.requests.rejectRequest.useMutation();
+
+
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        <div className="relative h-20 w-32 overflow-clip rounded-md bg-accent">
-          {property && (
-            <Image
-              src={property.imageUrls[0]!}
-              className="object-cover object-center"
-              alt=""
-              fill
-            />
-          )}
+    <div className="p-4">
+      {cityData ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {cityData.requests.map((requestData) => (
+            <div key={requestData.request.id} className="mb-4">
+              <RequestCard request={requestData.request} type="host">
+                <Button variant="darkOutline" className="mt-2" onClick={() => {
+                  rejectRequest({requestId: requestData.request.id});
+                }}>
+                  Reject
+                </Button>
+                <Button
+                  className="mt-2"
+                  onClick={() => {
+                    setDialogOpen(true);
+                    setSelectedRequest(requestData.request);
+                    setProperties(requestData.properties);
+                  }}
+                >
+                  Make an offer
+                </Button>
+              </RequestCard>
+            </div>
+          ))}
         </div>
-        <div className="flex-1">
-          <div className="text-lg font-semibold">
-            {property?.name ?? <SkeletonText className="w-2/3" />}
-          </div>
-          <div className="text-muted-foreground">
-            {property?.address ?? <SkeletonText className="w-1/4" />}
-          </div>
-          {property ? (
-            <Badge>{plural(property.numBids, "request")}</Badge>
-          ) : (
-            <Badge variant="skeleton" className="w-20" />
-          )}
-        </div>
-      </div>
-      <div className="space-y-2">
-        {requests && property
-          ? requests.map((request) => (
-              <HostCityRequestCard
-                key={request.id}
-                request={request}
-                property={property}
-              />
-            ))
-          : null}
-        {bids && property
-          ? bids.map((bid) => <HostBidCard key={bid.id} bid={bid} />)
-          : null}
-      </div>
+      ) : (
+        <SkeletonText>No requests found for {city}</SkeletonText>
+      )}
+      {step == 0 && (
+        <HostRequestDialog
+          propertyPrices={propertyPrices}
+          setPropertyPrices={setPropertyPrices}
+          open={dialogOpen}
+          setOpen={setDialogOpen}
+          properties={properties}
+          request={selectedRequest}
+          setStep={setStep}
+        />
+      )}
+      {step == 1 && (
+        <HostConfirmRequestDialog
+          request={selectedRequest}
+          properties={properties}
+          setStep={setStep}
+          propertyPrices={propertyPrices}
+          open={dialogOpen}
+          setOpen={setDialogOpen}
+          setPropertyPrices={setPropertyPrices}
+        />
+      )}
+      {step == 2 && (
+        <HostFinishRequestDialog request={selectedRequest} open={dialogOpen} setOpen={setDialogOpen} />
+      )}
     </div>
   );
 }
