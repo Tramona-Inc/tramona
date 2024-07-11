@@ -1,11 +1,9 @@
 import { api } from "@/utils/api";
-import { formatCurrency } from "@/utils/utils";
-
-import type Stripe from "stripe";
 import SummaryChart from "@/components/host/finances/summary/SummaryChart";
 import BalanceSummary from "@/components/host/finances/BalanceSummary";
 import AccountBalanceCard from "@/components/host/finances/summary/AccountBalanceCard";
 import { useEffect, useState } from "react";
+import { stripe } from "../../../server/api/routers/stripeRouter";
 export default function FinanceSummary({
   hostStripeAccountId,
   isStripeConnectInstanceReady,
@@ -16,7 +14,7 @@ export default function FinanceSummary({
   becameHostAt: Date | undefined;
 }) {
   const { data: accountBalance } =
-    api.stripe.checkStripeConnectAcountBalance.useQuery(hostStripeAccountId!, {
+    api.stripe.checkStripeConnectAccountBalance.useQuery(hostStripeAccountId!, {
       enabled: !!hostStripeAccountId,
     });
 
@@ -59,6 +57,7 @@ export default function FinanceSummary({
           <BalanceSummary
             balance={totalCurrentBalance}
             isStripeConnectInstanceReady={isStripeConnectInstanceReady}
+            stripeAccountIdNumber={hostStripeAccountId}
           />
           <AccountBalanceCard
             accountBalance={accountBalance}
