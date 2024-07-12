@@ -3,6 +3,7 @@ import { api } from "@/utils/api";
 import {
   useConversation,
   type Conversation,
+  type AdminConversations
 } from "@/utils/store/conversations";
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
@@ -16,13 +17,15 @@ import Spinner from "../_common/Spinner";
 import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
+import { AvatarFallback } from "../ui/avatar";
+
 
 export function MessageConversation({
   conversation,
   isSelected,
   setSelected,
 }: {
-  conversation: Conversation;
+  conversation: Conversation ;
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {
@@ -111,20 +114,30 @@ export default function MessagesSidebar({
       // refetchOnMount: false,
     });
 
+  const {data: fetchedConversationsForAdmin} = api.messages.getConversationForAdmin.useQuery();
+
   const conversations = useConversation((state) => state.conversationList);
+  const adminConversation = useConversation((state) => state.adminConversationList)
 
   const setConversationList = useConversation(
     (state) => state.setConversationList,
   );
 
+  const setAdminConversationList = useConversation(
+    (state) => state.setAdminConversationList,
+  )
+
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
     if (fetchedConversations) {
       setConversationList(fetchedConversations);
+    if(fetchedConversationsForAdmin){
+      setAdminConversationList(fetchedConversationsForAdmin);
+    }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchedConversations]);
+  }, [fetchedConversations, fetchedConversationsForAdmin]);
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
 
@@ -149,14 +162,13 @@ export default function MessagesSidebar({
           const newMessage: ChatMessageType = {
             id: payload.new.id,
             conversationId: payload.new.conversation_id,
-            userId: payload.new.user_id,
-            userToken: "",
+            userId: payload.new.user_id ?? "",
+            // userToken: "",
             message: payload.new.message,
             isEdit: payload.new.is_edit,
             createdAt: payload.new.created_at,
             read: payload.new.read,
           };
-
           setConversationToTop(payload.new.conversation_id, newMessage);
         }
       }
@@ -193,6 +205,12 @@ export default function MessagesSidebar({
     };
 
     void fetchConversationIds();
+    // const AdminConversationIds =async () => {
+    //   if(session) {
+    //     const channels = adminConversation
+    //     .map((conversation) => conversation.id)
+    //   }
+    // }
   }, [
     conversations,
     optimisticIds,
@@ -234,6 +252,19 @@ export default function MessagesSidebar({
             <Spinner />
           </div>
         )}
+        {session?.user.role === "admin" && 
+        (adminConversation.length > 0 && (
+          adminConversation.map((conversation) => (
+            <SidebarConversation 
+            key={conversation.id}
+            conversation={conversation}
+            adminConversation={conversation}
+            isSelected = {selectedConversation?.id === conversation.id}
+            setSelected={setSelected}
+            />
+          ))
+        ) 
+      )}
       </ScrollArea>
     </div>
   );

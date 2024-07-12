@@ -29,8 +29,8 @@ export const messages = pgTable(
       userId: text("user_id").references(() => users.id, {
         onDelete: "set null",
       }),
-    userToken: text("user_token")
-    .references(() => conversationParticipants.userToken),
+    // userToken: text("user_token")
+    // .references(() => conversationParticipants.userToken),
     message: varchar("message", { length: 1500 }).notNull(),
     read: boolean("read").default(false),
     isEdit: boolean("is_edit").default(false),
@@ -47,6 +47,32 @@ export const messages = pgTable(
   }),
 );
 
+export const guestMessages = pgTable(
+  "guest_messages",
+  {
+    id: varchar("id", {length: 21}).primaryKey().$defaultFn(nanoid),
+    conversationId: varchar("conversation_id")
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+    userToken: text("user_token")
+    .references(() => conversationGuests.userToken),
+    message: varchar("message", { length: 1500 }).notNull(),
+    read: boolean("read").default(false),
+    isEdit: boolean("is_edit").default(false),
+    createdAt: timestamp(
+      "created_at",
+      { withTimezone: true, mode: "string" },
+    )
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    conversationidIdx: index().on(t.conversationId),
+    usertokenIdx: index().on(t.userToken),
+  })
+)
+
+
 export const conversationParticipants = pgTable(
   "conversation_participants",
   {
@@ -55,11 +81,26 @@ export const conversationParticipants = pgTable(
       .references(() => conversations.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .references(() => users.id, { onDelete: "cascade" }),
-    userToken: text("user_token").unique(),
+    // userToken: text("user_token").unique(),
   },
   (t) => ({
     compoundKey: primaryKey({ columns: [t.conversationId, t.userId] }),
   }),
 );
 
+export const conversationGuests = pgTable(
+  "conversation_guests",
+  {
+    conversationId: varchar("conversation_id")
+      .notNull()
+      .references(() => conversations.id, {onDelete: "cascade"}),
+    userToken: text("user_token").unique(),
+    adminId:text("admin_id").notNull(),
+  },
+  (t) => ({
+    compoundKey: primaryKey({ columns: [t.conversationId, t.userToken]})
+  })
+)
+
 export type MessageType = typeof messages.$inferSelect;
+export type GuestMessageType = typeof guestMessages.$inferSelect;

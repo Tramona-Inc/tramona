@@ -1,9 +1,10 @@
-import { type MessageType } from "@/server/db/schema";
+import { type GuestMessageType, type MessageType } from "@/server/db/schema";
 import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 import { type MessageGroup } from "./groupMessages";
 import { AnonymousAvatar } from "../ui/avatar";
+import { type GuestMessage } from "@/utils/store/messages";
 
 export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   const { data: session } = useSession();
@@ -19,11 +20,11 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
           {user ? (
             <p className="font-semibold leading-none">{user.name}</p>
           ) : (
-            <p className="leading-none text-muted-foreground">[deleted user]</p>
+            <p className="leading-none text-muted-foreground">[unknown user]</p>
           )}
           <p className="text-xs text-muted-foreground">
             {formatRelative(firstMessage.createdAt, new Date())}
-            {session.user.id === firstMessage.userId && firstMessage.read && (
+            {"userId" in firstMessage && session.user.id === firstMessage.userId && firstMessage.read && (
               <> · read</>
             )}
           </p>
@@ -39,7 +40,7 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   );
 }
 
-function Message({ message }: { message: MessageType }) {
+function Message({ message }: { message: MessageType | GuestMessageType }) {
   return (
     <p>
       {message.message}

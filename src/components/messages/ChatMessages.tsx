@@ -9,7 +9,7 @@ export default function ChatMessages({
 }: {
   conversationId: string;
 }) {
-  const { switchConversation, fetchInitialMessages } = useMessage();
+  const { switchConversation, fetchInitialMessages, fetchMessagesForGuest } = useMessage();
 
   // Fetch conversation on the client
   useEffect(() => {
@@ -18,6 +18,7 @@ export default function ChatMessages({
 
     // Fetch initial messages when the component mounts
     void fetchInitialMessages(conversationId);
+    void fetchMessagesForGuest(conversationId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 

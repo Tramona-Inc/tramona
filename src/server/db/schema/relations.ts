@@ -15,8 +15,10 @@ import {
   hostTeams,
 } from "./tables/hostTeams";
 import {
+  conversationGuests,
   conversationParticipants,
   conversations,
+  guestMessages,
   messages,
 } from "./tables/messages";
 import { offers } from "./tables/offers";
@@ -189,6 +191,8 @@ export const earningsRelations = relations(referralEarnings, ({ one }) => ({
 export const conversationsRelations = relations(conversations, ({ many }) => ({
   messages: many(messages),
   participants: many(conversationParticipants),
+  guest_messages: many(guestMessages),
+  guest_participants: many(conversationGuests),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -202,6 +206,18 @@ export const messagesRelations = relations(messages, ({ one }) => ({
   }),
 }));
 
+export const guestMessagesRelations = relations(guestMessages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [guestMessages.conversationId],
+    references: [conversations.id],
+  }),
+  user: one(conversationGuests, {
+    fields: [guestMessages.userToken],
+    references: [conversationGuests.userToken],
+  }),
+}));
+
+
 export const conversationParticipantsRelations = relations(
   conversationParticipants,
   ({ one }) => ({
@@ -212,6 +228,16 @@ export const conversationParticipantsRelations = relations(
     user: one(users, {
       fields: [conversationParticipants.userId],
       references: [users.id],
+    }),
+  }),
+);
+
+export const conversationGuestsRelations = relations(
+  conversationGuests,
+  ({ one }) => ({
+    conversations: one(conversations, {
+      fields: [conversationGuests.conversationId],
+      references: [conversations.id],
     }),
   }),
 );

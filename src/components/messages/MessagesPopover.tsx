@@ -4,7 +4,8 @@ import supabase from "@/utils/supabase-client";
 import { Button } from '../ui/button'
 import UserAvatar from '../_common/UserAvatar'
 import { Form, FormControl, FormField, FormItem } from '../ui/form'
-import { type ChatMessageType, useMessage } from "@/utils/store/messages";
+import { type ChatMessageType, GuestMessage, useMessage } from "@/utils/store/messages";
+import { type MessageDbType } from '@/types/supabase.message';
 import { useConversation } from '@/utils/store/conversations';
 import { Input } from '../ui/input'
 import {MessageCircleMore, Mic, ArrowUp, SendHorizonal, Smile, X} from 'lucide-react'
@@ -18,6 +19,7 @@ import { api } from '@/utils/api'
 import { nanoid } from "nanoid";
 import { errorToast } from "@/utils/toasts";
 import AdminMessages from './AdminMessages';
+import { GuestMessageType } from '@/server/db/schema';
 // import { createConversationWithAdmin } from '@/server/api/routers/messagesRouter';
 
 let tempToken: string;
@@ -28,16 +30,19 @@ export default function MessagesPopover({session}: {
 
   const {mutateAsync: createConversation} = api.messages.createConversationWithAdmin.useMutation();
 
-  // const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
-  //  uniqueId: session?.user.id ?? "",
-  //  session: session ? true : false })
+  const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
+   uniqueId: session?.user.id ?? "",
+   session: session ? true : false })
 
   //  const { fetchInitialMessages } = useMessage()
   // void fetchInitialMessages(conversationId ?? "")
   
   const addMessageToConversation = useMessage( 
     (state) => state.addMessageToConversation
-  )  
+  )
+  
+  const optimisticIds = useMessage((state) => state.optimisticIds);
+  
   
   const setConversationToTop = useConversation(
     (state) => state.setConversationToTop,
@@ -46,6 +51,18 @@ export default function MessagesPopover({session}: {
   const removeMessageFromConversation = useMessage(
     (state) => state.removeMessageFromConversation,
   );
+
+  const { fetchInitialMessages, fetchMessagesForGuest } = useMessage()
+  if(!session) {
+    void fetchMessagesForGuest(conversationId ?? "")
+  }
+  void fetchInitialMessages(conversationId ?? "")
+  const { conversations } = useMessage()
+
+  const messages = conversationId 
+    ? conversations[conversationId]?.messages ?? []
+    : [];
+
   
   const formSchema = z.object({
         message: z.string(),
@@ -59,6 +76,9 @@ export default function MessagesPopover({session}: {
     }
   }
 
+  const currentConversationId = useMessage(
+    (state) => state.currentConversationId
+  )
   // const {data: conversation_id} = api.messages.getConversationsWithAdmin.useQuery({uniqueId: temporary_token});
   
   const handleOnSend = async (values: z.infer<typeof formSchema>) => {
@@ -70,49 +90,131 @@ export default function MessagesPopover({session}: {
       });
       console.log(conversationId)
 
-      const newMessage: ChatMessageType = {
-        id: nanoid(),
-        createdAt: new Date().toISOString().slice(0, -1),
-        conversationId: conversationId ?? "",
-        userId: session?.user.id ?? "", //user is logged in
-        userToken: tempToken, //user has not logged in
-        message: values.message,
-        read: false,
-        isEdit: false,
-      };
+      if(!session){
+        const newMessage: GuestMessage = {
+          id: nanoid(),
+          createdAt: new Date().toISOString().slice(0,-1),
+          conversationId: conversationId ?? "",
+          userToken: tempToken,
+          message: values.message,
+          read: false,
+          isEdit: false,
+        };
 
-      const newMessageToDb = {
-        id: newMessage.id,
-        conversation_id: conversationId ?? "",
-        user_id: newMessage.userId,
-        message: newMessage.message,
-        userToken: newMessage.userToken,
-        read: newMessage.read,
-        is_edit: newMessage.isEdit,
-        created_at: new Date().toISOString(),
-      };
+        const newMessageToDb = {
+          id: newMessage.id,
+          conversation_id: newMessage.conversationId,
+          user_token: newMessage.userToken,
+          message: newMessage.message,
+          read: newMessage.read,
+          is_edit: newMessage.isEdit,
+          created_at: newMessage.createdAt,
+        }
 
-      setConversationToTop(conversationId ?? "", newMessage);
-      addMessageToConversation(conversationId ?? "", newMessage)
-      const { error } = await supabase
-        .from("messages")
+        addMessageToConversation(conversationId ?? "", newMessage)
+        setConversationToTop(conversationId ?? "", newMessage)
+        const { error } = await supabase
+        .from("guest_messages")
         .insert(newMessageToDb)
-        .select("*, user(email, name, image)")
-        // .select("*")
+        // .select("*, user(email, name, image)")
+        .select("*")
         .single();
 
       if (error) {
         removeMessageFromConversation(conversationId ?? "", newMessage.id);
         errorToast();
       }
-      form.reset();
-    
-    
-        
       }
-      const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema)
-      })
+      else{
+        const newMessage: ChatMessageType = {
+          id: nanoid(),
+          createdAt: new Date().toISOString().slice(0, -1),
+          conversationId: conversationId ?? "",
+          userId: session?.user.id ?? "", //user is logged in
+          // userToken: tempToken, //user has not logged in
+          message: values.message,
+          read: false,
+          isEdit: false,
+        };
+  
+        const newMessageToDb = {
+          id: newMessage.id,
+          conversation_id: conversationId ?? "",
+          user_id: newMessage.userId,
+          message: newMessage.message,
+          // userToken: newMessage.userToken,
+          read: newMessage.read,
+          is_edit: newMessage.isEdit,
+          created_at: new Date().toISOString(),
+        };
+  
+        setConversationToTop(conversationId ?? "", newMessage);
+        addMessageToConversation(conversationId ?? "", newMessage)
+        const { error } = await supabase
+          .from("messages")
+          .insert(newMessageToDb)
+          .select("*, user(email, name, image)")
+          // .select("*")
+          .single();
+  
+        if (error) {
+          removeMessageFromConversation(conversationId ?? "", newMessage.id);
+          errorToast();
+        }
+      }
+      form.reset();
+
+    }
+      
+      const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+
+        if (!optimisticIds.includes(payload.new.id)) {
+          const { error } = await supabase
+            .from("user")
+            .select("name, email, image")
+            .eq("id", payload.new.user_id ?? "")
+            .single();
+          if (error) {
+            errorToast();
+          } else {
+            const newMessage: (ChatMessageType | GuestMessage) = {
+              id: payload.new.id,
+              conversationId: payload.new.conversation_id,
+              userId: payload.new.user_id ?? "",
+              message: payload.new.message,
+              isEdit: payload.new.is_edit,
+              createdAt: payload.new.created_at,
+              read: payload.new.read,
+            };
+          }
+        }        
+      }
+    
+      useEffect(() => {
+        const channel = supabase
+          .channel(`${currentConversationId}`)
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "messages",
+            },
+            (payload: { new: MessageDbType }) => void handlePostgresChange(payload),
+          )
+          .subscribe();
+    
+        return () => {
+          void channel.unsubscribe();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [currentConversationId, messages]);
+
+      
+
+    const form = useForm<z.infer<typeof formSchema>>({
+      resolver: zodResolver(formSchema)
+    })
       const today = new Date();
       let hours = today.getHours().toString();
       let minutes = today.getMinutes().toString();

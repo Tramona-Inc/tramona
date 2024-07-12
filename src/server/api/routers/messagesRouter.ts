@@ -5,7 +5,7 @@ import { conversationParticipants, users } from "@/server/db/schema";
 import { zodString } from "@/utils/zod-utils";
 import { and, eq, inArray, ne } from "drizzle-orm";
 import { input, z } from "zod";
-import { conversations, messages } from "./../../db/schema/tables/messages";
+import { conversationGuests, conversations, guestMessages, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
 import { columns } from "@/components/admin/view-recent-host/table/columns";
 
@@ -46,31 +46,82 @@ export async function fetchUsersConversations(userId: string) {
   });
 }
 
+export async function fetchGuestConversation(conversationId: string) {
+  return await db.query.conversationGuests.findFirst({
+    where: eq(conversations.id, conversationId),
+    columns:{},
+    with:{
+        conversations:{
+          with:{
+            guest_messages:{
+              orderBy: (guest_messages, {desc}) => [desc(guest_messages.createdAt)],
+              limit: 1,
+            },
+            guest_participants:{
+              columns: {
+                conversationId: true,
+                userToken: true,
+                adminId: true,
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+
+export async function fetchAdminConversations() {
+  const result = await db.query.conversationGuests.findMany({
+    where: eq(conversationGuests.adminId, ADMIN_ID),
+    columns: {},
+    with: {
+      conversations:{
+        with:{
+          guest_messages:{
+            orderBy: (guest_messages, {desc}) => [desc(guest_messages.createdAt)],
+            limit: 1,
+          },
+          guest_participants: {
+            columns: {
+              conversationId: true,
+              userToken: true,
+              adminId: true,
+            }
+          }
+        }
+      }
+    }
+  })
+  return result;
+}
+
+
 export async function fetchConversationWithAdmin(userId: string) {
   const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
-    with: {
-      conversations: {
-        with: {
-          conversation: {
-            with: {
-              participants: {
-                with: {
-                  user: {
+    with:{
+      conversations:{
+        with:{
+          conversation:{
+            with:{
+              participants:{
+                with:{
+                  user:{
                     columns: {
-                      id: true,
+                      id:true,
                       name: true,
-                      image: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+                      email: true,
+                      image:true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
 
   // Check if conversation contains two participants
   // and check if admin id is in there
@@ -88,11 +139,10 @@ export async function fetchConversationWithAdmin(userId: string) {
 
 //fetchconversation, if user is not logged in, with tempToken
 export async function fetchConversationWithAdminWithoutUser(userToken: string){
-  const result = await db.query.conversationParticipants.findFirst({
-    where: eq(conversationParticipants.userToken, userToken),
+  const result = await db.query.conversationGuests.findFirst({
+    where: eq(conversationGuests.userToken, userToken),
 })
-
-  return result?.conversationId
+return result?.conversationId;
 }
 
 export async function fetchConversationWithOffer(
@@ -150,11 +200,12 @@ export async function createConversationWithAdmin(userId: string | null, userTok
   // Generate conversation and get id
   const createdConversationId = await generateConversation();
   if(!userId && createdConversationId !== undefined){
-    const participantValues = [
-      { conversationId: createdConversationId, userToken: userToken },
-      { conversationId: createdConversationId, userId: ADMIN_ID },
-    ];
-    await db.insert(conversationParticipants).values(participantValues);
+    const participantValues = { 
+      conversationId: createdConversationId,
+      userToken: userToken, 
+      adminId: ADMIN_ID 
+    };
+    await db.insert(conversationGuests).values(participantValues);
     console.log("insert into cp");
     return createdConversationId;
   }
@@ -215,7 +266,6 @@ export async function addTwoUserToConversation(
     const participantValues = [
       { conversationId: createdConversationId, userId: user1Id },
       { conversationId: createdConversationId, userId: user2Id },
-
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
@@ -271,6 +321,33 @@ export const messagesRouter = createTRPCRouter({
     return [];
   }),
 
+  getConversationWithGuest: publicProcedure
+  .input(z.object({
+    conversationId: z.string(),
+  }))
+  .query(async ({input}) => {
+    const result = await fetchGuestConversation(input.conversationId);
+    return result;
+  }),
+
+  getConversationForAdmin: publicProcedure
+  .query(async () => {
+    const result = await fetchAdminConversations();
+    if(result){
+      const adminConversation = result.map((conversation) => ({
+        ...conversation.conversations,
+      }))
+      return adminConversation
+    }
+    return [];
+  }),
+
+  // getAdminConversations: protectedProcedure
+  // .query( async ({ ctx }) => {
+    
+  //   return result;
+  // }),
+
   getConversationsWithAdmin: publicProcedure
   .input(z.object({
     uniqueId: z.string(),
@@ -296,7 +373,7 @@ export const messagesRouter = createTRPCRouter({
   }))
   .mutation(async ({ input }) => {
     console.log(input.session)
-    //user has not signed in
+    // user has not signed in
     if(!input.session){
       const conversationId = await fetchConversationWithAdminWithoutUser(input.uniqueId);
       if(!conversationId){ 
@@ -307,7 +384,7 @@ export const messagesRouter = createTRPCRouter({
       return conversationId;
     }
     else{
-      //user has signed in
+      // user has signed in
       const conversationId = await fetchConversationWithAdmin(input.uniqueId);
   
       // Create conversation with admin if it doesn't exist

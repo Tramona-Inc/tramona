@@ -22,9 +22,16 @@ import { useEffect } from "react";
   console.log(conversationId)
 
 
-  const { fetchInitialMessages } = useMessage()
-  void fetchInitialMessages(conversationId ?? "")
-  const { conversations } = useMessage()
+  const { fetchMessagesForGuest, fetchInitialMessages } = useMessage()
+  if(!session) {
+    void fetchMessagesForGuest(conversationId ?? "")
+  }
+  else {
+    void fetchInitialMessages(conversationId ?? "")
+  }
+  const { conversations } = useMessage();
+
+  
   
   const optimisticIds = useMessage((state) => state.optimisticIds);
     const messages = conversationId 
@@ -62,7 +69,7 @@ import { useEffect } from "react";
                     {/* </p>
                     </div> */}
                   {/* } */}
-                  {messages.map((message, index) => ( message.userId === session?.user.id || message.userId === tempToken ?
+                  {messages.map((message, index) => ( "userId" in message && message.userId === session?.user.id || "userToken" in message && message.userToken === tempToken ?
                     <>
                     <div className="flex flex-row-reverse m-1 p-1" key={index}>
                       <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">

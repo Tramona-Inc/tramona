@@ -1,20 +1,25 @@
 import { LIMIT_MESSAGE } from "@/components/messages/ChatMessages";
 import { type MessageType } from "@/server/db/schema";
+import { type GuestMessageType } from "@/server/db/schema";
 import { create } from "zustand";
 import supabase from "../supabase-client";
 import { errorToast } from "../toasts";
+import { read } from "fs";
 
-export type ChatMessageType = MessageType; // make userId non-null
+export type ChatMessageType = MessageType & {userId: string}; // make userId non-null
+export type GuestMessage = GuestMessageType 
+
 
 type ConversationsState = Record<
   string,
   {
-    messages: ChatMessageType[];
+    messages: (ChatMessageType | GuestMessage)[];
     page: number;
     hasMore: boolean;
     alreadyFetched: boolean;
   }
 >;
+
 
 type MessageState = {
   conversations: ConversationsState;
@@ -23,7 +28,7 @@ type MessageState = {
   switchConversation: (conversationId: string) => void;
   addMessageToConversation: (
     conversationId: string,
-    messages: ChatMessageType,
+    messages: ChatMessageType | GuestMessage,
   ) => void;
   optimisticIds: string[];
   setOptimisticIds: (id: string) => void;
@@ -32,6 +37,7 @@ type MessageState = {
     moreMessages: ChatMessageType[],
   ) => void;
   fetchInitialMessages: (conversationId: string) => Promise<void>;
+  fetchMessagesForGuest: (conversationId: string) => Promise<void>;
   removeMessageFromConversation: (
     conversationId: string,
     messageId: string,
@@ -51,7 +57,7 @@ export const useMessage = create<MessageState>((set, get) => ({
   },
   addMessageToConversation: (
     conversationId: string,
-    newMessage: ChatMessageType,
+    newMessage: ChatMessageType | GuestMessage,
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
@@ -89,7 +95,7 @@ export const useMessage = create<MessageState>((set, get) => ({
     })),
   setMoreMessagesToConversation: (
     conversationId: string,
-    moreMessages: ChatMessageType[],
+    moreMessages: (ChatMessageType | GuestMessage)[],
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
@@ -136,29 +142,36 @@ export const useMessage = create<MessageState>((set, get) => ({
     }
 
     try {
-      // const { data, error } = await supabase
-      //   .from("messages")
-      //   .select(
-      //     `
-      //       *,
-      //       user(name, image, email)
-      //     `,
-      //   )
-      //   .range(0, LIMIT_MESSAGE)
-      //   .eq("conversation_id", conversationId)
-      //   .order("created_at", { ascending: false });
-
-        const { data, error } = await supabase
+      const { data, error } = await supabase
         .from("messages")
         .select(
           `
             *,
-            user(name, email, image)
+            user(name, image, email)
           `,
         )
         .range(0, LIMIT_MESSAGE)
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: false });
+
+        // const { data, error } = await supabase
+        // .from("messages")
+        // .select(
+        //   `
+        //     *,
+        //     user(name, email, image)
+        //   `
+        // )
+        // .range(0, LIMIT_MESSAGE)
+        // .eq("conversation_id", conversationId)
+        // .order("created_at", { ascending: false });
+
+        // const {data, error} = await supabase
+        // .from("messages")
+        // .select("*, user(name, email, image)")
+        // .range(0, LIMIT_MESSAGE)
+        // .eq("conversation_id", conversationId)
+        // .order("created_at", {ascending: false});
 
       if (error) {
         throw new Error(error.message);
@@ -169,27 +182,17 @@ export const useMessage = create<MessageState>((set, get) => ({
           id: message.id,
           createdAt: message.created_at,
           conversationId: message.conversation_id,
-          userId: message.user_id,
-          userToken: message.user_token,
+          userId: message.user_id ?? "",
+          // userToken: message.user_token,
           message: message.message,
           read: message.read ?? false, // since fetched means it's read
           isEdit: message.is_edit ?? false, // Provide a default value if needed
-          // user: {
-          //   name: message.user?.name ?? "",
-          //   image: message.user?.image ?? "",
-          //   email: message.user?.email ?? "",
-          // },
+          user: {
+            name: message.user?.name ?? "",
+            image: message.user?.image ?? "",
+            email: message.user?.email ?? "",
+          },
         }));
-        // const chatMessages: ChatMessageType[] = data.map((message) => ({
-        //   id: message.id,
-        //   createdAt: message.created_at,
-        //   conversationId: message.conversation_id,
-        //   userId: message.user_id,
-        //   userToken: message. userToken,
-        //   message: message.message,
-        //   read: message.read ?? false, // since fetched means it's read
-        //   isEdit: message.is_edit ?? false, // Provide a default value if needed
-        // }));
 
         const hasMore = chatMessages.length >= LIMIT_MESSAGE;
 
@@ -207,6 +210,51 @@ export const useMessage = create<MessageState>((set, get) => ({
         }));
       }
     } catch (error) {
+      errorToast();
+    }
+  },
+  fetchMessagesForGuest: async (conversationId: string): Promise<void> => {
+    const state = get();
+
+    if(state.conversations[conversationId]?.alreadyFetched) {
+      return;
+    }
+    
+    try{
+      const { data, error } = await supabase.
+      from("guest_messages")
+      .select("*")
+      .range(0, LIMIT_MESSAGE)
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: false })
+
+      if(data){
+        const chatMessages: (ChatMessageType | GuestMessage)[] = data.map((message) => ({
+          id: message.id,
+          conversationId: message.conversation_id,
+          userToken: message.user_token,
+          message: message.message,
+          createdAt: message.created_at,
+          isEdit: message.is_edit,
+          read: message.read,
+        }))
+
+        const hasMore = chatMessages.length >= LIMIT_MESSAGE
+
+        set((state) => ({
+          ...state,
+          conversations: {
+            ...state.conversations,
+            [conversationId]: {
+              messages: chatMessages,
+              page: 1,
+              hasMore,
+              alreadyFetched: true, // Set the flag to true after fetching
+            },
+          },
+        }));
+      }
+    } catch(error) {
       errorToast();
     }
   },

@@ -1,5 +1,5 @@
 import { type MessageDbType } from "@/types/supabase.message";
-import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { type GuestMessage, useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
@@ -17,6 +17,10 @@ function NoMessages() {
       No messages
     </div>
   );
+}
+
+function isChatMessage(message: ChatMessageType | GuestMessage): message is ChatMessageType {
+  return (message as ChatMessageType).userId !== undefined;
 }
 
 export default function ListMessages({
@@ -56,7 +60,7 @@ export default function ListMessages({
     const unreadMessageIds = messages
       .filter(
         (message) =>
-          message.read === false && message.userId !== session?.user.id,
+          message.read === false && isChatMessage(message) && message.userId !== session?.user.id,
       )
       .map((message) => message.id);
 
@@ -85,7 +89,7 @@ export default function ListMessages({
           conversationId: payload.new.conversation_id,
           userId: payload.new.user_id ?? "",
           message: payload.new.message,
-          userToken: "",
+          // userToken: "",
           isEdit: payload.new.is_edit,
           createdAt: payload.new.created_at,
           read: payload.new.read,
@@ -174,13 +178,13 @@ export default function ListMessages({
     .map((message) => {
       // Display message with user
       if (!participants || !session) return null;
-      if (message.userId === session.user.id) {
+      if (isChatMessage(message) && message.userId === session.user.id) {
         return { message, user: session.user };
       }
 
       const user =
         participants.find(
-          (participant) => participant?.id === message.userId,
+          (participant) => isChatMessage(message) && participant?.id === message.userId,
         ) ?? null; // null means its a deleted user
 
       return { message, user };

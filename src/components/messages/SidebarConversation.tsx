@@ -2,6 +2,7 @@ import { api } from "@/utils/api";
 import {
   useConversation,
   type Conversation,
+  type AdminConversation,
 } from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
@@ -10,10 +11,12 @@ import { formatRelative } from "date-fns";
 
 export function SidebarConversation({
   conversation,
+  adminConversation,
   isSelected,
   setSelected,
 }: {
   conversation: Conversation;
+  adminConversation?: AdminConversation;
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {

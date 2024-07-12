@@ -219,6 +219,32 @@ export type SupabaseDatabase = {
           },
         ]
       }
+      conversation_guests: {
+        Row: {
+          admin_id: string
+          conversation_id: string
+          user_token: string
+        }
+        Insert: {
+          admin_id: string
+          conversation_id: string
+          user_token: string
+        }
+        Update: {
+          admin_id?: string
+          conversation_id?: string
+          user_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_guests_conversation_id_conversations_id_fk"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -238,6 +264,13 @@ export type SupabaseDatabase = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_participants_user_id_user_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
             referencedColumns: ["id"]
           },
         ]
@@ -426,6 +459,51 @@ export type SupabaseDatabase = {
           },
         ]
       }
+      guest_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          is_edit: boolean | null
+          message: string
+          read: boolean | null
+          user_token: string | null
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id: string
+          is_edit?: boolean | null
+          message: string
+          read?: boolean | null
+          user_token?: string | null
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_edit?: boolean | null
+          message?: string
+          read?: boolean | null
+          user_token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_messages_conversation_id_conversations_id_fk"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guest_messages_user_token_conversation_guests_user_token_fk"
+            columns: ["user_token"]
+            isOneToOne: false
+            referencedRelation: "conversation_guests"
+            referencedColumns: ["user_token"]
+          },
+        ]
+      }
       host_profiles: {
         Row: {
           became_host_at: string
@@ -565,7 +643,6 @@ export type SupabaseDatabase = {
           message: string
           read: boolean | null
           user_id: string | null
-          user_token: string | null
         }
         Insert: {
           conversation_id: string
@@ -575,7 +652,6 @@ export type SupabaseDatabase = {
           message: string
           read?: boolean | null
           user_id?: string | null
-          user_token?: string | null
         }
         Update: {
           conversation_id?: string
@@ -585,7 +661,6 @@ export type SupabaseDatabase = {
           message?: string
           read?: boolean | null
           user_id?: string | null
-          user_token?: string | null
         }
         Relationships: [
           {
@@ -593,6 +668,13 @@ export type SupabaseDatabase = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_user_id_user_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
             referencedColumns: ["id"]
           },
         ]

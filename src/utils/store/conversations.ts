@@ -1,34 +1,46 @@
-import { type MessageType } from "@/server/db/schema";
+import { type MessageType, type GuestMessageType } from "@/server/db/schema";
 
 import { create } from "zustand";
 import { type RouterOutputs } from "../api";
 
 export type Conversation =
   RouterOutputs["messages"]["getConversations"][number];
+export type AdminConversation = 
+RouterOutputs["messages"]["getConversationForAdmin"][number];
+
 
 export type Conversations = RouterOutputs["messages"]["getConversations"];
+export type GuestConvos = RouterOutputs["messages"]["getConversationWithGuest"]
+export type AdminConversations = RouterOutputs["messages"]["getConversationForAdmin"]
 
 type ConversationListState = {
-  conversationList: Conversations | [];
-  setConversationList: (conversationList: Conversations | []) => void;
+  conversationList: Conversations  | [];
+  adminConversationList: AdminConversations | [];
+  setConversationList: (
+    conversationList: Conversations | [] 
+  ) => void;
+  setAdminConversationList: (
+    adminConversationList: AdminConversations | []
+  ) => void
   setConversationToTop: (
     conversationId: string,
-    newMessage: MessageType,
+    newMessage: MessageType | GuestMessageType,
   ) => void;
   setConversationReadState: (conversationId: string) => void;
 };
 
 export const useConversation = create<ConversationListState>((set) => ({
   conversationList: [],
-  setConversationList: (conversationList: Conversations | []) => {
+  adminConversationList: [],
+  setConversationList: (conversationList: Conversations  | []) => {
     set(() => ({ conversationList }));
   },
-  setConversationToTop: (conversationId: string, newMessage: MessageType) => {
+  setAdminConversationList: ( adminConversationList: AdminConversations | []) => {
+    set(() => ({ adminConversationList }))
+  },
+  setConversationToTop: (conversationId: string, newMessage:  GuestMessageType | MessageType ) => {
     set((state) => {
-      const updatedConversations: Conversations | [] = state.conversationList
-        ? [...state.conversationList]
-        : [];
-
+      const updatedConversations = [...state.conversationList]
       const conversationIndex = updatedConversations.findIndex(
         (conversation) => conversation.id === conversationId,
       );
@@ -38,25 +50,41 @@ export const useConversation = create<ConversationListState>((set) => ({
           conversationIndex,
           1,
         )[0];
-
         // Check if movedConversation is not undefined
         if (movedConversation) {
           // Update the first message in the messages array with the new message
-          movedConversation.messages = [
-            {
-              id: newMessage.id,
-              userId: newMessage.userId,
-              userToken: newMessage.userToken,
-              createdAt: newMessage.createdAt,
-              conversationId: newMessage.conversationId,
-              message: newMessage.message,
-              read: newMessage.read,
-              isEdit: newMessage.isEdit,
-            },
-            ...movedConversation.messages.slice(1), // Include the rest of the messages
-          ];
+          if("userId" in newMessage && "messages" in movedConversation){
+            movedConversation.messages = [
+              {
+                id: newMessage.id,
+                userId: newMessage.userId,
+                // userToken: newMessage.userToken,
+                createdAt: newMessage.createdAt,
+                conversationId: newMessage.conversationId,
+                message: newMessage.message,
+                read: newMessage.read,
+                isEdit: newMessage.isEdit,
+              },
+              ...movedConversation.messages.slice(1), // Include the rest of the messages
+            ];
+            updatedConversations.unshift(movedConversation);
+          } else if("userToken" in newMessage && "guest_messages" in movedConversation) {
 
-          updatedConversations.unshift(movedConversation);
+              movedConversation.guest_messages = [
+                {
+                  id: newMessage.id,
+                  userToken: newMessage.userToken,
+                  createdAt: newMessage.createdAt,
+                  conversationId: newMessage.conversationId,
+                  message: newMessage.message,
+                  read: newMessage.read,
+                  isEdit: newMessage.isEdit,
+                },
+                ...movedConversation.messages.slice(1),
+              ]
+          }
+
+          // updatedConversations.unshift(movedConversation);
         }
       }
 
