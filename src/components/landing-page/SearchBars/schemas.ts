@@ -23,17 +23,41 @@ const cityRequestSchema = z
     location: zodString(),
     date: z.object({ from: z.date(), to: z.date() }),
     numGuests: zodInteger({ min: 1 }),
-    maxNightlyPriceUSD: zodNumber({ min: 0 }).optional(),
-    // roomType: z.enum([...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER]).optional(),
+    maxNightlyPriceUSD: zodNumber({ min: 0 }),
     minNumBedrooms: z.number().optional(),
     minNumBeds: z.number().optional(),
     minNumBathrooms: z.number().optional(),
-    airbnbLink: optional(zodUrl()),
+    airbnbLink: z
+      .string()
+      .optional()
+      .or(z.literal(""))
+      .refine((url) => !url || url.startsWith("https://www.airbnb.com/rooms"), {
+        message: 'URL must start with "https://www.airbnb.com/rooms"',
+      }),
     note: optional(zodString()),
   })
-  .refine(({ date }) => date.from < date.to, {
-    message: "Must stay for at least 1 night",
-    path: ["date"],
+  .superRefine((data, ctx) => {
+    if (!data.airbnbLink) {
+      if (
+        !data.location ||
+        !data.date ||
+        !data.numGuests ||
+        !data.maxNightlyPriceUSD
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Either provide an Airbnb link or fill out the location, date, number of guests, and maximum nightly price.",
+          path: ["airbnbLink"], // specify the path to the field that is missing
+        });
+      } else if (data.date && data.date.from >= data.date.to) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Must stay for at least 1 night",
+          path: ["date"],
+        });
+      }
+    }
   });
 
 export const multiCityRequestSchema = z.object({

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Stripe } from "@stripe/stripe-js";
+import type { Stripe } from "@stripe/stripe-js";
 import { Button } from "../ui/button";
 import { useVerification, VerificationProvider } from "./VerificationContext";
 import { api } from "@/utils/api";
-import { ZodUndefined } from "zod";
 import { useSession } from "next-auth/react";
 import { useStripe } from "@/utils/stripe-client";
 

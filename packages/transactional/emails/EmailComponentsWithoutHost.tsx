@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import {
   Body,
   Column,
@@ -14,7 +15,7 @@ import {
 
 import { Tailwind } from "@react-email/tailwind";
 import * as React from "react";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -127,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
         <TramonaLogo />
       </div>
       <div className="inline-flex w-full items-center justify-center">
-        <Hr className="h-px w-11/12 border-0 bg-gray-400 " />
+        <Hr className="h-px w-11/12 border-0 bg-gray-400" />
       </div>
       <Heading className="my-0 ml-6 mt-4 text-left text-lg leading-8">
         <strong className="text-brand">{title}</strong>
@@ -139,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
 export const BottomHr = () => {
   return (
     <div className="inline-flex w-full items-center justify-center">
-      <Hr className="mt-8 h-px w-11/12 border-0  bg-gray-400" />
+      <Hr className="mt-8 h-px w-11/12 border-0 bg-gray-400" />
     </div>
   );
 };
@@ -201,7 +202,7 @@ export const CustomButtonOutline: React.FC<ButtonProps> = ({ title, link }) => {
 export const Footer = () => {
   return (
     <Row>
-      <Column className="mb-0 mt-2 ">
+      <Column className="mb-0 mt-2">
         <Text className="mb-0 ml-6 text-left text-xs text-black">Tramona</Text>
         <Text className="ml-6 mt-0 text-left text-xs text-black">
           2314 236th AVE NE Sammamish WA 98074
