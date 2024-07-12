@@ -1,21 +1,4 @@
-import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import HostPropertyForm from "@/components/host/HostPropertyForm";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   EmptyState,
   EmptyStateDescription,
@@ -23,10 +6,7 @@ import {
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
 import { type Property } from "@/server/db/schema/tables/properties";
-import { api } from "@/utils/api";
-import { plural } from "@/utils/utils";
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
-import { EditIcon, EyeOffIcon, FenceIcon, PlusIcon } from "lucide-react";
+import { FenceIcon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { NewPropertyBtn } from "./HostPropertiesLayout";
@@ -54,7 +34,7 @@ export default function HostProperties({
               ))}
             </div>
           ) : (
-            <EmptyState icon={FenceIcon} className="h-[calc(100vh-240px)]">
+            <EmptyState icon={FenceIcon}>
               <EmptyStateTitle>No properties yet</EmptyStateTitle>
               <EmptyStateDescription>
                 Add a property to get started!
@@ -78,7 +58,7 @@ function PropertyCard({ property }: { property: Property }) {
   return (
     <a
       onClick={() => router.push(`/host/properties/${property.id}`)}
-      className=" cursor-pointer"
+      className="cursor-pointer"
     >
       <div className="flex items-center gap-2 overflow-clip rounded-lg border-zinc-100 bg-card px-2 py-3 hover:bg-zinc-100">
         <div className="relative h-20 w-20">

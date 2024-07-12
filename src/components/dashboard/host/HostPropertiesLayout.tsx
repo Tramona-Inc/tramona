@@ -120,10 +120,13 @@ export default function HostPropertiesLayout({
               </Button>
             </Link>
           </div>
-          <Accordion type="multiple" className="w-full">
+          <Accordion type="single" className="w-full">
             <AccordionItem value="listed">
               <AccordionTrigger>
-                Listed {listedProperties?.length}
+                Listed{" "}
+                <span className="text-muted-foreground">
+                  {listedProperties?.length}
+                </span>
               </AccordionTrigger>
               <AccordionContent>
                 <HostProperties properties={listedProperties ?? null} />
@@ -131,7 +134,10 @@ export default function HostPropertiesLayout({
             </AccordionItem>
             <AccordionItem value="drafts">
               <AccordionTrigger>
-                Drafts {draftedProperties?.length}
+                Drafts{" "}
+                <span className="text-muted-foreground">
+                  {draftedProperties?.length}
+                </span>
               </AccordionTrigger>
               <AccordionContent>
                 <HostProperties properties={draftedProperties ?? null} />
@@ -139,7 +145,10 @@ export default function HostPropertiesLayout({
             </AccordionItem>
             <AccordionItem value="archive">
               <AccordionTrigger>
-                Archives {archivedProperties?.length}
+                Archives{" "}
+                <span className="text-muted-foreground">
+                  {archivedProperties?.length}
+                </span>
               </AccordionTrigger>
               <AccordionContent>
                 <HostProperties properties={archivedProperties ?? null} />
