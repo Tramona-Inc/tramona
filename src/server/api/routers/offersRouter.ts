@@ -228,6 +228,9 @@ export const offersRouter = createTRPCRouter({
             },
           },
           property: {
+            columns:{
+              latLngPoint:false,
+            },
             with: {
               host: {
                 columns: {
