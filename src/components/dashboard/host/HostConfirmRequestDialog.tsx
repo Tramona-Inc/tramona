@@ -33,6 +33,8 @@ export default function HostConfirmRequestDialog({
   setPropertyPrices,
   propertyPrices,
   setStep,
+  unclaimedOffers,
+  setUnclaimedOffers
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -43,6 +45,8 @@ export default function HostConfirmRequestDialog({
   >;
   propertyPrices: Record<number, string>;
   setStep: (step: number) => void;
+  unclaimedOffers: boolean;
+  setUnclaimedOffers: (unclaimedOffers: boolean) => void;
 }) {
   //   const [selectedPropertyToEdit, setSelectedPropertyToEdit] = useState<number | null>(null);
   //   const handleEdit = (id: number) => {
@@ -231,6 +235,7 @@ export default function HostConfirmRequestDialog({
         requestId: request.id,
         propertyId: property.id,
         totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
+        unclaimedOffer: unclaimedOffers
       });
     }
 

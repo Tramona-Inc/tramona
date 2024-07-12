@@ -416,6 +416,7 @@ export const offersRouter = createTRPCRouter({
         .object({
           propertyId: z.number(),
           totalPrice: z.number().min(1),
+          unclaimedOffer: z.boolean()
         })
         .and(
           z.union([

@@ -1,5 +1,5 @@
 /* OfferDialog.tsx */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,13 @@ import {
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
 export default function HostRequestDialog({
   open,
@@ -27,6 +34,8 @@ export default function HostRequestDialog({
   setPropertyPrices,
   propertyPrices,
   setStep,
+  unclaimedOffers,
+  setUnclaimedOffers
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -35,8 +44,11 @@ export default function HostRequestDialog({
   setPropertyPrices: (prices: Record<number, string>) => void;
   propertyPrices: Record<number, string>;
   setStep: (step: number) => void;
+  unclaimedOffers: boolean;
+  setUnclaimedOffers: (unclaimedOffers: boolean) => void;
 }) {
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
+ 
 
   const togglePropertySelection = (id: number) => {
     setSelectedProperties((prev) =>
@@ -54,6 +66,11 @@ export default function HostRequestDialog({
     const allPropertyIds = properties.map((property) => property.id);
     setSelectedProperties(allPropertyIds);
   };
+
+  const handleUnclaimedOffersToggle = () => {
+    setUnclaimedOffers((prevState: boolean) => !prevState);
+  }
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -189,6 +206,24 @@ export default function HostRequestDialog({
                         all-in
                       </div>
                     )}
+                    <div className="relative inline-block">
+                      <h4 className="text-dark text-sm font-semibold pr-4">
+                        If not accepted, would you like this offer to go to
+                        unclaimed offers?
+                      </h4>
+
+                      <Tooltip>
+                        <TooltipTrigger className="absolute left-12 bottom-0">
+                          <Info className="h-3 w-3 inline-block text-gray-600" />
+                        </TooltipTrigger>
+                        <TooltipContent variant="inverted" className="rounded-full p-2">
+                          If the guest does not accept this offer, it can be
+                          sent to unclaimed offers for 48 hours for any
+                          potential guest to book
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Switch checked={unclaimedOffers} onCheckedChange={handleUnclaimedOffersToggle}/>
                   </div>
                 )}
               </div>

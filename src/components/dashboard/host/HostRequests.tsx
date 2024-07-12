@@ -21,6 +21,7 @@ export default function HostRequests() {
     useState<HostDashboardRequest | null>(null);
   const [properties, setProperties] = useState<Property[] | null>(null);
   const [step, setStep] = useState(0);
+  const [unclaimedOffers, setUnclaimedOffers] = useState<boolean>(false);
 
   const { data: requestsWithProperties } =
     api.properties.getHostPropertiesWithRequests.useQuery();
@@ -69,6 +70,8 @@ export default function HostRequests() {
           properties={properties}
           request={selectedRequest}
           setStep={setStep}
+          unclaimedOffers={unclaimedOffers}
+          setUnclaimedOffers={setUnclaimedOffers}
         />
       )}
       {step == 1 && (
@@ -80,6 +83,8 @@ export default function HostRequests() {
           open={dialogOpen}
           setOpen={setDialogOpen}
           setPropertyPrices={setPropertyPrices}
+          unclaimedOffers={unclaimedOffers}
+          setUnclaimedOffers={setUnclaimedOffers}
         />
       )}
       {step == 2 && (
