@@ -31,15 +31,20 @@ export default function HostPropertiesAgeRestriction({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    // defaultValues: { age: property.ageRestriction },
+    defaultValues: { age: property.ageRestriction ?? undefined },
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
-  async function onSubmit({ age }: FormValues) {
-    const newProperty = { ...property, ageRestriction: age };
-    await updateProperty(newProperty);
-  }
+  const onSubmit = async () => {
+    const { age } = form.getValues();
+    if (form.formState.isValid) {
+      const newProperty = { ...property, ageRestriction: Number(age) };
+      await updateProperty(newProperty);
+    }
+  };
 
   return (
     <div className="my-6">
@@ -48,6 +53,7 @@ export default function HostPropertiesAgeRestriction({
           editing={editing}
           setEditing={setEditing}
           property={property}
+          onSubmit={onSubmit}
         />
       </div>
       <div className="space-y-4">
@@ -69,7 +75,12 @@ export default function HostPropertiesAgeRestriction({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input {...field} className="w-full" autoFocus />
+                        <Input
+                          {...field}
+                          className="w-full"
+                          autoFocus
+                          disabled={!editing}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
