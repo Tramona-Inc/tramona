@@ -337,9 +337,6 @@ export const propertiesRouter = createTRPCRouter({
       const long = input.long ?? 0;
       const radius = input.radius;
 
-      console.log("Input boundaries:", boundaries);
-      console.log("Cursor:", cursor);
-
       const data = await ctx.db
         .select({
           id: properties.id,
@@ -424,8 +421,6 @@ export const propertiesRouter = createTRPCRouter({
         )
         .limit(12)
         .orderBy(asc(sql`id`), asc(sql`distance`));
-
-      console.log("Fetched properties count:", data.length);
 
       return {
         data,
@@ -587,7 +582,8 @@ export const propertiesRouter = createTRPCRouter({
           property.id !== undefined &&
           !requestData.properties.some((p) => p.id === property.id)
         ) {
-          requestData.properties.push(property);
+          // TODO: fix types
+          requestData.properties.push(property as Property);
         }
       }
       return organizedData;

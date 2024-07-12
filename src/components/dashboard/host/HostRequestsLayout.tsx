@@ -16,6 +16,7 @@ import { HandshakeIcon } from "lucide-react";
 import Link from "next/link";
 
 import { MapPinIcon } from "lucide-react";
+import { type Request } from "@/server/db/schema";
 
 interface CityData {
   city: string;
@@ -25,20 +26,24 @@ interface CityData {
   }[];
 }
 
-export default function HostRequestsLayout({ children }: React.PropsWithChildren) {
-  const { data: properties } = api.properties.getHostPropertiesWithRequests.useQuery();
+export default function HostRequestsLayout({
+  children,
+}: React.PropsWithChildren) {
+  const { data: properties } =
+    api.properties.getHostPropertiesWithRequests.useQuery();
   const citiesTotal = properties ? properties.length : 0;
 
   return (
     <div className="flex">
-      <ScrollArea className="sticky inset-y-0 h-screen-minus-header w-80 border-r px-4 py-8 bg-white">
+      <ScrollArea className="sticky inset-y-0 h-screen-minus-header w-80 border-r bg-white px-4 py-8">
         <div className="pb-4">
           <h1 className="text-3xl font-bold">Requests</h1>
-          <div className="flex flex-row gap-2 mt-4">
+          {/* add this back when we add back bids, otherwise it looks stupid */}
+          {/* <div className="flex flex-row gap-2 mt-4">
             <Button variant={"secondaryLight"} className="rounded-full">
               Cities {citiesTotal}
             </Button>
-          </div>
+          </div> */}
         </div>
         <div className="pt-4">
           {properties ? (
@@ -47,7 +52,10 @@ export default function HostRequestsLayout({ children }: React.PropsWithChildren
                 <SidebarCity key={cityData.city} cityData={cityData} />
               ))
             ) : (
-              <EmptyState icon={HandshakeIcon} className="h-[calc(100vh-280px)]">
+              <EmptyState
+                icon={HandshakeIcon}
+                className="h-[calc(100vh-280px)]"
+              >
                 <EmptyStateTitle>No requests yet</EmptyStateTitle>
                 <EmptyStateDescription>
                   Properties with requests will show up here
@@ -84,7 +92,7 @@ export default function HostRequestsLayout({ children }: React.PropsWithChildren
 function SidebarCity({ cityData }: { cityData: CityData }) {
   const href = `/host/requests/${cityData.city}`;
   return (
-    <Link href={href} className="block mb-4">
+    <Link href={href} className="mb-4 block">
       <div className="flex gap-2 rounded-lg p-2 hover:bg-muted">
         <MapPinIcon className="h-5 w-5 text-gray-600" />
         <div className="flex-1 text-sm">
