@@ -40,10 +40,8 @@ export default function HostPropertiesAgeRestriction({
 
   const onSubmit = async () => {
     const { age } = form.getValues();
-    if (form.formState.isValid) {
-      const newProperty = { ...property, ageRestriction: Number(age) };
-      await updateProperty(newProperty);
-    }
+    const newProperty = { ...property, ageRestriction: Number(age) };
+    await updateProperty(newProperty);
   };
 
   return (
@@ -53,7 +51,7 @@ export default function HostPropertiesAgeRestriction({
           editing={editing}
           setEditing={setEditing}
           property={property}
-          onSubmit={onSubmit}
+          onSubmit={form.handleSubmit(onSubmit)}
         />
       </div>
       <div className="space-y-4">
@@ -78,7 +76,6 @@ export default function HostPropertiesAgeRestriction({
                         <Input
                           {...field}
                           className="w-full"
-                          autoFocus
                           disabled={!editing}
                         />
                       </FormControl>
