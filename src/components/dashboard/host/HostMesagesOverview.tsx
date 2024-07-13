@@ -46,12 +46,12 @@ export default function HostMessagesOverview({
   className?: string;
 }) {
   const { data: fetchedConversations, isLoading } =
-      api.messages.getConversations.useQuery(undefined, {
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-      });
+    api.messages.getConversations.useQuery(undefined, {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    });
   const conversations = useConversation((state) => state.conversationList);
-  const { fetchInitialMessages } = useMessage()
+  const { fetchInitialMessages } = useMessage();
   const { setConversationList } = useConversation();
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
@@ -69,7 +69,8 @@ export default function HostMessagesOverview({
           schema: "public",
           table: "messages",
         },
-        (payload: { new: MessageDbType }) => setConversationList(fetchedConversations ?? [])
+        (payload: { new: MessageDbType }) =>
+          setConversationList(fetchedConversations ?? []),
       )
       .subscribe();
 
@@ -79,14 +80,16 @@ export default function HostMessagesOverview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchedConversations]);
 
-
   return (
     <Card className={className}>
       <CardHeader>
         <div className="flex items-center gap-2">
           <MessageCircleIcon />
           <CardTitle>Messages</CardTitle>
-          <Badge variant="secondary">{conversations.filter((m) => m.messages[0]?.read === false).length} new</Badge>
+          <Badge variant="secondary">
+            {conversations.filter((m) => m.messages[0]?.read === false).length}{" "}
+            new
+          </Badge>
           <div className="flex-1" />
           <Button variant="ghost" asChild>
             <Link href="/messages">
@@ -98,28 +101,34 @@ export default function HostMessagesOverview({
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {conversations.filter((m) => m.messages[0]?.read === false).length > 0 ? conversations.map((conversation) => (
-            
-            <div key={conversation.id} className="flex items-center gap-2">
-                {conversation.messages[0]?.read === false && 
-                <>
-                <UserAvatar name={conversation.participants[0]?.image} />
+          {conversations.filter((m) => m.messages[0]?.read === false).length >
+          0 ? (
+            conversations.map((conversation) => (
+              <div key={conversation.id} className="flex items-center gap-2">
+                {conversation.messages[0]?.read === false && (
+                  <>
+                    <UserAvatar name={conversation.participants[0]?.image} />
                     <div>
-                      <p className="font-semibold">{conversation.participants[0]?.name}</p>
+                      <p className="font-semibold">
+                        {conversation.participants[0]?.name}
+                      </p>
                       <p className="line-clamp-1 text-sm text-muted-foreground">
-                        {conversation.messages[0]?.read === false &&  conversation.messages[0]?.message}
+                        {conversation.messages[0]?.read === false &&
+                          conversation.messages[0]?.message}
                       </p>
                     </div>
+                    <div className="flex-1" />
                     <div className="size-2 shrink-0 rounded-full bg-blue-500" />
-                </>
-              }
+                  </>
+                )}
               </div>
-            )) :
+            ))
+          ) : (
             <div className="flex-1 items-center justify-center">
               <p className="text-black">No new messages</p>
             </div>
-          }
-          </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
