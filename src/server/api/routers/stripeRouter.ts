@@ -64,10 +64,14 @@ export const stripeRouter = createTRPCRouter({
         {
           metadata: metadata, // metadata access for payment intent (webhook access)
 
-          transfer_data: {
-            amount: input.price - input.tramonaServiceFee,
-            destination: metadata.host_stripe_id,
-          },
+          ...(metadata.host_stripe_id
+            ? {
+                transfer_data: {
+                  amount: input.price - input.tramonaServiceFee,
+                  destination: metadata.host_stripe_id,
+                },
+              }
+            : {}),
         };
 
       const session = await stripe.checkout.sessions.create({
@@ -92,7 +96,7 @@ export const stripeRouter = createTRPCRouter({
         // success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}/?session_id={CHECKOUT_SESSION_ID}`,
         //success_url: `${env.NEXTAUTH_URL}/offers/${input.listingId}`, //remove becuase we are now using embedded
         //cancel_url: `${env.NEXTAUTH_URL}${input.cancelUrl}`,
-        return_url: `${env.NEXTAUTH_URL}/listings/${input.listingId}`,
+        return_url: `${env.NEXTAUTH_URL}/my-trips`, //redirect to my-trips page after payment
         metadata: metadata, // metadata access for checkout session
         payment_intent_data: paymentIntentData,
         ui_mode: "embedded",
