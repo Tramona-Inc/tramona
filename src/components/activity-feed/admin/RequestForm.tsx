@@ -14,6 +14,10 @@ import {
 import { Input } from "@/components/ui/input";
 import PlacesInput from "@/components/_common/PlacesInput";
 import {getNumNights} from "@/utils/utils";
+import { api } from "@/utils/api";
+import { errorToast } from '@/utils/toasts';
+import {type RequestCardDataType} from "@/components/activity-feed/ActivityFeed";
+import { createCreationTime, createRandomDate, createUserNameAndPic, randomizeLocationAndPrice } from './generationHelper';
 
 const formSchema = z.object({
   userName: z.string().min(1, "User name is required"),
@@ -27,34 +31,106 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function CreateRequestForm({ afterSubmit }: { afterSubmit?: () => void }) {
+export default function CreateRequestForm({ request, afterSubmit }: 
+  { request?: RequestCardDataType, afterSubmit?: () => void }) 
+  {
+  const createFillerRequest = api.feed.createFillerRequest.useMutation();
+  const updateFillerRequest = api.feed.updateFillerRequest.useMutation();
+  const { data: locationAndPrices, refetch: refetchLocationAndPrice } = api.feed.getLocationAndPrice.useQuery(
+    { atLeastNumOfEntries: 30 },
+    { enabled: false }
+  );
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      ...(request? {
+        userName: request.madeByGroup.owner.name || "",
+        userProfilePicUrl: request.madeByGroup.owner.image || "",
+        checkIn: request.checkIn.toISOString().slice(0, 10),
+        checkOut: request.checkOut.toISOString().slice(0, 10),
+        location: request.location,
+        entryCreationTime: request.createdAt.toISOString().slice(0, 19), 
+        maxNightlyPrice: request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut) / 100,
+      } : {
       userName: "",
       userProfilePicUrl: "",
       checkIn: "",
       checkOut: "",
       location: "",
-      entryCreationTime: new Date().toISOString().slice(0, 19), // Set default to current date
-      maxNightlyPrice: 0,
+      entryCreationTime: new Date().toLocaleString('sv-SE', { timeZoneName: 'short' }).replace(' ', 'T').slice(0, 19), // Set default to current time in user's time zone
+      maxNightlyPrice: 0,})
     },
   });
 
-  function onSubmit(data: FormSchema) {
+  async function onSubmit(data: FormSchema) {
     const formattedData = {
         ...data,
-        entryCreationTime: new Date(data.entryCreationTime).toISOString(),
-        maxTotalPrice: data.maxNightlyPrice * getNumNights(data.checkIn, data.checkOut),
+        entryCreationTime: new Date(data.entryCreationTime),
+        maxTotalPrice: data.maxNightlyPrice * 100 * getNumNights(data.checkIn, data.checkOut),
+        checkIn: new Date(data.checkIn),  // Convert string to Date
+        checkOut: new Date(data.checkOut), 
     };
     console.log(formattedData);
-    // TODO send the data to backend
+    // send the data to backend
+    if (request) {
+      const fillerRequestId = await updateFillerRequest.mutateAsync({id: request.id, ...formattedData}).catch(() => errorToast());
+    }
+    else{
+      const fillerRequestId = await createFillerRequest.mutateAsync(formattedData).catch(() => errorToast());
+    }
     afterSubmit?.();
   }
+
+  const handleGenerateRandomData = async () => {
+    const userData = await createUserNameAndPic();
+    let userName = "";
+    let userProfilePicUrl = "";
+    if (userData && userData[0]){
+      userName = userData[0].name;
+      userProfilePicUrl = userData[0].picture;
+    }
+    const { checkIn, checkOut } = createRandomDate();
+    const creationTime = createCreationTime();
+    const promise = await refetchLocationAndPrice();
+    const locationAndPrices = promise.data;
+
+    form.setValue('entryCreationTime', creationTime);
+    if (userData) {
+      form.setValue('userName', userName);
+      form.setValue('userProfilePicUrl', userProfilePicUrl);
+    }
+    if (checkIn && checkOut){
+      form.setValue('checkIn', checkIn);
+      form.setValue('checkOut', checkOut);
+    }
+    if (locationAndPrices){
+      console.log(locationAndPrices);
+      const random = randomizeLocationAndPrice(locationAndPrices);
+      if (random){
+        if (random.location){
+          form.setValue('location', random.location);
+        }
+        if (checkIn && checkOut){
+          form.setValue('maxNightlyPrice', random.nightlyPrice);
+        }
+      }
+    }
+  };
+
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Button
+          size="lg"
+          type="button"
+            onClick={handleGenerateRandomData}
+            className="col-span-full"
+          >
+            Smart Generate
+        </Button>
+        
         <FormField
           control={form.control}
           name="userName"

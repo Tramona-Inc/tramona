@@ -3,7 +3,7 @@ import { api } from "@/utils/api";
 import { useEffect, useState } from "react";
 import FeedRequestCard from "@/components/activity-feed/RequestCard";
 import FeedOfferCard from "@/components/activity-feed/OfferCard";
-import FeedBookingCard from "@/components/activity-feed/ConfirmationCard";
+import FeedBookingCard from "@/components/activity-feed/BookingCard";
 
 export type RequestCardDataType = {
   uniqueId: string;
@@ -17,6 +17,7 @@ export type RequestCardDataType = {
     owner: { id: string; name: string | null; image: string | null };
   };
   type: string;
+  isFiller: boolean;
 };
 
 export type OfferCardDataType = {
@@ -39,6 +40,7 @@ export type OfferCardDataType = {
     };
   } | null;
   type: string;
+  isFiller: boolean;
 };
 
 export type BookingCardDataType = {
@@ -58,6 +60,7 @@ export type BookingCardDataType = {
     city: string;
   };
   type: string;
+  isFiller: boolean;
 };
 export type MergedDataType =
   | RequestCardDataType
@@ -65,14 +68,18 @@ export type MergedDataType =
   | BookingCardDataType
   | null;
 
-export default function ActivityFeed() {
+export default function ActivityFeed({fillerOnly = false}: {fillerOnly?: boolean}) {
   const { data: feed, isLoading: loadingFeed } = api.feed.getFeed.useQuery({});
 
+  const filteredData = fillerOnly
+  ? feed?.mergedData.filter((item) => item.isFiller)
+  : feed?.mergedData;
+  
   return (
     <>
       <div className="max-w-lg space-y-4 overflow-y-auto">
         {!loadingFeed &&
-          feed?.mergedData.map((item) => {
+          filteredData?.map((item) => {
             switch (item.type) {
               case "request":
                 return (
@@ -90,7 +97,7 @@ export default function ActivityFeed() {
                 return (
                   <div key={item.uniqueId}>
                     <FeedBookingCard
-                      confirmation={item as BookingCardDataType}
+                      booking={item as BookingCardDataType}
                     />
                   </div>
                 );

@@ -18,6 +18,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils/utils";
+import { Button } from "@/components/ui/button";
+import CreateOfferDialog from "./admin/OfferDialog";
 
 export default function FeedofferCard({
   offer,
@@ -59,7 +61,7 @@ export default function FeedofferCard({
       <div className="flex">
         <div className=""></div>
       <div className="w-full space-y-2"> 
-      <div className="grid">
+      <div className="flex items-start justify-between w-full">
         <div>
           <p className="mb-5">Recieved a match</p>
           <p className="font-bold">
@@ -77,6 +79,10 @@ export default function FeedofferCard({
             </p>
           )}
         </div>
+        {offer.isFiller && (
+        <CreateOfferDialog offer={offer}>
+          <Button className="rounded-full ml-auto">Edit</Button>
+        </CreateOfferDialog> )}
       </div>
       <div className="relative">
         <Carousel
