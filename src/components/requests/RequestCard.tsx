@@ -31,6 +31,7 @@ import MobileSimilarProperties from "./MobileSimilarProperties";
 import { Separator } from "../ui/separator";
 import UserAvatar from "../_common/UserAvatar";
 import { getTime } from "date-fns";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -81,12 +82,27 @@ export default function RequestCard({
 
   const [open, setOpen] = useState(false);
 
+  function TravelerVerificationsDialog() {
+    return (
+      <Dialog>
+        <DialogTrigger>
+          <p className="underline">{request.name}</p>
+        </DialogTrigger>
+        <DialogContent>
+          <div className="flex items-center gap-2">
+            <UserAvatar size="sm" name={request.name} image={request.image} />
+            <p>{request.name}</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Card className="block">
       <WithdrawRequestDialog
         requestId={request.id}
         open={open}
-
         onOpenChange={setOpen}
       />
       <CardContent className="space-y-2">
@@ -95,10 +111,11 @@ export default function RequestCard({
         </p> */}
         {type !== "host" && <RequestCardBadge request={request} />}
         {type === "host" && (
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2">
             <UserAvatar size="sm" name={request.name} image={request.image} />
-            {request.name} &middot;{" "}
-            {formatInterval(Date.now() - getTime(request.createdAt))} ago
+            <TravelerVerificationsDialog />
+            <p>&middot;</p>
+            <p>{formatInterval(Date.now() - getTime(request.createdAt))} ago</p>
           </div>
         )}
         {/* {request.requestGroup.hasApproved ? (
