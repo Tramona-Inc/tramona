@@ -1,28 +1,111 @@
-import { api, type RouterOutputs } from "@/utils/api";
-import FeedRequestCard from "@/components/activity-feed/FeedRequestCard";
-import FeedOfferCard from "@/components/activity-feed/FeedOfferCard";
-import FeedBookingCard from "@/components/activity-feed/FeedBookingCard";
-import Spinner from "../_common/Spinner";
+import Head from "next/head";
+import { api } from "@/utils/api";
+import { useEffect, useState } from "react";
+import FeedRequestCard from "@/components/activity-feed/RequestCard";
+import FeedOfferCard from "@/components/activity-feed/OfferCard";
+import FeedBookingCard from "@/components/activity-feed/BookingCard";
 
-export type FeedItem = RouterOutputs["feed"]["getFeed"][number];
+export type RequestCardDataType = {
+  uniqueId: string;
+  id: number;
+  location: string;
+  maxTotalPrice: number;
+  checkIn: Date;
+  checkOut: Date;
+  createdAt: Date;
+  madeByGroup: {
+    owner: { id: string; name: string | null; image: string | null };
+  };
+  type: string;
+  isFiller: boolean;
+};
 
-export default function ActivityFeed() {
-  const { data: feed } = api.feed.getFeed.useQuery({});
+export type OfferCardDataType = {
+  uniqueId: string;
+  id: number;
+  createdAt: Date;
+  requestId: number | null;
+  propertyId: number;
+  totalPrice: number;
+  checkIn: Date;
+  checkOut: Date;
+  property: {
+    id: number;
+    imageUrls: string[];
+    originalNightlyPrice: number | null;
+  };
+  request: {
+    madeByGroup: {
+      owner: { id: string; name: string | null; image: string | null };
+    };
+  } | null;
+  type: string;
+  isFiller: boolean;
+};
 
-  if (!feed) return <Spinner />;
+export type BookingCardDataType = {
+  uniqueId: string;
+  id: number;
+  createdAt: Date;
+  checkIn: Date;
+  checkOut: Date;
+  group: {
+    owner: { id: string; name: string | null; image: string | null };
+  };
+  offer: { totalPrice: number } | null;
+  property: {
+    id: number;
+    imageUrls: string[];
+    originalNightlyPrice: number | null;
+    city: string;
+  };
+  type: string;
+  isFiller: boolean;
+};
+export type MergedDataType =
+  | RequestCardDataType
+  | OfferCardDataType
+  | BookingCardDataType
+  | null;
+
+export default function ActivityFeed({
+  fillerOnly = false,
+}: {
+  fillerOnly?: boolean;
+}) {
+  const { data: feed, isLoading: loadingFeed } = api.feed.getFeed.useQuery({});
+
+  const filteredData = fillerOnly
+    ? feed?.mergedData.filter((item) => item.isFiller)
+    : feed?.mergedData;
 
   return (
-    <div className="space-y-4">
-      {feed.map((item) => {
-        switch (item.type) {
-          case "request":
-            return <FeedRequestCard key={item.uniqueId} request={item} />;
-          case "offer":
-            return <FeedOfferCard key={item.uniqueId} offer={item} />;
-          case "booking":
-            return <FeedBookingCard key={item.uniqueId} confirmation={item} />;
-        }
-      })}
-    </div>
+    <>
+      <div className="max-w-lg space-y-4 overflow-y-auto">
+        {!loadingFeed &&
+          filteredData?.map((item) => {
+            switch (item.type) {
+              case "request":
+                return (
+                  <div key={item.uniqueId}>
+                    <FeedRequestCard request={item as RequestCardDataType} />
+                  </div>
+                );
+              case "offer":
+                return (
+                  <div key={item.uniqueId}>
+                    <FeedOfferCard offer={item as OfferCardDataType} />
+                  </div>
+                );
+              case "booking":
+                return (
+                  <div key={item.uniqueId}>
+                    <FeedBookingCard booking={item as BookingCardDataType} />
+                  </div>
+                );
+            }
+          })}
+      </div>
+    </>
   );
 }

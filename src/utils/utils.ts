@@ -206,10 +206,15 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getPropertyId(url: string): string | null {
+export function getPropertyId(url: string): number | null {
   const parsedUrl = new URL(url);
   const pathSegments = parsedUrl.pathname.split('/');
-  return pathSegments[pathSegments.length - 1] || null;
+  const propertyId = pathSegments[pathSegments.length - 1];
+  if (propertyId){
+    return parseInt(propertyId);
+  } else {
+    return null;
+  }
 }
 
 /**
