@@ -55,7 +55,10 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           <HostPropertiesDetails property={property} />
         </TabsContent>
         <TabsContent value="age">
-          <HostPropertiesAgeRestriction property={property} />
+          <HostPropertiesAgeRestriction
+            property={property}
+            key={`age-${property.id}`}
+          />
         </TabsContent>
         <TabsContent value="availability">
           <HostAvailability property={property} />
