@@ -117,6 +117,11 @@ export default function MessagesSidebar({
     (state) => state.setConversationList,
   );
 
+  const addMessageToConversation = useMessage(
+    (state) => state.addMessageToConversation
+  )
+  const { fetchInitialMessages } = useMessage()
+
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
     if (fetchedConversations) {
@@ -137,15 +142,15 @@ export default function MessagesSidebar({
   // Map and listen to all the connects the user is part of
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-      if (!optimisticIds.includes(payload.new.id)) {
-        const { error } = await supabase
-          .from("user")
-          .select("name, email, image")
-          .eq("id", payload.new.user_id)
-          .single();
-        if (error) {
-          errorToast();
-        } else {
+      // if (!optimisticIds.includes(payload.new.id)) {
+      //   const { error } = await supabase
+      //     .from("user")
+      //     .select("name, email, image")
+      //     .eq("id", payload.new.user_id)
+      //     .single();
+      //   if (error) {
+      //     errorToast();
+      //   } else {
           const newMessage: ChatMessageType = {
             id: payload.new.id,
             conversationId: payload.new.conversation_id,
@@ -157,8 +162,10 @@ export default function MessagesSidebar({
           };
 
           setConversationToTop(payload.new.conversation_id, newMessage);
-        }
-      }
+          // addMessageToConversation(payload.new.conversation_id, newMessage)
+          // void fetchInitialMessages(payload.new.conversation_id)
+      //   }
+      // }
     };
 
     const fetchConversationIds = async () => {
