@@ -18,7 +18,7 @@ function IncomingRequestCards({
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
-        <RequestCard isAdminDashboard key={request.id} request={request}>
+        <RequestCard type="admin" key={request.id} request={request}>
           <DeleteRequestDialog requestId={request.id}>
             <Button className="rounded-full" variant="outline">
               Delete

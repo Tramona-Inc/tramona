@@ -27,14 +27,14 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Image from "next/image";
-import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
+//import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import OfferPhotos from "./OfferPhotos";
 import { useMediaQuery } from "../_utils/useMediaQuery";
 import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
-import router from "next/router";
+import router, { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 import { formatDateRange } from "@/utils/utils";
@@ -55,6 +55,7 @@ export default function OfferPage({
   offer: OfferWithDetails;
   mapCenter: { lat: number | null; lng: number | null };
 }) {
+  const router = useRouter();
   const { status } = useSession();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -74,9 +75,10 @@ export default function OfferPage({
   // );
 
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
-  if (property.originalNightlyPrice === null) {
-    throw new Error("originalNightlyPrice is required but was not provided.");
-  }
+  // COMMENTED OUT FOR NOW
+  // if (property.originalNightlyPrice === null) {
+  //   throw new Error("originalNightlyPrice is required but was not provided.");
+  // }
   const originalTotal = property.originalNightlyPrice * numNights;
 
   const tramonaServiceFee = offer.tramonaFee;
@@ -811,235 +813,233 @@ export default function OfferPage({
                           <p className="text-sm text-muted-foreground">
                             Hosted by
                           </p>
-                          <div className="absolute -top-[6px] left-36 sm:left-72 flex-col sm:flex sm:flex-row space-x-4">
-                          <div className="flex justify-end sm:py-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button className="h-[23px] w-[107px] rounded-md bg-[#FF0000] text-[8px] text-white hover:bg-[#CC0000]">
-                                  View Property on Airbnb
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-full">
-                                <div className="max-h-96 overflow-y-auto">
-                                  <div className="flex flex-col space-y-10">
-                                    <div className="flex justify-center p-2 text-[20px]">
-                                      Remember: When comparing prices, Airbnb
-                                      hides the final price until the last step.
-                                      Our price is always the final, all in
-                                      price.
-                                    </div>
-                                    <div className="flex flex-col items-center justify-center space-y-4 pb-12">
-                                      <Button className="h-[34px] w-[150px] rounded-md bg-[#FF0000] text-[12px] text-white hover:bg-[#CC0000]">
-                                        See Pricing on Airbnb
-                                      </Button>
-                                      <Button className="h-[34px] w-[150px] rounded-md bg-[#FF0000] text-[12px] text-white hover:bg-[#CC0000]">
-                                        See Property on Airbnb
-                                      </Button>
+                          <div className="absolute -top-[6px] left-36 flex-col space-x-4 sm:left-72 sm:flex sm:flex-row">
+                            <div className="flex justify-end sm:py-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button className="h-[23px] w-[107px] rounded-md bg-[#FF0000] text-[8px] text-white hover:bg-[#CC0000]">
+                                    View Property on Airbnb
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-full">
+                                  <div className="max-h-96 overflow-y-auto">
+                                    <div className="flex flex-col space-y-10">
+                                      <div className="flex justify-center p-2 text-[20px]">
+                                        Remember: When comparing prices, Airbnb
+                                        hides the final price until the last
+                                        step. Our price is always the final, all
+                                        in price.
+                                      </div>
+                                      <div className="flex flex-col items-center justify-center space-y-4 pb-12">
+                                        <Button className="h-[34px] w-[150px] rounded-md bg-[#FF0000] text-[12px] text-white hover:bg-[#CC0000]">
+                                          See Pricing on Airbnb
+                                        </Button>
+                                        <Button className="h-[34px] w-[150px] rounded-md bg-[#FF0000] text-[12px] text-white hover:bg-[#CC0000]">
+                                          See Property on Airbnb
+                                        </Button>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          </div>
-                          <div className="flex justify-end py-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button className="hover:primaryGreen-hover h-[23px] w-[107px] rounded-md bg-primaryGreen text-[8px] text-white">
-                                  Book on Tramona
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="flex justify-center max-w-full">
-                                <div className="flex justify-center max-h-96 overflow-y-auto">
-                                      <Card className="h-[620px] max-w-96">
-                                        <div>
-                                          <div className="mb-8 ml-4 mt-2 flex flex-row items-baseline">
-                                            <div className="text-[20px] font-bold text-[#09090B]">
-                                              {formatCurrency(
-                                                offerNightlyPrice * numNights +
-                                                  tramonaServiceFee,
-                                              )}
-                                            </div>
-                                            <div className="text-[15px] font-semibold text-[#010101]">
-                                              &nbsp; Total
-                                            </div>
-                                          </div>
-                                          <div className="mx-2 grid grid-cols-2 gap-4 rounded-md border border-[#BEBEBE] p-4">
-                                            <div className="relative col-span-2 grid grid-cols-2">
-                                              <div className="col-span-1">
-                                                <div className="text-[11px] font-bold">
-                                                  CHECK-IN
-                                                </div>
-                                                <div className="text-[15px]">
-                                                  {formatShortDate(
-                                                    offer.checkIn,
-                                                  )}
-                                                </div>
-                                              </div>
-                                              <div className="col-span-1 ml-4">
-                                                <div className="text-[11px] font-bold">
-                                                  CHECK-OUT
-                                                </div>
-                                                <div className="text-[15px]">
-                                                  {formatShortDate(
-                                                    offer.checkOut,
-                                                  )}
-                                                </div>
-                                              </div>
-                                              <div className="absolute -bottom-4 -top-4 left-[50%] w-px bg-[#D9D9D9]"></div>
-                                              <div className="absolute -left-4 -right-4 top-14 h-px bg-[#D9D9D9]"></div>
-                                            </div>
-                                            <div className="col-span-2 pt-4">
-                                              <div className="text-[11px] font-bold">
-                                                GUESTS
-                                              </div>
-                                              <div className="text-[15px]">
-                                                {plural(
-                                                  request.numGuests,
-                                                  "Guest",
-                                                )}
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          {/* add width to book now button */}
-                                          <div className="my-4 flex justify-center">
-                                            {status === "authenticated" ? (
-                                              <HowToBookDialog
-                                                isBooked={isBooked}
-                                                listingId={offer.id}
-                                                propertyName={property.name}
-                                                originalNightlyPrice={
-                                                  property.originalNightlyPrice
-                                                }
-                                                airbnbUrl={
-                                                  property.airbnbUrl ?? ""
-                                                }
-                                                checkIn={offer.checkIn}
-                                                checkOut={offer.checkOut}
-                                                requestId={request?.id}
-                                                offer={{
-                                                  property,
-                                                  request,
-                                                  ...offer,
-                                                }}
-                                                totalPrice={offer.totalPrice}
-                                                offerNightlyPrice={
-                                                  offerNightlyPrice
-                                                }
-                                                isAirbnb={isAirbnb}
-                                              >
-                                                {isBooked ? (
-                                                  <>
-                                                    <CheckIcon className="size-5" />
-                                                    Booked
-                                                  </>
-                                                ) : (
-                                                  <>
-                                                    <Button
-                                                      className="mx-2 w-full"
-                                                      size="lg"
-                                                      variant="greenPrimary"
-                                                      disabled={isBooked}
-                                                    >
-                                                      Book Now
-                                                    </Button>
-                                                  </>
-                                                )}
-                                              </HowToBookDialog>
-                                            ) : (
-                                              <Button
-                                                onClick={() => {
-                                                  void router.push({
-                                                    pathname: "/auth/signin",
-                                                    query: {
-                                                      from: `/public-offer/${offer.id}`,
-                                                    },
-                                                  });
-                                                }}
-                                                variant="greenPrimary"
-                                                className="mx-2 w-full"
-                                              >
-                                                Log in to Book
-                                              </Button>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                            <div className="flex justify-end py-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button className="hover:primaryGreen-hover h-[23px] w-[107px] rounded-md bg-primaryGreen text-[8px] text-white">
+                                    Book on Tramona
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="flex max-w-full justify-center">
+                                  <div className="flex max-h-96 justify-center overflow-y-auto">
+                                    <Card className="h-[620px] max-w-96">
+                                      <div>
+                                        <div className="mb-8 ml-4 mt-2 flex flex-row items-baseline">
+                                          <div className="text-[20px] font-bold text-[#09090B]">
+                                            {formatCurrency(
+                                              offerNightlyPrice * numNights +
+                                                tramonaServiceFee,
                                             )}
                                           </div>
-
-                                          <div className="flex justify-center text-sm text-[#393939]">
-                                            Total incl. taxes. You will not be
-                                            charged yet
+                                          <div className="text-[15px] font-semibold text-[#010101]">
+                                            &nbsp; Total
                                           </div>
                                         </div>
-                                        <div className="space-y-4 py-0 text-muted-foreground">
-                                          <div className="text-base text-black">
-                                            <div className="flex justify-between py-2">
-                                              <p className="underline">
+                                        <div className="mx-2 grid grid-cols-2 gap-4 rounded-md border border-[#BEBEBE] p-4">
+                                          <div className="relative col-span-2 grid grid-cols-2">
+                                            <div className="col-span-1">
+                                              <div className="text-[11px] font-bold">
+                                                CHECK-IN
+                                              </div>
+                                              <div className="text-[15px]">
+                                                {formatShortDate(offer.checkIn)}
+                                              </div>
+                                            </div>
+                                            <div className="col-span-1 ml-4">
+                                              <div className="text-[11px] font-bold">
+                                                CHECK-OUT
+                                              </div>
+                                              <div className="text-[15px]">
+                                                {formatShortDate(
+                                                  offer.checkOut,
+                                                )}
+                                              </div>
+                                            </div>
+                                            <div className="absolute -bottom-4 -top-4 left-[50%] w-px bg-[#D9D9D9]"></div>
+                                            <div className="absolute -left-4 -right-4 top-14 h-px bg-[#D9D9D9]"></div>
+                                          </div>
+                                          <div className="col-span-2 pt-4">
+                                            <div className="text-[11px] font-bold">
+                                              GUESTS
+                                            </div>
+                                            <div className="text-[15px]">
+                                              {plural(
+                                                request.numGuests,
+                                                "Guest",
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        {/* add width to book now button */}
+                                        <div className="my-4 flex justify-center">
+                                          {status === "authenticated" ? (
+                                            <HowToBookDialog
+                                              isBooked={isBooked}
+                                              listingId={offer.id}
+                                              propertyName={property.name}
+                                              originalNightlyPrice={
+                                                property.originalNightlyPrice
+                                              }
+                                              airbnbUrl={
+                                                property.airbnbUrl ?? ""
+                                              }
+                                              checkIn={offer.checkIn}
+                                              checkOut={offer.checkOut}
+                                              requestId={request?.id}
+                                              offer={{
+                                                property,
+                                                request,
+                                                ...offer,
+                                              }}
+                                              totalPrice={offer.totalPrice}
+                                              offerNightlyPrice={
+                                                offerNightlyPrice
+                                              }
+                                              isAirbnb={isAirbnb}
+                                            >
+                                              {isBooked ? (
+                                                <>
+                                                  <CheckIcon className="size-5" />
+                                                  Booked
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <Button
+                                                    className="mx-2 w-full"
+                                                    size="lg"
+                                                    variant="greenPrimary"
+                                                    disabled={isBooked}
+                                                  >
+                                                    Book Now
+                                                  </Button>
+                                                </>
+                                              )}
+                                            </HowToBookDialog>
+                                          ) : (
+                                            <Button
+                                              onClick={() => {
+                                                void router.push({
+                                                  pathname: "/auth/signin",
+                                                  query: {
+                                                    from: `/public-offer/${offer.id}`,
+                                                  },
+                                                });
+                                              }}
+                                              variant="greenPrimary"
+                                              className="mx-2 w-full"
+                                            >
+                                              Log in to Book
+                                            </Button>
+                                          )}
+                                        </div>
+
+                                        <div className="flex justify-center text-sm text-[#393939]">
+                                          Total incl. taxes. You will not be
+                                          charged yet
+                                        </div>
+                                      </div>
+                                      <div className="space-y-4 py-0 text-muted-foreground">
+                                        <div className="text-base text-black">
+                                          <div className="flex justify-between py-2">
+                                            <p className="underline">
+                                              {formatCurrency(
+                                                offerNightlyPrice,
+                                              )}{" "}
+                                              &times;{" "}
+                                              {plural(numNights, "night")}
+                                            </p>
+                                            <p className="ms-1">
+                                              {formatCurrency(
+                                                offerNightlyPrice * numNights,
+                                              )}
+                                            </p>
+                                          </div>
+                                          <div className="flex justify-between py-2">
+                                            <p className="underline">
+                                              Cleaning fee
+                                            </p>
+                                            <p className="">Included</p>
+                                          </div>
+                                          <div className="flex justify-between py-2">
+                                            <p className="underline">
+                                              Tramona service fee
+                                            </p>
+                                            <p className="">
+                                              {formatCurrency(
+                                                tramonaServiceFee,
+                                              )}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <hr className="h-px bg-[#D9D9D9] py-0" />
+
+                                      <div className="flex w-full flex-col">
+                                        <p className="mb-4 text-2xl font-bold">
+                                          Price comparison
+                                        </p>
+
+                                        <div className="relative w-full rounded-lg border border-[#BEBEBE] px-2">
+                                          <div className="grid h-[39px] grid-cols-2">
+                                            <div className="col-span-1 flex items-center justify-between whitespace-nowrap pr-4">
+                                              <div className="text-[12px]">
+                                                Tramona price
+                                              </div>
+                                              <div className="text-sm font-bold">
                                                 {formatCurrency(
                                                   offerNightlyPrice,
-                                                )}{" "}
-                                                &times;{" "}
-                                                {plural(numNights, "night")}
-                                              </p>
-                                              <p className="ms-1">
-                                                {formatCurrency(
-                                                  offerNightlyPrice * numNights,
                                                 )}
-                                              </p>
+                                              </div>
                                             </div>
-                                            <div className="flex justify-between py-2">
-                                              <p className="underline">
-                                                Cleaning fee
-                                              </p>
-                                              <p className="">Included</p>
-                                            </div>
-                                            <div className="flex justify-between py-2">
-                                              <p className="underline">
-                                                Tramona service fee
-                                              </p>
-                                              <p className="">
+                                            <div className="col-span-1 flex items-center justify-between whitespace-nowrap pl-4">
+                                              <div className="text-[12px]">
+                                                Airbnb price
+                                              </div>
+                                              <div className="text-sm font-bold">
                                                 {formatCurrency(
-                                                  tramonaServiceFee,
+                                                  originalTotal / numNights,
                                                 )}
-                                              </p>
+                                              </div>
                                             </div>
+                                            <div className="absolute bottom-0 left-1/2 top-0 w-px bg-[#e2e1e1]"></div>
                                           </div>
                                         </div>
-                                        <hr className="h-px bg-[#D9D9D9] py-0" />
-
-                                        <div className="flex w-full flex-col">
-                                          <p className="mb-4 text-2xl font-bold">
-                                            Price comparison
-                                          </p>
-
-                                          <div className="relative w-full rounded-lg border border-[#BEBEBE] px-2">
-                                            <div className="grid h-[39px] grid-cols-2">
-                                              <div className="col-span-1 flex items-center justify-between whitespace-nowrap pr-4">
-                                                <div className="text-[12px]">
-                                                  Tramona price
-                                                </div>
-                                                <div className="text-sm font-bold">
-                                                  {formatCurrency(
-                                                    offerNightlyPrice,
-                                                  )}
-                                                </div>
-                                              </div>
-                                              <div className="col-span-1 flex items-center justify-between whitespace-nowrap pl-4">
-                                                <div className="text-[12px]">
-                                                  Airbnb price
-                                                </div>
-                                                <div className="text-sm font-bold">
-                                                  {formatCurrency(
-                                                    originalTotal / numNights,
-                                                  )}
-                                                </div>
-                                              </div>
-                                              <div className="absolute bottom-0 left-1/2 top-0 w-px bg-[#e2e1e1]"></div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </Card>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
+                                      </div>
+                                    </Card>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                             </div>
                           </div>
                         </div>

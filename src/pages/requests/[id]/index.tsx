@@ -183,7 +183,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const firstPropertyOfRequest = await db.query.offers.findFirst({
     where: and(eq(offers.requestId, serverRequestId)),
     with: {
-      property: true,
+      property: {
+        columns: {
+          latLngPoint: false,
+
+        }
+      },
     },
   });
 

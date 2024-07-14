@@ -225,7 +225,7 @@ export default function AdminOfferForm({
     if (offer) {
       const newOffer = {
         id: offer.id,
-        requestId: request ? request.id : null,
+        requestId: request ? request.id : offer.request?.id,
         propertyId: offer.property.id,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
@@ -253,7 +253,7 @@ export default function AdminOfferForm({
       }
 
       const newOffer = {
-        requestId: request ? request.id : null,
+        requestId: request?.id,
         propertyId,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,

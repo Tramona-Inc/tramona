@@ -4,6 +4,8 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
+import { waitUntil } from '@vercel/functions';
+
 import {
   and,
   between,
@@ -26,10 +28,11 @@ import {
   hostTeamInvites,
   hostTeamMembers,
   properties,
+  requestsToProperties,
   users,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
-import { EARTH_RADIUS_MILES } from "@/utils/constants";
+
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -238,9 +241,11 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
 
 export async function addProperty({
   hostId,
+  hostTeamId,
   property,
 }: {
   hostId?: string | null;
+  hostTeamId?: number | null;
   property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
     latitude?: number;
     longitude?: number;
@@ -255,6 +260,7 @@ export async function addProperty({
     lat = location.lat;
     lng = location.lng;
   }
+  const city = await getCity({ lat, lng });
 
   const [insertedProperty] = await db
     .insert(properties)
@@ -263,12 +269,42 @@ export async function addProperty({
       hostId,
       latitude: lat,
       longitude: lng,
-      city: await getCity({ lat, lng }),
+      city: city,
+      latLngPoint: sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
+      hostTeamId,
     })
-    .returning({ id: properties.id });
+    .returning({ id: properties.id, latLngPoint: properties.latLngPoint });
+
+  waitUntil(processRequests(insertedProperty!));
 
   return insertedProperty!.id;
 }
+
+async function processRequests(insertedProperty: { id: number, latLngPoint: any }) {
+  const allRequests = await db.query.requests.findMany({});
+
+  for (const request of allRequests) {
+    const matchingProperties = await getPropertiesForRequest({
+      id: request.id,
+      lat: request.lat,
+      lng: request.lng,
+      radius: request.radius,
+      location: request.location,
+      checkIn: request.checkIn,
+      checkOut: request.checkOut,
+      latLngPoint: request.latLngPoint,
+      propertyLatLngPoint: insertedProperty.latLngPoint,
+    });
+
+    if (matchingProperties.includes(insertedProperty.id)) {
+      await db.insert(requestsToProperties).values({
+        requestId: request.id,
+        propertyId: insertedProperty.id,
+      });
+    }
+  }
+}
+
 export async function getPropertiesForRequest(
   req: {
     lat?: number | null;
@@ -278,27 +314,38 @@ export async function getPropertiesForRequest(
     checkIn: Date;
     checkOut: Date;
     id: number;
+    latLngPoint?: { x: number; y: number; } | null;
+    propertyLatLngPoint?: { x: number; y: number; } | null;
   },
   { tx = db } = {},
 ) {
-  let propertyIsNearRequest: SQL | undefined = sql`(
-    ${EARTH_RADIUS_MILES} * acos(
-      cos(radians(${req.lat})) * cos(radians(${properties.latitude})) * cos(radians(${properties.longitude}) - radians(${req.lng})) +
-      sin(radians(${req.lat})) * sin(radians(${properties.latitude}))
-    )
-  ) <= ${req.radius ?? 10}`;
+  let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
 
-  if (req.radius === null || req.lat === null || req.lng === null) {
+  //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
+  if (req.lat != null && req.lng != null && req.radius != null) {
+    // Convert radius from miles to degrees (approximate)
+    const radiusDegrees = req.radius / 69;
+
+    propertyIsNearRequest = and(
+      gte(properties.latitude, req.lat - radiusDegrees),
+      lte(properties.latitude, req.lat + radiusDegrees),
+      gte(properties.longitude, req.lng - radiusDegrees),
+      lte(properties.longitude, req.lng + radiusDegrees)
+    );
+  } else {
     const coordinates = await getCoordinates(req.location);
     if (coordinates.bounds) {
       const { northeast, southwest } = coordinates.bounds;
-
-      propertyIsNearRequest = and(
-        lte(properties.longitude, northeast.lng),
-        gte(properties.longitude, southwest.lng),
-        lte(properties.latitude, northeast.lat),
-        gte(properties.latitude, southwest.lat),
-      );
+      propertyIsNearRequest = sql`
+        ST_Within(
+          properties.lat_lng_point,
+          ST_MakeEnvelope(
+            ${southwest.lng}, ${southwest.lat},
+            ${northeast.lng}, ${northeast.lat},
+            4326
+          )
+        )
+      `;
     }
   }
 
@@ -314,16 +361,16 @@ export async function getPropertiesForRequest(
       ),
   );
 
-  return await tx.query.properties
-    .findMany({
-      where: and(
-        isNotNull(properties.hostId),
-        propertyIsNearRequest,
-        propertyisAvailable,
-      ),
-      columns: { id: true },
-    })
-    .then((res) => res.map((p) => p.id));
+  const result = await tx.query.properties.findMany({
+    where: and(
+      isNotNull(properties.hostId),
+      propertyIsNearRequest,
+      propertyisAvailable,
+    ),
+    columns: { id: true, city: true, latitude: true, longitude: true },
+  });
+
+  return result.map(p => p.id);
 }
 
 export async function getAdminId() {
