@@ -2,13 +2,9 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import linkInputBg from "public/assets/images/link-input-bg.jpg";
 import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
-
-import { cn } from "@/utils/utils";
-
 import { TestimonialCarousel } from "../components/landing-page/_sections/TestimonialCarousel";
 import Image from "next/image";
 import { MobileTestimonialCarousel } from "../components/landing-page/_sections/MobileTestimonialCarousel";
-import Header from "@/components/_common/Header";
 import Link from "next/link";
 import {
   FormField,
@@ -40,7 +36,7 @@ export default function Page() {
     await onSubmit(event);
   };
 
-  const handleEnterLink = (event: { preventDefault: () => void; }) => {
+  const handleEnterLink = (event: { preventDefault: () => void }) => {
     event.preventDefault(); // Prevent default form submission behavior
     // Submit form data using form.onSubmit or other logic here
 
@@ -53,7 +49,6 @@ export default function Page() {
     };
     scrollToTop();
   };
-
 
   return (
     <MainLayout>
@@ -71,7 +66,7 @@ export default function Page() {
           </div>
 
           <div className="relative grid h-full grid-cols-1 p-4 lg:grid-cols-1">
-            <div className="-mt-56 lg:-mt-36 flex flex-col justify-center">
+            <div className="-mt-56 flex flex-col justify-center lg:-mt-36">
               <div className="relative pt-10 text-center">
                 <h1 className="mx-auto max-w-3xl text-balance text-[32px] font-bold text-gray-900 lg:text-5xl">
                   Already have a property you like?
@@ -96,9 +91,9 @@ export default function Page() {
         <div className="h-10 lg:h-12"></div>
 
         {/* the "how to" */}
-        <div className="max-w-full flex justify-center items-center">
+        <div className="flex max-w-full items-center justify-center">
           <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-3 lg:gap-4">
-            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg bg-white p-4 border-2">
+            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
               <div className="rounded-lg border-2 border-[#004236] p-2">
                 <Clock8 className="h-6 w-6 text-[#004236]" />
               </div>
@@ -106,21 +101,20 @@ export default function Page() {
                 Enter a link of a rental you want
               </p>
             </div>
-
-            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg bg-white p-4 border-2">
+            33
+            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
               <div className="rounded-lg border-2 border-[#004236] p-2">
                 <Handshake className="h-6 w-6 text-[#004236]" />
               </div>
-              <p className="text-start text-[20px] font-semibold">
-                We'll get it without the Airbnb fees
+              <p className="text-start text-xl font-semibold">
+                We&apos;sll get it without the Airbnb fees
               </p>
             </div>
-
-            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg bg-white p-4 border-2">
+            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
               <div className="rounded-lg border-2 border-[#004236] p-2">
                 <CircleDollarSign className="h-6 w-6 text-[#004236]" />
               </div>
-              <p className="text-start text-[20px] font-semibold">
+              <p className="text-start text-xl font-semibold">
                 Hosts in the area will also get a chance to send you matches
               </p>
             </div>
@@ -191,15 +185,15 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="mt-28 flex flex-col mx-4 items-center justify-center space-y-4">
-          <p className="text-[24px] font-bold text-center">
+        <div className="mx-4 mt-28 flex flex-col items-center justify-center space-y-4">
+          <p className="text-center text-2xl font-bold">
             We work with hundreds of thousands of your favorite hosts. Insert
             the link to your dream stay.
           </p>
           <Button
             type="submit"
             onClick={handleEnterLink}
-            className="text-md w-[294px] h-[62px] text-[24px] rounded-full bg-[#004236] font-semibold text-white"
+            className="text-md h-[62px] w-[294px] rounded-full bg-[#004236] text-[24px] font-semibold text-white"
           >
             Enter Link
           </Button>
@@ -224,7 +218,7 @@ export default function Page() {
           <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
             Have more questions?
           </h2>
-          <div className=" font-medium">
+          <div className="font-medium">
             Check out our FAQ for any questions, or send us a message directly
           </div>
           <Button asChild size="lg" className="w-40 rounded-full">
