@@ -230,6 +230,7 @@ export default function HostConfirmRequestDialog({
   );
 
   const handleSubmit = async () => {
+    alert(`unclaimedOfferState: ${unclaimedOffers}`);
     for (const property of selectedProperties) {
       await createOffersMutation.mutateAsync({
         requestId: request.id,

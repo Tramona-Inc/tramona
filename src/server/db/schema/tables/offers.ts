@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   index,
   integer,
@@ -32,6 +33,7 @@ export const offers = pgTable(
     tramonaFee: integer("tramona_fee").notNull().default(0), // in cents
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
+    unclaimedOffer: boolean("unclaimed_offer").notNull().default(true),
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),

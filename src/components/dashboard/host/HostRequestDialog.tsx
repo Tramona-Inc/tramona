@@ -18,7 +18,6 @@ import {
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipTrigger,
@@ -35,7 +34,7 @@ export default function HostRequestDialog({
   propertyPrices,
   setStep,
   unclaimedOffers,
-  setUnclaimedOffers
+  setUnclaimedOffers,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -48,7 +47,6 @@ export default function HostRequestDialog({
   setUnclaimedOffers: (unclaimedOffers: boolean) => void;
 }) {
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
- 
 
   const togglePropertySelection = (id: number) => {
     setSelectedProperties((prev) =>
@@ -69,8 +67,7 @@ export default function HostRequestDialog({
 
   const handleUnclaimedOffersToggle = () => {
     setUnclaimedOffers((prevState: boolean) => !prevState);
-  }
-
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -206,24 +203,27 @@ export default function HostRequestDialog({
                         all-in
                       </div>
                     )}
-                    <div className="relative inline-block">
-                      <h4 className="text-dark text-sm font-semibold pr-4">
-                        If not accepted, would you like this offer to go to
-                        unclaimed offers?
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-dark text-sm font-semibold">
+                      If your match is not accepted, would you like other travelers to be able to book this match?
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="ml-1 -mb-[2px] h-3 w-3 text-gray-600" />
+                          </TooltipTrigger>
+                          <TooltipContent
+                            variant="inverted"
+                            className="rounded-full p-2"
+                          >
+                            If checked yes, this will be sent to unclaimed offers and can get booked by anyone on Tramona
+                          </TooltipContent>
+                        </Tooltip>
                       </h4>
 
-                      <Tooltip>
-                        <TooltipTrigger className="absolute left-12 bottom-0">
-                          <Info className="h-3 w-3 inline-block text-gray-600" />
-                        </TooltipTrigger>
-                        <TooltipContent variant="inverted" className="rounded-full p-2">
-                          If the guest does not accept this offer, it can be
-                          sent to unclaimed offers for 48 hours for any
-                          potential guest to book
-                        </TooltipContent>
-                      </Tooltip>
+                      <Checkbox
+                        checked={unclaimedOffers}
+                        onCheckedChange={handleUnclaimedOffersToggle}
+                      />
                     </div>
-                    <Switch checked={unclaimedOffers} onCheckedChange={handleUnclaimedOffersToggle}/>
                   </div>
                 )}
               </div>

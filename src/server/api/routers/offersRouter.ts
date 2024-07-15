@@ -34,6 +34,7 @@ import {
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
+import { PgColumn } from "drizzle-orm/pg-core";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -87,8 +88,20 @@ export const offersRouter = createTRPCRouter({
           // mark the offer as accepted
           tx
             .update(offers)
-            .set({ acceptedAt: new Date() })
+            .set({ acceptedAt: new Date(), unclaimedOffer: false })
             .where(eq(offers.id, input.id)),
+
+          // New action to update other offers with the same propertyId
+          offer.request &&
+            tx
+              .update(offers)
+              .set({ unclaimedOffer: false })
+              .where(
+                and(
+                  isNotNull(offers.requestId),
+                  eq(offers.requestId, offer.request.id),
+                ),
+              ),
 
           // update referralCode
           ctx.user.referralCodeUsed &&
@@ -228,8 +241,8 @@ export const offersRouter = createTRPCRouter({
             },
           },
           property: {
-            columns:{
-              latLngPoint:false,
+            columns: {
+              latLngPoint: false,
             },
             with: {
               host: {
@@ -416,7 +429,7 @@ export const offersRouter = createTRPCRouter({
         .object({
           propertyId: z.number(),
           totalPrice: z.number().min(1),
-          unclaimedOffer: z.boolean()
+          unclaimedOffer: z.boolean(),
         })
         .and(
           z.union([
@@ -430,6 +443,7 @@ export const offersRouter = createTRPCRouter({
         ),
     )
     .mutation(async ({ ctx, input }) => {
+      console.log("Received unclaimedOffer:", input.unclaimedOffer);
       const propertyHostTeam = await ctx.db.query.properties
         .findFirst({
           where: eq(properties.id, input.propertyId),
@@ -664,6 +678,7 @@ export const offersRouter = createTRPCRouter({
             completedRequests.map((req) => req.id),
           ),
         ),
+        eq(offers.unclaimedOffer, true),
       ),
       with: {
         property: {
@@ -681,3 +696,24 @@ export const offersRouter = createTRPCRouter({
     return unMatchedOffers;
   }),
 });
+function neq(
+  id: PgColumn<
+    {
+      name: "id";
+      tableName: "offers";
+      dataType: "number";
+      columnType: "PgSerial";
+      data: number;
+      driverParam: number;
+      notNull: true;
+      hasDefault: true;
+      enumValues: undefined;
+      baseColumn: never;
+    },
+    {},
+    {}
+  >,
+  id1: number,
+): import("drizzle-orm").SQLWrapper | undefined {
+  throw new Error("Function not implemented.");
+}
