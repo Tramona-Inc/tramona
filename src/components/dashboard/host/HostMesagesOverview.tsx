@@ -18,6 +18,7 @@ import { useMeasure } from "@uidotdev/usehooks";
 import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { type MessageDbType } from "@/types/supabase.message";
+import { useSession } from "next-auth/react";
 
 // const fakeMessages = [
 //   {
@@ -45,6 +46,8 @@ export default function HostMessagesOverview({
 }: {
   className?: string;
 }) {
+
+  const {data: session} = useSession();
   const { data: fetchedConversations, isLoading } =
       api.messages.getConversations.useQuery(undefined, {
         refetchOnWindowFocus: false,
@@ -101,7 +104,7 @@ export default function HostMessagesOverview({
           {conversations.filter((m) => m.messages[0]?.read === false).length > 0 ? conversations.map((conversation) => (
             
             <div key={conversation.id} className="flex items-center gap-2">
-                {conversation.messages[0]?.read === false && 
+                {conversation.messages[0]?.read === false && conversation.participants[0]?.id !== session?.user.id &&
                 <>
                 <UserAvatar name={conversation.participants[0]?.image} />
                     <div>
