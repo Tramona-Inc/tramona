@@ -120,7 +120,7 @@ export default function HostPropertiesLayout({
               </Button>
             </Link>
           </div>
-          <Accordion type="single" className="w-full">
+          <Accordion type="multiple" className="w-full">
             <AccordionItem value="listed">
               <AccordionTrigger>
                 Listed{" "}
