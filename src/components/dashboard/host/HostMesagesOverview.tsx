@@ -101,7 +101,7 @@ export default function HostMessagesOverview({
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {conversations.filter((m) => m.messages[0]?.read === false).length > 0 ? conversations.map((conversation) => (
+          {conversations.filter((m) => m.messages[0]?.read === false && m.participants[0]?.id !== session?.user.id).length > 0 ? conversations.map((conversation) => (
             
             <div key={conversation.id} className="flex items-center gap-2">
                 {conversation.messages[0]?.read === false && conversation.participants[0]?.id !== session?.user.id &&
