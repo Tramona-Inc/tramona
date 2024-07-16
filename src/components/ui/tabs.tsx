@@ -36,10 +36,10 @@ const TabsTrigger = React.forwardRef<
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        "group inline-flex items-center justify-center gap-2 whitespace-nowrap p-2 text-sm font-semibold text-muted-foreground hover:bg-muted focus-visible:bg-muted disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-primary sm:px-4 sm:py-3 sm:text-base",
+        "group inline-flex items-center justify-center gap-2 whitespace-nowrap p-2 text-sm font-bold text-muted-foreground hover:bg-muted focus-visible:bg-muted disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-teal-900 sm:px-4 sm:py-3 sm:text-base",
         {
           // Conditionally add or remove border
-          "border-b-4 data-[state=active]:border-primary": !noBorder,
+          "border-b-4 data-[state=active]:border-teal-900": !noBorder,
         },
         className,
       )}
