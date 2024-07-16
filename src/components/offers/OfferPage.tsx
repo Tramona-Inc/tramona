@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import ReviewCard from "@/components/_common/ReviewCard";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +42,16 @@ export default function OfferPage({
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
 
   const isBooked = !!offer.acceptedAt;
+
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  useEffect(() => {
+    const aboutElement = aboutRef.current;
+    if (aboutElement) {
+      setIsOverflowing(aboutElement.scrollHeight > aboutElement.clientHeight);
+    }
+  }, []);
 
   // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
@@ -190,6 +201,11 @@ export default function OfferPage({
             House rules
           </a>
         )}
+        {property.reviews.length > 0 && (
+          <a href="#reviews" className="text-gray-600 hover:text-gray-800">
+            Reviews
+          </a>
+        )}
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-start">
@@ -223,7 +239,7 @@ export default function OfferPage({
               <UserAvatar
                 name={hostName}
                 email={property.host?.email}
-                image={property.host?.image}
+                image={property.hostProfilePic}
               />
               <div className="-space-y-1.5">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
@@ -237,24 +253,28 @@ export default function OfferPage({
               About this property
             </h1>
             <div className="z-20 max-w-2xl py-2 text-zinc-700">
-              <div className="line-clamp-5 break-words">{property.about}</div>
-              <div className="flex justify-start py-2">
-                <Dialog>
-                  <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
-                    Show more
-                    <ChevronRight className="ml-2" />
-                  </DialogTrigger>
-
-                  <DialogContent className="max-w-3xl p-8">
-                    <DialogHeader>
-                      <DialogTitle>About this property</DialogTitle>
-                    </DialogHeader>
-                    <p className="whitespace-break-spaces break-words text-base">
-                      {property.about}
-                    </p>
-                  </DialogContent>
-                </Dialog>
+              <div ref={aboutRef} className="line-clamp-5 break-words">
+                {property.about}
               </div>
+              {isOverflowing && (
+                <div className="flex justify-start py-2">
+                  <Dialog>
+                    <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
+                      Show more
+                      <ChevronRight className="ml-2" />
+                    </DialogTrigger>
+
+                    <DialogContent className="max-w-3xl p-8">
+                      <DialogHeader>
+                        <DialogTitle>About this property</DialogTitle>
+                      </DialogHeader>
+                      <p className="whitespace-break-spaces break-words text-base">
+                        {property.about}
+                      </p>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
             </div>
           </section>
           <hr className="h-px border-0 bg-gray-300" />
@@ -289,6 +309,23 @@ export default function OfferPage({
               </p>
             </div>
           </section>
+          {property.reviews.length > 0 && (
+            <section id="reviews" className="scroll-mt-36">
+              <h1 className="text-lg font-semibold md:text-xl">Reviews</h1>
+              <div className="py-2">
+                {property.reviews.map((review, index) => (
+                  <div key={index} className="">
+                    <ReviewCard
+                      name={review.name}
+                      profilePic={review.profilePic}
+                      review={review.review}
+                      rating={review.rating}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
         <div className="flex-1">
           <Card>

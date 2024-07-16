@@ -200,6 +200,7 @@ export const properties = pgTable(
 
     // for when blake/preju manually upload, otherwise get the host's name via hostId
     hostName: varchar("host_name", { length: 255 }),
+    hostProfilePic: varchar("host_profile_pic"),
 
     address: varchar("address", { length: 1000 }).notNull(),
     latitude: doublePrecision("latitude").notNull(),
@@ -250,7 +251,6 @@ export const properties = pgTable(
     airbnbBookUrl: varchar("airbnb_book_url"),
     hostImageUrl: varchar("host_image_url"),
     pricingScreenUrl: varchar("pricing_screen_url"),
-    hostProfilePic: varchar("host_profile_pic"),
     hostawayListingId: integer("hostaway_listing_id"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
