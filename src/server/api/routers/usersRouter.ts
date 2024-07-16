@@ -685,6 +685,7 @@ export const usersRouter = createTRPCRouter({
                 dateOfBirth: true,
                 phoneNumber: true,
                 emailVerified: true,
+                email: true,
               },
             },
           },

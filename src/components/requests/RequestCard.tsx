@@ -34,6 +34,7 @@ import { Separator } from "../ui/separator";
 import UserAvatar from "../_common/UserAvatar";
 import { getTime } from "date-fns";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { getAge } from "@/utils/utils";
 
 export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -88,16 +89,19 @@ export default function RequestCard({
     const { data: verificationList } = api.users.getUserVerifications.useQuery({
       madeByGroupId: request.madeByGroupId,
     });
-    console.log(verificationList);
 
     const verifications = [
-      { name: "Age", verified: verificationList?.dateOfBirth ? true : false },
       {
-        name: "Email",
+        name:
+          verificationList?.dateOfBirth && getAge(verificationList.dateOfBirth),
+        verified: verificationList?.dateOfBirth ? true : false,
+      },
+      {
+        name: verificationList?.email,
         verified: verificationList?.emailVerified ? true : false,
       },
       {
-        name: "Phone number",
+        name: verificationList?.phoneNumber,
         verified: verificationList?.phoneNumber ? true : false,
       },
     ];
@@ -110,7 +114,7 @@ export default function RequestCard({
         <DialogContent>
           <div className="flex items-center gap-2">
             <UserAvatar size="sm" name={request.name} image={request.image} />
-            <p className="font-bold">{request.name}</p>
+            <p className="text-lg font-bold">{request.name}</p>
           </div>
           {verifications.map((verification, index) => (
             <div

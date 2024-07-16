@@ -359,6 +359,34 @@ export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
   return isOverflowing;
 }
 
+function isValidBirthdate(date: string) {
+  // Regular expression to match MM/DD/YYYY format
+  const regex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
+  return regex.test(date);
+}
+
+export function getAge(birthdate: string) {
+  if (!isValidBirthdate(birthdate)) {
+    throw new Error("Invalid birthdate format. Please use MM/DD/YYYY.");
+  }
+  const [month, day, year] = birthdate.split("/").map(Number);
+
+  if (month && year && day) {
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+
+    // Adjust age if the birthday has not occurred yet this year
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age;
+  }
+}
 // export function formatDateRangeWithWeekday(
 //   fromDate: Date | string,
 //   toDate?: Date | string,
