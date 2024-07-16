@@ -1,10 +1,4 @@
-import {
-  optional,
-  zodInteger,
-  zodNumber,
-  zodString,
-  zodUrl,
-} from "@/utils/zod-utils";
+import { optional, zodInteger, zodNumber, zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 // import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from '@/server/db/schema';
 
@@ -83,10 +77,10 @@ const linkRequestSchema = z
   });
 
 export const multiCityRequestSchema = z.object({
-  data: z.array(cityRequestSchema).min(1),
+  data: cityRequestSchema,
 });
 export const multiLinkRequestSchema = z.object({
-  data: z.array(linkRequestSchema).min(1),
+  data: linkRequestSchema,
 });
 
 export type CityRequestDefaultVals = z.input<typeof cityRequestSchema>;

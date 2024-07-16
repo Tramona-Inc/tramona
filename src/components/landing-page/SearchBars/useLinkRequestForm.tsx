@@ -24,7 +24,7 @@ export function useLinkRequestForm({
 }) {
   const form = useZodForm({
     schema: multiLinkRequestSchema,
-    defaultValues: { data: [defaultSearchOrReqValues] },
+    defaultValues: { data: defaultSearchOrReqValues },
   });
 
   const { status } = useSession();
@@ -33,33 +33,24 @@ export function useLinkRequestForm({
     api.requests.createRequestWithLink.useMutation();
 
   const onSubmit = form.handleSubmit(async ({ data }) => {
-    const newRequests = data.map((request) => {
-      const { date: _date, ...restData } = request;
-      const checkIn = request.date.from;
-      const checkOut = request.date.to;
-      const numNights = getNumNights(checkIn, checkOut);
+    const { date: _date, ...restData } = data;
+    const checkIn = data.date.from;
+    const checkOut = data.date.to;
+    const numNights = getNumNights(checkIn, checkOut);
 
-      return {
-        checkIn: checkIn,
-        checkOut: checkOut,
-        ...restData,
-      };
-    });
+    const newRequests = {
+      checkIn: checkIn,
+      checkOut: checkOut,
+      ...restData,
+    };
 
     if (status === "unauthenticated") {
       localStorage.setItem("unsentRequests", JSON.stringify(newRequests));
       void router.push("/auth/signin").then(() => {
-        if (newRequests.length === 1) {
-          toast({
-            title: `Request saved: ${newRequests[0]!.airbnbLink}`,
-            description: "It will be sent after you sign in",
-          });
-        } else {
-          toast({
-            title: `Saved ${newRequests.length} requests`,
-            description: "They will be sent after you sign in",
-          });
-        }
+        toast({
+          title: `Request saved: ${newRequests.airbnbLink}`,
+          description: "It will be sent after you sign in",
+        });
       });
     } else {
       handleSetOpen(true);
@@ -70,9 +61,10 @@ export function useLinkRequestForm({
           // worked around needing to give defaultValues to useForm
           form.reset();
 
-          form.setValue("data", [
-            defaultSearchOrReqValues as MultiLinkRequestVals["data"][0],
-          ]);
+          form.setValue(
+            "data",
+            defaultSearchOrReqValues as MultiLinkRequestVals["data"],
+          );
           setCurTab(0);
           afterSubmit?.(result.madeByGroupIds);
         })

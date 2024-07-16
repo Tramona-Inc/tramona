@@ -63,7 +63,7 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
               requirements. To check out matches{" "}
             </p>
           ) : (
-            `Your request has been sent to your chosen Airbnb property and nearby listings. Over the next 24 hours, hosts will reach out with properties that meet your criteria. To view your matches`
+            `Your link has been submitted, either we will get you that property or one just like it. Over the next 24 hours, hosts will reach out with properties that meet your criteria. To view your matches `
           )}
           <Link
             href="/requests"

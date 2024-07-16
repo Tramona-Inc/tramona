@@ -6,9 +6,9 @@ import { getNumNights } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import {
-  type CityRequestDefaultVals,
   defaultSearchOrReqValues,
   multiCityRequestSchema,
+  type CityRequestDefaultVals,
 } from "./schemas";
 
 export function useCityRequestForm({
@@ -24,7 +24,7 @@ export function useCityRequestForm({
 }) {
   const form = useZodForm({
     schema: multiCityRequestSchema,
-    defaultValues: { data: [defaultSearchOrReqValues] },
+    defaultValues: { data: defaultSearchOrReqValues },
   });
 
   const { status } = useSession();
@@ -33,34 +33,25 @@ export function useCityRequestForm({
     api.requests.createMultiple.useMutation();
 
   const onSubmit = form.handleSubmit(async ({ data }) => {
-    const newRequests = data.map((request) => {
-      const { date: _date, maxNightlyPriceUSD, ...restData } = request;
-      const checkIn = request.date.from;
-      const checkOut = request.date.to;
-      const numNights = getNumNights(checkIn, checkOut);
+    const { date: _date, maxNightlyPriceUSD, ...restData } = data;
+    const checkIn = data.date.from;
+    const checkOut = data.date.to;
+    const numNights = getNumNights(checkIn, checkOut);
 
-      return {
-        checkIn: checkIn,
-        checkOut: checkOut,
-        maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
-        ...restData,
-      };
-    });
+    const newRequest = {
+      checkIn: checkIn,
+      checkOut: checkOut,
+      maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
+      ...restData,
+    };
 
     if (status === "unauthenticated") {
-      localStorage.setItem("unsentRequests", JSON.stringify(newRequests));
+      localStorage.setItem("unsentRequests", JSON.stringify(newRequest));
       void router.push("/auth/signin").then(() => {
-        if (newRequests.length === 1) {
-          toast({
-            title: `Request saved: ${newRequests[0]!.location}`,
-            description: "It will be sent after you sign in",
-          });
-        } else {
-          toast({
-            title: `Saved ${newRequests.length} requests`,
-            description: "They will be sent after you sign in",
-          });
-        }
+        toast({
+          title: `Request saved: ${newRequest.location}`,
+          description: "It will be sent after you sign in",
+        });
       });
     } else {
       handleSetOpen(true);
@@ -71,9 +62,10 @@ export function useCityRequestForm({
           // worked around needing to give defaultValues to useForm
           form.reset();
 
-          form.setValue("data", [
+          form.setValue(
+            "data",
             defaultSearchOrReqValues as CityRequestDefaultVals,
-          ]);
+          );
           setCurTab(0);
           afterSubmit?.(result.madeByGroupIds);
         })

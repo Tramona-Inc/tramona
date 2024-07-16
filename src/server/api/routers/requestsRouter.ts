@@ -17,7 +17,12 @@ import {
   requestsToProperties,
   users,
 } from "@/server/db/schema";
-import { sendText, sendWhatsApp, scrapeUsingLink } from "@/server/server-utils";
+import {
+  sendText,
+  sendWhatsApp,
+  scrapeUsingLink,
+  getPropertiesForRequest,
+} from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import {
@@ -225,19 +230,18 @@ export const requestsRouter = createTRPCRouter({
 
   createMultiple: protectedProcedure
     .input(
-      requestInsertSchema
-        .omit({ madeByGroupId: true, requestGroupId: true, latLngPoint: true })
-        .array()
-        .min(1)
-        .max(MAX_REQUEST_GROUP_SIZE),
+      requestInsertSchema.omit({
+        madeByGroupId: true,
+        requestGroupId: true,
+        latLngPoint: true,
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const { madeByGroupIds, results } = await handleRequestSubmission(
-          input,
-          { user: ctx.user },
-        );
-        return { madeByGroupIds, results };
+        const { transactionResults } = await handleRequestSubmission(input, {
+          user: ctx.user,
+        });
+        return { transactionResults };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -259,22 +263,17 @@ export const requestsRouter = createTRPCRouter({
         .extend({
           airbnbLink: z.string().url(),
           numGuests: z.number().min(1),
-        })
-        .array()
-        .min(1)
-        .max(MAX_REQUEST_GROUP_SIZE),
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       //we are going to use the given data to scrape the airbnb listing and create a request
-      const response = await scrapeUsingLink(input[0]!.airbnbLink);
+      const response = await scrapeUsingLink(input.airbnbLink);
       console.log(response);
-      const newRequest: RequestInput = [
-        {
-          ...input[0]!,
-          location: response?.cityName ?? "No location found",
-          maxTotalPrice: response?.formattedNightlyPrice ?? 0,
-        },
-      ];
+      const newRequest: RequestInput = {
+        ...input,
+        location: response?.cityName ?? "No location found",
+        maxTotalPrice: response?.formattedNightlyPrice ?? 0,
+      };
       //now we need to make a legitimate request with all of the data
       try {
         const { madeByGroupIds, results } = await handleRequestSubmission(
@@ -284,7 +283,6 @@ export const requestsRouter = createTRPCRouter({
         console.log("IT WORKED ");
         return { madeByGroupIds, results };
       } catch (err) {
-        console.log("FUUUUUUUUUUUUUU");
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create request",
@@ -714,15 +712,11 @@ export const requestsRouter = createTRPCRouter({
 });
 
 //Reusable functions
-const modifiedRequestSchema = requestInsertSchema
-  .omit({
-    madeByGroupId: true,
-    requestGroupId: true,
-    latLngPoint: true,
-  })
-  .array()
-  .min(1)
-  .max(MAX_REQUEST_GROUP_SIZE);
+const modifiedRequestSchema = requestInsertSchema.omit({
+  madeByGroupId: true,
+  requestGroupId: true,
+  latLngPoint: true,
+});
 
 // Infer the type from the modified schema
 type RequestInput = z.infer<typeof modifiedRequestSchema>;
@@ -731,108 +725,68 @@ export async function handleRequestSubmission(
   input: RequestInput,
   { user }: { user: Session["user"] },
 ) {
-  console.log("Input:", JSON.stringify(input, null, 2));
-  console.log("Transaction started");
+  try {
+    // Begin a transaction
+    const transactionResults = await db.transaction(async (tx) => {
+      const requestGroupId = await tx
+        .insert(requestGroups)
+        .values({ createdByUserId: user.id })
+        .returning()
+        .then((res) => res[0]!.id);
 
-  // Insert into requestGroups
-  const transactionResults = await db.transaction(async (tx) => {
-    const requestGroupId = await tx
-      .insert(requestGroups)
-      .values({ createdByUserId: user.id })
-      .returning()
-      .then((res) => res[0]!.id);
+      const madeByGroupId = await tx
+        .insert(groups)
+        .values({ ownerId: user.id })
+        .returning()
+        .then((res) => res[0]!.id);
 
-    const results = await Promise.all(
-      input.map(async (req) => {
-        const madeByGroupId = await tx
-          .insert(groups)
-          .values({ ownerId: user.id })
-          .returning()
-          .then((res) => res[0]!.id);
+      await tx.insert(groupMembers).values({
+        userId: user.id,
+        groupId: madeByGroupId,
+      });
 
-        await tx.insert(groupMembers).values({
-          userId: user.id,
-          groupId: madeByGroupId,
-        });
+      const { requestId } = await tx
+        .insert(requests)
+        .values({
+          ...input,
+          madeByGroupId,
+          requestGroupId,
+        })
+        .returning({ requestId: requests.id })
+        .then((res) => res[0]!);
 
-        const { requestId } = await tx
-          .insert(requests)
-          .values({
-            ...req,
-            madeByGroupId,
-            requestGroupId,
-          })
-          .returning({ requestId: requests.id })
-          .then((res) => res[0]!);
+      const propertyIds = await getPropertiesForRequest(
+        { ...input, id: requestId },
+        { tx },
+      );
 
-        // TODO: fix
+      await tx
+        .insert(requestsToProperties)
+        .values(propertyIds.map((propertyId) => ({ requestId, propertyId })));
 
-        // await getPropertiesForRequest(
-        //   { ...req, id: requestId },
-        //   { tx },
-        // ).then((propertyIds) =>
-        //   tx
-        //     .insert(requestsToProperties)
-        //     .values(
-        //       propertyIds.map((propertyId) => ({ requestId, propertyId })),
-        //     ),
-        // );
+      return { requestId, madeByGroupId };
+    });
 
-        return { requestId, madeByGroupId };
-      }),
-    );
-    //   results.forEach((result) => {
-    //     if (result.status === "rejected") {
-    //       throw new TRPCError({
-    //         code: "INTERNAL_SERVER_ERROR",
-    //         message: JSON.stringify(result.reason),
-    //       });
-    //     }
-    //   });
-    // });
-
-    return { madeByGroupIds: results.map((r) => r.madeByGroupId), results };
-  });
-
-  // if (ctx.user.isWhatsApp) {
-  //   void sendWhatsApp({
-  //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
-  //     to: ctx.user.phoneNumber!,
-  //   });
-  // } else {
-  //   void sendText({
-  //     to: ctx.user.phoneNumber!,
-  //     content:
-  //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-  //   });
-  // }
-
-  // if (env.NODE_ENV !== "production") return;
-
-  const { madeByGroupIds, results } = transactionResults;
-
-  const name = user.name ?? user.email;
-
-  if (input.length > 1) {
-    sendSlackMessage(
-      `*${name} just made ${input.length} requests*`,
-      `<https://tramona.com/admin|Go to admin dashboard>`,
-    );
-  } else {
-    const request = input[0]!;
-
+    // Messaging based on user preferences or environment
+    const name = user.name ?? user.email;
     const pricePerNight =
-      request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
+      input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
     const fmtdPrice = formatCurrency(pricePerNight);
-    const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-    const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
+    const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
+    const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
 
     sendSlackMessage(
-      `*${name} just made a request: ${request.location}*`,
+      `*${name} just made a request: ${input.location}*`,
       `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
       `<https://tramona.com/admin|Go to admin dashboard>`,
     );
-  }
 
-  return { madeByGroupIds, results };
+    return { transactionResults };
+  } catch (error) {
+    console.error("Failed to handle request submission:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to process the request submission",
+    });
+  }
 }

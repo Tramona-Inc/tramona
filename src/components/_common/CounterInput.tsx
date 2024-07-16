@@ -24,12 +24,12 @@ export function CounterInput({
       >
         <MinusCircleIcon className="size-3/5 text-muted-foreground" />
       </Button>
-      <p className="min-w-[2em] text-center font-bold">{value}</p>
+      <p className="-ml-2 min-w-[2em] text-center font-bold">{value}</p>
       <Button
         type="button"
         variant="ghost"
         size="icon"
-        className="rounded-full"
+        className="-ml-2 rounded-full"
         disabled={max !== undefined && value >= max}
         onClick={() => onChange(value + 1)}
       >
