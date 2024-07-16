@@ -108,7 +108,7 @@ export function TestimonialCarousel() {
     <div ref={containerRef} className="relative overflow-y-hidden">
       <Carousel
         setApi={setApi}
-        className="mx-auto w-full max-w-screen-2xl"
+        className="mx-auto w-full lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl"
         opts={{
           align: "center",
           loop: true,
