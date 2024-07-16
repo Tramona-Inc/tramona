@@ -27,13 +27,7 @@ const cityRequestSchema = z
     minNumBedrooms: z.number().optional(),
     minNumBeds: z.number().optional(),
     minNumBathrooms: z.number().optional(),
-    airbnbLink: z
-      .string()
-      .optional()
-      .or(z.literal(""))
-      .refine((url) => !url || url.startsWith("https://www.airbnb.com/rooms"), {
-        message: 'URL must start with "https://www.airbnb.com/rooms"',
-      }),
+    airbnbLink: z.string().optional(),
     note: optional(zodString()),
   })
   .superRefine((data, ctx) => {
@@ -45,7 +39,7 @@ const cityRequestSchema = z
             "Either provide an Airbnb link or fill out the location, date, number of guests, and maximum nightly price.",
           path: ["airbnbLink"], // specify the path to the field that is missing
         });
-      } else if (data.date && data.date.from >= data.date.to) {
+      } else if (data.date.from >= data.date.to) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Must stay for at least 1 night",
@@ -72,21 +66,19 @@ const linkRequestSchema = z
     note: optional(zodString()),
   })
   .superRefine((data, ctx) => {
-    if (!data.airbnbLink) {
-      if (!data.numGuests) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "Either provide an Airbnb link or fill out the location, date, number of guests, and maximum nightly price.",
-          path: ["airbnbLink"], // specify the path to the field that is missing
-        });
-      } else if (data.date.from >= data.date.to) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Must stay for at least 1 night",
-          path: ["date"],
-        });
-      }
+    if (!data.numGuests) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Either provide an Airbnb link or fill out the location, date, number of guests, and maximum nightly price.",
+        path: ["airbnbLink"], // specify the path to the field that is missing
+      });
+    } else if (data.date.from >= data.date.to) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Must stay for at least 1 night",
+        path: ["date"],
+      });
     }
   });
 

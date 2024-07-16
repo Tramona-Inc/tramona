@@ -23,11 +23,12 @@ import { useCityRequestForm } from "./useCityRequestForm";
 import { useLinkRequestForm } from "./useLinkRequestForm";
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import { toast } from "@/components/ui/use-toast";
-import { api, RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 
 import { Separator } from "@/components/ui/separator";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
 import LinkConfirmation from "./LinkConfirmation";
+import { z } from "zod";
 
 export type ScrapedProperty = {
   nightlyPrice: number;
@@ -128,7 +129,7 @@ export function DesktopRequestDealTab() {
 
   const handleCancelClick = () => {
     setLink(false);
-    form.setValue(`data.${curTab}.airbnbLink`, "");
+    form.resetField(`data.${curTab}.airbnbLink`, { defaultValue: undefined });
   };
 
   const handleExtractClick = () => {
