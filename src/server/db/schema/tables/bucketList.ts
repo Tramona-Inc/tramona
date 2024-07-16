@@ -9,7 +9,7 @@ import {
 import { users } from "./users";
 import { properties } from "./properties";
 import { createSelectSchema } from "drizzle-zod";
-import { zodString } from "@/utils/zod-utils";
+import { zodNumber, zodString } from "@/utils/zod-utils";
 import { z } from "zod";
 
 export const bucketListDestinations = pgTable("bucket_list_destinations", {

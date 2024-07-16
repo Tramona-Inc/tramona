@@ -1,11 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
-import HostPropertiesPriceRestriction from "./HostPropertiesPriceRestriction";
+import HostPropertiesPriceRestriction from "./HostPropertiesAgeRestriction";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
+import HostPropertiesAgeRestriction from "./HostPropertiesAgeRestriction";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
@@ -31,12 +32,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           >
             Listing details
           </TabsTrigger>
-          {/* <TabsTrigger
-            value="price"
+          <TabsTrigger
+            value="age"
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
-            Price restriction
-          </TabsTrigger> */}
+            Age restriction
+          </TabsTrigger>
           <TabsTrigger
             value="availability"
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
@@ -53,9 +54,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         <TabsContent value="details">
           <HostPropertiesDetails property={property} />
         </TabsContent>
-        {/* <TabsContent value="price">
-          <HostPropertiesPriceRestriction property={property} />
-        </TabsContent> */}
+        <TabsContent value="age">
+          <HostPropertiesAgeRestriction
+            property={property}
+            key={`age-${property.id}`}
+          />
+        </TabsContent>
         <TabsContent value="availability">
           <HostAvailability property={property} />
         </TabsContent>

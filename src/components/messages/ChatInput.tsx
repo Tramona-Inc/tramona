@@ -88,6 +88,7 @@ export default function ChatInput({
         .from("messages")
         .insert(newMessageToDb)
         .select("*, user(email, name, image)")
+        // .select("*")
         .single();
 
       if (error) {

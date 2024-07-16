@@ -129,4 +129,9 @@ export function zodPhone() {
   );
 }
 
-export const zodTime = z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/);
+export const zodTime = z
+  .string()
+  .regex(
+    /^(?:(?:[01]\d|2[0-3]):([0-5]\d))|(?:(0?[1-9]|1[0-2]):([0-5]\d)\s?(?:AM|PM))$/i,
+    "Invalid time format",
+  );
