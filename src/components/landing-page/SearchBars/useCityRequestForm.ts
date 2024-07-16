@@ -33,6 +33,7 @@ export function useCityRequestForm({
     api.requests.createMultiple.useMutation();
 
   const onSubmit = form.handleSubmit(async ({ data }) => {
+    console.log("SUBMITTTING");
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
     const checkIn = data.date.from;
     const checkOut = data.date.to;
