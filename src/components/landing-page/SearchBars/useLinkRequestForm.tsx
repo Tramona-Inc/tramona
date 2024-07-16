@@ -6,12 +6,12 @@ import { getNumNights } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import {
-  type CityRequestDefaultVals,
   defaultSearchOrReqValues,
-  multiCityRequestSchema,
+  multiLinkRequestSchema,
+  type MultiLinkRequestVals,
 } from "./schemas";
 
-export function useCityRequestForm({
+export function useLinkRequestForm({
   setCurTab,
   afterSubmit,
 }: {
@@ -19,18 +19,19 @@ export function useCityRequestForm({
   afterSubmit?: (madeByGroupIds?: number[]) => void;
 }) {
   const form = useZodForm({
-    schema: multiCityRequestSchema,
+    schema: multiLinkRequestSchema,
     defaultValues: { data: [defaultSearchOrReqValues] },
   });
 
   const { status } = useSession();
   const router = useRouter();
-  const { mutateAsync: createRequests } =
-    api.requests.createMultiple.useMutation();
+  const { mutateAsync: createRequestWithLink } =
+    api.requests.createRequestWithLink.useMutation();
 
   const onSubmit = form.handleSubmit(async ({ data }) => {
+    console.log("link form was called ");
     const newRequests = data.map((request) => {
-      const { date: _date, maxNightlyPriceUSD, ...restData } = request;
+      const { date: _date, ...restData } = request;
       const checkIn = request.date.from;
       const checkOut = request.date.to;
       const numNights = getNumNights(checkIn, checkOut);
@@ -38,7 +39,6 @@ export function useCityRequestForm({
       return {
         checkIn: checkIn,
         checkOut: checkOut,
-        maxTotalPrice: Math.round(numNights * maxNightlyPriceUSD * 100),
         ...restData,
       };
     });
@@ -48,7 +48,7 @@ export function useCityRequestForm({
       void router.push("/auth/signin").then(() => {
         if (newRequests.length === 1) {
           toast({
-            title: `Request saved: ${newRequests[0]!.location}`,
+            title: `Request saved: ${newRequests[0]!.airbnbLink}`,
             description: "It will be sent after you sign in",
           });
         } else {
@@ -59,14 +59,14 @@ export function useCityRequestForm({
         }
       });
     } else {
-      await createRequests(newRequests)
+      await createRequestWithLink(newRequests)
         .then((result) => {
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
           form.reset();
 
           form.setValue("data", [
-            defaultSearchOrReqValues as CityRequestDefaultVals,
+            defaultSearchOrReqValues as MultiLinkRequestVals["data"][0],
           ]);
           setCurTab(0);
           afterSubmit?.(result.madeByGroupIds);
@@ -83,4 +83,4 @@ export function useCityRequestForm({
   };
 }
 
-export type CityRequestForm = ReturnType<typeof useCityRequestForm>["form"];
+export type LinkRequestForm = ReturnType<typeof useLinkRequestForm>["form"];

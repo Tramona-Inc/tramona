@@ -10,6 +10,9 @@ import {
 } from "date-fns";
 import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
+//import puppeteer from "puppeteer";
+import { URLSearchParams } from "url";
+import { TRPCError } from "@trpc/server";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -128,24 +131,26 @@ export function formatDateMonthDayYear(date: Date) {
 
 export function getElapsedTime(createdAt: Date): string {
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+  const diffInSeconds = Math.floor(
+    (now.getTime() - createdAt.getTime()) / 1000,
+  );
 
   if (diffInSeconds < 60) {
-    return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
+    return `${diffInSeconds} second${diffInSeconds !== 1 ? "s" : ""} ago`;
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    return `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""} ago`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    return `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+  return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
 }
 
 export function getDisplayedName(realname: string | null): string {

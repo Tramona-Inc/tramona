@@ -8,7 +8,6 @@ import puppeteer from "puppeteer";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
 import { sleep } from "@/utils/utils";
-import { requestsRouter } from "./requestsRouter";
 
 type AirbnbListing = {
   id: string;
@@ -220,5 +219,31 @@ export const miscRouter = createTRPCRouter({
           message: "Error scraping the page",
         });
       }
+    }),
+  extractBookingDetails: publicProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      // Create a URL object
+      const urlObj = new URL(input);
+
+      // Get the search parameters
+      const params = new URLSearchParams(urlObj.search);
+
+      // Extract the values with null checks
+      const numOfAdults = parseInt(params.get("adults") || "0", 10);
+      const numOfChildren = parseInt(params.get("children") || "0", 10);
+      const numOfInfants = parseInt(params.get("infants") || "0", 10);
+      const checkIn = params.get("check_in") || "";
+      const checkOut = params.get("check_out") || "";
+
+      // Calculate the total number of guests
+      const numOfGuests = numOfAdults + numOfChildren + numOfInfants;
+
+      // Return the extracted details
+      return {
+        numOfGuests,
+        checkIn,
+        checkOut,
+      };
     }),
 });
