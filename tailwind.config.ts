@@ -10,6 +10,9 @@ module.exports = {
   ],
   prefix: "",
   theme: {
+    fontFamily: {
+      magazine: ["Stint-Ultra-Condensed", "sans-serif"],
+    },
     container: {
       center: true,
       padding: "2rem",
