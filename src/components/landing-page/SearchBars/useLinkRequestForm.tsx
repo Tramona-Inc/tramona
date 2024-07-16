@@ -14,9 +14,13 @@ import {
 export function useLinkRequestForm({
   setCurTab,
   afterSubmit,
+  handleSetOpen,
+  handleShowConfetti,
 }: {
   setCurTab: (val: number) => void;
   afterSubmit?: (madeByGroupIds?: number[]) => void;
+  handleSetOpen: (val: boolean) => void;
+  handleShowConfetti: (val: boolean) => void;
 }) {
   const form = useZodForm({
     schema: multiLinkRequestSchema,
@@ -29,7 +33,6 @@ export function useLinkRequestForm({
     api.requests.createRequestWithLink.useMutation();
 
   const onSubmit = form.handleSubmit(async ({ data }) => {
-    console.log("link form was called ");
     const newRequests = data.map((request) => {
       const { date: _date, ...restData } = request;
       const checkIn = request.date.from;
@@ -59,6 +62,8 @@ export function useLinkRequestForm({
         }
       });
     } else {
+      handleSetOpen(true);
+      handleShowConfetti(true);
       await createRequestWithLink(newRequests)
         .then((result) => {
           // we need to do this instead of form.reset() since i

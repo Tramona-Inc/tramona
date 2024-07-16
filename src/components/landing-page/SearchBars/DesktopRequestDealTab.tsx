@@ -23,7 +23,7 @@ import { useCityRequestForm } from "./useCityRequestForm";
 import { useLinkRequestForm } from "./useLinkRequestForm";
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import { toast } from "@/components/ui/use-toast";
-import { api } from "@/utils/api";
+import { api, RouterOutputs } from "@/utils/api";
 
 import { Separator } from "@/components/ui/separator";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
@@ -38,6 +38,8 @@ export type ScrapedProperty = {
   cityName: string;
 };
 
+type ExtractURLType = RouterOutputs["misc"]["extractBookingDetails"];
+
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
   const [open, setOpen] = useState(false);
@@ -51,10 +53,29 @@ export function DesktopRequestDealTab() {
   const [triggerExtract, setTriggerExtract] = useState(false);
   const [openLinkConfirmationDialog, setOpenLinkConfirmationDialog] =
     useState(false);
-  const [extractedLinkDataState, setExtractedLinkDataState] = useState();
+  const [extractedLinkDataState, setExtractedLinkDataState] = useState<
+    ExtractURLType | undefined
+  >();
+  const [airbnbLink, setAirbnbLink] = useState<string | null>(null);
+  const handleSetOpen = (val: boolean) => {
+    setOpen(val);
+  };
+  const handleShowConfetti = (val: boolean) => {
+    setShowConfetti(val);
+  };
 
-  const cityForm = useCityRequestForm({ setCurTab, afterSubmit });
-  const linkForm = useLinkRequestForm({ setCurTab, afterSubmit });
+  const cityForm = useCityRequestForm({
+    setCurTab,
+    afterSubmit,
+    handleSetOpen,
+    handleShowConfetti,
+  });
+  const linkForm = useLinkRequestForm({
+    setCurTab,
+    afterSubmit,
+    handleSetOpen,
+    handleShowConfetti,
+  });
 
   const { form, onSubmit } = link ? linkForm : cityForm;
 
@@ -74,8 +95,6 @@ export function DesktopRequestDealTab() {
       setMadeByGroupIds(madeByGroupIds);
       setGroupId(madeByGroupIds[0] ?? null);
     }
-    setOpen(true);
-    setShowConfetti(true);
   }
 
   const inviteUserByEmail = api.groups.inviteUserByEmail.useMutation();
@@ -118,7 +137,11 @@ export function DesktopRequestDealTab() {
     setOpenLinkConfirmationDialog(true);
   };
 
-  const airbnbLink = form.getValues(`data.${curTab}.airbnbLink`);
+  const allFormValues = form.watch();
+
+  useEffect(() => {
+    setAirbnbLink(allFormValues.data[curTab]!.airbnbLink!);
+  }, [allFormValues, curTab]);
 
   const {
     data: extractUrlData,
@@ -320,7 +343,9 @@ export function DesktopRequestDealTab() {
               disabled={form.formState.isSubmitting}
               className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
             >
-              Submit Request
+              {!form.formState.isSubmitting
+                ? "Submit Request"
+                : "Submitting..."}
             </Button>
           </div>
         </form>

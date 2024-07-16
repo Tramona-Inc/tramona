@@ -14,9 +14,13 @@ import {
 export function useCityRequestForm({
   setCurTab,
   afterSubmit,
+  handleSetOpen,
+  handleShowConfetti,
 }: {
   setCurTab: (val: number) => void;
   afterSubmit?: (madeByGroupIds?: number[]) => void;
+  handleSetOpen: (val: boolean) => void;
+  handleShowConfetti: (val: boolean) => void;
 }) {
   const form = useZodForm({
     schema: multiCityRequestSchema,
@@ -59,6 +63,8 @@ export function useCityRequestForm({
         }
       });
     } else {
+      handleSetOpen(true);
+      handleShowConfetti(true);
       await createRequests(newRequests)
         .then((result) => {
           // we need to do this instead of form.reset() since i

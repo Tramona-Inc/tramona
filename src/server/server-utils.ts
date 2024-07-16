@@ -34,6 +34,7 @@ import {
 import { getCity, getCoordinates } from "./google-maps";
 import puppeteer from "puppeteer";
 import { sleep } from "@/utils/utils";
+import { TRPCError } from "@trpc/server";
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -487,6 +488,8 @@ export async function scrapeUsingLink(url: string) {
     };
     return response;
   } catch (error) {
-    console.error(error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+    });
   }
 }

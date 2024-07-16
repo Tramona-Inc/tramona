@@ -5,6 +5,7 @@ import Confetti from "react-confetti";
 import Link from "next/link";
 import type { CityRequestForm } from "@/components/landing-page/SearchBars/useCityRequestForm";
 import RequestEmailInvitation from "./RequestEmaiInvitation";
+import type { LinkRequestForm } from "../useLinkRequestForm";
 
 export type FormValues = {
   data: {
@@ -26,7 +27,7 @@ export type FormValues = {
 interface RequestSubmittedDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  form: CityRequestForm;
+  form: CityRequestForm | LinkRequestForm;
   curTab: number;
   showConfetti: boolean;
   inviteLink: string | null;
@@ -44,8 +45,8 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   handleInvite,
   isLoading,
 }) => {
-  const formData = form.getValues("data");
-  const location = formData[curTab]?.location;
+  const formData = form.watch().data as FormValues["data"];
+  const location = formData[curTab]?.location ?? null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -54,9 +55,16 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
           <CircleCheckBig color="#528456" className="mr-2" /> Request sent!
         </div>
         <p className="mb-4 ml-8">
-          We sent your request out to every host in <b>{location}</b>. In the
-          next 24 hours, hosts will send you properties that match your
-          requirements. To check out matches{" "}
+          {location ? (
+            <p>
+              {" "}
+              We sent your request out to every host in <b>{location}</b>. In
+              the next 24 hours, hosts will send you properties that match your
+              requirements. To check out matches{" "}
+            </p>
+          ) : (
+            `Your request has been sent to your chosen Airbnb property and nearby listings. Over the next 24 hours, hosts will reach out with properties that meet your criteria. To view your matches`
+          )}
           <Link
             href="/requests"
             className="font-semibold text-neutral-900 underline"

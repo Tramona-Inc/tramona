@@ -1,12 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormContext, Controller } from "react-hook-form";
+import type { Control } from "react-hook-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import { CalendarIcon, Users2Icon } from "lucide-react";
 
-const LinkConfirmation = ({
+interface LinkConfirmationProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  extractedLinkDataState:
+    | {
+        checkIn: string;
+        checkOut: string;
+        numOfGuests: number;
+      }
+    | undefined;
+  extractIsLoading: boolean;
+  formControl: Control<any>;
+  formFields: {
+    checkIn: string;
+    checkOut: string;
+    numGuests: string;
+  };
+  onSubmit: () => void;
+}
+
+const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
   open,
   setOpen,
   extractedLinkDataState,
@@ -15,25 +36,35 @@ const LinkConfirmation = ({
   formFields,
   onSubmit,
 }) => {
-  const { setValue, getValues } = useFormContext();
+  const { setValue, watch, reset } = useFormContext();
 
-  const checkInValue = getValues(formFields.checkIn) || null;
-  const checkOutValue = getValues(formFields.checkOut) || null;
-
-  const handleConfirm = async () => {
+  useEffect(() => {
     if (extractedLinkDataState) {
       const checkInDate = new Date(extractedLinkDataState.checkIn);
       const checkOutDate = new Date(extractedLinkDataState.checkOut);
 
-      if (!isNaN(checkInDate) && !isNaN(checkOutDate)) {
+      if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime())) {
         setValue(formFields.checkIn, checkInDate);
         setValue(formFields.checkOut, checkOutDate);
-        setValue(formFields.numGuests, extractedLinkDataState.numGuests);
+        setValue(formFields.numGuests, extractedLinkDataState.numOfGuests);
+      } else {
+        console.error("Invalid date extracted", { checkInDate, checkOutDate });
       }
     }
+  }, [extractedLinkDataState, setValue, formFields]);
 
+  const checkInValue = watch(formFields.checkIn) as Date | undefined;
+  const checkOutValue = watch(formFields.checkOut) as Date | undefined;
+  const numGuestsValue = watch(formFields.numGuests) as number;
+
+  const handleConfirm = () => {
     setOpen(false);
     onSubmit(); // Call the form submit handler
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+    reset(); // Reset the form
   };
 
   return (
@@ -53,8 +84,8 @@ const LinkConfirmation = ({
                 disablePast
                 className="bg-white"
                 onChange={(value) => {
-                  setValue(formFields.checkIn, value.from);
-                  setValue(formFields.checkOut, value.to);
+                  setValue(formFields.checkIn, value?.from ?? undefined);
+                  setValue(formFields.checkOut, value?.to ?? undefined);
                 }}
                 value={{ from: checkInValue, to: checkOutValue }}
               />
@@ -70,7 +101,10 @@ const LinkConfirmation = ({
                 placeholder="Add guests"
                 icon={Users2Icon}
                 variant="lpDesktop"
-                onChange={(e) => setValue(formFields.numGuests, e.target.value)}
+                onChange={(e) =>
+                  setValue(formFields.numGuests, Number(e.target.value))
+                }
+                value={numGuestsValue || ""}
               />
             )}
           />
@@ -83,7 +117,7 @@ const LinkConfirmation = ({
           >
             {extractIsLoading ? "Submitting..." : "Submit Request"}
           </Button>
-          <Button onClick={() => setOpen(false)} variant="outline">
+          <Button onClick={handleCancel} variant="outline">
             Cancel
           </Button>
         </div>
