@@ -90,7 +90,7 @@ export default function HostMessagesOverview({
           <MessageCircleIcon />
           <CardTitle>Messages</CardTitle>
           <Badge variant="secondary">
-            {conversations.filter((m) => m.messages[0]?.read === false).length}{" "}
+            {conversations.filter((m) => m.messages[0]?.read === false && m.messages[0].userId !== session?.user.id).length}{" "}
             new
           </Badge>
           <div className="flex-1" />
@@ -107,7 +107,7 @@ export default function HostMessagesOverview({
           {conversations.filter((m) => m.messages[0]?.read === false && m.participants[0]?.id !== session?.user.id).length > 0 ? conversations.map((conversation) => (
             
             <div key={conversation.id} className="flex items-center gap-2">
-                {conversation.messages[0]?.read === false && conversation.participants[0]?.id !== session?.user.id &&
+                {conversation.messages[0]?.read === false && conversation.messages[0].userId !== session?.user.id &&
                 <>
                 <UserAvatar name={conversation.participants[0]?.image} />
                     <div>

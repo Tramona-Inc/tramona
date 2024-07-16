@@ -36,6 +36,10 @@ export default function ListMessages() {
     (state) => state.addMessageToConversation,
   );
 
+  const  setConversationReadState  = useConversation(
+    (state) => state.setConversationReadState
+  )
+
   const { fetchInitialMessages } = useMessage()
 
   const messages = currentConversationId
@@ -54,12 +58,13 @@ export default function ListMessages() {
           message.read === false && message.userId !== session?.user.id,
       )
       .map((message) => message.id);
+      console.log(unreadMessageIds)
 
     if (unreadMessageIds.length > 0) {
       void mutateAsync({ unreadMessageIds });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
+  }, [messages, ]);
 
   const hasMore = currentConversationId
     ? conversations[currentConversationId]?.hasMore ?? false
@@ -86,6 +91,7 @@ export default function ListMessages() {
         read: payload.new.read,
       };
       addMessageToConversation(payload.new.conversation_id, newMessage);
+      setConversationReadState(payload.new.conversation_id)
     }
         // console.log(data);
         // void fetchInitialMessages(currentConversationId ?? "")
@@ -165,7 +171,6 @@ export default function ListMessages() {
   );
 
   const participants = conversationList[conversationIndex]?.participants;
-
   const messagesWithUser = messages
     .slice()
     .reverse()
@@ -184,7 +189,7 @@ export default function ListMessages() {
       return { message, user };
     })
     .filter(Boolean);
-
+    console.log(messagesWithUser)
   const messageGroups = groupMessages(messagesWithUser);
 
   return (

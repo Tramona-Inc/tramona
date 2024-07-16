@@ -1,15 +1,30 @@
 import { type MessageType } from "@/server/db/schema";
+import { type MessageDbType } from "@/types/supabase.message";
 import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 import { type MessageGroup } from "./groupMessages";
 import { AnonymousAvatar } from "../ui/avatar";
+import supabase from "@/utils/supabase-client";
+import { useEffect } from "react";
 
 export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   const { data: session } = useSession();
   const { user, messages } = messageGroup;
   const firstMessage = messages[0];
-  if (!firstMessage || !session) return null;
+  if (!firstMessage || !session) return null;  
+
+  // useEffect(() => {
+  //   const channel = supabase
+  //   .channel(`${firstMessage.conversationId}`)
+  //   .on('postgres_changes',
+  //     {
+  //       event: "UPDATE",
+  //       schema: 'public',
+
+  //     }
+  //   )
+  // })
 
   return (
     <div className="flex items-start gap-2">

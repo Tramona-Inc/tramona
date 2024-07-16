@@ -44,6 +44,7 @@ export function MessageConversation({
   );
 
   async function handleSelected() {
+    console.log(messages)
     if (session?.user.id !== messages[0]?.userId && messages[0]?.id) {
       void setMessageToReadMutate({ messageId: messages[0]?.id });
       if (session) {
@@ -116,6 +117,10 @@ export default function MessagesSidebar({
   const setConversationList = useConversation(
     (state) => state.setConversationList,
   );
+
+  const setConversationReadState = useConversation(
+    (state) => state.setConversationReadState
+  )
 
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation
