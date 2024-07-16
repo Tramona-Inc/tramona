@@ -4,7 +4,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { type RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
@@ -85,10 +85,21 @@ export default function RequestCard({
   const [open, setOpen] = useState(false);
 
   function TravelerVerificationsDialog() {
+    const { data: verificationList } = api.users.getUserVerifications.useQuery({
+      madeByGroupId: request.madeByGroupId,
+    });
+    console.log(verificationList);
+
     const verifications = [
-      { name: "Email", verified: true },
-      { name: "Phone", verified: false },
-      { name: "Government ID", verified: true },
+      { name: "Age", verified: verificationList?.dateOfBirth ? true : false },
+      {
+        name: "Email",
+        verified: verificationList?.emailVerified ? true : false,
+      },
+      {
+        name: "Phone number",
+        verified: verificationList?.phoneNumber ? true : false,
+      },
     ];
 
     return (
