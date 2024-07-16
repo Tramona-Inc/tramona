@@ -67,8 +67,8 @@ export default function Page() {
 
         {/* the "how to" */}
         <div className="flex max-w-full items-center justify-center">
-          <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-3 lg:gap-4">
-            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
+          <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-3 lg:gap-4 lg:px-2">
+            <div className="flex max-w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
               <div className="rounded-lg border-2 border-[#004236] p-2">
                 <Clock8 className="h-6 w-6 text-[#004236]" />
               </div>
@@ -76,15 +76,15 @@ export default function Page() {
                 Enter a link of a rental you want
               </p>
             </div>
-            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
+            <div className="flex max-w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
               <div className="rounded-lg border-2 border-[#004236] p-2">
                 <Handshake className="h-6 w-6 text-[#004236]" />
               </div>
               <p className="text-start text-xl font-semibold">
-                We&apos;sll get it without the Airbnb fees
+                We&apos;ll get it without the Airbnb fees
               </p>
             </div>
-            <div className="flex w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
+            <div className="flex max-w-[22rem] flex-row items-center space-x-3 rounded-lg border-2 bg-white p-4">
               <div className="rounded-lg border-2 border-[#004236] p-2">
                 <CircleDollarSign className="h-6 w-6 text-[#004236]" />
               </div>
