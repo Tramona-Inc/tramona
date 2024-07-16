@@ -18,7 +18,7 @@ export function useLinkRequestForm({
   handleShowConfetti,
 }: {
   setCurTab: (val: number) => void;
-  afterSubmit?: (madeByGroupIds?: number[]) => void;
+  afterSubmit?: (madeByGroupIds?: number) => void;
   handleSetOpen: (val: boolean) => void;
   handleShowConfetti: (val: boolean) => void;
 }) {
@@ -66,7 +66,7 @@ export function useLinkRequestForm({
             defaultSearchOrReqValues as MultiLinkRequestVals["data"],
           );
           setCurTab(0);
-          afterSubmit?.(result.madeByGroupIds);
+          afterSubmit?.(result.transactionResults.madeByGroupId);
         })
         .catch(() => errorToast());
 

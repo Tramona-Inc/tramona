@@ -43,7 +43,7 @@ export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
   const [open, setOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [madeByGroupIds, setMadeByGroupIds] = useState<number[]>([]);
+  const [madeByGroupId, setMadeByGroupId] = useState<number>();
   const [link, setLink] = useState(false);
   const [groupId, setGroupId] = useState<number | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
@@ -89,17 +89,17 @@ export function DesktopRequestDealTab() {
     }
   }, [inviteLinkQuery.data]);
 
-  function afterSubmit(madeByGroupIds?: number[]) {
-    if (madeByGroupIds !== undefined) {
-      setMadeByGroupIds(madeByGroupIds);
-      setGroupId(madeByGroupIds[0] ?? null);
+  function afterSubmit(madeByGroupId?: number) {
+    if (madeByGroupId !== undefined) {
+      setMadeByGroupId(madeByGroupId);
+      setGroupId(madeByGroupId);
     }
   }
 
   const inviteUserByEmail = api.groups.inviteUserByEmail.useMutation();
 
   const handleInvite = async () => {
-    if (madeByGroupIds.length === 0) {
+    if (!madeByGroupId) {
       toast({ title: "Group IDs not available" });
       return;
     }
@@ -107,7 +107,7 @@ export function DesktopRequestDealTab() {
     setIsLoading(true);
     // try {
     //   for (const email of emails) {
-    //     for (const groupId of madeByGroupIds) {
+    //     for (const groupId of madeByGroupId) {
     //       if (email.length > 0) {
     //         await inviteUserByEmail.mutateAsync({ email, groupId });
     //       }
@@ -139,7 +139,7 @@ export function DesktopRequestDealTab() {
   const allFormValues = form.watch();
 
   useEffect(() => {
-    setAirbnbLink(allFormValues.data[curTab]!.airbnbLink!);
+    setAirbnbLink(allFormValues.data.airbnbLink!);
   }, [allFormValues, curTab]);
 
   const {

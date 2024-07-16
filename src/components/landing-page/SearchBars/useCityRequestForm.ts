@@ -18,7 +18,7 @@ export function useCityRequestForm({
   handleShowConfetti,
 }: {
   setCurTab: (val: number) => void;
-  afterSubmit?: (madeByGroupIds?: number[]) => void;
+  afterSubmit?: (madeByGroupIds?: number) => void;
   handleSetOpen: (val: boolean) => void;
   handleShowConfetti: (val: boolean) => void;
 }) {
@@ -56,7 +56,7 @@ export function useCityRequestForm({
     } else {
       handleSetOpen(true);
       handleShowConfetti(true);
-      await createRequests(newRequests)
+      await createRequests(newRequest)
         .then((result) => {
           // we need to do this instead of form.reset() since i
           // worked around needing to give defaultValues to useForm
@@ -67,7 +67,7 @@ export function useCityRequestForm({
             defaultSearchOrReqValues as CityRequestDefaultVals,
           );
           setCurTab(0);
-          afterSubmit?.(result.madeByGroupIds);
+          afterSubmit?.(result.transactionResults.madeByGroupId);
         })
         .catch(() => errorToast());
 

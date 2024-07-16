@@ -134,20 +134,20 @@ export default function MastHead() {
               <DesktopSearchLayout />
             </div>
           </div>
-            <div className="flex justify-center">
-              <div className="-mt-12 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:hidden">
-                <DesktopSearchLayout />
-              </div>
+          <div className="flex justify-center">
+            <div className="-mt-12 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:hidden">
+              <DesktopSearchLayout />
             </div>
+          </div>
         </div>
       </div>
 
       <div className="h-72 lg:h-60"></div>
 
-      <div className="hidden lg:flex mt-8 mx-4 justify-center space-y-4 lg:mt-16 lg:space-y-8 lg:mx-0">
+      <div className="mx-4 mt-8 hidden justify-center space-y-4 lg:mx-0 lg:mt-16 lg:flex lg:space-y-8">
         <TestimonialCarousel />
       </div>
-      <div className="lg:hidden mt-8 mx-4 flex justify-center space-y-4 lg:mt-16 lg:space-y-8 lg:mx-0">
+      <div className="mx-4 mt-8 flex justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
         <MobileTestimonialCarousel />
       </div>
 

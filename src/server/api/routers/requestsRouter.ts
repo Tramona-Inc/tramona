@@ -268,20 +268,19 @@ export const requestsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       //we are going to use the given data to scrape the airbnb listing and create a request
       const response = await scrapeUsingLink(input.airbnbLink);
-      console.log(response);
       const newRequest: RequestInput = {
         ...input,
-        location: response?.cityName ?? "No location found",
-        maxTotalPrice: response?.formattedNightlyPrice ?? 0,
+        location: response.cityName,
+        maxTotalPrice: response.formattedNightlyPrice,
       };
       //now we need to make a legitimate request with all of the data
       try {
-        const { madeByGroupIds, results } = await handleRequestSubmission(
+        const { transactionResults } = await handleRequestSubmission(
           newRequest,
           { user: ctx.user },
         );
         console.log("IT WORKED ");
-        return { madeByGroupIds, results };
+        return { transactionResults };
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
