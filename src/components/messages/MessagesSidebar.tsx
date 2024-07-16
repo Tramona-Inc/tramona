@@ -3,6 +3,7 @@ import { api } from "@/utils/api";
 import {
   useConversation,
   type Conversation,
+  type AdminConversation,
   type AdminConversations
 } from "@/utils/store/conversations";
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
@@ -17,6 +18,7 @@ import Spinner from "../_common/Spinner";
 import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
+import { AdminSidebar } from './AdminSidebar'
 import { AvatarFallback } from "../ui/avatar";
 
 
@@ -100,7 +102,7 @@ export function MessageConversation({
 
 export type SidebarProps = {
   selectedConversation: Conversation | null;
-  setSelected: (arg0: Conversation) => void;
+  setSelected: (arg0: Conversation | AdminConversation) => void;
 };
 
 export default function MessagesSidebar({
@@ -150,15 +152,15 @@ export default function MessagesSidebar({
   // Map and listen to all the connects the user is part of
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-      if (!optimisticIds.includes(payload.new.id)) {
-        const { error } = await supabase
-          .from("user")
-          .select("name, email, image")
-          .eq("id", payload.new.user_id ?? "")
-          .single();
-        if (error) {
-          errorToast();
-        } else {
+      // if (!optimisticIds.includes(payload.new.id)) {
+      //   const { error } = await supabase
+      //     .from("user")
+      //     .select("name, email, image")
+      //     .eq("id", payload.new.user_id ?? "")
+      //     .single();
+      //   if (error) {
+      //     errorToast();
+      //   } else {
           const newMessage: ChatMessageType = {
             id: payload.new.id,
             conversationId: payload.new.conversation_id,
@@ -171,8 +173,8 @@ export default function MessagesSidebar({
           };
           setConversationToTop(payload.new.conversation_id, newMessage);
         }
-      }
-    };
+    //   }
+    // };
 
     const fetchConversationIds = async () => {
       if (session) {
@@ -255,9 +257,9 @@ export default function MessagesSidebar({
         {session?.user.role === "admin" && 
         (adminConversation.length > 0 && (
           adminConversation.map((conversation) => (
-            <SidebarConversation 
+            <AdminSidebar 
             key={conversation.id}
-            conversation={conversation}
+            // conversation={conversation}
             adminConversation={conversation}
             isSelected = {selectedConversation?.id === conversation.id}
             setSelected={setSelected}

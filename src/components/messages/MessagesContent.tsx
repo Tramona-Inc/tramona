@@ -1,4 +1,4 @@
-import { type Conversation } from "@/utils/store/conversations";
+import { AdminConversation, type Conversation } from "@/utils/store/conversations";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
 import ChatMessages from "./ChatMessages";
@@ -9,8 +9,8 @@ export default function MessagesContent({
   selectedConversation,
   setSelected,
 }: {
-  selectedConversation: Conversation | null;
-  setSelected: (arg0: Conversation | null) => void;
+  selectedConversation: Conversation | AdminConversation |null;
+  setSelected: (arg0: Conversation | AdminConversation | null) => void;
 }) {
   if (!selectedConversation) {
     return (

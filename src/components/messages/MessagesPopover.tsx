@@ -153,8 +153,8 @@ export default function MessagesPopover({session}: {
         const { error } = await supabase
           .from("messages")
           .insert(newMessageToDb)
-          .select("*, user(email, name, image)")
-          // .select("*")
+          // .select("*, user(email, name, image)")
+          .select("*")
           .single();
   
         if (error) {
@@ -200,7 +200,7 @@ export default function MessagesPopover({session}: {
               schema: "public",
               table: "messages",
             },
-            (payload: { new: MessageDbType }) => void handlePostgresChange(payload),
+            (payload: { new: MessageDbType}) => void handlePostgresChange(payload),
           )
           .subscribe();
     

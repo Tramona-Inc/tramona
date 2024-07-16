@@ -75,15 +75,15 @@ export default function ListMessages({
     : false;
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    if (!optimisticIds.includes(payload.new.id)) {
-      const { error } = await supabase
-        .from("user")
-        .select("name, email, image")
-        .eq("id", payload.new.user_id ?? "")
-        .single();
-      if (error) {
-        errorToast();
-      } else {
+    // if (!optimisticIds.includes(payload.new.id)) {
+    //   const { error } = await supabase
+    //     .from("user")
+    //     .select("name, email, image")
+    //     .eq("id", payload.new.user_id ?? "")
+    //     .single();
+    //   if (error) {
+    //     errorToast();
+    //   } else {
         const newMessage: ChatMessageType = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
@@ -95,8 +95,8 @@ export default function ListMessages({
           read: payload.new.read,
         };
         addMessageToConversation(payload.new.conversation_id, newMessage);
-      }
-    }
+    //   }
+    // }
 
     const scrollContainer = scrollRef.current;
     if (
