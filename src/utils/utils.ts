@@ -126,26 +126,33 @@ export function formatDateMonthDayYear(date: Date) {
   return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
 }
 
+export function convertDateFormat(dateString: string) {
+  const [year, month, day] = dateString.split("-");
+  return `${month}/${day}/${year}`;
+}
+
 export function getElapsedTime(createdAt: Date): string {
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+  const diffInSeconds = Math.floor(
+    (now.getTime() - createdAt.getTime()) / 1000,
+  );
 
   if (diffInSeconds < 60) {
-    return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
+    return `${diffInSeconds} second${diffInSeconds !== 1 ? "s" : ""} ago`;
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    return `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""} ago`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    return `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+  return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
 }
 
 export function getDisplayedName(realname: string | null): string {
@@ -352,6 +359,34 @@ export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
   return isOverflowing;
 }
 
+function isValidBirthdate(date: string) {
+  // Regular expression to match MM/DD/YYYY format
+  const regex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
+  return regex.test(date);
+}
+
+export function getAge(birthdate: string) {
+  if (!isValidBirthdate(birthdate)) {
+    throw new Error("Invalid birthdate format. Please use MM/DD/YYYY.");
+  }
+  const [month, day, year] = birthdate.split("/").map(Number);
+
+  if (month && year && day) {
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+
+    // Adjust age if the birthday has not occurred yet this year
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age;
+  }
+}
 // export function formatDateRangeWithWeekday(
 //   fromDate: Date | string,
 //   toDate?: Date | string,
