@@ -34,6 +34,9 @@ export const offers = pgTable(
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
     unclaimedOffer: boolean("unclaimed_offer").notNull().default(true),
+    showInUnclaimed: boolean("show_in_unclaimed").notNull(),
+    updateQueueTime: timestamp("update_queue_time"),
+    unclaimedAt: timestamp("unclaimed_at"),
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),

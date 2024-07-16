@@ -90,19 +90,7 @@ export const offersRouter = createTRPCRouter({
             .update(offers)
             .set({ acceptedAt: new Date(), unclaimedOffer: false })
             .where(eq(offers.id, input.id)),
-
-          // New action to update other offers with the same propertyId
-          offer.request &&
-            tx
-              .update(offers)
-              .set({ unclaimedOffer: false })
-              .where(
-                and(
-                  isNotNull(offers.requestId),
-                  eq(offers.requestId, offer.request.id),
-                ),
-              ),
-
+            
           // update referralCode
           ctx.user.referralCodeUsed &&
             tx
@@ -429,7 +417,7 @@ export const offersRouter = createTRPCRouter({
         .object({
           propertyId: z.number(),
           totalPrice: z.number().min(1),
-          unclaimedOffer: z.boolean(),
+          showInUnclaimed: z.boolean(),
         })
         .and(
           z.union([
@@ -443,7 +431,7 @@ export const offersRouter = createTRPCRouter({
         ),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log("Received unclaimedOffer:", input.unclaimedOffer);
+      console.log("Received unclaimedOffer:", input.showInUnclaimed);
       const propertyHostTeam = await ctx.db.query.properties
         .findFirst({
           where: eq(properties.id, input.propertyId),
@@ -661,24 +649,48 @@ export const offersRouter = createTRPCRouter({
   //I want the all of the offers from each request that has been accepted except for the offer that has been accepted
   //Search in all requests, if there has been an off that has been accepted, then remove that offer from the list of offers
   //If there has been no offer accepted, then return nothing for that request
+  // getAllUnmatchedOffers: publicProcedure.query(async ({ ctx }) => {
+  //   //go through all the requests and filter out the ones that have an offer that has been accepted
+
+  //   const completedRequests = await ctx.db.query.requests.findMany({
+  //     where: isNotNull(requests.resolvedAt),
+  //   });
+
+  //   const unMatchedOffers = await ctx.db.query.offers.findMany({
+  //     where: and(
+  //       isNull(offers.acceptedAt),
+  //       or(
+  //         isNull(offers.requestId),
+  //         notInArray(
+  //           offers.requestId,
+  //           completedRequests.map((req) => req.id),
+  //         ),
+  //       ),
+  //       eq(offers.unclaimedOffer, true),
+  //     ),
+  //     with: {
+  //       property: {
+  //         columns: {
+  //           name: true,
+  //           originalNightlyPrice: true,
+  //           imageUrls: true,
+  //           id: true,
+  //           maxNumGuests: true,
+  //           numBedrooms: true,
+  //         },
+  //       },
+  //     },
+  //   });
+  //   return unMatchedOffers;
+  // }),
+
+
   getAllUnmatchedOffers: publicProcedure.query(async ({ ctx }) => {
-    //go through all the requests and filter out the ones that have an offer that has been accepted
-
-    const completedRequests = await ctx.db.query.requests.findMany({
-      where: isNotNull(requests.resolvedAt),
-    });
-
     const unMatchedOffers = await ctx.db.query.offers.findMany({
       where: and(
         isNull(offers.acceptedAt),
-        or(
-          isNull(offers.requestId),
-          notInArray(
-            offers.requestId,
-            completedRequests.map((req) => req.id),
-          ),
-        ),
         eq(offers.unclaimedOffer, true),
+        eq(offers.showInUnclaimed, true)
       ),
       with: {
         property: {

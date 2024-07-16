@@ -16,7 +16,8 @@ import {
   users,
 } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { eq, sql } from "drizzle-orm";
+import { add } from "date-fns";
+import { and, eq, not, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 
@@ -69,12 +70,16 @@ export default async function webhook(
           // Check if confirmed_at exists and is a valid date string
           if (confirmedAt && Date.parse(confirmedAt)) {
             const confirmedDate = new Date(confirmedAt);
+            const scheduleTime = add(new Date(), { hours: 24 });
 
             await db
               .update(offers)
               .set({
                 acceptedAt: confirmedDate,
                 paymentIntentId: paymentIntentSucceeded.id,
+                unclaimedOffer: false,
+                updateQueueTime: null,
+                unclaimedAt: null
               })
               .where(
                 eq(
@@ -82,6 +87,46 @@ export default async function webhook(
                   parseInt(paymentIntentSucceeded.metadata.listing_id!),
                 ),
               );
+
+            // Get the requestId of the accepted offer
+            const acceptedOffer = await db.query.offers.findFirst({
+              where: eq(
+                offers.id,
+                parseInt(paymentIntentSucceeded.metadata.listing_id!),
+              ),
+              columns: { requestId: true },
+            });
+
+            // if (acceptedOffer?.requestId) {
+            //   // Update all other offers with the same requestId
+            //   await db
+            //     .update(offers)
+            //     .set({ unclaimedOffer: true })
+            //     .where(
+            //       and(
+            //         eq(offers.requestId, acceptedOffer.requestId),
+            //         not(
+            //           eq(
+            //             offers.id,
+            //             parseInt(paymentIntentSucceeded.metadata.listing_id!),
+            //           ),
+            //         ),
+            //       ),
+            //     );
+            // }
+
+            if (acceptedOffer?.requestId) {
+              // Queue other offers with the same requestId for update
+              await db
+                .update(offers)
+                .set({ updateQueueTime: scheduleTime })
+                .where(
+                  and(
+                    eq(offers.requestId, acceptedOffer.requestId),
+                    not(eq(offers.id, offerId!))
+                  )
+                );
+            }
 
             await db
               .update(trips)

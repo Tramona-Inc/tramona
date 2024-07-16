@@ -236,7 +236,7 @@ export default function HostConfirmRequestDialog({
         requestId: request.id,
         propertyId: property.id,
         totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
-        unclaimedOffer: unclaimedOffers
+        showInUnclaimed: unclaimedOffers
       });
     }
 
