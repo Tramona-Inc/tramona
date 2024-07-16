@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import ReviewCard from "@/components/_common/ReviewCard";
 import {
   Dialog,
   DialogContent,
@@ -63,6 +64,16 @@ export default function OfferPage({
     property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
 
   const isBooked = !!offer.acceptedAt;
+
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  useEffect(() => {
+    const aboutElement = aboutRef.current;
+    if (aboutElement) {
+      setIsOverflowing(aboutElement.scrollHeight > aboutElement.clientHeight);
+    }
+  }, []);
 
   // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;

@@ -7,6 +7,7 @@ import {
 import {
   ALL_PROPERTY_TYPES,
   bookedDates,
+  groups,
   hostProfiles,
   hostTeamMembers,
   hostTeams,
@@ -20,7 +21,7 @@ import { eq } from "drizzle-orm";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
-import { zodString } from "@/utils/zod-utils";
+import { zodNumber, zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -482,7 +483,7 @@ export const usersRouter = createTRPCRouter({
                 (amenity) => amenity.amenityName,
               ), // Keep amenities as an array
               cancellationPolicy: property.cancellationPolicy,
-            }))
+            })),
           );
 
           // Now pass the resolved array of objects to the .values() method
@@ -670,5 +671,33 @@ export const usersRouter = createTRPCRouter({
         .where(eq(users.id, ctx.user.id));
 
       return "success";
+    }),
+
+  getUserVerifications: protectedProcedure
+    .input(z.object({ madeByGroupId: zodNumber() }))
+    .query(async ({ input, ctx }) => {
+      const verifications = await ctx.db.query.groups
+        .findFirst({
+          where: eq(groups.id, input.madeByGroupId),
+          with: {
+            owner: {
+              columns: {
+                dateOfBirth: true,
+                phoneNumber: true,
+                emailVerified: true,
+                email: true,
+              },
+            },
+          },
+        })
+        .then((res) => res?.owner);
+
+      if (!verifications) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Group not found",
+        });
+      }
+      return verifications;
     }),
 });

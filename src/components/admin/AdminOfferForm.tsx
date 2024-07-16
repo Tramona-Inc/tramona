@@ -52,6 +52,7 @@ const formSchema = z.object({
   propertyName: zodString(),
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
+  hostProfilePic: zodUrl(),
   address: zodString({ maxLen: 1000 }),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
@@ -76,6 +77,16 @@ const formSchema = z.object({
   checkOutTime: optional(zodTime),
   cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
+  reviews: optional(
+    z
+      .object({
+        profilePic: zodUrl(),
+        name: zodString(),
+        review: zodString({ maxLen: Infinity }),
+        rating: zodInteger({ min: 1, max: 5 }),
+      })
+      .array(),
+  ),
   // mapScreenshot: optional(zodString()),
 });
 
@@ -107,11 +118,13 @@ export default function AdminOfferForm({
         { value: "" },
         { value: "" },
       ],
+      reviews: [{ profilePic: "", name: "", review: "", rating: 0 }],
       ...(offer
         ? {
             // im sorry
             // ?? undefineds are to turn string | null into string | undefined
             hostName: offer.property.hostName ?? undefined,
+            hostProfilePic: offer.property.hostProfilePic ?? undefined,
             address: offer.property.address,
             areaDescription: offer.property.areaDescription ?? undefined,
             mapScreenshot: offer.property.mapScreenshot ?? undefined,
@@ -137,6 +150,7 @@ export default function AdminOfferForm({
             checkInTime: offer.property.checkInTime ?? undefined,
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
+            reviews: offer.property.reviews,
             bedsInRooms: offer.property.bedsInRooms
               ? stringifyBedsInRooms(offer.property.bedsInRooms)
               : undefined,
@@ -154,10 +168,16 @@ export default function AdminOfferForm({
     control: form.control,
   });
 
+  const reviewInputs = useFieldArray({
+    name: "reviews",
+    control: form.control,
+  });
+
   const updatePropertyMutation = api.properties.update.useMutation();
   const updateOfferMutation = api.offers.update.useMutation();
   const createPropertyMutation = api.properties.create.useMutation();
   const createOfferMutation = api.offers.create.useMutation();
+  const createReviewsMutation = api.reviews.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
@@ -231,6 +251,13 @@ export default function AdminOfferForm({
         tramonaFee: data.tramonaFee * 100,
       };
 
+      if (propertyData.reviews) {
+        await createReviewsMutation.mutateAsync({
+          reviews: propertyData.reviews,
+          propertyId: offer.property.id,
+        });
+      }
+
       await Promise.all([
         updatePropertyMutation.mutateAsync({
           ...newProperty,
@@ -259,7 +286,15 @@ export default function AdminOfferForm({
         tramonaFee: data.tramonaFee * 100,
         checkIn: request ? request.checkIn : new Date(checkInDate!),
         checkOut: request ? request.checkOut : new Date(checkOutDate!),
+        groupId: request?.madeByGroupId,
       };
+
+      if (propertyData.reviews) {
+        await createReviewsMutation.mutateAsync({
+          reviews: propertyData.reviews,
+          propertyId,
+        });
+      }
 
       await createOfferMutation.mutateAsync(newOffer).catch(() => errorToast());
     }
@@ -347,6 +382,20 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
+          name="hostProfilePic"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Host profile picture</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="originalNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
@@ -358,20 +407,6 @@ export default function AdminOfferForm({
                   prefix="$"
                   suffix="/night"
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="tramonaFee"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Tramona Fee</FormLabel>
-              <FormControl>
-                <Input {...field} inputMode="decimal" prefix="$" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -427,6 +462,20 @@ export default function AdminOfferForm({
                   prefix="$"
                   suffix="/night"
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tramonaFee"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tramona Fee</FormLabel>
+              <FormControl>
+                <Input {...field} inputMode="decimal" prefix="$" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -793,6 +842,78 @@ export default function AdminOfferForm({
               onClick={() => imageUrlInputs.append({ value: "" })}
             >
               Add another image (optional)
+            </Button>
+          </div>
+        </FormItem>
+
+        <FormItem className="col-span-full space-y-1">
+          <FormLabel>Reviews</FormLabel>
+          <div className="space-y-4">
+            {reviewInputs.fields.map((review, index) => (
+              <div key={review.id} className="space-y-1">
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.profilePic`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input {...field} placeholder="Profile Picture URL" />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.name`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input {...field} placeholder="Name" />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.rating`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="1"
+                        max="5"
+                        placeholder="Rating (1-5)"
+                      />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.review`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Textarea {...field} placeholder="Review" />
+                    </FormControl>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="emptyInput"
+                  onClick={() => reviewInputs.remove(index)}
+                >
+                  Remove Review
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              onClick={() =>
+                reviewInputs.append({
+                  profilePic: "",
+                  name: "",
+                  rating: 1,
+                  review: "",
+                })
+              }
+            >
+              Add Another Review
             </Button>
           </div>
         </FormItem>
