@@ -14,6 +14,8 @@ import {
   plural,
 } from "@/utils/utils";
 import {
+  BadgeCheck,
+  BadgeX,
   CalendarIcon,
   EllipsisIcon,
   MapPinIcon,
@@ -83,6 +85,12 @@ export default function RequestCard({
   const [open, setOpen] = useState(false);
 
   function TravelerVerificationsDialog() {
+    const verifications = [
+      { name: "Email", verified: true },
+      { name: "Phone", verified: false },
+      { name: "Government ID", verified: true },
+    ];
+
     return (
       <Dialog>
         <DialogTrigger>
@@ -91,8 +99,27 @@ export default function RequestCard({
         <DialogContent>
           <div className="flex items-center gap-2">
             <UserAvatar size="sm" name={request.name} image={request.image} />
-            <p>{request.name}</p>
+            <p className="font-bold">{request.name}</p>
           </div>
+          {verifications.map((verification, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between font-semibold"
+            >
+              <p>{verification.name}</p>
+              {verification.verified ? (
+                <div className="flex gap-2 text-teal-800">
+                  <BadgeCheck />
+                  <p>Verified</p>
+                </div>
+              ) : (
+                <div className="flex gap-2 text-red-500">
+                  <BadgeX />
+                  <p>Not verified</p>
+                </div>
+              )}
+            </div>
+          ))}
         </DialogContent>
       </Dialog>
     );
