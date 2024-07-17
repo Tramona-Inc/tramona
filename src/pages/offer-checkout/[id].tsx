@@ -1,6 +1,6 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import Spinner from "@/components/_common/Spinner";
-import Checkout from "@/components/requests/Checkout";
+import Checkout from "@/components/checkout/Checkout";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
