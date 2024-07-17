@@ -16,7 +16,6 @@ import { errorToast } from "@/utils/toasts";
 import { useToast } from "@/components/ui/use-toast";
 import { TrashIcon } from "lucide-react";
 import { formatPhoneNumberWithParentheses } from "@/utils/formatters";
-import Spinner from "../_common/Spinner";
 
 const formSchema = z.object({
   emergencyEmail: z.string().email(),
@@ -40,7 +39,7 @@ export default function ContactInfoForm() {
       onError: () => errorToast(),
     });
 
-  const { mutateAsync: deleteEmergencyContact, isLoading: deleteIsLoading } =
+  const { mutateAsync: deleteEmergencyContact } =
     api.users.deleteEmergencyContact.useMutation({
       onSuccess: () => {
         toast({
