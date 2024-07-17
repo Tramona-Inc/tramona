@@ -119,7 +119,7 @@ export function formatDateMonthDay(date: Date) {
 }
 
 export function formatDateWeekMonthDay(date: Date) {
-  return formatDate(removeTimezoneFromDate(date), "EEE MMMM d");
+  return formatDate(removeTimezoneFromDate(date), "EEE, MMMM d");
 }
 
 export function formatDateMonthDayYear(date: Date) {
@@ -398,6 +398,16 @@ export function getAge(birthdate: string) {
     return age;
   }
 }
+
+export function formatTime(time: string) {
+  const [hour, minute] = time.split(":").map(Number);
+  if (hour === undefined || minute === undefined) return time;
+  const fmtdMinutes = minute < 10 ? `0${minute}` : minute;
+  return hour > 12
+    ? `${hour - 12}:${fmtdMinutes} PM`
+    : `${hour}:${fmtdMinutes} AM`;
+}
+
 // export function formatDateRangeWithWeekday(
 //   fromDate: Date | string,
 //   toDate?: Date | string,

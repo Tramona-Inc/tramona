@@ -1,5 +1,4 @@
 import { Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 
@@ -113,7 +112,15 @@ export function GuestReviews() {
   );
 }
 
-const Review = ({ name, date, content }) => {
+const Review = ({
+  name,
+  date,
+  content,
+}: {
+  name: string;
+  date: string;
+  content: string;
+}) => {
   return (
     <div>
       <div className="review-header mb-1 flex justify-between">

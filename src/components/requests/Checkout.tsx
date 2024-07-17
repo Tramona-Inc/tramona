@@ -7,7 +7,6 @@ import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
 
 import {
-  cn,
   formatCurrency,
   getDiscountPercentage,
   getNumNights,
@@ -25,11 +24,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type OfferWithDetails } from "../offers/OfferPage";
-import { formatDateMonthDay, plural } from "@/utils/utils";
+import { formatDateWeekMonthDay, plural } from "@/utils/utils";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "./StripePaymentInfo";
 import { useMediaQuery } from "../_utils/useMediaQuery";
+import { Offer } from "@/server/db/schema";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -40,40 +40,9 @@ export default function Checkout({
   const router = useRouter();
   const chatWithAdmin = useChatWithAdmin();
 
-  const handleBackClick = (
-    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-  ) => {
-    event.preventDefault();
-    router.back();
-  };
-
-  const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.totalPrice / numberOfNights;
-  const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
-  const total = offer.totalPrice + offer.tramonaFee + tax;
-
-  const items = [
-    {
-      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(offer.totalPrice)}`,
-    },
-    {
-      title: "Cleaning fee",
-      price: "Included",
-    },
-    {
-      title: "Tramona service fee",
-      price: `${formatCurrency(offer.tramonaFee)}`,
-    },
-    {
-      title: "Taxes",
-      price: `${formatCurrency(tax)}`,
-    },
-  ];
-
   function BestPriceCard() {
     return (
-      <div className="rounded-lg border border-teal-900 bg-zinc-100 p-3 text-sm">
+      <div className="rounded-lg border border-zinc-500 bg-zinc-100 p-3 text-sm">
         <h3 className="font-bold">Best price</h3>
         <p className="font-semibold text-muted-foreground">
           This is an exclusive price only available on Tramona.
@@ -88,18 +57,18 @@ export default function Checkout({
         <div className="space-y-2 md:my-8">
           <h2 className="text-lg font-semibold">Your trip details</h2>
           <div className="text-sm">
-            <p>Dates</p>
+            <p className="text-muted-foreground">Dates</p>
             <p className="font-bold">
-              {formatDateMonthDay(offer.checkIn)} -{" "}
-              {formatDateMonthDay(offer.checkOut)}
+              {formatDateWeekMonthDay(offer.checkIn)} -{" "}
+              {formatDateWeekMonthDay(offer.checkOut)}
             </p>
           </div>
-          <div className="text-sm">
-            <p>Guests</p>
-            <p className="font-bold">
-              {request && plural(request.numGuests, "guest")}
-            </p>
-          </div>
+          {request && (
+            <div className="text-sm">
+              <p className="text-muted-foreground">Guests</p>
+              <p className="font-bold">{plural(request.numGuests, "guest")}</p>
+            </div>
+          )}
         </div>
       </>
     );
@@ -109,10 +78,9 @@ export default function Checkout({
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Cancellation Policy</h3>
-        <p className="text-sm font-semibold leading-5 text-muted-foreground">
-          This is an exclusive price only available on Tramona. This is an
-          exclusive price only available on Tramona. This is an exclusive price
-          only available on Tramona.
+        <p className="text-sm leading-5 text-muted-foreground">
+          {property.cancellationPolicy ??
+            "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
         </p>
       </div>
     );
@@ -192,6 +160,9 @@ export default function Checkout({
     );
   }
 
+  const nightlyPrice =
+    offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
+
   function CheckoutSummary() {
     return (
       <div>
@@ -233,24 +204,7 @@ export default function Checkout({
             </div>
             <Separator className="my-4" />
           </div>
-          <div className="space-y-4">
-            {items.map((item, index) => (
-              <div
-                className="flex items-center justify-between text-sm font-semibold"
-                key={index}
-              >
-                <p className={cn(index !== 3 && "underline")}>{item.title}</p>
-                <p>{item.price}</p>
-              </div>
-            ))}
-          </div>
-          <div className="hidden md:block">
-            <Separator className="my-4" />
-          </div>
-          <div className="my-4 flex items-center justify-between text-sm font-bold md:my-0 md:font-semibold">
-            <p>Total (USD)</p>
-            <p>{formatCurrency(total)}</p>
-          </div>
+          <OfferPriceDetails offer={offer} />
         </div>
         <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
           <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
@@ -279,10 +233,10 @@ export default function Checkout({
           />
         </div>
         <div className="absolute inset-x-0 bottom-0 m-4">
-          <div className="space-y-2 rounded-xl bg-primary/60 p-3 text-sm text-white">
+          <div className="space-y-2 rounded-xl bg-black/60 p-3 text-sm text-white backdrop-blur-sm">
             <p>
               &quot;My experience with Tramona has been wonderful. Any questions
-              i have i hear back instantly, and the prices are truly unbeatable.
+              I have I hear back instantly, and the prices are truly unbeatable.
               Every time a friend is thinking of traveling i always recommend
               Tramona.&quot;
             </p>
@@ -299,16 +253,17 @@ export default function Checkout({
   }
 
   return (
-    <div className="px-4 md:px-3">
-      <div className="mb-4 md:mb-8">
-        <Link href="#" onClick={handleBackClick}>
-          <div className="flex items-center gap-2">
-            <ChevronLeft />
-            <p className="font-semibold">Confirm and pay</p>
-          </div>
-        </Link>
-      </div>
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">
+    <div className="px-4">
+      <Button
+        variant="ghost"
+        className="rounded-full font-semibold"
+        onClick={router.back}
+      >
+        <ChevronLeft />
+        Offers
+      </Button>
+      <h1 className="py-8 text-2xl font-bold">Confirm and pay</h1>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {isMediumScreen ? (
           <div className="hidden md:block">
             <BestPriceCard />
@@ -372,6 +327,55 @@ export default function Checkout({
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+export function OfferPriceDetails({
+  offer,
+}: {
+  offer: Pick<Offer, "totalPrice" | "tramonaFee" | "checkIn" | "checkOut">;
+}) {
+  const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
+  const nightlyPrice = offer.totalPrice / numberOfNights;
+  const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
+  const total = offer.totalPrice + offer.tramonaFee + tax;
+
+  const items = [
+    {
+      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
+      price: `${formatCurrency(offer.totalPrice)}`,
+    },
+    {
+      title: "Cleaning fee",
+      price: "Included",
+    },
+    {
+      title: "Tramona service fee",
+      price: `${formatCurrency(offer.tramonaFee)}`,
+    },
+    {
+      title: "Taxes",
+      price: `${formatCurrency(tax)}`,
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {items.map((item, index) => (
+        <div
+          className="flex items-center justify-between text-sm font-semibold"
+          key={index}
+        >
+          <p className="underline">{item.title}</p>
+          <p>{item.price}</p>
+        </div>
+      ))}
+      <Separator />
+      <div className="flex items-center justify-between pb-4 font-bold">
+        <p>Total (USD)</p>
+        <p>{formatCurrency(total)}</p>
       </div>
     </div>
   );

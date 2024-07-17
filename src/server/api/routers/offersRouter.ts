@@ -229,10 +229,11 @@ export const offersRouter = createTRPCRouter({
             },
           },
           property: {
-            columns:{
-              latLngPoint:false,
+            columns: {
+              latLngPoint: false,
             },
             with: {
+              reviews: true,
               host: {
                 columns: {
                   id: true,
@@ -248,7 +249,6 @@ export const offersRouter = createTRPCRouter({
                   },
                 },
               },
-              reviews: true,
             },
           },
         },

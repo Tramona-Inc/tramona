@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { zodString } from "@/utils/zod-utils";
-import { zodBedsInRooms } from "@/utils/zodBedsInRooms";
+import { zodRoomsWithBedsParser } from "@/utils/zodBedsInRooms";
 
 export default function Page() {
   const form = useZodForm({
@@ -26,7 +26,7 @@ export default function Page() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((data) => {
-            const res = zodBedsInRooms.safeParse(data.bedsInRooms);
+            const res = zodRoomsWithBedsParser.safeParse(data.bedsInRooms);
             if (!res.success) {
               form.setError("bedsInRooms", {
                 message: res.error.issues[0]!.message,

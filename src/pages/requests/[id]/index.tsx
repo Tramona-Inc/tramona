@@ -108,67 +108,49 @@ function Page({
           site_name: "Tramona",
         }}
       />
-      <div className="flex justify-center max-w-full overflow-x-hidden lg:overflow-x-visible lg:px-0">
-        {request && offers ? (
-          <div className="min-h-screen-minus-header lg:px-4 pb-footer-height pt-5">
-            <div className="mx-auto w-[360px] lg:max-w-7xl">
-              <div className="flex items-center justify-center lg:justify-center">
-                <div className="px-4 lg:mx-16">
-                  <div className="hidden lg:block">
-                    <Button asChild variant="ghost" className="rounded-full">
-                      <Link href="/requests">
-                        <ArrowLeftIcon /> Back to requests
-                      </Link>
-                    </Button>
-                  </div>
-                  <div className="lg:hidden">
-                    <Button asChild variant="ghost" className="rounded-full">
-                      <Link href="/requests">
-                        <ChevronLeft className="-mx-1"/>
-                        <div className="font-semibold">Requests</div>
-                      </Link>
-                    </Button>
-                  </div>
-                  <div className="px-4 pb-32">
-                    <Tabs
-                      defaultValue={`${offers[0]?.id}`}
-                      value={selectedOfferId}
-                      onValueChange={setSelectedOfferId}
-                    >
-                      <div className="relative w-full mt-5">
-                      <TabsList className="w-max">
-                        {offers.map((offer, i) => (
-                          <TabsTrigger key={offer.id} value={`${offer.id}`}>
-                            Offer {i + 1}
-                          </TabsTrigger>
-                        ))}
-                        <div className="hidden lg:block absolute top-0 right-0">
-                          <ShareButton
-                            id={request.id}
-                            isRequest={true}
-                            propertyName={offers[0]!.property.name}
-                          />
-                        </div>
-                      </TabsList>
-                      </div>
-
-                      <div className="flex flex-col">
-                        {offers.map((offer) => (
-                          <TabsContent key={offer.id} value={`${offer.id}`}>
-                            <OfferPage offer={offer} mapCenter={mapCenter} />
-                          </TabsContent>
-                        ))}
-                      </div>
-                    </Tabs>
-                  </div>
+      {request && offers ? (
+        <div className="min-h-screen-minus-header pb-footer-height pt-5 lg:px-4">
+          <div className="mx-auto max-w-7xl">
+            <Button asChild variant="ghost" className="rounded-full">
+              <Link href="/requests">
+                <ChevronLeft className="-mx-1" />
+                <div className="font-semibold">Requests</div>
+              </Link>
+            </Button>
+            <div className="px-4 pb-32">
+              <Tabs
+                defaultValue={`${offers[0]?.id}`}
+                value={selectedOfferId}
+                onValueChange={setSelectedOfferId}
+              >
+                <div className="relative mt-5 w-full">
+                  <TabsList className="w-max">
+                    {offers.map((offer, i) => (
+                      <TabsTrigger key={offer.id} value={`${offer.id}`}>
+                        Offer {i + 1}
+                      </TabsTrigger>
+                    ))}
+                    <div className="absolute right-0 top-0 hidden lg:block">
+                      <ShareButton
+                        id={request.id}
+                        isRequest={true}
+                        propertyName={offers[0]!.property.name}
+                      />
+                    </div>
+                  </TabsList>
                 </div>
-              </div>
+                {offers.map((offer) => (
+                  <TabsContent key={offer.id} value={`${offer.id}`}>
+                    <OfferPage offer={offer} mapCenter={mapCenter} />
+                  </TabsContent>
+                ))}
+              </Tabs>
             </div>
           </div>
-        ) : (
-          <Spinner />
-        )}
-      </div>
+        </div>
+      ) : (
+        <Spinner />
+      )}
     </DashboardLayout>
   );
 }
@@ -186,8 +168,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       property: {
         columns: {
           latLngPoint: false,
-
-        }
+        },
       },
     },
   });

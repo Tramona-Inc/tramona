@@ -14,6 +14,9 @@ export const reviews = pgTable("reviews", {
   review: text("review").notNull(),
 });
 
+export type NewReview = typeof reviews.$inferInsert;
+export type Review = typeof reviews.$inferSelect;
+
 export const reviewsSelectSchema = createSelectSchema(reviews);
 export const reviewsInsertSchema = createInsertSchema(reviews, {
   profilePic: z.string().url(),
