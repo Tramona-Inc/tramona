@@ -12,24 +12,14 @@ import {
   getDiscountPercentage,
   getNumNights,
 } from "@/utils/utils";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import StripePaymentInfo from "./StripePaymentInfo";
+import StripePaymentInfo from "../requests/StripePaymentInfo";
 import { useMediaQuery } from "../_utils/useMediaQuery";
+
+import CheckoutInfoForm from "./ContactInfoForm";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -114,55 +104,6 @@ export default function Checkout({
           exclusive price only available on Tramona. This is an exclusive price
           only available on Tramona.
         </p>
-      </div>
-    );
-  }
-
-  const formSchema = z.object({
-    email: z.string().email(),
-    phone: z.string().min(10),
-  });
-
-  type FormSchema = z.infer<typeof formSchema>;
-
-  function ContactInfo() {
-    const form = useForm<FormSchema>({ resolver: zodResolver(formSchema) });
-
-    return (
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Contact Information</h3>
-        <p className="text-sm text-muted-foreground">
-          We encourage every traveler to have the travel details in case of
-          emergencies.
-        </p>
-        <Form {...form}>
-          <FormField
-            name="email"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="col-span-full">
-                <FormLabel>Email address</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name="phone"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="col-span-full">
-                <FormLabel>Phone number</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </Form>
       </div>
     );
   }
@@ -300,7 +241,7 @@ export default function Checkout({
 
   return (
     <div className="px-4 md:px-3">
-      <div className="mb-4 md:mb-8">
+      <div className="mb-4 md:m-8">
         <Link href="#" onClick={handleBackClick}>
           <div className="flex items-center gap-2">
             <ChevronLeft />
@@ -316,7 +257,7 @@ export default function Checkout({
             <Separator className="my-4" />
             <CancellationPolicy />
             <Separator className="my-4" />
-            <ContactInfo />
+            <CheckoutInfoForm />
             {/* <Separator className="my-4" />
             <TermsAndSubmit /> */}
             <Separator className="my-4" />
@@ -332,7 +273,7 @@ export default function Checkout({
             <Separator className="my-6" />
             <CancellationPolicy />
             <Separator className="my-6" />
-            <ContactInfo />
+            <CheckoutInfoForm />
             <Separator className="my-6" />
             {/* <TermsAndSubmit /> */}
             <Separator className="my-6" />
