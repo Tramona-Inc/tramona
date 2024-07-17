@@ -21,6 +21,7 @@ import {
   ExternalLinkIcon,
   FlameIcon,
   ArrowRightIcon,
+  BookCheckIcon,
 } from "lucide-react";
 import Image from "next/image";
 import "leaflet/dist/leaflet.css";
@@ -449,15 +450,23 @@ export default function OfferPage({
                   </div>
                 )}
                 <Button
-                  asChild
+                  asChild={!isBooked}
                   variant="greenPrimary"
                   size="lg"
                   className="w-full"
+                  disabled={isBooked}
                 >
-                  <Link href={`/offer-checkout/${offer.id}`}>
-                    Book now
-                    <ArrowRightIcon className="size-5" />
-                  </Link>
+                  {isBooked ? (
+                    <>
+                      <BookCheckIcon className="size-5" />
+                      Booked
+                    </>
+                  ) : (
+                    <Link href={`/offer-checkout/${offer.id}`}>
+                      Book now
+                      <ArrowRightIcon className="size-5" />
+                    </Link>
+                  )}
                 </Button>
                 <OfferPriceDetails offer={offer} />
               </CardContent>
