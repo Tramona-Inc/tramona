@@ -14,7 +14,6 @@ import { api } from "@/utils/api";
 import { Button } from "../ui/button";
 import { errorToast } from "@/utils/toasts";
 import { useToast } from "@/components/ui/use-toast";
-import { TrashIcon } from "lucide-react";
 import { formatPhoneNumberWithParentheses } from "@/utils/formatters";
 
 const formSchema = z.object({
@@ -71,7 +70,7 @@ export default function ContactInfoForm() {
         {emergencyContacts?.map((contact) => (
           <div
             key={contact.id}
-            className="flex items-center rounded-lg border border-muted p-4"
+            className="flex rounded-lg border border-muted px-4 pb-2 pt-3"
           >
             <div className="flex flex-1 flex-row justify-between">
               <div className="mr-4 flex flex-col">
@@ -87,10 +86,10 @@ export default function ContactInfoForm() {
             </div>
             <Button
               onClick={() => deleteEmergencyContact({ id: contact.id })}
-              variant="destructive"
-              className="ml-4"
+              variant="link"
+              className="ml-4 mt-2 text-destructive"
             >
-              <TrashIcon size={16} />
+              Delete
             </Button>
           </div>
         ))}
