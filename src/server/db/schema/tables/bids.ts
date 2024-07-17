@@ -44,9 +44,15 @@ export const bids = pgTable(
     numGuests: integer("num_guests").notNull().default(1),
     amount: integer("amount").notNull(),
     status: bidStatusEnum("status").notNull().default("Pending"),
-    statusUpdatedAt: timestamp("status_updated_at").notNull().defaultNow(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    statusUpdatedAt: timestamp("status_updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     dialogShown: boolean("dialog_shown").notNull().default(false),
   },
   (t) => ({

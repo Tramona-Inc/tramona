@@ -565,12 +565,55 @@ export const biddingRouter = createTRPCRouter({
       numGuests: random(1, 5),
     });
   }),
-  putDialogShown: protectedProcedure
-    .input(z.object({ bidId: zodInteger() }))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(bids)
-        .set({ dialogShown: true })
-        .where(eq(bids.id, input.bidId));
-    }),
+  
+  getAllHostPending: roleRestrictedProcedure(["host"]).query(
+    async ({ ctx }) => {
+      const allHostProperties = (
+        await db.query.properties.findMany({
+          where: eq(properties.hostId, ctx.user.id),
+          columns: {
+            id: true,
+          },
+        })
+      ).map((property) => property.id);
+
+      const allActiveBids = await db.query.bids.findMany({
+        with: {
+          madeByGroup: {
+            with: { members: { with: { user: true } }, invites: true },
+          },
+          property: {
+            columns: {
+              id: true,
+              name: true,
+              address: true,
+              imageUrls: true,
+              originalNightlyPrice: true,
+              originalListingUrl: true,
+              longitude: true,
+              latitude: true,
+            },
+          },
+          counters: {
+            orderBy: (counters, { desc }) => [desc(counters.createdAt)],
+            limit: 1,
+            columns: {
+              id: true,
+              counterAmount: true,
+              createdAt: true,
+              status: true,
+              userId: true,
+            },
+          },
+        },
+        where: and(
+          eq(bids.status, "Pending"),
+          inArray(bids.propertyId, allHostProperties),
+        ),
+        orderBy: desc(bids.createdAt),
+      });
+
+      return allActiveBids;
+    },
+  ),
 });
