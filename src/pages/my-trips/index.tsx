@@ -6,25 +6,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BriefcaseIcon, HistoryIcon } from "lucide-react";
 import SuccessfulBookingDialog from "@/components/my-trips/SuccessfulBookingDialog";
 import { useEffect, useState } from "react";
-import { useSSE } from "@/hooks/useSSE";
+import { api } from "@/utils/api";
+import Spinner from "@/components/_common/Spinner";
+
 
 export default function MyTrips() {
   const [open, setOpen] = useState(false);
-  const booking = useSSE('@/pages/api/stripe-webhook'); 
+  const [booking, setBooking] = useState<any | null>(null);
+  const { data: allTrips } = api.trips.getMyTrips.useQuery();
 
-  // useEffect(() => {
-  //   if (booking) {
-  //     setOpen(true);
-  //   }
-  // }, [booking]);
+  const upcomingTrips = allTrips ? allTrips.filter((trip) => trip.checkIn > new Date()) : [];
+  const pastTrips = allTrips ? allTrips.filter((trip) => trip.checkIn <= new Date()) : [];
+
+  // find the last element in upcomingTrips array, which is the most recent booking. If it was created at is less than 15 seconds ago, show the dialog
   useEffect(() => {
-    console.log('Booking data received:', booking);
-    if (booking) {
-      console.log('Opening dialog');
-      setOpen(true);
+    if (upcomingTrips.length > 0) {
+      const mostRecentBooking = upcomingTrips[upcomingTrips.length - 1];
+      const bookingTime = new Date(mostRecentBooking!.createdAt).getTime();
+      const currentTime = new Date().getTime();
+      if (currentTime - bookingTime < 15000) { // 15 seconds
+        setBooking(mostRecentBooking);
+        setOpen(true);
+      }
     }
-  }, [booking]);
-
+  }, [upcomingTrips]);
 
   return (
     <DashboardLayout type="guest">
@@ -47,12 +52,16 @@ export default function MyTrips() {
               History
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="upcoming">
-            <UpcomingTrips />
-          </TabsContent>
-          <TabsContent value="history">
-            <PastTrips />
-          </TabsContent>
+          {allTrips === undefined ? <Spinner /> : (
+            <>
+              <TabsContent value="upcoming">
+                <UpcomingTrips upcomingTrips={upcomingTrips}/>
+              </TabsContent>
+              <TabsContent value="history">
+                <PastTrips pastTrips={pastTrips}/>
+              </TabsContent>
+            </>
+          )}
         </Tabs>
       </div>
     </DashboardLayout>

@@ -19,9 +19,8 @@ import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { EventEmitter } from 'events';
+import { createSSEConnection } from "./sse";
 
-const eventEmitter = new EventEmitter();
 // ! Necessary for stripe
 export const config = {
   api: {
@@ -59,7 +58,6 @@ export default async function webhook(
     // * You can add other event types to catch
     switch (event.type) {
       case "payment_intent.succeeded":
-        console.log("Payment intent succeeded event")
         const paymentIntentSucceeded = event.data.object;
         const offerId =
           paymentIntentSucceeded.metadata.listing_id === undefined
@@ -68,11 +66,11 @@ export default async function webhook(
 
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
-          console.log("Confirmed at:", confirmedAt);
+
           // Check if confirmed_at exists and is a valid date string
           if (confirmedAt && Date.parse(confirmedAt)) {
             const confirmedDate = new Date(confirmedAt);
-            console.log("Confirmed date existed:", confirmedDate);
+
             await db
               .update(offers)
               .set({
@@ -101,7 +99,6 @@ export default async function webhook(
               ); // setting the paymentIntentId in the trips table
 
             const requestId = paymentIntentSucceeded.metadata.request_id;
-            console.log("Request ID:", requestId);
             if (requestId && !isNaN(parseInt(requestId))) {
               await db
                 .update(requests)
@@ -110,7 +107,7 @@ export default async function webhook(
 
               if (offerId) {
                 const offer = await db.query.offers.findFirst({
-                  with: { request: true, property: true},
+                  with: { request: true, property: true, },
                   where: eq(offers.id, offerId),
                 });
 
@@ -123,9 +120,9 @@ export default async function webhook(
                     propertyId: offer.propertyId,
                     offerId: offer.id,
                   });
-                  console.log('Emitting paymentSuccess event with data:', JSON.stringify(offer));
-                  eventEmitter.emit('paymentSuccess', JSON.stringify(offer));
                 }
+                // Trigger SSE to send offer data to client
+                createSSEConnection(1, offer);
               }
             }
           } else {
@@ -426,33 +423,8 @@ export default async function webhook(
     }
 
     res.json({ received: true });
-  } else if (req.method === "GET") {
-    console.log('SSE connection established');
-    // Set headers for server-side events (SSE)
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
-    });
-
-    // Send a comment to keep the connection alive
-    const sendKeepAlive = () => res.write(':keep-alive\n\n');
-    const keepAliveInterval = setInterval(sendKeepAlive, 60000);
-
-    // Listen for payment success events
-    const listener = (data: string) => {
-      console.log('Sending SSE event:', data);
-      res.write(`data: ${data}\n\n`);
-    };
-    eventEmitter.on('paymentSuccess', listener);
-
-    // Clean up on close
-    req.on('close', () => {
-      clearInterval(keepAliveInterval);
-      eventEmitter.off('paymentSuccess', listener);
-    });
   } else {
-    res.setHeader("Allow", ["POST", "GET"]);
+    res.setHeader("Allow", "POST");
     res.status(405).end("Method Not Allowed");
   }
 }
