@@ -1,13 +1,7 @@
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
-import {
-  format,
-  formatDate,
-  isSameDay,
-  isSameMonth,
-  isSameYear,
-} from "date-fns";
+import { formatDate, isSameDay, isSameMonth, isSameYear } from "date-fns";
 import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -81,32 +75,49 @@ export function capitalize(str: string) {
  * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
-export function formatDateRange(fromDate: Date, toDate?: Date) {
+export function formatDateRange(
+  fromDate: Date,
+  toDate?: Date,
+  { withWeekday = false } = {},
+) {
   const from = removeTimezoneFromDate(fromDate);
   const to = toDate ? removeTimezoneFromDate(toDate) : "";
 
   const isCurYear = isSameYear(from, new Date());
-
-  if (!to || isSameDay(from, to)) {
-    return format(from, isCurYear ? "MMM d" : "MMM d, yyyy");
-  }
-
   const sameMonth = isSameMonth(from, to);
   const sameYear = isSameYear(from, to);
 
+  if (withWeekday) {
+    if (!to || isSameDay(from, to)) {
+      return formatDate(from, "EEE, MMMM d, yyyy");
+    }
+
+    if (sameYear) {
+      return `${formatDate(from, "EEE, MMMM d")} – ${formatDate(
+        to,
+        isCurYear ? "d, yyyy" : "MMM d, yyyy",
+      )}`;
+    }
+  }
+
+  if (!to || isSameDay(from, to)) {
+    const format = isCurYear ? "MMM d" : "MMM d, yyyy";
+    return formatDate(from, format);
+  }
+
   if (sameMonth && sameYear) {
-    return `${format(from, "MMM d")} – ${format(
+    return `${formatDate(from, "MMM d")} – ${formatDate(
       to,
       isCurYear ? "d" : "d, yyyy",
     )}`;
   }
   if (sameYear) {
-    return `${format(from, "MMM d")} – ${format(
+    return `${formatDate(from, "MMM d")} – ${formatDate(
       to,
       isCurYear ? "MMM d" : "MMM d, yyyy",
     )}`;
   }
-  return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
+  return `${formatDate(from, "MMM d, yyyy")} – ${formatDate(to, "MMM d, yyyy")}`;
 }
 
 function removeTimezoneFromDate(date: Date) {
@@ -131,7 +142,7 @@ export function formatDateYearMonthDay(date: Date) {
 }
 
 export function formatShortDate(date: Date) {
-  return format(removeTimezoneFromDate(date), "M/d/yyyy");
+  return formatDate(removeTimezoneFromDate(date), "M/d/yyyy");
 }
 
 export function convertDateFormat(dateString: string) {
@@ -144,29 +155,22 @@ export function getElapsedTime(createdAt: Date): string {
   const diffInSeconds = Math.floor(
     (now.getTime() - createdAt.getTime()) / 1000,
   );
-  const diffInSeconds = Math.floor(
-    (now.getTime() - createdAt.getTime()) / 1000,
-  );
 
   if (diffInSeconds < 60) {
-    return `${diffInSeconds} second${diffInSeconds !== 1 ? "s" : ""} ago`;
     return `${diffInSeconds} second${diffInSeconds !== 1 ? "s" : ""} ago`;
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
     return `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""} ago`;
-    return `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""} ago`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
     return `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
-    return `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
   return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
 }
 
@@ -217,21 +221,15 @@ export function formatArrayToString(
   arr: string[],
   { junction }: { junction: "and" | "or" } = { junction: "and" },
 ) {
-export function formatArrayToString(
-  arr: string[],
-  { junction }: { junction: "and" | "or" } = { junction: "and" },
-) {
   if (arr.length === 0) {
     return "";
   } else if (arr.length === 1) {
     return arr[0]!;
   } else if (arr.length === 2) {
     return `${arr[0]} ${junction} ${arr[1]}`;
-    return `${arr[0]} ${junction} ${arr[1]}`;
   } else {
     const lastItem = arr.pop();
     const joinedItems = arr.join(", ");
-    return `${joinedItems}, ${junction} ${lastItem}`;
     return `${joinedItems}, ${junction} ${lastItem}`;
   }
 }

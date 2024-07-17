@@ -8,7 +8,6 @@ import {
   index,
   integer,
   jsonb,
-  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -23,7 +22,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { ALL_LISTING_SITE_NAMES } from "@/utils/listing-sites";
 import { ALL_LISTING_SITE_NAMES } from "@/utils/listing-sites";
 
 export const ALL_PROPERTY_TYPES = [

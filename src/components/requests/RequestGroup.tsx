@@ -5,19 +5,19 @@ import { RequestCardAction } from "@/components/requests/RequestCardAction";
 import { type RequestGroup } from "@/server/db/schema";
 
 export default function RequestGroupCards({
-  requestGroup,
   requests,
-  isWaiting,
-  startTimer,
-  selectedRequest,
-  setSelectedRequest,
+  // requestGroup,
+  // isWaiting,
+  // startTimer,
+  // selectedRequest,
+  // setSelectedRequest,
 }: {
-  requestGroup: RequestGroup;
   requests: DetailedRequest[];
-  isWaiting: boolean;
-  startTimer: () => void;
-  selectedRequest?: DetailedRequest | null;
-  setSelectedRequest?: (request: DetailedRequest | null) => void;
+  // requestGroup: RequestGroup;
+  // isWaiting: boolean;
+  // startTimer: () => void;
+  // selectedRequest?: DetailedRequest | null;
+  // setSelectedRequest?: (request: DetailedRequest | null) => void;
 }) {
   if (requests.length === 0) return null;
 
@@ -29,24 +29,25 @@ export default function RequestGroupCards({
   //   />
   // );
 
-  const handleCardClick = (request: DetailedRequest) => {
-    setSelectedRequest?.(request);
-  };
+  // // const handleCardClick = (request: DetailedRequest) => {
+  // //   setSelectedRequest?.(request);
+  // // };
+
+  const isSelected = false;
 
   if (requests.length === 1) {
     const request = requests[0]!;
 
-    const isSelected = !!selectedRequest && selectedRequest.id === request.id;
+    // const isSelected = !!selectedRequest && selectedRequest.id === request.id;
     return (
       <div
         key={request.id}
-        onClick={() => handleCardClick(request)}
+        // onClick={() => handleCardClick(request)}
         className={`cursor-pointer rounded-xl border-2 *:h-full ${isSelected ? "border-foreground" : "border-transparent"}`}
       >
         {/* The is selected prop going inside of Request card is just for mobile desktop is handles in activeRequestGroup */}
         <RequestCard request={request} isSelected={isSelected} type="guest">
           <RequestCardAction request={request} />
-
           {/* {requestGroup.hasApproved ? (
             <RequestCardAction request={request} />
           ) : (
@@ -66,11 +67,11 @@ export default function RequestGroupCards({
       </div>
       <div className="flex gap-2 overflow-x-auto p-2">
         {requests.map((request) => {
-          const isSelected = selectedRequest?.id === request.id;
+          // const isSelected = selectedRequest?.id === request.id;
           return (
             <div
               key={request.id}
-              onClick={() => handleCardClick(request)}
+              // onClick={() => handleCardClick(request)}
               className={`min-w-96 cursor-pointer *:h-full ${isSelected ? "rounded-xl border border-primary" : ""}`}
             >
               <RequestCard request={request} type="guest">

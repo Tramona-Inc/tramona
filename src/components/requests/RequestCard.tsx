@@ -221,6 +221,7 @@ export default function RequestCard({
 
           {fmtdFilters && <p>{fmtdFilters} </p>}
           {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
+          {fmtdFilters && <p>{fmtdFilters}</p>}
           {request.airbnbLink && (
             <a className="underline" href={request.airbnbLink}>
               Airbnb Link
