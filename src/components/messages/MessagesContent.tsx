@@ -9,8 +9,8 @@ export default function MessagesContent({
   selectedConversation,
   setSelected,
 }: {
-  selectedConversation: Conversation | AdminConversation |null;
-  setSelected: (arg0: Conversation | AdminConversation | null) => void;
+  selectedConversation: Conversation & AdminConversation |null;
+  setSelected: (arg0: Conversation & AdminConversation | null) => void;
 }) {
   if (!selectedConversation) {
     return (

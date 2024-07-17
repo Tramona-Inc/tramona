@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import LoadMoreMessages from "./LoadMoreMessages";
 import { groupMessages } from "./groupMessages";
 import { MessageGroup } from "./MessageGroup";
+import { User } from "@/server/db/schema";
 
 function NoMessages() {
   return (
@@ -84,12 +85,12 @@ export default function ListMessages({
     //   if (error) {
     //     errorToast();
     //   } else {
-        const newMessage: ChatMessageType = {
+        const newMessage: ChatMessageType & GuestMessage = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
           userId: payload.new.user_id ?? "",
           message: payload.new.message,
-          // userToken: "",
+          userToken: "",
           isEdit: payload.new.is_edit,
           createdAt: payload.new.created_at,
           read: payload.new.read,
@@ -165,19 +166,25 @@ export default function ListMessages({
 
   // Get all participants
   const { conversationList } = useConversation();
+  const { adminConversationList } = useConversation();
 
   const conversationIndex = conversationList.findIndex(
     (conversation) => conversation.id === currentConversationId,
   );
 
+  const adminConversationIndex = adminConversationList.findIndex(
+    (conversation) => conversation.id === currentConversationId,
+  )
   const participants = conversationList[conversationIndex]?.participants;
+
+  const guest_participants = adminConversationList[adminConversationIndex]?.guest_participants;
 
   const messagesWithUser = messages
     .slice()
     .reverse()
     .map((message) => {
       // Display message with user
-      if (!participants || !session) return null;
+      if (!participants || !guest_participants || !session) return null;
       if (isChatMessage(message) && message.userId === session.user.id) {
         return { message, user: session.user };
       }
@@ -185,6 +192,8 @@ export default function ListMessages({
       const user =
         participants.find(
           (participant) => isChatMessage(message) && participant?.id === message.userId,
+        ) ?? guest_participants.find(
+          (participant) => participant.userToken === message.userToken
         ) ?? null; // null means its a deleted user
 
       return { message, user };

@@ -13,7 +13,7 @@ export type GuestMessage = GuestMessageType
 type ConversationsState = Record<
   string,
   {
-    messages: (ChatMessageType | GuestMessage)[];
+    messages: (ChatMessageType & GuestMessage)[];
     page: number;
     hasMore: boolean;
     alreadyFetched: boolean;
@@ -28,13 +28,13 @@ type MessageState = {
   switchConversation: (conversationId: string) => void;
   addMessageToConversation: (
     conversationId: string,
-    messages: ChatMessageType | GuestMessage,
+    messages: ChatMessageType & GuestMessage,
   ) => void;
   optimisticIds: string[];
   setOptimisticIds: (id: string) => void;
   setMoreMessagesToConversation: (
     conversationId: string,
-    moreMessages: ChatMessageType[],
+    moreMessages: (ChatMessageType & GuestMessage)[],
   ) => void;
   fetchInitialMessages: (conversationId: string) => Promise<void>;
   fetchMessagesForGuest: (conversationId: string) => Promise<void>;
@@ -57,7 +57,7 @@ export const useMessage = create<MessageState>((set, get) => ({
   },
   addMessageToConversation: (
     conversationId: string,
-    newMessage: ChatMessageType | GuestMessage,
+    newMessage: ChatMessageType & GuestMessage,
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
@@ -95,7 +95,7 @@ export const useMessage = create<MessageState>((set, get) => ({
     })),
   setMoreMessagesToConversation: (
     conversationId: string,
-    moreMessages: (ChatMessageType | GuestMessage)[],
+    moreMessages: (ChatMessageType & GuestMessage)[],
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
@@ -154,31 +154,12 @@ export const useMessage = create<MessageState>((set, get) => ({
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: false });
 
-        // const { data, error } = await supabase
-        // .from("messages")
-        // .select(
-        //   `
-        //     *,
-        //     user(name, email, image)
-        //   `
-        // )
-        // .range(0, LIMIT_MESSAGE)
-        // .eq("conversation_id", conversationId)
-        // .order("created_at", { ascending: false });
-
-        // const {data, error} = await supabase
-        // .from("messages")
-        // .select("*, user(name, email, image)")
-        // .range(0, LIMIT_MESSAGE)
-        // .eq("conversation_id", conversationId)
-        // .order("created_at", {ascending: false});
-
       if (error) {
         throw new Error(error.message);
       }
 
       if (data) {
-        const chatMessages: ChatMessageType[] = data.map((message) => ({
+        const chatMessages: (ChatMessageType & GuestMessage)[] = data.map((message) => ({
           id: message.id,
           createdAt: message.created_at,
           conversationId: message.conversation_id,
@@ -227,6 +208,8 @@ export const useMessage = create<MessageState>((set, get) => ({
       .range(0, LIMIT_MESSAGE)
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: false })
+
+      
 
       if(data){
         const chatMessages: (ChatMessageType | GuestMessage)[] = data.map((message) => ({

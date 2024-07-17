@@ -25,6 +25,7 @@ import { useEffect } from "react";
   const { fetchMessagesForGuest, fetchInitialMessages } = useMessage()
   if(!session) {
     void fetchMessagesForGuest(conversationId ?? "")
+    void fetchInitialMessages(conversationId ?? "")
   }
   else {
     void fetchInitialMessages(conversationId ?? "")

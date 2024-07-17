@@ -2,20 +2,27 @@ import { type GuestMessageType, type MessageType, type User } from "@/server/db/
 import { type GuestMessage, type ChatMessageType } from "@/utils/store/messages";
 
 export type MessageGroup = {
-  user: Pick<User, "name" | "email" | "image" | "id"> | null;
-  messages: (MessageType | GuestMessageType )[];
+  user: (Pick<User, "name" | "email" | "image" | "id">) & {
+    conversationId: string;
+    userToken: string | null;
+    adminId: string;
+} | null;
+  messages: (MessageType & GuestMessageType )[];
 };
 
 // groups messages made by the same user with <2 mins in between
 
+function isBasicUser(user: Pick<User, "name" | "email" | "image" | "id">): user is Pick<User, "name" | "email" | "image" | "id"> {
+  return user && "id" in user && "email" in user;
+}
+
 export function groupMessages(
   messages: {
-    message: ChatMessageType | GuestMessage;
-    user: MessageGroup["user"] | null;
+    message: ChatMessageType & GuestMessage;
+    user: MessageGroup["user"] ;
   }[],
 ) {
   const groups: MessageGroup[] = [];
-  console.log("I dont understand whats going on")
 
   messages.forEach(({ message, user }) => {
     const lastGroup = groups[groups.length - 1];

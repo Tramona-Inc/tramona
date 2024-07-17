@@ -12,7 +12,7 @@ import { Input } from "../ui/input";
 
 import { api } from "@/utils/api";
 import { sub } from "date-fns";
-
+import { useChatWithAdmin } from'@/utils/useChatWithAdmin'
 const formSchema = z.object({
   message: z.string().refine((data) => data.trim() !== ""),
 });
@@ -57,12 +57,12 @@ export default function ChatInput({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
+
       const newMessage: ChatMessageType = {
         id: nanoid(),
         createdAt: new Date().toISOString(),
         conversationId: conversationId,
         userId: session.user.id,
-        userToken: "",
         message: values.message,
         read: false,
         isEdit: false,
@@ -73,7 +73,6 @@ export default function ChatInput({
         created_at: new Date().toISOString(),
         conversation_id: conversationId,
         user_id: newMessage.userId,
-        userToken: newMessage.userToken,
         message: newMessage.message,
         read: newMessage.read,
         is_edit: newMessage.isEdit,
@@ -84,6 +83,7 @@ export default function ChatInput({
       setOptimisticIds(newMessage.id);
 
       form.reset();
+
 
       // ! Optimistic UI first then add to db
       const { error } = await supabase
