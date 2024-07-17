@@ -8,7 +8,8 @@ import Link from "next/link";
 import { getDiscountPercentage } from "@/utils/utils";
 import { useEffect, useRef, useState } from "react";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import html2canvas from "html2canvas";
+import Confetti from "react-confetti";
+import exportAsImage from "@/utils/exportAsImage";
 
 export default function SuccessfulBidDialog({
   open,
@@ -19,40 +20,12 @@ export default function SuccessfulBidDialog({
   setOpen: (o: boolean) => void;
   offer: any;
 }) {
-
-  useEffect(() => {
-    console.log('ConfirmationDialog rendered with props:', { open, offer });
-  }, [open, offer]);
-
+  const dialogRef = useRef<HTMLDivElement>(null);
   if (!offer) return null;
-  // const handleShare = async () => {
-  //   if (dialogRef.current) {
-  //     const canvas = await html2canvas(dialogRef.current, {
-  //       ignoreElements: (element) => element.tagName === "BUTTON",
-  //     });
-  //     const image = canvas.toDataURL("image/png");
-
-  //     const shareData = {
-  //       title: "Tramona Bid Win",
-  //       text: `We won our bid on Tramona, we're going to ${property?.address}!`,
-  //       files: [
-  //         new File([await (await fetch(image)).blob()], "dialog.png", {
-  //           type: "image/png",
-  //         }),
-  //       ],
-  //     };
-
-  //     try {
-  //       await navigator.share(shareData);
-  //     } catch (error) {
-  //       console.error("Error sharing", error);
-  //     }
-  //   }
-  // };
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogContent>
+      <DialogContent ref={dialogRef}>
         <div className="space-y-4 text-center">
           <div className="mt-3 md:mt-9 relative">
             <h1 className="text-9xl font-magazine flex-col font-medium relative z-10">
@@ -73,17 +46,21 @@ export default function SuccessfulBidDialog({
           {/* <p className="font-medium">Your trip to <span className="font-extrabold">Paris</span> from June 22nd - June 28th is confirmed.</p> */}
           {offer && (
             <p className="font-medium">
-              Your trip to <span className="font-extrabold">${offer.request.location}</span> from {`${formatDateMonthDay(offer.checkIn)} - ${formatDateMonthDay(offer.checkOut)} is confirmed.`}
+              Your trip to <span className="font-extrabold">{offer.property.city}</span> from {`${formatDateMonthDay(offer.checkIn)} - ${formatDateMonthDay(offer.checkOut)} is confirmed.`}
             </p>
           )}
           <div className="md:py-5">
             <Link href="/my-trips">
-              <Button variant="greenPrimary" className="w-full px-10 py-6 sm:w-auto rounded-full text-lg">
+              <Button variant="greenPrimary" className="w-full px-10 py-6 sm:w-auto rounded-full text-lg" onClick={() => {if (dialogRef.current) exportAsImage(dialogRef.current, `tramona-booking-${offer.property.city}`)}}>
                 Share
               </Button>
             </Link>
           </div>
         </div>
+
+        <div className="z-100 pointer-events-none fixed inset-0">
+            <Confetti width={window.innerWidth} recycle={false} />
+          </div>
       </DialogContent>
     </Dialog>
   );
