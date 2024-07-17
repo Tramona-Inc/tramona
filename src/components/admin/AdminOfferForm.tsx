@@ -39,7 +39,10 @@ import axios from "axios";
 import ErrorMsg from "../ui/ErrorMsg";
 import { parseListingUrl, zodListingUrl } from "@/utils/listing-sites";
 import { useZodForm } from "@/utils/useZodForm";
-import { stringifyBedsInRooms, zodBedsInRooms } from "@/utils/zodBedsInRooms";
+import {
+  stringifyRoomsWithBeds,
+  zodRoomsWithBedsParser,
+} from "@/utils/zodRoomsWithBeds";
 
 const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
@@ -59,7 +62,7 @@ const formSchema = z.object({
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
   numBathrooms: zodInteger({ min: 1 }),
-  bedsInRooms: zodString(),
+  roomsWithBeds: zodString(),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
   checkInDate: optional(zodString()),
   checkOutDate: optional(zodString()),
@@ -77,16 +80,15 @@ const formSchema = z.object({
   checkOutTime: optional(zodTime),
   cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
-  reviews: optional(
-    z
-      .object({
-        profilePic: zodUrl(),
-        name: zodString(),
-        review: zodString({ maxLen: Infinity }),
-        rating: zodInteger({ min: 1, max: 5 }),
-      })
-      .array(),
-  ),
+  reviews: z
+    .object({
+      profilePic: zodUrl(),
+      name: zodString(),
+      review: zodString({ maxLen: Infinity }),
+      rating: zodInteger({ min: 1, max: 5 }),
+    })
+    .array(),
+
   // mapScreenshot: optional(zodString()),
 });
 
@@ -151,8 +153,8 @@ export default function AdminOfferForm({
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
             reviews: offer.property.reviews,
-            bedsInRooms: offer.property.bedsInRooms
-              ? stringifyBedsInRooms(offer.property.bedsInRooms)
+            roomsWithBeds: offer.property.roomsWithBeds
+              ? stringifyRoomsWithBeds(offer.property.roomsWithBeds)
               : undefined,
           }
         : {}),
@@ -185,15 +187,15 @@ export default function AdminOfferForm({
   const getMembersMutation = api.groups.getGroupMembers.useMutation();
 
   const onSubmit = form.handleSubmit(async (data) => {
-    const res = zodBedsInRooms.safeParse(data.bedsInRooms);
+    const res = zodRoomsWithBedsParser.safeParse(data.roomsWithBeds);
     if (!res.success) {
-      form.setError("bedsInRooms", {
+      form.setError("roomsWithBeds", {
         message: res.error.issues[0]!.message,
       });
       return;
     }
 
-    const bedsInRooms = res.data;
+    const roomsWithBeds = res.data;
 
     let url: string | null = null;
 
@@ -237,7 +239,7 @@ export default function AdminOfferForm({
 
       originalListingSite: originalListing?.Site.siteName,
       originalListingId: originalListing?.listingId,
-      bedsInRooms,
+      roomsWithBeds,
     };
 
     // if offer wasnt null then this is an "update offer" form
@@ -251,12 +253,10 @@ export default function AdminOfferForm({
         tramonaFee: data.tramonaFee * 100,
       };
 
-      if (propertyData.reviews) {
-        await createReviewsMutation.mutateAsync({
-          reviews: propertyData.reviews,
-          propertyId: offer.property.id,
-        });
-      }
+      await createReviewsMutation.mutateAsync({
+        reviews: propertyData.reviews,
+        propertyId: offer.property.id,
+      });
 
       await Promise.all([
         updatePropertyMutation.mutateAsync({
@@ -289,12 +289,10 @@ export default function AdminOfferForm({
         groupId: request?.madeByGroupId,
       };
 
-      if (propertyData.reviews) {
-        await createReviewsMutation.mutateAsync({
-          reviews: propertyData.reviews,
-          propertyId,
-        });
-      }
+      await createReviewsMutation.mutateAsync({
+        reviews: propertyData.reviews,
+        propertyId,
+      });
 
       await createOfferMutation.mutateAsync(newOffer).catch(() => errorToast());
     }
@@ -584,7 +582,7 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
-          name="bedsInRooms"
+          name="roomsWithBeds"
           render={({ field }) => (
             <FormItem className="col-span-full">
               <FormLabel>Beds in Rooms</FormLabel>

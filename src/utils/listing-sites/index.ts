@@ -3,6 +3,7 @@ import { zodUrl } from "../zod-utils";
 import { Airbnb } from "./Airbnb";
 import { BookingDotCom } from "./BookingDotCom";
 import { Vrbo } from "./Vrbo";
+import { type Property } from "@/server/db/schema";
 
 export type ListingSiteUrlParams = {
   checkIn?: Date;
@@ -10,17 +11,23 @@ export type ListingSiteUrlParams = {
   numGuests: number;
 };
 
-export type ListingSite<TSiteName extends string> = {
+export type OriginalListing<
+  TSiteName extends ListingSiteName = ListingSiteName,
+> = {
+  readonly id: string;
+  readonly site: ListingSite<TSiteName>;
+
+  getListingUrl(params: ListingSiteUrlParams): string;
+  getReviewsUrl(params: ListingSiteUrlParams): string;
+  getCheckoutUrl(params: ListingSiteUrlParams): string;
+};
+
+export type ListingSite<TSiteName extends ListingSiteName> = {
   readonly siteName: TSiteName;
   readonly baseUrl: string;
   readonly parseId: (url: string) => string | undefined;
 
-  createListing: (id: string) => {
-    readonly id: string;
-    getListingUrl(params: ListingSiteUrlParams): string;
-    getReviewsUrl(params: ListingSiteUrlParams): string;
-    getCheckoutUrl(params: ListingSiteUrlParams): string;
-  };
+  createListing: (id: string) => OriginalListing<TSiteName>;
 };
 
 const ALL_LISTING_SITES = [Airbnb, BookingDotCom, Vrbo] as const;
@@ -33,7 +40,7 @@ export const ALL_LISTING_SITE_NAMES = [
 
 type ListingSiteName = (typeof ALL_LISTING_SITE_NAMES)[number];
 
-function getSiteURLParser<TSiteName extends string>(
+function getSiteURLParser<TSiteName extends ListingSiteName>(
   Site: ListingSite<TSiteName>,
 ) {
   return zodUrl()
@@ -60,7 +67,7 @@ export const zodListingUrl = zodUrl().pipe(
     ),
 );
 
-// to ensure that this will work
+// to ensure that this will work without erroring
 export function parseListingUrl(url: string) {
   return z
     .union([
@@ -78,11 +85,18 @@ export function createListing({
   id: string;
   siteName: ListingSiteName;
 }) {
-  const Site = {
-    [Airbnb.siteName]: Airbnb,
-    [BookingDotCom.siteName]: BookingDotCom,
-    [Vrbo.siteName]: Vrbo,
-  }[siteName];
-
+  const Site = ALL_LISTING_SITES.find((Site) => Site.siteName === siteName)!;
   return Site.createListing(id);
+}
+
+export function getOriginalListing(
+  property: Pick<Property, "originalListingId" | "originalListingSite">,
+) {
+  if (!property.originalListingSite || !property.originalListingId) {
+    return null;
+  }
+  return createListing({
+    id: property.originalListingId,
+    siteName: property.originalListingSite,
+  });
 }

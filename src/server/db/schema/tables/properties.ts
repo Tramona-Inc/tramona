@@ -242,7 +242,23 @@ export const ALL_BED_TYPES = [
 
 export type BedType = (typeof ALL_BED_TYPES)[number];
 
-export type BedsInRooms = { type: BedType; count: number }[][];
+export const roomsWithBedsSchema = z.array(
+  z.object({
+    name: z.string().trim().min(1, { message: "Room name cannot be empty" }),
+    beds: z.array(
+      z.object({
+        count: z.number().int().positive(),
+        type: z.enum(ALL_BED_TYPES, {
+          errorMap: (_, ctx) => ({
+            message: `Unsupported bed type "${ctx.data}"`,
+          }),
+        }),
+      }),
+    ),
+  }),
+);
+
+export type RoomWithBeds = z.infer<typeof roomsWithBedsSchema.element>;
 
 export const properties = pgTable(
   "properties",
@@ -255,8 +271,7 @@ export const properties = pgTable(
     originalListingSite: listingSiteEnum("original_listing_site"),
     originalListingId: varchar("original_listing_id"),
 
-    bedsInRooms: jsonb("beds_in_rooms").$type<BedsInRooms>(),
-
+    roomsWithBeds: jsonb("rooms_with_beds").$type<RoomWithBeds[]>(),
     propertyType: propertyTypeEnum("property_type").notNull(),
     roomType: propertyRoomTypeEnum("room_type")
       .notNull()
@@ -272,6 +287,8 @@ export const properties = pgTable(
     // for when blake/preju manually upload, otherwise get the host's name via hostId
     hostName: varchar("host_name", { length: 255 }),
     hostProfilePic: varchar("host_profile_pic"),
+    hostNumReviews: integer("host_num_reviews"),
+    hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
     latitude: doublePrecision("latitude").notNull(),
@@ -346,6 +363,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   otherAmenities: z.array(z.string()),
   checkInTime: zodTime,
   checkOutTime: zodTime,
+  roomsWithBeds: roomsWithBedsSchema,
 });
 
 // make everything except id optional

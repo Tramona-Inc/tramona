@@ -14,6 +14,7 @@ export const Vrbo: ListingSite<"Vrbo"> = {
   createListing(id) {
     return {
       id,
+      site: this,
 
       getListingUrl(params) {
         const { checkIn, checkOut, numGuests } = params;

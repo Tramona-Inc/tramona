@@ -14,6 +14,7 @@ export const BookingDotCom: ListingSite<"Booking.com"> = {
   createListing(id) {
     return {
       id,
+      site: this,
 
       getListingUrl(params) {
         const { checkIn, checkOut, numGuests } = params;
