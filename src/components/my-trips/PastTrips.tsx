@@ -9,7 +9,7 @@ export default function PastTrips({ pastTrips }: { pastTrips: TripCardDetails[] 
 
   return pastTrips.length !== 0 ? (
     <div className="grid grid-cols-1 gap-4 pt-8 xl:grid-cols-2">
-      {pastTrips.map((trip: any) => (
+      {pastTrips.map((trip) => (
         <PastTripCard key={trip.id} trip={trip} />
       ))}
     </div>

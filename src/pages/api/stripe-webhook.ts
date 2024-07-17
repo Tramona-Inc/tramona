@@ -19,7 +19,6 @@ import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { createSSEConnection } from "./sse";
 
 // ! Necessary for stripe
 export const config = {
@@ -121,8 +120,6 @@ export default async function webhook(
                     offerId: offer.id,
                   });
                 }
-                // Trigger SSE to send offer data to client
-                createSSEConnection(1, offer);
               }
             }
           } else {

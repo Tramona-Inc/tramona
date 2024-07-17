@@ -9,7 +9,7 @@ export default function UpcomingTrips({upcomingTrips}: {upcomingTrips: TripCardD
 
   return upcomingTrips.length > 0 ? (
     <div className="grid grid-cols-1 gap-4 pt-8 xl:grid-cols-2">
-      {upcomingTrips.map((trip: any) => (
+      {upcomingTrips.map((trip) => (
         <UpcomingTripCard key={trip.id} trip={trip} />
       ))}
     </div>
