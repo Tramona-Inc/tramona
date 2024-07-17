@@ -8,7 +8,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ALL_PROPERTY_TYPES, type Request } from "@/server/db/schema";
+import {
+  ALL_BED_TYPES,
+  ALL_PROPERTY_TYPES,
+  type Request,
+} from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
 import { capitalize, plural } from "@/utils/utils";
@@ -20,6 +24,7 @@ import {
   zodUrl,
 } from "@/utils/zod-utils";
 import { useState } from "react";
+import { useFieldArray } from "react-hook-form";
 import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { type OfferWithProperty } from "../requests/[id]/OfferCard";
@@ -73,6 +78,7 @@ const formSchema = z.object({
   amenities: z.string().transform((s) => s.split("\n").map((s) => s.trim())),
   about: zodString({ maxLen: Infinity }),
   originalListingUrl: optional(zodListingUrl),
+  originalListingUrl: optional(zodListingUrl),
   airbnbMessageUrl: optional(zodUrl()),
   tramonaFee: zodNumber({ min: 0 }),
   checkInInfo: optional(zodString()),
@@ -112,6 +118,8 @@ export default function AdminOfferForm({
 
   const form = useZodForm({
     schema: formSchema,
+  const form = useZodForm({
+    schema: formSchema,
     defaultValues: {
       imageUrls: [
         { value: "" },
@@ -137,6 +145,7 @@ export default function AdminOfferForm({
             propertyType: offer.property.propertyType,
             avgRating: offer.property.avgRating,
             numRatings: offer.property.numRatings,
+            amenities: offer.property.amenities.join("\n"),
             amenities: offer.property.amenities.join("\n"),
             about: offer.property.about,
             airbnbUrl: offer.property.airbnbUrl ?? undefined,
@@ -219,6 +228,11 @@ export default function AdminOfferForm({
     const totalPrice = Math.round(
       data.offeredNightlyPriceUSD * numberOfNights * 100,
     );
+
+    const originalListing =
+      propertyData.originalListingUrl !== undefined
+        ? parseListingUrl(propertyData.originalListingUrl)
+        : undefined;
 
     const originalListing =
       propertyData.originalListingUrl !== undefined
@@ -333,6 +347,7 @@ export default function AdminOfferForm({
 
     afterSubmit?.();
   });
+  });
 
   const defaultNightlyPrice = 0;
   const [nightlyPrice, setNightlyPrice] = useState(
@@ -346,7 +361,9 @@ export default function AdminOfferForm({
     <Form {...form}>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
       {/* {JSON.stringify(form.formState.errors, null, 2)} */}
+      {/* {JSON.stringify(form.formState.errors, null, 2)} */}
       <form
+        onSubmit={onSubmit}
         onSubmit={onSubmit}
         className="grid grid-cols-1 gap-4 md:grid-cols-2"
       >
@@ -370,6 +387,20 @@ export default function AdminOfferForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Host name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="hostProfilePic"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Host profile picture</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -671,6 +702,23 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="originalListingUrl"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Original Listing URL</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  inputMode="url"
+                  placeholder="Leave blank for direct listings"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -685,6 +733,7 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
+
 
         <FormField
           control={form.control}

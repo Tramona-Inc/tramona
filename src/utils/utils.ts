@@ -144,22 +144,29 @@ export function getElapsedTime(createdAt: Date): string {
   const diffInSeconds = Math.floor(
     (now.getTime() - createdAt.getTime()) / 1000,
   );
+  const diffInSeconds = Math.floor(
+    (now.getTime() - createdAt.getTime()) / 1000,
+  );
 
   if (diffInSeconds < 60) {
+    return `${diffInSeconds} second${diffInSeconds !== 1 ? "s" : ""} ago`;
     return `${diffInSeconds} second${diffInSeconds !== 1 ? "s" : ""} ago`;
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
     return `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""} ago`;
+    return `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""} ago`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
     return `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
+    return `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
   return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
 }
 
@@ -210,15 +217,21 @@ export function formatArrayToString(
   arr: string[],
   { junction }: { junction: "and" | "or" } = { junction: "and" },
 ) {
+export function formatArrayToString(
+  arr: string[],
+  { junction }: { junction: "and" | "or" } = { junction: "and" },
+) {
   if (arr.length === 0) {
     return "";
   } else if (arr.length === 1) {
     return arr[0]!;
   } else if (arr.length === 2) {
     return `${arr[0]} ${junction} ${arr[1]}`;
+    return `${arr[0]} ${junction} ${arr[1]}`;
   } else {
     const lastItem = arr.pop();
     const joinedItems = arr.join(", ");
+    return `${joinedItems}, ${junction} ${lastItem}`;
     return `${joinedItems}, ${junction} ${lastItem}`;
   }
 }
