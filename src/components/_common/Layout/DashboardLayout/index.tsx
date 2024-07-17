@@ -16,7 +16,6 @@ export default function DashboardLayout({
 }: DashboardLayoutProps) {
   const { data: session } = useSession();
   const isMd = useIsMd();
-
   return (
     <>
       <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
