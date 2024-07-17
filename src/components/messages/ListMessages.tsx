@@ -184,15 +184,15 @@ export default function ListMessages({
     .reverse()
     .map((message) => {
       // Display message with user
-      if (!participants || !guest_participants || !session) return null;
+      if ((!participants && !guest_participants) || !session) return null;
       if (isChatMessage(message) && message.userId === session.user.id) {
         return { message, user: session.user };
       }
 
       const user =
-        participants.find(
+        participants?.find(
           (participant) => isChatMessage(message) && participant?.id === message.userId,
-        ) ?? guest_participants.find(
+        ) ?? guest_participants?.find(
           (participant) => participant.userToken === message.userToken
         ) ?? null; // null means its a deleted user
 
