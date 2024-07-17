@@ -16,7 +16,6 @@ import { HandshakeIcon } from "lucide-react";
 import Link from "next/link";
 
 import { MapPinIcon } from "lucide-react";
-import { type Request } from "@/server/db/schema";
 
 interface CityData {
   city: string;
@@ -31,14 +30,13 @@ export default function HostRequestsLayout({
 }: React.PropsWithChildren) {
   const { data: properties } =
     api.properties.getHostPropertiesWithRequests.useQuery();
-  const citiesTotal = properties ? properties.length : 0;
+  // const citiesTotal = properties ? properties.length : 0;
 
   return (
     <div className="flex">
       <ScrollArea className="sticky inset-y-0 h-screen-minus-header w-80 border-r bg-white px-4 py-8">
         <div className="pb-4">
           <h1 className="text-3xl font-bold">Requests</h1>
-          {/* add this back when we add back bids, otherwise it looks stupid */}
           {/* <div className="flex flex-row gap-2 mt-4">
             <Button variant={"secondaryLight"} className="rounded-full">
               Cities {citiesTotal}

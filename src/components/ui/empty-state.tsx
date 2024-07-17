@@ -10,7 +10,10 @@ const EmptyState = React.forwardRef<
 >(({ className, icon: Icon, children, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col items-center justify-center", className)}
+    className={cn(
+      "flex flex-col items-center justify-center text-center",
+      className,
+    )}
     {...props}
   >
     <div className="rounded-full bg-zinc-200 p-4 text-zinc-600">
