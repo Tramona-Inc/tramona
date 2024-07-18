@@ -4,7 +4,7 @@ import OfferPage from "@/components/offers/OfferPage";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
-import { ArrowLeftIcon, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -18,16 +18,12 @@ import { offers } from "@/server/db/schema/tables/offers";
 import { requests } from "@/server/db/schema/tables/requests";
 import { and, eq } from "drizzle-orm";
 
-import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
-import { useMediaQuery } from "@uidotdev/usehooks";
-import MobileOfferPage from "@/components/offers/MobileOfferPage";
-
 type PageProps = {
-  offer: OfferWithDetails; // Replace with a more specific type if you have one
+  offer: OfferWithDetails;
   serverRequestId: number;
   serverFirstImage: string;
   serverFirstPropertyName: string;
-  serverRequestLocation: string; // Ensure this is a plain string
+  serverRequestLocation: string;
   baseUrl: string;
 };
 
@@ -41,11 +37,6 @@ function Page({
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
   const [selectedOfferId, setSelectedOfferId] = useState("");
-  const [applyOverflowHidden, setApplyOverflowHidden] = useState(false);
-  const [mapCenter, setMapCenter] = useState({
-    lat: 37.774929,
-    lng: -122.419416,
-  }); // Default center
 
   const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery(
     { id: requestId },
@@ -53,16 +44,6 @@ function Page({
       enabled: router.isReady,
     },
   );
-
-  useEffect(() => {
-    const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
-    if (offer?.property.longitude && offer.property.latitude) {
-      setMapCenter({
-        lat: offer.property.latitude,
-        lng: offer.property.longitude,
-      });
-    }
-  }, [selectedOfferId, offers]);
 
   const [effectHasRun, setEffectHasRun] = useState(false);
 
@@ -141,7 +122,7 @@ function Page({
                 </div>
                 {offers.map((offer) => (
                   <TabsContent key={offer.id} value={`${offer.id}`}>
-                    <OfferPage offer={offer} mapCenter={mapCenter} />
+                    <OfferPage offer={offer} />
                   </TabsContent>
                 ))}
               </Tabs>

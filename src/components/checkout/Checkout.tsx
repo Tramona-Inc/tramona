@@ -6,20 +6,15 @@ import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
 
-import {
-  cn,
-  formatCurrency,
-  getDiscountPercentage,
-  getNumNights,
-} from "@/utils/utils";
+import { getDiscountPercentage, getNumNights } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
-import { TAX_PERCENTAGE } from "@/utils/constants";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "../requests/StripePaymentInfo";
 import { useMediaQuery } from "../_utils/useMediaQuery";
 
 import CheckoutInfoForm from "./ContactInfoForm";
+import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -36,30 +31,6 @@ export default function Checkout({
     event.preventDefault();
     router.back();
   };
-
-  const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.totalPrice / numberOfNights;
-  const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
-  const total = offer.totalPrice + offer.tramonaFee + tax;
-
-  const items = [
-    {
-      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(offer.totalPrice)}`,
-    },
-    {
-      title: "Cleaning fee",
-      price: "Included",
-    },
-    {
-      title: "Tramona service fee",
-      price: `${formatCurrency(offer.tramonaFee)}`,
-    },
-    {
-      title: "Taxes",
-      price: `${formatCurrency(tax)}`,
-    },
-  ];
 
   function BestPriceCard() {
     return (
@@ -108,32 +79,35 @@ export default function Checkout({
     );
   }
 
-  function TermsAndSubmit() {
-    return (
-      <div className="md:mt-8">
-        <div className="mb-8 space-y-4 text-muted-foreground">
-          <p className="text-sm font-semibold leading-5">
-            On behalf of Tramona we ask that you please follow the house rules
-            and treat the house as if it were your own
-          </p>
-          <p className="px-2 text-xs md:px-0">
-            By selecting the button, I agree to the booking terms. I also agree
-            to the Terms of Service, Payment Terms of Service and I acknowledge
-            the Privacy Policy
-          </p>
-        </div>
-        <Button variant="greenPrimary" className="w-full font-semibold sm:my-2">
-          Confirm and pay
-        </Button>
-        <p className="my-4 text-center text-xs font-semibold text-muted-foreground md:my-0">
-          As soon as you book you will get an email and text confirmation with
-          all booking details
-        </p>
-      </div>
-    );
-  }
+  // function TermsAndSubmit() {
+  //   return (
+  //     <div className="md:mt-8">
+  //       <div className="mb-8 space-y-4 text-muted-foreground">
+  //         <p className="text-sm font-semibold leading-5">
+  //           On behalf of Tramona we ask that you please follow the house rules
+  //           and treat the house as if it were your own
+  //         </p>
+  //         <p className="px-2 text-xs md:px-0">
+  //           By selecting the button, I agree to the booking terms. I also agree
+  //           to the Terms of Service, Payment Terms of Service and I acknowledge
+  //           the Privacy Policy
+  //         </p>
+  //       </div>
+  //       <Button variant="greenPrimary" className="w-full font-semibold sm:my-2">
+  //         Confirm and pay
+  //       </Button>
+  //       <p className="my-4 text-center text-xs font-semibold text-muted-foreground md:my-0">
+  //         As soon as you book you will get an email and text confirmation with
+  //         all booking details
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   function CheckoutSummary() {
+    const nightlyPrice =
+      offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
+
     return (
       <div>
         <div className="md:rounded-t-xl md:border md:border-b-0 md:p-3">
@@ -174,24 +148,7 @@ export default function Checkout({
             </div>
             <Separator className="my-4" />
           </div>
-          <div className="space-y-4">
-            {items.map((item, index) => (
-              <div
-                className="flex items-center justify-between text-sm font-semibold"
-                key={index}
-              >
-                <p className={cn(index !== 3 && "underline")}>{item.title}</p>
-                <p>{item.price}</p>
-              </div>
-            ))}
-          </div>
-          <div className="hidden md:block">
-            <Separator className="my-4" />
-          </div>
-          <div className="my-4 flex items-center justify-between text-sm font-bold md:my-0 md:font-semibold">
-            <p>Total (USD)</p>
-            <p>{formatCurrency(total)}</p>
-          </div>
+          <OfferPriceDetails offer={offer} />
         </div>
         <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
           <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">

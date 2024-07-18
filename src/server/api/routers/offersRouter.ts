@@ -155,15 +155,6 @@ export const offersRouter = createTRPCRouter({
 
       return await ctx.db.query.offers.findMany({
         where: eq(offers.requestId, input.id),
-        columns: {
-          createdAt: true,
-          totalPrice: true,
-          acceptedAt: true,
-          tramonaFee: true,
-          checkIn: true,
-          checkOut: true,
-          id: true,
-        },
         with: {
           request: {
             with: {

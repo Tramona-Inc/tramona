@@ -30,7 +30,6 @@ import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 import { Card, CardContent } from "../ui/card";
-import { OfferPriceDetails } from "../requests/Checkout";
 import { getOriginalListing } from "@/utils/listing-sites";
 import { PropertyCompareBtn } from "./PropertyCompareBtn";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
@@ -41,6 +40,7 @@ import {
   PetsRule,
   SmokingRule,
 } from "./HouseRules";
+import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
