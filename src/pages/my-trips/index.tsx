@@ -6,13 +6,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BriefcaseIcon, HistoryIcon } from "lucide-react";
 import SuccessfulBookingDialog from "@/components/my-trips/SuccessfulBookingDialog";
 import { useEffect, useState } from "react";
-import { api } from "@/utils/api";
+import { api, RouterOutputs } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
-
+import { Trip } from "@/server/db/schema";
+export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
 export default function MyTrips() {
+  // booking and trip are the same thing
   const [open, setOpen] = useState(false);
-  const [booking, setBooking] = useState<any | null>(null);
+  const [booking, setBooking] = useState<TripCardDetails | null>(null);
   const { data: allTrips } = api.trips.getMyTrips.useQuery();
 
   const upcomingTrips = allTrips ? allTrips.filter((trip) => trip.checkIn > new Date()) : [];
@@ -24,7 +26,7 @@ export default function MyTrips() {
       const mostRecentBooking = upcomingTrips[upcomingTrips.length - 1];
       const bookingTime = new Date(mostRecentBooking!.createdAt).getTime();
       const currentTime = new Date().getTime();
-      if (currentTime - bookingTime < 15000) { // 15 seconds
+      if (mostRecentBooking && currentTime - bookingTime < 15000) { // 15 seconds
         setBooking(mostRecentBooking);
         setOpen(true);
       }
@@ -36,7 +38,7 @@ export default function MyTrips() {
       <Head>
         <title>My Trips | Tramona</title>
       </Head>
-      <SuccessfulBookingDialog open={open} setOpen={setOpen} offer={booking}/>
+      <SuccessfulBookingDialog open={open} setOpen={setOpen} booking={booking}/>
 
       <div className="container col-span-10 flex flex-col gap-10 py-10 pb-32 2xl:col-span-11">
         <h1 className="text-4xl font-bold">My Trips</h1>

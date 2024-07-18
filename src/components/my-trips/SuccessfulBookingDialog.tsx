@@ -10,18 +10,20 @@ import { useEffect, useRef, useState } from "react";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import Confetti from "react-confetti";
 import exportAsImage from "@/utils/exportAsImage";
+import { Trip } from "@/server/db/schema";
+import { TripCardDetails } from "@/pages/my-trips";
 
 export default function SuccessfulBidDialog({
   open,
   setOpen,
-  offer,
+  booking,
 }: {
   open: boolean;
   setOpen: (o: boolean) => void;
-  offer: any;
+  booking: TripCardDetails | null;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  if (!offer) return null;
+  if (!booking) return null;
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
@@ -34,7 +36,7 @@ export default function SuccessfulBidDialog({
             </h1>
             <div className="flex overflow-hidden rounded-2xl mt-[-2.5rem] justify-center">
               <div className="relative block aspect-square overflow-clip rounded-xl w-64">
-                <Image src={ offer?.property?.imageUrls[0] }  // ?? "https://lh3.googleusercontent.com/p/AF1QipPJT4-Ym5fEQ-sOnwe_fc_vLprgF4PPBe1tRqGn=s1360-w1360-h1020"
+                <Image src={ booking?.property?.imageUrls[0]! }  
                   alt="" layout="fill" objectFit="cover"
                 />
               </div>
@@ -44,14 +46,14 @@ export default function SuccessfulBidDialog({
             Congrats on booking your trip!
           </h3>
           {/* <p className="font-medium">Your trip to <span className="font-extrabold">Paris</span> from June 22nd - June 28th is confirmed.</p> */}
-          {offer && (
+          {booking && (
             <p className="font-medium">
-              Your trip to <span className="font-extrabold">{offer.property.city}</span> from {`${formatDateMonthDay(offer.checkIn)} - ${formatDateMonthDay(offer.checkOut)} is confirmed.`}
+              Your trip to <span className="font-extrabold">{booking.property.city}</span> from {`${formatDateMonthDay(booking.checkIn)} - ${formatDateMonthDay(booking.checkOut)} is confirmed.`}
             </p>
           )}
           <div className="md:py-5">
             <Link href="/my-trips">
-              <Button variant="greenPrimary" className="w-full px-10 py-6 sm:w-auto rounded-full text-lg" onClick={() => {if (dialogRef.current) exportAsImage(dialogRef.current, `tramona-booking-${offer.property.city}`)}}>
+              <Button variant="greenPrimary" className="w-full px-10 py-6 sm:w-auto rounded-full text-lg" onClick={() => {if (dialogRef.current) exportAsImage(dialogRef.current, `tramona-booking-${booking.property.city}`)}}>
                 Share
               </Button>
             </Link>
