@@ -3,8 +3,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CircleCheckBig, Sparkles } from "lucide-react";
 import Confetti from "react-confetti";
 import Link from "next/link";
-import type { CityRequestForm } from "@/components/landing-page/SearchBars/useCityRequestForm";
 import RequestEmailInvitation from "./RequestEmaiInvitation";
+import type { CityRequestForm } from "@/components/landing-page/SearchBars/useCityRequestForm";
+import type { LinkRequestForm } from "@/components/landing-page/SearchBars/useLinkRequestForm";
 
 export type FormValues = {
   data: {
@@ -26,12 +27,18 @@ export type FormValues = {
 interface RequestSubmittedDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  form: CityRequestForm;
+  form: CityRequestForm | LinkRequestForm;
   curTab: number;
   showConfetti: boolean;
   inviteLink: string | null;
   handleInvite: (emails: string[]) => void;
   isLoading: boolean;
+}
+
+function isCityRequestForm(
+  form: CityRequestForm | LinkRequestForm,
+): form is CityRequestForm {
+  return "citySpecificProperty" in form; // Example property unique to CityRequestForm
 }
 
 const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
@@ -44,8 +51,11 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   handleInvite,
   isLoading,
 }) => {
-  const formData = form.getValues("data");
-  const location = formData[curTab]?.location;
+  // Watch the specific data entry for the current tab
+  const formData = form.watch(`data.${curTab}`);
+  const isCityForm = isCityRequestForm(form);
+  // Now we can directly access location or use a fallback
+  const location = isCityForm && formData ? formData.location : undefined;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -54,9 +64,15 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
           <CircleCheckBig color="#528456" className="mr-2" /> Request sent!
         </div>
         <p className="mb-4 ml-8">
-          We sent your request out to every host in <b>{location}</b>. In the
-          next 24 hours, hosts will send you properties that match your
-          requirements. To check out matches{" "}
+          {isCityForm ? (
+            <p>
+              We sent your request out to every host in <b>{location}</b>. In
+              the next 24 hours, hosts will send you properties that match your
+              requirements. To check out matches
+            </p>
+          ) : (
+            "Your link has been submitted, either we will get you that property or one just like it. Over the next 24 hours, hosts will reach out with properties that meet your criteria. To view your matches"
+          )}
           <Link
             href="/requests"
             className="font-semibold text-neutral-900 underline"
@@ -65,7 +81,7 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
           </Link>
           .
         </p>
-        <hr className="my-4 bg-[#D9D6D1]"></hr>
+        <hr className="my-4 bg-[#D9D6D1]" />
         <h1 className="text-xl font-bold">Want $0 fees on this trip?</h1>
         <p>
           Add your friends so they can see the matches and stay informed with

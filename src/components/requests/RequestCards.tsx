@@ -53,27 +53,23 @@ export function RequestCards({
     setTimeout(() => setIsWaiting(false), 3 * 60 * 1000); // 3 minutes
   }
 
-  useEffect(() => {
-    const firstRequest = requestGroups[0]?.requests[0];
+  // useEffect(() => {
+  //   const firstRequest = requestGroups[0]?.requests[0];
 
-    if (firstRequest) {
-      setSelectedRequest?.(firstRequest);
-    }
-  }, []);
+  //   if (firstRequest) {
+  //     setSelectedRequest?.(firstRequest);
+  //   }
+  // }, []);
 
-  return (
-    <div className="space-y-4">
-      {requestGroups.map(({ group: requestGroup, requests }) => (
-        <RequestGroupCards
-          key={requestGroup.id}
-          requestGroup={requestGroup}
-          requests={requests}
-          isWaiting={isWaiting}
-          startTimer={startTimer}
-          selectedRequest={selectedRequest}
-          setSelectedRequest={setSelectedRequest}
-        />
-      ))}
-    </div>
-  );
+  return requestGroups.map(({ group: requestGroup, requests }) => (
+    <RequestGroupCards
+      key={requestGroup.id}
+      requestGroup={requestGroup}
+      requests={requests}
+      isWaiting={isWaiting}
+      startTimer={startTimer}
+      // selectedRequest={selectedRequest}
+      // setSelectedRequest={setSelectedRequest}
+    />
+  ));
 }

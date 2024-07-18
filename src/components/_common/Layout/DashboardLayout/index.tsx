@@ -25,7 +25,7 @@ export default function DashboardLayout({
             <Sidebar type={type} />
           </aside>
         )}
-        <div className="lg:flex-1">
+        <div className="min-w-0 lg:flex-1">
           <main className="relative min-h-screen-minus-header">{children}</main>
           {session ? (
             <MobileNav type={type} />

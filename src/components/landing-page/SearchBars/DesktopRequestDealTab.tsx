@@ -14,21 +14,19 @@ import {
   CalendarIcon,
   DollarSignIcon,
   FilterIcon,
-  HomeIcon,
   Link2,
   MapPinIcon,
   Plus,
   Users2Icon,
 } from "lucide-react";
 import { useCityRequestForm } from "./useCityRequestForm";
+import { useLinkRequestForm } from "./useLinkRequestForm";
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import { toast } from "@/components/ui/use-toast";
-import { api } from "@/utils/api";
-import { TRPCError } from "@trpc/server";
-
+import { api, type RouterOutputs } from "@/utils/api";
 import { Separator } from "@/components/ui/separator";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
-import LoadingPropertyScrape from "./DesktopRequestComponents/LoadingPropertyScrape";
+import LinkConfirmation from "./LinkConfirmation";
 
 export type ScrapedProperty = {
   nightlyPrice: number;
@@ -39,23 +37,46 @@ export type ScrapedProperty = {
   cityName: string;
 };
 
+type ExtractURLType = RouterOutputs["misc"]["extractBookingDetails"];
+
 export function DesktopRequestDealTab() {
   const [curTab, setCurTab] = useState(0);
   const [open, setOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [madeByGroupIds, setMadeByGroupIds] = useState<number[]>([]);
+  const [madeByGroupId, setMadeByGroupId] = useState<number>();
   const [link, setLink] = useState(false);
   const [groupId, setGroupId] = useState<number | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [scrapedPropertyData, setScrapedPropertyData] = useState<
-    ScrapedProperty | undefined
-  >();
-  const [propertyName, setPropertyName] = useState<string | undefined>();
-  const [triggerScrape, setTriggerScrape] = useState(false);
-  const [scrapeLoading, setScrapeLoading] = useState(false);
 
-  const { form, onSubmit } = useCityRequestForm({ setCurTab, afterSubmit });
+  const [triggerExtract, setTriggerExtract] = useState(false);
+  const [openLinkConfirmationDialog, setOpenLinkConfirmationDialog] =
+    useState(false);
+  const [extractedLinkDataState, setExtractedLinkDataState] = useState<
+    ExtractURLType | undefined
+  >();
+  const [airbnbLink, setAirbnbLink] = useState<string | null>(null);
+  const handleSetOpen = (val: boolean) => {
+    setOpen(val);
+  };
+  const handleShowConfetti = (val: boolean) => {
+    setShowConfetti(val);
+  };
+
+  const cityForm = useCityRequestForm({
+    setCurTab,
+    afterSubmit,
+    handleSetOpen,
+    handleShowConfetti,
+  });
+  const linkForm = useLinkRequestForm({
+    setCurTab,
+    afterSubmit,
+    handleSetOpen,
+    handleShowConfetti,
+  });
+
+  const { form, onSubmit } = link ? linkForm : cityForm;
 
   const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
     { groupId: groupId! },
@@ -68,19 +89,17 @@ export function DesktopRequestDealTab() {
     }
   }, [inviteLinkQuery.data]);
 
-  function afterSubmit(madeByGroupIds?: number[]) {
-    if (madeByGroupIds !== undefined) {
-      setMadeByGroupIds(madeByGroupIds);
-      setGroupId(madeByGroupIds[0] ?? null);
+  function afterSubmit(madeByGroupId?: number) {
+    if (madeByGroupId !== undefined) {
+      setMadeByGroupId(madeByGroupId);
+      setGroupId(madeByGroupId);
     }
-    setOpen(true);
-    setShowConfetti(true);
   }
 
   const inviteUserByEmail = api.groups.inviteUserByEmail.useMutation();
 
   const handleInvite = async () => {
-    if (madeByGroupIds.length === 0) {
+    if (!madeByGroupId) {
       toast({ title: "Group IDs not available" });
       return;
     }
@@ -88,7 +107,7 @@ export function DesktopRequestDealTab() {
     setIsLoading(true);
     // try {
     //   for (const email of emails) {
-    //     for (const groupId of madeByGroupIds) {
+    //     for (const groupId of madeByGroupId) {
     //       if (email.length > 0) {
     //         await inviteUserByEmail.mutateAsync({ email, groupId });
     //       }
@@ -103,70 +122,67 @@ export function DesktopRequestDealTab() {
   };
 
   const handleAddLinkClick = () => {
-    setLink(!link);
+    setLink(true);
   };
 
   const handleCancelClick = () => {
-    setLink(!link);
-    form.setValue(`data.${curTab}.airbnbLink`, "");
+    setLink(false);
+    form.resetField(`data.${curTab}.airbnbLink`, { defaultValue: undefined });
   };
 
-  const handleScrapeClick = () => {
-    setScrapeLoading(true);
-    setTriggerScrape(true);
+  const handleExtractClick = () => {
+    setTriggerExtract(true);
+    setOpenLinkConfirmationDialog(true);
   };
 
-  // link scrape logic
-  const airbnbLink = form.getValues(`data.${curTab}.airbnbLink`);
-  const { data: scrapedProperty, refetch: refetchScrape } =
-    api.misc.scrapeUsingLink.useQuery(
-      { url: airbnbLink! },
-      {
-        enabled: false,
-        onSuccess: () => {
-          setScrapeLoading(false);
-          setTriggerScrape(false);
-        },
-        onError: (error) => {
-          setScrapeLoading(false);
-          setTriggerScrape(false);
-          toast({
-            variant: "destructive",
-            title: "Be sure it is a valid Airbnb property link.",
-            description: error.message || "An error occurred please try again.",
-          });
-        },
-      },
-    );
+  const airbnbLinkValue = form.watch(`data.${curTab}.airbnbLink`);
 
-  // Update form values when scraped property data is available
   useEffect(() => {
-    if (scrapedProperty && !(scrapedProperty instanceof TRPCError)) {
-      const roundedNightlyPrice =
-        Math.round(scrapedProperty.nightlyPrice * 100) / 100;
-      form.setValue(`data.${curTab}.maxNightlyPriceUSD`, roundedNightlyPrice);
-      form.setValue(`data.${curTab}.location`, scrapedProperty.cityName);
-      form.setValue(`data.${curTab}.numGuests`, scrapedProperty.numGuests);
+    setAirbnbLink(airbnbLinkValue);
+  }, [airbnbLinkValue, curTab]);
+
+  const {
+    data: extractUrlData,
+    refetch: extractURLRefetch,
+    isLoading: extractURLIsLoading,
+  } = api.misc.extractBookingDetails.useQuery(airbnbLink!, {
+    enabled: false,
+    onSuccess: (data) => {
+      form.setValue(`data.${curTab}.numGuests`, data.numOfGuests);
       form.setValue(`data.${curTab}.date`, {
-        from: scrapedProperty.checkIn,
-        to: scrapedProperty.checkOut,
+        from: new Date(data.checkIn),
+        to: new Date(data.checkOut),
       });
-      setPropertyName(scrapedProperty.propertyName);
-      setScrapedPropertyData(scrapedProperty);
-      console.log(scrapedPropertyData);
-    }
-  }, [scrapedProperty, scrapedPropertyData, curTab, form]);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error extracting booking details.",
+        description: error.message || "An error occurred, please try again.",
+      });
+    },
+  });
 
   useEffect(() => {
-    if (triggerScrape) {
-      refetchScrape().catch(() => {
+    if (triggerExtract) {
+      console.log("Airbnb link", airbnbLink);
+      extractURLRefetch().catch(() => {
         toast({
           variant: "destructive",
-          title: "We couldn't find that property. Please try another property.",
+          title:
+            "We couldn't extract the booking details. Please check the link.",
         });
       });
+      setTriggerExtract(false);
+      setExtractedLinkDataState(extractUrlData);
+      console.log(extractUrlData);
     }
-  }, [triggerScrape, refetchScrape]);
+  }, [triggerExtract, extractURLRefetch]);
+
+  useEffect(() => {
+    console.log("Form Errors:", form.formState.errors);
+    console.log("form", form.watch());
+  }, [form.formState.errors]);
 
   return (
     <>
@@ -176,104 +192,93 @@ export function DesktopRequestDealTab() {
           className="flex flex-col justify-between gap-y-4"
           key={curTab} // rerender on tab changes
         >
-          {scrapeLoading ? (
-            <LoadingPropertyScrape />
-          ) : (
-            <div
-              className={
-                link ? "pointer-events-none placeholder-black opacity-50" : ""
-              }
-            >
-              {link && (
-                <Input
-                  label="Property Name"
-                  value={propertyName}
-                  placeholder="Property name"
-                  icon={HomeIcon}
-                  variant="lpDesktop"
-                  className="pointer-events-none my-1 bg-white text-black"
-                />
+          <div
+            className={
+              link ? "pointer-events-none placeholder-black opacity-50" : ""
+            }
+          >
+            <PlacesInput
+              control={form.control}
+              name={`data.${curTab}.location`}
+              formLabel="Location"
+              variant="lpDesktop"
+              placeholder="Select a location"
+              icon={MapPinIcon}
+            />
+
+            <FormField
+              control={form.control}
+              name={`data.${curTab}.date`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <DateRangeInput
+                      {...field}
+                      label="Check in/out"
+                      icon={CalendarIcon}
+                      variant="lpDesktop"
+                      disablePast
+                      className="bg-white"
+                      onChange={(value) => field.onChange(value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-              <PlacesInput
-                control={form.control}
-                name={`data.${curTab}.location`}
-                formLabel="Location"
-                variant="lpDesktop"
-                placeholder="Select a location"
-                icon={MapPinIcon}
-              />
+            />
+            <FormField
+              control={form.control}
+              name={`data.${curTab}.numGuests`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      label="Guests"
+                      placeholder="Add guests"
+                      icon={Users2Icon}
+                      variant="lpDesktop"
+                      onChange={(e) => field.onChange(e)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`data.${curTab}.maxNightlyPriceUSD`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      label="Maximum nightly price"
+                      placeholder="Price per night"
+                      suffix="/night"
+                      icon={DollarSignIcon}
+                      variant="lpDesktop"
+                      onChange={(e) => field.onChange(e)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name={`data.${curTab}.date`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <DateRangeInput
-                        {...field}
-                        label="Check in/out"
-                        icon={CalendarIcon}
-                        variant="lpDesktop"
-                        disablePast
-                        className="bg-white"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`data.${curTab}.numGuests`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        label="Guests"
-                        placeholder="Add guests"
-                        icon={Users2Icon}
-                        variant="lpDesktop"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`data.${curTab}.maxNightlyPriceUSD`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        label="Maximum nightly price"
-                        placeholder="Price per night"
-                        suffix="/night"
-                        icon={DollarSignIcon}
-                        variant="lpDesktop"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex items-center gap-2 text-teal-900">
-                <CityRequestFiltersDialog form={form} curTab={curTab}>
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    className="px-2 text-teal-900 hover:bg-teal-900/15"
-                  >
-                    <FilterIcon />
-                    More filters
-                  </Button>
-                </CityRequestFiltersDialog>
-              </div>
+            <div className="flex items-center gap-2 text-teal-900">
+              <CityRequestFiltersDialog form={form} curTab={curTab}>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="px-2 text-teal-900 hover:bg-teal-900/15"
+                >
+                  <FilterIcon />
+                  More filters
+                </Button>
+              </CityRequestFiltersDialog>
             </div>
-          )}
+          </div>
           <div className="flex flex-row items-center justify-center gap-x-4 text-zinc-400">
             <Separator className="w-2/5 bg-zinc-400" />
             <p> or </p>
@@ -309,6 +314,7 @@ export function DesktopRequestDealTab() {
                             placeholder="Paste property link here (optional)"
                             className="w-full"
                             icon={Link2}
+                            onChange={(e) => field.onChange(e)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -316,16 +322,14 @@ export function DesktopRequestDealTab() {
                     )}
                   />
                 </div>
-                {!scrapeLoading && (
-                  <Button
-                    variant="greenPrimary"
-                    type="button"
-                    onClick={handleScrapeClick}
-                    className="font-bold"
-                  >
-                    Add
-                  </Button>
-                )}
+                <Button
+                  variant="greenPrimary"
+                  type="button"
+                  onClick={handleExtractClick}
+                  className="font-bold"
+                >
+                  Extract
+                </Button>
                 <Button
                   variant="link"
                   type="button"
@@ -341,13 +345,32 @@ export function DesktopRequestDealTab() {
             <Button
               type="submit"
               size="lg"
-              disabled={form.formState.isSubmitting}
-              className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
+              variant="greenPrimary"
+              // disabled={form.formState.isSubmitting}
+              className="mt-2"
             >
-              Submit Request
+              {!form.formState.isSubmitting
+                ? "Submit Request"
+                : "Submitting..."}
             </Button>
           </div>
         </form>
+
+        {openLinkConfirmationDialog && (
+          <LinkConfirmation
+            open={openLinkConfirmationDialog}
+            setOpen={setOpenLinkConfirmationDialog}
+            extractedLinkDataState={extractedLinkDataState}
+            extractIsLoading={extractURLIsLoading}
+            formControl={form.control}
+            formFields={{
+              checkIn: `data.${curTab}.date.from`,
+              checkOut: `data.${curTab}.date.to`,
+              numGuests: `data.${curTab}.numGuests`,
+            }}
+            onSubmit={onSubmit} // Pass the form's submit handler
+          />
+        )}
 
         <RequestSubmittedDialog
           open={open}

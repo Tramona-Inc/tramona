@@ -254,10 +254,6 @@ const EmailInvitation: React.FC<EmailInvitationProps> = ({
           )}
         </div>
       </div>
-      <p className="mb-16 flex flex-row items-center rounded-lg bg-[#F1F5F5] p-4 text-sm text-black md:mb-2">
-        <Sparkles className="mr-2" />
-        Once everyone is added to the trip, Tramona removes all fees.
-      </p>
     </div>
   );
 };

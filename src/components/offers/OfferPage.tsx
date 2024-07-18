@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import ReviewCard from "@/components/_common/ReviewCard";
 import {
   Dialog,
@@ -11,21 +10,37 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { type RouterOutputs } from "@/utils/api";
-import { formatCurrency, getNumNights, plural } from "@/utils/utils";
+import { formatDateWeekMonthDay, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
-import { CheckIcon, ImagesIcon, ChevronRight } from "lucide-react";
+import {
+  ImagesIcon,
+  ChevronRight,
+  StarIcon,
+  BedDoubleIcon,
+  InfoIcon,
+  ExternalLinkIcon,
+  FlameIcon,
+  ArrowRightIcon,
+  BookCheckIcon,
+} from "lucide-react";
 import Image from "next/image";
-//import HowToBookDialog from "../requests/[id]/OfferCard/HowToBookDialog";
 import "leaflet/dist/leaflet.css";
 import OfferPhotos from "./OfferPhotos";
-import { useMediaQuery } from "../_utils/useMediaQuery";
-import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
-import router, { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
-import { formatDateRange } from "@/utils/utils";
+import { Card, CardContent } from "../ui/card";
+import { getOriginalListing } from "@/utils/listing-sites";
+import { PropertyCompareBtn } from "./PropertyCompareBtn";
+import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
+import Link from "next/link";
+import {
+  CheckInTimeRule,
+  CheckOutTimeRule,
+  PetsRule,
+  SmokingRule,
+} from "./HouseRules";
+import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -34,13 +49,6 @@ export default function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
-  const router = useRouter();
-  const { status } = useSession();
-  const isMobile = useMediaQuery("(max-width: 640px)");
-
-  const isAirbnb =
-    property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
-
   const isBooked = !!offer.acceptedAt;
 
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -53,48 +61,27 @@ export default function OfferPage({
     }
   }, []);
 
-  // const lisa = false; // temporary until we add payments
   const hostName = property.host?.name ?? property.hostName;
-  const offerNightlyPrice =
-    offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
 
-  // const discountPercentage = getDiscountPercentage(
-  //   property.originalNightlyPrice ?? 0,
-  //   offerNightlyPrice ?? 0,
-  // );
+  const originalListing = getOriginalListing(property);
 
-  const numNights = getNumNights(offer.checkIn, offer.checkOut);
-  // COMMENTED OUT FOR NOW 
-  // if (property.originalNightlyPrice === null) {
-  //   throw new Error("originalNightlyPrice is required but was not provided.");
-  // }
-  const originalTotal = property.originalNightlyPrice * numNights;
+  const renderSeeMoreButton = property.imageUrls.length > 5;
 
-  const tramonaServiceFee = offer.tramonaFee;
-
-  // const tax = (offer.totalPrice + tramonaServiceFee) * TAX_PERCENTAGE;
-
-  const renderSeeMoreButton = property.imageUrls.length > 4;
-
-  const [indexOfSelectedImage, setIndexOfSelectedImage] = useState<number>(0);
+  const [selectedImageIdx, setSelectedImageIdx] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
   return (
-    <div className="space-y-4">
-      <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
+    <div>
+      <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
         <Dialog>
-          {isMobile ? (
-            // Only render the first image on small screens
-            <div>
-              <DialogTrigger
-                key={0}
-                onClick={() => setIndexOfSelectedImage(0)}
-                className="hover:opacity-90"
-              >
-                <Image src={firstImageUrl} alt="" fill objectFit="cover" />
-              </DialogTrigger>
-            </div>
-          ) : (
-            property.imageUrls.slice(0, 5).map((imageUrl, index) => (
+          <DialogTrigger
+            key={0}
+            onClick={() => setSelectedImageIdx(0)}
+            className="hover:opacity-90 sm:hidden"
+          >
+            <Image src={firstImageUrl} alt="" fill objectFit="cover" />
+          </DialogTrigger>
+          <div className="hidden sm:contents">
+            {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
               <div
                 key={index}
                 className={`relative col-span-1 row-span-1 ${
@@ -102,20 +89,19 @@ export default function OfferPage({
                 }`}
               >
                 <DialogTrigger
-                  key={index}
-                  onClick={() => setIndexOfSelectedImage(index)}
+                  onClick={() => setSelectedImageIdx(index)}
                   className="hover:opacity-90"
                 >
                   <Image src={imageUrl} alt="" fill objectFit="cover" />
                 </DialogTrigger>
               </div>
-            ))
-          )}
+            ))}
+          </div>
           <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
             <div className="screen-full flex justify-center">
               <OfferPhotos
                 propertyImages={property.imageUrls}
-                indexOfSelectedImage={indexOfSelectedImage}
+                indexOfSelectedImage={selectedImageIdx}
               />
             </div>
           </DialogContent>
@@ -153,7 +139,7 @@ export default function OfferPage({
                       >
                         <div
                           key={index}
-                          onClick={() => setIndexOfSelectedImage(index)}
+                          onClick={() => setSelectedImageIdx(index)}
                         >
                           <AspectRatio ratio={3 / 2}>
                             <Image
@@ -172,7 +158,7 @@ export default function OfferPage({
                     <div className="screen-full flex justify-center">
                       <OfferPhotos
                         propertyImages={property.imageUrls}
-                        indexOfSelectedImage={indexOfSelectedImage}
+                        indexOfSelectedImage={selectedImageIdx}
                       />
                     </div>
                   </DialogContent>
@@ -183,108 +169,115 @@ export default function OfferPage({
         )}
       </div>
 
-      <div className="flex justify-start space-x-4">
-        <a
-          href="#overview"
-          className="font-medium text-black hover:text-gray-800"
-        >
-          Overview
-        </a>
-        <a href="#amenities" className="text-gray-600 hover:text-gray-800">
-          Amenities
-        </a>
-        <a href="#cancellation" className="text-gray-600 hover:text-gray-800">
-          Cancellation Policy
-        </a>
-        {property.checkInTime && (
-          <a href="#house-rules" className="text-gray-600 hover:text-gray-800">
-            House rules
-          </a>
-        )}
-        {property.reviews.length > 0 && (
-          <a href="#reviews" className="text-gray-600 hover:text-gray-800">
-            Reviews
-          </a>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
-        <div className="flex-[2] space-y-2">
-          <h1 className="items-center text-lg font-semibold sm:text-3xl">
-            {property.name}
-          </h1>
-          <div className="text-sm font-medium">
-            <span>{plural(property.maxNumGuests, "Guest")}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBedrooms, "bedroom")}</span>
-            <span className="mx-2">·</span>
-            <span>{property.propertyType}</span>
-            <span className="mx-2">·</span>
-            <span>{plural(property.numBeds, "bed")}</span>
-            {property.numBathrooms && (
-              <>
-                <span className="mx-2">·</span>
-                <span>{plural(property.numBathrooms, "bath")}</span>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <hr className="h-px border-0 bg-gray-300" />
-      <div className="flex flex-col-reverse gap-4 md:flex-row md:items-start">
-        <div className="flex-[2] space-y-6">
+      <div className="relative flex gap-8 pt-4">
+        <div className="min-w-0 flex-1 space-y-4">
           <section>
+            <h1 className="flex-1 text-3xl font-semibold sm:text-4xl">
+              {property.name}
+            </h1>
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <div className="flex-1">
+                <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium">
+                  {property.propertyType} in {property.city} ·{" "}
+                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  {property.avgRating}{" "}
+                  <a href="#reviews" className="underline">
+                    ({plural(property.numRatings, "review")})
+                  </a>
+                </p>
+                <p className="text-sm font-medium">
+                  {plural(property.maxNumGuests, "guest")} ·{" "}
+                  {plural(property.numBedrooms, "bedroom")} ·{" "}
+                  {plural(property.numBeds, "bed")}
+                  {property.numBathrooms && (
+                    <> · {plural(property.numBathrooms, "bath")}</>
+                  )}
+                </p>
+              </div>
+              {originalListing && (
+                <div className="self-end">
+                  <PropertyCompareBtn
+                    checkIn={offer.checkIn}
+                    checkOut={offer.checkOut}
+                    numGuests={request?.numGuests ?? 1}
+                    originalListing={originalListing}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="border-t pt-4">
             <div className="flex items-center gap-2">
               <UserAvatar
                 name={hostName}
                 email={property.host?.email}
-                image={property.hostProfilePic}
+                image={property.host?.image}
               />
-              <div className="-space-y-1.5">
+              <div className="-space-y-1">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
                 <p className="text-lg font-medium">{hostName}</p>
               </div>
             </div>
           </section>
-          <hr className="h-px border-0 bg-gray-300" />
-          <section id="overview" className="scroll-mt-36">
-            <h1 className="text-lg font-semibold md:text-xl">
+
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">
               About this property
-            </h1>
-            <div className="z-20 max-w-2xl py-2 text-zinc-700">
+            </h2>
+            <div className="z-20 max-w-2xl text-zinc-700">
               <div ref={aboutRef} className="line-clamp-5 break-words">
                 {property.about}
               </div>
               {isOverflowing && (
-                <div className="flex justify-start py-2">
-                  <Dialog>
-                    <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
-                      Show more
-                      <ChevronRight className="ml-2" />
-                    </DialogTrigger>
+                <Dialog>
+                  <DialogTrigger className="inline-flex items-center justify-center text-foreground underline underline-offset-2">
+                    Show more
+                    <ChevronRight className="ml-2" />
+                  </DialogTrigger>
 
-                    <DialogContent className="max-w-3xl p-8">
-                      <DialogHeader>
-                        <DialogTitle>About this property</DialogTitle>
-                      </DialogHeader>
-                      <p className="whitespace-break-spaces break-words text-base">
-                        {property.about}
-                      </p>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                  <DialogContent className="max-w-3xl p-8">
+                    <DialogHeader>
+                      <DialogTitle>About this property</DialogTitle>
+                    </DialogHeader>
+                    <p className="whitespace-break-spaces break-words text-base">
+                      {property.about}
+                    </p>
+                  </DialogContent>
+                </Dialog>
               )}
             </div>
           </section>
-          <hr className="h-px border-0 bg-gray-300" />
-          <section id="amenities" className="scroll-mt-36">
-            <h1 className="text-lg font-semibold md:text-xl">Amenitites</h1>
+
+          {property.roomsWithBeds && (
+            <section>
+              <h2 className="subheading border-t pb-2 pt-4">Rooms & Beds</h2>
+              <div className="flex gap-4 overflow-x-auto">
+                {property.roomsWithBeds.map((room, index) => (
+                  <div
+                    key={index}
+                    className="flex min-w-56 flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
+                  >
+                    <BedDoubleIcon />
+                    <p className="text-lg font-semibold">{room.name}</p>
+                    <p className="text-center text-sm text-muted-foreground">
+                      {room.beds
+                        .map((bed) => plural(bed.count, bed.type))
+                        .join(", ")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">Amenitites</h2>
             <PropertyAmenities amenities={property.amenities} />
 
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto">
+                <Button variant="secondary" className="w-full sm:w-auto">
                   Show all amenities
                 </Button>
               </DialogTrigger>
@@ -298,202 +291,218 @@ export default function OfferPage({
               </DialogContent>
             </Dialog>
           </section>
-          <section id="cancellation" className="scroll-mt-36">
-            <h1 className="text-lg font-semibold md:text-xl">
-              Cancellation Policy
-            </h1>
-            <div className="py-2">
-              <p className="text-sm font-medium text-black">
-                {property.cancellationPolicy ??
-                  "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
-              </p>
-            </div>
-          </section>
-          {property.reviews.length > 0 && (
-            <section id="reviews" className="scroll-mt-36">
-              <h1 className="text-lg font-semibold md:text-xl">Reviews</h1>
-              <div className="py-2">
-                {property.reviews.map((review, index) => (
-                  <div key={index} className="">
-                    <ReviewCard
-                      name={review.name}
-                      profilePic={review.profilePic}
-                      review={review.review}
-                      rating={review.rating}
-                    />
-                  </div>
-                ))}
+
+          {property.latitude && property.longitude && (
+            <section>
+              <h2 className="subheading border-t pb-2 pt-4">
+                Where you&apos;ll be
+              </h2>
+              <div className="relative mt-4 h-[400px]">
+                <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
+                  <SingleLocationMap
+                    lat={property.latitude}
+                    lng={property.longitude}
+                  />
+                </div>
               </div>
             </section>
           )}
-        </div>
-        <div className="flex-1">
-          <Card>
-            <div>
-              <div className="my-2 grid gap-1">
-                <div>
-                  <div className="inline-flex w-full items-center justify-start rounded-full py-2 md:rounded-3xl lg:rounded-full">
+
+          <section>
+            <div className="flex items-start justify-between border-t pb-2 pt-4">
+              <div>
+                <h2 className="subheading">Guest Reviews</h2>
+                <div className="flex items-center gap-2 pb-4">
+                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  {property.avgRating} · {plural(property.numRatings, "review")}
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-4">
+              {property.reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+            {originalListing && (
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 font-semibold text-teal-700 underline underline-offset-2"
+                href={originalListing.getReviewsUrl({
+                  checkIn: offer.checkIn,
+                  checkOut: offer.checkOut,
+                  numGuests: request?.numGuests ?? 1,
+                })}
+              >
+                See all reviews
+                <ExternalLinkIcon className="h-4 w-4" />
+              </Link>
+            )}
+          </section>
+
+          {property.hostNumReviews && property.hostRating && (
+            <section>
+              <h2 className="subheading border-t pb-2 pt-4">Meet your host</h2>
+              <Card className="mt-4 max-w-sm p-8">
+                <CardContent className="flex items-center justify-between sm:p-6">
+                  <div className="space-y-4">
+                    <UserAvatar
+                      size="huge"
+                      name={hostName}
+                      image={property.host?.image}
+                    />
+                    <p className="text-center text-lg font-bold">{hostName}</p>
+                  </div>
+                  <div className="divide-y *:p-2">
                     <div>
-                      <p className="text-sm text-gray-600">Check in / out</p>
-                      <p className="text-base font-bold">
-                        {formatDateRange(offer.checkIn, offer.checkOut)}
+                      <p className="text-center text-lg font-bold">
+                        {property.hostNumReviews}
+                      </p>
+                      <p className="text-center">Reviews</p>
+                    </div>
+                    <div>
+                      <p className="text-center text-lg font-bold">
+                        {property.hostRating}
+                      </p>
+                      <p className="text-center">Rating</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">House rules</h2>
+            <div className="overflow-x-auto">
+              <div className="flex gap-4">
+                {property.checkInTime !== null && (
+                  <CheckInTimeRule checkInTime={property.checkInTime} />
+                )}
+                {property.checkOutTime !== null && (
+                  <CheckOutTimeRule checkOutTime={property.checkOutTime} />
+                )}
+                {property.petsAllowed !== null && (
+                  <PetsRule petsAllowed={property.petsAllowed} />
+                )}
+                {property.smokingAllowed !== null && (
+                  <SmokingRule smokingAllowed={property.smokingAllowed} />
+                )}
+              </div>
+            </div>
+            <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
+            <p>
+              {property.cancellationPolicy ??
+                "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+            </p>
+          </section>
+
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">
+              Check-in information
+            </h2>
+            <p>
+              {property.checkInInfo === "self"
+                ? "Self check-in"
+                : property.checkInInfo}
+            </p>
+          </section>
+
+          <div className="flex justify-end">
+            <ShareOfferDialog
+              id={offer.id}
+              isRequest={false}
+              propertyName={property.name}
+            />
+          </div>
+        </div>
+
+        <div className="hidden w-96 shrink-0 lg:block">
+          <div className="sticky top-[calc(var(--header-height)+1rem)] space-y-4">
+            <Card>
+              <CardContent className="space-y-4">
+                {request && (
+                  <div className="grid grid-cols-2 rounded-lg border *:px-4 *:py-2">
+                    <div className="border-r">
+                      <p className="text-xs font-bold uppercase text-muted-foreground">
+                        Check-in
+                      </p>
+                      <p className="font-bold">
+                        {formatDateWeekMonthDay(offer.checkIn)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase text-muted-foreground">
+                        Check-out
+                      </p>
+                      <p className="font-bold">
+                        {formatDateWeekMonthDay(offer.checkOut)}
+                      </p>
+                    </div>
+                    <div className="col-span-full border-t">
+                      <p className="text-xs font-bold uppercase text-muted-foreground">
+                        Guests
+                      </p>
+                      <p className="font-bold">
+                        {plural(request.numGuests, "guest")}
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div className="inline-flex w-full items-center rounded-full py-2 md:rounded-3xl lg:rounded-full">
-                {request && (
-                  <div>
-                    <p className="text-sm text-gray-600">Guests</p>
-                    <p className="font-bold">
-                      {plural(request.numGuests, "Guest")}
-                    </p>
-                  </div>
                 )}
-              </div>
-              <div className="w-full rounded-full py-2 md:rounded-3xl lg:rounded-full">
-                <div>
-                  <p className="text-sm text-gray-600">Tramona price</p>
-                  <p className="flex items-center font-bold">
-                    {formatCurrency(offerNightlyPrice)}
-                    <span className="ml-2 font-normal text-gray-500 line-through">
-                      {formatCurrency(originalTotal / numNights)}
-                    </span>
-                    <span className="ml-2 font-normal text-gray-500">
-                      (Airbnb)
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-            <hr className="h-px bg-gray-300 py-0" />
-            <div className="space-y-4 py-0 text-muted-foreground">
-              <div className="-space-y-1 text-black">
-                <div className="flex justify-between py-2">
-                  <p className="font-medium underline">
-                    {formatCurrency(offerNightlyPrice)} &times;{" "}
-                    {plural(numNights, "night")}
-                  </p>
-                  <p className="ms-1 font-bold">
-                    {formatCurrency(offerNightlyPrice * numNights)}
-                  </p>
-                </div>
-                <div className="flex justify-between py-2">
-                  <p className="font-medium underline">Service fee</p>
-                  <p className="font-bold">
-                    {formatCurrency(tramonaServiceFee)}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <hr className="h-px bg-gray-300 py-0" />
-            <div className="flex justify-between">
-              <div>
-                <p className="text-xl font-bold">Total</p>
-              </div>
-              <p className="text-xl font-bold">
-                {formatCurrency(
-                  offerNightlyPrice * numNights + tramonaServiceFee,
-                )}
-              </p>
-            </div>
-            <div>
-              {isBooked ? (
-                <Button variant="greenPrimary" className="w-full font-bold">
-                  <CheckIcon className="size-5" />
-                  Booked
-                </Button>
-              ) : (
                 <Button
+                  asChild={!isBooked}
                   variant="greenPrimary"
-                  className="w-full font-bold"
-                  onClick={() => router.push(`/offer-checkout/${offer.id}`)}
+                  size="lg"
+                  className="w-full"
+                  disabled={isBooked}
                 >
-                  Confirm Booking
-                </Button>
-              )}
-            </div>
-            {/* {status === "authenticated" ? (
-              <HowToBookDialog
-                isBooked={isBooked}
-                listingId={offer.id}
-                propertyName={property.name}
-                originalNightlyPrice={property.originalNightlyPrice}
-                airbnbUrl={property.airbnbUrl ?? ""}
-                checkIn={offer.checkIn}
-                checkOut={offer.checkOut}
-                requestId={request?.id}
-                offer={{ property, request, ...offer }}
-                totalPrice={offer.totalPrice}
-                offerNightlyPrice={offerNightlyPrice}
-                isAirbnb={isAirbnb}
-              >
-                <Button size="lg" variant="greenPrimary" disabled={isBooked}>
                   {isBooked ? (
                     <>
-                      <CheckIcon className="size-5" />
+                      <BookCheckIcon className="size-5" />
                       Booked
                     </>
                   ) : (
-                    <>Confirm Booking</>
+                    <Link href={`/offer-checkout/${offer.id}`}>
+                      Book now
+                      <ArrowRightIcon className="size-5" />
+                    </Link>
                   )}
                 </Button>
-              </HowToBookDialog>
-            ) : (
-              <Button
-                onClick={() => {
-                  void router.push({
-                    pathname: "/auth/signin",
-                    query: { from: `/public-offer/${offer.id}` },
-                  });
-                }}
-                variant="greenPrimary"
-                className="w-full"
-              >
-                Log in to Book
-              </Button>
-            )} */}
-          </Card>
+                <OfferPriceDetails offer={offer} />
+              </CardContent>
+            </Card>
+            <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
+              <FlameIcon className="size-7 shrink-0" />
+              <div>
+                <p className="text-sm font-bold">Tramona exclusive deal</p>
+                <p className="text-xs">
+                  This is an exclusive offer created just for you &ndash; you
+                  will not be able to find this price anywhere else
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 rounded-xl border border-blue-300 bg-blue-50 p-3 text-blue-800">
+              <InfoIcon className="size-7 shrink-0" />
+              <div>
+                <p className="text-sm font-bold">Important Notes</p>
+                <p className="text-xs">
+                  These dates could get booked on other platforms for full
+                  price. If they do, your match will be automatically withdrawn.
+                  <br />
+                  <br />
+                  After 24 hours, this match will become available for the
+                  public to book.
+                  <br />
+                  <br />
+                  <b>
+                    We encourage you to book within 24 hours for best results.
+                  </b>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      {property.checkInTime && (
-        <div>
-          <hr className="h-px border-0 bg-gray-300" />
-          <section id="house-rules" className="scroll-mt-36">
-            <h1 className="text-lg font-bold">House rules</h1>
-            {property.checkInTime && property.checkOutTime && (
-              <div className="my-2 flex items-center justify-start gap-16">
-                <div className="flex items-center">
-                  <ArrowLeftToLineIcon className="mr-2" />{" "}
-                  <div>
-                    <div className="font-semibold">Check-in time</div>
-                    <div>After {property.checkInTime.substring(0, 5)}</div>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <ArrowRightToLineIcon className="mr-2" />{" "}
-                  <div>
-                    <div className="font-semibold">Check-out time</div>
-                    <div>Before {property.checkOutTime.substring(0, 5)}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {property.checkInInfo && (
-              <div className="pt-6">
-                <h1 className="text-md font-bold">Additional information</h1>
-                <p>{property.checkInInfo}</p>
-              </div>
-            )}
-          </section>
-        </div>
-      )}
-      <ShareOfferDialog
-        id={offer.id}
-        isRequest={false}
-        propertyName={property.name}
-      />
     </div>
   );
 }

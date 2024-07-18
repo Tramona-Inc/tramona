@@ -1,10 +1,10 @@
-import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import OfferPage from "@/components/offers/OfferPage";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
-import { ArrowLeftIcon } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -18,14 +18,12 @@ import { offers } from "@/server/db/schema/tables/offers";
 import { requests } from "@/server/db/schema/tables/requests";
 import { and, eq } from "drizzle-orm";
 
-import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
-
 type PageProps = {
-  offer: OfferWithDetails; // Replace with a more specific type if you have one
+  offer: OfferWithDetails;
   serverRequestId: number;
   serverFirstImage: string;
   serverFirstPropertyName: string;
-  serverRequestLocation: string; // Ensure this is a plain string
+  serverRequestLocation: string;
   baseUrl: string;
 };
 
@@ -39,10 +37,6 @@ function Page({
   const router = useRouter();
   const requestId = parseInt(router.query.id as string);
   const [selectedOfferId, setSelectedOfferId] = useState("");
-  const [mapCenter, setMapCenter] = useState({
-    lat: 37.774929,
-    lng: -122.419416,
-  }); // Default center
 
   const { data: offers } = api.offers.getByRequestIdWithProperty.useQuery(
     { id: requestId },
@@ -50,16 +44,6 @@ function Page({
       enabled: router.isReady,
     },
   );
-
-  useEffect(() => {
-    const offer = offers?.find((o) => `${o.id}` === selectedOfferId);
-    if (offer?.property.longitude && offer.property.latitude) {
-      setMapCenter({
-        lat: offer.property.latitude,
-        lng: offer.property.longitude,
-      });
-    }
-  }, [selectedOfferId, offers]);
 
   const [effectHasRun, setEffectHasRun] = useState(false);
 
@@ -83,7 +67,7 @@ function Page({
   }
 
   return (
-    <DashboadLayout type="guest">
+    <DashboardLayout type="guest">
       <NextSeo
         title={serverFirstPropertyName}
         description={`Check out your tramona offers in ${serverRequestLocation}`}
@@ -106,60 +90,49 @@ function Page({
         }}
       />
       {request && offers ? (
-        <div>
-          <div className="p-4">
+        <div className="min-h-screen-minus-header pb-footer-height pt-5 lg:px-4">
+          <div className="mx-auto max-w-7xl">
             <Button asChild variant="ghost" className="rounded-full">
               <Link href="/requests">
-                <ArrowLeftIcon /> Back to all requests
+                <ChevronLeft className="-mx-1" />
+                <div className="font-semibold">Requests</div>
               </Link>
             </Button>
-          </div>
-          <div className="px-4 pb-32">
-            <Tabs
-              defaultValue={`${offers[0]?.id}`}
-              value={selectedOfferId}
-              onValueChange={setSelectedOfferId}
-            >
-              <TabsList className="w-max">
-                {offers.map((offer, i) => (
-                  <TabsTrigger key={offer.id} value={`${offer.id}`}>
-                    Offer {i + 1}
-                  </TabsTrigger>
+            <div className="px-4 pb-32">
+              <Tabs
+                defaultValue={`${offers[0]?.id}`}
+                value={selectedOfferId}
+                onValueChange={setSelectedOfferId}
+              >
+                <div className="relative mt-5 w-full">
+                  <TabsList className="w-max">
+                    {offers.map((offer, i) => (
+                      <TabsTrigger key={offer.id} value={`${offer.id}`}>
+                        Offer {i + 1}
+                      </TabsTrigger>
+                    ))}
+                    <div className="absolute right-0 top-0 hidden lg:block">
+                      <ShareButton
+                        id={request.id}
+                        isRequest={true}
+                        propertyName={offers[0]!.property.name}
+                      />
+                    </div>
+                  </TabsList>
+                </div>
+                {offers.map((offer) => (
+                  <TabsContent key={offer.id} value={`${offer.id}`}>
+                    <OfferPage offer={offer} />
+                  </TabsContent>
                 ))}
-                <div className="mx-4  mt-5 flex h-full items-center justify-center">
-                  <ShareButton
-                    id={request.id}
-                    isRequest={true}
-                    propertyName={offers[0]!.property.name}
-                  />
-                </div>
-              </TabsList>
-
-              <div className="flex flex-col lg:flex-row lg:space-x-10">
-                <div className="flex-1">
-                  {offers.map((offer) => (
-                    <TabsContent key={offer.id} value={`${offer.id}`}>
-                      <OfferPage offer={offer} />
-                    </TabsContent>
-                  ))}
-                </div>
-                <div className="top-5 mt-5 flex-1 lg:sticky lg:mt-0 lg:h-screen">
-                  <div className="relative h-screen lg:h-full">
-                    <SingleLocationMap
-                      key={`${mapCenter.lat}-${mapCenter.lng}`} // Unique key to force re-render
-                      lat={mapCenter.lat}
-                      lng={mapCenter.lng}
-                    />
-                  </div>
-                </div>
-              </div>
-            </Tabs>
+              </Tabs>
+            </div>
           </div>
         </div>
       ) : (
         <Spinner />
       )}
-    </DashboadLayout>
+    </DashboardLayout>
   );
 }
 
@@ -176,8 +149,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       property: {
         columns: {
           latLngPoint: false,
-
-        }
+        },
       },
     },
   });

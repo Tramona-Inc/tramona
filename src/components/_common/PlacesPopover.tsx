@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/popover";
 import useTimeout from "@/utils/useTimeout";
 import { cn } from "@/utils/utils";
-import { Check } from "lucide-react";
+import { Check, MapPinIcon } from "lucide-react";
 import usePlaceAutocomplete from "use-places-autocomplete";
 import { FormControl } from "../ui/form";
 
@@ -64,7 +64,7 @@ export default function PlacesPopover({
         <PopoverTrigger asChild>
           <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
         </PopoverTrigger>
-        <PopoverContent dontAnimate align="start" className={className}>
+        <PopoverContent dontAnimate align="start" className={cn("p-0 bg-white rounded-3xl shadow-lg border border-gray-100", className)}>
           <Command>
             <CommandInput
               value={input}
@@ -90,17 +90,24 @@ export default function PlacesPopover({
                       setInput(suggestion.description);
                       setOpen(false);
                     }}
-                    className="flex"
+                    className="mx-2 my-1 flex rounded-md data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground px-3 py-3"
                   >
+                    <div className="flex flex-1 items-center">
+                      <div className="mr-2 rounded-md bg-gray-300 p-3">
+                        <MapPinIcon className="h-5 w-5 text-gray-800" />
+                      </div>
+                      <p className="line-clamp-1 flex-1">
+                        {suggestion.description}
+                      </p>
+                    </div>
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4 flex-shrink-0",
+                        "ml-2 h-4 w-4 flex-shrink-0",
                         suggestion.description === value
                           ? "opacity-100"
                           : "opacity-0",
                       )}
                     />
-                    <p className="line-clamp-1">{suggestion.description}</p>
                   </CommandItem>
                 ))}
               </CommandList>
