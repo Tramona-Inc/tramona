@@ -36,7 +36,7 @@ import { AdjustedPropertiesProvider } from "./AdjustedPropertiesContext";
 import { useRouter } from "next/router";
 import { cities } from "../cities";
 
-export default function SearchPage() {
+export default function () {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
   const router = useRouter();
