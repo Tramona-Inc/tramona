@@ -89,7 +89,7 @@ export default function ContactInfoForm() {
               variant="link"
               className="ml-4 mt-2 text-destructive"
             >
-              Delete
+              Remove
             </Button>
           </div>
         ))}
