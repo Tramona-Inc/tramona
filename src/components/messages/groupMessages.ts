@@ -1,33 +1,33 @@
 import { type GuestMessageType, type MessageType, type User } from "@/server/db/schema";
 import { type GuestMessage, type ChatMessageType } from "@/utils/store/messages";
 
-export type MessageGroup = {
-  user: (Pick<User, "name" | "email" | "image" | "id">) & {
+export type MessageGroups = {
+  user: Pick<User, "name" | "email" | "image" | "id"> | {
     conversationId: string;
     userToken: string | null;
-    adminId: string;
 } | null;
   messages: (MessageType & GuestMessageType )[];
 };
 
 // groups messages made by the same user with <2 mins in between
 
-function isBasicUser(user: Pick<User, "name" | "email" | "image" | "id">): user is Pick<User, "name" | "email" | "image" | "id"> {
-  return user && "id" in user && "email" in user;
-}
+// function isBasicUser(user: Pick<User, "name" | "email" | "image" | "id">): user is Pick<User, "name" | "email" | "image" | "id"> {
+//   return user && "id" in user && "email" in user;
+// }
 
 export function groupMessages(
   messages: {
     message: ChatMessageType & GuestMessage;
-    user: MessageGroup["user"] ;
+    user: MessageGroups["user"] ;
   }[],
 ) {
-  const groups: MessageGroup[] = [];
+  const groups: MessageGroups[] = [];
 
+  console.log(messages)
   messages.forEach(({ message, user }) => {
     const lastGroup = groups[groups.length - 1];
 
-    if (!user || (lastGroup && user.id !== lastGroup?.user?.id)) {
+    if (!user || (lastGroup && "id" in user && user.id !== lastGroup?.user?.id)) {
       groups.push({
         user,
         messages: [message],

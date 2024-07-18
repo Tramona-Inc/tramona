@@ -11,6 +11,7 @@ import {
   MessageCircleIcon,
   Search,
   WrenchIcon,
+  MessageCircleMore,
 } from "lucide-react";
 
 export const adminNavLinks = [
@@ -55,6 +56,7 @@ export const guestMobileNavLinks = [
   { href: "/explore", name: "Explore", icon: Search },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
+  { href: "/admin-messages", name: "messages", icon: MessageCircleMore}
 ];
 
 export const guestNavLinks = [

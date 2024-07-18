@@ -2,6 +2,7 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import {
+  AdminConversation,
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
@@ -19,19 +20,22 @@ import {MessageCircleMore, Mic, ArrowUp, SendHorizonal, Smile, X} from 'lucide-r
 import {cn} from '@/utils/utils';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import AdminMessages from "@/components/messages/AdminMessages";
 import * as z from "zod";
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
-    useState<Conversation | null>(null);
+    useState<Conversation & AdminConversation | null>(null);
 
-  const selectConversation = (conversation: Conversation | null) => {
+  const selectConversation = (conversation: Conversation & AdminConversation | null) => {
     setSelectedConversation(conversation);
   };
 
   // * Allows us to open message from url query
   const [isViewed, setIsViewd] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
+  const adminConversation = useConversation((state) => state.adminConversationList)
   console.log(conversations)
+  console.log(adminConversation)
   const { query } = useRouter();
 
   useEffect(() => {
@@ -49,6 +53,17 @@ function MessageDisplay() {
       }
 
       setIsViewd(true);
+    }
+
+    if(query.conversationId && adminConversation.length > 0 && !isViewed){
+      const conversationIdToSelect = query.conversationId as string;
+      const conversationToSelect = adminConversation.find(
+        (conversation) => conversation.id === conversationIdToSelect,
+      );
+
+      if(conversationIdToSelect && selectedConversation?.id !== conversationToSelect?.id) {
+        setSelectedConversation(conversationToSelect)
+      }
     }
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
@@ -136,23 +151,7 @@ export default function MessagePage() {
                 <UserAvatar image={session?.user.image}/>
                 <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Tramona Host</p>
                 <p className='flex-1 px-2 antialiased text-sm font-medium'>Hostname</p>
-              {/* <PopoverClose>
-                  <X className='fixed top-4 left-12 text-white'/>
-              </PopoverClose> */}
-              </div>
-              <div className="grow grid grid-rows-1">
-                <div className="flex place-items-end m-1 p-1">
-                  {/* <UserAvatar className="my-2" image={session?.user.image}/> */}
-                  <p className="px-2 py-2 border-none rounded-r-xl rounded-tl-xl bg-[#2E2E2E] text-sm text-white text-background max-w-[15rem] h-max antialiased">
-                    Ask Your Question
-                  </p>
-                </div>
-              <div className="flex flex-row-reverse m-1 p-1">
-                {/* <UserAvatar image={session?.user.image}/> */}
-              <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">
-                  Hey! how are you doing? I had few questions
-                  {/* <span className='text-xs pl-4 text-right'>{`${hours}:${minutes}`}</span> */}
-                </p>
+                <AdminMessages />
               </div>
               </div>
               </div>
@@ -180,7 +179,6 @@ export default function MessagePage() {
                 <ArrowUp className='text-xs antialiased'/>
               </Button>
               </div>
-      </div>
       </DashboardLayout>
       </>
     }

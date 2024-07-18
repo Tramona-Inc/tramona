@@ -1,5 +1,5 @@
 import { useConversation } from "@/utils/store/conversations";
-import { type ChatMessageType, useMessage } from "@/utils/store/messages";
+import { type ChatMessageType, GuestMessage, useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,12 +30,14 @@ export default function ChatInput({
   });
 
   const { data: session } = useSession();
+  const {data: checkConversationId} = api.messages.checkConversationWithAdmin.useQuery({conversationId: conversationId})
 
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
   );
 
   const utils = api.useUtils();
+
 
   const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
@@ -56,9 +58,9 @@ export default function ChatInput({
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (session) {
+    if (session && checkConversationId?.conversationId !== conversationId) {
 
-      const newMessage: ChatMessageType = {
+      const newMessage: ChatMessageType & GuestMessage = {
         id: nanoid(),
         createdAt: new Date().toISOString(),
         conversationId: conversationId,
@@ -66,6 +68,7 @@ export default function ChatInput({
         message: values.message,
         read: false,
         isEdit: false,
+        userToken: ""
       };
 
       const newMessageToDb = {
@@ -96,6 +99,45 @@ export default function ChatInput({
         removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
       }
+    }
+      else if(session && checkConversationId?.conversationId === conversationId) {
+        const newMessage: ChatMessageType & GuestMessage = {
+          id: nanoid(),
+          createdAt: new Date().toISOString().slice(0,-1),
+          conversationId: conversationId ?? "",
+          userToken: session.user.id,
+          message: values.message,
+          read: false,
+          isEdit: false,
+          userId: "",
+        };
+
+        const newMessageToDb = {
+          id: newMessage.id,
+          conversation_id: newMessage.conversationId,
+          user_token: newMessage.userToken,
+          message: newMessage.message,
+          read: newMessage.read,
+          is_edit: newMessage.isEdit,
+          created_at: newMessage.createdAt,
+        }
+
+        addMessageToConversation(conversationId ?? "", newMessage)
+        setConversationToTop(conversationId ?? "", newMessage)
+        const { error } = await supabase
+        .from("guest_messages")
+        .insert(newMessageToDb)
+        // .select("*, user(email, name, image)")
+        .select("*")
+        .single();
+
+        form.reset();
+
+      if (error) {
+        removeMessageFromConversation(conversationId ?? "", newMessage.id);
+        errorToast();
+      }
+      
 
       if (participantPhoneNumbers) {
         void Promise.all(

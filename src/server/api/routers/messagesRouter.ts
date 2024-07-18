@@ -8,6 +8,7 @@ import { input, z } from "zod";
 import { conversationGuests, conversations, guestMessages, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
 import { columns } from "@/components/admin/view-recent-host/table/columns";
+import { getAdminId } from "@/server/server-utils";
 
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
@@ -205,6 +206,10 @@ export async function createConversationWithAdmin(userId: string | null, userTok
       userToken: userToken, 
       adminId: ADMIN_ID 
     };
+    // const participantValues = [
+    //   { conversationId: createdConversationId, userToken: userToken },
+    //   { conversationId: createdConversationId, ad: ADMIN_ID },
+    // ]
     await db.insert(conversationGuests).values(participantValues);
     console.log("insert into cp");
     return createdConversationId;
@@ -321,6 +326,12 @@ export const messagesRouter = createTRPCRouter({
     return [];
   }),
 
+  fetchAdminId:protectedProcedure
+  .query(async () => {
+    const admin_id = await getAdminId()
+    return admin_id
+  }),
+
   getConversationWithGuest: publicProcedure
   .input(z.object({
     conversationId: z.string(),
@@ -429,6 +440,20 @@ export const messagesRouter = createTRPCRouter({
         );
       }
     }),
+
+  checkConversationWithAdmin: protectedProcedure
+  .input(
+    z.object({
+      conversationId: zodString(),
+    })
+  )
+  .query(async ({input}) => {
+    const result = db.query.guestMessages.findFirst({
+      where: eq(guestMessages.conversationId, input.conversationId),
+      columns: {conversationId: true}
+    })
+    return result
+  }),
 
   addUserToConversation: publicProcedure
     .input(

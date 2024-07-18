@@ -94,6 +94,7 @@ export const conversationGuests = pgTable(
     conversationId: varchar("conversation_id")
       .notNull()
       .references(() => conversations.id, {onDelete: "cascade"}),
+
     userToken: text("user_token").unique(),
     adminId:text("admin_id").notNull(),
   },

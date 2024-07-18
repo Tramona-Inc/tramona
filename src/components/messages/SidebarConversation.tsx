@@ -11,14 +11,12 @@ import { formatRelative } from "date-fns";
 
 export function SidebarConversation({
   conversation,
-  adminConversation,
   isSelected,
   setSelected,
 }: {
   conversation: Conversation;
-  adminConversation?: AdminConversation;
   isSelected: boolean;
-  setSelected: (arg0: Conversation) => void;
+  setSelected: (arg0: Conversation & AdminConversation) => void;
 }) {
   const { participants, messages, id, name } = conversation;
 

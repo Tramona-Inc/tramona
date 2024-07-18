@@ -1,4 +1,4 @@
-import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { GuestMessage, useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { getFromAndTo } from "@/utils/utils";
@@ -56,11 +56,11 @@ export default function LoadMoreMessages() {
       if (error) {
         errorToast();
       } else {
-        const loadedMessages: ChatMessageType[] = data.map((message) => ({
+        const loadedMessages: (ChatMessageType | GuestMessage)[] = data.map((message) => ({
           conversationId: message.conversation_id,
           id: message.id,
           createdAt: message.created_at,
-          userId: message.user_id,
+          userId: message.user_id ?? "",
           message: message.message,
           read: message.read,
           isEdit: message.is_edit,

@@ -1,4 +1,4 @@
-import { type MessageDbType } from "@/types/supabase.message";
+import { GuestMessageType, type MessageDbType } from "@/types/supabase.message";
 import { api } from "@/utils/api";
 import {
   useConversation,
@@ -6,7 +6,7 @@ import {
   type AdminConversation,
   type AdminConversations
 } from "@/utils/store/conversations";
-import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { GuestMessage, useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { cn } from "@/utils/utils";
@@ -20,6 +20,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
 import { AdminSidebar } from './AdminSidebar'
 import { AvatarFallback } from "../ui/avatar";
+import { getAdminId } from '@/server/server-utils'
 
 
 export function MessageConversation({
@@ -63,7 +64,6 @@ export function MessageConversation({
 
     setSelected(conversation);
   }
-
   return (
     <div
       className={cn(
@@ -101,8 +101,8 @@ export function MessageConversation({
 }
 
 export type SidebarProps = {
-  selectedConversation: Conversation | null;
-  setSelected: (arg0: Conversation | AdminConversation) => void;
+  selectedConversation: Conversation & AdminConversation | null;
+  setSelected: (arg0: Conversation & AdminConversation) => void;
 };
 
 export default function MessagesSidebar({
@@ -115,10 +115,16 @@ export default function MessagesSidebar({
       refetchOnWindowFocus: false,
       // refetchOnMount: false,
     });
-
-  const {data: fetchedConversationsForAdmin} = api.messages.getConversationForAdmin.useQuery();
+    const{data: adminid} = api.messages.fetchAdminId.useQuery();
+    const participant = fetchedConversations?.find((conversation) => conversation.participants.filter((user) => user.id !== adminid))
+    
+    fetchedConversations?.filter((conversation) => conversation.id !== participant?.id)
+  const {data: fetchedConversationsForAdmin} = api.messages.getConversationForAdmin.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
 
   const conversations = useConversation((state) => state.conversationList);
+
   const adminConversation = useConversation((state) => state.adminConversationList)
 
   const setConversationList = useConversation(
@@ -152,15 +158,6 @@ export default function MessagesSidebar({
   // Map and listen to all the connects the user is part of
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-      // if (!optimisticIds.includes(payload.new.id)) {
-      //   const { error } = await supabase
-      //     .from("user")
-      //     .select("name, email, image")
-      //     .eq("id", payload.new.user_id ?? "")
-      //     .single();
-      //   if (error) {
-      //     errorToast();
-      //   } else {
           const newMessage: ChatMessageType = {
             id: payload.new.id,
             conversationId: payload.new.conversation_id,
@@ -173,12 +170,24 @@ export default function MessagesSidebar({
           };
           setConversationToTop(payload.new.conversation_id, newMessage);
         }
-    //   }
-    // };
+    
+    const handlePostgresChangeOnGuest = async (payload: { new: GuestMessageType }) => {
+      const newMessage: GuestMessage = {
+        id: payload.new.id,
+        conversationId: payload.new.conversation_id,
+        userToken: payload.new.user_token,
+        message: payload.new.message,
+        isEdit: payload.new.is_edit,
+        createdAt: payload.new.created_at,
+        read: payload.new.read,
+      };
+      setConversationToTop(payload.new.conversation_id, newMessage);
+    }
 
     const fetchConversationIds = async () => {
       if (session) {
         const channels = conversations
+        .filter((conversation) => conversation.id )
           .map((conversation) => conversation.id)
           // When channel is selected turn of here so it can listen in the child
           .filter(
@@ -203,16 +212,39 @@ export default function MessagesSidebar({
         return () => {
           channels.forEach((channel) => void channel.unsubscribe());
         };
+
+      }
+      if(adminConversation) {
+        const channels = adminConversation
+        .filter((conversation) => conversation.id )
+          .map((conversation) => conversation.id)
+          // When channel is selected turn of here so it can listen in the child
+          .filter(
+            (conversationId) => conversationId !== selectedConversation?.id,
+          )
+          .map((conversationId) =>
+            supabase
+              .channel(conversationId)
+              .on(
+                "postgres_changes",
+                {
+                  event: "INSERT",
+                  schema: "public",
+                  table: "guest_messages",
+                },
+                (payload: { new: GuestMessageType }) =>
+                  void handlePostgresChangeOnGuest(payload),
+              )
+              .subscribe(),
+          );
+
+        return () => {
+          channels.forEach((channel) => void channel.unsubscribe());
+        };
       }
     };
 
     void fetchConversationIds();
-    // const AdminConversationIds =async () => {
-    //   if(session) {
-    //     const channels = adminConversation
-    //     .map((conversation) => conversation.id)
-    //   }
-    // }
   }, [
     conversations,
     optimisticIds,
@@ -231,7 +263,17 @@ export default function MessagesSidebar({
 
       <ScrollArea className="h-full p-2">
         {!isLoading ? (
-          conversations.length > 0 ? (
+          conversations.length > 0 ? session?.user.id !== adminid ? (
+            conversations.filter((conversation) => conversation.id !== participant?.id).map((conversation) => (
+              <SidebarConversation
+                key={conversation.id}
+                conversation={conversation}
+                isSelected={selectedConversation?.id === conversation.id}
+                setSelected={setSelected}
+              />
+            ))
+          ):
+          (
             conversations.map((conversation) => (
               <SidebarConversation
                 key={conversation.id}
@@ -240,7 +282,8 @@ export default function MessagesSidebar({
                 setSelected={setSelected}
               />
             ))
-          ) : (
+          )
+          : (
             <div className="flex h-full flex-col items-center justify-center">
               <MessageEmptySvg />
               <h2 className="text-2xl font-bold">No conversations yet</h2>

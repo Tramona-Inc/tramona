@@ -2,26 +2,30 @@ import { type GuestMessageType, type MessageType } from "@/server/db/schema";
 import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
-import { type MessageGroup } from "./groupMessages";
+import { type MessageGroups } from "./groupMessages";
 import { AnonymousAvatar } from "../ui/avatar";
 import { type GuestMessage } from "@/utils/store/messages";
 
-export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
+export function MessageGroup({ messageGroup }: { messageGroup: MessageGroups }) {
   const { data: session } = useSession();
   const { user, messages } = messageGroup;
   const firstMessage = messages[0];
   if (!firstMessage || !session) return null;
 
+  
   return (
     <div className="flex items-start gap-2">
-      {user ? <UserAvatar {...user} /> : <AnonymousAvatar />}
+      {  user ? <UserAvatar {...user} /> : <AnonymousAvatar />}
       <div>
         <div className="flex items-baseline gap-2">
-          {user ? (
+          {"name" in user && user ? (
             <p className="font-semibold leading-none">{user.name}</p>
-          ) : (
+          ) :
+          (
             <p className="leading-none text-muted-foreground">[unknown user]</p>
-          )}
+          ) 
+          
+          }
           <p className="text-xs text-muted-foreground">
             {formatRelative(firstMessage.createdAt, new Date())}
             {"userId" in firstMessage && session.user.id === firstMessage.userId && firstMessage.read && (

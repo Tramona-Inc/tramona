@@ -25,7 +25,7 @@ import { useEffect } from "react";
   const { fetchMessagesForGuest, fetchInitialMessages } = useMessage()
   if(!session) {
     void fetchMessagesForGuest(conversationId ?? "")
-    void fetchInitialMessages(conversationId ?? "")
+    // void fetchInitialMessages(conversationId ?? "")
   }
   else {
     void fetchInitialMessages(conversationId ?? "")
@@ -43,33 +43,9 @@ import { useEffect } from "react";
 
     return(
     <>
-              {/* <div className="grow grid grid-rows-1 overflow-y-scroll"> */}
+    {messages.length > 0 ? 
               <div className="flex flex-1 w-full overflow-y-scroll flex-col-reverse gap-1 p-3">
-                  {/* <UserAvatar className="my-2" image={session?.user.image}/> */}
-                  {/* {messageByUser.map((message, index) => (
-  
-                <div className="flex flex-row-reverse m-1 p-1" key={index}>
-                <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">
-                    {message.message} */}
-                    {/* <span className='text-xs pl-4 text-right'>{`${hours}:${minutes}`}</span> */}
-                  {/* </p>
-                </div>
-                  ))} */}
-                  {/* {messageBySender.map((message, index) => (
-                <div className="flex place-items-end m-1 p-1" key={index}>
-                  <p  className="px-2 py-2 border-none rounded-r-xl rounded-tl-xl bg-[#2E2E2E] text-sm text-white text-background max-w-[15rem] h-max antialiased">
-                    {message.message}
-                  </p>
-                </div>
-                  ))} */}
-                  {/* {!session &&
-                    <div className="flex flex-row-reverse m-1 p-1">
-                    <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">
-                       */}
-                      {/* <span className='text-xs pl-4 text-right'>{`${hours}:${minutes}`}</span> */}
-                    {/* </p>
-                    </div> */}
-                  {/* } */}
+                  
                   {messages.map((message, index) => ( "userId" in message && message.userId === session?.user.id || "userToken" in message && message.userToken === tempToken ?
                     <>
                     <div className="flex flex-row-reverse m-1 p-1" key={index}>
@@ -89,6 +65,11 @@ import { useEffect } from "react";
                 {/* <UserAvatar image={session?.user.image}/> */}
                 {/* {conversation.} */}
               </div>
+              :
+              <div className="flex flex-1 w-full">
+                <p className="flex m-auto text-[#8B8B8B] items-center justify-center">How can we help you?</p>
+              </div>
+  }
     </>
     )
 }

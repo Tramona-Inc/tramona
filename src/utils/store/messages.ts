@@ -28,7 +28,7 @@ type MessageState = {
   switchConversation: (conversationId: string) => void;
   addMessageToConversation: (
     conversationId: string,
-    messages: ChatMessageType & GuestMessage,
+    messages: ChatMessageType | GuestMessage,
   ) => void;
   optimisticIds: string[];
   setOptimisticIds: (id: string) => void;
@@ -57,7 +57,7 @@ export const useMessage = create<MessageState>((set, get) => ({
   },
   addMessageToConversation: (
     conversationId: string,
-    newMessage: ChatMessageType & GuestMessage,
+    newMessage: ChatMessageType | GuestMessage,
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
@@ -209,10 +209,12 @@ export const useMessage = create<MessageState>((set, get) => ({
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: false })
 
-      
+      if (error) {
+        throw new Error(error.message);
+      }
 
       if(data){
-        const chatMessages: (ChatMessageType | GuestMessage)[] = data.map((message) => ({
+        const chatMessages: (ChatMessageType & GuestMessage)[] = data.map((message) => ({
           id: message.id,
           conversationId: message.conversation_id,
           userToken: message.user_token,

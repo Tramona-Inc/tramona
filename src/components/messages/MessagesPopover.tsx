@@ -4,14 +4,14 @@ import supabase from "@/utils/supabase-client";
 import { Button } from '../ui/button'
 import UserAvatar from '../_common/UserAvatar'
 import { Form, FormControl, FormField, FormItem } from '../ui/form'
-import { type ChatMessageType, GuestMessage, useMessage } from "@/utils/store/messages";
-import { type MessageDbType } from '@/types/supabase.message';
+import { type ChatMessageType, type GuestMessage, useMessage } from "@/utils/store/messages";
+import { GuestMessageType, type MessageDbType } from '@/types/supabase.message';
 import { useConversation } from '@/utils/store/conversations';
 import { Input } from '../ui/input'
-import {MessageCircleMore, Mic, ArrowUp, SendHorizonal, Smile, X} from 'lucide-react'
-import { Session } from 'next-auth';
+import {MessageCircleMore, ArrowUp, X} from 'lucide-react'
+import { type Session } from 'next-auth';
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { PopoverClose } from '@radix-ui/react-popover'
@@ -19,7 +19,8 @@ import { api } from '@/utils/api'
 import { nanoid } from "nanoid";
 import { errorToast } from "@/utils/toasts";
 import AdminMessages from './AdminMessages';
-import { GuestMessageType } from '@/server/db/schema';
+import { useMediaQuery } from "@/components/_utils/useMediaQuery";
+
 // import { createConversationWithAdmin } from '@/server/api/routers/messagesRouter';
 
 let tempToken: string;
@@ -36,13 +37,13 @@ export default function MessagesPopover({session}: {
 
   //  const { fetchInitialMessages } = useMessage()
   // void fetchInitialMessages(conversationId ?? "")
-  
+  const isMobile = useMediaQuery("(max-width:648px)")
   const addMessageToConversation = useMessage( 
     (state) => state.addMessageToConversation
   )
   
   const optimisticIds = useMessage((state) => state.optimisticIds);
-  
+  const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
   
   const setConversationToTop = useConversation(
     (state) => state.setConversationToTop,
@@ -53,6 +54,7 @@ export default function MessagesPopover({session}: {
   );
 
   const { fetchInitialMessages, fetchMessagesForGuest } = useMessage()
+
   if(!session) {
     void fetchMessagesForGuest(conversationId ?? "")
   }
@@ -91,7 +93,7 @@ export default function MessagesPopover({session}: {
       console.log(conversationId)
 
       if(!session){
-        const newMessage: GuestMessage = {
+        const newMessage: ChatMessageType | GuestMessage = {
           id: nanoid(),
           createdAt: new Date().toISOString().slice(0,-1),
           conversationId: conversationId ?? "",
@@ -99,6 +101,7 @@ export default function MessagesPopover({session}: {
           message: values.message,
           read: false,
           isEdit: false,
+          // userId: "",
         };
 
         const newMessageToDb = {
@@ -112,7 +115,8 @@ export default function MessagesPopover({session}: {
         }
 
         addMessageToConversation(conversationId ?? "", newMessage)
-        setConversationToTop(conversationId ?? "", newMessage)
+        setOptimisticIds(newMessage.id)
+        // setConversationToTop(conversationId ?? "", newMessage)
         const { error } = await supabase
         .from("guest_messages")
         .insert(newMessageToDb)
@@ -126,12 +130,12 @@ export default function MessagesPopover({session}: {
       }
       }
       else{
-        const newMessage: ChatMessageType = {
+        const newMessage: ChatMessageType | GuestMessage = {
           id: nanoid(),
           createdAt: new Date().toISOString().slice(0, -1),
           conversationId: conversationId ?? "",
           userId: session?.user.id ?? "", //user is logged in
-          // userToken: tempToken, //user has not logged in
+          // userToken: "", //user has not logged in
           message: values.message,
           read: false,
           isEdit: false,
@@ -142,19 +146,19 @@ export default function MessagesPopover({session}: {
           conversation_id: conversationId ?? "",
           user_id: newMessage.userId,
           message: newMessage.message,
-          // userToken: newMessage.userToken,
+          // userToken: "",
           read: newMessage.read,
           is_edit: newMessage.isEdit,
           created_at: new Date().toISOString(),
         };
   
-        setConversationToTop(conversationId ?? "", newMessage);
+        // setConversationToTop(conversationId ?? "", newMessage);
         addMessageToConversation(conversationId ?? "", newMessage)
         const { error } = await supabase
           .from("messages")
           .insert(newMessageToDb)
-          // .select("*, user(email, name, image)")
-          .select("*")
+          .select("*, user(email, name, image)")
+          // .select("*")
           .single();
   
         if (error) {
@@ -166,28 +170,29 @@ export default function MessagesPopover({session}: {
 
     }
       
-      const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+      const handlePostgresChange = async (payload: { new: GuestMessageType }) => {
 
-        if (!optimisticIds.includes(payload.new.id)) {
-          const { error } = await supabase
-            .from("user")
-            .select("name, email, image")
-            .eq("id", payload.new.user_id ?? "")
-            .single();
-          if (error) {
-            errorToast();
-          } else {
-            const newMessage: (ChatMessageType | GuestMessage) = {
+        // if (!optimisticIds.includes(payload.new.id)) {
+        //   const { error } = await supabase
+        //     .from("user")
+        //     .select("name, email, image")
+        //     .eq("id", payload.new.user_id ?? "")
+        //     .single();
+        //   if (error) {
+        //     errorToast();
+        //   } else {
+            const newMessage: ChatMessageType | GuestMessage = {
               id: payload.new.id,
               conversationId: payload.new.conversation_id,
-              userId: payload.new.user_id ?? "",
+              userToken:payload.new.user_token,
               message: payload.new.message,
               isEdit: payload.new.is_edit,
               createdAt: payload.new.created_at,
               read: payload.new.read,
+              // userToken: "",
             };
-          }
-        }        
+          // }
+        // }        
       }
     
       useEffect(() => {
@@ -198,9 +203,9 @@ export default function MessagesPopover({session}: {
             {
               event: "INSERT",
               schema: "public",
-              table: "messages",
+              table: "guest_messages",
             },
-            (payload: { new: MessageDbType}) => void handlePostgresChange(payload),
+            (payload: { new: GuestMessageType}) => void handlePostgresChange(payload),
           )
           .subscribe();
     
@@ -221,12 +226,20 @@ export default function MessagesPopover({session}: {
       hours = hours.length === 1 ? "0" + hours : hours;
       minutes = minutes.length === 1 ? "0" + minutes : minutes;
       return (
+      <>
+        {!isMobile ? 
       <div className="fixed bottom-10 right-4 z-50">
             <Popover>
             <PopoverTrigger asChild>
+              {session?.user.role !== "host" && session?.user.role !== "admin" ? 
+              
+            
                 <Button className="border rounded-full p-4 w-18 h-18 m-4">
                     <MessageCircleMore />
                 </Button>
+                :
+                <></>
+              }
               </PopoverTrigger>  
               <PopoverContent className="grid grid-rows-1 p-0 w-[21rem] h-[35rem] mx-8 bg-black border rounded-xl border-gray-800">
               <div className="flex flex-col">
@@ -275,4 +288,46 @@ export default function MessagesPopover({session}: {
               </PopoverContent>            
             </Popover>
           </div>
+          :
+          <>
+          <div className='grid grid-rows-1 p-0 w-screen h-screen-minus-header-n-footer bg-black border  border-gray-800"'>
+          <div className="flex flex-col">
+            <div className="flex flex-col w-full h-[7rem] items-center justify-start p-4 text-base font-bold text-white bg-[#1A1A1A]">
+                <UserAvatar image={session?.user.image}/>
+                <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Tramona Host</p>
+                <p className='flex-1 px-2 antialiased text-sm font-medium'>Hostname</p>
+              </div>
+              <AdminMessages />
+            </div>
+          <div className="flex flex-row gap-2 h-max items-center p-1 border border-gray-500 rounded-full mx-4 my-2">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleOnSend)} className='flex flex-row w-full'>
+            <FormField
+            control={form.control}
+            name="message"
+            render={({field}) => {
+              return (
+              <FormItem className='flex-1'>
+                <FormControl>
+                  <Input
+                  placeholder="Type a message..."
+                  className="flex w-full rounded-xl border-0 bg-transparent text-sm text-white"
+                  {...field}
+                  />
+                </FormControl>
+              </FormItem>)
+            }}
+            />
+          {/* <Smile className='text-gray-500 text-xs font-light antialiased w-5 h-5'/>
+            <Mic className='text-gray-500 text-xs font-light antialiased w-5 h-5' /> */}
+          <Button className='bg-[#0D4273] px-2 rounded-full' size="icon" type='submit'>
+            <ArrowUp className='text-xs antialiased'/>
+          </Button>
+            </form>
+          </Form>
+          </div>
+          </div>
+          </>
+        }
+        </>
 )}

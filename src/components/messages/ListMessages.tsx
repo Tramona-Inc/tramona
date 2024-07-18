@@ -1,4 +1,4 @@
-import { type MessageDbType } from "@/types/supabase.message";
+import { type MessageDbType, type GuestMessageType } from "@/types/supabase.message";
 import { type GuestMessage, useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
@@ -11,6 +11,7 @@ import LoadMoreMessages from "./LoadMoreMessages";
 import { groupMessages } from "./groupMessages";
 import { MessageGroup } from "./MessageGroup";
 import { User } from "@/server/db/schema";
+import { type MessageGroups } from "./groupMessages";
 
 function NoMessages() {
   return (
@@ -24,6 +25,7 @@ function isChatMessage(message: ChatMessageType | GuestMessage): message is Chat
   return (message as ChatMessageType).userId !== undefined;
 }
 
+
 export default function ListMessages({
   conversationId,
 }: {
@@ -36,11 +38,11 @@ export default function ListMessages({
 
   const [notification, setNotification] = useState(0);
 
-  const { conversations } = useMessage();
   const optimisticIds = useMessage((state) => state.optimisticIds);
   const currentConversationId = useMessage(
     (state) => state.currentConversationId,
   );
+  const { conversations } = useMessage();
 
   // console.log(currentConversationId);
 
@@ -108,6 +110,20 @@ export default function ListMessages({
     }
   };
 
+  const handlePostgresChangeOnGuest = async (payload: {new: GuestMessageType}) => {
+    const newMessage: ChatMessageType | GuestMessage = {
+      id: payload.new.id,
+      conversationId: payload.new.conversation_id,
+      // userId: "",
+      message: payload.new.message,
+      userToken: payload.new.user_token,
+      isEdit: payload.new.is_edit,
+      createdAt: payload.new.created_at,
+      read: payload.new.read,
+    };
+    addMessageToConversation(payload.new.conversation_id, newMessage);
+  }
+
   useEffect(() => {
     const channel = supabase
       .channel(`${currentConversationId}`)
@@ -127,6 +143,20 @@ export default function ListMessages({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConversationId, messages]);
+
+  useEffect(() => {
+    const channel = supabase
+    .channel(`${currentConversationId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema:"public",
+        table:"guest_messages",
+      },
+      (payload: {new: GuestMessageType}) => void handlePostgresChangeOnGuest(payload) 
+    )
+  }, [currentConversationId, messages])
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
@@ -178,7 +208,7 @@ export default function ListMessages({
   const participants = conversationList[conversationIndex]?.participants;
 
   const guest_participants = adminConversationList[adminConversationIndex]?.guest_participants;
-
+  console.log(messages)
   const messagesWithUser = messages
     .slice()
     .reverse()
@@ -187,6 +217,10 @@ export default function ListMessages({
       if ((!participants && !guest_participants) || !session) return null;
       if (isChatMessage(message) && message.userId === session.user.id) {
         return { message, user: session.user };
+      }
+
+      if(message.userToken === session.user.id){
+        return {message, user: session.user}
       }
 
       const user =
