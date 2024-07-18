@@ -1,5 +1,5 @@
 /* OfferDialog.tsx */
-import { useState } from "react";
+import { Dispatch, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ export default function HostRequestDialog({
   setOpen: (open: boolean) => void;
   request: HostDashboardRequest;
   properties: Property[];
-  setPropertyPrices: (prices: Record<number, string>) => void;
+  setPropertyPrices: Dispatch<React.SetStateAction<Record<number, string>>>;
   propertyPrices: Record<number, string>;
   setStep: (step: number) => void;
 }) {
