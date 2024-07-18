@@ -27,6 +27,7 @@ import { api, type RouterOutputs } from "@/utils/api";
 import { Separator } from "@/components/ui/separator";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
 import LinkConfirmation from "./LinkConfirmation";
+import { cn } from "@/utils/utils";
 
 export type ScrapedProperty = {
   nightlyPrice: number;
@@ -40,7 +41,6 @@ export type ScrapedProperty = {
 type ExtractURLType = RouterOutputs["misc"]["extractBookingDetails"];
 
 export function DesktopRequestDealTab() {
-  const [curTab, setCurTab] = useState(0);
   const [open, setOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [madeByGroupId, setMadeByGroupId] = useState<number>();
@@ -55,7 +55,7 @@ export function DesktopRequestDealTab() {
   const [extractedLinkDataState, setExtractedLinkDataState] = useState<
     ExtractURLType | undefined
   >();
-  const [airbnbLink, setAirbnbLink] = useState<string | null>(null);
+
   const handleSetOpen = (val: boolean) => {
     setOpen(val);
   };
@@ -64,13 +64,11 @@ export function DesktopRequestDealTab() {
   };
 
   const cityForm = useCityRequestForm({
-    setCurTab,
     afterSubmit,
     handleSetOpen,
     handleShowConfetti,
   });
   const linkForm = useLinkRequestForm({
-    setCurTab,
     afterSubmit,
     handleSetOpen,
     handleShowConfetti,
@@ -127,7 +125,7 @@ export function DesktopRequestDealTab() {
 
   const handleCancelClick = () => {
     setLink(false);
-    form.resetField(`data.${curTab}.airbnbLink`, { defaultValue: undefined });
+    form.resetField("airbnbLink", { defaultValue: undefined });
   };
 
   const handleExtractClick = () => {
@@ -135,21 +133,17 @@ export function DesktopRequestDealTab() {
     setOpenLinkConfirmationDialog(true);
   };
 
-  const airbnbLinkValue = form.watch(`data.${curTab}.airbnbLink`);
-
-  useEffect(() => {
-    setAirbnbLink(airbnbLinkValue);
-  }, [airbnbLinkValue, curTab]);
+  const formData = form.watch();
 
   const {
     data: extractUrlData,
     refetch: extractURLRefetch,
     isLoading: extractURLIsLoading,
-  } = api.misc.extractBookingDetails.useQuery(airbnbLink!, {
+  } = api.misc.extractBookingDetails.useQuery(formData.airbnbLink, {
     enabled: false,
     onSuccess: (data) => {
-      form.setValue(`data.${curTab}.numGuests`, data.numOfGuests);
-      form.setValue(`data.${curTab}.date`, {
+      form.setValue("numGuests", data.numOfGuests);
+      form.setValue("date", {
         from: new Date(data.checkIn),
         to: new Date(data.checkOut),
       });
@@ -165,7 +159,6 @@ export function DesktopRequestDealTab() {
 
   useEffect(() => {
     if (triggerExtract) {
-      console.log("Airbnb link", airbnbLink);
       extractURLRefetch().catch(() => {
         toast({
           variant: "destructive",
@@ -175,214 +168,200 @@ export function DesktopRequestDealTab() {
       });
       setTriggerExtract(false);
       setExtractedLinkDataState(extractUrlData);
-      console.log(extractUrlData);
     }
   }, [triggerExtract, extractURLRefetch]);
 
-  useEffect(() => {
-    console.log("Form Errors:", form.formState.errors);
-    console.log("form", form.watch());
-  }, [form.formState.errors]);
-
   return (
-    <>
-      <Form {...form}>
-        <form
-          onSubmit={onSubmit}
-          className="flex flex-col justify-between gap-y-4"
-          key={curTab} // rerender on tab changes
+    <Form {...form}>
+      <form
+        onSubmit={onSubmit}
+        className="flex flex-col justify-between gap-y-4"
+      >
+        <div
+          className={cn("space-y-2", link && "placeholder-black opacity-50")}
         >
-          <div
-            className={
-              link ? "pointer-events-none placeholder-black opacity-50" : ""
-            }
-          >
-            <PlacesInput
-              control={form.control}
-              name={`data.${curTab}.location`}
-              formLabel="Location"
-              variant="lpDesktop"
-              placeholder="Select a location"
-              icon={MapPinIcon}
-            />
-
-            <FormField
-              control={form.control}
-              name={`data.${curTab}.date`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <DateRangeInput
-                      {...field}
-                      label="Check in/out"
-                      icon={CalendarIcon}
-                      variant="lpDesktop"
-                      disablePast
-                      className="bg-white"
-                      onChange={(value) => field.onChange(value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`data.${curTab}.numGuests`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      label="Guests"
-                      placeholder="Add guests"
-                      icon={Users2Icon}
-                      variant="lpDesktop"
-                      onChange={(e) => field.onChange(e)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`data.${curTab}.maxNightlyPriceUSD`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      label="Maximum nightly price"
-                      placeholder="Price per night"
-                      suffix="/night"
-                      icon={DollarSignIcon}
-                      variant="lpDesktop"
-                      onChange={(e) => field.onChange(e)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex items-center gap-2 text-teal-900">
-              <CityRequestFiltersDialog form={form} curTab={curTab}>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="px-2 text-teal-900 hover:bg-teal-900/15"
-                >
-                  <FilterIcon />
-                  More filters
-                </Button>
-              </CityRequestFiltersDialog>
-            </div>
-          </div>
-          <div className="flex flex-row items-center justify-center gap-x-4 text-zinc-400">
-            <Separator className="w-2/5 bg-zinc-400" />
-            <p> or </p>
-            <Separator className="w-2/5 bg-zinc-400" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm">
-              Have a property you like? We&apos;ll send your request directly to
-              the host.
-            </p>
-            {!link && (
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={handleAddLinkClick}
-              >
-                <Plus size={20} />
-                Add link
-              </Button>
-            )}
-            {link && (
-              <div className="flex items-center space-x-2">
-                <div className="basis-full">
-                  <FormField
-                    control={form.control}
-                    name={`data.${curTab}.airbnbLink`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Paste property link here (optional)"
-                            className="w-full"
-                            icon={Link2}
-                            onChange={(e) => field.onChange(e)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button
-                  variant="greenPrimary"
-                  type="button"
-                  onClick={handleExtractClick}
-                  className="font-bold"
-                >
-                  Extract
-                </Button>
-                <Button
-                  variant="link"
-                  type="button"
-                  onClick={handleCancelClick}
-                  className="font-bold"
-                >
-                  Cancel
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end sm:justify-start">
-            <Button
-              type="submit"
-              size="lg"
-              variant="greenPrimary"
-              // disabled={form.formState.isSubmitting}
-              className="mt-2"
-            >
-              {!form.formState.isSubmitting
-                ? "Submit Request"
-                : "Submitting..."}
-            </Button>
-          </div>
-        </form>
-
-        {openLinkConfirmationDialog && (
-          <LinkConfirmation
-            open={openLinkConfirmationDialog}
-            setOpen={setOpenLinkConfirmationDialog}
-            extractedLinkDataState={extractedLinkDataState}
-            extractIsLoading={extractURLIsLoading}
-            formControl={form.control}
-            formFields={{
-              checkIn: `data.${curTab}.date.from`,
-              checkOut: `data.${curTab}.date.to`,
-              numGuests: `data.${curTab}.numGuests`,
-            }}
-            onSubmit={onSubmit} // Pass the form's submit handler
+          <PlacesInput
+            control={form.control}
+            name={`location`}
+            formLabel="Location"
+            variant="lpDesktop"
+            placeholder="Select a location"
+            icon={MapPinIcon}
           />
-        )}
 
-        <RequestSubmittedDialog
-          open={open}
-          setOpen={setOpen}
-          form={form}
-          curTab={curTab}
-          showConfetti={showConfetti}
-          handleInvite={handleInvite}
-          isLoading={isLoading}
-          inviteLink={inviteLink}
+          <FormField
+            control={form.control}
+            name={`date`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <DateRangeInput
+                    {...field}
+                    label="Check in/out"
+                    icon={CalendarIcon}
+                    variant="lpDesktop"
+                    disablePast
+                    className="bg-white"
+                    onChange={(value) => field.onChange(value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`numGuests`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field}
+                    label="Guests"
+                    placeholder="Add guests"
+                    icon={Users2Icon}
+                    variant="lpDesktop"
+                    onChange={(e) => field.onChange(e)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`maxNightlyPriceUSD`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field}
+                    label="Maximum nightly price"
+                    placeholder="Price per night"
+                    suffix="/night"
+                    icon={DollarSignIcon}
+                    variant="lpDesktop"
+                    onChange={(e) => field.onChange(e)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex items-center gap-2 text-teal-900">
+            <CityRequestFiltersDialog form={form}>
+              <Button
+                variant="ghost"
+                type="button"
+                className="px-2 text-teal-900 hover:bg-teal-900/15"
+              >
+                <FilterIcon />
+                More filters
+              </Button>
+            </CityRequestFiltersDialog>
+          </div>
+        </div>
+        <div className="flex flex-row items-center justify-center gap-x-4 text-zinc-400">
+          <Separator className="w-2/5 bg-zinc-400" />
+          <p> or </p>
+          <Separator className="w-2/5 bg-zinc-400" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-pretty text-sm">
+            Have a property you like? We&apos;ll send your request directly to
+            the host.
+          </p>
+          {!link && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={handleAddLinkClick}
+            >
+              <Plus size={20} />
+              Add link
+            </Button>
+          )}
+          {link && (
+            <div className="flex items-center space-x-2">
+              <div className="basis-full">
+                <FormField
+                  control={form.control}
+                  name={`airbnbLink`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Paste property link here (optional)"
+                          className="w-full"
+                          icon={Link2}
+                          onChange={(e) => field.onChange(e)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <Button
+                variant="greenPrimary"
+                type="button"
+                onClick={handleExtractClick}
+                className="font-bold"
+              >
+                Extract
+              </Button>
+              <Button
+                variant="link"
+                type="button"
+                onClick={handleCancelClick}
+                className="font-bold"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="flex justify-end sm:justify-start">
+          <Button
+            type="submit"
+            size="lg"
+            variant="greenPrimary"
+            disabled={form.formState.isSubmitting}
+            className="mt-2"
+          >
+            Submit Request
+          </Button>
+        </div>
+      </form>
+
+      {openLinkConfirmationDialog && (
+        <LinkConfirmation
+          open={openLinkConfirmationDialog}
+          setOpen={setOpenLinkConfirmationDialog}
+          extractedLinkDataState={extractedLinkDataState}
+          extractIsLoading={extractURLIsLoading}
+          formControl={form.control}
+          formFields={{
+            checkIn: `date.from`,
+            checkOut: `date.to`,
+            numGuests: `numGuests`,
+          }}
+          onSubmit={onSubmit} // Pass the form's submit handler
         />
-      </Form>
-    </>
+      )}
+
+      <RequestSubmittedDialog
+        open={open}
+        setOpen={setOpen}
+        form={form}
+        showConfetti={showConfetti}
+        handleInvite={handleInvite}
+        isLoading={isLoading}
+        inviteLink={inviteLink}
+      />
+    </Form>
   );
 }

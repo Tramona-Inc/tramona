@@ -5,7 +5,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { type DetailedRequest } from "@/components/requests/RequestCard";
+import {
+  HostDashboardRequest,
+  type DetailedRequest,
+} from "@/components/requests/RequestCard";
 import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,
@@ -36,7 +39,7 @@ export default function HostConfirmRequestDialog({
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  request: DetailedRequest;
+  request: HostDashboardRequest;
   properties: Property[];
   setPropertyPrices: React.Dispatch<
     React.SetStateAction<Record<number, string>>

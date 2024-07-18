@@ -64,7 +64,14 @@ export default function PlacesPopover({
         <PopoverTrigger asChild>
           <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
         </PopoverTrigger>
-        <PopoverContent dontAnimate align="start" className={cn("p-0 bg-white rounded-3xl shadow-lg border border-gray-100", className)}>
+        <PopoverContent
+          dontAnimate
+          align="start"
+          className={cn(
+            "rounded-lg border border-zinc-100 bg-white p-0 shadow-lg",
+            className,
+          )}
+        >
           <Command>
             <CommandInput
               value={input}
@@ -80,7 +87,7 @@ export default function PlacesPopover({
                     <CommandGroup>Loading suggestions...</CommandGroup>
                   )} */}
             {suggestionsLoading === "OK" && (
-              <CommandList>
+              <CommandList className="p-1">
                 {data.map((suggestion) => (
                   <CommandItem
                     key={suggestion.place_id}
@@ -90,11 +97,11 @@ export default function PlacesPopover({
                       setInput(suggestion.description);
                       setOpen(false);
                     }}
-                    className="mx-2 my-1 flex rounded-md data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground px-3 py-3"
+                    className="flex rounded-md p-2 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
                   >
                     <div className="flex flex-1 items-center">
-                      <div className="mr-2 rounded-md bg-gray-300 p-3">
-                        <MapPinIcon className="h-5 w-5 text-gray-800" />
+                      <div className="mr-2 rounded-md bg-black/10 p-2">
+                        <MapPinIcon className="h-5 w-5 text-zinc-800" />
                       </div>
                       <p className="line-clamp-1 flex-1">
                         {suggestion.description}
@@ -114,7 +121,7 @@ export default function PlacesPopover({
             )}
             {input === "" && (
               <CommandGroup>
-                <p className="mt-2 text-center text-sm text-muted-foreground">
+                <p className="py-3 text-center text-sm text-muted-foreground">
                   Start typing to see suggestions
                 </p>
               </CommandGroup>

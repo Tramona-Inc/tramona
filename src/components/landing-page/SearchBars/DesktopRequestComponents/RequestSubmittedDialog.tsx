@@ -6,56 +6,32 @@ import Link from "next/link";
 import RequestEmailInvitation from "./RequestEmaiInvitation";
 import type { CityRequestForm } from "@/components/landing-page/SearchBars/useCityRequestForm";
 import type { LinkRequestForm } from "@/components/landing-page/SearchBars/useLinkRequestForm";
-
-export type FormValues = {
-  data: {
-    location?: string;
-    date?: {
-      from: Date;
-      to: Date;
-    };
-    numGuests?: number;
-    maxNightlyPriceUSD?: number;
-    airbnbLink?: string;
-    minNumBathrooms?: number;
-    note?: string;
-    minNumBeds?: number;
-    minNumBedrooms?: number;
-  }[];
-};
+import { isCityRequestForm } from "../schemas";
 
 interface RequestSubmittedDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   form: CityRequestForm | LinkRequestForm;
-  curTab: number;
   showConfetti: boolean;
   inviteLink: string | null;
   handleInvite: (emails: string[]) => void;
   isLoading: boolean;
 }
 
-function isCityRequestForm(
-  form: CityRequestForm | LinkRequestForm,
-): form is CityRequestForm {
-  return "citySpecificProperty" in form; // Example property unique to CityRequestForm
-}
-
 const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   open,
   setOpen,
   form,
-  curTab,
   showConfetti,
   inviteLink,
   handleInvite,
   isLoading,
 }) => {
   // Watch the specific data entry for the current tab
-  const formData = form.watch(`data.${curTab}`);
+  const formData = (form as CityRequestForm).watch();
   const isCityForm = isCityRequestForm(form);
   // Now we can directly access location or use a fallback
-  const location = isCityForm && formData ? formData.location : undefined;
+  const location = isCityForm && formData.location;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -65,17 +41,21 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
         </div>
         <p className="mb-4 ml-8">
           {isCityForm ? (
-            <p>
+            <>
               We sent your request out to every host in <b>{location}</b>. In
               the next 24 hours, hosts will send you properties that match your
-              requirements. To check out matches
-            </p>
+              requirements. To check out matches,{" "}
+            </>
           ) : (
-            "Your link has been submitted, either we will get you that property or one just like it. Over the next 24 hours, hosts will reach out with properties that meet your criteria. To view your matches"
+            <>
+              Your link has been submitted, either we will get you that property
+              or one just like it. Over the next 24 hours, hosts will reach out
+              with properties that meet your criteria. To view your matches,{" "}
+            </>
           )}
           <Link
             href="/requests"
-            className="font-semibold text-neutral-900 underline"
+            className="font-semibold text-zinc-900 underline"
           >
             click here
           </Link>

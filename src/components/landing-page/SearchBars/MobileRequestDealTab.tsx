@@ -41,7 +41,7 @@ export function MobileRequestDealTab({
           <div className="grid gap-1">
             <PlacesInput
               control={form.control}
-              name={`data.${curTab}.location`}
+              name={`location`}
               formLabel="Location"
               variant="lpMobile"
               placeholder="Select a location"
@@ -49,7 +49,7 @@ export function MobileRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.date`}
+              name={`date`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -67,7 +67,7 @@ export function MobileRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.numGuests`}
+              name={`numGuests`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -85,7 +85,7 @@ export function MobileRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.maxNightlyPriceUSD`}
+              name={`maxNightlyPriceUSD`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>

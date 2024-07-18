@@ -1,7 +1,12 @@
 import React, { useEffect } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import type { Control } from "react-hook-form";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DateRangeInput from "@/components/_common/DateRangeInput";
@@ -72,11 +77,13 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="flex flex-col">
-        <h2>Confirm Booking Details</h2>
+        <DialogHeader>
+          <DialogTitle>Confirm Booking Details</DialogTitle>
+        </DialogHeader>
         {extractIsLoading ? (
           <Spinner />
         ) : (
-          <div>
+          <div className="space-y-2">
             <Controller
               name={formFields.checkIn}
               control={formControl}
@@ -116,15 +123,15 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
           </div>
         )}
         <div className="flex w-full justify-between gap-x-2">
+          <Button onClick={handleCancel} variant="secondary">
+            Cancel
+          </Button>
           <Button
             onClick={handleConfirm}
             disabled={extractIsLoading}
             variant="greenPrimary"
           >
             {extractIsLoading ? "Submitting..." : "Submit Request"}
-          </Button>
-          <Button onClick={handleCancel} variant="outline">
-            Cancel
           </Button>
         </div>
       </DialogContent>

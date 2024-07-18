@@ -59,41 +59,39 @@ export default function DateRangeInput({
         />
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto p-0 backdrop-blur-md rounded-3xl"
+        className="w-auto rounded-3xl p-0 backdrop-blur-md"
         align="center"
         side="bottom"
       >
         <div className="hidden lg:block">
-        <Calendar
-          mode="range"
-          selected={value}
-          onSelect={(e) => {
-            if (e?.from && e.to === undefined) {
-              e.to = e.from;
-            }
-            onChange(e);
-          }}
-          disabled={dateIsDisabled}
-          numberOfMonths={2}
-          showOutsideDays={true}
-          className="h-80"
-        />
+          <Calendar
+            mode="range"
+            selected={value}
+            onSelect={(e) => {
+              if (e?.from && e.to === undefined) {
+                e.to = e.from;
+              }
+              onChange(e);
+            }}
+            disabled={dateIsDisabled}
+            numberOfMonths={2}
+            className="h-80"
+          />
         </div>
         <div className="lg:hidden">
-        <Calendar
-          mode="range"
-          selected={value}
-          onSelect={(e) => {
-            if (e?.from && e.to === undefined) {
-              e.to = e.from;
-            }
-            onChange(e);
-          }}
-          disabled={dateIsDisabled}
-          numberOfMonths={1}
-          showOutsideDays={true}
-          className="h-80"
-        />
+          <Calendar
+            mode="range"
+            selected={value}
+            onSelect={(e) => {
+              if (e?.from && e.to === undefined) {
+                e.to = e.from;
+              }
+              onChange(e);
+            }}
+            disabled={dateIsDisabled}
+            numberOfMonths={1}
+            className="h-80"
+          />
         </div>
       </PopoverContent>
     </Popover>

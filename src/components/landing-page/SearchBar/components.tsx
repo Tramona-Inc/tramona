@@ -57,15 +57,15 @@
 //     if (response instanceof TRPCError) {
 //       errorToast("Couldn't retrieve data from AirBnB, please try again.");
 //     } else {
-//       // parentForm.setValue(`data.${curTab}.airbnbLink`, data.airbnbLink);
+//       // parentForm.setValue(`airbnbLink`, data.airbnbLink);
 //       parentForm.setValue(
-//         `data.${curTab}.maxNightlyPriceUSD`,
+//         `maxNightlyPriceUSD`,
 //         response.nightlyPrice,
 //       );
-//       parentForm.setValue(`data.${curTab}.location`, response.propertyName);
-//       parentForm.setValue(`data.${curTab}.date.from`, response.checkIn);
-//       parentForm.setValue(`data.${curTab}.date.to`, response.checkOut);
-//       parentForm.setValue(`data.${curTab}.numGuests`, response.numGuests);
+//       parentForm.setValue(`location`, response.propertyName);
+//       parentForm.setValue(`date.from`, response.checkIn);
+//       parentForm.setValue(`date.to`, response.checkOut);
+//       parentForm.setValue(`numGuests`, response.numGuests);
 
 //       setDialogOpen(false);
 //     }
@@ -73,7 +73,7 @@
 
 //   return (
 //     <div>
-//       {parentForm.getValues(`data.${curTab}.airbnbLink`) === undefined ? (
+//       {parentForm.getValues(`airbnbLink`) === undefined ? (
 //         <Button
 //           type="button"
 //           variant="outline"
@@ -93,7 +93,7 @@
 //           onClick={() => setDialogOpen(true)}
 //         >
 //           <X />
-//           {parentForm.getValues(`data.${curTab}.airbnbLink`)!.substring(0, 50)}
+//           {parentForm.getValues(`airbnbLink`)!.substring(0, 50)}
 //           ...
 //         </Button>
 //       )}
@@ -111,7 +111,7 @@
 //               <FormField
 //                 control={form.control}
 //                 name={"airbnbLink"}
-//                 defaultValue={parentForm.getValues(`data.${curTab}.airbnbLink`)}
+//                 defaultValue={parentForm.getValues(`airbnbLink`)}
 //                 render={({ field }) => (
 //                   <FormItem>
 //                     <FormLabel>Link</FormLabel>
@@ -171,15 +171,15 @@
 //     if (response instanceof TRPCError) {
 //       errorToast("Couldn't retrieve data from AirBnB, please try again.");
 //     } else {
-//       parentForm.setValue(`data.${curTab}.airbnbLink`, data.airbnbLink);
+//       parentForm.setValue(`airbnbLink`, data.airbnbLink);
 //       parentForm.setValue(
-//         `data.${curTab}.maxNightlyPriceUSD`,
+//         `maxNightlyPriceUSD`,
 //         response.nightlyPrice,
 //       );
-//       parentForm.setValue(`data.${curTab}.location`, response.propertyName);
-//       parentForm.setValue(`data.${curTab}.date.from`, response.checkIn);
-//       parentForm.setValue(`data.${curTab}.date.to`, response.checkOut);
-//       parentForm.setValue(`data.${curTab}.numGuests`, response.numGuests);
+//       parentForm.setValue(`location`, response.propertyName);
+//       parentForm.setValue(`date.from`, response.checkIn);
+//       parentForm.setValue(`date.to`, response.checkOut);
+//       parentForm.setValue(`numGuests`, response.numGuests);
 //     }
 //   };
 
@@ -187,7 +187,7 @@
 //     <div>
 //       <Popover>
 //         <PopoverTrigger asChild>
-//           {parentForm.getValues(`data.${curTab}.airbnbLink`) === undefined ? (
+//           {parentForm.getValues(`airbnbLink`) === undefined ? (
 //             <Button
 //               type="button"
 //               variant="outline"
@@ -206,7 +206,7 @@
 //             >
 //               <X />
 //               {parentForm
-//                 .getValues(`data.${curTab}.airbnbLink`)!
+//                 .getValues(`airbnbLink`)!
 //                 .substring(0, 50)}
 //               ...
 //             </Button>
@@ -218,7 +218,7 @@
 //               <FormField
 //                 control={form.control}
 //                 name={"airbnbLink"}
-//                 defaultValue={parentForm.getValues(`data.${curTab}.airbnbLink`)}
+//                 defaultValue={parentForm.getValues(`airbnbLink`)}
 //                 render={({ field }) => (
 //                   <FormItem>
 //                     <FormLabel>

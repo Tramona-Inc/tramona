@@ -21,11 +21,11 @@ import {
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
 import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
-import { TestimonialCarousel } from "./TestimonialCarousel";
+import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import Typewriter from "typewriter-effect";
 import Image from "next/image";
 import CompletedRequestsSection from "./CompletedRequests";
-import { MobileTestimonialCarousel } from "./MobileTestimonialCarousel";
+import { MobileTestimonialCarousel } from "./testimonials/MobileTestimonialCarousel";
 
 export default function MastHead() {
   return (
@@ -331,11 +331,11 @@ export default function MastHead() {
         </div>
 
         <div className="flex flex-1 flex-col items-center rounded-lg bg-zinc-100 p-6 text-center">
-          <h3 className="mb-4 text-2xl font-bold">Listing your place</h3>
+          <h3 className="mb-4 text-2xl font-bold">Listing your place?</h3>
           <p className="mb-6 text-sm text-zinc-600">
-            It&apos;s as easy as making an account, and signing up has a host.
-            We have API access from the biggest PMS, or you can upload manually.
-            Once on, wait for requests to roll in.
+            It&apos;s as easy as making an account and signing up as a host. We
+            have API access from the biggest PMS&apos;s, or you can upload
+            manually. Once on, wait for requests to roll in.
           </p>
           <div className="mb-2 text-4xl font-bold text-teal-900">15%</div>
           <p className="mb-6 text-sm text-zinc-600">

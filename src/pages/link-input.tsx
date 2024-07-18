@@ -2,13 +2,12 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import linkInputBg from "public/assets/images/link-input-bg.jpg";
 import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
-import { TestimonialCarousel } from "../components/landing-page/_sections/TestimonialCarousel";
 import Image from "next/image";
-import { MobileTestimonialCarousel } from "../components/landing-page/_sections/MobileTestimonialCarousel";
 import Link from "next/link";
-import AddAirbnbLink from "@/components/link-input/AddAirbnbLink";
 
 import { Clock8, Handshake, CircleDollarSign } from "lucide-react";
+import { TestimonialCarousel } from "@/components/landing-page/_sections/SeeCompletedRequests";
+import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
 
 // ... (other imports)
 
