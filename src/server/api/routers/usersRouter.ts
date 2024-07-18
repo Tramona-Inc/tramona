@@ -7,6 +7,7 @@ import {
 import {
   ALL_PROPERTY_TYPES,
   bookedDates,
+  emergencyContacts,
   groups,
   hostProfiles,
   hostTeamMembers,
@@ -700,4 +701,30 @@ export const usersRouter = createTRPCRouter({
       }
       return verifications;
     }),
+  addEmergencyContacts: protectedProcedure
+    .input(
+      z.object({
+        emergencyEmail: z.string(),
+        emergencyPhone: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.insert(emergencyContacts).values({
+        userId: ctx.user.id,
+        emergencyEmail: input.emergencyEmail,
+        emergencyPhone: input.emergencyPhone,
+      });
+    }),
+  deleteEmergencyContact: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(emergencyContacts)
+        .where(eq(emergencyContacts.id, input.id));
+    }),
+  getEmergencyContacts: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.emergencyContacts.findMany({
+      where: eq(emergencyContacts.userId, ctx.user.id),
+    });
+  }),
 });

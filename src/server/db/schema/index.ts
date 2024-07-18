@@ -10,6 +10,7 @@ export * from "./tables/counters";
 export * from "./tables/groups";
 export * from "./tables/hostProfiles";
 export * from "./tables/hostTeams";
+export * from "./tables/emergencyContacts";
 export * from "./tables/messages";
 export * from "./tables/offers";
 export * from "./tables/properties";
