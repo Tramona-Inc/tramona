@@ -115,10 +115,10 @@ export default function MastHead() {
 
       <div className="h-72 lg:h-60"></div>
 
-      <div className="mx-4 mt-8 hidden justify-center space-y-4 lg:mx-0 lg:mt-16 lg:flex lg:space-y-8">
+      <div className="mt-8 hidden max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:flex lg:space-y-8">
         <TestimonialCarousel />
       </div>
-      <div className="mx-4 mt-8 flex justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
+      <div className="mt-8 flex max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
         <MobileTestimonialCarousel />
       </div>
 
@@ -186,7 +186,7 @@ export default function MastHead() {
       </div>
 
       <div className="flex justify-center">
-        <div className="mt-20 lg:grid lg:grid-cols-2 lg:gap-24">
+        <div className="mt-20 lg:grid lg:grid-cols-2 xl:gap-24">
           <div className="flex flex-col space-y-1 pb-6 text-left lg:mr-24 lg:flex lg:flex-col lg:justify-center lg:space-y-4">
             <h2 className="text-2xl font-extrabold lg:text-4xl">
               See completed requests

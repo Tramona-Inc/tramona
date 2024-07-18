@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import { CalendarIcon, Users2Icon } from "lucide-react";
+import Spinner from "@/components/_common/Spinner";
 
 interface LinkConfirmationProps {
   open: boolean;
@@ -39,6 +40,7 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
   const { setValue, watch, reset } = useFormContext();
 
   useEffect(() => {
+    console.log("extractedLinkDataState", extractedLinkDataState);
     if (extractedLinkDataState) {
       const checkInDate = new Date(extractedLinkDataState.checkIn);
       const checkOutDate = new Date(extractedLinkDataState.checkOut);
@@ -51,7 +53,7 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
         console.error("Invalid date extracted", { checkInDate, checkOutDate });
       }
     }
-  }, [extractedLinkDataState, setValue, formFields]);
+  }, [extractedLinkDataState]);
 
   const checkInValue = watch(formFields.checkIn) as Date | undefined;
   const checkOutValue = watch(formFields.checkOut) as Date | undefined;
@@ -71,44 +73,48 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="flex flex-col">
         <h2>Confirm Booking Details</h2>
-        <div>
-          <Controller
-            name={formFields.checkIn}
-            control={formControl}
-            render={({ field }) => (
-              <DateRangeInput
-                {...field}
-                label="Check In/Out"
-                icon={CalendarIcon}
-                variant="lpDesktop"
-                disablePast
-                className="bg-white"
-                onChange={(value) => {
-                  setValue(formFields.checkIn, value?.from ?? undefined);
-                  setValue(formFields.checkOut, value?.to ?? undefined);
-                }}
-                value={{ from: checkInValue, to: checkOutValue }}
-              />
-            )}
-          />
-          <Controller
-            name={formFields.numGuests}
-            control={formControl}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Number of Guests"
-                placeholder="Add guests"
-                icon={Users2Icon}
-                variant="lpDesktop"
-                onChange={(e) =>
-                  setValue(formFields.numGuests, Number(e.target.value))
-                }
-                value={numGuestsValue || ""}
-              />
-            )}
-          />
-        </div>
+        {extractIsLoading ? (
+          <Spinner />
+        ) : (
+          <div>
+            <Controller
+              name={formFields.checkIn}
+              control={formControl}
+              render={({ field }) => (
+                <DateRangeInput
+                  {...field}
+                  label="Check In/Out"
+                  icon={CalendarIcon}
+                  variant="lpDesktop"
+                  disablePast
+                  className="bg-white"
+                  onChange={(value) => {
+                    setValue(formFields.checkIn, value?.from ?? undefined);
+                    setValue(formFields.checkOut, value?.to ?? undefined);
+                  }}
+                  value={{ from: checkInValue, to: checkOutValue }}
+                />
+              )}
+            />
+            <Controller
+              name={formFields.numGuests}
+              control={formControl}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Number of Guests"
+                  placeholder="Add guests"
+                  icon={Users2Icon}
+                  variant="lpDesktop"
+                  onChange={(e) =>
+                    setValue(formFields.numGuests, Number(e.target.value))
+                  }
+                  value={numGuestsValue || ""}
+                />
+              )}
+            />
+          </div>
+        )}
         <div className="flex w-full justify-between gap-x-2">
           <Button
             onClick={handleConfirm}

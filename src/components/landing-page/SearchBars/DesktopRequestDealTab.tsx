@@ -132,15 +132,14 @@ export function DesktopRequestDealTab() {
 
   const handleExtractClick = () => {
     setTriggerExtract(true);
-    console.log(extractedLinkDataState);
     setOpenLinkConfirmationDialog(true);
   };
 
-  const allFormValues = form.watch();
+  const airbnbLinkValue = form.watch(`data.${curTab}.airbnbLink`);
 
   useEffect(() => {
-    setAirbnbLink(allFormValues.data.airbnbLink!);
-  }, [allFormValues, curTab]);
+    setAirbnbLink(airbnbLinkValue);
+  }, [airbnbLinkValue, curTab]);
 
   const {
     data: extractUrlData,
@@ -166,6 +165,7 @@ export function DesktopRequestDealTab() {
 
   useEffect(() => {
     if (triggerExtract) {
+      console.log("Airbnb link", airbnbLink);
       extractURLRefetch().catch(() => {
         toast({
           variant: "destructive",
@@ -175,8 +175,14 @@ export function DesktopRequestDealTab() {
       });
       setTriggerExtract(false);
       setExtractedLinkDataState(extractUrlData);
+      console.log(extractUrlData);
     }
   }, [triggerExtract, extractURLRefetch]);
+
+  useEffect(() => {
+    console.log("Form Errors:", form.formState.errors);
+    console.log("form", form.watch());
+  }, [form.formState.errors]);
 
   return (
     <>
@@ -339,8 +345,9 @@ export function DesktopRequestDealTab() {
             <Button
               type="submit"
               size="lg"
-              disabled={form.formState.isSubmitting}
-              className="mt-2 h-12 w-full rounded-md bg-teal-900 hover:bg-teal-950 sm:w-auto sm:rounded-full lg:rounded-md"
+              variant="greenPrimary"
+              // disabled={form.formState.isSubmitting}
+              className="mt-2"
             >
               {!form.formState.isSubmitting
                 ? "Submit Request"

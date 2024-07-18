@@ -179,6 +179,7 @@ export const offersRouter = createTRPCRouter({
               host: {
                 columns: { id: true, name: true, email: true, image: true },
               },
+              reviews: true,
             },
           },
         },
@@ -247,6 +248,7 @@ export const offersRouter = createTRPCRouter({
                   },
                 },
               },
+              reviews: true,
             },
           },
         },
