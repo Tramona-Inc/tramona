@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent } from "../ui/dialog";
+import { DialogContent, Dialog, DialogTrigger } from "../ui/dialog";
 import { type Bid } from "@/server/db/schema/tables/bids";
 import { api } from "@/utils/api";
 import { formatDateMonthDay } from "@/utils/utils";
@@ -9,9 +9,8 @@ import { getDiscountPercentage } from "@/utils/utils";
 import { useEffect, useRef, useState } from "react";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import Confetti from "react-confetti";
-import exportAsImage from "@/utils/exportAsImage";
-import { Trip } from "@/server/db/schema";
 import { TripCardDetails } from "@/pages/my-trips";
+import SharePropertyDialogContent from "../_common/ShareLink/SharePropertyDialogContent";
 
 export default function SuccessfulBidDialog({
   open,
@@ -22,12 +21,12 @@ export default function SuccessfulBidDialog({
   setOpen: (o: boolean) => void;
   booking: TripCardDetails | null;
 }) {
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   if (!booking) return null;
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogContent ref={dialogRef}>
+      <DialogContent>
         <div className="space-y-4 text-center">
           <div className="mt-3 md:mt-9 relative">
             <h1 className="text-9xl font-magazine flex-col font-medium relative z-10">
@@ -52,17 +51,26 @@ export default function SuccessfulBidDialog({
             </p>
           )}
           <div className="md:py-5">
-            <Link href="/my-trips">
-              <Button variant="greenPrimary" className="w-full px-10 py-6 sm:w-auto rounded-full text-lg" onClick={() => {if (dialogRef.current) exportAsImage(dialogRef.current, `tramona-booking-${booking.property.city}`)}}>
+            <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="greenPrimary" className="w-full px-10 py-6 sm:w-auto rounded-full text-lg">
                 Share
-              </Button>
-            </Link>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="text-xl font-semibold">
+            <SharePropertyDialogContent
+              id={booking.property.id}
+              propertyName={booking.property.name}
+            />
+          </DialogContent>
+        </Dialog>
           </div>
         </div>
 
         <div className="z-100 pointer-events-none fixed inset-0">
             <Confetti width={window.innerWidth} recycle={false} />
-          </div>
+        </div>
+
       </DialogContent>
     </Dialog>
   );
