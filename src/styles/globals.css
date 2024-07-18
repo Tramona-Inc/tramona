@@ -104,13 +104,6 @@ body {
   .paused {
     animation-play-state: paused;
   }
-}
-
-@import url("https://fonts.googleapis.com/css2?family=Stint+Ultra+Condensed&display=swap");
-@font-face {
-  font-family: "Stint-Ultra-Condensed";
-  src: url("../../public/fonts/StintUltraCondensed-Regular.ttf"); 
-}
 
   .custom-tabs-trigger {
     @apply border-b-2 transition-colors hover:border-[#2F5BF6] hover:text-[#2F5BF6];
@@ -124,4 +117,10 @@ body {
     -webkit-line-clamp: 3; /* Number of lines to show before truncating */
     line-clamp: 3;
   }
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Stint+Ultra+Condensed&display=swap");
+@font-face {
+  font-family: "Stint-Ultra-Condensed";
+  src: url("../../public/fonts/StintUltraCondensed-Regular.ttf"); 
 }
