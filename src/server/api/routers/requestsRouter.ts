@@ -6,7 +6,6 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  MAX_REQUEST_GROUP_SIZE,
   groupMembers,
   groups,
   requestGroups,
@@ -33,10 +32,8 @@ import {
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, count, eq, exists } from "drizzle-orm";
-import { groupBy, max } from "lodash";
-import puppeteer from "puppeteer";
+import { groupBy } from "lodash";
 import { z } from "zod";
-import type { createTRPCContext } from "@/server/api/trpc";
 import type { Session } from "next-auth";
 
 const updateRequestInputSchema = z.object({
