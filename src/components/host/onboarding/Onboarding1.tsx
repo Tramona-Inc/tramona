@@ -88,12 +88,22 @@ export default function Onboarding1({
     },
   ];
 
+  const formSchema = z.object({
+    pms: z.enum(ALL_PROPERTY_PMS),
+    accountId: z.string().optional(),
+    apiKey: z.string().optional(),
+  }).refine((data) => {
+    if (data.pms === "Hostaway") {
+      return !!data.accountId && !!data.apiKey;
+    }
+    return true;
+  }, {
+    message: "Account ID and API Key are required for Hostaway",
+    path: ["accountId", "apiKey"],
+  });
+  
   const form = useZodForm({
-    schema: z.object({
-      pms: z.enum(ALL_PROPERTY_PMS),
-      accountId: z.string(),
-      apiKey: z.string(),
-    }),
+    schema: formSchema,
   });
 
   const { mutateAsync: generateBearerToken } =
@@ -103,21 +113,53 @@ export default function Onboarding1({
       },
     });
 
+  const { mutateAsync: getOwnerRezAuthUrl } =
+    api.pms.getOwnerRezAuthUrl.useMutation({
+      onSuccess: () => {
+        closeModal();
+      },
+    });
+
   const { mutateAsync: createHostProfile } =
     api.users.createHostProfile.useMutation({});
 
-  const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
-    const { bearerToken } = await generateBearerToken({ accountId, apiKey });
-    console.log(bearerToken);
-
-    await createHostProfile({
-      hostawayApiKey: apiKey,
-      hostawayAccountId: accountId,
-      hostawayBearerToken: bearerToken,
+    const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
+      console.log("Form submitted:", { pms, accountId, apiKey });
+      if (pms === "OwnerRez") {
+        alert("Calling getOwnerRezAuthUrl");
+        try {
+          const authUrl = await getOwnerRezAuthUrl({
+            redirectUri: `${window.location.origin}/api/ownerrez-callback`,
+            state: crypto.randomUUID(),
+          });
+          if (authUrl) {
+            window.location.href = authUrl;
+          } else {
+            throw new Error("Failed to get OwnerRez authorization URL");
+          }
+        } catch (error) {
+          console.error("Error getting OwnerRez auth URL:", error);
+        }
+      } else if (pms === "Hostaway") {
+        console.log("Calling generateBearerToken");
+        if (accountId && apiKey) {
+          try {
+            const { bearerToken } = await generateBearerToken({ accountId, apiKey });
+            console.log(bearerToken);
+            await createHostProfile({
+              hostawayApiKey: apiKey,
+              hostawayAccountId: accountId,
+              hostawayBearerToken: bearerToken,
+            });
+            void router.push("/host");
+          } catch (error) {
+            console.error("Error in Hostaway flow:", error);
+          }
+        } else {
+          console.error("Account ID and API Key are required for Hostaway");
+        }
+      }
     });
-    void router.push("/host");
-    console.log({ pms, accountId, apiKey });
-  });
 
   return (
     <>
@@ -176,7 +218,17 @@ export default function Onboarding1({
             <>
               <div className="space-y-4">
                 <Form {...form}>
-                  <form onSubmit={handleSubmit}>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      console.log(
+                        "Form state before submit:",
+                        form.getValues(),
+                      );
+                      console.log("Form errors:", form.formState.errors);
+                      handleSubmit(e);
+                    }}
+                  >
                     <FormField
                       control={form.control}
                       name="pms"
@@ -208,36 +260,44 @@ export default function Onboarding1({
                         </FormItem>
                       )}
                     ></FormField>
-                    <FormField
-                      control={form.control}
-                      name="accountId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Account ID</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              autoFocus
-                              placeholder="Account ID"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    ></FormField>
-                    <FormField
-                      control={form.control}
-                      name="apiKey"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>API Key</FormLabel>
-                          <FormControl>
-                            <Input {...field} autoFocus placeholder="API Key" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    ></FormField>
+                    {form.watch("pms") !== "OwnerRez" && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="accountId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Account ID</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  autoFocus
+                                  placeholder="Account ID"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        ></FormField>
+                        <FormField
+                          control={form.control}
+                          name="apiKey"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>API Key</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  autoFocus
+                                  placeholder="API Key"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        ></FormField>
+                      </>
+                    )}
                     <Button
                       type="submit"
                       // disabled={form.formState.isSubmitting}

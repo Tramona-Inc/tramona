@@ -52,6 +52,8 @@ export const env = createEnv({
     GOOGLE_MAPS_KEY: z.string(),
     OCP_APIM_SUBSCRIPTION_KEY: z.string(),
     X_ENVIRONMENT: z.string(),
+    OWNERREZ_CLIENT_ID: z.string(),
+    OWNERREZ_CLIENT_SECRET: z.string(),
   },
 
   /**
@@ -109,6 +111,8 @@ export const env = createEnv({
     GOOGLE_MAPS_KEY: process.env.GOOGLE_MAPS_KEY,
     OCP_APIM_SUBSCRIPTION_KEY: process.env.OCP_APIM_SUBSCRIPTION_KEY,
     X_ENVIRONMENT: process.env.X_ENVIRONMENT,
+    OWNERREZ_CLIENT_ID: process.env.OWNERREZ_CLIENT_ID,
+    OWNERREZ_CLIENT_SECRET: process.env.OWNERREZ_CLIENT_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

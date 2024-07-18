@@ -1,6 +1,7 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import axios from "axios";
+import { env } from "@/env";
 
 export const pmsRouter = createTRPCRouter({
   generateHostawayBearerToken: publicProcedure
@@ -93,4 +94,65 @@ export const pmsRouter = createTRPCRouter({
         throw new Error("Failed to fetch Hostaway calendar");
       }
     }),
+
+  // OwnerRez
+
+  getOwnerRezAuthUrl: publicProcedure
+    .input(
+      z.object({
+        redirectUri: z.string().optional(),
+        state: z.string().optional(),
+      }),
+    )
+    .mutation(({ input }) => {
+      const { redirectUri, state } = input;
+      const baseUrl = "https://app.ownerrez.com/oauth/authorize";
+      const params = new URLSearchParams({
+        response_type: "code",
+        client_id: env.OWNERREZ_CLIENT_ID,
+        ...(redirectUri && { redirect_uri: redirectUri }),
+        ...(state && { state }),
+      });
+      console.log(params)
+
+      return `${baseUrl}?${params.toString()}`;
+    }),
+
+  exchangeOwnerRezCodeForToken: publicProcedure
+    .input(
+      z.object({
+        code: z.string(),
+        redirectUri: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { code, redirectUri } = input;
+
+      try {
+        const response = await axios.post(
+          "https://app.ownerrez.com/oauth/access_token",
+          new URLSearchParams({
+            grant_type: "authorization_code",
+            code,
+            ...(redirectUri && { redirect_uri: redirectUri }),
+          }),
+          {
+            auth: {
+              username: env.OWNERREZ_CLIENT_ID, // Use the env variable here
+              password: env.OWNERREZ_CLIENT_SECRET, // Use the env variable here
+            },
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          },
+        );
+
+        return response.data;
+      } catch (error) {
+        console.error("Error exchanging code for token:", error);
+        throw new Error("Failed to exchange code for token");
+      }
+    }),
+
+  // ... other procedures
 });

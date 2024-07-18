@@ -175,7 +175,7 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Archived",
 ]);
 
-export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
+export const ALL_PROPERTY_PMS = ["Hostaway", "OwnerRez"] as const;
 
 export const propertyPMS = pgEnum("property_pms", ALL_PROPERTY_PMS);
 
