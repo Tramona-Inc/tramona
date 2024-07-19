@@ -4,14 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { getDiscountPercentage, getNumNights } from "@/utils/utils";
+import { getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "../requests/StripePaymentInfo";
 import CheckoutInfoForm from "./ContactInfoForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -20,7 +19,7 @@ export default function Checkout({
 }) {
   const router = useRouter();
   const chatWithAdmin = useChatWithAdmin();
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = !useIsSm();
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
