@@ -112,7 +112,7 @@ export function CityRequestFiltersDialog({
                   <ToggleGroupInput
                     {...field}
                     options={ALL_REQUESTABLE_AMENITIES}
-                    renderButton={({ option, onClick, selected }) => {
+                    renderToggleBtn={({ option, onClick, selected }) => {
                       const Icon = getAmenityIcon(option);
                       return (
                         <button
@@ -129,9 +129,9 @@ export function CityRequestFiltersDialog({
                         </button>
                       );
                     }}
-                    renderButtons={({ buttons }) => (
+                    renderToggleBtns={({ toggleBtns }) => (
                       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        {buttons}
+                        {toggleBtns}
                       </div>
                     )}
                   />
