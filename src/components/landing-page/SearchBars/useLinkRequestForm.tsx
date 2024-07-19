@@ -8,12 +8,12 @@ import { linkRequestSchema } from "./schemas";
 
 export function useLinkRequestForm({
   afterSubmit,
-  handleSetOpen,
-  handleShowConfetti,
+  //   // handleSetOpen,
+  //   //handleShowConfetti,
 }: {
-  afterSubmit?: (madeByGroupIds?: number) => void;
-  handleSetOpen: (val: boolean) => void;
-  handleShowConfetti: (val: boolean) => void;
+  afterSubmit?: (madeByGroupId?: number) => void;
+  //   // handleSetOpen: (val: boolean) => void;
+  //   //handleShowConfetti: (val: boolean) => void;
 }) {
   const form = useZodForm({
     schema: linkRequestSchema,
@@ -34,7 +34,6 @@ export function useLinkRequestForm({
       checkOut: checkOut,
       ...restData,
     };
-
     if (status === "unauthenticated") {
       localStorage.setItem("unsentRequests", JSON.stringify(newRequests));
       void router.push("/auth/signin").then(() => {
@@ -44,8 +43,9 @@ export function useLinkRequestForm({
         });
       });
     } else {
-      handleSetOpen(true);
-      handleShowConfetti(true);
+      // handleSetOpen(true);
+      //handleShowConfetti(true);
+      //definity a router error we come back later
       await createRequestWithLink(newRequests)
         .then((result) => {
           form.reset();
@@ -53,6 +53,7 @@ export function useLinkRequestForm({
         })
         .catch(() => errorToast());
     }
+    console.log("ATLEST WE TRIED ");
   });
 
   return {

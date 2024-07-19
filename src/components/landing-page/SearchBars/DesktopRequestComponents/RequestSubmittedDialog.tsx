@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CircleCheckBig, Sparkles } from "lucide-react";
 import Confetti from "react-confetti";
@@ -7,15 +7,13 @@ import RequestEmailInvitation from "./RequestEmaiInvitation";
 import type { CityRequestForm } from "@/components/landing-page/SearchBars/useCityRequestForm";
 import type { LinkRequestForm } from "@/components/landing-page/SearchBars/useLinkRequestForm";
 import { isCityRequestForm } from "../schemas";
-
+import { api } from "@/utils/api";
 interface RequestSubmittedDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   form: CityRequestForm | LinkRequestForm;
   showConfetti: boolean;
-  inviteLink: string | null;
-  handleInvite: (emails: string[]) => void;
-  isLoading: boolean;
+  madeByGroupId: number | undefined;
 }
 
 const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
@@ -23,15 +21,26 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   setOpen,
   form,
   showConfetti,
-  inviteLink,
-  handleInvite,
-  isLoading,
+  madeByGroupId,
 }) => {
   // Watch the specific data entry for the current tab
   const formData = (form as CityRequestForm).watch();
   const isCityForm = isCityRequestForm(form);
   // Now we can directly access location or use a fallback
   const location = isCityForm && formData.location;
+  const [groupId, setGroupId] = useState<number | null>(null);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+
+  const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
+    { groupId: groupId! },
+    { enabled: groupId !== null },
+  );
+
+  useEffect(() => {
+    if (inviteLinkQuery.data) {
+      setInviteLink(inviteLinkQuery.data.link);
+    }
+  }, [inviteLinkQuery.data]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -68,12 +77,12 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
           the trip details.
         </p>
 
-        <RequestEmailInvitation
-          inviteLink={inviteLink}
-          handleInvite={handleInvite}
-          isLoading={isLoading}
-        />
-
+        {madeByGroupId && (
+          <RequestEmailInvitation
+            inviteLink={inviteLink}
+            madeByGroupId={madeByGroupId}
+          />
+        )}
         <p className="mb-16 flex flex-row items-center rounded-lg bg-[#F1F5F5] p-4 text-sm text-black md:mb-2">
           <Sparkles className="mr-2" />
           Once everyone is added to the trip, Tramona removes all fees.

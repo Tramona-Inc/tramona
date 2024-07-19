@@ -60,6 +60,7 @@ export const linkRequestSchema = z
 export type CityRequestDefaultVals = z.input<typeof cityRequestSchema>;
 export type LinkRequestVals = z.infer<typeof linkRequestSchema>;
 export type SearchBarVals = z.infer<typeof searchSchema>;
+
 export function isCityRequestForm(
   form: CityRequestForm | LinkRequestForm,
 ): form is CityRequestForm {

@@ -20,12 +20,13 @@ import {
 } from "lucide-react";
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
-import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
+import DesktopRequestDealTab from "../SearchBars/DesktopRequestDealTab";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import Typewriter from "typewriter-effect";
 import Image from "next/image";
 import CompletedRequestsSection from "./CompletedRequests";
 import { MobileTestimonialCarousel } from "./testimonials/MobileTestimonialCarousel";
+import Link from "next/link";
 
 export default function MastHead() {
   return (
@@ -195,18 +196,20 @@ export default function MastHead() {
               Check out our feed to see recent deals
             </div>
             <div className="hidden lg:block">
-              <Button className="rounded-full bg-teal-900 hover:bg-teal-950">
-                View deals
-              </Button>
+              <Link href="/exclusive-offers">
+                <Button variant="greenPrimary">View deals</Button>
+              </Link>
             </div>
           </div>
           <div className="flex items-center justify-center">
             <CompletedRequestsSection />
           </div>
           <div className="flex justify-center pt-8 lg:hidden">
-            <Button className="w-80 rounded-full bg-teal-900 hover:bg-teal-950">
-              View deals
-            </Button>
+            <Link href="/exclusive-offers">
+              <Button variant="greenPrimary" size="lg">
+                View deals
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
