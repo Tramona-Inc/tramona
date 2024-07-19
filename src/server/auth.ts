@@ -84,7 +84,7 @@ export const authOptions: NextAuthOptions = {
       const newToken = token;
 
       if (trigger === "update" && token.sub) {
-        if (adapter && typeof adapter.getUser === "function") {
+        if (adapter.getUser) {
           const latestUser = await adapter.getUser(token.sub);
           if (latestUser) {
             user = latestUser;
@@ -92,6 +92,7 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (user) {
         newToken.id = user.id;
         newToken.role = user.role;
@@ -137,28 +138,22 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        if (
-          credentials?.email === undefined || // no email or username
-          credentials?.password === undefined // no password
-        )
-          return Promise.resolve(null);
+        if (credentials == undefined) return Promise.resolve(null);
 
         let user = null;
 
-        if (credentials?.email !== undefined) {
-          user = await db.query.users.findFirst({
-            where: eq(users.email, credentials?.email),
-          });
-        }
+        user = await db.query.users.findFirst({
+          where: eq(users.email, credentials.email),
+        });
 
-        if (user === undefined || user === null) {
-          return Promise.resolve(null); // user not found
-        } else if (user.password === undefined || user.password === null) {
+        if (user === undefined) return Promise.resolve(null); // user not found
+
+        if (user.password === null) {
           return Promise.resolve(null); // users created with google auth
         }
 
         const isPasswordValid = await bycrypt.compare(
-          credentials?.password,
+          credentials.password,
           user.password,
         );
 
@@ -172,25 +167,10 @@ export const authOptions: NextAuthOptions = {
         return Promise.resolve(user as User);
       },
     }),
-    // EmailProvider({
-    //   server: {
-    //     host: env.SMTP_HOST,
-    //     port: env.SMTP_PORT,
-    //     auth: {
-    //       user: env.SMTP_USER,
-    //       pass: env.SMTP_PASSWORD,
-    //     },
-    //   },
-    //   from: process.env.EMAIL_FROM,
-    // }),
     FacebookProvider({
       clientId: env.FACEBOOK_CLIENT_ID,
       clientSecret: env.FACEBOOK_CLIENT_SECRET,
     }),
-    // GithubProvider({
-    //   clientId: env.GITHUB_CLIENT_ID,
-    //   clientSecret: env.GITHUB_CLIENT_SECRET,
-    // }),
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,

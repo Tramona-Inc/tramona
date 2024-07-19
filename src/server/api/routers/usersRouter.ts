@@ -702,7 +702,7 @@ export const usersRouter = createTRPCRouter({
     }),
 
   getUserVerifications: protectedProcedure
-    .input(z.object({ madeByGroupId: zodNumber() }))
+    .input(z.object({ madeByGroupId: z.number() }))
     .query(async ({ input, ctx }) => {
       const verifications = await ctx.db.query.groups
         .findFirst({
@@ -720,14 +720,11 @@ export const usersRouter = createTRPCRouter({
         })
         .then((res) => res?.owner);
 
-      if (!verifications) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Group not found",
-        });
-      }
+      if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+
       return verifications;
     }),
+
   addEmergencyContacts: protectedProcedure
     .input(
       z.object({

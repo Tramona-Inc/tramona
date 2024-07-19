@@ -24,12 +24,15 @@ export default function UserAvatarMastHead({
   email?: string | null;
   image?: string | null;
 } & AvatarVariants) {
-
   if (!name && !email && !image) return <AnonymousAvatar size={size} />;
   const fallback = name ? getInitials(name) : email?.[0] ?? "?";
   return (
     <Avatar className="border-2 border-white" size={size}>
-      {image ? <AvatarImage src={image} alt="" /> : <AvatarFallback>{fallback}</AvatarFallback>}
+      {image ? (
+        <AvatarImage src={image} alt="" />
+      ) : (
+        <AvatarFallback>{fallback}</AvatarFallback>
+      )}
     </Avatar>
   );
 }

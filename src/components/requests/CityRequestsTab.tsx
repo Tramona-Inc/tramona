@@ -3,15 +3,13 @@ import Spinner from "../_common/Spinner";
 import { RequestCards } from "./RequestCards";
 import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import RequestEmptySvg from "../_common/EmptyStateSvg/RequestEmptySvg";
-import { useState } from "react";
-import { type DetailedRequest } from "@/components/requests/RequestCard";
 import { NewCityRequestBtn } from "./NewCityRequestBtn";
 
 export default function CityRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
   //you can access all of the request details with selectedRequest
-  const [selectedRequest, setSelectedRequest] =
-    useState<DetailedRequest | null>(null);
+  // const [selectedRequest, setSelectedRequest] =
+  //   useState<DetailedRequest | null>(null);
 
   if (!requests) return <Spinner />;
 
@@ -25,11 +23,7 @@ export default function CityRequestsTab() {
       {/* <div className="pb-64 md:w-[450px]"> */}
       <NewCityRequestBtn />
       <div className="grid-col-1 grid gap-4 pb-32 md:grid-cols-2">
-        <RequestCards
-          requestGroups={requests.activeRequestGroups}
-          selectedRequest={selectedRequest}
-          setSelectedRequest={setSelectedRequest}
-        />
+        <RequestCards requestGroups={requests.activeRequestGroups} />
       </div>
       {/* </div> */}
       {/* <div className="hidden md:block md:flex-1">

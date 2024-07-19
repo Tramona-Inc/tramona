@@ -20,12 +20,13 @@ import {
 } from "lucide-react";
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
-import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
-import { TestimonialCarousel } from "./TestimonialCarousel";
+import DesktopRequestDealTab from "../SearchBars/DesktopRequestDealTab";
+import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import Typewriter from "typewriter-effect";
 import Image from "next/image";
 import CompletedRequestsSection from "./CompletedRequests";
-import { MobileTestimonialCarousel } from "./MobileTestimonialCarousel";
+import { MobileTestimonialCarousel } from "./testimonials/MobileTestimonialCarousel";
+import Link from "next/link";
 
 export default function MastHead() {
   return (
@@ -195,18 +196,20 @@ export default function MastHead() {
               Check out our feed to see recent deals
             </div>
             <div className="hidden lg:block">
-              <Button className="rounded-full bg-teal-900 hover:bg-teal-950">
-                View deals
-              </Button>
+              <Link href="/exclusive-offers">
+                <Button variant="greenPrimary">View deals</Button>
+              </Link>
             </div>
           </div>
           <div className="flex items-center justify-center">
             <CompletedRequestsSection />
           </div>
           <div className="flex justify-center pt-8 lg:hidden">
-            <Button className="w-80 rounded-full bg-teal-900 hover:bg-teal-950">
-              View deals
-            </Button>
+            <Link href="/exclusive-offers">
+              <Button variant="greenPrimary" size="lg">
+                View deals
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -331,11 +334,11 @@ export default function MastHead() {
         </div>
 
         <div className="flex flex-1 flex-col items-center rounded-lg bg-zinc-100 p-6 text-center">
-          <h3 className="mb-4 text-2xl font-bold">Listing your place</h3>
+          <h3 className="mb-4 text-2xl font-bold">Listing your place?</h3>
           <p className="mb-6 text-sm text-zinc-600">
-            It&apos;s as easy as making an account, and signing up has a host.
-            We have API access from the biggest PMS, or you can upload manually.
-            Once on, wait for requests to roll in.
+            It&apos;s as easy as making an account and signing up as a host. We
+            have API access from the biggest PMS&apos;s, or you can upload
+            manually. Once on, wait for requests to roll in.
           </p>
           <div className="mb-2 text-4xl font-bold text-teal-900">15%</div>
           <p className="mb-6 text-sm text-zinc-600">

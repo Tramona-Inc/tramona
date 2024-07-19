@@ -34,7 +34,6 @@ import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
-  type NewProperty,
   properties,
   type Property,
 } from "./../../db/schema/tables/properties";
@@ -531,7 +530,7 @@ export const propertiesRouter = createTRPCRouter({
           hostawayListingId: row._listing_id,
           hostName: row.host_name,
           // Add other property fields here
-        } as NewProperty;
+        } as Property;
 
         const request = {
           id: row.request_id,
@@ -556,6 +555,7 @@ export const propertiesRouter = createTRPCRouter({
           radius: row.radius,
           name: row.user_name,
           profilePic: row.image,
+          amenities: row.amenities,
           // Add other request fields here
         } as Request;
 
@@ -578,12 +578,9 @@ export const propertiesRouter = createTRPCRouter({
         }
 
         // Check if the property is not already in the properties array
-        if (
-          property.id !== undefined &&
-          !requestData.properties.some((p) => p.id === property.id)
-        ) {
+        if (!requestData.properties.some((p) => p.id === property.id)) {
           // TODO: fix types
-          requestData.properties.push(property as Property);
+          requestData.properties.push(property);
         }
       }
       return organizedData;

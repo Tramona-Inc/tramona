@@ -1,8 +1,7 @@
 import RequestCard, {
-  type DetailedRequest,
+  type GuestDashboardRequest,
 } from "@/components/requests/RequestCard";
 import { RequestCardAction } from "@/components/requests/RequestCardAction";
-import { type RequestGroup } from "@/server/db/schema";
 
 export default function RequestGroupCards({
   requests,
@@ -12,7 +11,7 @@ export default function RequestGroupCards({
   // selectedRequest,
   // setSelectedRequest,
 }: {
-  requests: DetailedRequest[];
+  requests: GuestDashboardRequest[];
   // requestGroup: RequestGroup;
   // isWaiting: boolean;
   // startTimer: () => void;
@@ -43,7 +42,7 @@ export default function RequestGroupCards({
       <div
         key={request.id}
         // onClick={() => handleCardClick(request)}
-        className={`cursor-pointer rounded-xl border-2 *:h-full ${isSelected ? "border-foreground" : "border-transparent"}`}
+        className={`rounded-xl border-2 *:h-full ${isSelected ? "border-foreground" : "border-transparent"}`}
       >
         {/* The is selected prop going inside of Request card is just for mobile desktop is handles in activeRequestGroup */}
         <RequestCard request={request} isSelected={isSelected} type="guest">
@@ -72,7 +71,7 @@ export default function RequestGroupCards({
             <div
               key={request.id}
               // onClick={() => handleCardClick(request)}
-              className={`min-w-96 cursor-pointer *:h-full ${isSelected ? "rounded-xl border border-primary" : ""}`}
+              className={`min-w-96 *:h-full ${isSelected ? "rounded-xl border border-primary" : ""}`}
             >
               <RequestCard request={request} type="guest">
                 <RequestCardAction request={request} />

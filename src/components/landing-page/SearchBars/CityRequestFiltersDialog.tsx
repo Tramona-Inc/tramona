@@ -1,130 +1,193 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { type CityRequestForm } from "./useCityRequestForm";
-import { OptionalFilter } from "./OptionalFilter";
-import { Link2, ListFilter } from "lucide-react";
+import {
+  AirVentIcon,
+  LampDeskIcon,
+  UtensilsIcon,
+  WavesIcon,
+  WifiIcon,
+} from "lucide-react";
 import {
   FormField,
   FormItem,
   FormControl,
   FormMessage,
+  FormLabel,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { ToggleGroupInput } from "@/components/_common/ToggleGroupInput";
+import {
+  ALL_REQUESTABLE_AMENITIES,
+  type RequestableAmenity,
+} from "@/server/db/schema";
+import { cn } from "@/utils/utils";
+import { HotTubIcon } from "@/components/_icons/HotTubIcon";
+import { Total } from "@/components/property/PropertyFilter";
 
 export function CityRequestFiltersDialog({
   form,
-  curTab,
   children,
 }: {
   form: CityRequestForm;
-  curTab: number;
   children: React.ReactNode;
 }) {
-  const [notes, setNotes] = useState("");
-
-  const handleNotesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = event.target.value;
-    if (newValue.length <= 100) {
-      setNotes(newValue);
-    }
-  };
+  const { note } = form.watch();
+  const noteLength = note?.length ?? 0;
 
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-[425px] bg-white lg:max-w-[700px]">
+      <DialogContent className="max-w-3xl bg-white">
         <DialogHeader>
           <DialogTitle>Additional filters</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="lg:hidden space-y-1">
-            <p className="text-sm">
-              Have a property you like? We&apos;ll send your request directly to
-              the host.
-            </p>
-            <div className="flex">
-              <div className="basis-full">
-                <FormField
-                  control={form.control}
-                  name={`data.${curTab}.airbnbLink`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Paste property link here (optional)"
-                          className="w-full"
-                          icon={Link2}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="lg:hidden">
-            <OptionalFilter form={form} curTab={curTab}>
-              <Button
-                variant="ghost"
-                type="button"
-                className="px-2 text-teal-900 hover:bg-teal-900/15"
-              >
-                <ListFilter />
-              </Button>
-            </OptionalFilter>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-            <FilterCheckbox label="Pool" />
-            <FilterCheckbox label="Hot tub" />
-            <FilterCheckbox label="A/C" />
-            <FilterCheckbox label="Dedicated workspace" />
-            <FilterCheckbox label="BBQ grill" />
-            <FilterCheckbox label="Smoking allowed" />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="notes" className="text-sm font-medium">
-              Additional notes
-            </label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={handleNotesChange}
-              placeholder="Enter your additional notes here..."
+          <div className="flex flex-col gap-2 *:flex-1 md:flex-row">
+            <FormField
+              control={form.control}
+              name="minNumBeds"
+              render={({ field }) => (
+                <FormItem className="rounded-md border pl-2">
+                  <FormControl>
+                    <Total
+                      name="Beds"
+                      total={field.value ?? 0}
+                      setTotal={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <div className="text-sm text-gray-500">
-              {notes.length}/100 characters
-            </div>
+            <FormField
+              control={form.control}
+              name="minNumBedrooms"
+              render={({ field }) => (
+                <FormItem className="rounded-md border pl-2">
+                  <FormControl>
+                    <Total
+                      name="Bedrooms"
+                      total={field.value ?? 0}
+                      setTotal={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="minNumBathrooms"
+              render={({ field }) => (
+                <FormItem className="rounded-md border pl-2">
+                  <FormControl>
+                    <Total
+                      name="Bathrooms"
+                      total={field.value ?? 0}
+                      setTotal={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
+          <FormField
+            control={form.control}
+            name="amenities"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>Amenities</FormLabel>
+                <FormControl>
+                  <ToggleGroupInput
+                    {...field}
+                    options={ALL_REQUESTABLE_AMENITIES}
+                    renderToggleBtn={({ option, onClick, selected }) => {
+                      const Icon = getAmenityIcon(option);
+                      return (
+                        <button
+                          onClick={onClick}
+                          className={cn(
+                            "flex h-10 items-center justify-center gap-4 rounded-md border px-3 text-sm font-semibold",
+                            selected
+                              ? "border-primaryGreen bg-primaryGreen-background"
+                              : "hover:bg-zinc-100",
+                          )}
+                        >
+                          <Icon className="size-5 shrink-0" />
+                          {option}
+                        </button>
+                      );
+                    }}
+                    renderToggleBtns={({ toggleBtns }) => (
+                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        {toggleBtns}
+                      </div>
+                    )}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="note"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <div className="flex justify-between">
+                  <FormLabel>Additional notes</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    {noteLength}/100
+                  </p>
+                </div>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    className="resize-y"
+                    rows={2}
+                    maxLength={100}
+                    placeholder="Enter your additional notes here..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-        <Button className="w-full bg-[#004236] hover:bg-[#004236]/90">
-          Save Filters
-        </Button>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="greenPrimary">Done</Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function FilterCheckbox({ label }: { label: string }) {
-  return (
-    <div className="flex items-center space-x-2 rounded-md border px-2 py-3">
-      <Checkbox id={label} />
-      <label
-        htmlFor={label}
-        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        {label}
-      </label>
-    </div>
-  );
+function getAmenityIcon(amenity: RequestableAmenity) {
+  switch (amenity) {
+    case "Pool":
+      return WavesIcon;
+    case "Hot tub":
+      return HotTubIcon;
+    case "A/C":
+      return AirVentIcon;
+    case "Dedicated workspace":
+      return LampDeskIcon;
+    case "Kitchen":
+      return UtensilsIcon;
+    case "Wifi":
+      return WifiIcon;
+  }
 }

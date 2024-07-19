@@ -6,7 +6,6 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  MAX_REQUEST_GROUP_SIZE,
   groupMembers,
   groups,
   requestGroups,
@@ -33,10 +32,8 @@ import {
 } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, count, eq, exists } from "drizzle-orm";
-import { groupBy, max } from "lodash";
-import puppeteer from "puppeteer";
+import { groupBy } from "lodash";
 import { z } from "zod";
-import type { createTRPCContext } from "@/server/api/trpc";
 import type { Session } from "next-auth";
 
 const updateRequestInputSchema = z.object({
@@ -228,7 +225,7 @@ export const requestsRouter = createTRPCRouter({
       });
   }),
 
-  createMultiple: protectedProcedure
+  create: protectedProcedure
     .input(
       requestInsertSchema.omit({
         madeByGroupId: true,
@@ -237,17 +234,10 @@ export const requestsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      try {
-        const { transactionResults } = await handleRequestSubmission(input, {
-          user: ctx.user,
-        });
-        return { transactionResults };
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create request",
-        });
-      }
+      const { transactionResults } = await handleRequestSubmission(input, {
+        user: ctx.user,
+      });
+      return { transactionResults };
     }),
 
   createRequestWithLink: protectedProcedure
@@ -274,19 +264,10 @@ export const requestsRouter = createTRPCRouter({
         maxTotalPrice: response.formattedNightlyPrice,
       };
       //now we need to make a legitimate request with all of the data
-      try {
-        const { transactionResults } = await handleRequestSubmission(
-          newRequest,
-          { user: ctx.user },
-        );
-        console.log("IT WORKED ");
-        return { transactionResults };
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create request",
-        });
-      }
+      const { transactionResults } = await handleRequestSubmission(newRequest, {
+        user: ctx.user,
+      });
+      return { transactionResults };
     }),
 
   // createMultiple: protectedProcedure
@@ -724,68 +705,60 @@ export async function handleRequestSubmission(
   input: RequestInput,
   { user }: { user: Session["user"] },
 ) {
-  try {
-    // Begin a transaction
-    const transactionResults = await db.transaction(async (tx) => {
-      const requestGroupId = await tx
-        .insert(requestGroups)
-        .values({ createdByUserId: user.id })
-        .returning()
-        .then((res) => res[0]!.id);
+  // Begin a transaction
+  const transactionResults = await db.transaction(async (tx) => {
+    const requestGroupId = await tx
+      .insert(requestGroups)
+      .values({ createdByUserId: user.id })
+      .returning()
+      .then((res) => res[0]!.id);
 
-      const madeByGroupId = await tx
-        .insert(groups)
-        .values({ ownerId: user.id })
-        .returning()
-        .then((res) => res[0]!.id);
+    const madeByGroupId = await tx
+      .insert(groups)
+      .values({ ownerId: user.id })
+      .returning()
+      .then((res) => res[0]!.id);
 
-      await tx.insert(groupMembers).values({
-        userId: user.id,
-        groupId: madeByGroupId,
-      });
-
-      const { requestId } = await tx
-        .insert(requests)
-        .values({
-          ...input,
-          madeByGroupId,
-          requestGroupId,
-        })
-        .returning({ requestId: requests.id })
-        .then((res) => res[0]!);
-
-      const propertyIds = await getPropertiesForRequest(
-        { ...input, id: requestId },
-        { tx },
-      );
-
-      await tx
-        .insert(requestsToProperties)
-        .values(propertyIds.map((propertyId) => ({ requestId, propertyId })));
-
-      return { requestId, madeByGroupId };
+    await tx.insert(groupMembers).values({
+      userId: user.id,
+      groupId: madeByGroupId,
     });
 
-    // Messaging based on user preferences or environment
-    const name = user.name ?? user.email;
-    const pricePerNight =
-      input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
-    const fmtdPrice = formatCurrency(pricePerNight);
-    const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
-    const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
+    const { requestId } = await tx
+      .insert(requests)
+      .values({
+        ...input,
+        madeByGroupId,
+        requestGroupId,
+      })
+      .returning({ requestId: requests.id })
+      .then((res) => res[0]!);
 
-    sendSlackMessage(
-      `*${name} just made a request: ${input.location}*`,
-      `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-      `<https://tramona.com/admin|Go to admin dashboard>`,
+    const propertyIds = await getPropertiesForRequest(
+      { ...input, id: requestId },
+      { tx },
     );
 
-    return { transactionResults };
-  } catch (error) {
-    console.error("Failed to handle request submission:", error);
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Failed to process the request submission",
-    });
-  }
+    await tx
+      .insert(requestsToProperties)
+      .values(propertyIds.map((propertyId) => ({ requestId, propertyId })));
+
+    return { requestId, madeByGroupId };
+  });
+
+  // Messaging based on user preferences or environment
+  const name = user.name ?? user.email;
+  const pricePerNight =
+    input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
+  const fmtdPrice = formatCurrency(pricePerNight);
+  const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
+  const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
+
+  sendSlackMessage(
+    `*${name} just made a request: ${input.location}*`,
+    `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+    `<https://tramona.com/admin|Go to admin dashboard>`,
+  );
+
+  return { transactionResults };
 }
