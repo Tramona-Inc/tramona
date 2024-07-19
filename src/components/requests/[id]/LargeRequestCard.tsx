@@ -7,14 +7,14 @@ import {
   plural,
 } from "@/utils/utils";
 import { CalendarIcon, FilterIcon, MapPinIcon, UsersIcon } from "lucide-react";
-import { type DetailedRequest } from "../RequestCard";
+import { type GuestDashboardRequest } from "../RequestCard";
 import RequestRefreshDialog from "../RequestRefreshDialog";
 import RequestCardBadge from "../RequestCardBadge";
 
 export default function LargeRequestCard({
   request,
 }: {
-  request: DetailedRequest | undefined;
+  request: GuestDashboardRequest | undefined;
 }) {
   if (!request) {
     return <Card size="lg" className="h-64" />;
