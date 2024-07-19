@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
-import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
 
 import { getDiscountPercentage, getNumNights } from "@/utils/utils";
@@ -11,7 +10,6 @@ import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "../requests/StripePaymentInfo";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 
 import CheckoutInfoForm from "./ContactInfoForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
@@ -21,7 +19,6 @@ export default function Checkout({
 }: {
   offer: OfferWithDetails;
 }) {
-  const isMediumScreen = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
   const chatWithAdmin = useChatWithAdmin();
 
@@ -196,78 +193,69 @@ export default function Checkout({
     );
   }
 
+  function ChatWithHost() {
+    return (
+      <p className="text-sm">
+        Questions?{" "}
+        <span className="text-teal-900 underline">
+          <button
+            onClick={() => chatWithAdmin()}
+            className="text-blue-600 underline underline-offset-2"
+          >
+            Chat with host
+          </button>
+        </span>
+      </p>
+    );
+  }
+
   return (
     <div className="px-4 md:px-3">
-      <div className="mb-4 md:m-8">
-        <Link href="#" onClick={handleBackClick}>
-          <div className="flex items-center gap-2">
-            <ChevronLeft />
-            <p className="font-semibold">Confirm and pay</p>
-          </div>
+      <div className="mb-4 flex items-center gap-2">
+        <Link href="#" onClick={handleBackClick} className="contents">
+          <ChevronLeft />
+          <p className="font-semibold">Confirm and pay</p>
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">
-        {isMediumScreen ? (
-          <div className="hidden md:block">
-            <BestPriceCard />
-            <TripDetails />
-            <Separator className="my-4" />
-            <CancellationPolicy />
-            <Separator className="my-4" />
-            <CheckoutInfoForm />
-            {/* <Separator className="my-4" />
+        <div className="hidden md:block">
+          <BestPriceCard />
+          <TripDetails />
+          <Separator className="my-4" />
+          <CancellationPolicy />
+          <Separator className="my-4" />
+          <CheckoutInfoForm />
+          {/* <Separator className="my-4" />
             <TermsAndSubmit /> */}
-            <Separator className="my-4" />
-            <StripePaymentInfo offer={{ property, request, ...offer }} />
+          <Separator className="my-4" />
+          <StripePaymentInfo offer={{ property, request, ...offer }} />
+        </div>
+        <div className="md:hidden">
+          <BestPriceCard />
+          <Separator className="my-6" />
+          <TripDetails />
+          <Separator className="my-6" />
+          <CheckoutSummary />
+          <Separator className="my-6" />
+          <CancellationPolicy />
+          <Separator className="my-6" />
+          <CheckoutInfoForm />
+          <Separator className="my-6" />
+          {/* <TermsAndSubmit /> */}
+          <Separator className="my-6" />
+          <StripePaymentInfo offer={{ property, request, ...offer }} />
+          <CustomerReview />
+          <div className="mt-4">
+            <ChatWithHost />
           </div>
-        ) : (
-          <div className="md:hidden">
-            <BestPriceCard />
-            <Separator className="my-6" />
-            <TripDetails />
-            <Separator className="my-6" />
-            <CheckoutSummary />
-            <Separator className="my-6" />
-            <CancellationPolicy />
-            <Separator className="my-6" />
-            <CheckoutInfoForm />
-            <Separator className="my-6" />
-            {/* <TermsAndSubmit /> */}
-            <Separator className="my-6" />
-            <StripePaymentInfo offer={{ property, request, ...offer }} />
-            <CustomerReview />
-            <div className="mt-4">
-              <p className="text-sm">
-                Questions?{" "}
-                <span className="text-teal-900 underline">
-                  <button
-                    onClick={() => chatWithAdmin()}
-                    className="text-blue-600 underline underline-offset-2"
-                  >
-                    Chat with host
-                  </button>
-                </span>
-              </p>
-            </div>
-          </div>
-        )}
+        </div>
         <div className="sticky top-24 hidden h-fit space-y-2 md:block md:pl-10 xl:pl-20">
           <div className="space-y-10">
             <CheckoutSummary />
             <CustomerReview />
           </div>
           <div>
-            <p className="text-sm">
-              Questions?{" "}
-              <span className="text-teal-900 underline">
-                <button
-                  onClick={() => chatWithAdmin()}
-                  className="text-blue-600 underline underline-offset-2"
-                >
-                  Chat with host
-                </button>
-              </span>
-            </p>
+            <ChatWithHost />
           </div>
         </div>
       </div>
