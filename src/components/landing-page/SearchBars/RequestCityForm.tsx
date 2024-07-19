@@ -14,50 +14,37 @@ import {
   CalendarIcon,
   DollarSignIcon,
   FilterIcon,
-  Link2,
   MapPinIcon,
   Plus,
   Users2Icon,
 } from "lucide-react";
 import { useCityRequestForm } from "./useCityRequestForm";
-import { useLinkRequestForm } from "./useLinkRequestForm";
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import { toast } from "@/components/ui/use-toast";
 import { api, type RouterOutputs } from "@/utils/api";
 import { Separator } from "@/components/ui/separator";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
-import LinkConfirmation from "./LinkConfirmation";
 import { cn } from "@/utils/utils";
 import AddAirbnbLink from "@/components/link-input/AddAirbnbLink";
+import { set } from "lodash";
 
-export type ScrapedProperty = {
-  nightlyPrice: number;
-  propertyName: string;
-  checkIn: Date;
-  checkOut: Date;
-  numGuests: number;
-  cityName: string;
-};
-
-type ExtractURLType = RouterOutputs["misc"]["extractBookingDetails"];
-
-export default function RequestCityForm({ showLink }) {
-  const [open, setOpen] = useState(false);
+export default function RequestCityForm({
+  isLinkActive,
+  setIsLinkActive,
+}: {
+  isLinkActive: boolean;
+  setIsLinkActive: (val: boolean) => void;
+}) {
+  const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
+    useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [madeByGroupId, setMadeByGroupId] = useState<number>();
   const [groupId, setGroupId] = useState<number | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [triggerExtract, setTriggerExtract] = useState(false);
-  const [openLinkConfirmationDialog, setOpenLinkConfirmationDialog] =
-    useState(false);
-  const [extractedLinkDataState, setExtractedLinkDataState] = useState<
-    ExtractURLType | undefined
-  >();
-
   const handleSetOpen = (val: boolean) => {
-    setOpen(val);
+    setRequestSubmittedDialogOpen(true);
   };
   const handleShowConfetti = (val: boolean) => {
     setShowConfetti(val);
@@ -116,41 +103,9 @@ export default function RequestCityForm({ showLink }) {
 
   const formData = form.watch();
 
-  const {
-    data: extractUrlData,
-    refetch: extractURLRefetch,
-    isLoading: extractURLIsLoading,
-  } = api.misc.extractBookingDetails.useQuery(formData.airbnbLink, {
-    enabled: false,
-    onSuccess: (data) => {
-      form.setValue("numGuests", data.numOfGuests);
-      form.setValue("date", {
-        from: new Date(data.checkIn),
-        to: new Date(data.checkOut),
-      });
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Error extracting booking details.",
-        description: error.message || "An error occurred, please try again.",
-      });
-    },
-  });
-
-  useEffect(() => {
-    if (triggerExtract) {
-      extractURLRefetch().catch(() => {
-        toast({
-          variant: "destructive",
-          title:
-            "We couldn't extract the booking details. Please check the link.",
-        });
-      });
-      setTriggerExtract(false);
-      setExtractedLinkDataState(extractUrlData);
-    }
-  }, [triggerExtract, extractURLRefetch]);
+  const handleAddLinkClick = () => {
+    setIsLinkActive(true);
+  };
 
   return (
     <Form {...form}>
@@ -161,7 +116,7 @@ export default function RequestCityForm({ showLink }) {
         <div
           className={cn(
             "space-y-2",
-            showLink && "placeholder-black opacity-50",
+            isLinkActive && "placeholder-black opacity-50",
           )}
         >
           <PlacesInput
@@ -256,7 +211,7 @@ export default function RequestCityForm({ showLink }) {
             Have a property you like? We&apos;ll send your request directly to
             the host.
           </p>
-          {!showLink && (
+          {!isLinkActive && (
             <Button
               type="button"
               variant="secondary"
@@ -267,9 +222,8 @@ export default function RequestCityForm({ showLink }) {
               Add link
             </Button>
           )}
-          {showLink && <AddAirbnbLink />}
         </div>
-        <div className="flex justify-end sm:justify-start">
+        {/* <div className="flex justify-end sm:justify-start">
           <Button
             type="submit"
             size="lg"
@@ -279,33 +233,15 @@ export default function RequestCityForm({ showLink }) {
           >
             Submit Request
           </Button>
-        </div>
+        </div> */}
       </form>
 
-      {openLinkConfirmationDialog && (
-        <LinkConfirmation
-          open={openLinkConfirmationDialog}
-          setOpen={setOpenLinkConfirmationDialog}
-          extractedLinkDataState={extractedLinkDataState}
-          extractIsLoading={extractURLIsLoading}
-          formControl={form.control}
-          formFields={{
-            checkIn: `date.from`,
-            checkOut: `date.to`,
-            numGuests: `numGuests`,
-          }}
-          onSubmit={onSubmit} // Pass the form's submit handler
-        />
-      )}
-
       <RequestSubmittedDialog
-        open={open}
-        setOpen={setOpen}
-        form={form}
+        open={requestSubmittedDialogOpen}
+        setOpen={setRequestSubmittedDialogOpen}
         showConfetti={showConfetti}
-        handleInvite={handleInvite}
-        isLoading={isLoading}
-        inviteLink={inviteLink}
+        madeByGroupId={madeByGroupId}
+        form={form}
       />
     </Form>
   );

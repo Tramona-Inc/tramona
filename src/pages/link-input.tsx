@@ -54,10 +54,7 @@ export default function Page() {
                   for a better price
                 </p>
                 <div className="mx-auto mt-8 max-w-3xl">
-                  <AddAirbnbLink
-                    isLinkActive={true}
-                    fromRequestDealTab={true}
-                  />
+                  <AddAirbnbLink fromRequestDealTab={false} />
                 </div>
               </div>
             </div>
