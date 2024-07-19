@@ -3,27 +3,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
-import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
-
 import { getDiscountPercentage, getNumNights } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "../requests/StripePaymentInfo";
-import { useMediaQuery } from "../_utils/useMediaQuery";
-
 import CheckoutInfoForm from "./ContactInfoForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 
 export default function Checkout({
   offer: { property, request, ...offer },
 }: {
   offer: OfferWithDetails;
 }) {
-  const isMediumScreen = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
   const chatWithAdmin = useChatWithAdmin();
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -71,38 +68,35 @@ export default function Checkout({
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Cancellation Policy</h3>
         <p className="text-sm font-semibold leading-5 text-muted-foreground">
-          This is an exclusive price only available on Tramona. This is an
-          exclusive price only available on Tramona. This is an exclusive price
-          only available on Tramona.
+          {property.cancellationPolicy
+            ? property.cancellationPolicy
+            : "No cancellation policy"}
         </p>
       </div>
     );
   }
 
-  // function TermsAndSubmit() {
-  //   return (
-  //     <div className="md:mt-8">
-  //       <div className="mb-8 space-y-4 text-muted-foreground">
-  //         <p className="text-sm font-semibold leading-5">
-  //           On behalf of Tramona we ask that you please follow the house rules
-  //           and treat the house as if it were your own
-  //         </p>
-  //         <p className="px-2 text-xs md:px-0">
-  //           By selecting the button, I agree to the booking terms. I also agree
-  //           to the Terms of Service, Payment Terms of Service and I acknowledge
-  //           the Privacy Policy
-  //         </p>
-  //       </div>
-  //       <Button variant="greenPrimary" className="w-full font-semibold sm:my-2">
-  //         Confirm and pay
-  //       </Button>
-  //       <p className="my-4 text-center text-xs font-semibold text-muted-foreground md:my-0">
-  //         As soon as you book you will get an email and text confirmation with
-  //         all booking details
-  //       </p>
-  //     </div>
-  //   );
-  // }
+  function TermsAndSubmit() {
+    return (
+      <div className="md:mt-8">
+        <div className="mb-8 space-y-4 text-muted-foreground">
+          <p className="text-sm font-semibold leading-5">
+            On behalf of Tramona we ask that you please follow the house rules
+            and treat the house as if it were your own
+          </p>
+          <p className="px-2 text-xs md:px-0">
+            By selecting the button, I agree to the booking terms. I also agree
+            to the Terms of Service, Payment Terms of Service and I acknowledge
+            the Privacy Policy
+          </p>
+        </div>
+        <p className="my-4 text-center text-xs font-semibold text-muted-foreground md:my-0">
+          As soon as you book you will get an email and text confirmation with
+          all booking details
+        </p>
+      </div>
+    );
+  }
 
   function CheckoutSummary() {
     const nightlyPrice =
@@ -152,11 +146,12 @@ export default function Checkout({
         </div>
         <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
           <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
-            {property.originalNightlyPrice &&
-              getDiscountPercentage(
-                property.originalNightlyPrice,
-                nightlyPrice,
-              )}
+            {property.originalNightlyPrice
+              ? getDiscountPercentage(
+                  property.originalNightlyPrice,
+                  nightlyPrice,
+                )
+              : 0}
             % Off
           </h2>
         </div>
@@ -196,78 +191,74 @@ export default function Checkout({
     );
   }
 
+  function ChatWithHost() {
+    return (
+      <p className="text-sm">
+        Questions?{" "}
+        <span className="text-teal-900 underline">
+          <button
+            onClick={() => chatWithAdmin()}
+            className="text-blue-600 underline underline-offset-2"
+          >
+            Chat with host
+          </button>
+        </span>
+      </p>
+    );
+  }
+
   return (
     <div className="px-4 md:px-3">
-      <div className="mb-4 md:m-8">
-        <Link href="#" onClick={handleBackClick}>
-          <div className="flex items-center gap-2">
-            <ChevronLeft />
-            <p className="font-semibold">Confirm and pay</p>
-          </div>
+      <div className="mb-4 flex items-center gap-2">
+        <Link href="#" onClick={handleBackClick} className="contents">
+          <ChevronLeft />
+          <p className="font-semibold">Confirm and pay</p>
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">
-        {isMediumScreen ? (
-          <div className="hidden md:block">
-            <BestPriceCard />
-            <TripDetails />
-            <Separator className="my-4" />
-            <CancellationPolicy />
-            <Separator className="my-4" />
-            <CheckoutInfoForm />
-            {/* <Separator className="my-4" />
-            <TermsAndSubmit /> */}
-            <Separator className="my-4" />
+        <div className="hidden md:block">
+          <BestPriceCard />
+          <TripDetails />
+          <Separator className="my-4" />
+          <CancellationPolicy />
+          <Separator className="my-4" />
+          <CheckoutInfoForm />
+          <Separator className="my-4" />
+          <TermsAndSubmit />
+          <Separator className="my-4" />
+          {!isMobile && (
             <StripePaymentInfo offer={{ property, request, ...offer }} />
-          </div>
-        ) : (
-          <div className="md:hidden">
-            <BestPriceCard />
-            <Separator className="my-6" />
-            <TripDetails />
-            <Separator className="my-6" />
-            <CheckoutSummary />
-            <Separator className="my-6" />
-            <CancellationPolicy />
-            <Separator className="my-6" />
-            <CheckoutInfoForm />
-            <Separator className="my-6" />
-            {/* <TermsAndSubmit /> */}
-            <Separator className="my-6" />
+          )}
+        </div>
+        <div className="md:hidden">
+          <BestPriceCard />
+          <Separator className="my-6" />
+          <TripDetails />
+          <Separator className="my-6" />
+          <CheckoutSummary />
+          <Separator className="my-6" />
+          <CancellationPolicy />
+          <Separator className="my-6" />
+          <CheckoutInfoForm />
+          <Separator className="my-6" />
+          <TermsAndSubmit />
+          <Separator className="my-6" />
+          {isMobile && (
             <StripePaymentInfo offer={{ property, request, ...offer }} />
-            <CustomerReview />
-            <div className="mt-4">
-              <p className="text-sm">
-                Questions?{" "}
-                <span className="text-teal-900 underline">
-                  <button
-                    onClick={() => chatWithAdmin()}
-                    className="text-blue-600 underline underline-offset-2"
-                  >
-                    Chat with host
-                  </button>
-                </span>
-              </p>
-            </div>
+          )}
+          <Separator className="my-6" />
+          <CustomerReview />
+          <div className="mt-4">
+            <ChatWithHost />
           </div>
-        )}
+        </div>
         <div className="sticky top-24 hidden h-fit space-y-2 md:block md:pl-10 xl:pl-20">
           <div className="space-y-10">
             <CheckoutSummary />
             <CustomerReview />
           </div>
           <div>
-            <p className="text-sm">
-              Questions?{" "}
-              <span className="text-teal-900 underline">
-                <button
-                  onClick={() => chatWithAdmin()}
-                  className="text-blue-600 underline underline-offset-2"
-                >
-                  Chat with host
-                </button>
-              </span>
-            </p>
+            <ChatWithHost />
           </div>
         </div>
       </div>

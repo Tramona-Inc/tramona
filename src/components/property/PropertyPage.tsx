@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-
 import {
   Dialog,
   DialogContent,
@@ -21,7 +20,6 @@ import {
   MapPin,
 } from "lucide-react";
 import Image from "next/image";
-import { useMediaQuery } from "../_utils/useMediaQuery";
 import OfferPhotos from "../offers/OfferPhotos";
 import { AspectRatio } from "../ui/aspect-ratio";
 import BiddingForm from "./BiddingForm";
@@ -44,8 +42,6 @@ export default function PropertyPage({ property }: { property: Property }) {
       lat: property.latitude,
       lng: property.longitude,
     }).data;
-
-  const isMobile = useMediaQuery("(max-width: 640px)");
 
   // const isAirbnb =
   //   property.airbnbUrl === null || property.airbnbUrl === "" ? false : true;
@@ -91,19 +87,17 @@ export default function PropertyPage({ property }: { property: Property }) {
       </div>
       <div className="relative grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl bg-background">
         <Dialog>
-          {isMobile ? (
-            // Only render the first image on small screens
-            <div>
-              <DialogTrigger
-                key={0}
-                onClick={() => setIndexOfSelectedImage(0)}
-                className="hover:opacity-90"
-              >
-                <Image src={firstImageUrl} alt="" fill objectFit="cover" />
-              </DialogTrigger>
-            </div>
-          ) : (
-            property.imageUrls.slice(0, 5).map((imageUrl, index) => (
+          <div className="block sm:hidden">
+            <DialogTrigger
+              key={0}
+              onClick={() => setIndexOfSelectedImage(0)}
+              className="hover:opacity-90"
+            >
+              <Image src={firstImageUrl} alt="" fill objectFit="cover" />
+            </DialogTrigger>
+          </div>
+          <div className="hidden sm:contents">
+            {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
               <div
                 key={index}
                 className={`relative col-span-1 row-span-1 ${
@@ -118,8 +112,8 @@ export default function PropertyPage({ property }: { property: Property }) {
                   <Image src={imageUrl} alt="" fill objectFit="cover" />
                 </DialogTrigger>
               </div>
-            ))
-          )}
+            ))}
+          </div>
           <DialogContent className="flex items-center justify-center bg-transparent">
             <div className="flex justify-center">
               <OfferPhotos
@@ -150,7 +144,7 @@ export default function PropertyPage({ property }: { property: Property }) {
                     {property.imageUrls.map((imageUrl, index) => (
                       <DialogTrigger
                         key={index}
-                        className={` hover:opacity-90 ${
+                        className={`hover:opacity-90 ${
                           index === 0 || index % 3 === 0
                             ? "col-span-2 row-span-2"
                             : property.imageUrls.length - 1 == index &&
@@ -176,8 +170,8 @@ export default function PropertyPage({ property }: { property: Property }) {
                       </DialogTrigger>
                     ))}
                   </div>
-                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent ">
-                    <div className="  screen-full flex justify-center">
+                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+                    <div className="screen-full flex justify-center">
                       <OfferPhotos
                         propertyImages={property.imageUrls}
                         indexOfSelectedImage={indexOfSelectedImage}

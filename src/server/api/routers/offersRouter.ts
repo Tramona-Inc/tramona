@@ -432,17 +432,17 @@ export const offersRouter = createTRPCRouter({
         })
         .then((res) => res?.hostTeam);
 
-      if (!propertyHostTeam) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+      // if (!propertyHostTeam) {
+      //   throw new TRPCError({ code: "BAD_REQUEST" });
+      // }
 
-      if (
-        !propertyHostTeam.members.find(
-          (member) => member.userId === ctx.user.id,
-        )
-      ) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+      // if (
+      //   !propertyHostTeam.members.find(
+      //     (member) => member.userId === ctx.user.id,
+      //   )
+      // ) {
+      //   throw new TRPCError({ code: "UNAUTHORIZED" });
+      // }
 
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
