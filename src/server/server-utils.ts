@@ -472,11 +472,7 @@ export async function scrapeUsingLink(url: string) {
       throw new Error("Failed to extract number of days from price items");
     }
     const nightlyPrice = totalPrice / numDays;
-    console.log("nightlyPrice", nightlyPrice);
-    console.log("totalPrice", totalPrice);
-    console.log("numDays", numDays);
     const formattedNightlyPrice = Math.round(nightlyPrice * 100);
-    console.log("formattedNightlyPrice gaaaaaa", formattedNightlyPrice);
     const propertyName =
       listingCardTextContent[0]?.substring(0, 255) ?? "Airbnb Property";
     const checkIn = new Date(searchParams.get("check_in")!);

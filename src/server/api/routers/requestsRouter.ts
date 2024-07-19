@@ -24,18 +24,12 @@ import {
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
-import {
-  formatCurrency,
-  formatDateRange,
-  getNumNights,
-  plural,
-} from "@/utils/utils";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, count, eq, exists } from "drizzle-orm";
 import { groupBy } from "lodash";
 import { z } from "zod";
 import type { Session } from "next-auth";
-import { getCoordinates } from "@/server/google-maps";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
