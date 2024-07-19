@@ -1,4 +1,4 @@
-import RequestCityForm from "./RequestCityForm";
+import RequestCityForm, { type RequestCityFormRef } from "./RequestCityForm";
 import AddAirbnbLink, {
   type AddAirbnbLinkRef,
 } from "@/components/link-input/AddAirbnbLink";
@@ -8,8 +8,8 @@ import { useState, useRef } from "react";
 export default function DesktopRequestDealTab() {
   //handle which form is active
   const [isLinkActive, setIsLinkActive] = useState<boolean>(false);
-  const cityFormRef = useRef();
-  const airbnbFormRef = useRef<AddAirbnbLinkRef>();
+  const cityFormRef = useRef<RequestCityFormRef>(null);
+  const airbnbFormRef = useRef<AddAirbnbLinkRef>(null);
 
   function handleActiveLink(val: boolean) {
     setIsLinkActive(val);

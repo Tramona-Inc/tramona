@@ -49,10 +49,8 @@ export function useCityRequestForm({
         });
       });
     } else {
-      console.log("newRequest", newRequest);
       handleSetOpen(true);
       handleShowConfetti(true);
-      console.log("newRequest", newRequest);
       await createRequests(newRequest)
         .then((result) => {
           form.reset();
