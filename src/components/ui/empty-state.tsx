@@ -30,7 +30,10 @@ const EmptyStateTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("pt-2 text-2xl font-bold tracking-tight", className)}
+    className={cn(
+      "pt-2 text-2xl font-bold tracking-tight text-foreground",
+      className,
+    )}
     {...props}
   />
 ));
