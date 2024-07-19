@@ -13,6 +13,7 @@ import StripePaymentInfo from "../requests/StripePaymentInfo";
 
 import CheckoutInfoForm from "./ContactInfoForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import { useMediaQuery } from "../_utils/useMediaQuery";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -21,6 +22,7 @@ export default function Checkout({
 }) {
   const router = useRouter();
   const chatWithAdmin = useChatWithAdmin();
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -228,7 +230,9 @@ export default function Checkout({
           {/* <Separator className="my-4" />
             <TermsAndSubmit /> */}
           <Separator className="my-4" />
-          <StripePaymentInfo offer={{ property, request, ...offer }} />
+          {!isMobile && (
+            <StripePaymentInfo offer={{ property, request, ...offer }} />
+          )}
         </div>
         <div className="md:hidden">
           <BestPriceCard />
@@ -241,9 +245,12 @@ export default function Checkout({
           <Separator className="my-6" />
           <CheckoutInfoForm />
           <Separator className="my-6" />
-          {/* <TermsAndSubmit /> */}
+          {/* <TermsAndSubmit />
+          <Separator className="my-6" /> */}
+          {isMobile && (
+            <StripePaymentInfo offer={{ property, request, ...offer }} />
+          )}
           <Separator className="my-6" />
-          <StripePaymentInfo offer={{ property, request, ...offer }} />
           <CustomerReview />
           <div className="mt-4">
             <ChatWithHost />
