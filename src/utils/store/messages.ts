@@ -5,6 +5,7 @@ import { create } from "zustand";
 import supabase from "../supabase-client";
 import { errorToast } from "../toasts";
 import { read } from "fs";
+import { set } from "lodash";
 
 export type ChatMessageType = MessageType & {userId: string}; // make userId non-null
 export type GuestMessage = GuestMessageType 
@@ -23,12 +24,17 @@ type ConversationsState = Record<
 
 type MessageState = {
   conversations: ConversationsState;
+  adminConversations: ConversationsState;
   currentConversationId: string | null;
   setCurrentConversationId: (id: string) => void;
   switchConversation: (conversationId: string) => void;
   addMessageToConversation: (
     conversationId: string,
-    messages: ChatMessageType | GuestMessage,
+    messages: ChatMessageType & GuestMessage,
+  ) => void;
+  addMessageToAdminConversation: (
+    conversationId: string,
+    messages: ChatMessageType & GuestMessage,
   ) => void;
   optimisticIds: string[];
   setOptimisticIds: (id: string) => void;
@@ -46,6 +52,7 @@ type MessageState = {
 
 export const useMessage = create<MessageState>((set, get) => ({
   conversations: {},
+  adminConversations: {},
   currentConversationId: null,
   setCurrentConversationId: (id: string) => {
     set(() => ({
@@ -57,13 +64,13 @@ export const useMessage = create<MessageState>((set, get) => ({
   },
   addMessageToConversation: (
     conversationId: string,
-    newMessage: ChatMessageType | GuestMessage,
+    newMessage: ChatMessageType & GuestMessage,
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
         ...state.conversations,
       };
-
+      
       // Check if the conversation exists in the state
       if (updatedConversations[conversationId]) {
         // Add the new message to the existing conversation
@@ -87,6 +94,34 @@ export const useMessage = create<MessageState>((set, get) => ({
 
       return updatedState;
     });
+  },
+  addMessageToAdminConversation: (
+    conversationId:  string,
+    newMessage: ChatMessageType & GuestMessage,
+  ) => {
+    set((state) => {
+      const updatedAdminConversations: ConversationsState = {
+        ...state.adminConversations,
+      }
+
+      if(updatedAdminConversations[conversationId]) {
+        updatedAdminConversations[conversationId] = {
+          messages: [
+            newMessage,
+            ...(updatedAdminConversations[conversationId]?.messages ?? []),
+          ],
+          page: updatedAdminConversations[conversationId]?.page ?? 1,
+          hasMore: updatedAdminConversations[conversationId]?.hasMore ?? false,
+          alreadyFetched: updatedAdminConversations[conversationId]?.alreadyFetched ?? true,
+        };
+      }
+        const updatedAdminState: MessageState = {
+          ...state,
+          adminConversations: updatedAdminConversations,
+          optimisticIds: [...state.optimisticIds, newMessage.id]
+        }
+        return updatedAdminState
+    })
   },
   optimisticIds: [],
   setOptimisticIds: (id: string) =>
@@ -164,7 +199,7 @@ export const useMessage = create<MessageState>((set, get) => ({
           createdAt: message.created_at,
           conversationId: message.conversation_id,
           userId: message.user_id ?? "",
-          // userToken: message.user_token,
+          userToken: "",
           message: message.message,
           read: message.read ?? false, // since fetched means it's read
           isEdit: message.is_edit ?? false, // Provide a default value if needed
@@ -197,7 +232,7 @@ export const useMessage = create<MessageState>((set, get) => ({
   fetchMessagesForGuest: async (conversationId: string): Promise<void> => {
     const state = get();
 
-    if(state.conversations[conversationId]?.alreadyFetched) {
+    if(state.adminConversations[conversationId]?.alreadyFetched) {
       return;
     }
     
@@ -222,14 +257,15 @@ export const useMessage = create<MessageState>((set, get) => ({
           createdAt: message.created_at,
           isEdit: message.is_edit,
           read: message.read,
+          userId: "",
         }))
 
         const hasMore = chatMessages.length >= LIMIT_MESSAGE
 
         set((state) => ({
           ...state,
-          conversations: {
-            ...state.conversations,
+          adminConversations: {
+            ...state.adminConversations,
             [conversationId]: {
               messages: chatMessages,
               page: 1,

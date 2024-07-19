@@ -15,11 +15,11 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroups }) 
   
   return (
     <div className="flex items-start gap-2">
-      {  user ? <UserAvatar {...user} /> : <AnonymousAvatar />}
+      { user ? <UserAvatar {...user} /> : <AnonymousAvatar />}
       <div>
         <div className="flex items-baseline gap-2">
-          {"name" in user && user ? (
-            <p className="font-semibold leading-none">{user.name}</p>
+          {user ? (
+            <p className="font-semibold leading-none">{"name" in user && user.name}</p>
           ) :
           (
             <p className="leading-none text-muted-foreground">[unknown user]</p>

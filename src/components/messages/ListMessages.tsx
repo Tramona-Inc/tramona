@@ -12,6 +12,7 @@ import { groupMessages } from "./groupMessages";
 import { MessageGroup } from "./MessageGroup";
 import { User } from "@/server/db/schema";
 import { type MessageGroups } from "./groupMessages";
+import { setOptions } from "leaflet";
 
 function NoMessages() {
   return (
@@ -23,6 +24,10 @@ function NoMessages() {
 
 function isChatMessage(message: ChatMessageType | GuestMessage): message is ChatMessageType {
   return (message as ChatMessageType).userId !== undefined;
+}
+
+function isGuestMessage(message: ChatMessageType | GuestMessage): message is GuestMessage {
+  return (message as GuestMessage).userToken !== undefined;
 }
 
 
@@ -39,24 +44,36 @@ export default function ListMessages({
   const [notification, setNotification] = useState(0);
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
+  const setOptimisticIds = useMessage((state) => state.optimisticIds)
   const currentConversationId = useMessage(
     (state) => state.currentConversationId,
   );
-  const { conversations } = useMessage();
+  const { conversations, adminConversations } = useMessage();
 
   // console.log(currentConversationId);
-
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
   );
+
+  const addMessageToAdminConversation = useMessage(
+    (state) => state.addMessageToAdminConversation,
+  );
+
+  const setConversationToTop = useConversation(
+    (state) => state.setConversationToTop,
+  )
+  const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
+  const { mutateAsync: adminMessagesToRead } = api.messages.setGuestMessagesToRead.useMutation();
+
+
+  const { data: session } = useSession();
 
   const messages = currentConversationId
     ? conversations[currentConversationId]?.messages ?? []
     : [];
 
-  const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
+  const adminMessages = currentConversationId ? adminConversations[conversationId]?.messages ?? [] : [];
 
-  const { data: session } = useSession();
 
   // Set all the messages to read when loaded
   useEffect(() => {
@@ -73,6 +90,18 @@ export default function ListMessages({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
+  useEffect(() => {
+    const unreadAdminMessagesIds = adminMessages
+    .filter((message) => 
+      message.read === false && isGuestMessage(message) && message.userToken !== session?.user.id, 
+    )
+    .map((message) => message.id);
+
+    if(unreadAdminMessagesIds.length > 0){
+      void adminMessagesToRead( {unreadMessageIds: unreadAdminMessagesIds} )
+    }
+  }, [adminMessages])
+
   const hasMore = currentConversationId
     ? conversations[currentConversationId]?.hasMore ?? false
     : false;
@@ -87,6 +116,8 @@ export default function ListMessages({
     //   if (error) {
     //     errorToast();
     //   } else {
+    console.log("Handling postgres change")
+    if(!optimisticIds.includes(payload.new.id)) {
         const newMessage: ChatMessageType & GuestMessage = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
@@ -98,6 +129,9 @@ export default function ListMessages({
           read: payload.new.read,
         };
         addMessageToConversation(payload.new.conversation_id, newMessage);
+        console.log(conversations);
+        setConversationToTop(payload.new.conversation_id, newMessage);
+      }
     //   }
     // }
 
@@ -121,7 +155,15 @@ export default function ListMessages({
       createdAt: payload.new.created_at,
       read: payload.new.read,
     };
-    addMessageToConversation(payload.new.conversation_id, newMessage);
+    addMessageToAdminConversation(payload.new.conversation_id, newMessage);
+
+    const scrollContainer = scrollRef.current;
+    if (
+      scrollContainer.scrollTop <
+      scrollContainer.scrollHeight - scrollContainer.clientHeight - 10
+    ) {
+      setNotification((current) => current + 1);
+    }
   }
 
   useEffect(() => {
@@ -137,8 +179,9 @@ export default function ListMessages({
         (payload: { new: MessageDbType }) => void handlePostgresChange(payload),
       )
       .subscribe();
-
+    // console.log(channel);
     return () => {
+      console.log('Unsubscribing from channel');
       void channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -156,7 +199,11 @@ export default function ListMessages({
       },
       (payload: {new: GuestMessageType}) => void handlePostgresChangeOnGuest(payload) 
     )
-  }, [currentConversationId, messages])
+
+    return () => {
+      void channel.unsubscribe();
+    }
+  }, [currentConversationId, adminMessages])
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
@@ -165,7 +212,7 @@ export default function ListMessages({
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
+  }, [messages, adminMessages]);
 
   const handleOnScroll = () => {
     const scrollContainer = scrollRef.current;
@@ -208,27 +255,30 @@ export default function ListMessages({
   const participants = conversationList[conversationIndex]?.participants;
 
   const guest_participants = adminConversationList[adminConversationIndex]?.guest_participants;
-  console.log(messages)
+
+  // console.log(conversationList)
+  // console.log(adminConversationList)
+  // console.log(conversations)
+  // console.log(adminConversations)
   const messagesWithUser = messages
     .slice()
     .reverse()
     .map((message) => {
       // Display message with user
-      if ((!participants && !guest_participants) || !session) return null;
+      // if ((!participants && !guest_participants) || !session) return null;
+      if (!participants || !session) return null;
+
       if (isChatMessage(message) && message.userId === session.user.id) {
         return { message, user: session.user };
-      }
-
-      if(message.userToken === session.user.id){
-        return {message, user: session.user}
       }
 
       const user =
         participants?.find(
           (participant) => isChatMessage(message) && participant?.id === message.userId,
-        ) ?? guest_participants?.find(
-          (participant) => participant.userToken === message.userToken
-        ) ?? null; // null means its a deleted user
+        ) ?? null;
+        // ) ?? guest_participants?.find(
+        //   (participant) => participant.userToken === message.userToken
+        // ) ?? null; // null means its a deleted user
 
       return { message, user };
     })
@@ -236,6 +286,25 @@ export default function ListMessages({
 
   const messageGroups = groupMessages(messagesWithUser);
 
+  const messageWithGuest = adminMessages
+  .slice()
+  .reverse()
+  .map((message) => {
+    if(!guest_participants || !session) return null;
+
+    if(isGuestMessage(message) && message.userToken === session.user.id){
+      return {message, user: session.user};
+    }
+
+    const user = guest_participants?.find(
+      (participant) => isGuestMessage(message) && participant.userToken === message.userToken) 
+      ?? null;
+
+      return {message, user};
+  })
+  .filter(Boolean);
+  
+  const adminMessageGroups = groupMessages(messageWithGuest);
   return (
     <>
       <div
@@ -252,8 +321,14 @@ export default function ListMessages({
               messageGroup={messageGroup}
             />
           ))}
+          {adminMessageGroups.map((messageGroup) => (
+            <MessageGroup
+              key={messageGroup.messages[0]?.id}
+              messageGroup={messageGroup}
+            />
+          ))}
         </div>
-        {messages.length === 0 && (
+        {messages.length === 0 && adminMessages.length === 0 && (
           <div className="flex h-full w-full items-center justify-center">
             <NoMessages />
           </div>

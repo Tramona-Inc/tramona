@@ -31,45 +31,6 @@ export default function MessagesPopover({session}: {
 
   const {mutateAsync: createConversation} = api.messages.createConversationWithAdmin.useMutation();
 
-  const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
-   uniqueId: session?.user.id ?? "",
-   session: session ? true : false })
-
-  //  const { fetchInitialMessages } = useMessage()
-  // void fetchInitialMessages(conversationId ?? "")
-  const isMobile = useMediaQuery("(max-width:648px)")
-  const addMessageToConversation = useMessage( 
-    (state) => state.addMessageToConversation
-  )
-  
-  const optimisticIds = useMessage((state) => state.optimisticIds);
-  const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
-  
-  const setConversationToTop = useConversation(
-    (state) => state.setConversationToTop,
-  );
-  
-  const removeMessageFromConversation = useMessage(
-    (state) => state.removeMessageFromConversation,
-  );
-
-  const { fetchInitialMessages, fetchMessagesForGuest } = useMessage()
-
-  if(!session) {
-    void fetchMessagesForGuest(conversationId ?? "")
-  }
-  void fetchInitialMessages(conversationId ?? "")
-  const { conversations } = useMessage()
-
-  const messages = conversationId 
-    ? conversations[conversationId]?.messages ?? []
-    : [];
-
-  
-  const formSchema = z.object({
-        message: z.string(),
-  })
-  
   if (!session && typeof window !== "undefined") {
     tempToken = localStorage.getItem("tempToken") ?? "";
     if (!tempToken) {
@@ -78,9 +39,57 @@ export default function MessagesPopover({session}: {
     }
   }
 
+  const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
+    uniqueId: session?.user.id ?? tempToken ?? "",
+    session: session ? true : false,
+  })
+
+  //  const { fetchInitialMessages } = useMessage()
+  // void fetchInitialMessages(conversationId ?? "")
+  const isMobile = useMediaQuery("(max-width:648px)")
+  const addMessageToConversation = useMessage( 
+    (state) => state.addMessageToConversation
+  )
+  const addMessageToAdminConversation = useMessage( 
+    (state) => state.addMessageToAdminConversation
+  )
+  
+  const optimisticIds = useMessage((state) => state.optimisticIds);
+  const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
+  
+  
+  const removeMessageFromConversation = useMessage(
+    (state) => state.removeMessageFromConversation,
+  );
+
   const currentConversationId = useMessage(
     (state) => state.currentConversationId
   )
+  const { conversations } = useMessage();
+  const { adminConversations } = useMessage()
+
+  const { fetchInitialMessages, fetchMessagesForGuest } = useMessage()
+
+  if(!session) {
+    void fetchMessagesForGuest(conversationId ?? "")
+  }
+  void fetchInitialMessages(conversationId ?? "")
+
+  const messages = conversationId ?
+    conversations[conversationId]?.messages ?? [] : [];
+
+  const adminMessages = conversationId 
+    ? adminConversations[conversationId]?.messages ?? []
+    : [];
+  
+  const adminDetails = adminMessages.find((message) => "userToken" in message && message.userToken !== tempToken)
+  const { data: sender } = api.messages.fetchAdminDetails.useQuery({ adminId: adminDetails?.userToken ?? ""}) 
+
+  const formSchema = z.object({
+        message: z.string(),
+  })
+
+  
   // const {data: conversation_id} = api.messages.getConversationsWithAdmin.useQuery({uniqueId: temporary_token});
   
   const handleOnSend = async (values: z.infer<typeof formSchema>) => {
@@ -93,7 +102,7 @@ export default function MessagesPopover({session}: {
       console.log(conversationId)
 
       if(!session){
-        const newMessage: ChatMessageType | GuestMessage = {
+        const newMessage: ChatMessageType & GuestMessage = {
           id: nanoid(),
           createdAt: new Date().toISOString().slice(0,-1),
           conversationId: conversationId ?? "",
@@ -101,7 +110,7 @@ export default function MessagesPopover({session}: {
           message: values.message,
           read: false,
           isEdit: false,
-          // userId: "",
+          userId: "",
         };
 
         const newMessageToDb = {
@@ -114,7 +123,7 @@ export default function MessagesPopover({session}: {
           created_at: newMessage.createdAt,
         }
 
-        addMessageToConversation(conversationId ?? "", newMessage)
+        addMessageToAdminConversation(conversationId ?? "", newMessage)
         setOptimisticIds(newMessage.id)
         // setConversationToTop(conversationId ?? "", newMessage)
         const { error } = await supabase
@@ -130,12 +139,13 @@ export default function MessagesPopover({session}: {
       }
       }
       else{
-        const newMessage: ChatMessageType | GuestMessage = {
+        
+        const newMessage: ChatMessageType & GuestMessage = {
           id: nanoid(),
           createdAt: new Date().toISOString().slice(0, -1),
           conversationId: conversationId ?? "",
           userId: session?.user.id ?? "", //user is logged in
-          // userToken: "", //user has not logged in
+          userToken: "", //user has not logged in
           message: values.message,
           read: false,
           isEdit: false,
@@ -154,6 +164,7 @@ export default function MessagesPopover({session}: {
   
         // setConversationToTop(conversationId ?? "", newMessage);
         addMessageToConversation(conversationId ?? "", newMessage)
+        setOptimisticIds(newMessage.id);
         const { error } = await supabase
           .from("messages")
           .insert(newMessageToDb)
@@ -167,21 +178,14 @@ export default function MessagesPopover({session}: {
         }
       }
       form.reset();
-
     }
-      
-      const handlePostgresChange = async (payload: { new: GuestMessageType }) => {
 
-        // if (!optimisticIds.includes(payload.new.id)) {
-        //   const { error } = await supabase
-        //     .from("user")
-        //     .select("name, email, image")
-        //     .eq("id", payload.new.user_id ?? "")
-        //     .single();
-        //   if (error) {
-        //     errorToast();
-        //   } else {
-            const newMessage: ChatMessageType | GuestMessage = {
+    
+      
+      const handlePostgresChangeOnGuest = async (payload: { new: GuestMessageType }) => {
+
+        if(!optimisticIds.includes(payload.new.id)){
+            const newMessage: ChatMessageType & GuestMessage = {
               id: payload.new.id,
               conversationId: payload.new.conversation_id,
               userToken:payload.new.user_token,
@@ -189,8 +193,11 @@ export default function MessagesPopover({session}: {
               isEdit: payload.new.is_edit,
               createdAt: payload.new.created_at,
               read: payload.new.read,
-              // userToken: "",
+              userId: "",
             };
+            addMessageToAdminConversation(payload.new.conversation_id, newMessage)
+            setOptimisticIds(newMessage.id)
+          }
           // }
         // }        
       }
@@ -205,7 +212,7 @@ export default function MessagesPopover({session}: {
               schema: "public",
               table: "guest_messages",
             },
-            (payload: { new: GuestMessageType}) => void handlePostgresChange(payload),
+            (payload: { new: GuestMessageType}) => void handlePostgresChangeOnGuest(payload),
           )
           .subscribe();
     
@@ -213,9 +220,12 @@ export default function MessagesPopover({session}: {
           void channel.unsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [currentConversationId, messages]);
+      }, [currentConversationId, adminMessages]);
 
-      
+    // const adminDetails = session ? 
+    // messages.filter((message) => "userId" in message && message.userId !== session?.user.id ) :
+    // adminMessages.filter((message) => "userToken" in message && message.userToken !== tempToken)
+    // console.log(adminDetails);
 
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema)
@@ -232,8 +242,6 @@ export default function MessagesPopover({session}: {
             <Popover>
             <PopoverTrigger asChild>
               {session?.user.role !== "host" && session?.user.role !== "admin" ? 
-              
-            
                 <Button className="border rounded-full p-4 w-18 h-18 m-4">
                     <MessageCircleMore />
                 </Button>
@@ -244,9 +252,9 @@ export default function MessagesPopover({session}: {
               <PopoverContent className="grid grid-rows-1 p-0 w-[21rem] h-[35rem] mx-8 bg-black border rounded-xl border-gray-800">
               <div className="flex flex-col">
               <div className="flex flex-col w-full h-[7rem] items-center justify-start p-4 text-base font-bold text-white bg-[#1A1A1A]">
-                <UserAvatar image={session?.user.image}/>
-                <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Tramona Host</p>
-                <p className='flex-1 px-2 antialiased text-sm font-medium'>Hostname</p>
+                <UserAvatar image={session?.user.image ?? sender?.image}/>
+                <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Concierge</p>
+                <p className='flex-1 px-2 antialiased text-sm font-medium'>{sender?.name}</p>
               <PopoverClose>
                   <X className='fixed top-4 left-12 text-white'/>
               </PopoverClose>
@@ -294,8 +302,8 @@ export default function MessagesPopover({session}: {
           <div className="flex flex-col">
             <div className="flex flex-col w-full h-[7rem] items-center justify-start p-4 text-base font-bold text-white bg-[#1A1A1A]">
                 <UserAvatar image={session?.user.image}/>
-                <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Tramona Host</p>
-                <p className='flex-1 px-2 antialiased text-sm font-medium'>Hostname</p>
+                <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Concierge</p>
+                <p className='flex-1 px-2 antialiased text-sm font-medium'>Tramona host</p>
               </div>
               <AdminMessages />
             </div>

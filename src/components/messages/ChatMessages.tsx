@@ -17,7 +17,7 @@ export default function ChatMessages({
     switchConversation(conversationId);
 
     // Fetch initial messages when the component mounts
-    void fetchInitialMessages(conversationId);
+    void fetchInitialMessages(conversationId); 
     void fetchMessagesForGuest(conversationId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);

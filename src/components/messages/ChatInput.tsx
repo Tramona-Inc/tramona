@@ -36,6 +36,10 @@ export default function ChatInput({
     (state) => state.addMessageToConversation,
   );
 
+  const addMessageToAdminConversation = useMessage(
+    (state) => state.addMessageToAdminConversation,
+  )
+
   const utils = api.useUtils();
 
 
@@ -122,8 +126,10 @@ export default function ChatInput({
           created_at: newMessage.createdAt,
         }
 
-        addMessageToConversation(conversationId ?? "", newMessage)
+        addMessageToAdminConversation(conversationId ?? "", newMessage)
         setConversationToTop(conversationId ?? "", newMessage)
+        setOptimisticIds(newMessage.id);
+
         const { error } = await supabase
         .from("guest_messages")
         .insert(newMessageToDb)

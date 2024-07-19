@@ -39,7 +39,7 @@ function MessageDisplay() {
   const { query } = useRouter();
 
   useEffect(() => {
-    if (query.conversationId && conversations.length > 0 && !isViewed) {
+    if (query.conversationId && conversations.length > 0) {
       const conversationIdToSelect = query.conversationId as string;
       const conversationToSelect = conversations.find(
         (conversation) => conversation.id === conversationIdToSelect,
@@ -55,7 +55,8 @@ function MessageDisplay() {
       setIsViewd(true);
     }
 
-    if(query.conversationId && adminConversation.length > 0 && !isViewed){
+    if(query.conversationId && adminConversation.length > 0){
+      console.log(query)
       const conversationIdToSelect = query.conversationId as string;
       const conversationToSelect = adminConversation.find(
         (conversation) => conversation.id === conversationIdToSelect,

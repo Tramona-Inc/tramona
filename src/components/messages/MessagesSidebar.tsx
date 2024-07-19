@@ -251,6 +251,7 @@ export default function MessagesSidebar({
     selectedConversation?.id,
     session,
     setConversationToTop,
+    adminConversation,
   ]);
 
   console.log("in Messages Sidebar");

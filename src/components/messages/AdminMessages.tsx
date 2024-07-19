@@ -1,52 +1,107 @@
 import { api } from "@/utils/api"
-import { ChatMessageType, useMessage } from "@/utils/store/messages";
+import { ChatMessageType, GuestMessage, useMessage } from "@/utils/store/messages";
 import { useSession } from "next-auth/react";
 import { ScrollArea } from "../ui/scroll-area";
 import { useConversation } from "@/utils/store/conversations";
 import { useEffect } from "react";
+import { type MessageDbType } from "@/types/supabase.message";
+import supabase from "@/utils/supabase-client";
 
 // export default function AdminMessages ({conversationId}:{
 //   conversationId: string | null
 // }) {
-  export default function AdminMessages (){  
+  export default function AdminMessages (
+  )  {  
   const {data: session} = useSession();
   let tempToken: string = "";
   if(!session && typeof window !== undefined){
     tempToken = localStorage.getItem("tempToken") ?? "";
   }
-  console.log(tempToken)
+  // console.log(tempToken)
   const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
     uniqueId: session?.user.id ?? tempToken ?? "",
     session: session ? true : false,
   })
-  console.log(conversationId)
+  // console.log(conversationId)
 
 
   const { fetchMessagesForGuest, fetchInitialMessages } = useMessage()
-  if(!session) {
+  if(!session || session.user.role === "admin") {
     void fetchMessagesForGuest(conversationId ?? "")
     // void fetchInitialMessages(conversationId ?? "")
   }
   else {
     void fetchInitialMessages(conversationId ?? "")
   }
-  const { conversations } = useMessage();
 
+  const currentConversationId = useMessage(
+    (state) => state.currentConversationId
+  )
+  const { conversations } = useMessage();
+  const { adminConversations } = useMessage();
+
+  const addMessageToConversation = useMessage(
+    (state) => state.addMessageToConversation
+  )
   
   
   const optimisticIds = useMessage((state) => state.optimisticIds);
-    const messages = conversationId 
-    ? conversations[conversationId]?.messages ?? []
+  const setOptimisticIds = useMessage(
+    (state) => state.setOptimisticIds
+  )
+  const messages = conversationId ?
+  conversations[conversationId]?.messages ?? [] : [];
+    const adminMessages = conversationId 
+    ? adminConversations[conversationId]?.messages ?? []
     : [];
 
-    console.log(messages)
+    const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+      console.log("handling postgres change for logged in user");
+          const newMessage: ChatMessageType | GuestMessage = {
+            id: payload.new.id,
+            conversationId: payload.new.conversation_id,
+            userId: payload.new.user_id ?? "",
+            // userToken:payload.new.user_token,
+            message: payload.new.message,
+            isEdit: payload.new.is_edit,
+            createdAt: payload.new.created_at,
+            read: payload.new.read,
+            // userToken: "",
+          };
+          addMessageToConversation(payload.new.conversation_id, newMessage)
+          setOptimisticIds(newMessage.id)
+        // }
+      // }        
+    }
+  
+    useEffect(() => {
+      const channel = supabase
+        .channel(`${currentConversationId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+          },
+          (payload: { new: MessageDbType}) => void handlePostgresChange(payload),
+        )
+        .subscribe();
+  
+      return () => {
+        console.log("unsubscibing from channel");
+        void channel.unsubscribe();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentConversationId, messages]);
+  //   console.log(messages)
 
     return(
     <>
-    {messages.length > 0 ? 
+    {session ? (messages.length > 0 ? 
               <div className="flex flex-1 w-full overflow-y-scroll flex-col-reverse gap-1 p-3">
                   
-                  {messages.map((message, index) => ( "userId" in message && message.userId === session?.user.id || "userToken" in message && message.userToken === tempToken ?
+                  { (messages.map((message, index) => ( "userId" in message && message.userId === session?.user.id || "userToken" in message && message.userToken === tempToken ?
                     <>
                     <div className="flex flex-row-reverse m-1 p-1" key={index}>
                       <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">
@@ -57,19 +112,41 @@ import { useEffect } from "react";
                     </>
                     :
                     <div className="flex place-items-end m-1 p-1" key={index}>
+                      <p  className="px-2 py-2 border-none rounded-r-xl rounded-tl-xl bg-[#2E2E2E] text-sm text-white text-background max-w-[15rem] h-max antialiased">
+                    {message.message}
+                  </p>
+                </div>)))
+                  }
+              </div>
+              :
+              <div className="flex flex-1 w-full">
+                <p className="flex m-auto text-[#8B8B8B] items-center justify-center">How can we help you?</p>
+              </div>)
+              :
+              adminMessages.length > 0 ?
+              <div className="flex flex-1 w-full overflow-y-scroll flex-col-reverse gap-1 p-3">
+              {(adminMessages.map((message, index) => ("userToken" in message && message.userToken === tempToken ? 
+                <>
+                    <div className="flex flex-row-reverse m-1 p-1" key={index}>
+                      <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">
+                        {message.message} 
+                        {/* <span className='text-xs pl-4 text-right'>{`${hours}:${minutes}`}</span> */}
+                      </p>
+                      </div>
+                </>
+                :
+                <div className="flex place-items-end m-1 p-1" key={index}>
                   <p  className="px-2 py-2 border-none rounded-r-xl rounded-tl-xl bg-[#2E2E2E] text-sm text-white text-background max-w-[15rem] h-max antialiased">
                     {message.message}
                   </p>
                 </div>
-                  ))}
-                {/* <UserAvatar image={session?.user.image}/> */}
-                {/* {conversation.} */}
+              )))}
               </div>
               :
               <div className="flex flex-1 w-full">
                 <p className="flex m-auto text-[#8B8B8B] items-center justify-center">How can we help you?</p>
               </div>
-  }
+            }
     </>
     )
 }

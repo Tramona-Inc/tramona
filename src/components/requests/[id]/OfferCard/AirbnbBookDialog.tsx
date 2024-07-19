@@ -103,7 +103,7 @@ export default function AirbnbBookDialog(
     }
 
     if(isBooked){
-      sendByMail.mutateAsync({
+      await sendByMail.mutateAsync({
        to: user.email,
        userName: user.name ?? "",
        placeName: offer.property.name,

@@ -5,8 +5,9 @@ export type MessageGroups = {
   user: Pick<User, "name" | "email" | "image" | "id"> | {
     conversationId: string;
     userToken: string | null;
+    adminId: string;
 } | null;
-  messages: (MessageType & GuestMessageType )[];
+  messages: (MessageType | GuestMessageType )[];
 };
 
 // groups messages made by the same user with <2 mins in between
@@ -28,6 +29,12 @@ export function groupMessages(
     const lastGroup = groups[groups.length - 1];
 
     if (!user || (lastGroup && "id" in user && user.id !== lastGroup?.user?.id)) {
+      groups.push({
+        user,
+        messages: [message],
+      });
+    }
+    else if(!user || (lastGroup && "userToken" in user && user.userToken !== lastGroup?.user?.userToken)){
       groups.push({
         user,
         messages: [message],

@@ -332,6 +332,23 @@ export const messagesRouter = createTRPCRouter({
     return admin_id
   }),
 
+  fetchAdminDetails: publicProcedure
+  .input(z.object(
+    {adminId: z.string(),}
+  ))
+  .query(async ({input}) => {
+    const result = await db.query.users.findFirst(
+      {
+        where: eq(users.id, input.adminId),
+        columns: {
+          name: true,
+          image: true,
+        }
+      }
+    )
+    return result;
+  }),
+
   getConversationWithGuest: publicProcedure
   .input(z.object({
     conversationId: z.string(),
@@ -558,5 +575,19 @@ export const messagesRouter = createTRPCRouter({
         .update(messages)
         .set({ read: true })
         .where(inArray(messages.id, input.unreadMessageIds));
+    }),
+
+  setGuestMessagesToRead:
+  protectedProcedure
+    .input(
+      z.object({
+        unreadMessageIds: z.string().array(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(guestMessages)
+        .set({ read: true })
+        .where(inArray(guestMessages.id, input.unreadMessageIds));
     }),
 });
