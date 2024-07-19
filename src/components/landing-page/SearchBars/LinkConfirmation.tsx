@@ -13,8 +13,8 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { api } from "@/utils/api";
 import RequestSubmittedDialog from "./DesktopRequestComponents/RequestSubmittedDialog";
+
 interface LinkConfirmationProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -60,14 +60,7 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
         console.error("Invalid date extracted", { checkInDate, checkOutDate });
       }
     }
-  }, [extractedLinkDataState, airbnbLink]);
-
-  const handleConfirm = () => {
-    setOpen(false);
-    onSubmit().catch((e) => {
-      console.error("Error submitting link request", e);
-    });
-  };
+  }, [extractedLinkDataState, airbnbLink, form]);
 
   const handleCancel = () => {
     setOpen(false);
@@ -89,15 +82,12 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogHeader></DialogHeader>
-        <DialogContent className="p-12">
+        <DialogContent className="sm:p-12">
           <h3 className="mb-10 text-center text-xl font-semibold">
             Please confirm your request details
           </h3>
           <Form {...form}>
-            <form
-              className="flex flex-col gap-y-4"
-              onSubmit={form.handleSubmit(handleConfirm)}
-            >
+            <form className="flex flex-col gap-y-4" onSubmit={onSubmit}>
               {extractIsLoading ? (
                 <Spinner />
               ) : (
@@ -148,7 +138,7 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
                       <Input
                         {...field}
                         label="Airbnb Link"
-                        placeholder={airbnbLink ?? ""}
+                        placeholder={airbnbLink}
                         disabled
                         icon={Users2Icon}
                         variant="lpDesktop"
@@ -158,15 +148,15 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
                 </div>
               )}
               <div className="flex w-full flex-row-reverse justify-between gap-x-2">
-                <Button onClick={handleCancel} variant="secondary">
-                  Cancel
-                </Button>
                 <Button
-                  onClick={handleConfirm}
-                  disabled={extractIsLoading}
+                  type="submit"
+                  disabled={extractIsLoading || form.formState.isSubmitting}
                   variant="greenPrimary"
                 >
                   {extractIsLoading ? "Submitting..." : "Confirm"}
+                </Button>
+                <Button onClick={handleCancel} variant="secondary">
+                  Cancel
                 </Button>
               </div>
             </form>

@@ -36,7 +36,12 @@ export default function DesktopRequestDealTab() {
           fromRequestDealTab={true}
         />
       )}
-      <Button variant="greenPrimary" onClick={handleSubmit} className="mt-3">
+      <Button
+        type="submit"
+        variant="greenPrimary"
+        onClick={handleSubmit}
+        className="mt-3"
+      >
         Submit Request
       </Button>
     </div>

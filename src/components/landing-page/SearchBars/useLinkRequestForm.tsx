@@ -38,7 +38,7 @@ export function useLinkRequestForm({
       localStorage.setItem("unsentRequests", JSON.stringify(newRequests));
       void router.push("/auth/signin").then(() => {
         toast({
-          title: `Request saved: ${newRequests.airbnbLink}`,
+          title: `Request saved`,
           description: "It will be sent after you sign in",
         });
       });
