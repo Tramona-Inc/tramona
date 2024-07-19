@@ -18,7 +18,7 @@ export type MessageGroups = {
 
 export function groupMessages(
   messages: {
-    message: ChatMessageType & GuestMessage;
+    message: ChatMessageType | GuestMessage;
     user: MessageGroups["user"] ;
   }[],
 ) {

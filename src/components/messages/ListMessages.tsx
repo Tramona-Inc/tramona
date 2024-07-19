@@ -88,7 +88,7 @@ export default function ListMessages({
       void mutateAsync({ unreadMessageIds });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
+  }, [currentConversationId, messages]);
 
   useEffect(() => {
     const unreadAdminMessagesIds = adminMessages
@@ -100,30 +100,20 @@ export default function ListMessages({
     if(unreadAdminMessagesIds.length > 0){
       void adminMessagesToRead( {unreadMessageIds: unreadAdminMessagesIds} )
     }
-  }, [adminMessages])
+  }, [currentConversationId, adminMessages])
 
   const hasMore = currentConversationId
     ? conversations[currentConversationId]?.hasMore ?? false
     : false;
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    // if (!optimisticIds.includes(payload.new.id)) {
-    //   const { error } = await supabase
-    //     .from("user")
-    //     .select("name, email, image")
-    //     .eq("id", payload.new.user_id ?? "")
-    //     .single();
-    //   if (error) {
-    //     errorToast();
-    //   } else {
     console.log("Handling postgres change")
     if(!optimisticIds.includes(payload.new.id)) {
-        const newMessage: ChatMessageType & GuestMessage = {
+        const newMessage: ChatMessageType = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
           userId: payload.new.user_id ?? "",
           message: payload.new.message,
-          userToken: "",
           isEdit: payload.new.is_edit,
           createdAt: payload.new.created_at,
           read: payload.new.read,
@@ -145,18 +135,20 @@ export default function ListMessages({
   };
 
   const handlePostgresChangeOnGuest = async (payload: {new: GuestMessageType}) => {
-    const newMessage: ChatMessageType | GuestMessage = {
-      id: payload.new.id,
-      conversationId: payload.new.conversation_id,
-      // userId: "",
-      message: payload.new.message,
-      userToken: payload.new.user_token,
-      isEdit: payload.new.is_edit,
-      createdAt: payload.new.created_at,
-      read: payload.new.read,
-    };
-    addMessageToAdminConversation(payload.new.conversation_id, newMessage);
-
+    if(!optimisticIds.includes(payload.new.id)) {
+      const newMessage: GuestMessage = {
+        id: payload.new.id,
+        conversationId: payload.new.conversation_id,
+        // userId: "",
+        message: payload.new.message,
+        userToken: payload.new.user_token,
+        isEdit: payload.new.is_edit,
+        createdAt: payload.new.created_at,
+        read: payload.new.read,
+      };
+      addMessageToAdminConversation(payload.new.conversation_id, newMessage);
+      setConversationToTop(payload.new.conversation_id, newMessage)
+    }
     const scrollContainer = scrollRef.current;
     if (
       scrollContainer.scrollTop <
@@ -167,6 +159,7 @@ export default function ListMessages({
   }
 
   useEffect(() => {
+    console.log(currentConversationId);
     const channel = supabase
       .channel(`${currentConversationId}`)
       .on(
@@ -188,6 +181,7 @@ export default function ListMessages({
   }, [currentConversationId, messages]);
 
   useEffect(() => {
+    console.log("handling guest_messages changes");
     const channel = supabase
     .channel(`${currentConversationId}`)
     .on(
@@ -201,6 +195,7 @@ export default function ListMessages({
     )
 
     return () => {
+      
       void channel.unsubscribe();
     }
   }, [currentConversationId, adminMessages])

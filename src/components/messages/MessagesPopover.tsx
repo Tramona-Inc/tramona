@@ -62,9 +62,6 @@ export default function MessagesPopover({session}: {
     (state) => state.removeMessageFromConversation,
   );
 
-  const currentConversationId = useMessage(
-    (state) => state.currentConversationId
-  )
   const { conversations } = useMessage();
   const { adminConversations } = useMessage()
 
@@ -82,9 +79,12 @@ export default function MessagesPopover({session}: {
     ? adminConversations[conversationId]?.messages ?? []
     : [];
   
-  const adminDetails = adminMessages.find((message) => "userToken" in message && message.userToken !== tempToken)
-  const { data: sender } = api.messages.fetchAdminDetails.useQuery({ adminId: adminDetails?.userToken ?? ""}) 
-
+  const adminDetails: ChatMessageType & GuestMessage | null = session ? messages.find((message) => "userId" in message && message.userId !== session.user.id) :  adminMessages.find((message) => "userToken" in message && message.userToken !== tempToken)
+  // console.log(adminDetails);
+  const { data: sender } = session ? 
+  api.messages.fetchAdminDetails.useQuery({adminId: adminDetails?.userId ?? ""}) :
+  api.messages.fetchAdminDetails.useQuery({adminId: adminDetails?.userToken  ?? ""})
+  // console.log(sender?.name);
   const formSchema = z.object({
         message: z.string(),
   })
@@ -179,53 +179,52 @@ export default function MessagesPopover({session}: {
       }
       form.reset();
     }
-
-    
-      
-      const handlePostgresChangeOnGuest = async (payload: { new: GuestMessageType }) => {
-
-        if(!optimisticIds.includes(payload.new.id)){
-            const newMessage: ChatMessageType & GuestMessage = {
-              id: payload.new.id,
-              conversationId: payload.new.conversation_id,
-              userToken:payload.new.user_token,
-              message: payload.new.message,
-              isEdit: payload.new.is_edit,
-              createdAt: payload.new.created_at,
-              read: payload.new.read,
-              userId: "",
-            };
-            addMessageToAdminConversation(payload.new.conversation_id, newMessage)
-            setOptimisticIds(newMessage.id)
-          }
-          // }
-        // }        
-      }
-    
-      useEffect(() => {
-        const channel = supabase
-          .channel(`${currentConversationId}`)
-          .on(
-            "postgres_changes",
-            {
-              event: "INSERT",
-              schema: "public",
-              table: "guest_messages",
-            },
-            (payload: { new: GuestMessageType}) => void handlePostgresChangeOnGuest(payload),
-          )
-          .subscribe();
-    
-        return () => {
-          void channel.unsubscribe();
+  //   console.log(messages)
+  useEffect(() => {
+    console.log("handling postgres change for logged in user");
+    console.log(conversationId);
+    const channel = supabase
+      .channel(`${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload: { new: MessageDbType}) => {
+          console.log(payload)
+          void handlePostgresChange(payload)},
+      )
+      .subscribe();
+    console.log("going or no?");
+    return () => {
+      console.log("unsubscibing from channel");
+      void channel.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, messages]);
+  
+  const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+    console.log("coming to handlePostgresChange")
+    if(optimisticIds.includes(payload.new.id)) {
+        const newMessage: ChatMessageType & GuestMessage = {
+          id: payload.new.id,
+          conversationId: payload.new.conversation_id,
+          userId: payload.new.user_id ?? "",
+          // userToken:payload.new.user_token,
+          message: payload.new.message,
+          isEdit: payload.new.is_edit,
+          createdAt: payload.new.created_at,
+          read: payload.new.read,
+          userToken: "",
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [currentConversationId, adminMessages]);
+        addMessageToConversation(payload.new.conversation_id, newMessage)
+        setOptimisticIds(newMessage.id)      
+  }
+  }
+  
 
-    // const adminDetails = session ? 
-    // messages.filter((message) => "userId" in message && message.userId !== session?.user.id ) :
-    // adminMessages.filter((message) => "userToken" in message && message.userToken !== tempToken)
-    // console.log(adminDetails);
 
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema)
@@ -298,7 +297,7 @@ export default function MessagesPopover({session}: {
           </div>
           :
           <>
-          <div className='grid grid-rows-1 p-0 w-screen h-screen-minus-header-n-footer bg-black border  border-gray-800"'>
+          <div className='grid grid-rows-1 p-0 w-screen h-screen-minus-header-n-footer bg-black border  border-gray-800 sm:hidden'>
           <div className="flex flex-col">
             <div className="flex flex-col w-full h-[7rem] items-center justify-start p-4 text-base font-bold text-white bg-[#1A1A1A]">
                 <UserAvatar image={session?.user.image}/>

@@ -28,6 +28,8 @@ import {
 } from "../ui/dropdown-menu";
 import { NavBarLink } from "./NavBarLink";
 
+let tempToken: string;
+
 export default function Sidebar({
   type,
   withLogo = false,
@@ -51,6 +53,15 @@ export default function Sidebar({
               { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
           : guestNavLinks;
+  
+    if (typeof window !== "undefined") {
+      tempToken = localStorage.getItem("tempToken") ?? "";
+    }
+        
+  const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
+    uniqueId: tempToken ?? "",
+    session: session ? true : false,
+  })
 
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery(undefined, {
@@ -90,7 +101,7 @@ export default function Sidebar({
             <NavBarLink href={link.href} icon={link.icon}>
               {link.name}
             </NavBarLink>
-            {totalUnreadMessages !== undefined &&
+            {totalUnreadMessages !== undefined && !!conversationId &&
               totalUnreadMessages > 0 &&
               link.name === "Messages" && (
                 <div className="pointer-events-none absolute inset-y-3 right-3 flex flex-col justify-center lg:justify-start">

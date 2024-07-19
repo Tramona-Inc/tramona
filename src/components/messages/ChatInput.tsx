@@ -64,7 +64,7 @@ export default function ChatInput({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session && checkConversationId?.conversationId !== conversationId) {
 
-      const newMessage: ChatMessageType & GuestMessage = {
+      const newMessage: ChatMessageType = {
         id: nanoid(),
         createdAt: new Date().toISOString(),
         conversationId: conversationId,
@@ -72,7 +72,6 @@ export default function ChatInput({
         message: values.message,
         read: false,
         isEdit: false,
-        userToken: ""
       };
 
       const newMessageToDb = {
@@ -87,7 +86,7 @@ export default function ChatInput({
 
       setConversationToTop(conversationId, newMessage);
       addMessageToConversation(conversationId, newMessage);
-      setOptimisticIds(newMessage.id);
+      // setOptimisticIds(newMessage.id);
 
       form.reset();
 
@@ -128,7 +127,7 @@ export default function ChatInput({
 
         addMessageToAdminConversation(conversationId ?? "", newMessage)
         setConversationToTop(conversationId ?? "", newMessage)
-        setOptimisticIds(newMessage.id);
+        // setOptimisticIds(newMessage.id);
 
         const { error } = await supabase
         .from("guest_messages")

@@ -8,13 +8,23 @@ import { read } from "fs";
 import { set } from "lodash";
 
 export type ChatMessageType = MessageType & {userId: string}; // make userId non-null
-export type GuestMessage = GuestMessageType 
+export type GuestMessage = GuestMessageType; 
 
 
 type ConversationsState = Record<
   string,
   {
-    messages: (ChatMessageType & GuestMessage)[];
+    messages: ChatMessageType[];
+    page: number;
+    hasMore: boolean;
+    alreadyFetched: boolean;
+  }
+>;
+
+type AdminConversationsState = Record<
+  string,
+  {
+    messages: GuestMessage[];
     page: number;
     hasMore: boolean;
     alreadyFetched: boolean;
@@ -24,17 +34,17 @@ type ConversationsState = Record<
 
 type MessageState = {
   conversations: ConversationsState;
-  adminConversations: ConversationsState;
+  adminConversations: AdminConversationsState;
   currentConversationId: string | null;
   setCurrentConversationId: (id: string) => void;
   switchConversation: (conversationId: string) => void;
   addMessageToConversation: (
     conversationId: string,
-    messages: ChatMessageType & GuestMessage,
+    messages: ChatMessageType,
   ) => void;
   addMessageToAdminConversation: (
     conversationId: string,
-    messages: ChatMessageType & GuestMessage,
+    messages:  GuestMessage,
   ) => void;
   optimisticIds: string[];
   setOptimisticIds: (id: string) => void;
@@ -64,7 +74,7 @@ export const useMessage = create<MessageState>((set, get) => ({
   },
   addMessageToConversation: (
     conversationId: string,
-    newMessage: ChatMessageType & GuestMessage,
+    newMessage: ChatMessageType,
   ) => {
     set((state) => {
       const updatedConversations: ConversationsState = {
@@ -97,10 +107,10 @@ export const useMessage = create<MessageState>((set, get) => ({
   },
   addMessageToAdminConversation: (
     conversationId:  string,
-    newMessage: ChatMessageType & GuestMessage,
+    newMessage: GuestMessage,
   ) => {
     set((state) => {
-      const updatedAdminConversations: ConversationsState = {
+      const updatedAdminConversations: AdminConversationsState = {
         ...state.adminConversations,
       }
 

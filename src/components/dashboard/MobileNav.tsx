@@ -4,6 +4,7 @@ import {
   guestMobileNavLinks,
   hostMobileNavLinks,
   unloggedNavLinks,
+  adminMessageLink
 } from "@/config/sideNavLinks";
 import { cn } from "@/utils/utils";
 import {
@@ -16,6 +17,7 @@ import {
   Contact,
   MessageCircleQuestion,
   MenuIcon,
+  MessageCircleMoreIcon
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -162,7 +164,9 @@ export default function MobileNav({
             ]
           : type == "unlogged"
             ? unloggedNavLinks
-            : guestMobileNavLinks;
+            : [...guestMobileNavLinks, 
+                { href: "/admin-messages", name: "admin-messages", icon: MessageCircleMoreIcon},
+            ];
 
   return (
     <header
