@@ -31,8 +31,6 @@ import { api } from "@/utils/api";
 import { Separator } from "@/components/ui/separator";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
 import { cn } from "@/utils/utils";
-import { SubmitHandler } from "react-hook-form";
-import exp from "constants";
 
 interface RequestCityFormProps {
   isLinkActive: boolean;
