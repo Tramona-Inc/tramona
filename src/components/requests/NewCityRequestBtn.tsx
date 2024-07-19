@@ -12,7 +12,6 @@ import { PlusIcon } from "lucide-react";
 import { useIsSm } from "@/utils/utils";
 
 export function NewCityRequestBtn() {
-  const isMobile = !useIsSm();
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,11 +26,12 @@ export function NewCityRequestBtn() {
         <DialogHeader className="border-b pb-2 font-bold">
           Request a deal
         </DialogHeader>
-        {isMobile ? (
+        <div className="contents sm:hidden">
           <MobileRequestDealTab closeSheet={() => setOpen(false)} />
-        ) : (
+        </div>
+        <div className="hidden sm:contents">
           <DesktopRequestDealTab />
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );

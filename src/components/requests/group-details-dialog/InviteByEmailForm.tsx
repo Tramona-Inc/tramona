@@ -100,14 +100,10 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
       });
   }
 
-  const isMobile =
-    typeof window !== "undefined" &&
-    window.navigator.userAgent.includes("Mobi");
-
   return (
     <Form {...form}>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-      {!isMobile && (
+      <div className="hidden sm:contents">
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
           <FormField
             control={form.control}
@@ -137,19 +133,20 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
             Invite
           </Button>
         </form>
-      )}
+      </div>
       {inviteLink && (
         <div className="mt-4 flex gap-2">
-          {!isMobile ? (
+          <div className="hidden sm:contents">
             <>
               <Input value={inviteLink.link} readOnly />
               <Button onClick={handleCopyToClipboard}>Copy</Button>
             </>
-          ) : (
+          </div>
+          <div className="contents sm:hidden">
             <Button className="w-100 flex-1" onClick={handleShare}>
               Add other travelers
             </Button>
-          )}
+          </div>
         </div>
       )}
     </Form>

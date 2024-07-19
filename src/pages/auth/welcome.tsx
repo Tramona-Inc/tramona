@@ -44,23 +44,6 @@ function StepperContentLayout({
 }
 
 function Step1(): JSX.Element {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    function handleResize() {
-      setIsMobile(window.innerWidth < 768); // Adjust the breakpoint as needed
-    }
-
-    // Initial call to set isMobile based on current window size
-    handleResize();
-
-    // Add event listener to update isMobile state when window is resized
-    window.addEventListener("resize", handleResize);
-
-    // Clean up the event listener
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
     <StepperContentLayout className="gap-4 lg:container">
       <div className="flex flex-col gap-1 text-center leading-5 lg:gap-4 lg:leading-6">
@@ -75,13 +58,23 @@ function Step1(): JSX.Element {
 
       <div className="grid grid-cols-1 text-balance text-center font-semibold leading-4 lg:grid-cols-3 lg:gap-4 lg:text-lg lg:leading-5">
         <div className="h flex place-items-center lg:block">
-          {isMobile ? <WalletIconMobile /> : <WalletIcon />}
+          <div className="contents sm:hidden">
+            <WalletIconMobile />
+          </div>
+          <div className="hidden sm:contents">
+            <WalletIcon />
+          </div>
           <div className="basis-5/6">
             <p>Set your budget and request deals from relevant properties.</p>
           </div>
         </div>
         <div className="flex place-items-center lg:block">
-          {isMobile ? <SupportIconMobile /> : <SupportIcon />}
+          <div className="contents sm:hidden">
+            <SupportIconMobile />
+          </div>
+          <div className="hidden sm:contents">
+            <SupportIcon />
+          </div>
           <div className="basis-5/6">
             <p>
               Negotiate directly with hosts to find a price that works for you
@@ -90,11 +83,12 @@ function Step1(): JSX.Element {
           </div>
         </div>
         <div className="flex place-items-center lg:block">
-          {isMobile ? (
+          <div className="contents sm:hidden">
             <TransparentPricingIconMobile />
-          ) : (
+          </div>
+          <div className="hidden sm:contents">
             <TransparentPricingIcon />
-          )}
+          </div>
           <div className="basis-5/6">
             <p>Avoid hidden fees with transparent pricing.</p>
           </div>
@@ -105,23 +99,6 @@ function Step1(): JSX.Element {
 }
 
 function Step2(): JSX.Element {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    function handleResize() {
-      setIsMobile(window.innerWidth < 768); // Adjust the breakpoint as needed
-    }
-
-    // Initial call to set isMobile based on current window size
-    handleResize();
-
-    // Add event listener to update isMobile state when window is resized
-    window.addEventListener("resize", handleResize);
-
-    // Clean up the event listener
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
     <StepperContentLayout className="gap-4 lg:container">
       <div className="text-center">
@@ -129,33 +106,35 @@ function Step2(): JSX.Element {
       </div>
 
       <div className="relative grid grid-cols-1 space-y-9 ps-14 leading-4 lg:grid-cols-7 lg:space-y-10 lg:ps-0 lg:leading-5">
-        {isMobile ? (
+        <div className="contents sm:hidden">
           <div className="absolute -left-1 top-8">
             <BounceIconMobile />
           </div>
-        ) : (
+        </div>
+        <div className="hidden sm:contents">
           <div className="absolute -left-44 bottom-16 rotate-12">
             <BounceIcon />
           </div>
-        )}
+        </div>
 
         <div className="col-span-1 flex gap-4 lg:col-span-4">
           <div className="relative">
-            {isMobile ? (
+            <div className="contents sm:hidden">
               <>
                 <CircleIconMobile />
                 <div className="absolute -left-14 -top-6">
                   <NoGpsIconMobile />
                 </div>
               </>
-            ) : (
+            </div>
+            <div className="hidden sm:contents">
               <>
                 <CircleIcon />
                 <div className="absolute -left-3 -top-12">
                   <NoGpsIcon />
                 </div>
               </>
-            )}
+            </div>
           </div>
           <div className="space-y-2">
             <h2 className="font-bold lg:text-xl">Make a request</h2>
@@ -166,7 +145,14 @@ function Step2(): JSX.Element {
           </div>
         </div>
         <div className="col-span-1 flex gap-4 lg:col-start-2 lg:col-end-6">
-          <div>{isMobile ? <CircleIconMobile /> : <CircleIcon />}</div>
+          <div>
+            <div className="contents sm:hidden">
+              <CircleIconMobile />
+            </div>
+            <div className="hidden sm:contents">
+              <CircleIcon />
+            </div>
+          </div>
           <div className="space-y-2">
             <h2 className="font-bold lg:text-xl">Make an offer</h2>
             <p>
@@ -176,7 +162,14 @@ function Step2(): JSX.Element {
           </div>
         </div>
         <div className="col-span-1 flex gap-4 lg:col-start-3 lg:col-end-7">
-          <div>{isMobile ? <CircleIconMobile /> : <CircleIcon />}</div>
+          <div>
+            <div className="contents sm:hidden">
+              <CircleIconMobile />
+            </div>
+            <div className="hidden sm:contents">
+              <CircleIcon />
+            </div>
+          </div>
           <div className="space-y-2">
             <h2 className="font-bold lg:text-xl">Negotiate</h2>
             <p>
@@ -187,21 +180,22 @@ function Step2(): JSX.Element {
         </div>
         <div className="col-span-1 flex gap-4 lg:col-start-4 lg:col-end-8">
           <div className="relative">
-            {isMobile ? (
+            <div className="contents sm:hidden">
               <>
                 <CircleIconMobile />
                 <div className="absolute -left-16 -top-6">
                   <BeachIconMiniMobile />
                 </div>
               </>
-            ) : (
+            </div>
+            <div className="hidden sm:contents">
               <>
                 <CircleIcon />
                 <div className="absolute -left-8 -top-14">
                   <BeachIconMini />
                 </div>
               </>
-            )}
+            </div>
           </div>
           <div className="space-y-2">
             <h2 className="font-bold lg:text-xl">Get Ready to Travel</h2>
@@ -217,8 +211,6 @@ function Step2(): JSX.Element {
 }
 
 function Step3(): JSX.Element {
-  const isMobile = !useIsMd();
-
   return (
     <StepperContentLayout className="gap-4 text-center lg:container">
       <h1 className="text-3xl font-bold lg:text-5xl">Start traveling now</h1>
@@ -226,7 +218,12 @@ function Step3(): JSX.Element {
         And get properties out of your budget, for your budget
       </p>
       <div className="flex justify-center">
-        {isMobile ? <BeachIconMobile /> : <BeachIcon />}
+        <div className="contents sm:hidden">
+          <BeachIconMobile />
+        </div>
+        <div className="hidden sm:contents">
+          <BeachIcon />
+        </div>
       </div>
       <div className="flex justify-center">
         <div>
