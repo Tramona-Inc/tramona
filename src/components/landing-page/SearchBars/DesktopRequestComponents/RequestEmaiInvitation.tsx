@@ -63,29 +63,29 @@ const EmailInvitation = ({
   };
 
   const onInvite = () => {
-    handleInvite(emails);
+    void handleInvite(emails);
   };
-  const handleInvite = async () => {
-    if (madeByGroupId.length === 0) {
+  const handleInvite = async (emails: string[]) => {
+    if (!madeByGroupId) {
       toast({ title: "Group IDs not available" });
       return;
     }
 
     setIsLoading(true);
-    try {
-      for (const email of emails) {
-        for (const groupId of madeByGroupId) {
-          if (email.length > 0) {
-            await inviteUserByEmail.mutateAsync({ email, groupId });
-          }
-        }
-      }
-      toast({ title: "Invites sent successfully!" });
-    } catch (error) {
-      toast({ title: "Error sending invites" });
-    } finally {
-      setIsLoading(false);
-    }
+    // try {
+    //   // for (const email of emails) {
+    //   //   for (const groupId of madeByGroupId) {
+    //   //     if (email.length > 0) {
+    //   //       await inviteUserByEmail.mutateAsync({ email, groupId });
+    //   //     }
+    //   //   }
+    //   }
+    //   toast({ title: "Invites sent successfully!" });
+    // } catch (error) {
+    //   toast({ title: "Error sending invites" });
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   return (
