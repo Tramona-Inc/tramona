@@ -2,7 +2,6 @@ import {
   VerificationProvider,
   useVerification,
 } from "@/components/_utils/VerificationContext";
-
 import SearchPropertiesMap from "./SearchPropertiesMap";
 import { api } from "@/utils/api";
 import { useBidding } from "@/utils/store/bidding";
@@ -24,9 +23,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import DynamicDesktopSearchBar from "./DynamicDesktopSearchBar";
-
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
-
 import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
 //check to see if there is no cities filter and clear it on, if no maps dont exist
 import { useCitiesFilter } from "@/utils/store/cities-filter";
