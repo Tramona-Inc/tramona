@@ -126,7 +126,6 @@ export default function Onboarding1({
     const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
       console.log("Form submitted:", { pms, accountId, apiKey });
       if (pms === "OwnerRez") {
-        alert("Calling getOwnerRezAuthUrl");
         try {
           const authUrl = await getOwnerRezAuthUrl({
             redirectUri: `${window.location.origin}/api/ownerrez-callback`,

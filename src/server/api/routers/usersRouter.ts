@@ -175,36 +175,63 @@ export const usersRouter = createTRPCRouter({
         hostawayAccountId: z.string().optional(),
         hostawayBearerToken: z.string().optional(),
         hostawayApiKey: z.string().optional(),
+        ownerRezAccountId: z.string().optional(),
+        ownerRezBearerToken: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const teamId = await ctx.db
-        .insert(hostTeams)
-        .values({
-          ownerId: ctx.user.id,
-          name: `${ctx.user.name ?? ctx.user.username ?? ctx.user.email}`,
-        })
-        .returning()
-        .then((res) => res[0]!.id);
-
-      // Insert Host info
-
-      await ctx.db.insert(hostTeamMembers).values({
-        hostTeamId: teamId,
-        userId: ctx.user.id,
+      // Check if a host profile already exists
+      const existingProfile = await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
       });
 
-      const res = await ctx.db
-        .insert(hostProfiles)
-        .values({
-          userId: ctx.user.id,
-          curTeamId: teamId,
-          hostawayApiKey: input.hostawayApiKey,
-          hostawayAccountId: input.hostawayAccountId,
-          hostawayBearerToken: input.hostawayBearerToken,
-        })
-        .returning();
+      let teamId: number;
+      let res;
 
+      if (existingProfile) {
+        // Update existing profile
+        teamId = existingProfile.curTeamId;
+        res = await ctx.db
+          .update(hostProfiles)
+          .set({
+            hostawayApiKey: input.hostawayApiKey,
+            hostawayAccountId: input.hostawayAccountId,
+            hostawayBearerToken: input.hostawayBearerToken,
+            ownerRezAccountId: input.ownerRezAccountId,
+            ownerRezBearerToken: input.ownerRezBearerToken,
+          })
+          .where(eq(hostProfiles.userId, ctx.user.id))
+          .returning();
+      } else {
+        const teamId = await ctx.db
+          .insert(hostTeams)
+          .values({
+            ownerId: ctx.user.id,
+            name: `${ctx.user.name ?? ctx.user.username ?? ctx.user.email}`,
+          })
+          .returning()
+          .then((res) => res[0]!.id);
+
+        // Insert Host info
+
+        await ctx.db.insert(hostTeamMembers).values({
+          hostTeamId: teamId,
+          userId: ctx.user.id,
+        });
+
+        res = await ctx.db
+          .insert(hostProfiles)
+          .values({
+            userId: ctx.user.id,
+            curTeamId: teamId,
+            hostawayApiKey: input.hostawayApiKey,
+            hostawayAccountId: input.hostawayAccountId,
+            hostawayBearerToken: input.hostawayBearerToken,
+            ownerRezAccountId: input.ownerRezAccountId,
+            ownerRezBearerToken: input.ownerRezBearerToken,
+          })
+          .returning();
+      }
       interface PropertyType {
         id: number;
         name: string;

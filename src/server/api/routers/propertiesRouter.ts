@@ -528,7 +528,7 @@ export const propertiesRouter = createTRPCRouter({
           createdAt: row.created_at,
           isPrivate: row.is_private,
           hostProfilePic: row.host_profile_pic,
-          hostawayListingId: row.hostaway_listing_id,
+          hostawayListingId: row._listing_id,
           hostName: row.host_name,
           // Add other property fields here
         } as NewProperty;

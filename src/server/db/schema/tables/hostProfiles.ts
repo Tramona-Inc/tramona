@@ -31,6 +31,9 @@ export const hostProfiles = pgTable(
     hostawayApiKey: varchar("hostaway_api_key"),
     hostawayAccountId: varchar("hostaway_account_id"),
     hostawayBearerToken: varchar("hostaway_bearer_token"),
+    // ownerrez
+    ownerRezAccountId: varchar("ownerrez_account_id"),
+    ownerRezBearerToken: varchar("ownerrez_bearer_token"),
     curTeamId: integer("cur_team_id")
       .notNull()
       .references(() => hostTeams.id),
