@@ -36,7 +36,7 @@ import { AdjustedPropertiesProvider } from "./AdjustedPropertiesContext";
 import { useRouter } from "next/router";
 import { cities } from "../cities";
 
-export default function () {
+export default function SearchPage() {
   const filter = useCitiesFilter((state) => state.filter);
   const setFilter = useCitiesFilter((state) => state.setFilter);
   const router = useRouter();
@@ -52,8 +52,6 @@ export default function () {
   const isFilterUndefined = filter === undefined;
 
   useMaybeSendUnsentRequests();
-
-  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const { data: isPropertyBids, error: propertyBidsError } =
     api.biddings.getAllPropertyBids.useQuery(undefined, {
@@ -108,76 +106,73 @@ export default function () {
         </Head>
         <div className="relative mb-20 bg-white">
           <VerificationBanner />
-          {!isMobile ? (
-            <div className="mt-12 space-y-4 px-4">
-              <div className="item-center flex justify-center text-2xl font-black">
-                Explore popular destinations
-              </div>
-              <p className="text-balance text-center text-lg">
-                Search through our properties, send an offer, and the host will
-                accept, deny or counter your offer in 24 hours or less.
-              </p>
-              <div className="sticky top-16 z-30 bg-white">
-                <DynamicDesktopSearchBar />
-                <div className="flex items-center gap-2 border-b">
-                  <div className="w-full">
-                    <CitiesFilter />
-                  </div>
-                  <FiltersBtn />
+          <div className="mt-12 hidden space-y-4 px-4 md:block">
+            <div className="item-center flex justify-center text-2xl font-black">
+              Explore popular destinations
+            </div>
+            <p className="text-balance text-center text-lg">
+              Search through our properties, send an offer, and the host will
+              accept, deny or counter your offer in 24 hours or less.
+            </p>
+            <div className="sticky top-16 z-30 bg-white">
+              <DynamicDesktopSearchBar />
+              <div className="flex items-center gap-2 border-b">
+                <div className="w-full">
+                  <CitiesFilter />
                 </div>
-              </div>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
-                  <div
-                    className={`col-span-1  ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
-                  >
-                    <SearchListings
-                      isFilterUndefined={isFilterUndefined}
-                      callSiblingFunction={callFetchAdjustedPropertiesFunction}
-                    />
-                  </div>
-                  {!isFilterUndefined && (
-                    <div className="col-span-1 md:col-span-1 lg:col-span-2">
-                      <div className="sticky top-16">
-                        <SearchPropertiesMap
-                          isFilterUndefined={isFilterUndefined}
-                          setFunctionRef={setFunctionRef}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <FiltersBtn />
               </div>
             </div>
-          ) : (
-            <div>
-              <div className="mt-4 space-y-2 p-4">
-                <div className="text-center text-3xl font-bold">
-                  Explore popular destinations
-                </div>
-                <div className="text-pretty text-center">
-                  Search through our properties, send an offer, and the host
-                  will accept, deny or counter your offer in 24 hours or less.
-                </div>
-              </div>
-              <div className="relative flex flex-col">
-                <MobileJustSearch />
-                <div className="my-1 mt-16">
-                  <MobileFilterBar />
-                </div>
-                <div>
-                  <SearchPropertiesMap
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-x-4 md:grid-cols-3 lg:grid-cols-5">
+                <div
+                  className={`col-span-1 ${isFilterUndefined ? "md:col-span-3 lg:col-span-5" : "md:col-span-2 lg:col-span-3"}`}
+                >
+                  <SearchListings
                     isFilterUndefined={isFilterUndefined}
-                    setFunctionRef={setFunctionRef}
+                    callSiblingFunction={callFetchAdjustedPropertiesFunction}
                   />
                 </div>
-                <MobileSearchListings
-                  isFilterUndefined={isFilterUndefined}
-                  callSiblingFunction={callFetchAdjustedPropertiesFunction}
-                />
+                {!isFilterUndefined && (
+                  <div className="col-span-1 md:col-span-1 lg:col-span-2">
+                    <div className="sticky top-16">
+                      <SearchPropertiesMap
+                        isFilterUndefined={isFilterUndefined}
+                        setFunctionRef={setFunctionRef}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
+          <div className="md:hidden">
+            <div className="mt-4 space-y-2 p-4">
+              <div className="text-center text-3xl font-bold">
+                Explore popular destinations
+              </div>
+              <div className="text-pretty text-center">
+                Search through our properties, send an offer, and the host will
+                accept, deny or counter your offer in 24 hours or less.
+              </div>
+            </div>
+            <div className="relative flex flex-col">
+              <MobileJustSearch />
+              <div className="my-1 mt-16">
+                <MobileFilterBar />
+              </div>
+              <div>
+                <SearchPropertiesMap
+                  isFilterUndefined={isFilterUndefined}
+                  setFunctionRef={setFunctionRef}
+                />
+              </div>
+              <MobileSearchListings
+                isFilterUndefined={isFilterUndefined}
+                callSiblingFunction={callFetchAdjustedPropertiesFunction}
+              />
+            </div>
+          </div>
         </div>
       </AdjustedPropertiesProvider>
     </VerificationProvider>
