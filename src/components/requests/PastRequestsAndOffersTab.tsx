@@ -2,8 +2,6 @@ import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue"
 import Spinner from "@/components/_common/Spinner";
 import { RequestCards } from "@/components/requests/RequestCards";
 import { api } from "@/utils/api";
-import { type DetailedRequest } from "./RequestCard";
-import { useState } from "react";
 import PropertyOfferCard from "./PropertyOfferCard";
 
 export default function PastRequestsAndOffersTab() {

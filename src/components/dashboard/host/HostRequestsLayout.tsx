@@ -9,6 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { type Property } from "@/server/db/schema/tables/properties";
+import { type Request } from "@/server/db/schema/tables/requests";
 import { api } from "@/utils/api";
 import { plural } from "@/utils/utils";
 import { range } from "lodash";

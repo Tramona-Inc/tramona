@@ -104,21 +104,19 @@ function Page({
                 value={selectedOfferId}
                 onValueChange={setSelectedOfferId}
               >
-                <div className="relative mt-5 w-full">
+                <div className="flex items-center justify-between">
                   <TabsList className="w-max">
                     {offers.map((offer, i) => (
                       <TabsTrigger key={offer.id} value={`${offer.id}`}>
                         Offer {i + 1}
                       </TabsTrigger>
                     ))}
-                    <div className="absolute right-0 top-0 hidden lg:block">
-                      <ShareButton
-                        id={request.id}
-                        isRequest={true}
-                        propertyName={offers[0]!.property.name}
-                      />
-                    </div>
                   </TabsList>
+                  <ShareButton
+                    id={request.id}
+                    isRequest={true}
+                    propertyName={offers[0]!.property.name}
+                  />
                 </div>
                 {offers.map((offer) => (
                   <TabsContent key={offer.id} value={`${offer.id}`}>

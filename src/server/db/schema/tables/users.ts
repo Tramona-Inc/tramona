@@ -75,7 +75,7 @@ export const users = pgTable(
       .default("false")
       .notNull(),
     verificationReportId: varchar("verification_report_id"),
-    dateOfBirth: varchar("date_of_birth").notNull(),
+    dateOfBirth: varchar("date_of_birth"),
 
     profileUrl: varchar("profile_url", { length: 1000 }),
     location: varchar("location", { length: 1000 }),

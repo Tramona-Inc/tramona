@@ -1,20 +1,7 @@
-import * as bcrypt from "bcrypt";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/server/api/trpc";
-import { groupMembers, requests, offers } from "@/server/db/schema";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 
-import { env } from "@/env";
-import { db } from "@/server/db";
-import { generateReferralCode } from "@/utils/utils";
-import { zodNumber, zodString } from "@/utils/zod-utils";
-import { TRPCError } from "@trpc/server";
-import jwt from "jsonwebtoken";
+import { zodNumber } from "@/utils/zod-utils";
 import { z } from "zod";
-import { and, count, eq, exists, inArray } from "drizzle-orm";
-import { groupBy } from "lodash";
 
 export const feedRouter = createTRPCRouter({
   getFeed: publicProcedure
@@ -148,6 +135,6 @@ export const feedRouter = createTRPCRouter({
         })),
       ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-      return { mergedData };
+      return mergedData;
     }),
 });

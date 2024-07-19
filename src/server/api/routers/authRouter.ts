@@ -187,7 +187,6 @@ export const authRouter = createTRPCRouter({
         referralCode: z.string().optional(),
         conversationId: z.string(),
         hostType: z.enum(ALL_HOST_TYPES),
-        profileUrl: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {

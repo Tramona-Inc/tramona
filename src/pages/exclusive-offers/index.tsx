@@ -1,6 +1,4 @@
 import ActivityFeed from "@/components/activity-feed/ActivityFeed";
-import Head from "next/head";
-import Link from "next/link";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { NextSeo } from "next-seo";
 
