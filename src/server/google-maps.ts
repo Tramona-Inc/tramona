@@ -42,11 +42,12 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
     component.types.includes("country"),
   );
 
-  const cityComponent = addressComponents.find((component) =>
-    component.types.includes("locality") ||
-    component.types.includes("sublocality") ||
-    component.types.includes("neighborhood") ||
-    component.types.includes("administrative_area_level_3")
+  const cityComponent = addressComponents.find(
+    (component) =>
+      component.types.includes("locality") ||
+      component.types.includes("sublocality") ||
+      component.types.includes("neighborhood") ||
+      component.types.includes("administrative_area_level_3"),
   );
 
   const state = addressComponents.find((component) =>
@@ -57,10 +58,11 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
 
   // Map specific neighborhoods to their parent cities
   if (cityComponent?.types.includes("neighborhood")) {
-    const parentLocality = addressComponents.find((component) =>
-      component.types.includes("locality") ||
-      component.types.includes("sublocality") ||
-      component.types.includes("administrative_area_level_3")
+    const parentLocality = addressComponents.find(
+      (component) =>
+        component.types.includes("locality") ||
+        component.types.includes("sublocality") ||
+        component.types.includes("administrative_area_level_3"),
     );
     if (parentLocality) {
       city = parentLocality.long_name;

@@ -53,7 +53,6 @@ export function useLinkRequestForm({
         })
         .catch(() => errorToast());
     }
-    console.log("ATLEST WE TRIED ");
   });
 
   return {

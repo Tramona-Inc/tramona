@@ -232,12 +232,11 @@ export const miscRouter = createTRPCRouter({
       // Extract the values with null checks
       const numOfAdults = parseInt(params.get("adults") ?? "0", 10);
       const numOfChildren = parseInt(params.get("children") ?? "0", 10);
-      const numOfInfants = parseInt(params.get("infants") ?? "0", 10);
       const checkIn = params.get("check_in") ?? "";
       const checkOut = params.get("check_out") ?? "";
 
       // Calculate the total number of guests
-      const numOfGuests = numOfAdults + numOfChildren + numOfInfants;
+      const numOfGuests = numOfAdults + numOfChildren;
 
       // Return the extracted details
       return {
