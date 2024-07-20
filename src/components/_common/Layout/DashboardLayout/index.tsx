@@ -8,7 +8,7 @@ import { useIsMd, useIsLg } from "@/utils/utils";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import MessagesPopover from "@/components/messages/MessagesPopover";
+import MessagesPopover from "@/components/messages/MessagesPop";
 
 
 

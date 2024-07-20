@@ -1,4 +1,4 @@
-import MessagesPopover from '@/components/messages/MessagesPopover'
+import MessagesPopover from '@/components/messages/MessagesPop'
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { useSession } from 'next-auth/react';
 import UserAvatar from '@/components/_common/UserAvatar'
