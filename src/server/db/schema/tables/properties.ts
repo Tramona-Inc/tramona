@@ -7,6 +7,7 @@ import {
   geometry,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -21,6 +22,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
+import { ALL_LISTING_SITE_NAMES } from "@/utils/listing-sites";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -177,81 +179,177 @@ export const propertyStatusEnum = pgEnum("property_status", [
 
 export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
 
-export const propertyPMS = pgEnum("property_pms", ALL_PROPERTY_PMS);
+export const propertyPMSEnum = pgEnum("property_pms", ALL_PROPERTY_PMS);
 
-export const properties = pgTable("properties", {
-  id: serial("id").primaryKey(),
-  hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-  hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
+export const listingSiteEnum = pgEnum("listing_site", ALL_LISTING_SITE_NAMES);
 
-  propertyType: propertyTypeEnum("property_type").notNull(),
-  roomType: propertyRoomTypeEnum("room_type").notNull().default("Entire place"),
+export const ALL_BED_TYPES = [
+  "Single Bed",
+  "Double Bed",
+  "Queen Bunk Bed",
+  "Twin Bunk Bed",
+  "TwinXL Bunk Bed",
+  "Crib",
+  "Full Day Bed",
+  "King Day Bed",
+  "Queen Day Bed",
+  "Twin Day Bed",
+  "TwinXL Day Bed",
+  "Full Bed",
+  "Full Futon",
+  "King Futon",
+  "Queen Futon",
+  "Twin Futon",
+  "TwinXL Futon",
+  "King Bed",
+  "Full Murphy Bed",
+  "King Murphy Bed",
+  "Queen Murphy Bed",
+  "Twin Murphy Bed",
+  "TwinXL Murphy Bed",
+  "Queen Bed",
+  "Full Rollaway Bed",
+  "King Rollaway Bed",
+  "Queen Rollaway Bed",
+  "Twin Rollaway Bed",
+  "TwinXL Rollaway Bed",
+  "Full Sofa Bed",
+  "King Sofa Bed",
+  "Queen Sofa Bed",
+  "Twin Sofa Bed",
+  "TwinXL Sofa Bed",
+  "Full Trundle Bed",
+  "King Trundle Bed",
+  "Queen Trundle Bed",
+  "Twin Trundle Bed",
+  "TwinXL Trundle Bed",
+  "Twin Bed",
+  "Twin XL Bed",
+  "Full Water Bed",
+  "King Water Bed",
+  "Queen Water Bed",
+  "Twin Water Bed",
+  "TwinXL Water Bed",
+  "Full Bunk Bed",
+  "King Bunk Bed",
+  "Air Mattress",
+  "Floor Mattress",
+  "Toddler Bed",
+  "Hammock",
+  "Small Double Bed",
+  "California King Bed",
+] as const;
 
-  // how many guests does this property accomodate at most?
-  maxNumGuests: smallint("max_num_guests").notNull(),
-  numBeds: smallint("num_beds").notNull(),
-  numBedrooms: smallint("num_bedrooms").notNull(),
-  numBathrooms: doublePrecision("num_bathrooms"),
-  // propertyPMS: propertyPMS("property_pms"),
+export type BedType = (typeof ALL_BED_TYPES)[number];
 
-  // for when blake/preju manually upload, otherwise get the host's name via hostId
-  hostName: varchar("host_name", { length: 255 }),
+export const roomsWithBedsSchema = z.array(
+  z.object({
+    name: z.string().trim().min(1, { message: "Room name cannot be empty" }),
+    beds: z.array(
+      z.object({
+        count: z.number().int().positive(),
+        type: z.enum(ALL_BED_TYPES, {
+          errorMap: (_, ctx) => ({
+            message: `Unsupported bed type "${ctx.data}"`,
+          }),
+        }),
+      }),
+    ),
+  }),
+);
 
-  address: varchar("address", { length: 1000 }).notNull(),
-  latitude: doublePrecision("latitude").notNull(),
-  longitude: doublePrecision("longitude").notNull(),
-  city: varchar("city", { length: 255 }).notNull(),
+export type RoomWithBeds = z.infer<typeof roomsWithBedsSchema.element>;
 
-  originalListingUrl: varchar("url"),
+export const properties = pgTable(
+  "properties",
+  {
+    id: serial("id").primaryKey(),
+    hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
+    hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
-  checkInInfo: varchar("check_in_info"),
-  checkInTime: time("check_in_time"),
-  checkOutTime: time("check_out_time"),
+    // null = only on Tramona
+    originalListingSite: listingSiteEnum("original_listing_site"),
+    originalListingId: varchar("original_listing_id"),
 
-  // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
-  amenities: varchar("amenities")
-    .array()
-    .notNull()
-    .default(sql`'{}'`), // .default([]) doesnt work, you gotta do this
-  otherAmenities: varchar("other_amenities")
-    .array()
-    .notNull()
-    .default(sql`'{}'`),
+    roomsWithBeds: jsonb("rooms_with_beds").$type<RoomWithBeds[]>(),
+    propertyType: propertyTypeEnum("property_type").notNull(),
+    roomType: propertyRoomTypeEnum("room_type")
+      .notNull()
+      .default("Entire place"),
 
-  imageUrls: varchar("image_url").array().notNull(),
+    // how many guests does this property accomodate at most?
+    maxNumGuests: smallint("max_num_guests").notNull(),
+    numBeds: smallint("num_beds").notNull(),
+    numBedrooms: smallint("num_bedrooms").notNull(),
+    numBathrooms: doublePrecision("num_bathrooms"),
+    // propertyPMS: propertyPMS("property_pms"),
 
-  name: varchar("name", { length: 255 }).notNull(),
-  about: text("about").notNull(),
+    // for when blake/preju manually upload, otherwise get the host's name via hostId
+    hostName: varchar("host_name", { length: 255 }),
+    hostProfilePic: varchar("host_profile_pic"),
+    hostNumReviews: integer("host_num_reviews"),
+    hostRating: doublePrecision("host_rating"),
 
-  petsAllowed: boolean("pets_allowed"),
-  smokingAllowed: boolean("smoking_allowed"),
+    address: varchar("address", { length: 1000 }).notNull(),
+    latitude: doublePrecision("latitude").notNull(),
+    longitude: doublePrecision("longitude").notNull(),
+    city: varchar("city", { length: 255 }).notNull(),
 
-  otherHouseRules: varchar("other_house_rules", { length: 1000 }),
+    originalListingUrl: varchar("url"),
 
-  avgRating: doublePrecision("avg_rating").notNull().default(0),
-  numRatings: integer("num_ratings").notNull().default(0),
-  airbnbUrl: varchar("airbnb_url"),
-  airbnbMessageUrl: varchar("airbnb_message_url"),
-  originalNightlyPrice: integer("original_nightly_price"), // in cents
-  areaDescription: text("area_description"),
-  mapScreenshot: text("map_screenshot"),
-  cancellationPolicy: text("cancellation_policy"),
+    checkInInfo: varchar("check_in_info"),
+    checkInTime: time("check_in_time"),
+    checkOutTime: time("check_out_time"),
 
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  isPrivate: boolean("is_private").notNull().default(false),
-  // priceRestriction: integer("price_restriction"),
-  propertyStatus: propertyStatusEnum("property_status").default("Listed"),
-  airbnbBookUrl: varchar("airbnb_book_url"),
-  hostImageUrl: varchar("host_image_url"),
-  pricingScreenUrl: varchar("pricing_screen_url"),
-  hostProfilePic: varchar("host_profile_pic"),
-  hostawayListingId: integer("hostaway_listing_id"),
-  latLngPoint: geometry("lat_lng_point", { type: 'point', mode: 'xy', srid: 4326 }),
-}, (t) => ({
-  spatialIndex: index('spacial_index').using('gist', t.latLngPoint),
-}));
+    // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
+    amenities: varchar("amenities")
+      .array()
+      .notNull()
+      .default(sql`'{}'`), // .default([]) doesnt work, you gotta do this
+    otherAmenities: varchar("other_amenities")
+      .array()
+      .notNull()
+      .default(sql`'{}'`),
+
+    imageUrls: varchar("image_url").array().notNull(),
+
+    name: varchar("name", { length: 255 }).notNull(),
+    about: text("about").notNull(),
+
+    petsAllowed: boolean("pets_allowed"),
+    smokingAllowed: boolean("smoking_allowed"),
+
+    otherHouseRules: varchar("other_house_rules", { length: 1000 }),
+
+    avgRating: doublePrecision("avg_rating").notNull().default(0),
+    numRatings: integer("num_ratings").notNull().default(0),
+    airbnbUrl: varchar("airbnb_url"),
+    airbnbMessageUrl: varchar("airbnb_message_url"),
+    originalNightlyPrice: integer("original_nightly_price"), // in cents
+    areaDescription: text("area_description"),
+    mapScreenshot: text("map_screenshot"),
+    cancellationPolicy: text("cancellation_policy"),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    isPrivate: boolean("is_private").notNull().default(false),
+    ageRestriction: integer("age_restriction"),
+    propertyStatus: propertyStatusEnum("property_status").default("Listed"),
+    airbnbBookUrl: varchar("airbnb_book_url"),
+    hostImageUrl: varchar("host_image_url"),
+    pricingScreenUrl: varchar("pricing_screen_url"),
+    hostawayListingId: integer("hostaway_listing_id"),
+    latLngPoint: geometry("lat_lng_point", {
+      type: "point",
+      mode: "xy",
+      srid: 4326,
+    }),
+  },
+  (t) => ({
+    spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
+  }),
+);
 
 export type Property = typeof properties.$inferSelect;
 export type NewProperty = typeof properties.$inferInsert;
@@ -265,6 +363,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   otherAmenities: z.array(z.string()),
   checkInTime: zodTime,
   checkOutTime: zodTime,
+  roomsWithBeds: roomsWithBedsSchema,
 });
 
 // make everything except id optional

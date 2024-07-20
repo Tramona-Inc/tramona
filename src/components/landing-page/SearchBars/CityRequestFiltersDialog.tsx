@@ -1,46 +1,139 @@
+import React from "react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { type CityRequestForm } from "./useCityRequestForm";
 import {
-  FormControl,
+  AirVentIcon,
+  LampDeskIcon,
+  UtensilsIcon,
+  WavesIcon,
+  WifiIcon,
+} from "lucide-react";
+import {
   FormField,
   FormItem,
+  FormControl,
   FormMessage,
+  FormLabel,
 } from "@/components/ui/form";
-import { Total } from "../search/MobilePropertyFilter";
+import { ToggleGroupInput } from "@/components/_common/ToggleGroupInput";
+import {
+  ALL_REQUESTABLE_AMENITIES,
+  type RequestableAmenity,
+} from "@/server/db/schema";
+import { cn } from "@/utils/utils";
+import { HotTubIcon } from "@/components/_icons/HotTubIcon";
+import { Total } from "@/components/property/PropertyFilter";
 
 export function CityRequestFiltersDialog({
   form,
-  curTab,
   children,
 }: {
   form: CityRequestForm;
-  curTab: number;
   children: React.ReactNode;
 }) {
+  const { note } = form.watch();
+  const noteLength = note?.length ?? 0;
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-3xl bg-white">
         <DialogHeader>
-          <DialogTitle>Filters</DialogTitle>
+          <DialogTitle>Additional filters</DialogTitle>
         </DialogHeader>
-        <div className="">
+        <div className="grid gap-4 py-4">
+          <div className="flex flex-col gap-2 *:flex-1 md:flex-row">
+            <FormField
+              control={form.control}
+              name="minNumBeds"
+              render={({ field }) => (
+                <FormItem className="rounded-md border pl-2">
+                  <FormControl>
+                    <Total
+                      name="Beds"
+                      total={field.value ?? 0}
+                      setTotal={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="minNumBedrooms"
+              render={({ field }) => (
+                <FormItem className="rounded-md border pl-2">
+                  <FormControl>
+                    <Total
+                      name="Bedrooms"
+                      total={field.value ?? 0}
+                      setTotal={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="minNumBathrooms"
+              render={({ field }) => (
+                <FormItem className="rounded-md border pl-2">
+                  <FormControl>
+                    <Total
+                      name="Bathrooms"
+                      total={field.value ?? 0}
+                      setTotal={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
-            name={`data.${curTab}.minNumBeds`}
+            name="amenities"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
+                <FormLabel>Amenities</FormLabel>
                 <FormControl>
-                  <Total
-                    name="Beds"
-                    total={field.value ?? 0}
-                    setTotal={field.onChange}
+                  <ToggleGroupInput
+                    {...field}
+                    options={ALL_REQUESTABLE_AMENITIES}
+                    renderToggleBtn={({ option, onClick, selected }) => {
+                      const Icon = getAmenityIcon(option);
+                      return (
+                        <button
+                          onClick={onClick}
+                          className={cn(
+                            "flex h-10 items-center justify-center gap-4 rounded-md border px-3 text-sm font-semibold",
+                            selected
+                              ? "border-primaryGreen bg-primaryGreen-background"
+                              : "hover:bg-zinc-100",
+                          )}
+                        >
+                          <Icon className="size-5 shrink-0" />
+                          {option}
+                        </button>
+                      );
+                    }}
+                    renderToggleBtns={({ toggleBtns }) => (
+                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        {toggleBtns}
+                      </div>
+                    )}
                   />
                 </FormControl>
                 <FormMessage />
@@ -49,30 +142,22 @@ export function CityRequestFiltersDialog({
           />
           <FormField
             control={form.control}
-            name={`data.${curTab}.minNumBedrooms`}
+            name="note"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
+                <div className="flex justify-between">
+                  <FormLabel>Additional notes</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    {noteLength}/100
+                  </p>
+                </div>
                 <FormControl>
-                  <Total
-                    name="Bedrooms"
-                    total={field.value ?? 0}
-                    setTotal={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`data.${curTab}.minNumBathrooms`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Total
-                    name="Bathrooms"
-                    total={field.value ?? 0}
-                    setTotal={field.onChange}
+                  <Textarea
+                    {...field}
+                    className="resize-y"
+                    rows={2}
+                    maxLength={100}
+                    placeholder="Enter your additional notes here..."
                   />
                 </FormControl>
                 <FormMessage />
@@ -80,7 +165,29 @@ export function CityRequestFiltersDialog({
             )}
           />
         </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="greenPrimary">Done</Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}
+
+function getAmenityIcon(amenity: RequestableAmenity) {
+  switch (amenity) {
+    case "Pool":
+      return WavesIcon;
+    case "Hot tub":
+      return HotTubIcon;
+    case "A/C":
+      return AirVentIcon;
+    case "Dedicated workspace":
+      return LampDeskIcon;
+    case "Kitchen":
+      return UtensilsIcon;
+    case "Wifi":
+      return WifiIcon;
+  }
 }

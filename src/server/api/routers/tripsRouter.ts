@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { groupMembers, trips } from "@/server/db/schema";
+import { groupMembers, properties, trips } from "@/server/db/schema";
 import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists } from "drizzle-orm";
@@ -26,6 +26,40 @@ export const tripsRouter = createTRPCRouter({
         property: {
           columns: { name: true, imageUrls: true, address: true },
           with: { host: { columns: { name: true, image: true } } },
+        },
+      },
+    });
+  }),
+
+  getHostTrips: protectedProcedure.query(async ({ ctx }) => {
+    return await db.query.trips.findMany({
+      where: exists(
+        db.select().from(properties).where(eq(properties.hostId, ctx.user.id)),
+      ),
+      with: {
+        property: {
+          columns: { name: true, imageUrls: true, city: true },
+          with: { host: { columns: { name: true, image: true } } },
+        },
+        offer: {
+          columns: {
+            totalPrice: true,
+            checkIn: true,
+            checkOut: true,
+          },
+          with: {
+            request: {
+              columns: {
+                location: true,
+                numGuests: true,
+              },
+              with: {
+                madeByGroup: {
+                  with: { owner: { columns: { name: true } } },
+                },
+              },
+            },
+          },
         },
       },
     });

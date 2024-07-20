@@ -104,7 +104,7 @@ export default function HostPropertiesLayout({
       <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
         <ScrollArea>
           <h1 className="text-3xl font-bold">Properties</h1>
-          <p className="text-muted-foreground">24% currently vacant</p>
+          {/* <p className="text-muted-foreground">24% currently vacant</p> */}
           <div className="my-4">
             {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
             <Link href="/host-onboarding">
@@ -123,7 +123,10 @@ export default function HostPropertiesLayout({
           <Accordion type="multiple" className="w-full">
             <AccordionItem value="listed">
               <AccordionTrigger>
-                Listed {listedProperties?.length}
+                Listed{" "}
+                <span className="text-muted-foreground">
+                  {listedProperties?.length}
+                </span>
               </AccordionTrigger>
               <AccordionContent>
                 <HostProperties properties={listedProperties ?? null} />
@@ -131,7 +134,10 @@ export default function HostPropertiesLayout({
             </AccordionItem>
             <AccordionItem value="drafts">
               <AccordionTrigger>
-                Drafts {draftedProperties?.length}
+                Drafts{" "}
+                <span className="text-muted-foreground">
+                  {draftedProperties?.length}
+                </span>
               </AccordionTrigger>
               <AccordionContent>
                 <HostProperties properties={draftedProperties ?? null} />
@@ -139,7 +145,10 @@ export default function HostPropertiesLayout({
             </AccordionItem>
             <AccordionItem value="archive">
               <AccordionTrigger>
-                Archives {archivedProperties?.length}
+                Archives{" "}
+                <span className="text-muted-foreground">
+                  {archivedProperties?.length}
+                </span>
               </AccordionTrigger>
               <AccordionContent>
                 <HostProperties properties={archivedProperties ?? null} />

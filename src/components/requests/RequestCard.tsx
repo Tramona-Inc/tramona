@@ -9,10 +9,17 @@ import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
+  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { EllipsisIcon, MapPinIcon, TrashIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  EllipsisIcon,
+  MapPinIcon,
+  TrashIcon,
+  Users2Icon,
+} from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import RequestCardBadge from "./RequestCardBadge";
@@ -22,32 +29,35 @@ import WithdrawRequestDialog from "./WithdrawRequestDialog";
 
 import MobileSimilarProperties from "./MobileSimilarProperties";
 import { Separator } from "../ui/separator";
+import { Badge } from "../ui/badge";
+import UserAvatar from "../_common/UserAvatar";
+import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
+import { getTime } from "date-fns";
 
-export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
+export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
   | "inactiveRequestGroups"][number]["requests"][number];
 
-export type RequestWithUser = RouterOutputs["requests"]["getAll"][
+export type AdminDashboardRequst = RouterOutputs["requests"]["getAll"][
   | "incomingRequests"
   | "pastRequests"][number];
 
+export type HostDashboardRequest =
+  RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["request"];
+
 export default function RequestCard({
   request,
+  type,
   isSelected,
-  isAdminDashboard,
   children,
-}: React.PropsWithChildren<
-  | {
-      request: DetailedRequest;
-      isAdminDashboard?: false | undefined;
-      isSelected?: boolean;
-    }
-  | {
-      request: RequestWithUser;
-      isAdminDashboard: true;
-      isSelected?: boolean;
-    }
->) {
+}: (
+  | { type: "guest"; request: GuestDashboardRequest }
+  | { type: "admin"; request: AdminDashboardRequst }
+  | { type: "host"; request: HostDashboardRequest }
+) & {
+  isSelected?: boolean;
+  children?: React.ReactNode;
+}) {
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
@@ -59,7 +69,8 @@ export default function RequestCard({
     excludeDefaults: true,
   });
 
-  const showAvatars = request.numGuests > 1 || isAdminDashboard;
+  const showAvatars =
+    (request.numGuests > 1 && type !== "host") || type === "admin";
 
   const [open, setOpen] = useState(false);
 
@@ -71,34 +82,23 @@ export default function RequestCard({
         onOpenChange={setOpen}
       />
       <CardContent className="space-y-2">
-        {/* <p className="font-mono text-xs uppercase text-muted-foreground">
-          Id: {request.id} · Request group Id: {request.requestGroupId}
-        </p> */}
-        <RequestCardBadge request={request} />
-        {/* {request.requestGroup.hasApproved ? (
-          <RequestCardBadge request={request} />
-        ) : (
-          <Tooltip>
-            <TooltipTrigger>
-              <Badge variant="lightGray" className="border tracking-tight">
-                Unconfirmed
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-64">
-              You haven&apos;t confirmed your request yet. Check your text
-              messages or click &quot;Resend Confirmation&quot; to start getting
-              offers.
-            </TooltipContent>
-          </Tooltip>
-        )} */}
+        {type !== "host" && <RequestCardBadge request={request} />}
+        {type === "host" && (
+          <div className="flex items-center gap-2">
+            <UserAvatar size="sm" name={request.name} image={request.image} />
+            <TravelerVerificationsDialog request={request} />
+            <p>&middot;</p>
+            <p>{formatInterval(Date.now() - getTime(request.createdAt))} ago</p>
+          </div>
+        )}
         <div className="absolute right-2 top-0 flex items-center gap-2">
           {showAvatars && (
             <RequestGroupAvatars
               request={request}
-              isAdminDashboard={isAdminDashboard}
+              isAdminDashboard={type === "admin"}
             />
           )}
-          {!isAdminDashboard && !request.resolvedAt && (
+          {type === "guest" && !request.resolvedAt && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
@@ -122,10 +122,33 @@ export default function RequestCard({
         </div>
         <div>
           <p>Requested {fmtdPrice}/night</p>
-          <p>{fmtdDateRange}</p>
-          {fmtdFilters && <p>{fmtdFilters} &middot;</p>}
-          <p>{fmtdNumGuests}</p>
-          {request.note && <p>&ldquo;{request.note}&rdquo;</p>}
+          <p className="flex items-center gap-2">
+            <span className="flex items-center gap-1">
+              <CalendarIcon className="size-4" />
+              {fmtdDateRange}
+            </span>
+            &middot;
+            <span className="flex items-center gap-1">
+              <Users2Icon className="size-4" />
+              {fmtdNumGuests}
+            </span>
+          </p>
+
+          {fmtdFilters && <p>{fmtdFilters}</p>}
+
+          <div className="flex flex-wrap gap-2">
+            {request.amenities.map((amenity) => (
+              <Badge key={amenity}>{amenity}</Badge>
+            ))}
+          </div>
+
+          {request.note && (
+            <div className="rounded-lg bg-zinc-100 px-4 py-2">
+              <p className="text-xs text-muted-foreground">Note</p>
+              <p>&ldquo;{request.note}&rdquo;</p>
+            </div>
+          )}
+
           {request.airbnbLink && (
             <a className="underline" href={request.airbnbLink}>
               Airbnb Link

@@ -27,7 +27,7 @@ import UserAvatar from "../_common/UserAvatar";
 import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
+// import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,7 +50,7 @@ export default function ProfilePage() {
 
   // const [dialogOpen, setDialogOpen] = useState(false);
   const [picture, setPicture]= useState("/assets/images/profile-avatars/Avatar_2.png")
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  // const isMobile = useMediaQuery("(max-width: 640px)");
   const { data: session } = useSession({ required: true });
 
   const { data } = api.users.myReferralCode.useQuery();
@@ -117,7 +117,7 @@ export default function ProfilePage() {
   const deleteBLDDialogState = useDialogState();
 
   return (
-    <div className="mx-auto mb-5 min-h-screen-minus-header max-w-4xl space-y-3">
+    <div className="mx-auto min-h-screen-minus-header max-w-4xl space-y-3 pb-10">
       {/* Profile Header */}
       <section className="rounded-lg border">
          <div className="relative h-40 bg-teal-900 lg:h-52">
@@ -173,15 +173,15 @@ export default function ProfilePage() {
                   {profileInfo?.name}
                 </h2>
                 {verificationStatus?.isIdentityVerified == "true" ? (
-                  <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
+                  <div className="flex flex-row items-center gap-x-1 text-center text-xs font-semibold tracking-tighter text-green-800">
                     <BadgeCheck size={22} /> Verified
                   </div>
                 ) : verificationStatus?.isIdentityVerified == "pending" ? (
-                  <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
+                  <div className="flex flex-row items-center gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
                     <Clock2Icon size={22} /> Pending
                   </div>
                 ) : (
-                  <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
+                  <div className="flex flex-row items-center gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
                     <BadgeXIcon size={22} /> Not Verified
                   </div>
                 )}
@@ -228,13 +228,13 @@ export default function ProfilePage() {
       {/* pop up if no verified */}
       {verificationStatus?.isIdentityVerified == "false" && (
         <section className="flex flex-col justify-center gap-x-2 rounded-lg border border-red-200 p-4">
-          <div className="flex flex-row gap-x-1 font-bold ">
+          <div className="flex flex-row gap-x-1 font-bold">
             <InfoIcon size={24} className="text-red-400" /> Verify your Identity
           </div>
           <p className="ml-2">
             Hosts are more likely to accept your bid when they know who you are.
           </p>
-          <div className="  mt-3 flex w-1/4">
+          <div className="mt-3 flex w-1/4">
             <VerificationProvider>
               <IdentityModal />
             </VerificationProvider>

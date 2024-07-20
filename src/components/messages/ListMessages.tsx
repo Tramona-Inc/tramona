@@ -55,6 +55,7 @@ export default function ListMessages({
     (state) => state.addMessageToConversation,
   );
 
+  const { fetchInitialMessages, fetchMessagesForGuest } = useMessage()
   const addMessageToAdminConversation = useMessage(
     (state) => state.addMessageToAdminConversation,
   );
@@ -173,6 +174,7 @@ export default function ListMessages({
       )
       .subscribe();
     // console.log(channel);
+    void fetchInitialMessages(currentConversationId ?? "")
     return () => {
       console.log('Unsubscribing from channel');
       void channel.unsubscribe();
@@ -194,6 +196,7 @@ export default function ListMessages({
       (payload: {new: GuestMessageType}) => void handlePostgresChangeOnGuest(payload) 
     )
 
+    void fetchMessagesForGuest(currentConversationId ?? "")
     return () => {
       
       void channel.unsubscribe();

@@ -11,7 +11,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
+// import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import UserAvatar from '@/components/_common/UserAvatar'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -72,7 +72,7 @@ function MessageDisplay() {
     <div className="flex h-screen-minus-header-n-footer divide-x">
       <div
         className={cn(
-          "w-full md:w-96",
+          "w-full bg-white md:w-96",
           selectedConversation && "hidden md:block",
         )}
       >
@@ -102,7 +102,7 @@ export default function MessagePage() {
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery();
 
-    const isMobile = useMediaQuery("(max-width:648px)")
+    // const isMobile = useMediaQuery("(max-width:648px)")
 
     const formSchema = z.object({
       message: z.string(),
@@ -120,9 +120,9 @@ export default function MessagePage() {
 
   return (
     <>
-    {!isMobile
-    ?
-      <>
+    {/* {!isMobile
+    ? */}
+      <div className="hidden sm:block">
       <Head>
         <title>
           {totalUnreadMessages && totalUnreadMessages > 0
@@ -134,9 +134,8 @@ export default function MessagePage() {
       <DashboardLayout type={session?.user.role ?? "guest"}>
         <MessageDisplay />
       </DashboardLayout>
-      </>
-      :
-      <>
+      </div>
+      <div className="sm:hidden">
       {/* <Head>
       <title>
         {totalUnreadMessages && totalUnreadMessages > 0
@@ -181,8 +180,7 @@ export default function MessagePage() {
               </Button>
               </div>
       </DashboardLayout>
-      </>
-    }
+      </div>
     </>
   );
 }

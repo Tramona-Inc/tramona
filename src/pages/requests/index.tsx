@@ -1,11 +1,10 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
-import { HistoryIcon, HomeIcon, MapPinIcon } from "lucide-react";
+import { HistoryIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import CityRequestsTab from "../../components/requests/CityRequestsTab";
 import PastRequestsAndOffersTab from "../../components/requests/PastRequestsAndOffersTab";
-import PropertyOfferTab from "@/components/requests/PropertyOfferTab";
 import { NextSeo } from "next-seo";
 import { CongratsDialog } from "@/components/landing-page/SearchBars/CongratsDialog";
 
@@ -17,10 +16,10 @@ function RequestsTabs() {
           <MapPinIcon className="hidden sm:block" />
           City Requests
         </TabsTrigger>
-        <TabsTrigger value="propertyOffers">
+        {/* <TabsTrigger value="propertyOffers">
           <HomeIcon className="hidden sm:block" />
           Property Offers
-        </TabsTrigger>
+        </TabsTrigger> */}
         <TabsTrigger value="history">
           <HistoryIcon className="hidden sm:block" />
           History
@@ -29,9 +28,9 @@ function RequestsTabs() {
       <TabsContent value="cityRequests">
         <CityRequestsTab />
       </TabsContent>
-      <TabsContent value="propertyOffers">
+      {/* <TabsContent value="propertyOffers">
         <PropertyOfferTab />
-      </TabsContent>
+      </TabsContent> */}
       <TabsContent value="history">
         <PastRequestsAndOffersTab />
       </TabsContent>
@@ -58,14 +57,14 @@ export default function Page() {
   return (
     <>
       <NextSeo
-        title="Requests & offers"
-        description="Check out your tramona offers and requests."
+        title="Requests"
+        description="Check out your Tramona requests."
         canonical={`${baseUrl}/requests`}
         openGraph={{
           url: `${baseUrl}/requests`,
           type: "website",
-          title: "Requests & offers",
-          description: "Check out your tramona offers and requests.",
+          title: "Requests",
+          description: "Check out your Tramona requests.",
           images: [
             {
               url: `https://www.tramona.com/assets/images/landing-page/main.png`,
@@ -85,7 +84,7 @@ export default function Page() {
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">
-                Requests & offers
+                Requests
               </h1>
               {/* <NewRequestButton /> */}
             </div>

@@ -21,6 +21,7 @@ import {
   guestMessages,
   messages,
 } from "./tables/messages";
+import { emergencyContacts } from "./tables/emergencyContacts";
 import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
@@ -47,6 +48,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   reservations: many(reservations),
   bucketListDestinations: many(bucketListDestinations),
   bucketListProperties: many(bucketListProperties),
+  emergencyContacts: many(emergencyContacts),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -366,3 +368,13 @@ export const tripsRelations = relations(trips, ({ one }) => ({
     references: [bids.id],
   }),
 }));
+
+export const emergencyContactsRelations = relations(
+  emergencyContacts,
+  ({ one }) => ({
+    users: one(users, {
+      fields: [emergencyContacts.userId],
+      references: [users.id],
+    }),
+  }),
+);

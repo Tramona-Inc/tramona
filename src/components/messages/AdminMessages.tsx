@@ -6,6 +6,7 @@ import { useConversation } from "@/utils/store/conversations";
 import { useEffect } from "react";
 import { type MessageDbType, type GuestMessageType } from "@/types/supabase.message";
 import supabase from "@/utils/supabase-client";
+import { fetchGuestConversation } from "@/server/api/routers/messagesRouter";
 
 // export default function AdminMessages ({conversationId}:{
 //   conversationId: string | null
@@ -14,7 +15,7 @@ import supabase from "@/utils/supabase-client";
   )  {  
   const {data: session} = useSession();
   let tempToken: string = "";
-  if(!session && typeof window !== undefined){
+  if(!session && typeof window !== "undefined"){
     tempToken = localStorage.getItem("tempToken") ?? "";
   }
   // console.log(tempToken)
@@ -25,14 +26,14 @@ import supabase from "@/utils/supabase-client";
   // console.log(conversationId)
 
 
-  // const { fetchMessagesForGuest, fetchInitialMessages } = useMessage()
-  // if(!session || session.user.role === "admin") {
-  //   void fetchMessagesForGuest(conversationId ?? "")
-  //   // void fetchInitialMessages(conversationId ?? "")
-  // }
-  // else {
-  //   void fetchInitialMessages(conversationId ?? "")
-  // }
+  const { fetchMessagesForGuest, fetchInitialMessages } = useMessage()
+  if(!session || session.user.role === "admin") {
+    void fetchMessagesForGuest(conversationId ?? "")
+    // void fetchInitialMessages(conversationId ?? "")
+  }
+  else {
+    void fetchInitialMessages(conversationId ?? "")
+  }
 
   const { conversations } = useMessage();
   const { adminConversations } = useMessage();
@@ -55,8 +56,6 @@ import supabase from "@/utils/supabase-client";
   ? adminConversations[conversationId]?.messages ?? []
     : [];
 
-    
-
     const handlePostgresChangeOnGuest = async (payload: { new: GuestMessageType }) => {
       if(!optimisticIds.includes(payload.new.id)){
         const newMessage: ChatMessageType | GuestMessage = {
@@ -75,6 +74,51 @@ import supabase from "@/utils/supabase-client";
   // }        
   }
 
+  useEffect(() => {
+    console.log("handling postgres change for logged in user");
+    console.log(conversationId);
+    const channel = supabase
+      .channel(`${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload: { new: MessageDbType}) => {
+          console.log(payload)
+          void handlePostgresChange(payload)},
+      )
+      .subscribe();
+      
+    console.log("going or no?");
+    return () => {
+      console.log("unsubscibing from channel");
+      void channel.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, messages]);
+  
+  const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+    console.log("coming to handlePostgresChange")
+    if(optimisticIds.includes(payload.new.id)) {
+        const newMessage: ChatMessageType & GuestMessage = {
+          id: payload.new.id,
+          conversationId: payload.new.conversation_id,
+          userId: payload.new.user_id ?? "",
+          // userToken:payload.new.user_token,
+          message: payload.new.message,
+          isEdit: payload.new.is_edit,
+          createdAt: payload.new.created_at,
+          read: payload.new.read,
+          userToken: "",
+        };
+        addMessageToConversation(payload.new.conversation_id, newMessage)
+        // setOptimisticIds(newMessage.id)      
+    }
+  }
+
 useEffect(() => {
   const channel = supabase
     .channel(`${conversationId}`)
@@ -89,11 +133,14 @@ useEffect(() => {
     )
     .subscribe();
 
-  // return () => {
-  //   void channel.unsubscribe();
-  // };
+  return () => {
+    void channel.unsubscribe();
+  };
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [adminMessages]);
+    
+
+
 
     return(
     <>

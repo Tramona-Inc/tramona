@@ -6,8 +6,6 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  MAX_REQUEST_GROUP_SIZE,
-  Request,
   groupMembers,
   groups,
   requestGroups,
@@ -19,9 +17,10 @@ import {
   users,
 } from "@/server/db/schema";
 import {
-  getPropertiesForRequest,
   sendText,
   sendWhatsApp,
+  scrapeUsingLink,
+  getPropertiesForRequest,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -35,6 +34,7 @@ import { TRPCError } from "@trpc/server";
 import { and, count, eq, exists } from "drizzle-orm";
 import { groupBy } from "lodash";
 import { z } from "zod";
+import type { Session } from "next-auth";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -225,120 +225,213 @@ export const requestsRouter = createTRPCRouter({
       });
   }),
 
-  createMultiple: protectedProcedure
+  create: protectedProcedure
     .input(
-      requestInsertSchema
-        .omit({ madeByGroupId: true, requestGroupId: true })
-        .array()
-        .min(1)
-        .max(MAX_REQUEST_GROUP_SIZE),
+      requestInsertSchema.omit({
+        madeByGroupId: true,
+        requestGroupId: true,
+        latLngPoint: true,
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      const transactionResults = await ctx.db.transaction(async (tx) => {
-        const requestGroupId = await tx
-          .insert(requestGroups)
-          .values({ createdByUserId: ctx.user.id })
-          .returning()
-          .then((res) => res[0]!.id);
-
-        const results = await Promise.all(
-          input.map(async (req) => {
-            const madeByGroupId = await tx
-              .insert(groups)
-              .values({ ownerId: ctx.user.id })
-              .returning()
-              .then((res) => res[0]!.id);
-
-            await tx.insert(groupMembers).values({
-              userId: ctx.user.id,
-              groupId: madeByGroupId,
-            });
-
-            const { requestId } = await tx
-              .insert(requests)
-              .values({
-                ...req,
-                madeByGroupId,
-                requestGroupId,
-              })
-              .returning({ requestId: requests.id })
-              .then((res) => res[0]!);
-
-            await getPropertiesForRequest(
-              { ...req, id: requestId },
-              { tx },
-            ).then((propertyIds) =>
-              Promise.all(
-                propertyIds.map((propertyId) =>
-                  tx
-                    .insert(requestsToProperties)
-                    .values({ requestId, propertyId }),
-                ),
-              ),
-            );
-
-            return { requestId, madeByGroupId };
-          }),
-        );
-        //   results.forEach((result) => {
-        //     if (result.status === "rejected") {
-        //       throw new TRPCError({
-        //         code: "INTERNAL_SERVER_ERROR",
-        //         message: JSON.stringify(result.reason),
-        //       });
-        //     }
-        //   });
-        // });
-
-        return { madeByGroupIds: results.map((r) => r.madeByGroupId), results };
+      const { transactionResults } = await handleRequestSubmission(input, {
+        user: ctx.user,
       });
-
-      // if (ctx.user.isWhatsApp) {
-      //   void sendWhatsApp({
-      //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
-      //     to: ctx.user.phoneNumber!,
-      //   });
-      // } else {
-      //   void sendText({
-      //     to: ctx.user.phoneNumber!,
-      //     content:
-      //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-      //   });
-      // }
-
-      // if (env.NODE_ENV !== "production") return;
-
-      const { madeByGroupIds, results } = transactionResults;
-
-      const name = ctx.user.name ?? ctx.user.email;
-
-      if (input.length > 1) {
-        sendSlackMessage(
-          `*${name} just made ${input.length} requests*`,
-          `<https://tramona.com/admin|Go to admin dashboard>`,
-        );
-      } else {
-        const request = input[0]!;
-
-        const pricePerNight =
-          request.maxTotalPrice /
-          getNumNights(request.checkIn, request.checkOut);
-        const fmtdPrice = formatCurrency(pricePerNight);
-        const fmtdDateRange = formatDateRange(
-          request.checkIn,
-          request.checkOut,
-        );
-        const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
-
-        sendSlackMessage(
-          `*${name} just made a request: ${request.location}*`,
-          `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-          `<https://tramona.com/admin|Go to admin dashboard>`,
-        );
-      }
-
-      return { madeByGroupIds, results };
+      return { transactionResults };
     }),
+
+  createRequestWithLink: protectedProcedure
+    .input(
+      requestInsertSchema
+        .omit({
+          location: true,
+          maxTotalPrice: true,
+          madeByGroupId: true,
+          requestGroupId: true,
+          latLngPoint: true,
+        })
+        .extend({
+          airbnbLink: z.string().url(),
+          numGuests: z.number().min(1),
+        }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      //we are going to use the given data to scrape the airbnb listing and create a request
+      const response = await scrapeUsingLink(input.airbnbLink);
+      const newRequest: RequestInput = {
+        ...input,
+        location: response.cityName,
+        maxTotalPrice: response.formattedNightlyPrice,
+      };
+      //now we need to make a legitimate request with all of the data
+      const { transactionResults } = await handleRequestSubmission(newRequest, {
+        user: ctx.user,
+      });
+      return { transactionResults };
+    }),
+
+  // createMultiple: protectedProcedure
+  //   .input(
+  //     requestInsertSchema
+  //       .omit({ madeByGroupId: true, requestGroupId: true })
+  //       .array()
+  //       .min(1)
+  //       .max(MAX_REQUEST_GROUP_SIZE),
+  //   )
+  //   .mutation(async ({ ctx, input }) => {
+  //     const transactionResults = await ctx.db.transaction(async (tx) => {
+  //       const requestGroupId = await tx
+  //         .insert(requestGroups)
+  //         .values({ createdByUserId: ctx.user.id })
+  //         .returning()
+  //         .then((res) => res[0]!.id);
+
+  //       const results = await Promise.all(
+  //         input.map(async (req) => {
+  //           const madeByGroupId = await tx
+  //             .insert(groups)
+  //             .values({ ownerId: ctx.user.id })
+  //             .returning()
+  //             .then((res) => res[0]!.id);
+
+  //           await tx.insert(groupMembers).values({
+  //             userId: ctx.user.id,
+  //             groupId: madeByGroupId,
+  //           });
+  //           const { requestId } = await tx.insert(requests).values({
+  //             ...req,
+  //             madeByGroupId,
+  //             requestGroupId,
+  //           })
+  //             .returning({ requestId: requests.id })
+  //             .then((res) => {
+  //               if (!res[0]) {
+  //                 throw new Error("Failed to insert request");
+  //               }
+  //               console.log('Inserted request with ID:', res[0].requestId);
+  //               return res[0];
+  //             });
+
+  //           async function isPropertyAvailable(propertyId: number, checkInDate: Date, checkOutDate: Date): Promise<boolean> {
+  //             const overlappingBookings = await db
+  //               .select()
+  //               .from(bookedDates)
+  //               .where(
+  //                 and(eq(bookedDates.propertyId, propertyId), between(bookedDates.date, checkInDate, checkOutDate)),
+  //               )
+  //               .limit(1);
+
+  //             return overlappingBookings.length === 0;
+  //           }
+
+  //           async function getPropertyIdsInLocation(input: { location: string, radius: number | null, lat: number | null, lng: number | null }) {
+  //             const { location, radius, lat, lng } = input;
+
+  //             let propertyIdsInLocation;
+
+  //             if (radius === null || lat === null || lng === null) {
+  //               const coordinates = await getCoordinates(location);
+  //               if (!coordinates.bounds) {
+  //                 throw new Error('Bounds are undefined');
+  //               }
+  //               const { northeast, southwest } = coordinates.bounds;
+  //               // Use address-based filtering
+  //               propertyIdsInLocation = await db.query.properties.findMany({
+  //                 where: and(and(and(and(gte(properties.latitude, southwest.lat), lte(properties.latitude, northeast.lat)), gte(properties.longitude, southwest.lng)), lte(properties.longitude, northeast.lng)), isNotNull(properties.hostId)),
+  //                 columns: { id: true },
+  //               }).then((res) => res.map((r) => r.id));
+  //             } else {
+  //               // Use radius-based filtering
+  //               const earthRadiusMiles = 3959; // Earth's radius in miles
+
+  //               propertyIdsInLocation = await db.query.properties.findMany({
+  //                 where: and(
+  //                   isNotNull(properties.hostId),
+  //                   sql`(
+  //                       ${earthRadiusMiles} * acos(
+  //                         cos(radians(${lat})) * cos(radians(${properties.latitude})) * cos(radians(${properties.longitude}) - radians(${lng})) +
+  //                         sin(radians(${lat})) * sin(radians(${properties.latitude}))
+  //                       )
+  //                     ) <= ${radius}`
+  //                 ),
+  //                 columns: { id: true },
+  //               }).then((res) => res.map((r) => r.id));
+  //             }
+
+  //             return propertyIdsInLocation;
+  //           }
+
+  //           const propertyIdsInLocation = await getPropertyIdsInLocation({ location: input[0]!.location, radius: input[0]!.radius ?? null, lat: input[0]!.lat ?? null, lng: input[0]!.lng ?? null });
+
+  //           for (const propertyId of propertyIdsInLocation) {
+  //             const isAvailable = await isPropertyAvailable(propertyId, input[0]!.checkIn, input[0]!.checkOut);
+
+  //             if (isAvailable) {
+  //               await db.insert(requestsToProperties).values({
+  //                 requestId: requestId,
+  //                 propertyId: propertyId,
+  //               });
+  //             }
+  //           }
+
+  //           return { madeByGroupId, requestGroupId };
+  //         }),
+  //       );
+  //       //   results.forEach((result) => {
+  //       //     if (result.status === "rejected") {
+  //       //       throw new TRPCError({
+  //       //         code: "INTERNAL_SERVER_ERROR",
+  //       //         message: JSON.stringify(result.reason),
+  //       //       });
+  //       //     }
+  //       //   });
+  //       // });
+
+  //       return { madeByGroupIds: results.map(r => r.madeByGroupId), results };
+  //     });
+
+  //     // if (ctx.user.isWhatsApp) {
+  //     //   void sendWhatsApp({
+  //     //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
+  //     //     to: ctx.user.phoneNumber!,
+  //     //   });
+  //     // } else {
+  //     //   void sendText({
+  //     //     to: ctx.user.phoneNumber!,
+  //     //     content:
+  //     //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
+  //     //   });
+  //     // }
+
+  //     // if (env.NODE_ENV !== "production") return;
+
+  //     const { madeByGroupIds, results } = transactionResults;
+
+  //     const name = ctx.user.name ?? ctx.user.email;
+
+  //     if (input.length > 1) {
+  //       sendSlackMessage(
+  //         `*${name} just made ${input.length} requests*`,
+  //         `<https://tramona.com/admin|Go to admin dashboard>`,
+  //       );
+  //     } else {
+  //       const request = input[0]!;
+
+  //       const pricePerNight =
+  //         request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
+  //       const fmtdPrice = formatCurrency(pricePerNight);
+  //       const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
+  //       const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
+
+  //       sendSlackMessage(
+  //         `*${name} just made a request: ${request.location}*`,
+  //         `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+  //         `<https://tramona.com/admin|Go to admin dashboard>`,
+  //       );
+  //     }
+
+  //     return { madeByGroupIds, results };
+  //   }),
 
   // resolving a request with no offers = reject
 
@@ -508,7 +601,7 @@ export const requestsRouter = createTRPCRouter({
 
   getByPropertyId: protectedProcedure
     .input(z.number())
-    .query(async ({ ctx, input: propertyId }) => {
+    .query(async ({ input: propertyId }) => {
       // const hostId = await db.query.properties
       //   .findFirst({
       //     columns: { hostId: true },
@@ -588,4 +681,84 @@ export const requestsRouter = createTRPCRouter({
         propertyLinks: deserializedPropertyLinks,
       };
     }),
+
+  rejectRequest: protectedProcedure
+    .input(z.object({ requestId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(requestsToProperties)
+        .where(eq(requestsToProperties.requestId, input.requestId));
+    }),
 });
+
+//Reusable functions
+const modifiedRequestSchema = requestInsertSchema.omit({
+  madeByGroupId: true,
+  requestGroupId: true,
+  latLngPoint: true,
+});
+
+// Infer the type from the modified schema
+type RequestInput = z.infer<typeof modifiedRequestSchema>;
+
+export async function handleRequestSubmission(
+  input: RequestInput,
+  { user }: { user: Session["user"] },
+) {
+  // Begin a transaction
+  const transactionResults = await db.transaction(async (tx) => {
+    const requestGroupId = await tx
+      .insert(requestGroups)
+      .values({ createdByUserId: user.id })
+      .returning()
+      .then((res) => res[0]!.id);
+
+    const madeByGroupId = await tx
+      .insert(groups)
+      .values({ ownerId: user.id })
+      .returning()
+      .then((res) => res[0]!.id);
+
+    await tx.insert(groupMembers).values({
+      userId: user.id,
+      groupId: madeByGroupId,
+    });
+
+    const { requestId } = await tx
+      .insert(requests)
+      .values({
+        ...input,
+        madeByGroupId,
+        requestGroupId,
+      })
+      .returning({ requestId: requests.id })
+      .then((res) => res[0]!);
+
+    const propertyIds = await getPropertiesForRequest(
+      { ...input, id: requestId },
+      { tx },
+    );
+
+    await tx
+      .insert(requestsToProperties)
+      .values(propertyIds.map((propertyId) => ({ requestId, propertyId })));
+
+    return { requestId, madeByGroupId };
+  });
+
+  // Messaging based on user preferences or environment
+  const name = user.name ?? user.email;
+  const pricePerNight =
+    input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
+  const fmtdPrice = formatCurrency(pricePerNight);
+  const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
+  const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
+
+  sendSlackMessage(
+    `*${name} just made a request: ${input.location}*`,
+    `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+    `<https://tramona.com/admin|Go to admin dashboard>`,
+  );
+
+  return { transactionResults };
+}

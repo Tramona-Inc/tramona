@@ -3,8 +3,8 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import { useSession } from "next-auth/react";
 import Header from "../../Header";
 import Footer from "../DesktopFooter";
-import { useIsMd } from "@/utils/utils";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
+import { useIsMd, useIsLg } from "@/utils/utils";
+// import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +24,8 @@ export default function DashboardLayout({
 }: DashboardLayoutProps) {
   const { data: session } = useSession();
   const isMd = useIsMd();
-  const isMobile = useMediaQuery("(max-width: 684px)")
+  const isLg = useIsLg();
+  // const isMobile = useMediaQuery("(max-width: 684px)")
   const formSchema = z.object({
     message: z.string(),
   })
@@ -41,18 +42,16 @@ export default function DashboardLayout({
             <Sidebar type={type} />
           </aside>
         )}
-        <div className="lg:flex-1">
-          <main className="relative min-h-screen-minus-header bg-zinc-50">
-            {children}
-          </main>
+        <div className="min-w-0 lg:flex-1">
+          <main className="relative min-h-screen-minus-header">{children}</main>
           {session ? (
             <MobileNav type={type} />
           ) : (
             <MobileNav type={"unlogged"} />
           )}
-          {!isMobile && 
-          <MessagesPopover session={session}/>
-          }
+          {/* {!isMobile &&  */}
+          {isLg && <MessagesPopover /> }
+          {/* } */}
           {isMd && <Footer />}
         </div>
       </div>

@@ -140,6 +140,9 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: ^0.10.0
         version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
+      '@tabler/icons-react':
+        specifier: ^3.9.0
+        version: 3.9.0(react@18.2.0)
       '@tailwindcss/aspect-ratio':
         specifier: ^0.4.2
         version: 0.4.2(tailwindcss@3.4.4)
@@ -179,6 +182,9 @@ importers:
       '@uidotdev/usehooks':
         specifier: ^2.4.1
         version: 2.4.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@vercel/functions':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@vercel/og':
         specifier: ^0.6.2
         version: 0.6.2
@@ -198,7 +204,7 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       clsx:
-        specifier: ^2.1.0
+        specifier: ^2.1.1
         version: 2.1.1
       cmdk:
         specifier: ^0.2.1
@@ -231,7 +237,7 @@ importers:
         specifier: 8.0.4
         version: 8.0.4(react@18.2.0)
       framer-motion:
-        specifier: ^11.0.15
+        specifier: ^11.2.11
         version: 11.2.11(@emotion/is-prop-valid@0.8.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       google-map-react:
         specifier: ^2.2.1
@@ -339,8 +345,14 @@ importers:
         specifier: ^3.1.0
         version: 3.3.0
       stripe:
-        specifier: ^16.0.0
-        version: 16.0.0
+        specifier: ^16.2.0
+        version: 16.2.0
+      'stripe-js:':
+        specifier: 'link:@types/stripe-js:'
+        version: 'link:@types/stripe-js:'
+      supabase:
+        specifier: ^1.183.5
+        version: 1.183.5
       superjson:
         specifier: ^2.2.1
         version: 2.2.1
@@ -348,7 +360,7 @@ importers:
         specifier: ^11.1.3
         version: 11.1.4
       tailwind-merge:
-        specifier: ^2.2.1
+        specifier: ^2.3.0
         version: 2.3.0
       tailwind-scrollbar-hide:
         specifier: ^1.1.7
@@ -3745,6 +3757,14 @@ packages:
       typescript:
         optional: true
 
+  '@tabler/icons-react@3.9.0':
+    resolution: {integrity: sha512-7Fbcrb5LYBGd9rwfkgrJsvLYGqPqO4WV3u6lfqE2wRzEVcevDQcdvo8toKp5Jcc66MPMEmMg+/tnUGwFIKQmUQ==}
+    peerDependencies:
+      react: '>= 16'
+
+  '@tabler/icons@3.9.0':
+    resolution: {integrity: sha512-wZAwEu4iI0WmUA/bjstzNYri13D8X14f/SCRrzr2MyU+WP/6Vd+xq4YLM52dOS8V6ZVt+ujuE9IFkuJdsdSVAQ==}
+
   '@tailwindcss/aspect-ratio@0.4.2':
     resolution: {integrity: sha512-8QPrypskfBa7QIMuKHg2TA7BqES6vhBrDLOv8Unb6FcFyd3TjKbc6lcmb9UPQHxfl24sXoJ41ux/H7qQQvfaSQ==}
     peerDependencies:
@@ -4180,6 +4200,10 @@ packages:
 
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
+
+  '@vercel/functions@1.0.2':
+    resolution: {integrity: sha512-j3udyHOv/05Y8o3WQ/ANMWa1aYagsY5B3ouImiwgYsz5z4CBUHTY5dk74oQAXYr+bgoVDpdDlmxkpnxGzKEdLQ==}
+    engines: {node: '>= 16'}
 
   '@vercel/og@0.6.2':
     resolution: {integrity: sha512-OTe0KE37F5Y2eTys6eMnfopC+P4qr2ooXUTFyFPTplYSPwowmFk/HLD1FXtbKLjqsIH0SgekcJWad+C5uX4nkg==}
@@ -8904,8 +8928,8 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  stripe@16.0.0:
-    resolution: {integrity: sha512-HNPTzXrSompUxeGqDpbNmPvH/UEzziIxGWvTDTZwIBLlL6CFqR+3YLpV+g4HXOsPKbQRguauptQwVWO7Y/yEGg==}
+  stripe@16.2.0:
+    resolution: {integrity: sha512-kNHb5x6mlQJ8V92Afn+F+uyHG3U0+Mc1pOYxDkbEh/kI3oF63URnUt6dwTQthELYWBy04arerm2XjwgtzEPDEA==}
     engines: {node: '>=12.*'}
 
   strnum@1.0.5:
@@ -14145,6 +14169,13 @@ snapshots:
     optionalDependencies:
       typescript: 5.4.5
 
+  '@tabler/icons-react@3.9.0(react@18.2.0)':
+    dependencies:
+      '@tabler/icons': 3.9.0
+      react: 18.2.0
+
+  '@tabler/icons@3.9.0': {}
+
   '@tailwindcss/aspect-ratio@0.4.2(tailwindcss@3.4.4)':
     dependencies:
       tailwindcss: 3.4.4
@@ -14477,7 +14508,7 @@ snapshots:
 
   '@types/stripe@8.0.417':
     dependencies:
-      stripe: 16.0.0
+      stripe: 16.2.0
 
   '@types/unist@2.0.10': {}
 
@@ -14621,6 +14652,8 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
 
   '@ungap/structured-clone@1.2.0': {}
+
+  '@vercel/functions@1.0.2': {}
 
   '@vercel/og@0.6.2':
     dependencies:
@@ -19892,7 +19925,7 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  stripe@16.0.0:
+  stripe@16.2.0:
     dependencies:
       '@types/node': 20.14.2
       qs: 6.12.1

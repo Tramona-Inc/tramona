@@ -14,7 +14,7 @@ export default function FinanceSummary({
   becameHostAt: Date | undefined;
 }) {
   const { data: accountBalance } =
-    api.stripe.checkStripeConnectAcountBalance.useQuery(hostStripeAccountId!, {
+    api.stripe.checkStripeConnectAccountBalance.useQuery(hostStripeAccountId!, {
       enabled: !!hostStripeAccountId,
     });
 
@@ -54,6 +54,7 @@ export default function FinanceSummary({
         <Separator className="h-[2px] lg:hidden" />
         <div className="flex w-full flex-col gap-y-3">
           <BalanceSummary
+            stripeAccountIdNumber={hostStripeAccountId}
             balance={totalCurrentBalance}
             isStripeConnectInstanceReady={isStripeConnectInstanceReady}
           />

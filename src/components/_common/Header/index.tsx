@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useMediaQuery } from "@/components/_utils/useMediaQuery";
+// import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import HeaderTopRight from "./HeaderTopRight";
 import HamburgerMenuMobile from "./HamburgerMenuMobile";
 import { Separator } from '@/components/ui/separator'
@@ -51,7 +51,7 @@ export default function Header(props: HeaderProps) {
       <div className="contents lg:hidden">
         <SmallHeader {...props} />
       </div>
-      <div className="container hidden lg:contents ">
+      <div className="container hidden lg:contents">
         <LargeHeader {...props} />
       </div>
     </>
@@ -60,7 +60,7 @@ export default function Header(props: HeaderProps) {
 
 const headerLinks1 = [
   { name: "Link Input", href: "/link-input" },
-  { name: "Unclaimed Offers", href: "/unclaimed-offers" },
+  //{ name: "Unclaimed Offers", href: "/unclaimed-offers" },
   { name: "Recent Deals", href: "/exclusive-offers" },
 ];
 
@@ -103,7 +103,7 @@ function HamburgerMenu({
     icon?: React.ReactNode | null;
   }[];
 }) {
-  const isMobile = useMediaQuery("(max-width:810px)")
+  // const isMobile = useMediaQuery("(max-width:810px)")
   const [open, setOpen] = useState(false);
 
   return (
@@ -157,8 +157,8 @@ function HamburgerMenu({
          </div>
        </DropdownMenuTrigger>
         {/* <DropdownMenuPortal container={document.body}> */}
-        {isMobile ? 
-        <DropdownMenuContent className="fixed -top-[3rem] -right-12 w-screen h-screen bg-white z-50 p-4 overflow-y-auto">
+        {/* {isMobile ?  */}
+        <DropdownMenuContent className="sm:hidden fixed -top-[3rem] -right-12 w-screen h-screen bg-white z-50 p-4 overflow-y-auto">
         <DropdownMenuLabel className="text-xl font-bold text-teal-900">
           <div className="flex items-center gap-3">
             <button
@@ -194,8 +194,8 @@ function HamburgerMenu({
           </Link>
         ))}
         </DropdownMenuContent>
-          :
-          <DropdownMenuContent className="bg-white">
+        
+          <DropdownMenuContent className="bg-white hidden">
             <DropdownMenuLabel className="text-xl font-bold text-teal-900">
           <div className="flex items-center gap-3">
             <button
@@ -231,7 +231,7 @@ function HamburgerMenu({
           </Link>
         ))}
         </DropdownMenuContent>
-        }
+        {/* } */}
         {/* </DropdownMenuPortal> */}
       </DropdownMenu> 
   );
@@ -243,12 +243,12 @@ function LargeHeader(props: HeaderProps) {
   const pathname = usePathname();
 
   return (
-    <header className=" sticky top-0 z-50 flex h-header-height items-center border-b bg-white p-4 lg:px-24">
-      <div className="pr-10">
+    <header className="sticky top-0 z-50 flex h-header-height items-center border-b bg-white p-4 lg:pl-8 xl:px-20">
+      <div className="pr-5">
         <TramonaLogo />
       </div>
 
-      <div className="flex items-center justify-center gap-8 text-muted-foreground">
+      <div className="mt-1 flex items-center justify-center gap-x-5 leading-tight text-muted-foreground">
         {props.type === "marketing" && (
           <>
             {status !== "authenticated" &&
@@ -259,7 +259,7 @@ function LargeHeader(props: HeaderProps) {
                   render={({ selected }) => (
                     <span
                       className={cn(
-                        "font-bold",
+                        "text-sm font-bold xl:text-base",
                         selected && "underline underline-offset-2",
                       )}
                     >
@@ -279,7 +279,7 @@ function LargeHeader(props: HeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-full border bg-white px-4 py-2 text-sm font-bold text-teal-900"
+                className="whitespace-nowrap rounded-full border bg-white px-3 py-1 text-sm font-bold text-teal-900 xl:text-base"
               >
                 {link.name}
               </Link>
