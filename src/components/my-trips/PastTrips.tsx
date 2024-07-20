@@ -1,9 +1,9 @@
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
 import PastTripCard from "@/components/my-trips/PastTripCard";
+import { TripCardDetails } from "@/pages/my-trips";
 import { api, type RouterOutputs } from "@/utils/api";
 
-export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
 export default function PastTrips({ pastTrips }: { pastTrips: TripCardDetails[] }) {
 

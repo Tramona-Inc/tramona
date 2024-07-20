@@ -125,3 +125,9 @@ body {
     line-clamp: 3;
   }
 }
+
+@import url("https://fonts.googleapis.com/css2?family=Stint+Ultra+Condensed&display=swap");
+@font-face {
+  font-family: "Stint-Ultra-Condensed";
+  src: url("../../public/fonts/StintUltraCondensed-Regular.ttf"); 
+}

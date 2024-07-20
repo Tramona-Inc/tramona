@@ -24,7 +24,13 @@ export const tripsRouter = createTRPCRouter({
       ),
       with: {
         property: {
-          columns: { name: true, imageUrls: true, address: true, city: true },
+          columns: {
+            id: true,
+            name: true,
+            imageUrls: true,
+            address: true,
+            city: true,
+          },
           with: { host: { columns: { name: true, image: true } } },
         },
       },
