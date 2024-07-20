@@ -84,7 +84,7 @@ body {
 
 @layer base {
   * {
-    @apply border-border;
+    @apply scroll-mt-36 border-border;
   }
   body {
     @apply bg-zinc-50 text-foreground;
@@ -95,6 +95,9 @@ body {
 }
 
 @layer components {
+  .subheading {
+    @apply text-xl font-semibold md:text-2xl;
+  }
 }
 
 @layer utilities {
@@ -109,14 +112,16 @@ body {
   src: url("../../public/fonts/StintUltraCondensed-Regular.ttf"); 
 }
 
-.custom-tabs-trigger {
-  @apply border-b-2 transition-colors hover:border-[#2F5BF6] hover:text-[#2F5BF6];
-}
+  .custom-tabs-trigger {
+    @apply border-b-2 transition-colors hover:border-[#2F5BF6] hover:text-[#2F5BF6];
+  }
 
-.ellipsis {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-line-clamp: 3; /* Number of lines to show before truncating */
+  .ellipsis {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 3; /* Number of lines to show before truncating */
+    line-clamp: 3;
+  }
 }

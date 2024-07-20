@@ -7,6 +7,7 @@ import {
   geometry,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -21,6 +22,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
+import { ALL_LISTING_SITE_NAMES } from "@/utils/listing-sites";
 
 export const ALL_PROPERTY_TYPES = [
   "Condominium",
@@ -177,7 +179,86 @@ export const propertyStatusEnum = pgEnum("property_status", [
 
 export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
 
-export const propertyPMS = pgEnum("property_pms", ALL_PROPERTY_PMS);
+export const propertyPMSEnum = pgEnum("property_pms", ALL_PROPERTY_PMS);
+
+export const listingSiteEnum = pgEnum("listing_site", ALL_LISTING_SITE_NAMES);
+
+export const ALL_BED_TYPES = [
+  "Single Bed",
+  "Double Bed",
+  "Queen Bunk Bed",
+  "Twin Bunk Bed",
+  "TwinXL Bunk Bed",
+  "Crib",
+  "Full Day Bed",
+  "King Day Bed",
+  "Queen Day Bed",
+  "Twin Day Bed",
+  "TwinXL Day Bed",
+  "Full Bed",
+  "Full Futon",
+  "King Futon",
+  "Queen Futon",
+  "Twin Futon",
+  "TwinXL Futon",
+  "King Bed",
+  "Full Murphy Bed",
+  "King Murphy Bed",
+  "Queen Murphy Bed",
+  "Twin Murphy Bed",
+  "TwinXL Murphy Bed",
+  "Queen Bed",
+  "Full Rollaway Bed",
+  "King Rollaway Bed",
+  "Queen Rollaway Bed",
+  "Twin Rollaway Bed",
+  "TwinXL Rollaway Bed",
+  "Full Sofa Bed",
+  "King Sofa Bed",
+  "Queen Sofa Bed",
+  "Twin Sofa Bed",
+  "TwinXL Sofa Bed",
+  "Full Trundle Bed",
+  "King Trundle Bed",
+  "Queen Trundle Bed",
+  "Twin Trundle Bed",
+  "TwinXL Trundle Bed",
+  "Twin Bed",
+  "Twin XL Bed",
+  "Full Water Bed",
+  "King Water Bed",
+  "Queen Water Bed",
+  "Twin Water Bed",
+  "TwinXL Water Bed",
+  "Full Bunk Bed",
+  "King Bunk Bed",
+  "Air Mattress",
+  "Floor Mattress",
+  "Toddler Bed",
+  "Hammock",
+  "Small Double Bed",
+  "California King Bed",
+] as const;
+
+export type BedType = (typeof ALL_BED_TYPES)[number];
+
+export const roomsWithBedsSchema = z.array(
+  z.object({
+    name: z.string().trim().min(1, { message: "Room name cannot be empty" }),
+    beds: z.array(
+      z.object({
+        count: z.number().int().positive(),
+        type: z.enum(ALL_BED_TYPES, {
+          errorMap: (_, ctx) => ({
+            message: `Unsupported bed type "${ctx.data}"`,
+          }),
+        }),
+      }),
+    ),
+  }),
+);
+
+export type RoomWithBeds = z.infer<typeof roomsWithBedsSchema.element>;
 
 export const properties = pgTable(
   "properties",
@@ -186,6 +267,11 @@ export const properties = pgTable(
     hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
     hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
+    // null = only on Tramona
+    originalListingSite: listingSiteEnum("original_listing_site"),
+    originalListingId: varchar("original_listing_id"),
+
+    roomsWithBeds: jsonb("rooms_with_beds").$type<RoomWithBeds[]>(),
     propertyType: propertyTypeEnum("property_type").notNull(),
     roomType: propertyRoomTypeEnum("room_type")
       .notNull()
@@ -201,6 +287,8 @@ export const properties = pgTable(
     // for when blake/preju manually upload, otherwise get the host's name via hostId
     hostName: varchar("host_name", { length: 255 }),
     hostProfilePic: varchar("host_profile_pic"),
+    hostNumReviews: integer("host_num_reviews"),
+    hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
     latitude: doublePrecision("latitude").notNull(),
@@ -275,6 +363,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   otherAmenities: z.array(z.string()),
   checkInTime: zodTime,
   checkOutTime: zodTime,
+  roomsWithBeds: roomsWithBedsSchema,
 });
 
 // make everything except id optional

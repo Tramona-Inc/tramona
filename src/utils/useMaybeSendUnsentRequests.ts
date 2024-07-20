@@ -1,19 +1,14 @@
-import {
-  MAX_REQUEST_GROUP_SIZE,
-  requestInsertSchema,
-} from "@/server/db/schema";
+import { requestInsertSchema } from "@/server/db/schema";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { api } from "./api";
 import { errorToast, successfulRequestToast } from "./toasts";
 import { z } from "zod";
-import { toast } from "@/components/ui/use-toast";
 
 export function useMaybeSendUnsentRequests() {
   const { status } = useSession();
 
-  const { mutateAsync: createRequests } =
-    api.requests.createMultiple.useMutation();
+  const { mutateAsync: createRequests } = api.requests.create.useMutation();
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -26,29 +21,19 @@ export function useMaybeSendUnsentRequests() {
       .omit({ madeByGroupId: true, requestGroupId: true })
       // overwrite checkIn and checkOut because JSON.parse doesnt handle dates
       .extend({ checkIn: z.coerce.date(), checkOut: z.coerce.date() })
-      .array()
-      .nonempty()
-      .max(MAX_REQUEST_GROUP_SIZE)
       .safeParse(JSON.parse(unsentRequestsJSON));
 
     if (!res.success) return;
 
-    const { data: unsentRequests } = res;
+    const { data: unsentRequest } = res;
 
     void (async () => {
       try {
-        createRequests(unsentRequests).catch(() => {
+        createRequests(unsentRequest).catch(() => {
           throw new Error();
         });
 
-        if (unsentRequests.length === 1) {
-          const req = unsentRequests[0];
-          successfulRequestToast(req);
-        } else {
-          toast({
-            title: `Successfully submitted ${unsentRequests.length} requests`,
-          });
-        }
+        successfulRequestToast(unsentRequest);
       } catch (e) {
         errorToast();
         localStorage.setItem("unsentRequests", unsentRequestsJSON);

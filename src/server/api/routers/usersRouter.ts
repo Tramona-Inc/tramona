@@ -7,6 +7,7 @@ import {
 import {
   ALL_PROPERTY_TYPES,
   bookedDates,
+  emergencyContacts,
   groups,
   hostProfiles,
   hostTeamMembers,
@@ -674,7 +675,7 @@ export const usersRouter = createTRPCRouter({
     }),
 
   getUserVerifications: protectedProcedure
-    .input(z.object({ madeByGroupId: zodNumber() }))
+    .input(z.object({ madeByGroupId: z.number() }))
     .query(async ({ input, ctx }) => {
       const verifications = await ctx.db.query.groups
         .findFirst({
@@ -692,12 +693,35 @@ export const usersRouter = createTRPCRouter({
         })
         .then((res) => res?.owner);
 
-      if (!verifications) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Group not found",
-        });
-      }
+      if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+
       return verifications;
     }),
+
+  addEmergencyContacts: protectedProcedure
+    .input(
+      z.object({
+        emergencyEmail: z.string(),
+        emergencyPhone: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.insert(emergencyContacts).values({
+        userId: ctx.user.id,
+        emergencyEmail: input.emergencyEmail,
+        emergencyPhone: input.emergencyPhone,
+      });
+    }),
+  deleteEmergencyContact: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(emergencyContacts)
+        .where(eq(emergencyContacts.id, input.id));
+    }),
+  getEmergencyContacts: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.emergencyContacts.findMany({
+      where: eq(emergencyContacts.userId, ctx.user.id),
+    });
+  }),
 });

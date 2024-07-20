@@ -52,7 +52,7 @@ export const hostNavLinks = [...hostMobileNavLinks];
 
 export const guestMobileNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/explore", name: "Explore", icon: Search },
+  // { href: "/explore", name: "Explore", icon: Search },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
 ];
@@ -64,5 +64,5 @@ export const guestNavLinks = [
 
 export const unloggedNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/explore", name: "Explore", icon: Search },
+  // { href: "/explore", name: "Explore", icon: Search },
 ];

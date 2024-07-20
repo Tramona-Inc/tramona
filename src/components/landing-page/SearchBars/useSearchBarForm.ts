@@ -1,8 +1,7 @@
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useZodForm } from "@/utils/useZodForm";
-import { useEffect } from "react";
-import { defaultSearchOrReqValues, searchSchema } from "./schemas";
+import { searchSchema } from "./schemas";
 
 export function useSearchBarForm({
   afterSubmit = undefined,
@@ -11,13 +10,8 @@ export function useSearchBarForm({
 } = {}) {
   const form = useZodForm({
     schema: searchSchema,
-    defaultValues: defaultSearchOrReqValues,
     reValidateMode: "onSubmit",
   });
-
-  const { guests, filter, maxNightlyPrice, checkIn } = useCitiesFilter(
-    (state) => state,
-  );
 
   const setGuests = useCitiesFilter((state) => state.setGuests);
   const setFilter = useCitiesFilter((state) => state.setFilter);
@@ -29,13 +23,6 @@ export function useSearchBarForm({
   );
   const setCheckIn = useCitiesFilter((state) => state.setCheckIn);
   const setCheckOut = useCitiesFilter((state) => state.setCheckOut);
-
-  useEffect(() => {
-    if (!filter) form.setValue("location", undefined);
-    if (!checkIn) form.setValue("date", undefined);
-    if (!guests) form.setValue("numGuests", undefined);
-    if (!maxNightlyPrice) form.setValue("maxNightlyPriceUSD", undefined);
-  }, [checkIn, filter, form, guests, maxNightlyPrice]);
 
   const utils = api.useUtils();
 
@@ -75,8 +62,8 @@ export function useSearchBarForm({
 
       setGuests(numGuests ?? 0);
       setMaxNightlyPrice((maxNightlyPriceUSD ?? 0) * 100);
-      setCheckIn(date?.from);
-      setCheckOut(date?.to);
+      setCheckIn(date.from);
+      setCheckOut(date.to);
 
       afterSubmit?.();
     },

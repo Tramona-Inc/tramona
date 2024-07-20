@@ -1,13 +1,7 @@
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
-import {
-  format,
-  formatDate,
-  isSameDay,
-  isSameMonth,
-  isSameYear,
-} from "date-fns";
+import { formatDate, isSameDay, isSameMonth, isSameYear } from "date-fns";
 import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -81,32 +75,49 @@ export function capitalize(str: string) {
  * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
-export function formatDateRange(fromDate: Date, toDate?: Date) {
+export function formatDateRange(
+  fromDate: Date,
+  toDate?: Date,
+  { withWeekday = false } = {},
+) {
   const from = removeTimezoneFromDate(fromDate);
   const to = toDate ? removeTimezoneFromDate(toDate) : "";
 
   const isCurYear = isSameYear(from, new Date());
-
-  if (!to || isSameDay(from, to)) {
-    return format(from, isCurYear ? "MMM d" : "MMM d, yyyy");
-  }
-
   const sameMonth = isSameMonth(from, to);
   const sameYear = isSameYear(from, to);
 
+  if (withWeekday) {
+    if (!to || isSameDay(from, to)) {
+      return formatDate(from, "EEE, MMMM d, yyyy");
+    }
+
+    if (sameYear) {
+      return `${formatDate(from, "EEE, MMMM d")} – ${formatDate(
+        to,
+        isCurYear ? "d, yyyy" : "MMM d, yyyy",
+      )}`;
+    }
+  }
+
+  if (!to || isSameDay(from, to)) {
+    const format = isCurYear ? "MMM d" : "MMM d, yyyy";
+    return formatDate(from, format);
+  }
+
   if (sameMonth && sameYear) {
-    return `${format(from, "MMM d")} – ${format(
+    return `${formatDate(from, "MMM d")} – ${formatDate(
       to,
       isCurYear ? "d" : "d, yyyy",
     )}`;
   }
   if (sameYear) {
-    return `${format(from, "MMM d")} – ${format(
+    return `${formatDate(from, "MMM d")} – ${formatDate(
       to,
       isCurYear ? "MMM d" : "MMM d, yyyy",
     )}`;
   }
-  return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
+  return `${formatDate(from, "MMM d, yyyy")} – ${formatDate(to, "MMM d, yyyy")}`;
 }
 
 function removeTimezoneFromDate(date: Date) {
@@ -119,11 +130,19 @@ export function formatDateMonthDay(date: Date) {
 }
 
 export function formatDateWeekMonthDay(date: Date) {
-  return formatDate(removeTimezoneFromDate(date), "EEE MMMM d");
+  return formatDate(removeTimezoneFromDate(date), "EEE, MMMM d");
 }
 
 export function formatDateMonthDayYear(date: Date) {
   return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
+}
+
+export function formatDateYearMonthDay(date: Date) {
+  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd");
+}
+
+export function formatShortDate(date: Date) {
+  return formatDate(removeTimezoneFromDate(date), "M/d/yyyy");
 }
 
 export function convertDateFormat(dateString: string) {
@@ -198,17 +217,20 @@ export function formatInterval(ms: number) {
   return "now";
 }
 
-export function formatArrayToString(arr: string[]) {
+export function formatArrayToString(
+  arr: string[],
+  { junction }: { junction: "and" | "or" } = { junction: "and" },
+) {
   if (arr.length === 0) {
     return "";
   } else if (arr.length === 1) {
     return arr[0]!;
   } else if (arr.length === 2) {
-    return `${arr[0]} and ${arr[1]}`;
+    return `${arr[0]} ${junction} ${arr[1]}`;
   } else {
     const lastItem = arr.pop();
     const joinedItems = arr.join(", ");
-    return `${joinedItems}, and ${lastItem}`;
+    return `${joinedItems}, ${junction} ${lastItem}`;
   }
 }
 
@@ -236,7 +258,7 @@ export function getDiscountPercentage(
 // these will need to be kept in sync with
 // https://tailwindcss.com/docs/screens and ./tailwind.config.ts
 
-export const useScreenWidth = () => useWindowSize().width ?? 0;
+const useScreenWidth = () => useWindowSize().width ?? 0;
 
 /**
  * screen width >= 640 (same as tailwind `sm:`)
@@ -387,32 +409,12 @@ export function getAge(birthdate: string) {
     return age;
   }
 }
-// export function formatDateRangeWithWeekday(
-//   fromDate: Date | string,
-//   toDate?: Date | string,
-// ) {
-//   // Convert to Date objects if necessary
-//   //converting because the gssp function returns a string
-//   if (typeof fromDate === "string") {
-//     fromDate = new Date(fromDate);
-//   }
-//   if (typeof toDate === "string") {
-//     toDate = new Date(toDate);
-//   }
 
-//   fromDate = removeTimezoneFromDate(fromDate);
-//   toDate = toDate && removeTimezoneFromDate(toDate);
-
-//   const options: Intl.DateTimeFormatOptions = {
-//     weekday: "short",
-//     month: "short",
-//     day: "numeric",
-//   };
-
-//   const fromFormatted = fromDate.toLocaleDateString("en-US", options);
-//   const toFormatted = toDate
-//     ? (toDate as Date).toLocaleDateString("en-US", options)
-//     : "";
-
-//   return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
-// }
+export function formatTime(time: string) {
+  const [hour, minute] = time.split(":").map(Number);
+  if (hour === undefined || minute === undefined) return time;
+  const fmtdMinutes = minute < 10 ? `0${minute}` : minute;
+  return hour > 12
+    ? `${hour - 12}:${fmtdMinutes} PM`
+    : `${hour}:${fmtdMinutes} AM`;
+}

@@ -251,22 +251,6 @@ export default function HostSignUpForm() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="profileUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="text"
-                    placeholder="Enter your profile link"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormMessage />
           <Button

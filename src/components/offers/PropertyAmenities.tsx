@@ -10,8 +10,7 @@ import {
   EggFriedIcon,
 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
-import { useMediaQuery } from "../_utils/useMediaQuery";
-import { FunctionComponent, SVGProps } from "react";
+import { type FunctionComponent, type SVGProps } from "react";
 import {
   WifiIcon,
   UtensilsIcon,
@@ -80,8 +79,8 @@ const AmenityItem: React.FC<AmenityItemProps> = ({ name }) => {
   const IconComponent = amenityIcons[name];
   if (!IconComponent) return null;
   return (
-    <div className="flex items-center space-x-2 py-2 md:py-6">
-      {IconComponent && <IconComponent className="h-5 w-5" />}
+    <div className="flex items-center space-x-2 py-2 lg:py-4">
+      <IconComponent className="h-7 w-7 rounded-full bg-[#EEEEEE] p-1" />
       <span>{name}</span>
     </div>
   );
@@ -118,7 +117,7 @@ const PropertyAmenities = ({ amenities }: { amenities: string[] }) => {
     .slice(0, toDisplay);
 
   return (
-    <div className="gap-4 py-6 md:grid md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       {topAmenities.map((amenity, index) => (
         <AmenityItem key={index} name={amenity} />
       ))}

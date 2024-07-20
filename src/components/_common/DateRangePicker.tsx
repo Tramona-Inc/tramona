@@ -126,7 +126,6 @@ export default function DateRangePicker({
           onSelect={handleSelect}
           disabled={(date: Date) => !!dateIsDisabled(date)}
           numberOfMonths={1}
-          showOutsideDays={true}
           className="h-80"
         />
       </PopoverContent>
