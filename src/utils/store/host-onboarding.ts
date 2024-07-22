@@ -19,6 +19,7 @@ export type LocationType = {
 };
 
 type HostOnboardingState = {
+  [x: string]: any;
   progress: number;
   setProgress: (progress: number) => void;
   isEdit: boolean;
@@ -42,6 +43,7 @@ type HostOnboardingState = {
     petsAllowed: boolean;
     smokingAllowed: boolean;
     otherHouseRules: string | null | undefined;
+    bookedDates: Date[];
   };
   setIsEdit: (isEdit: boolean) => void;
   setMaxGuests: (maxGuests: number) => void;
@@ -67,6 +69,7 @@ type HostOnboardingState = {
   setPetsAllowed: (petsAllowed: boolean) => void;
   setSmokingAllowed: (smokingAllowed: boolean) => void;
   setOtherHouseRules: (otherHouseRules: string) => void;
+  setBookedDates: (bookedDates: Date[]) => void;
   resetSession: () => void;
 };
 
@@ -102,6 +105,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         petsAllowed: false,
         smokingAllowed: false,
         otherHouseRules: "",
+        bookedDates: [],
       },
       setIsEdit: (isEdit: boolean) => {
         set((state) => ({ ...state, isEdit }));
@@ -318,6 +322,15 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           listing: {
             ...state.listing,
             otherHouseRules,
+          },
+        }));
+      },
+      setBookedDates: (bookedDates: Date[]) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            bookedDates,
           },
         }));
       },

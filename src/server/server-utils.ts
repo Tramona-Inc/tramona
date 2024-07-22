@@ -35,6 +35,8 @@ import { getCity, getCoordinates } from "./google-maps";
 import puppeteer from "puppeteer";
 import { sleep } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
+import { formatDateRange } from "@/utils/utils";
+
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -372,8 +374,34 @@ export async function getPropertiesForRequest(
       propertyIsNearRequest,
       propertyisAvailable,
     ),
-    columns: { id: true, city: true, latitude: true, longitude: true },
+    columns: { id: true, city: true, latitude: true, longitude: true, hostId: true },
   });
+
+  const uniqueHostIds = [...new Set(result.map((p) => p.hostId))];
+
+  const hosts = await tx.query.users.findMany({
+    where: inArray(users.id, uniqueHostIds),
+    columns: { id: true, phoneNumber: true, isWhatsApp: true },
+  });
+
+  for (const host of hosts) {
+    const hostPhoneNumber = host.phoneNumber;
+
+    if (host.isWhatsApp) {
+      // TODO: SEND CORRECT TEMPLATE ID
+      await sendWhatsApp({
+        templateId: "HXb293923af34665e7eefc81be0579e5db",
+        to: hostPhoneNumber!,
+      });
+    } else {
+      await sendText({
+        to: hostPhoneNumber!,
+        content: `Tramona: There is a request for the dates ${formatDateRange(req.checkIn, req.checkOut)} in ${req.location} where you have a property with a vacancy. Click here to view and accept or counter offer. https://tramona.com/host`,
+      });
+    }
+    // Send Twilio message to host
+
+  }
 
   return result.map((p) => p.id);
 }

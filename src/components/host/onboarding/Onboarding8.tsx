@@ -1,16 +1,12 @@
+import ImagesInput from "@/components/_common/ImagesInput";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,11 +15,13 @@ import SaveAndExit from "./SaveAndExit";
 import { useEffect, useState } from "react";
 
 const formSchema = z.object({
-  propertyName: zodString(),
-  about: zodString({ maxLen: Infinity }),
+  imageURLs: z
+    .string()
+    .array()
+    .min(5, { message: "Please submit at least 5 photos" }),
 });
 
-type FormSchema = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
 export default function Onboarding8({
   editing = false,
@@ -32,26 +30,20 @@ export default function Onboarding8({
   editing?: boolean;
   setHandleOnboarding?: (handle: () => void) => void;
 }) {
-  const title = useHostOnboarding((state) => state.listing.title);
-  const setTitle = useHostOnboarding((state) => state.setTitle);
-
-  const description = useHostOnboarding((state) => state.listing.description);
-  const setDescription = useHostOnboarding((state) => state.setDescription);
-
+  const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
   const [error, setError] = useState(false);
 
-  const form = useForm<FormSchema>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      propertyName: title,
-      about: description,
+      imageURLs: imageURLs,
     },
   });
 
-  async function handleFormSubmit(values: FormSchema) {
-    console.log(values);
-    setTitle(values.propertyName);
-    setDescription(values.about);
+  const setImageUrls = useHostOnboarding((state) => state.setImageUrls);
+
+  async function handleFormSubmit({ imageURLs }: FormValues) {
+    setImageUrls(imageURLs);
   }
 
   function handleError() {
@@ -66,57 +58,54 @@ export default function Onboarding8({
   return (
     <>
       {!editing && <SaveAndExit />}
-      <div className="container my-10 flex flex-grow flex-col justify-center">
-        <h1 className="mb-3 text-3xl font-bold">Describe your listing</h1>
-        {error && (
-          <p className="text-red-500">Please fill out all required fields</p>
-        )}
-        <Form {...form}>
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="propertyName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-lg font-bold text-primary">
-                    Create a title
-                  </FormLabel>
-                  <FormDescription>
-                    Keep it short and descriptive.
-                  </FormDescription>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="about"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-lg font-bold text-primary">
-                    Create your description
-                  </FormLabel>
-                  <FormDescription>
-                    Share what makes your place unique.
-                  </FormDescription>
-                  <FormControl>
-                    <Textarea {...field} className="resize-y" rows={10} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </Form>
-      </div>
+      <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
+        <div className="px-4 pb-32 pt-16">
+          <div className="mx-auto max-w-3xl">
+            <h1 className="font-old my-3 text-3xl">
+              Add some photos of your property
+            </h1>
+            {error && (
+              <p className="text-red-500">Please upload at least 5 photos</p>
+            )}
+            <p className="mb-5 text-muted-foreground">
+              Choose at least 5 photos (put your best photos first)
+            </p>
+            <Form {...form}>
+              <form
+                className="flex flex-col gap-2"
+                onSubmit={form.handleSubmit(handleFormSubmit)}
+                noValidate
+                autoComplete="off"
+              >
+                <FormField
+                  control={form.control}
+                  name="imageURLs"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ImagesInput {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                {/* <Button type="submit">Submit</Button> */}
+              </form>
+            </Form>
+            <div className="my-5 text-center">
+              <p className="font-bold">
+                Total Uploaded Images:{" "}
+                <span className="font-normal">{imageURLs.length}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
       {!editing && (
         <OnboardingFooter
           handleNext={form.handleSubmit(handleFormSubmit)}
-          isFormValid={form.formState.isValid}
+          isFormValid={form.formState.isValid || imageURLs.length >= 5}
           isForm={true}
           handleError={handleError}
         />
