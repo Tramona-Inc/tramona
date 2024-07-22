@@ -53,7 +53,7 @@ export function TestimonialCarousel() {
     <div ref={containerRef} className="relative overflow-y-hidden">
       <Carousel
         setApi={setApi}
-        className="mx-auto w-full lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl"
+        className="mx-auto w-full max-w-full 2xl:max-w-screen-2xl"
         opts={{
           align: "center",
           loop: true,
@@ -65,11 +65,9 @@ export function TestimonialCarousel() {
           {testimonials.concat(testimonials).map((testimonial, index) => (
             <CarouselItem
               key={index}
-              className="basis-[80%] pl-4 transition-opacity duration-300 lg:basis-1/4"
+              className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3 xl:basis-1/4 pl-4 transition-opacity duration-300"
             >
               <div className="h-[300px] w-full">
-                {" "}
-                {/* Fixed size container */}
                 <Card
                   className={cn(
                     "h-full w-full border-none bg-gray-100 shadow-none transition-opacity duration-300",
