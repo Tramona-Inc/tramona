@@ -4,7 +4,7 @@ import { z } from "zod";
 import { env } from "@/env";
 import axios from "axios";
 import { db } from "@/server/db";
-import { reservations } from "../../db/schema/tables/reservations";
+import { superhogRequests } from "../../db/schema/tables/superhogRequests";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
@@ -114,7 +114,7 @@ export const superhogRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      await db.insert(reservations).values({
+      await db.insert(superhogRequests).values({
         checkIn: input.reservation.checkIn,
         checkOut: input.reservation.checkOut,
         echoToken: input.metadata.echoToken,
@@ -128,8 +128,9 @@ export const superhogRouter = createTRPCRouter({
         nameOfVerifiedUser: `${input.guest.firstName} ${input.guest.lastName}`,
       });
     }),
+
   getAllVerifications: roleRestrictedProcedure(["admin"]).query(async () => {
-    return await db.query.reservations.findMany();
+    return await db.query.superhogRequests.findMany();
   }),
 
   deleteVerification: roleRestrictedProcedure(["admin"])
@@ -156,10 +157,10 @@ export const superhogRouter = createTRPCRouter({
         );
         console.log(response.data);
         await db
-          .delete(reservations)
+          .delete(superhogRequests)
           .where(
             eq(
-              reservations.superhogVerificationId,
+              superhogRequests.superhogVerificationId,
               input.verification.verificationId,
             ),
           );
@@ -197,14 +198,14 @@ export const superhogRouter = createTRPCRouter({
         console.log(response.data);
         console.log("it worked ");
         await db
-          .update(reservations)
+          .update(superhogRequests)
           .set({
             checkIn: input.reservation.checkIn,
             checkOut: input.reservation.checkOut,
           })
           .where(
             eq(
-              reservations.superhogVerificationId,
+              superhogRequests.superhogVerificationId,
               input.verification.verificationId,
             ),
           );
