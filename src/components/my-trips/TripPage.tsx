@@ -14,29 +14,24 @@ import {
 } from "lucide-react";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { formatCurrency, plural } from "@/utils/utils";
-import { api } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import Spinner from "../_common/Spinner";
+import { type RouterOutputs } from "@/utils/api";
+export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-export default function TripPage({ tripId }: { tripId: number }) {
+export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
   const chatWithAdmin = useChatWithAdmin();
 
-  const { data } = api.trips.getMyTripsPageDetails.useQuery({
-    tripId,
-  });
-
-  if (!data) return <Spinner />;
-
-  const { trip, tripPrice, coordinates } = data;
+  const { trip, tripPrice, coordinates } = tripData;
 
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
 
   return (
-    <div className=" col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
+    <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
       <Button asChild size="icon" variant="ghost" className="rounded-full">
         <Link href={"/my-trips"}>
           <ArrowLeftIcon />
