@@ -37,7 +37,7 @@ export default function DateOfBirth() {
 
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
     onSuccess: () => {
-      void router.push("/auth/referral");
+      void router.push("/auth/onboarding-2");
     },
   });
 

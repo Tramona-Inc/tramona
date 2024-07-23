@@ -133,7 +133,7 @@ export default function Onboarding() {
             void update();
 
             void router.push({
-              pathname: "/auth/date-of-birth",
+              pathname: "/auth/onboarding-1",
             });
           }
         }
