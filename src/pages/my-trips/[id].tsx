@@ -3,28 +3,28 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import TripPage from "@/components/my-trips/TripPage";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
+import { api } from "@/utils/api";
+import Spinner from "@/components/_common/Spinner";
 
 export default function TripDetailsPage() {
   const router = useRouter();
-  const [tripId, setTripId] = useState<number | null>(null);
+  const tripId = parseInt(router.query.id as string);
 
-  useEffect(() => {
-    if (router.isReady) {
-      const id = parseInt(router.query.id as string, 10);
-      if (isNaN(id)) {
-        console.error("Invalid trip ID:", router.query.id);
-      } else {
-        setTripId(id);
-      }
-    }
-  }, [router.isReady, router.query.id]);
+  const { data: trip } = api.trips.getMyTripsPageDetails.useQuery(
+    {
+      tripId: tripId,
+    },
+    {
+      enabled: router.isReady,
+    },
+  );
 
   return (
     <DashboardLayout type="guest">
       <Head>
         <title>My Trips | Tramona</title>
       </Head>
-      {tripId && <TripPage tripId={tripId} />}
+      {trip ? <TripPage tripData={trip} /> : <Spinner />}
     </DashboardLayout>
   );
 }
