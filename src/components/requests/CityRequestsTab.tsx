@@ -22,7 +22,7 @@ export default function CityRequestsTab() {
       {/* <div className="md:flex md:gap-8"> */}
       {/* <div className="pb-64 md:w-[450px]"> */}
       <NewCityRequestBtn />
-      <div className="grid-col-1 grid gap-4 pb-32 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 pb-32 md:grid-cols-2">
         <RequestCards requestGroups={requests.activeRequestGroups} />
       </div>
       {/* </div> */}
