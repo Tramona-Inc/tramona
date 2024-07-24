@@ -12,13 +12,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { api } from "@/utils/api";
 import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 export default function FirstAndLastName() {
+  const router = useRouter();
+  const { data: session } = useSession();
+
   const formSchema = z.object({
     firstName: zodString(),
     lastName: zodString(),
@@ -30,8 +36,20 @@ export default function FirstAndLastName() {
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit = () => {
-    console.log("submitted");
+  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
+    onSuccess: () => {
+      void router.push("/auth/onboarding-3");
+    },
+  });
+
+  const onSubmit = async ({ firstName, lastName }: FormValues) => {
+    if (session?.user.id && firstName && lastName) {
+      await updateProfile({
+        id: session.user.id,
+        firstName,
+        lastName,
+      });
+    }
   };
 
   return (
