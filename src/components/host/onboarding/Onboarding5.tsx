@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
-// import ical from 'ical';
 import { useHostOnboarding } from '@/utils/store/host-onboarding';
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,7 @@ import OnboardingFooter from './OnboardingFooter';
 import SaveAndExit from './SaveAndExit';
 
 const formSchema = z.object({
-  calendarFile: z.instanceof(File, { message: 'Please upload a calendar file' }),
+  iCalUrl: z.string().url('Please enter a valid URL'),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -21,39 +20,23 @@ export default function PropertyAvailability({
   editing = false,
   setHandleOnboarding,
 }) {
-  const [bookedDatez, setBookedDatez] = useState([]);
+  const [bookedDates, setBookedDates] = useState([]);
   const setBookingDates = useHostOnboarding((state) => state.setBookingDates);
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
   });
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      form.setValue('calendarFile', file);
-      // await parseCalendarFile(file);
-    }
-  };
-
-  // const parseCalendarFile = async (file) => {
-  //   const reader = new FileReader();
-  //   reader.onload = (event) => {
-  //     const data = event.target.result;
-  //     const parsedData = ical.parseICS(data);
-  //     const events = Object.values(parsedData).filter((event) => event.type === 'VEVENT');
-  //     const dates = events.map((event) => ({
-  //       start: event.start,
-  //       end: event.end,
-  //       summary: event.summary,
-  //     }));
-  //     setBookingDates(dates);
-  //     setBookedDatez(dates);
-  //   };
-  //   reader.readAsText(file);
-  // };
-
   async function handleFormSubmit(values: FormSchema) {
-    // Handle form submission if necessary
+    try {
+      // Send the iCal URL to your backend for processing
+      const response = await axios.post('/api/calendar-sync', { iCalUrl: values.iCalUrl, propertyId: 5033 });
+      const dates = response.data.dates;
+      setBookingDates(dates);
+      setBookedDates(dates);
+    } catch (error) {
+      console.error('Error syncing calendar:', error);
+      // Handle error (e.g., show error message to user)
+    }
   }
 
   return (
@@ -62,23 +45,22 @@ export default function PropertyAvailability({
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-10">
           <h1 className="text-4xl font-bold">
-            Upload your iCal or Google Calendar
+            Enter your iCal URL
           </h1>
           <Form {...form}>
             <FormField
               control={form.control}
-              name="calendarFile"
+              name="iCalUrl"
               render={({ field }) => (
                 <FormItem>
-                  <Label className="font-semibold">Calendar File</Label>
+                  <Label className="font-semibold">iCal URL</Label>
                   <Input
                     {...field}
-                    type="file"
-                    accept=".ics"
-                    onChange={handleFileChange}
+                    type="url"
+                    placeholder="https://example.com/calendar.ics"
                   />
                   <FormMessage>
-                    {form.formState.errors.calendarFile?.message}
+                    {form.formState.errors.iCalUrl?.message}
                   </FormMessage>
                 </FormItem>
               )}
@@ -87,7 +69,7 @@ export default function PropertyAvailability({
           <div>
             <h2 className="text-2xl font-bold">Booked Dates</h2>
             <ul>
-              {bookedDatez.map((date, index) => (
+              {bookedDates.map((date, index) => (
                 <li key={index}>
                   {date.summary} from {new Date(date.start).toLocaleString()} to {new Date(date.end).toLocaleString()}
                 </li>

@@ -28,6 +28,7 @@ import { reservations } from "./tables/reservations";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
 import { reviews } from "./tables/reviews";
+import { reservedDates } from "./tables/reservedDates";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -94,6 +95,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   requestsToProperties: many(requestsToProperties),
   bids: many(bids),
   bookedDates: many(bookedDates),
+  reservedDates: many(reservedDates),
   reservations: many(reservations),
   reviews: many(reviews),
 }));
