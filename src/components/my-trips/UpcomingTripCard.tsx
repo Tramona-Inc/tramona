@@ -31,21 +31,23 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
         <div className="flex w-full flex-col gap-4 p-4 pt-12 lg:pt-4">
           <div className="flex w-full flex-col justify-between gap-3 lg:flex-row lg:gap-6">
-            <div className="flex flex-col">
-              <Link
-                href={`/my-trips/${trip.id}`}
-                className="relative h-32 w-52"
-              >
-                <Image
-                  fill
-                  alt=""
-                  className="object-cover"
-                  src={trip.property.imageUrls[0]!}
-                />
-                <Badge variant="lightGray" className="absolute left-2 top-3">
-                  Trip {dayjs(trip.checkIn).fromNow()}
-                </Badge>
-              </Link>
+            <div className="flex flex-col gap-4 lg:gap-0">
+              <div className="flex justify-center sm:justify-start">
+                <Link
+                  href={`/my-trips/${trip.id}`}
+                  className="relative h-48 w-full -mt-8 lg:-mt-0 sm:h-32 sm:w-52"
+                >
+                  <Image
+                    fill
+                    alt=""
+                    className="rounded-md object-cover"
+                    src={trip.property.imageUrls[0]!}
+                  />
+                  <Badge variant="lightGray" className="absolute left-2 top-3">
+                    Trip {dayjs(trip.checkIn).fromNow()}
+                  </Badge>
+                </Link>
+              </div>
               <div className="mt-4 flex gap-2">
                 <UserAvatar
                   name={trip.property.host?.name}
@@ -67,12 +69,13 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-4">
-              <h2 className="text-2xl font-bold">{trip.property.name}</h2>
-              <div className="flex">
-                <MapPin />
-                <p>{trip.property.address}</p>
-              </div>
+            <div className="mt-4 flex flex-col gap-4">
+              <h2 className="text-xl font-bold lg:text-2xl">
+                {trip.property.name}
+              </h2>
+
+              <p>{trip.property.address}</p>
+
               <div className="">
                 <p>{formatDateRange(trip.checkIn, trip.checkOut)}</p>
                 <Link
@@ -87,7 +90,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
 
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
-          <div className="flex flex-col justify-end gap-2 px-4 sm:flex-row lg:justify-center lg:gap-4">
+          <div className="flex flex-col justify-center gap-2 px-4 sm:flex-row lg:gap-4">
             <Button variant="secondary" onClick={() => chatWithAdmin()}>
               <MessageCircle className="size-4" />
               Message your host
