@@ -48,6 +48,7 @@ export default function FirstAndLastName() {
         id: session.user.id,
         firstName,
         lastName,
+        onboardingStep: 2,
       });
     }
   };

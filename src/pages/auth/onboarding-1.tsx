@@ -19,6 +19,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import ErrorMsg from "@/components/ui/ErrorMsg";
+import { useState } from "react";
 
 export default function DateOfBirth() {
   const { data: session } = useSession();
@@ -46,6 +47,7 @@ export default function DateOfBirth() {
       await updateProfile({
         id: session.user.id,
         dateOfBirth: convertDateFormat(dob),
+        onboardingStep: 1,
       });
     } else {
       form.setError("root", {
