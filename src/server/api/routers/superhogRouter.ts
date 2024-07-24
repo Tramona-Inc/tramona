@@ -4,7 +4,7 @@ import { z } from "zod";
 import { env } from "@/env";
 import axios from "axios";
 import { db } from "@/server/db";
-import { properties, users, superhogRequests } from "@/server/db/schema";
+import { properties, users, superhogRequests, trips } from "@/server/db/schema";
 
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -225,16 +225,12 @@ export const superhogRouter = createTRPCRouter({
       }
 
       await db.insert(superhogRequests).values({
-        checkIn: input.reservation.checkIn,
-        checkOut: input.reservation.checkOut,
         echoToken: input.metadata.echoToken,
-        propertyAddress: input.listing.address.addressLine1,
-        propertyTown: input.listing.address.town,
-        propertyCountryIso: input.listing.address.countryIso,
         superhogStatus: verification.status,
         superhogVerificationId: verification.verificationId,
         superhogReservationId: input.reservation.reservationId,
-        nameOfVerifiedUser: `${input.guest.firstName} ${input.guest.lastName}`,
+        userId: "1",
+        propertyId: 1,
       });
     }),
 
@@ -307,14 +303,14 @@ export const superhogRouter = createTRPCRouter({
         console.log(response.data);
         console.log("it worked ");
         await db
-          .update(superhogRequests)
+          .update(trips)
           .set({
-            checkIn: input.reservation.checkIn,
-            checkOut: input.reservation.checkOut,
+            checkIn: new Date(input.reservation.checkIn),
+            checkOut: new Date(input.reservation.checkOut),
           })
           .where(
             eq(
-              superhogRequests.superhogVerificationId,
+              trips.superhogRequestId, // we need another query to acces the actual superhog db
               input.verification.verificationId,
             ),
           );
