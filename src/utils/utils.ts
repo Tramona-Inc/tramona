@@ -138,7 +138,7 @@ export function formatDateMonthDayYear(date: Date) {
 }
 
 export function formatDateYearMonthDay(date: Date) {
-  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd");
+  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd"); //ex 2021-12-31
 }
 
 export function formatShortDate(date: Date) {

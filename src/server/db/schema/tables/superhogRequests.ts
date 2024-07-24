@@ -1,10 +1,10 @@
 import {
   integer,
   pgTable,
-  date,
   serial,
   pgEnum,
   varchar,
+  text,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
@@ -28,15 +28,15 @@ export const superhogRequests = pgTable("superhog_requests", {
     length: 100,
   }).notNull(),
   superhogStatus: superhogStatusEnum("superhog_status"),
-  userId: integer("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  tripId: integer("trips_id")
-    .notNull()
-    .references(() => trips.id, { onDelete: "cascade" }),
   propertyId: integer("property_id")
     .notNull()
     .references(() => properties.id, { onDelete: "cascade" }),
+  // tripId: integer("trip_id")
+  //   .notNull()
+  //   .references(() => trips.id, { onDelete: "cascade" }),
   // nameOfVerifiedUser: varchar("name_of_verified_user", {
   //   length: 100,
   // }).references(() => users.name, { onDelete: "cascade" }), //we need to make non-nullable after we require it in signup

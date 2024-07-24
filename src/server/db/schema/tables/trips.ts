@@ -10,6 +10,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { offers } from "./offers";
+import { superhogRequests } from "./superhogRequests";
 import { bids } from "./bids";
 import { properties } from "./properties";
 import { z } from "zod";
@@ -39,6 +40,10 @@ export const trips = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    superhogRequestId: integer("superhog_request_id").references(
+      () => superhogRequests.id,
+      { onDelete: "cascade" },
+    ),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),

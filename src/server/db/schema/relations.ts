@@ -24,7 +24,10 @@ import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
-import { superhogRequests } from "./tables/superhogRequests";
+import {
+  superhogRequests,
+  superhogRequestsFormSchema,
+} from "./tables/superhogRequests";
 
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
@@ -292,7 +295,7 @@ export const hostTeamInviteRelations = relations(
 
 export const superhogRequestsRelations = relations(
   superhogRequests,
-  ({ one }) => ({
+  ({ one, many }) => ({
     property: one(properties, {
       fields: [superhogRequests.propertyId],
       references: [properties.id],
@@ -301,10 +304,7 @@ export const superhogRequestsRelations = relations(
       fields: [superhogRequests.userId],
       references: [users.id],
     }),
-    trip: one(trips, {
-      fields: [superhogRequests.tripId],
-      references: [trips.id],
-    }),
+    trip: many(trips),
   }),
 );
 
@@ -332,7 +332,7 @@ export const bucketListPropertiesRelations = relations(
   }),
 );
 
-export const tripsRelations = relations(trips, ({ one, many }) => ({
+export const tripsRelations = relations(trips, ({ one }) => ({
   group: one(groups, {
     fields: [trips.groupId],
     references: [groups.id],
@@ -349,7 +349,10 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
     fields: [trips.bidId],
     references: [bids.id],
   }),
-  superhogRequests: many(superhogRequests),
+  superhogRequests: one(superhogRequests, {
+    fields: [trips.superhogRequestId],
+    references: [superhogRequests.id],
+  }),
 }));
 
 export const emergencyContactsRelations = relations(

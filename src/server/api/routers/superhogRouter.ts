@@ -4,10 +4,15 @@ import { z } from "zod";
 import { env } from "@/env";
 import axios from "axios";
 import { db } from "@/server/db";
-import { superhogRequests } from "../../db/schema/tables/superhogRequests";
+import { properties, users, superhogRequests } from "@/server/db/schema";
+
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-
+import { generateTimeStamp } from "@/utils/utils";
+import { v4 as uuidv4 } from "uuid";
+import type { Trip } from "@/server/db/schema/tables/trips";
+import { formatDateYearMonthDay } from "@/utils/utils";
+import { getCountryISO, getPostcode } from "@/server/google-maps";
 export interface ReservationInterface {
   id: number;
   checkIn: string;
@@ -53,6 +58,120 @@ interface AxiosError extends Error {
   };
 }
 
+type ResponseType = {
+  data: {
+    verification?: {
+      verificationId: string;
+      status: "Pending" | "Rejected" | "Approved" | "Flagged";
+    };
+  };
+};
+
+// this is the metadata to work with
+// metadata: {
+//   confirmed_at: '2024-07-23T23:22:44.297Z',
+//   total_savings: '-13000',
+//   price: '54000',
+//   property_id: '25',
+//   tramonaServiceFee: '10000',
+//   request_id: '123',
+//   user_id: '6cf59186-bf24-4609-b978-450ffa9d5ad6',
+//   listing_id: '27'
+// },
+//   //check to see if the reservation has already been created by checking the trips table since this will becalled on everyupdate
+
+export async function createSuperhogReservation({
+  listingId,
+  propertyId,
+  userId,
+  trip,
+}: {
+  listingId: number;
+  propertyId: number;
+  userId: string;
+  trip: Trip;
+}) {
+  //find the property using its id
+  const property = await db.query.properties.findFirst({
+    where: eq(properties.id, propertyId),
+  });
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (property && user) {
+    const reservationObject = {
+      metadata: {
+        timeStamp: generateTimeStamp(),
+        echoToken: uuidv4(),
+      },
+      listing: {
+        listingId: listingId.toString(), //this is the offer ID
+        listingName: property.name,
+        address: {
+          addressLine1: property.address,
+          addressLine2: "", //can be null
+          town: property.city,
+          countryIso: await getCountryISO({
+            lat: property.latitude,
+            lng: property.longitude,
+          }),
+          postcode: await getPostcode({
+            lat: property.latitude,
+            lng: property.longitude,
+          }),
+        },
+        petsAllowed: property.petsAllowed ? "true" : "false",
+      },
+      reservation: {
+        reservationId: trip.id.toString(),
+        checkIn: formatDateYearMonthDay(trip.checkIn), // 2024-08-24 format
+        checkOut: formatDateYearMonthDay(trip.checkOut),
+        channel: "Tramona",
+        creationDate: formatDateYearMonthDay(new Date()),
+      },
+      guest: {
+        firstName: user.name?.split(" ")[0] ?? " ", //change to first name
+        lastName: user.name?.split(" ")[1] ?? " ", //change to last name
+        email: user.email,
+        telephoneNumber: user.phoneNumber?.toString() ?? "+19496833881",
+      },
+    };
+
+    console.log("this is the reservation object", reservationObject);
+
+    const { verification } = await axios
+      .post<unknown, ResponseType>(
+        "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
+        reservationObject,
+        config,
+      )
+      .then((res) => res.data)
+      .catch((error: AxiosError) => {
+        throw new Error(error.response.data.detail);
+      });
+
+    if (!verification) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    console.log("this is the verification", verification);
+
+    //now we can create the superhog_ request table
+    await db.insert(superhogRequests).values({
+      echoToken: reservationObject.metadata.echoToken,
+      propertyId: propertyId,
+      userId: userId,
+      superhogStatus: verification.status,
+      superhogVerificationId: verification.verificationId,
+      superhogReservationId: reservationObject.reservation.reservationId,
+    });
+  }
+}
+
+//TRPC FUNCTIONS
+
 export const superhogRouter = createTRPCRouter({
   createSuperhogRequest: roleRestrictedProcedure(["admin"])
     //update later this should be updating the schema, not creating it
@@ -90,15 +209,6 @@ export const superhogRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      type ResponseType = {
-        data: {
-          verification?: {
-            verificationId: string;
-            status: "Pending" | "Rejected" | "Approved" | "Flagged" | "null";
-          };
-        };
-      };
-
       const { verification } = await axios
         .post<unknown, ResponseType>(
           "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
@@ -121,8 +231,7 @@ export const superhogRouter = createTRPCRouter({
         propertyAddress: input.listing.address.addressLine1,
         propertyTown: input.listing.address.town,
         propertyCountryIso: input.listing.address.countryIso,
-        superhogStatus:
-          verification.status === "null" ? null : verification.status,
+        superhogStatus: verification.status,
         superhogVerificationId: verification.verificationId,
         superhogReservationId: input.reservation.reservationId,
         nameOfVerifiedUser: `${input.guest.firstName} ${input.guest.lastName}`,
