@@ -39,7 +39,7 @@ export default function MastHead() {
     // padding for the sides? and do we want rounded corners?
     <>
     <section className="relative bg-white pb-4">
-      <div className="relative h-[500px] lg:h-[700px]">
+      <div className="relative sm:h-[700px] sm:mb-24 lg:mb-0">
         <div className="absolute inset-0">
           <Image
             src={landingBg}
@@ -108,27 +108,22 @@ export default function MastHead() {
               </div>
             </div>
           </div>
-          <div className="flex justify-center p-10">
-            <div className="hidden rounded-2xl border bg-white p-4 shadow-2xl lg:block lg:max-w-xl lg:flex-1">
-              <DesktopSearchLayout />
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <div className="-mt-12 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:hidden">
+          <div className="flex justify-center lg:p-10">
+            <div className="mt-12 lg:mt-0 rounded-2xl border bg-white p-4 shadow-2xl lg:max-w-xl flex-1">
               <DesktopSearchLayout />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="h-72 lg:h-60"></div>
+      <div className="h-24 lg:h-60"></div>
 
-      <div className="mt-8 hidden max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:flex lg:space-y-8">
+      <div className="mt-8 flex max-w-full px-4 justify-center space-y-4 mx-0 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
         <TestimonialCarousel />
       </div>
-      <div className="mt-8 flex max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
+      {/* <div className="mt-8 flex max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
         <MobileTestimonialCarousel />
-      </div>
+      </div> */}
 
       <div className="mt-20 space-y-4 lg:mt-24 lg:space-y-12">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
@@ -365,7 +360,7 @@ export function DesktopSearchLayout() {
   return (
     <div className="space-y-3">
       <p className="text-sm font-semibold text-muted-foreground lg:block">
-        Send a request to every host in&nbsp;
+        Send a request to every host in&nbsp;<br className="sm:hidden"/>
         <span className="font-bold text-teal-900">
           <Typewriter
             component={"span"}
