@@ -66,6 +66,7 @@ export default async function webhook(
             ? undefined
             : parseInt(paymentIntentSucceeded.metadata.listing_id);
 
+        console.log(paymentIntentSucceeded.metadata)
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
 
@@ -86,7 +87,7 @@ export default async function webhook(
                 ),
               );
 
-            const result = await db
+             await db
               .update(trips)
               .set({
                 paymentIntentId: paymentIntentSucceeded.id,
@@ -128,8 +129,17 @@ export default async function webhook(
                   const user = await db.query.users.findFirst({
                     where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
                   });
-      
-                  const {data: userTrips} = api.trips.getMyTripsPageDetails.useQuery({tripId: result[0]?.id ?? 0});
+                  
+                  const tripId = await db.query.trips.findFirst({
+                    where: eq(trips.offerId, parseInt(paymentIntentSucceeded.metadata.listing_id!)),
+                    columns: {
+                      id: true,
+                    }
+                  })
+                  
+                  const id = tripId?.id
+                  const {data: userTrips} = api.trips.getMyTripsPageDetails.useQuery({ tripId: id ?? 0 });
+                  console.log(userTrips);
                   if(userTrips) {
                     console.log("we have userTrips")
                     const {trip, tripPrice, coordinates} = userTrips
@@ -138,9 +148,9 @@ export default async function webhook(
                       subject: "Your Confirmation Mail & receipt",
                       content: BookingConfirmationEmail({
                         userName: user?.name ?? "",
-                        placeName: trip.property.name ?? "",
-                        startDate: trip.checkIn ?? new Date(),
-                        endDate: trip.checkOut ?? new Date(),
+                        placeName: trip.property.name,
+                        startDate: trip.checkIn,
+                        endDate: trip.checkOut,
                         address: trip.property.address,
                         propertyImageLink: trip.property.imageUrls[0] ?? "",
                         tripDetailLink: "https://www.tramona.com/",
