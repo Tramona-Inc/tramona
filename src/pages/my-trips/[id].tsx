@@ -5,12 +5,13 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
+import { getNumNights } from "@/utils/utils";
 
 export default function TripDetailsPage() {
   const router = useRouter();
   const tripId = parseInt(router.query.id as string);
 
-  const { data: trip } = api.trips.getMyTripsPageDetails.useQuery(
+  const { data: trips } = api.trips.getMyTripsPageDetails.useQuery(
     {
       tripId: tripId,
     },
@@ -19,12 +20,14 @@ export default function TripDetailsPage() {
     },
   );
 
+  
+
   return (
     <DashboardLayout type="guest">
       <Head>
         <title>My Trips | Tramona</title>
       </Head>
-      {trip ? <TripPage tripData={trip} /> : <Spinner />}
+      {trips ? <TripPage tripData={trips} /> : <Spinner />}
     </DashboardLayout>
   );
 }

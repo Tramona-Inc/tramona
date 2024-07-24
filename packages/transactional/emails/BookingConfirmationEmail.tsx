@@ -15,10 +15,10 @@ import { Text, Section, Hr, Row, Column } from "@react-email/components";
 interface BookingConfirmationEmailProps {
   userName: string;
   placeName: string;
-  hostName: string;
-  hostImageUrl: string;
-  startDate: string;
-  endDate: string;
+  // hostName: string;
+  // hostImageUrl: string;
+  startDate: Date;
+  endDate: Date;
   address: string;
   propertyImageLink: string;
   tripDetailLink: string;
@@ -26,14 +26,15 @@ interface BookingConfirmationEmailProps {
   tramonaPrice: number;
   offerLink: string;
   numOfNights: number;
-  tramonaServiceFee: number;
+  receiptNumber: string;
+  tramonaServiceFee? : number,
 }
 
 export default function BookingConfirmationEmail({
   userName = "User",
   placeName = "Tropical getaway in Mexico",
-  startDate = "Nov 6",
-  endDate = "Nov 11, 2024",
+  startDate = new Date("Nov 6, 2023"),
+  endDate = new Date("Nov 11, 2024"),
   address = "101 Street Planet Earth",
   propertyImageLink = "https://via.placeholder.com/600x300",
   tripDetailLink = "https://www.tramona.com/",
@@ -41,6 +42,7 @@ export default function BookingConfirmationEmail({
   tramonaPrice = 500,
   offerLink = "http://tramona/offers{offer.id}",
   numOfNights = 3,
+  receiptNumber = "12345",
   tramonaServiceFee,
 }: BookingConfirmationEmailProps) {
   return (
@@ -106,14 +108,14 @@ export default function BookingConfirmationEmail({
             x{numOfNights} nights
           </Column>
           <Column className="text-end" style={{ paddingLeft: "150px" }}>
-            {formatCurrency(tramonaServiceFee)}
+            {formatCurrency(tramonaPrice)}
           </Column>
         </Row>
         <Hr className="pt-5" />
         <Row className="font-bold">
           <Column>Total (USD)</Column>
           <Column className="text-right">
-            {formatCurrency(tramonaPrice + tramonaServiceFee)}
+            {tramonaServiceFee ? formatCurrency(tramonaPrice + tramonaServiceFee) : formatCurrency(tramonaPrice)}
           </Column>
         </Row>
       </Section>

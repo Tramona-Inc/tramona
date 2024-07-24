@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DesktopRequestDealTab } from "../landing-page/SearchBars/DesktopRequestDealTab";
+import DesktopRequestDealTab  from "../landing-page/SearchBars/DesktopRequestDealTab";
 import { MobileRequestDealTab } from "../landing-page/SearchBars/MobileRequestDealTab";
 import {
   Dialog,

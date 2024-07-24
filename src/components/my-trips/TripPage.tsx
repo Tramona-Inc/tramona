@@ -12,6 +12,7 @@ import {
   ChevronRight,
   MessageCircle,
 } from "lucide-react";
+import { sendEmail } from "@/server/server-utils";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { formatCurrency, plural } from "@/utils/utils";
 import "leaflet/dist/leaflet.css";
@@ -29,6 +30,8 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
   const { trip, tripPrice, coordinates } = tripData;
 
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
+
+  // const {mutateAsync: sendConfirmationEmail} = 
 
   return (
     <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">

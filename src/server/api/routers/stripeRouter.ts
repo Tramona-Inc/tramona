@@ -1,11 +1,18 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { users } from "@/server/db/schema";
+import { trips, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 import { hostProfiles } from "@/server/db/schema";
+import { sendEmail } from "@/server/server-utils";
+import BookingConfirmationEmail from "packages/transactional/emails/BookingConfirmationEmail";
+import { api, type RouterOutputs } from "@/utils/api";
+import { db } from "@/server/db";
+import { getNumNights } from "@/utils/utils";
+export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
+
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -21,6 +28,7 @@ export const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
   typescript: true,
 });
 // change the apiVersion
+
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
@@ -102,9 +110,17 @@ export const stripeRouter = createTRPCRouter({
         ui_mode: "embedded",
       });
       console.log("This is the host stripe id ", metadata.host_stripe_id);
+      // const trip  = await db.query.trips.findFirst({
+      //   where: eq(trips.propertyId, metadata.property_id),
+      //   columns: {
+      //     id: true,
+      //   }
+      // })
+      // const id = trip?.id ?? 0
+      // const result = await sendConfirmationEmail(id ?? 0, paymentIntentData)
       return { clientSecret: session.client_secret };
     }),
-
+    
   authorizePayment: protectedProcedure
     .input(
       z.object({

@@ -15,10 +15,13 @@ import {
   trips,
   users,
 } from "@/server/db/schema";
+import { getNumNights } from "@/utils/utils";
+import { sendEmail } from "@/server/server-utils";
 import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import BookingConfirmationEmail from "packages/transactional/emails/BookingConfirmationEmail";
 
 // ! Necessary for stripe
 export const config = {
@@ -83,7 +86,7 @@ export default async function webhook(
                 ),
               );
 
-            await db
+            const result = await db
               .update(trips)
               .set({
                 paymentIntentId: paymentIntentSucceeded.id,
@@ -95,7 +98,9 @@ export default async function webhook(
                   trips.offerId,
                   parseInt(paymentIntentSucceeded.metadata.listing_id!),
                 ),
-              ); // setting the paymentIntentId in the trips table
+              ).returning(); // setting the paymentIntentId in the trips table
+
+            
 
             const requestId = paymentIntentSucceeded.metadata.request_id;
             if (requestId && !isNaN(parseInt(requestId))) {
@@ -119,6 +124,35 @@ export default async function webhook(
                     propertyId: offer.propertyId,
                     offerId: offer.id,
                   });
+
+                  const user = await db.query.users.findFirst({
+                    where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
+                  });
+      
+                  const {data: userTrips} = api.trips.getMyTripsPageDetails.useQuery({tripId: result[0]?.id ?? 0});
+                  if(userTrips) {
+                    console.log("we have userTrips")
+                    const {trip, tripPrice, coordinates} = userTrips
+                    await sendEmail({
+                      to: paymentIntentSucceeded.receipt_email ?? "",
+                      subject: "Your Confirmation Mail & receipt",
+                      content: BookingConfirmationEmail({
+                        userName: user?.name ?? "",
+                        placeName: trip.property.name ?? "",
+                        startDate: trip.checkIn ?? new Date(),
+                        endDate: trip.checkOut ?? new Date(),
+                        address: trip.property.address,
+                        propertyImageLink: trip.property.imageUrls[0] ?? "",
+                        tripDetailLink: "https://www.tramona.com/",
+                        originalPrice: trip.property.originalNightlyPrice ?? 0,
+                        tramonaPrice: tripPrice,
+                        offerLink: "http://tramona/offers{offer.id}",
+                        numOfNights: getNumNights(trip.checkIn, trip.checkOut),
+                        receiptNumber: paymentIntentSucceeded.id,
+                        tramonaServiceFee: 0,
+                      })
+                    })
+                  }
                 }
               }
             }

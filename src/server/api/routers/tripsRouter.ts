@@ -101,4 +101,5 @@ export const tripsRouter = createTRPCRouter({
       }
       return { trip, tripPrice, coordinates };
     }),
+
 });
