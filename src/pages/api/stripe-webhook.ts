@@ -9,6 +9,7 @@ import { db } from "@/server/db";
 import {
   hostProfiles,
   offers,
+  properties,
   referralCodes,
   referralEarnings,
   requests,
@@ -66,6 +67,7 @@ export default async function webhook(
             ? undefined
             : parseInt(paymentIntentSucceeded.metadata.listing_id);
 
+          const paymentMethod = paymentIntentSucceeded.payment_method
         console.log(paymentIntentSucceeded.metadata)
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
@@ -129,37 +131,51 @@ export default async function webhook(
                   const user = await db.query.users.findFirst({
                     where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
                   });
+
+                  const cardNumber = await stripe.paymentMethods.retrieve(paymentIntentSucceeded.payment_method as string);
                   
-                  const tripId = await db.query.trips.findFirst({
+                  const trip = await db.query.trips.findFirst({
                     where: eq(trips.offerId, parseInt(paymentIntentSucceeded.metadata.listing_id!)),
                     columns: {
                       id: true,
+                      checkIn: true,
+                      checkOut: true,
+                      propertyId: true,
                     }
                   })
                   
-                  const id = tripId?.id
-                  const {data: userTrips} = api.trips.getMyTripsPageDetails.useQuery({ tripId: id ?? 0 });
-                  console.log(userTrips);
-                  if(userTrips) {
+                  const property = await db.query.properties.findFirst({
+                    where: eq(properties.id, trip?.propertyId ?? 0),
+                    columns: {
+                      name: true,
+                      address: true,
+                      imageUrls: true,
+                    }
+                  })
+
+                  console.log(trip)
+                  console.log(property)
+                  if(trip && property){
+
                     console.log("we have userTrips")
-                    const {trip, tripPrice, coordinates} = userTrips
                     await sendEmail({
                       to: paymentIntentSucceeded.receipt_email ?? "",
                       subject: "Your Confirmation Mail & receipt",
                       content: BookingConfirmationEmail({
                         userName: user?.name ?? "",
-                        placeName: trip.property.name,
+                        placeName: property?.name,
                         startDate: trip.checkIn,
                         endDate: trip.checkOut,
-                        address: trip.property.address,
-                        propertyImageLink: trip.property.imageUrls[0] ?? "",
+                        address: property.address,
+                        propertyImageLink: property.imageUrls[0] ?? "",
                         tripDetailLink: "https://www.tramona.com/",
-                        originalPrice: trip.property.originalNightlyPrice ?? 0,
-                        tramonaPrice: tripPrice,
+                        tramonaPrice: paymentIntentSucceeded.amount,
                         offerLink: "http://tramona/offers{offer.id}",
                         numOfNights: getNumNights(trip.checkIn, trip.checkOut),
                         receiptNumber: paymentIntentSucceeded.id,
-                        tramonaServiceFee: 0,
+                        tramonaServiceFee: parseInt(paymentIntentSucceeded.metadata.tramonaServiceFee ?? ""),
+                        paymentMethod: cardNumber.card?.last4 ?? "",
+                        datePaid: paymentIntentSucceeded.metadata.confirmed_at?.slice(0,10) ?? "",
                       })
                     })
                   }
