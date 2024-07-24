@@ -1,6 +1,9 @@
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import axios from "axios";
+import { users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
+import { redirect } from "next/dist/server/api-utils";
 
 export const pmsRouter = createTRPCRouter({
   generateHostawayBearerToken: publicProcedure
@@ -91,6 +94,67 @@ export const pmsRouter = createTRPCRouter({
       } catch (error) {
         console.error("Error fetching Hostaway calendar:", error);
         throw new Error("Failed to fetch Hostaway calendar");
+      }
+    }),
+
+    createHospitableCustomer: protectedProcedure
+    .mutation(async ({ctx}) => {
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id)
+      });
+
+      // Check if a user was found
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Destructure the necessary properties from the user object
+      const { id, name, email, phoneNumber } = user;
+      try {
+        const response = await axios.post(
+          "https://connect.hospitable.com/api/v1/customers",
+          {
+            id,
+            name,
+            email,
+            phone: phoneNumber,
+            timezone: "UTC",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+            },
+          },
+        );
+
+        type HospitableAuthCodeResponse = {
+          data: {
+            expires_at: Date;
+            return_url: string;
+          }
+        };
+
+        const authCodeResponse = await axios.post<HospitableAuthCodeResponse>(
+          "https://connect.hospitable.com/api/v1/auth-codes",
+          {
+            customer_id: id,
+            redirect_url: "https://tramona.com/host",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+            },
+          },
+        );
+
+
+
+        console.log("Hospitable sync response:", response.data);
+        console.log("Hospitable auth code response:", authCodeResponse.data);
+        return authCodeResponse.data;
+      } catch (error) {
+        console.error("Error syncing with Hospitable:", error);
+        throw new Error("Failed to sync with Hospitable");
       }
     }),
 });

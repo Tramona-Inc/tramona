@@ -36,6 +36,7 @@ import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
+import { on } from "events";
 
 export default function Onboarding1({
   onPressNext,
@@ -86,6 +87,15 @@ export default function Onboarding1({
       text: "Do you use a PMS? Easily sync your properties to Tramona.",
       onClick: () => openModal("syncPMS"),
     },
+    {
+      id: "4",
+      icon: <AssistedListing />,
+      title: "Sync with Airbnb through Hospitable",
+      text: "Use Hospitable API to sync your Airbnb properties to Tramona.",
+      onClick: async () => {
+        await createHospitableCustomer();
+      },
+    },
   ];
 
   const form = useZodForm({
@@ -95,6 +105,13 @@ export default function Onboarding1({
       apiKey: z.string(),
     }),
   });
+
+  const { mutateAsync: createHospitableCustomer } =
+    api.pms.createHospitableCustomer.useMutation({
+      onSuccess: (res) => {
+        void router.push(res.data.return_url);
+      },
+    });
 
   const { mutateAsync: generateBearerToken } =
     api.pms.generateHostawayBearerToken.useMutation({
@@ -118,6 +135,8 @@ export default function Onboarding1({
     void router.push("/host");
     console.log({ pms, accountId, apiKey });
   });
+
+
 
   return (
     <>
