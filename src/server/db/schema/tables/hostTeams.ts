@@ -16,7 +16,7 @@ export const hostTeams = pgTable(
     name: text("name"),
     ownerId: text("owner_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
   },
   (t) => ({
     owneridIdx: index().on(t.ownerId),
