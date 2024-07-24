@@ -29,23 +29,24 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   return (
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
-        <Link href={`/my-trips/${trip.id}`} className="relative w-96">
-          <Image
-            fill
-            alt=""
-            className="object-cover"
-            src={trip.property.imageUrls[0]!}
-          />
-          <Badge variant="lightGray" className="absolute left-4 top-4">
-            Trip {dayjs(trip.checkIn).fromNow()}
-          </Badge>
-        </Link>
-
         <div className="flex w-full flex-col gap-4 p-4 pt-12 lg:pt-4">
           <div className="flex w-full flex-col justify-between gap-3 lg:flex-row lg:gap-6">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold">{trip.property.name}</h2>
-              <div className="flex gap-2">
+            <div className="flex flex-col">
+              <Link
+                href={`/my-trips/${trip.id}`}
+                className="relative h-32 w-52"
+              >
+                <Image
+                  fill
+                  alt=""
+                  className="object-cover"
+                  src={trip.property.imageUrls[0]!}
+                />
+                <Badge variant="lightGray" className="absolute left-2 top-3">
+                  Trip {dayjs(trip.checkIn).fromNow()}
+                </Badge>
+              </Link>
+              <div className="mt-4 flex gap-2">
                 <UserAvatar
                   name={trip.property.host?.name}
                   // image={trip.property.host?.image}
@@ -66,28 +67,27 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                 </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold">Location</h3>
+            <div className="flex flex-col gap-4">
+              <h2 className="text-2xl font-bold">{trip.property.name}</h2>
               <div className="flex">
                 <MapPin />
                 <p>{trip.property.address}</p>
               </div>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold">Check-in details</h3>
-              <p>{formatDateRange(trip.checkIn, trip.checkOut)}</p>
-              <Link
-                href={`/my-trips/${trip.id}`}
-                className="text-sm font-bold underline underline-offset-4"
-              >
-                View more
-              </Link>
+              <div className="">
+                <p>{formatDateRange(trip.checkIn, trip.checkOut)}</p>
+                <Link
+                  href={`/my-trips/${trip.id}`}
+                  className="text-sm font-bold underline underline-offset-4"
+                >
+                  View more
+                </Link>
+              </div>
             </div>
           </div>
 
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
-          <div className="flex flex-col justify-end gap-2 sm:flex-row">
+          <div className="flex flex-col justify-end gap-2 px-4 sm:flex-row lg:justify-center lg:gap-4">
             <Button variant="secondary" onClick={() => chatWithAdmin()}>
               <MessageCircle className="size-4" />
               Message your host
