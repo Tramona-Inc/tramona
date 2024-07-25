@@ -42,7 +42,7 @@ export default function BookingAddedNotificationEmail({
           booking_link={tripDetailLink}
         />
       </Section>
-      <CustomButton link={tripDetailLink} title="View trip detail" />
+      <CustomButton link={tripDetailLink} title="View trip details" />
     </Layout>
   );
 }

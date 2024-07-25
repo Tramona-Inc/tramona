@@ -26,6 +26,7 @@ interface BookingConfirmationEmailProps {
   tramonaPrice: number;
   offerLink: string;
   numOfNights: number;
+  serviceFee: number;
   receiptNumber: string;
   tramonaServiceFee? : number,
   paymentMethod: string,
@@ -46,6 +47,7 @@ export default function BookingConfirmationEmail({
   tramonaPrice = 500,
   offerLink = "http://tramona/offers{offer.id}",
   numOfNights = 3,
+  serviceFee = 20,
   receiptNumber = "12345",
   tramonaServiceFee,
   paymentMethod = "Card",
@@ -73,7 +75,7 @@ export default function BookingConfirmationEmail({
           confirmation_link={tripDetailLink}
         />
       </Section>
-      <CustomButton link={offerLink} title="View trip detail" />
+      <CustomButton link={offerLink} title="View trip details" />
       <Section
         className="flex flex-col items-center justify-center px-6 pb-6 pt-6"
         style={{ width: "100%" }}
@@ -113,34 +115,28 @@ export default function BookingConfirmationEmail({
         </Row> */}
         <Row className="">
           <Column>
-            <Text className="whitespace-no-wrap text-xs">
-              Tramona&apos;s Price
+            <Text className="whitespace-no-wrap text-base">
+            {formatCurrency(tramonaPrice/numOfNights)} x {numOfNights} nights
             </Text>
           </Column>
-          <Column
-            className="whitespace-no-wrap text-xs text-[#606060]"
-            style={{ paddingLeft: "5px" }}
-          >
-            x{numOfNights} nights
-          </Column>
-          <Column style={{ paddingLeft: "150px" }}>
+          <Column className="text-end" style={{ paddingLeft: "150px" }}>
             {formatCurrency(tramonaPrice)}
           </Column>
         </Row>
         <Row className="">
           <Column>
-            <Text className="text-xs">Service Fee</Text>
+            <Text className="text-base">Service Fee</Text>
           </Column>
-          <Column className="text-xs text-white" style={{ paddingLeft: "5px" }}>
-            x{numOfNights} nights
-          </Column>
+          {/* <Column className="text-xs text-white" style={{ paddingLeft: "5px" }}>
+            x {numOfNights} nights
+          </Column> */}
           <Column className="text-end" style={{ paddingLeft: "150px" }}>
-            {formatCurrency(tramonaServiceFee ?? 0)}
+            {formatCurrency(serviceFee ?? 0)}
           </Column>
         </Row>
         <Row>
           <Column>
-            <Text className="text-xs">Tax</Text>
+            <Text className="text-base">Tax</Text>
           </Column>
           <Column className="text-end" style={{paddingLeft: "150px"}}>
           {formatCurrency(tax)}
@@ -150,7 +146,7 @@ export default function BookingConfirmationEmail({
         <Row className="font-bold">
           <Column>Total (USD)</Column>
           <Column className="text-right">
-            {formatCurrency(totalPricePaid)}
+            {formatCurrency(totalPricePaid + serviceFee)}
           </Column>
         </Row>
       </Section>

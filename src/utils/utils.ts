@@ -1,3 +1,4 @@
+import { feedRouter } from "@/server/api/routers/feedRouter";
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
@@ -197,6 +198,11 @@ export function getNumNights(from: Date | string, to: Date | string) {
   return Math.round(
     (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),
   );
+}
+
+// 3 = daily superhog fee, 3.5% is stripe fee
+export function getServiceFee(numOfNights: number, totalPrice: number) {
+  return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
 }
 
 /**

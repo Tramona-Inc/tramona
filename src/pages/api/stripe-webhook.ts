@@ -16,7 +16,7 @@ import {
   trips,
   users,
 } from "@/server/db/schema";
-import { getNumNights } from "@/utils/utils";
+import { getNumNights, getServiceFee } from "@/utils/utils";
 import { sendEmail } from "@/server/server-utils";
 import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
@@ -172,6 +172,7 @@ export default async function webhook(
                         propertyImageLink: property.imageUrls[0] ?? "",
                         tripDetailLink: "https://www.tramona.com/",
                         numOfNights: getNumNights(trip.checkIn, trip.checkOut),
+                        serviceFee: getServiceFee(getNumNights(trip.checkIn, trip.checkOut), offer.totalPrice + tax),
                         tramonaPrice: offer.totalPrice,
                         offerLink: "http://tramona/offers{offer.id}",
                         receiptNumber: paymentIntentSucceeded.id,
