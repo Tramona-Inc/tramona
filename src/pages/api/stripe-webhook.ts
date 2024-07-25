@@ -129,10 +129,12 @@ export default async function webhook(
                     offerId: offer.id,
                   });
 
+                  //User, property, trip data required to send in email
                   const user = await db.query.users.findFirst({
                     where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
                   });
 
+                  //fetch last 4 digits of customer card & send in confirmation email
                   const cardNumber = await stripe.paymentMethods.retrieve(paymentIntentSucceeded.payment_method as string);
                   
                   const trip = await db.query.trips.findFirst({
@@ -156,8 +158,6 @@ export default async function webhook(
 
                   const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
 
-                  console.log(trip)
-                  console.log(property)
                   if(trip && property){
                     console.log("we have userTrips")
                     await sendEmail({
