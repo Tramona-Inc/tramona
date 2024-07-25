@@ -2,17 +2,19 @@
 import { createTRPCRouter, roleRestrictedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import { env } from "@/env";
-import axios from "axios";
+import axios, { all } from "axios";
 import { db } from "@/server/db";
 import { properties, users, superhogRequests, trips } from "@/server/db/schema";
 
-import { eq } from "drizzle-orm";
+import { eq, isNotNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { generateTimeStamp } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import type { Trip } from "@/server/db/schema/tables/trips";
 import { formatDateYearMonthDay } from "@/utils/utils";
 import { getCountryISO, getPostcode } from "@/server/google-maps";
+import { sendSlackMessage } from "@/server/slack";
+import { messages } from "../../db/schema/tables/messages";
 export interface ReservationInterface {
   id: number;
   checkIn: string;
@@ -149,30 +151,66 @@ export async function createSuperhogReservation({
       )
       .then((res) => res.data)
       .catch((error: AxiosError) => {
+        sendSlackMessage(
+          `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+        );
         throw new Error(error.response.data.detail);
       });
 
     if (!verification) {
+      sendSlackMessage(
+        `SUPERHOG REQUEST ERROR: The verification was not created because it was not found`,
+      );
       throw new TRPCError({ code: "NOT_FOUND" });
     }
 
-    console.log("this is the verification", verification);
-
     //now we can create the superhog_ request table
-    await db.insert(superhogRequests).values({
-      echoToken: reservationObject.metadata.echoToken,
-      propertyId: propertyId,
-      userId: userId,
-      superhogStatus: verification.status,
-      superhogVerificationId: verification.verificationId,
-      superhogReservationId: reservationObject.reservation.reservationId,
-    });
+    const currentSuperHogRequestId = await db
+      .insert(superhogRequests)
+      .values({
+        echoToken: reservationObject.metadata.echoToken,
+        propertyId: propertyId,
+        userId: userId,
+        superhogStatus: verification.status,
+        superhogVerificationId: verification.verificationId,
+        superhogReservationId: reservationObject.reservation.reservationId, //this is the trip id but not connected it doesnt matter what the value is tbh
+      })
+      .returning({ id: superhogRequests.id });
+
+    console.log(
+      "this is the current superhog request id",
+      currentSuperHogRequestId,
+    );
+    //update the trip with the superhog request id
+    if (currentSuperHogRequestId.length > 0) {
+      await db
+        .update(trips)
+        .set({
+          superhogRequestId: currentSuperHogRequestId[0]!.id,
+        })
+        .where(eq(trips.id, trip.id));
+    }
+    if (
+      verification.status === "Rejected" ||
+      verification.status == "Flagged"
+    ) {
+      sendSlackMessage(
+        `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${verification.status} for tripID ${trip.id} for ${user.name}`,
+      );
+    }
+  }
+  //top level if statement
+  else {
+    sendSlackMessage(
+      `*SUPERHOG REQUEST ERROR*: The property with id ${propertyId} or the user with id ${userId} does not exist in the database`,
+    );
   }
 }
 
 //TRPC FUNCTIONS
 
 export const superhogRouter = createTRPCRouter({
+  //this is for manuel upload and testing
   createSuperhogRequest: roleRestrictedProcedure(["admin"])
     //update later this should be updating the schema, not creating it
     .input(
@@ -208,7 +246,7 @@ export const superhogRouter = createTRPCRouter({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const { verification } = await axios
         .post<unknown, ResponseType>(
           "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
@@ -223,19 +261,65 @@ export const superhogRouter = createTRPCRouter({
       if (!verification) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
-
       await db.insert(superhogRequests).values({
         echoToken: input.metadata.echoToken,
         superhogStatus: verification.status,
         superhogVerificationId: verification.verificationId,
         superhogReservationId: input.reservation.reservationId,
-        userId: "1",
-        propertyId: 1,
+        userId: ctx.user.id, //since we dont have access to the user id
+        propertyId: parseInt(input.listing.listingId),
       });
     }),
 
   getAllVerifications: roleRestrictedProcedure(["admin"]).query(async () => {
-    return await db.query.superhogRequests.findMany();
+    const allSuperhogRequestWithTrips = await db.query.trips.findMany({
+      where: isNotNull(trips.superhogRequestId),
+      with: {
+        superhogRequests: {
+          with: {
+            property: {
+              columns: {
+                address: true,
+                city: true,
+                latitude: true,
+                longitude: true,
+              },
+            },
+            user: {
+              columns: { name: true, firstName: true, lastName: true },
+            },
+          },
+        },
+      },
+    });
+
+    const allReservations = await Promise.all(
+      allSuperhogRequestWithTrips.map(async (reservation) => {
+        const countryISO = await getCountryISO({
+          lat: reservation.superhogRequests!.property.latitude,
+          lng: reservation.superhogRequests!.property.longitude,
+        });
+        return {
+          id: reservation.id,
+          checkIn: formatDateYearMonthDay(reservation.checkIn).toString(),
+          checkOut: formatDateYearMonthDay(reservation.checkOut).toString(),
+          echoToken: reservation.superhogRequests!.echoToken,
+          propertyAddress: reservation.superhogRequests!.property.address,
+          propertyTown: reservation.superhogRequests!.property.city,
+          propertyCountryIso: countryISO,
+          superhogStatus: reservation.superhogRequests!.superhogStatus,
+          superhogVerificationId:
+            reservation.superhogRequests!.superhogVerificationId,
+          superhogReservationId:
+            reservation.superhogRequests!.superhogReservationId,
+          nameOfVerifiedUser: reservation.superhogRequests!.user.name,
+          userId: reservation.superhogRequests!.userId,
+          propertyId: reservation.superhogRequests!.propertyId.toString(),
+        };
+      }),
+    );
+
+    return allReservations as ReservationInterface[];
   }),
 
   deleteVerification: roleRestrictedProcedure(["admin"])
@@ -293,6 +377,7 @@ export const superhogRouter = createTRPCRouter({
         }),
       }),
     )
+
     .mutation(async ({ input }) => {
       try {
         const response = await axios.put(
@@ -302,6 +387,16 @@ export const superhogRouter = createTRPCRouter({
         );
         console.log(response.data);
         console.log("it worked ");
+
+        //find the id of the superhog request
+        const superhogRequestId = await db.query.superhogRequests.findFirst({
+          columns: { id: true },
+          where: eq(
+            superhogRequests.superhogVerificationId,
+            input.verification.verificationId,
+          ),
+        });
+
         await db
           .update(trips)
           .set({
@@ -311,7 +406,7 @@ export const superhogRouter = createTRPCRouter({
           .where(
             eq(
               trips.superhogRequestId, // we need another query to acces the actual superhog db
-              input.verification.verificationId,
+              superhogRequestId!.id,
             ),
           );
       } catch (error) {

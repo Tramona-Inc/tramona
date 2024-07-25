@@ -24,14 +24,11 @@ import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
-import {
-  superhogRequests,
-  superhogRequestsFormSchema,
-} from "./tables/superhogRequests";
-
+import { superhogRequests } from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
 import { reviews } from "./tables/reviews";
+import { superhogErrors } from "./tables/superhogErrors";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -51,6 +48,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   bucketListDestinations: many(bucketListDestinations),
   bucketListProperties: many(bucketListProperties),
   emergencyContacts: many(emergencyContacts),
+  superHogErrors: many(superhogErrors),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -100,6 +98,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   bookedDates: many(bookedDates),
   superhogRequests: many(superhogRequests),
   reviews: many(reviews),
+  superhogErrors: many(superhogErrors),
 }));
 
 export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
@@ -308,6 +307,21 @@ export const superhogRequestsRelations = relations(
   }),
 );
 
+export const superhogErrorsRelations = relations(superhogErrors, ({ one }) => ({
+  user: one(users, {
+    fields: [superhogErrors.userId],
+    references: [users.id],
+  }),
+  trip: one(trips, {
+    fields: [superhogErrors.tripId],
+    references: [trips.id],
+  }),
+  property: one(properties, {
+    fields: [superhogErrors.propertiesId],
+    references: [properties.id],
+  }),
+}));
+
 export const bucketListDestinationsRelations = relations(
   bucketListDestinations,
   ({ one }) => ({
@@ -332,7 +346,7 @@ export const bucketListPropertiesRelations = relations(
   }),
 );
 
-export const tripsRelations = relations(trips, ({ one }) => ({
+export const tripsRelations = relations(trips, ({ one, many }) => ({
   group: one(groups, {
     fields: [trips.groupId],
     references: [groups.id],
@@ -353,6 +367,7 @@ export const tripsRelations = relations(trips, ({ one }) => ({
     fields: [trips.superhogRequestId],
     references: [superhogRequests.id],
   }),
+  superhogErrors: many(superhogErrors),
 }));
 
 export const emergencyContactsRelations = relations(

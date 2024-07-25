@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { api } from "@/utils/api";
 import { generateTimeStamp } from "@/utils/utils";
-import { ReservationInterface } from "@/server/api/routers/superhogRouter";
+import { type ReservationInterface } from "@/server/api/routers/superhogRouter";
 import Spinner from "@/components/_common/Spinner";
 import {
   CircleCheckBigIcon,
@@ -10,7 +10,6 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import { reducer } from "../../ui/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,7 +44,7 @@ export default function DeleteSuperhog() {
 
   const content = data ? (
     data.length < 1 ? (
-      <p className="flex h-[400px] items-center justify-center text-center">
+      <p className="flex h-[400px] w-full items-center justify-center text-center">
         Currently there are no verification forms
       </p>
     ) : (
@@ -55,7 +54,7 @@ export default function DeleteSuperhog() {
             <CardHeader className="flex flex-row items-start justify-between">
               <div className="flex flex-col gap-y-1">
                 <h1 className="font-bold">{reservation.nameOfVerifiedUser}</h1>
-                <div className="flex flex-row items-center gap-x-1 text-xs  font-semibold text-primary">
+                <div className="flex flex-row items-center gap-x-1 text-xs font-semibold text-primary">
                   Status: <div>{reservation.superhogStatus} </div>
                   <div>
                     {reservation.superhogStatus === "Approved" ? (
@@ -164,6 +163,13 @@ export default function DeleteSuperhog() {
         <p className="my-3 font-semibold">
           Select a verification report to delete
         </p>
+        <Card className="my-4 bg-red-50">
+          <CardContent>
+            <div className="font-bold">
+              Warning: Deleting a request will not the delete the trip itself...{" "}
+            </div>
+          </CardContent>
+        </Card>
         <div className=" ">
           {isLoading ? (
             <Spinner />

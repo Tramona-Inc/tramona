@@ -150,6 +150,13 @@ export function convertDateFormat(dateString: string) {
   return `${month}/${day}/${year}`;
 }
 
+export function addDays(date: Date, days: number): Date {
+  //add days to a date object
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
 export function getElapsedTime(createdAt: Date): string {
   const now = new Date();
   const diffInSeconds = Math.floor(

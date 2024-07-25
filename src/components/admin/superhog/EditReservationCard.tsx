@@ -71,7 +71,6 @@ export default function EditReservationCard({
   };
   const { mutateAsync } = api.superhog.updateVerification.useMutation({
     onSuccess: () => {
-      console.log("success");
       toast({
         title: "Reservation Updated",
         description: "The reservation has been updated successfully",
@@ -114,7 +113,7 @@ export default function EditReservationCard({
       <CardHeader className="flex flex-row items-start justify-between">
         <div className="flex flex-col gap-y-1">
           <h1 className="font-bold">{reservation.nameOfVerifiedUser}</h1>
-          <div className="flex flex-row items-center gap-x-1 text-xs  font-semibold text-primary">
+          <div className="flex flex-row items-center gap-x-1 text-xs font-semibold text-primary">
             Status: <div>{reservation.superhogStatus} </div>
             <div>
               {reservation.superhogStatus === "Approved" ? (
@@ -136,7 +135,7 @@ export default function EditReservationCard({
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>
-                Edit {reservation.nameOfVerifiedUser}&aposs check-in dates
+                Edit {reservation.nameOfVerifiedUser}&apos;s check-in dates
               </DialogTitle>
               <DialogDescription className="text-sm">
                 Make changes to the request here. Click update when you&aposre

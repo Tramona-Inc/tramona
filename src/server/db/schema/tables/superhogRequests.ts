@@ -9,7 +9,6 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 import { users } from "./users";
-import { trips } from "./trips";
 
 export const superhogStatusEnum = pgEnum("superhog_status", [
   "Approved",

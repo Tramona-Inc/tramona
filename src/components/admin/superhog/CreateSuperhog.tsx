@@ -25,7 +25,11 @@ import {
 } from "../../ui/select";
 import { Separator } from "../../ui/separator";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { generateTimeStamp } from "@/utils/utils";
+import {
+  formatDateYearMonthDay,
+  generateTimeStamp,
+  addDays,
+} from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -54,10 +58,10 @@ export default function SuperhogForm() {
     },
     reservation: {
       reservationId: "02389sdfax2547a",
-      checkIn: "2024-05-24",
-      checkOut: "2024-06-24",
+      checkIn: formatDateYearMonthDay(addDays(new Date(), 1)),
+      checkOut: formatDateYearMonthDay(addDays(new Date(), 2)),
       channel: "Tramona",
-      creationDate: "2023-12-19",
+      creationDate: formatDateYearMonthDay(new Date()),
     },
     guest: {
       firstName: "Peter",
@@ -201,7 +205,7 @@ export default function SuperhogForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-bold text-primary">
-                        Listing Id / Property Id
+                        Listing Id (Trip Id)
                       </FormLabel>
                       <FormControl>
                         <Input {...field} />
@@ -214,7 +218,7 @@ export default function SuperhogForm() {
                   )}
                 />
               </div>
-              <div className="flex flex-row items-center justify-around gap-x-10 ">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="listing.address.addressLine1"

@@ -42,7 +42,6 @@ export const trips = pgTable(
       .defaultNow(),
     superhogRequestId: integer("superhog_request_id").references(
       () => superhogRequests.id,
-      { onDelete: "cascade" },
     ),
   },
   (t) => ({
