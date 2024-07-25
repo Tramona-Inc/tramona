@@ -68,12 +68,15 @@ export const tripsRouter = createTRPCRouter({
   getMyTripsPageDetails: protectedProcedure
     .input(z.object({ tripId: z.number() }))
     .query(async ({ input }) => {
+
       const tripWithOrigin = await db.query.trips.findFirst({
         where: eq(trips.id, input.tripId),
         with: {
-          bid: { with: { counters: { columns: { counterAmount: true } } } },
           offer: { columns: { totalPrice: true } },
           property: {
+            columns: {
+              latLngPoint: false,
+            },
             with: {
               host: {
                 columns: { name: true, email: true, image: true, id: true },
@@ -82,14 +85,13 @@ export const tripsRouter = createTRPCRouter({
           },
         },
       });
-
+     
       if (!tripWithOrigin) throw new TRPCError({ code: "NOT_FOUND" });
-
-      const coordinates = await getCoordinates(tripWithOrigin.property.address);
-      const { bid, offer, ...trip } = tripWithOrigin;
-      const tripPrice = bid
-        ? bid.counters[bid.counters.length - 1]?.counterAmount
-        : offer?.totalPrice;
+      
+      const coordinates = {location: {lat: tripWithOrigin.property.latitude, lng: tripWithOrigin.property.longitude}};
+      
+      const { offer, ...trip } = tripWithOrigin;
+      const tripPrice = offer?.totalPrice;
 
       if (tripPrice === undefined) {
         throw new TRPCError({
@@ -97,7 +99,6 @@ export const tripsRouter = createTRPCRouter({
           message: "Could not find the price for this trip.",
         });
       }
-
       return { trip, tripPrice, coordinates };
     }),
 });
