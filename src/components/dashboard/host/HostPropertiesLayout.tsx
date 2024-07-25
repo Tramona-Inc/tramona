@@ -243,6 +243,7 @@ export function HostPropertyEditBtn({
   const setOtherHouseRules = useHostOnboarding(
     (state) => state.setOtherHouseRules,
   );
+  const setCancellationPolicy = useHostOnboarding((state) => state.setCancellationPolicy);
 
   const addressWithApt: LocationType = {
     country: property.address.split(", ")[4] ?? "",
@@ -286,6 +287,7 @@ export function HostPropertyEditBtn({
     setSmokingAllowed(property.smokingAllowed ?? false);
     setOtherHouseRules(property.otherHouseRules ?? "");
     setEditing(!editing);
+    setCancellationPolicy(property.cancellationPolicy ?? "");
   };
 
   return (

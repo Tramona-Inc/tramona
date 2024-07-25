@@ -24,7 +24,7 @@ export const tripsRouter = createTRPCRouter({
       ),
       with: {
         property: {
-          columns: { name: true, imageUrls: true, address: true },
+          columns: { name: true, imageUrls: true, address: true, cancellationPolicy: true },
           with: { host: { columns: { name: true, image: true } } },
         },
       },
@@ -85,11 +85,11 @@ export const tripsRouter = createTRPCRouter({
           },
         },
       });
-     
+
       if (!tripWithOrigin) throw new TRPCError({ code: "NOT_FOUND" });
-      
+
       const coordinates = {location: {lat: tripWithOrigin.property.latitude, lng: tripWithOrigin.property.longitude}};
-      
+
       const { offer, ...trip } = tripWithOrigin;
       const tripPrice = offer?.totalPrice;
 

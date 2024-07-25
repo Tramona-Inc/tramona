@@ -4,7 +4,7 @@ import { HelpCircleIcon, InfoIcon, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { formatDateRange } from "@/utils/utils";
+import { formatDateRange, getCancellationPolicy } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
 import MapPin from "../_icons/MapPin";
@@ -25,6 +25,20 @@ dayjs.extend(relativeTime);
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   const chatWithAdmin = useChatWithAdmin();
+
+  const formatText = (text: string) => {
+    const lines = text.split("\n");
+    return lines.map((line, index) => (
+      <span key={index} className="block">
+        <span style={{ color: "#000000", fontWeight: "bold" }}>
+          {line.split(":")[0]}:
+        </span>
+        <span style={{ color: "#343434" }}>
+          {line.includes(":") && line.split(":")[1]}
+        </span>
+      </span>
+    ));
+  };
 
   return (
     <div className="w-full">
@@ -102,10 +116,20 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               <SheetContent side="bottom" className="p-0">
                 <SheetHeader className="border-b-[1px] p-5">
                   <SheetTitle className="text-xl font-bold lg:text-2xl">
-                    Cancelation Policy
+                    {trip.property.cancellationPolicy ? (
+                      <p>
+                        Cancellation Policy: {trip.property.cancellationPolicy}
+                      </p>
+                    ) : (
+                      <p>Cancellation Policy</p>
+                    )}
                   </SheetTitle>
                 </SheetHeader>
-
+                {trip.property.cancellationPolicy ? (
+                  <p className="whitespace-pre-line text-left text-sm text-muted-foreground border-b-[1px] px-5 py-10">
+                  {formatText(getCancellationPolicy(trip.property.cancellationPolicy))}
+                </p>
+                ): (
                 <div className="border-b-[1px] px-5 py-10">
                   <ol type="1" className="list-inside list-decimal">
                     <li>
@@ -162,6 +186,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                     </li>
                   </ol>
                 </div>
+                )}
 
                 <SheetFooter className="p-5">
                   <SheetClose asChild>

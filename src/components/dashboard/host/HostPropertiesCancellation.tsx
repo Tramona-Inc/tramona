@@ -44,7 +44,7 @@ export default function HostPropertiesCancellation({
         <div className="rounded-xl bg-zinc-100 p-6">
           {property.cancellationPolicy ? (
             <p className="whitespace-pre-line text-left text-sm text-muted-foreground">
-              {formatText(getCancellationPolicy(property.cancellationPolicy)!)}
+              {formatText(getCancellationPolicy(property.cancellationPolicy))}
             </p>
           ) : (
             <div>
