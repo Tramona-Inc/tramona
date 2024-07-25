@@ -93,12 +93,6 @@ export default function Onboarding7({
                 {/* <Button type="submit">Submit</Button> */}
               </form>
             </Form>
-            <div className="my-5 text-center">
-              <p className="font-bold">
-                Total Uploaded Images:{" "}
-                <span className="font-normal">{imageURLs.length}</span>
-              </p>
-            </div>
           </div>
         </div>
       </div>

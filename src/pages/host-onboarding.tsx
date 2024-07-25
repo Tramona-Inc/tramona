@@ -11,6 +11,7 @@ import Onboarding9 from "@/components/host/onboarding/Onboarding9";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import OnboardingLayout from "../components/host/onboarding/layout";
 import Onboarding10 from "@/components/host/onboarding/Onboarding10";
+import Onboarding11 from "@/components/host/onboarding/Onboarding11";
 
 export default function Onboarding() {
   const progress = useHostOnboarding((state) => state.progress);
@@ -32,6 +33,7 @@ export default function Onboarding() {
       {progress === 7 && <Onboarding8 />}
       {progress === 8 && <Onboarding9 />}
       {progress === 9 && <Onboarding10 />}
+      {progress === 10 && <Onboarding11 />}
     </OnboardingLayout>
   );
 }

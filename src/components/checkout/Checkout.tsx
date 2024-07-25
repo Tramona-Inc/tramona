@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
+import { getCancellationPolicy, getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
@@ -68,7 +68,7 @@ export default function Checkout({
         <h3 className="text-lg font-semibold">Cancellation Policy</h3>
         <p className="text-sm font-semibold leading-5 text-muted-foreground">
           {property.cancellationPolicy
-            ? property.cancellationPolicy
+            ? getCancellationPolicy(property.cancellationPolicy)
             : "No cancellation policy"}
         </p>
       </div>

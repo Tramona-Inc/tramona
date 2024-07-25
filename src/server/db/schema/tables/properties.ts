@@ -87,6 +87,16 @@ export const ALL_PROPERTY_TYPES = [
   "Villa",
 ] as const;
 
+export const ALL_CANCELLATION_POLICIES = [
+  "Flexible",
+  "Moderate",
+  "Firm",
+  "Strict",
+  "Super Strict 30 Days",
+  "Super Strict 60 Days",
+  "Long Term",
+] as const;
+
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
   "Shared room",
