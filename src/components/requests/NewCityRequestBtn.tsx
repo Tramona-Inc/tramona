@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import DesktopRequestDealTab  from "../landing-page/SearchBars/DesktopRequestDealTab";
+import CityRequestFormContainer from "../landing-page/SearchBars/CityRequestFormContainer";
 import { MobileRequestDealTab } from "../landing-page/SearchBars/MobileRequestDealTab";
 import {
   Dialog,
@@ -30,7 +30,7 @@ export function NewCityRequestBtn() {
         {isMobile ? (
           <MobileRequestDealTab closeSheet={() => setOpen(false)} />
         ) : (
-          <DesktopRequestDealTab />
+          <CityRequestFormContainer />
         )}
       </DialogContent>
     </Dialog>

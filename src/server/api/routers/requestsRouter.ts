@@ -754,9 +754,11 @@ export async function handleRequestSubmission(
   console.log(input.maxTotalPrice, " and this is the formatedPrice", fmtdPrice);
 
   sendSlackMessage(
-    `*${name} just made a request: ${input.location}*`,
-    `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-    `<https://tramona.com/admin|Go to admin dashboard>`,
+    [
+      `*${name} just made a request: ${input.location}*`,
+      `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+      `<https://tramona.com/admin|Go to admin dashboard>`,
+    ].join("\n"),
   );
 
   return { transactionResults };
