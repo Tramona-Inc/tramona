@@ -30,6 +30,8 @@ interface BookingConfirmationEmailProps {
   tramonaServiceFee? : number,
   paymentMethod: string,
   datePaid: string
+  tax: number,
+  totalPricePaid: number,
 }
 
 export default function BookingConfirmationEmail({
@@ -48,6 +50,8 @@ export default function BookingConfirmationEmail({
   tramonaServiceFee,
   paymentMethod = "Card",
   datePaid = "27-02",
+  tax = 0,
+  totalPricePaid = 0,
 }: BookingConfirmationEmailProps) {
   return (
     <Layout title_preview="Booking confirmation/Payment received">
@@ -134,11 +138,19 @@ export default function BookingConfirmationEmail({
             {formatCurrency(tramonaServiceFee ?? 0)}
           </Column>
         </Row>
+        <Row>
+          <Column>
+            <Text className="text-xs">Tax</Text>
+          </Column>
+          <Column className="text-end" style={{paddingLeft: "150px"}}>
+          {formatCurrency(tax)}
+          </Column>
+        </Row>
         <Hr className="pt-5" />
         <Row className="font-bold">
           <Column>Total (USD)</Column>
           <Column className="text-right">
-            {tramonaServiceFee ? formatCurrency(tramonaPrice + tramonaServiceFee) : formatCurrency(tramonaPrice)}
+            {formatCurrency(totalPricePaid)}
           </Column>
         </Row>
       </Section>

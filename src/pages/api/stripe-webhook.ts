@@ -23,6 +23,7 @@ import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import BookingConfirmationEmail from "packages/transactional/emails/BookingConfirmationEmail";
+import { TAX_PERCENTAGE } from "@/utils/constants";
 
 // ! Necessary for stripe
 export const config = {
@@ -153,10 +154,11 @@ export default async function webhook(
                     }
                   })
 
+                  const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
+
                   console.log(trip)
                   console.log(property)
                   if(trip && property){
-
                     console.log("we have userTrips")
                     await sendEmail({
                       to: paymentIntentSucceeded.receipt_email ?? "",
@@ -169,13 +171,15 @@ export default async function webhook(
                         address: property.address,
                         propertyImageLink: property.imageUrls[0] ?? "",
                         tripDetailLink: "https://www.tramona.com/",
-                        tramonaPrice: paymentIntentSucceeded.amount,
-                        offerLink: "http://tramona/offers{offer.id}",
                         numOfNights: getNumNights(trip.checkIn, trip.checkOut),
+                        tramonaPrice: offer.totalPrice,
+                        offerLink: "http://tramona/offers{offer.id}",
                         receiptNumber: paymentIntentSucceeded.id,
                         tramonaServiceFee: parseInt(paymentIntentSucceeded.metadata.tramonaServiceFee ?? ""),
                         paymentMethod: cardNumber.card?.last4 ?? "",
                         datePaid: paymentIntentSucceeded.metadata.confirmed_at?.slice(0,10) ?? "",
+                        tax: tax,
+                        totalPricePaid: paymentIntentSucceeded.amount,
                       })
                     })
                   }
