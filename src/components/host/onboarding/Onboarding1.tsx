@@ -37,6 +37,7 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { on } from "events";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Onboarding1({
   onPressNext,
@@ -68,34 +69,37 @@ export default function Onboarding1({
   const items = [
     {
       id: "1",
-      icon: <ManuallyAdd />,
-      title: "Manually Add",
-      text: "Complete a simple step-by-step process to add your property information",
-      onClick: onPressNext,
-    },
-    {
-      id: "2",
-      icon: <AssistedListing />,
-      title: "Assisted Listing",
-      text: "Have the Tramona onboarding team set up my account.",
-      onClick: () => openModal("assistedListing"),
-    },
-    {
-      id: "3",
-      icon: <AssistedListing />,
-      title: "Sync with PMS",
-      text: "Do you use a PMS? Easily sync your properties to Tramona.",
-      onClick: () => openModal("syncPMS"),
-    },
-    {
-      id: "4",
-      icon: <AssistedListing />,
-      title: "Sync with Airbnb through Hospitable",
-      text: "Use Hospitable API to sync your Airbnb properties to Tramona.",
+      // icon: <AssistedListing />,
+      title: "Connect directly with Airbnb",
+      text: "Connect with your Airbnb account. This is the easiest & preferred way",
+      recommended : true,
       onClick: async () => {
         await createHospitableCustomer();
       },
     },
+    {
+      id: "2",
+      icon: <AssistedListing />,
+      title: "PMS",
+      text: "Connect with our PMS partners for effortless signup.",
+      onClick: () => openModal("syncPMS"),
+    },
+    {
+      id: "3",
+      icon: <ManuallyAdd />,
+      title: "You Add",
+      text: "Manually list your properties",
+      onClick: onPressNext,
+    },
+    {
+      id: "4",
+      icon: <AssistedListing />,
+      title: "We Add",
+      text: "Have the Tramona onboarding team set up your account.",
+      onClick: () => openModal("assistedListing"),
+    },
+    
+   
   ];
 
   const form = useZodForm({
@@ -153,20 +157,35 @@ export default function Onboarding1({
 
         <div className="flex flex-col items-center justify-center sm:mx-20">
           <h1 className="mb-16 flex flex-col pt-8 text-4xl font-semibold">
-            It&apos;s easy to list your
-            <span>property on Tramona</span>
+            {/* It&apos;s easy to list your
+            <span>property on Tramona</span> */}
+            Get started on Tramona
           </h1>
 
           <div className="flex flex-col gap-10">
             {items.map((item) => (
+              item.id === "1" ? 
+              <>
               <CardSelect
                 key={item.title}
                 title={item.title}
                 text={item.text}
                 onClick={item.onClick}
+                recommended = {item.recommended}
               >
-                {item.icon}
+                {/* {item.icon} */}
+                <Checkbox className="w-12 h-12"></Checkbox>
               </CardSelect>
+              </>:
+              <CardSelect
+              key={item.title}
+              title={item.title}
+              text={item.text}
+              onClick={item.onClick}
+            >
+              {/* {item.icon} */}
+              <Checkbox className="w-12 h-12"></Checkbox>
+            </CardSelect>
             ))}
           </div>
         </div>
