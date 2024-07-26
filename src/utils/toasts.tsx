@@ -1,6 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
-import { formatCurrency, formatDateRange, getNumNights, plural } from "./utils";
+import { formatCurrency, formatDateRange, getNumNights } from "./utils";
 import { type Request } from "@/server/db/schema";
 
 export function errorToast(error = "Something went wrong, please try again") {
