@@ -212,18 +212,25 @@ export function getServiceFee(numOfNights: number, totalPrice: number) {
   return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
 }
 
-// 3 * num nights
-export function getSuperHogFee(numOfNights: number, totalPrice: number) {
-  return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
-}
-// total * 0.035
-export function getStripeFee(numOfNights: number, totalPrice: number) {
-  return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
-}
 
-// total + stripe fee
-export function getFinalTotal(numOfNights: number, totalPrice: number) {
-  return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
+
+export function getPriceBreakdown(bookingCost: number, numNights: number, superhogFee: number, tax: number) {
+  const superhogFeePaid = numNights * superhogFee * 100;
+  const taxPaid = (bookingCost + superhogFeePaid) * tax
+  const totalMinusStripe = bookingCost + superhogFeePaid + taxPaid;
+  const stripeFee = Math.ceil(totalMinusStripe * 0.035);
+  const serviceFee = superhogFeePaid + stripeFee;
+  const finalTotal = totalMinusStripe + stripeFee;
+
+  const priceBreakdown = {
+    bookingCost: bookingCost,
+    taxPaid: taxPaid,
+    serviceFee: serviceFee,
+    firstTotal: totalMinusStripe,
+    finalTotal: finalTotal
+  };
+  console.log(priceBreakdown);
+  return priceBreakdown;
 }
 
 

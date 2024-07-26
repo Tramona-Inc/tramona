@@ -22,6 +22,12 @@ import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
 
+
+import { getNumNights, getPriceBreakdown, getServiceFee } from "@/utils/utils";
+import { sendEmail } from "@/server/server-utils";
+import BookingConfirmationEmail from "packages/transactional/emails/BookingConfirmationEmail";
+import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
+
 // ! Necessary for stripe
 export const config = {
   api: {
@@ -152,9 +158,11 @@ export default async function webhook(
                   })
 
                   const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
+                
 
                   if(trip && property){
                     console.log("we have userTrips")
+                    const { bookingCost, taxPaid, serviceFee, firstTotal, finalTotal } = getPriceBreakdown(offer.totalPrice, getNumNights(trip.checkIn, trip.checkOut), SUPERHOG_FEE, TAX_PERCENTAGE);
                     await sendEmail({
                       to: paymentIntentSucceeded.receipt_email ?? "",
                       subject: "Your Confirmation Mail & receipt",
@@ -167,15 +175,16 @@ export default async function webhook(
                         propertyImageLink: property.imageUrls[0] ?? "",
                         tripDetailLink: "https://www.tramona.com/",
                         numOfNights: getNumNights(trip.checkIn, trip.checkOut),
-                        serviceFee: getServiceFee(getNumNights(trip.checkIn, trip.checkOut), offer.totalPrice + tax),
-                        tramonaPrice: offer.totalPrice,
+                        serviceFee: serviceFee,
+                        tramonaPrice: bookingCost,
                         offerLink: "http://tramona/offers{offer.id}",
                         receiptNumber: paymentIntentSucceeded.id,
                         tramonaServiceFee: parseInt(paymentIntentSucceeded.metadata.tramonaServiceFee ?? ""),
                         paymentMethod: cardNumber.card?.last4 ?? "",
                         datePaid: paymentIntentSucceeded.metadata.confirmed_at?.slice(0,10) ?? "",
-                        tax: tax,
-                        totalPricePaid: paymentIntentSucceeded.amount,
+                        tax: taxPaid,
+                        // totalPricePaid: paymentIntentSucceeded.amount,
+                        totalPricePaid: finalTotal,
                       })
                     })
                   }
