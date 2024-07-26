@@ -74,7 +74,7 @@ export const tripsRouter = createTRPCRouter({
   getMyTripsPageDetails: protectedProcedure
     .input(z.object({ tripId: z.number() }))
     .query(async ({ input }) => {
-      const tripWithOrigin = await db.query.trips.findFirst({
+      const trip = await db.query.trips.findFirst({
         where: eq(trips.id, input.tripId),
         with: {
           property: {
@@ -90,17 +90,14 @@ export const tripsRouter = createTRPCRouter({
         },
       });
 
-      if (!tripWithOrigin) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!trip) throw new TRPCError({ code: "NOT_FOUND" });
 
       const coordinates = {
         location: {
-          lat: tripWithOrigin.property.latitude,
-          lng: tripWithOrigin.property.longitude,
+          lat: trip.property.latitude,
+          lng: trip.property.longitude,
         },
       };
-
-      const { ...trip } = tripWithOrigin;
-
       return { trip, coordinates };
     }),
 });

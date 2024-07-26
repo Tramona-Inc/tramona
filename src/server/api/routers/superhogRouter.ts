@@ -113,7 +113,7 @@ export async function createSuperhogReservation({
         echoToken: uuidv4(),
       },
       listing: {
-        listingId: listingId.toString(), //this is the offer ID
+        listingId: propertyId.toString(), //this is the offer ID
         listingName: property.name,
         address: {
           addressLine1: property.address,
@@ -273,9 +273,9 @@ export const superhogRouter = createTRPCRouter({
           await db.insert(superhogErrors).values({
             echoToken: input.metadata.echoToken,
             error: error.response.data.detail,
-            propertiesId: null, //only for testing
+            propertiesId: parseInt(input.listing.listingId), //only for testing
             userId: null, //only for testing
-            tripId: parseInt(input.listing.listingId),
+            tripId: parseInt(input.reservation.reservationId),
             action: "create",
           });
           sendSlackMessage(
@@ -301,7 +301,7 @@ export const superhogRouter = createTRPCRouter({
           echoToken: input.metadata.echoToken,
           superhogStatus: verification.status,
           superhogVerificationId: verification.verificationId,
-          superhogReservationId: input.reservation.reservationId,
+          superhogReservationId: input.reservation.reservationId, //this is actually the trip id
           userId: ctx.user.id, //since we dont have access to the user id
           propertyId: 5000, //since we dont have access to the property id THIS FUNCTION IS JUST SO WE CAN GET CERTIFIED
         })
@@ -492,6 +492,11 @@ export const superhogRouter = createTRPCRouter({
       } catch (error) {
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
+          sendSlackMessage(
+            [
+              `SUPERHOG REQUEST ERROR: axios error... ${axiosError.response.data.detail}`,
+            ].join("\n"),
+          );
           await db.insert(superhogErrors).values({
             echoToken: input.metadata.echoToken,
             error: axiosError.message,
