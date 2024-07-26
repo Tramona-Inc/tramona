@@ -11,7 +11,7 @@ import {
   superhogErrors,
 } from "@/server/db/schema";
 
-import { eq, exists, isNotNull } from "drizzle-orm";
+import { eq, isNotNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { generateTimeStamp } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
