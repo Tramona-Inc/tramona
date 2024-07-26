@@ -273,8 +273,8 @@ export const superhogRouter = createTRPCRouter({
           await db.insert(superhogErrors).values({
             echoToken: input.metadata.echoToken,
             error: error.response.data.detail,
-            propertiesId: null,
-            userId: null,
+            propertiesId: null, //only for testing
+            userId: null, //only for testing
             tripId: parseInt(input.listing.listingId),
             action: "create",
           });
@@ -303,7 +303,7 @@ export const superhogRouter = createTRPCRouter({
           superhogVerificationId: verification.verificationId,
           superhogReservationId: input.reservation.reservationId,
           userId: ctx.user.id, //since we dont have access to the user id
-          propertyId: 0, //since we dont have access to the property id THIS FUNCTION IS JUST SO WE CAN GET CERTIFIED
+          propertyId: 5000, //since we dont have access to the property id THIS FUNCTION IS JUST SO WE CAN GET CERTIFIED
         })
         .returning({ id: superhogRequests.id });
 
