@@ -1,6 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
-import { formatCurrency, formatDateRange, getNumNights, plural } from "./utils";
+import { formatCurrency, formatDateRange, getNumNights } from "./utils";
 import { type Request } from "@/server/db/schema";
 
 export function errorToast(error = "Something went wrong, please try again") {
@@ -19,10 +19,16 @@ export function errorToast(error = "Something went wrong, please try again") {
   });
 }
 
-export function successfulRequestToast(request: Pick<Request, "location">) {
+export function successfulRequestToast(
+  request: Pick<Request, "location" | "checkIn" | "checkOut" | "maxTotalPrice">,
+) {
+  const numNights = getNumNights(request.checkIn, request.checkOut);
+  const fmtdNightlyPrice = formatCurrency(request.maxTotalPrice / numNights);
+  const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
+
   toast({
-    title: `Request sent: ${request.location}`,
-    description: `Please check your phone for a confirmation text`,
+    title: `Request sent successfully!`,
+    description: `${request.location} for ${fmtdNightlyPrice} · ${fmtdDateRange}`,
   });
 }
 

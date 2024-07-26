@@ -8,12 +8,10 @@ import { linkRequestSchema } from "./schemas";
 
 export function useLinkRequestForm({
   afterSubmit,
-  //   // handleSetOpen,
-  //   //handleShowConfetti,
+  setMadeByGroupId,
 }: {
-  afterSubmit?: (madeByGroupId?: number) => void;
-  //   // handleSetOpen: (val: boolean) => void;
-  //   //handleShowConfetti: (val: boolean) => void;
+  afterSubmit?: () => void;
+  setMadeByGroupId?: (val: number) => void;
 }) {
   const form = useZodForm({
     schema: linkRequestSchema,
@@ -43,13 +41,11 @@ export function useLinkRequestForm({
         });
       });
     } else {
-      // handleSetOpen(true);
-      //handleShowConfetti(true);
-      //definity a router error we come back later
       await createRequestWithLink(newRequests)
         .then((result) => {
           form.reset();
-          afterSubmit?.(result.transactionResults.madeByGroupId);
+          afterSubmit?.();
+          setMadeByGroupId?.(result.transactionResults.madeByGroupId);
         })
         .catch(() => errorToast());
     }

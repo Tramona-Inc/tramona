@@ -71,19 +71,19 @@ export default function EditReservationCard({
   };
   const { mutateAsync } = api.superhog.updateVerification.useMutation({
     onSuccess: () => {
-      console.log("success");
       toast({
         title: "Reservation Updated",
         description: "The reservation has been updated successfully",
       });
     },
     onError: (error) => {
-      console.log(error);
-      toast({
-        title: "Error",
-        description: "The reservation has not been updated successfully",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        toast({
+          title: "The reservation has not been updated successfully",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -95,18 +95,19 @@ export default function EditReservationCard({
   const onSubmit = (data: FormSchema) => {
     mutateAsync(data)
       .then(() => {
-        console.log("success");
         toast({
           title: "Reservation Updated",
           description: "The reservation has been updated successfully",
         });
       })
-      .catch((error: Error) => {
-        toast({
-          title: "Error",
-          description: "The reservation has not been updated successfully",
-          variant: "destructive",
-        });
+      .catch((error) => {
+        if (error instanceof Error) {
+          toast({
+            title: "The reservation has not been updated successfully",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       });
   };
   return (
@@ -114,7 +115,7 @@ export default function EditReservationCard({
       <CardHeader className="flex flex-row items-start justify-between">
         <div className="flex flex-col gap-y-1">
           <h1 className="font-bold">{reservation.nameOfVerifiedUser}</h1>
-          <div className="flex flex-row items-center gap-x-1 text-xs  font-semibold text-primary">
+          <div className="flex flex-row items-center gap-x-1 text-xs font-semibold text-primary">
             Status: <div>{reservation.superhogStatus} </div>
             <div>
               {reservation.superhogStatus === "Approved" ? (
@@ -136,7 +137,7 @@ export default function EditReservationCard({
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>
-                Edit {reservation.nameOfVerifiedUser}&aposs check-in dates
+                Edit {reservation.nameOfVerifiedUser}&apos;s check-in dates
               </DialogTitle>
               <DialogDescription className="text-sm">
                 Make changes to the request here. Click update when you&aposre
