@@ -22,7 +22,7 @@ import { eq } from "drizzle-orm";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
-import { zodNumber, zodString } from "@/utils/zod-utils";
+import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -30,19 +30,17 @@ import axios from "axios";
 import { getCity } from "@/server/google-maps";
 
 export const usersRouter = createTRPCRouter({
-  me: protectedProcedure.query(async ({ ctx }) => {
+  getOnboardingStep: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
-        role: true,
-        referralCodeUsed: true,
+        onboardingStep: true,
       },
     });
-
-    return {
-      role: res?.role ?? "guest",
-      referralCodeUsed: res?.referralCodeUsed ?? null,
-    };
+    if (!res) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    }
+    return res.onboardingStep;
   }),
 
   myVerificationStatus: protectedProcedure.query(async ({ ctx }) => {
@@ -675,7 +673,7 @@ export const usersRouter = createTRPCRouter({
     }),
 
   getUserVerifications: protectedProcedure
-    .input(z.object({ madeByGroupId: zodNumber() }))
+    .input(z.object({ madeByGroupId: z.number() }))
     .query(async ({ input, ctx }) => {
       const verifications = await ctx.db.query.groups
         .findFirst({
@@ -693,14 +691,11 @@ export const usersRouter = createTRPCRouter({
         })
         .then((res) => res?.owner);
 
-      if (!verifications) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Group not found",
-        });
-      }
+      if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+
       return verifications;
     }),
+
   addEmergencyContacts: protectedProcedure
     .input(
       z.object({

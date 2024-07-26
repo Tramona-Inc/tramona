@@ -4,10 +4,10 @@ import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-
 import { Clock8, Handshake, CircleDollarSign } from "lucide-react";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/SeeCompletedRequests";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
+import AddAirbnbLink from "../components/link-input/AddAirbnbLink";
 
 // ... (other imports)
 
@@ -54,7 +54,7 @@ export default function Page() {
                   for a better price
                 </p>
                 <div className="mx-auto mt-8 max-w-3xl">
-                  {/* <AddAirbnbLink /> */}
+                  <AddAirbnbLink fromRequestDealTab={false} />
                 </div>
               </div>
             </div>

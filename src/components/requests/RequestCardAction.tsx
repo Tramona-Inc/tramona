@@ -3,12 +3,16 @@ import { plural } from "@/utils/utils";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { ArrowRightIcon, UserPlusIcon } from "lucide-react";
-import { type DetailedRequest } from "./RequestCard";
+import { type GuestDashboardRequest } from "./RequestCard";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
 import { getRequestWithGroupDetails } from "./RequestGroupAvatars";
 
-export function RequestCardAction({ request }: { request: DetailedRequest }) {
+export function RequestCardAction({
+  request,
+}: {
+  request: GuestDashboardRequest;
+}) {
   const { data: session } = useSession({ required: true });
   if (!session) return null;
 

@@ -104,6 +104,7 @@
     "google-map-react": "^2.2.1",
     "google-maps-react": "^2.0.6",
     "ical": "^0.8.0",
+    "html2canvas": "^1.4.1",
     "input-otp": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",

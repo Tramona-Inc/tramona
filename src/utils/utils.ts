@@ -4,9 +4,6 @@ import { clsx, type ClassValue } from "clsx";
 import { formatDate, isSameDay, isSameMonth, isSameYear } from "date-fns";
 import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-//import puppeteer from "puppeteer";
-import { URLSearchParams } from "url";
-import { TRPCError } from "@trpc/server";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -141,7 +138,7 @@ export function formatDateMonthDayYear(date: Date) {
 }
 
 export function formatDateYearMonthDay(date: Date) {
-  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd");
+  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd"); //ex 2021-12-31
 }
 
 export function formatShortDate(date: Date) {
@@ -151,6 +148,13 @@ export function formatShortDate(date: Date) {
 export function convertDateFormat(dateString: string) {
   const [year, month, day] = dateString.split("-");
   return `${month}/${day}/${year}`;
+}
+
+export function addDays(date: Date, days: number): Date {
+  //add days to a date object
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
 }
 
 export function getElapsedTime(createdAt: Date): string {
@@ -261,7 +265,7 @@ export function getDiscountPercentage(
 // these will need to be kept in sync with
 // https://tailwindcss.com/docs/screens and ./tailwind.config.ts
 
-export const useScreenWidth = () => useWindowSize().width ?? 0;
+const useScreenWidth = () => useWindowSize().width ?? 0;
 
 /**
  * screen width >= 640 (same as tailwind `sm:`)
@@ -421,33 +425,3 @@ export function formatTime(time: string) {
     ? `${hour - 12}:${fmtdMinutes} PM`
     : `${hour}:${fmtdMinutes} AM`;
 }
-
-// export function formatDateRangeWithWeekday(
-//   fromDate: Date | string,
-//   toDate?: Date | string,
-// ) {
-//   // Convert to Date objects if necessary
-//   //converting because the gssp function returns a string
-//   if (typeof fromDate === "string") {
-//     fromDate = new Date(fromDate);
-//   }
-//   if (typeof toDate === "string") {
-//     toDate = new Date(toDate);
-//   }
-
-//   fromDate = removeTimezoneFromDate(fromDate);
-//   toDate = toDate && removeTimezoneFromDate(toDate);
-
-//   const options: Intl.DateTimeFormatOptions = {
-//     weekday: "short",
-//     month: "short",
-//     day: "numeric",
-//   };
-
-//   const fromFormatted = fromDate.toLocaleDateString("en-US", options);
-//   const toFormatted = toDate
-//     ? (toDate as Date).toLocaleDateString("en-US", options)
-//     : "";
-
-//   return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
-// }

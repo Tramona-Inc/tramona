@@ -3,35 +3,23 @@ import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
 import UserAvatarMastHead from "@/components/_common/UserAvatarMasthead";
 import { Avatar } from "@/components/ui/avatar";
-import { useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { cn } from "@/utils/utils";
 import {
   CircleDollarSign,
   Handshake,
-  SearchIcon,
   ShieldIcon,
   TableProperties,
 } from "lucide-react";
-import { MobileSearchTab } from "../SearchBars/MobileSearchTab";
-import { MobileRequestDealTab } from "../SearchBars/MobileRequestDealTab";
-import { DesktopRequestDealTab } from "../SearchBars/DesktopRequestDealTab";
+import CityRequestFormContainer from "../SearchBars/CityRequestFormContainer";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
-import Typewriter from "typewriter-effect";
 import Image from "next/image";
 import CompletedRequestsSection from "./CompletedRequests";
-import { MobileTestimonialCarousel } from "./testimonials/MobileTestimonialCarousel";
+import Link from "next/link";
 
 export default function MastHead() {
   return (
     // padding for the sides? and do we want rounded corners?
     <section className="relative bg-white pb-4">
-      <div className="relative h-[500px] lg:h-[700px]">
+      <div className="relative sm:mb-24 sm:h-[700px] lg:mb-0">
         <div className="absolute inset-0">
           <Image
             src={landingBg}
@@ -100,27 +88,22 @@ export default function MastHead() {
               </div>
             </div>
           </div>
-          <div className="flex justify-center p-10">
-            <div className="hidden rounded-2xl border bg-white p-4 shadow-2xl lg:block lg:max-w-xl lg:flex-1">
-              <DesktopSearchLayout />
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <div className="-mt-12 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:hidden">
-              <DesktopSearchLayout />
+          <div className="flex justify-center lg:p-10">
+            <div className="mt-12 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:mt-0 lg:max-w-xl">
+              <CityRequestFormContainer />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="h-72 lg:h-60"></div>
+      <div className="h-24 lg:h-60"></div>
 
-      <div className="mt-8 hidden max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:flex lg:space-y-8">
+      <div className="mx-0 mt-8 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
         <TestimonialCarousel />
       </div>
-      <div className="mt-8 flex max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
+      {/* <div className="mt-8 flex max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
         <MobileTestimonialCarousel />
-      </div>
+      </div> */}
 
       <div className="mt-20 space-y-4 lg:mt-24 lg:space-y-12">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
@@ -195,18 +178,20 @@ export default function MastHead() {
               Check out our feed to see recent deals
             </div>
             <div className="hidden lg:block">
-              <Button className="rounded-full bg-teal-900 hover:bg-teal-950">
-                View deals
-              </Button>
+              <Link href="/exclusive-offers">
+                <Button variant="greenPrimary">View deals</Button>
+              </Link>
             </div>
           </div>
           <div className="flex items-center justify-center">
             <CompletedRequestsSection />
           </div>
           <div className="flex justify-center pt-8 lg:hidden">
-            <Button className="w-80 rounded-full bg-teal-900 hover:bg-teal-950">
-              View deals
-            </Button>
+            <Link href="/exclusive-offers">
+              <Button variant="greenPrimary" size="lg">
+                View deals
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -347,68 +332,5 @@ export default function MastHead() {
         </div>
       </div>
     </section>
-  );
-}
-
-export function DesktopSearchLayout() {
-  return (
-    <div className="space-y-3">
-      <p className="text-sm font-semibold text-muted-foreground lg:block">
-        Send a request to every host in&nbsp;
-        <span className="font-bold text-teal-900">
-          <Typewriter
-            component={"span"}
-            options={{
-              strings: ["LOS ANGELES", "PARIS", "MIAMI", "ANY CITY"],
-              autoStart: true,
-              loop: true,
-            }}
-          />
-        </span>
-      </p>
-      <DesktopRequestDealTab />
-    </div>
-  );
-}
-
-export function MobileSearchLayout() {
-  const [mode, setMode] = useState<"search" | "request">("search");
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="w-full">
-        <div className="z-40 flex flex-row gap-x-3 rounded-lg bg-white px-3 py-5 text-center font-semibold text-muted-foreground shadow-lg">
-          <SearchIcon />
-          Name your price or submit an offer
-        </div>
-      </SheetTrigger>
-      <SheetContent side="top" className="h-full">
-        <SheetHeader>
-          <div className="flex h-full w-full items-center justify-center gap-2 pb-5">
-            <Button
-              variant="link"
-              className={cn(mode === "search" && "underline")}
-              onClick={() => setMode("search")}
-            >
-              Search
-            </Button>
-            <Button
-              variant="link"
-              className={cn(mode === "request" && "underline")}
-              onClick={() => setMode("request")}
-            >
-              Request deal
-            </Button>
-          </div>
-        </SheetHeader>
-        {mode === "search" && (
-          <MobileSearchTab closeSheet={() => setOpen(false)} />
-        )}
-        {mode === "request" && (
-          <MobileRequestDealTab closeSheet={() => setOpen(false)} />
-        )}
-      </SheetContent>
-    </Sheet>
   );
 }

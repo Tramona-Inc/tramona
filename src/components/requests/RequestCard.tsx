@@ -9,6 +9,7 @@ import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
+  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
@@ -19,22 +20,23 @@ import {
   TrashIcon,
   Users2Icon,
 } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent, CardFooter } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import RequestCardBadge from "./RequestCardBadge";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestDialog from "./WithdrawRequestDialog";
 
-import MobileSimilarProperties from "./MobileSimilarProperties";
-import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
+import UserAvatar from "../_common/UserAvatar";
+import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
+import { getTime } from "date-fns";
 
-export type DetailedRequest = RouterOutputs["requests"]["getMyRequests"][
+export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
   | "inactiveRequestGroups"][number]["requests"][number];
 
-export type RequestWithUser = RouterOutputs["requests"]["getAll"][
+export type AdminDashboardRequst = RouterOutputs["requests"]["getAll"][
   | "incomingRequests"
   | "pastRequests"][number];
 
@@ -43,26 +45,17 @@ export type HostDashboardRequest =
 
 export default function RequestCard({
   request,
-  isSelected,
   type,
+  isSelected,
   children,
-}: React.PropsWithChildren<
-  | {
-      request: DetailedRequest;
-      type: "guest";
-      isSelected?: boolean;
-    }
-  | {
-      request: RequestWithUser;
-      type: "admin";
-      isSelected?: boolean;
-    }
-  | {
-      request: HostDashboardRequest;
-      type: "host";
-      isSelected?: boolean;
-    }
->) {
+}: (
+  | { type: "guest"; request: GuestDashboardRequest }
+  | { type: "admin"; request: AdminDashboardRequst }
+  | { type: "host"; request: HostDashboardRequest }
+) & {
+  isSelected?: boolean;
+  children?: React.ReactNode;
+}) {
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
@@ -79,81 +72,28 @@ export default function RequestCard({
 
   const [open, setOpen] = useState(false);
 
-  // function TravelerVerificationsDialog() {
-  //   if (type !== "host") return null;
-
-  //   const { data: verificationList } = api.users.getUserVerifications.useQuery({
-  //     madeByGroupId: request.madeByGroupId,
-  //   });
-
-  //   const verifications = [
-  //     {
-  //       name:
-  //         verificationList?.dateOfBirth && getAge(verificationList.dateOfBirth),
-  //       verified: verificationList?.dateOfBirth ? true : false,
-  //     },
-  //     {
-  //       name: verificationList?.email,
-  //       verified: verificationList?.emailVerified ? true : false,
-  //     },
-  //     {
-  //       name: verificationList?.phoneNumber,
-  //       verified: verificationList?.phoneNumber ? true : false,
-  //     },
-  //   ];
-
-  //   return (
-  //     <Dialog>
-  //       <DialogTrigger>
-  //         <p className="underline">{request.name}</p>
-  //       </DialogTrigger>
-  //       <DialogContent>
-  //         <div className="flex items-center gap-2">
-  //           <UserAvatar size="sm" name={request.name} image={request.image} />
-  //           <p className="text-lg font-bold">{request.name}</p>
-  //         </div>
-  //         {verifications.map((verification, index) => (
-  //           <div
-  //             key={index}
-  //             className="flex items-center justify-between font-semibold"
-  //           >
-  //             <p>{verification.name}</p>
-  //             {verification.verified ? (
-  //               <div className="flex gap-2 text-teal-800">
-  //                 <BadgeCheck />
-  //                 <p>Verified</p>
-  //               </div>
-  //             ) : (
-  //               <div className="flex gap-2 text-red-500">
-  //                 <BadgeX />
-  //                 <p>Not verified</p>
-  //               </div>
-  //             )}
-  //           </div>
-  //         ))}
-  //       </DialogContent>
-  //     </Dialog>
-  //   );
-  // }
-
   return (
-    <Card className="block">
+    <Card>
       <WithdrawRequestDialog
         requestId={request.id}
         open={open}
         onOpenChange={setOpen}
       />
-      <CardContent className="space-y-2">
+      <div>
         {type !== "host" && <RequestCardBadge request={request} />}
-        {/* {type === "host" && (
+        {type === "host" && (
           <div className="flex items-center gap-2">
-            <UserAvatar size="sm" name={request.name} image={request.image} />
-            <TravelerVerificationsDialog />
+            <UserAvatar
+              size="sm"
+              name={request.traveler.name}
+              image={request.traveler.image}
+            />
+            <TravelerVerificationsDialog request={request} />
             <p>&middot;</p>
             <p>{formatInterval(Date.now() - getTime(request.createdAt))} ago</p>
           </div>
-        )} */}
-        <div className="absolute right-2 top-0 flex items-center gap-2">
+        )}
+        <div className="absolute right-2 top-2 flex items-center gap-2">
           {showAvatars && (
             <RequestGroupAvatars
               request={request}
@@ -176,6 +116,8 @@ export default function RequestCard({
             </DropdownMenu>
           )}
         </div>
+      </div>
+      <CardContent className="space-y-1">
         <div className="flex items-start gap-1">
           <MapPinIcon className="shrink-0 text-primary" />
           <h2 className="text-base font-bold text-primary md:text-lg">
@@ -195,39 +137,26 @@ export default function RequestCard({
               {fmtdNumGuests}
             </span>
           </p>
-
-          {fmtdFilters && <p>{fmtdFilters}</p>}
-
-          <div className="flex flex-wrap gap-2">
-            {request.amenities.map((amenity) => (
-              <Badge key={amenity}>{amenity}</Badge>
-            ))}
-          </div>
-
-          {request.note && (
-            <div className="rounded-lg bg-zinc-100 px-4 py-2">
-              <p className="text-xs text-muted-foreground">Note</p>
-              <p>&ldquo;{request.note}&rdquo;</p>
-            </div>
-          )}
-
-          {request.airbnbLink && (
-            <a className="underline" href={request.airbnbLink}>
-              Airbnb Link
-            </a>
-          )}
         </div>
-        <div className="flex justify-end gap-2">{children}</div>
-        {isSelected && (
-          <div className="md:hidden">
-            <Separator className="my-1" />
-            <MobileSimilarProperties
-              location={request.location}
-              city={request.location}
-            />
+        {fmtdFilters && <p>{fmtdFilters}</p>}
+        <div className="flex flex-wrap gap-1">
+          {request.amenities.map((amenity) => (
+            <Badge key={amenity}>{amenity}</Badge>
+          ))}
+        </div>
+        {request.note && (
+          <div className="rounded-lg bg-zinc-100 px-4 py-2">
+            <p className="text-xs text-muted-foreground">Note</p>
+            <p>&ldquo;{request.note}&rdquo;</p>
           </div>
         )}
+        {request.airbnbLink && (
+          <a className="underline" href={request.airbnbLink}>
+            Airbnb Link
+          </a>
+        )}
       </CardContent>
+      <CardFooter>{children}</CardFooter>
     </Card>
   );
 }

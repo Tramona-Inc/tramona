@@ -5,10 +5,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  HostDashboardRequest,
-  type DetailedRequest,
-} from "@/components/requests/RequestCard";
+import { type HostDashboardRequest } from "@/components/requests/RequestCard";
 import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,

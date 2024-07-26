@@ -13,6 +13,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
+import { last } from "lodash";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
@@ -46,6 +47,8 @@ export const users = pgTable(
     // nextauth fields
     id: text("id").notNull().primaryKey(),
     name: text("name"),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
     email: text("email").notNull(),
     emailVerified: timestamp("emailVerified", { withTimezone: true }),
     image: text("image"),
@@ -75,7 +78,7 @@ export const users = pgTable(
       .default("false")
       .notNull(),
     verificationReportId: varchar("verification_report_id"),
-    dateOfBirth: varchar("date_of_birth").notNull(),
+    dateOfBirth: varchar("date_of_birth"),
 
     profileUrl: varchar("profile_url", { length: 1000 }),
     location: varchar("location", { length: 1000 }),
@@ -84,6 +87,7 @@ export const users = pgTable(
       .default(sql`'{}'`),
     about: text("about"),
     // destinations: varchar("destinations").array(),
+    onboardingStep: integer("onboarding_step").notNull().default(0),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),

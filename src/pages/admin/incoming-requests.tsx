@@ -4,7 +4,7 @@ import AdminOfferDialog from "@/components/admin/AdminOfferDialog";
 import DeleteRequestDialog from "@/components/admin/DeleteRequestDialog";
 import RejectRequestDialog from "@/components/admin/RejectRequestDialog";
 import RequestCard, {
-  type RequestWithUser,
+  type AdminDashboardRequst,
 } from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
@@ -13,7 +13,7 @@ import Head from "next/head";
 function IncomingRequestCards({
   requests,
 }: {
-  requests: RequestWithUser[] | undefined;
+  requests: AdminDashboardRequst[] | undefined;
 }) {
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">

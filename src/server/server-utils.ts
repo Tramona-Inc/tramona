@@ -20,6 +20,7 @@ import {
 } from "drizzle-orm";
 import {
   type NewProperty,
+  type Property,
   type User,
   bookedDates,
   groupInvites,
@@ -284,10 +285,9 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
-async function processRequests(insertedProperty: {
-  id: number;
-  latLngPoint: any;
-}) {
+async function processRequests(
+  insertedProperty: Pick<Property, "id" | "latLngPoint">,
+) {
   const allRequests = await db.query.requests.findMany({});
 
   for (const request of allRequests) {
@@ -322,7 +322,7 @@ export async function getPropertiesForRequest(
     checkOut: Date;
     id: number;
     latLngPoint?: { x: number; y: number } | null;
-    propertyLatLngPoint?: { x: number; y: number } | null;
+    propertyLatLngPoint?: Property["latLngPoint"];
   },
   { tx = db } = {},
 ) {
@@ -500,7 +500,7 @@ export async function scrapeUsingLink(url: string) {
       throw new Error("Failed to extract number of days from price items");
     }
     const nightlyPrice = totalPrice / numDays;
-    const formattedNightlyPrice = Math.round(nightlyPrice * 100) * 100;
+    const formattedNightlyPrice = Math.round(nightlyPrice * 100);
     const propertyName =
       listingCardTextContent[0]?.substring(0, 255) ?? "Airbnb Property";
     const checkIn = new Date(searchParams.get("check_in")!);
