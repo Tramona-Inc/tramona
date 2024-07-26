@@ -161,25 +161,24 @@ export default function SignUp({
           </div>
 
           <div className="my-5 flex w-full flex-col items-center justify-center gap-5">
-            {providers &&
-              Object.values(providers)
-                .slice(1) // remove the email provider
-                .map((provider) => {
-                  return (
-                    <Button
-                      key={provider.name}
-                      variant={"darkOutline"}
-                      onClick={() => signIn(provider.id)}
-                      className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
-                    >
-                      <Icons iconName={provider.name} />
-                      <span className="col-span-3 text-lg font-extrabold tracking-tight">
-                        Sign up with
-                        {" " + provider.name}
-                      </span>
-                    </Button>
-                  );
-                })}
+            {Object.values(providers)
+              .slice(1) // remove the email provider
+              .map((provider) => {
+                return (
+                  <Button
+                    key={provider.name}
+                    variant={"darkOutline"}
+                    onClick={() => signIn(provider.id)}
+                    className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
+                  >
+                    <Icons iconName={provider.name} />
+                    <span className="col-span-3 text-lg font-extrabold tracking-tight">
+                      Sign up with
+                      {" " + provider.name}
+                    </span>
+                  </Button>
+                );
+              })}
           </div>
         </section>
         <p>
