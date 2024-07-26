@@ -94,7 +94,7 @@
     "core-js": "3.37.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
-    "drizzle-orm": "^0.31.0",
+    "drizzle-orm": "^0.31.4",
     "drizzle-pagination": "^1.0.10",
     "drizzle-zod": "^0.5.1",
     "embla-carousel-autoplay": "8.1.5",
