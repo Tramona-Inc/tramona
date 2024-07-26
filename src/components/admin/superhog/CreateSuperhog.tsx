@@ -223,13 +223,13 @@ export default function SuperhogForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-bold text-primary">
-                        Listing Id (Trip Id)
+                        Listing Id (Property Id)
                       </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
                       <FormDescription>
-                        This is your public display name.
+                        Input an existing property id
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -370,12 +370,14 @@ export default function SuperhogForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-bold text-primary">
-                        Superhog Reservation Id
+                        Superhog Reservation Id (Trip Id)
                       </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
-                      <FormDescription>Required/random number</FormDescription>
+                      <FormDescription>
+                        Required/Input a valid trip id
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

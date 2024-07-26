@@ -122,7 +122,6 @@ export function formatDateRange(
 }
 
 function removeTimezoneFromDate(date: Date) {
-  // Convert to ISO string and split by 'T' to get date part
   return new Date(date).toISOString().split("Z")[0]!;
 }
 
