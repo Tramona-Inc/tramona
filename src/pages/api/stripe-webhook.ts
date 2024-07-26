@@ -107,7 +107,7 @@ export default async function webhook(
 
               if (offerId) {
                 const offer = await db.query.offers.findFirst({
-                  with: { request: true },
+                  with: { request: true, property: true, },
                   where: eq(offers.id, offerId),
                 });
 
