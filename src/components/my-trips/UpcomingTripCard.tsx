@@ -18,7 +18,7 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { TripCardDetails } from "./PastTrips";
+import { TripCardDetails } from "@/pages/my-trips";;
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
