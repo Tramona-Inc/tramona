@@ -1,3 +1,4 @@
+import Typewriter from "typewriter-effect";
 import RequestCityForm, { type RequestCityFormRef } from "./RequestCityForm";
 import AddAirbnbLink, {
   type AddAirbnbLinkRef,
@@ -5,7 +6,7 @@ import AddAirbnbLink, {
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 
-export default function DesktopRequestDealTab() {
+export default function CityRequestFormContainer() {
   //handle which form is active
   const [isLinkActive, setIsLinkActive] = useState<boolean>(false);
   const cityFormRef = useRef<RequestCityFormRef>(null);
@@ -23,7 +24,21 @@ export default function DesktopRequestDealTab() {
   };
 
   return (
-    <div className="flex flex-col gap-y-3">
+    <div className="space-y-3">
+      <p className="text-sm font-semibold text-muted-foreground lg:block">
+        Send a request to every host in&nbsp;
+        <br className="sm:hidden" />
+        <span className="font-bold text-teal-900">
+          <Typewriter
+            component={"span"}
+            options={{
+              strings: ["LOS ANGELES", "PARIS", "MIAMI", "ANY CITY"],
+              autoStart: true,
+              loop: true,
+            }}
+          />
+        </span>
+      </p>
       <RequestCityForm
         ref={cityFormRef}
         isLinkActive={isLinkActive}
@@ -36,12 +51,7 @@ export default function DesktopRequestDealTab() {
           fromRequestDealTab={true}
         />
       )}
-      <Button
-        type="submit"
-        variant="greenPrimary"
-        onClick={handleSubmit}
-        className="mt-3"
-      >
+      <Button type="submit" variant="greenPrimary" onClick={handleSubmit}>
         Submit Request
       </Button>
     </div>
