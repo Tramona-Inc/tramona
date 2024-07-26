@@ -25,9 +25,15 @@ import {
 } from "../../ui/select";
 import { Separator } from "../../ui/separator";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { generateTimeStamp } from "@/utils/utils";
+import {
+  formatDateYearMonthDay,
+  generateTimeStamp,
+  addDays,
+} from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/components/ui/use-toast";
+import { type AxiosError } from "axios";
+import Spinner from "@/components/_common/Spinner";
 
 //IMPORTANT THERE IS TWO RESERVATION ID. reservationID is a required is a required
 //input for the superhog verification API,howerver reservation.id is the primary key of the reservation table in the database
@@ -41,7 +47,7 @@ export default function SuperhogForm() {
       echoToken: uuidv4(),
     },
     listing: {
-      listingId: "asda3466",
+      listingId: "0",
       listingName: "Padron retreat house",
       address: {
         addressLine1: "Peper street number 32",
@@ -54,10 +60,10 @@ export default function SuperhogForm() {
     },
     reservation: {
       reservationId: "02389sdfax2547a",
-      checkIn: "2024-05-24",
-      checkOut: "2024-06-24",
+      checkIn: formatDateYearMonthDay(addDays(new Date(), 1)).toString(),
+      checkOut: formatDateYearMonthDay(addDays(new Date(), 2)).toString(),
       channel: "Tramona",
-      creationDate: "2023-12-19",
+      creationDate: formatDateYearMonthDay(new Date()).toString(),
     },
     guest: {
       firstName: "Peter",
@@ -105,7 +111,7 @@ export default function SuperhogForm() {
     defaultValues: defaultRequestValues,
   });
 
-  const { mutateAsync: createSuperhogRequest } =
+  const { mutateAsync: createSuperhogRequest, isLoading: isSubmitting } =
     api.superhog.createSuperhogRequest.useMutation({
       onSuccess: () => {
         toast({
@@ -122,8 +128,24 @@ export default function SuperhogForm() {
       },
     });
 
+  async function handleCreateSuperhogRequest(data: FormSchema) {
+    try {
+      await createSuperhogRequest(data);
+    } catch (error) {
+      // Handle the error gracefully here
+      const axiosError = error as AxiosError;
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          axiosError.message ||
+          "An error occurred while submitting the request.",
+      });
+    }
+  }
+
   const onSubmit = async (data: FormSchema) => {
-    await createSuperhogRequest(data);
+    await handleCreateSuperhogRequest(data);
   };
 
   return (
@@ -201,20 +223,20 @@ export default function SuperhogForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-bold text-primary">
-                        Listing Id / Property Id
+                        Listing Id (Property Id)
                       </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
                       <FormDescription>
-                        This is your public display name.
+                        Input an existing property id
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex flex-row items-center justify-around gap-x-10 ">
+              <div className="flex flex-row items-center justify-around gap-x-10">
                 <FormField
                   control={form.control}
                   name="listing.address.addressLine1"
@@ -348,12 +370,14 @@ export default function SuperhogForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-bold text-primary">
-                        Superhog Reservation Id
+                        Superhog Reservation Id (Trip Id)
                       </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
-                      <FormDescription>Required/random number</FormDescription>
+                      <FormDescription>
+                        Required/Input a valid trip id
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -497,7 +521,10 @@ export default function SuperhogForm() {
                 />
               </div>
 
-              <Button type="submit">Submit</Button>
+              <Button type="submit">
+                {" "}
+                {isSubmitting ? "Submitting" : "Submit"}
+              </Button>
             </form>
           </Form>
         </CardContent>

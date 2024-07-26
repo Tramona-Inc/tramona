@@ -2,55 +2,57 @@ import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Icons } from "@/components/_icons/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import ErrorMsg from "@/components/ui/ErrorMsg";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { api } from "@/utils/api";
+import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { convertDateFormat } from "@/utils/utils";
-import { api } from "@/utils/api";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import ErrorMsg from "@/components/ui/ErrorMsg";
 
-export default function DateOfBirth() {
-  const { data: session } = useSession();
+export default function FirstAndLastName() {
   const router = useRouter();
+  const { data: session } = useSession();
 
   const formSchema = z.object({
-    dob: z.string(),
+    firstName: zodString(),
+    lastName: zodString(),
   });
 
   type FormValues = z.infer<typeof formSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { dob: "" },
   });
+
+  const { refetch: refetchOnboardingStep } =
+    api.users.getOnboardingStep.useQuery(undefined, { enabled: false });
 
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
     onSuccess: () => {
-      void router.push("/auth/referral");
+      void refetchOnboardingStep();
+      void router.push("/auth/onboarding-3");
     },
   });
 
-  async function onDobSubmit({ dob }: FormValues) {
-    if (session?.user.id && dob) {
+  async function onSubmit({ firstName, lastName }: FormValues) {
+    if (session?.user.id && firstName && lastName) {
       await updateProfile({
         id: session.user.id,
-        dateOfBirth: convertDateFormat(dob),
-      });
-    } else {
-      form.setError("root", {
-        type: "manual",
-        message: "Please enter your date of birth.",
+        firstName,
+        lastName,
+        onboardingStep: 3,
       });
     }
   }
@@ -58,25 +60,41 @@ export default function DateOfBirth() {
   return (
     <MainLayout type="auth" className="flex flex-col justify-center gap-5 p-4">
       <Head>
-        <title>Date of Birth | Tramona</title>
+        <title>First and Last Name | Tramona</title>
       </Head>
-
       <h1 className="text-center text-4xl font-bold tracking-tight">
-        Please enter your date of birth
+        Please enter your government issued first and last name
       </h1>
       <div>
-        <Card className="mx-auto max-w-md">
+        <Card className="mx-auto max-w-xl">
           <CardContent>
             <Form {...form}>
               <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-              <form onSubmit={form.handleSubmit(onDobSubmit)}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid grid-cols-2 gap-x-6"
+              >
                 <FormField
-                  name="dob"
+                  name="firstName"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel>First name</FormLabel>
                       <FormControl>
-                        <Input {...field} type="date" autoFocus />
+                        <Input {...field} autoFocus />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="lastName"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -85,7 +103,7 @@ export default function DateOfBirth() {
                 <Button
                   type="submit"
                   disabled={form.formState.isSubmitting}
-                  className="mt-4 w-full"
+                  className="col-span-2 mt-4"
                 >
                   {form.formState.isSubmitting && (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
