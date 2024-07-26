@@ -14,7 +14,7 @@ export default function PastRequestsAndOffersTab() {
   if (!requests || !offers) return <Spinner />;
 
   return requests.inactiveRequestGroups.length !== 0 ? (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-4 pb-32 md:grid-cols-2">
       <RequestCards requestGroups={requests.inactiveRequestGroups} />
       {offers.map((offer) => (
         <PropertyOfferCard

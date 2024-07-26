@@ -36,12 +36,16 @@ export function TravelerVerificationsDialog({
   return (
     <Dialog>
       <DialogTrigger>
-        <p className="underline">{request.name}</p>
+        <p className="underline">{request.traveler.name}</p>
       </DialogTrigger>
       <DialogContent>
         <div className="flex items-center gap-2">
-          <UserAvatar size="sm" name={request.name} image={request.image} />
-          <p className="text-lg font-bold">{request.name}</p>
+          <UserAvatar
+            size="sm"
+            name={request.traveler.name}
+            image={request.traveler.image}
+          />
+          <p className="text-lg font-bold">{request.traveler.name}</p>
         </div>
         {verifications.map((verification, index) => (
           <div

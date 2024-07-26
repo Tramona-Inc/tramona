@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import PlacesInput from "@/components/_common/PlacesInput";
 import { Button } from "@/components/ui/button";
@@ -23,10 +18,9 @@ import {
   Plus,
   Users2Icon,
 } from "lucide-react";
-import { useCityRequestForm, type CityRequestForm } from "./useCityRequestForm";
+import { useCityRequestForm } from "./useCityRequestForm";
 
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
-import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { Separator } from "@/components/ui/separator";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
@@ -47,29 +41,21 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
       useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [madeByGroupId, setMadeByGroupId] = useState<number>();
-    const [groupId, setGroupId] = useState<number | null>(null);
     const [inviteLink, setInviteLink] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSetOpen = (val: boolean) => {
-      setRequestSubmittedDialogOpen(true);
-    };
-
-    const handleShowConfetti = (val: boolean) => {
-      setShowConfetti(val);
-    };
 
     const cityForm = useCityRequestForm({
-      afterSubmit,
-      handleSetOpen,
-      handleShowConfetti,
+      beforeSubmit() {
+        setRequestSubmittedDialogOpen(true);
+        setShowConfetti(true);
+      },
+      setMadeByGroupId,
     });
 
     const { form, onSubmit } = cityForm;
 
     const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
-      { groupId: groupId! },
-      { enabled: groupId !== null },
+      { groupId: madeByGroupId! },
+      { enabled: madeByGroupId !== undefined },
     );
 
     useEffect(() => {
@@ -77,24 +63,6 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
         setInviteLink(inviteLinkQuery.data.link);
       }
     }, [inviteLinkQuery.data]);
-
-    function afterSubmit(madeByGroupId?: number) {
-      if (madeByGroupId !== undefined) {
-        setMadeByGroupId(madeByGroupId);
-        setGroupId(madeByGroupId);
-      }
-    }
-
-    const inviteUserByEmail = api.groups.inviteUserByEmail.useMutation();
-
-    const handleInvite = async () => {
-      if (!madeByGroupId) {
-        toast({ title: "Group IDs not available" });
-        return;
-      }
-
-      setIsLoading(true);
-    };
 
     const handleAddLinkClick = () => {
       setIsLinkActive(true);
@@ -135,7 +103,6 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
                       variant="lpDesktop"
                       disablePast
                       className="bg-white"
-                      onChange={(value) => field.onChange(value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -154,7 +121,6 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
                       placeholder="Add guests"
                       icon={Users2Icon}
                       variant="lpDesktop"
-                      onChange={(e) => field.onChange(e)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -174,7 +140,6 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
                       suffix="/night"
                       icon={DollarSignIcon}
                       variant="lpDesktop"
-                      onChange={(e) => field.onChange(e)}
                     />
                   </FormControl>
                   <FormMessage />

@@ -27,7 +27,6 @@ interface LinkConfirmationProps {
     | undefined;
   extractIsLoading: boolean;
   airbnbLink: string;
-  //onSubmit: () => void;
 }
 
 const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
@@ -36,15 +35,21 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
   extractedLinkDataState,
   extractIsLoading,
   airbnbLink,
-  //onSubmit,
 }) => {
   const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
     useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [madeByGroupId, setMadeByGroupId] = useState<number>();
-  const [groupId, setGroupId] = useState<number | null>(null);
 
-  const { form, onSubmit } = useLinkRequestForm({ afterSubmit });
+  const { form, onSubmit } = useLinkRequestForm({
+    afterSubmit() {
+      setOpen(false);
+      setRequestSubmittedDialogOpen(true);
+      setShowConfetti(true);
+      form.reset();
+    },
+    setMadeByGroupId,
+  });
 
   useEffect(() => {
     if (extractedLinkDataState) {
@@ -66,17 +71,6 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
     setOpen(false);
     form.reset(); // Reset the form
   };
-
-  function afterSubmit(madeByGroupId?: number) {
-    setOpen(false);
-    setRequestSubmittedDialogOpen(true);
-    setShowConfetti(true);
-    form.reset();
-    if (madeByGroupId !== undefined) {
-      setMadeByGroupId(madeByGroupId);
-      setGroupId(madeByGroupId);
-    }
-  }
 
   return (
     <div>
@@ -105,7 +99,6 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
                             variant="lpDesktop"
                             disablePast
                             className="bg-white"
-                            onChange={(value) => field.onChange(value)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -124,7 +117,6 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
                             placeholder="Add guests"
                             icon={Users2Icon}
                             variant="lpDesktop"
-                            onChange={(e) => field.onChange(e)}
                           />
                         </FormControl>
                         <FormMessage />

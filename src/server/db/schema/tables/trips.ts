@@ -10,6 +10,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { offers } from "./offers";
+import { superhogRequests } from "./superhogRequests";
 import { bids } from "./bids";
 import { properties } from "./properties";
 import { z } from "zod";
@@ -34,11 +35,16 @@ export const trips = pgTable(
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
     numGuests: integer("num_guests").notNull(),
+    totalPriceAfterFees: integer("total_price_after_fees").notNull().default(0), // in cents
+
     paymentIntentId: varchar("payment_intent_id"),
     checkoutSessionId: varchar("checkout_session_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    superhogRequestId: integer("superhog_request_id").references(
+      () => superhogRequests.id,
+    ),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),

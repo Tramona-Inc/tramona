@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { groupMembers, properties, trips } from "@/server/db/schema";
-import { getCoordinates } from "@/server/google-maps";
+
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists } from "drizzle-orm";
 import { z } from "zod";
@@ -77,9 +77,10 @@ export const tripsRouter = createTRPCRouter({
       const tripWithOrigin = await db.query.trips.findFirst({
         where: eq(trips.id, input.tripId),
         with: {
-          bid: { with: { counters: { columns: { counterAmount: true } } } },
-          offer: { columns: { totalPrice: true } },
           property: {
+            columns: {
+              latLngPoint: false,
+            },
             with: {
               host: {
                 columns: { name: true, email: true, image: true, id: true },
@@ -91,19 +92,15 @@ export const tripsRouter = createTRPCRouter({
 
       if (!tripWithOrigin) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const coordinates = await getCoordinates(tripWithOrigin.property.address);
-      const { bid, offer, ...trip } = tripWithOrigin;
-      const tripPrice = bid
-        ? bid.counters[bid.counters.length - 1]?.counterAmount
-        : offer?.totalPrice;
+      const coordinates = {
+        location: {
+          lat: tripWithOrigin.property.latitude,
+          lng: tripWithOrigin.property.longitude,
+        },
+      };
 
-      if (tripPrice === undefined) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Could not find the price for this trip.",
-        });
-      }
+      const { ...trip } = tripWithOrigin;
 
-      return { trip, tripPrice, coordinates };
+      return { trip, coordinates };
     }),
 });
