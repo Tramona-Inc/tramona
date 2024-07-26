@@ -32,6 +32,8 @@ import {
 } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/components/ui/use-toast";
+import { type AxiosError } from "axios";
+import Spinner from "@/components/_common/Spinner";
 
 //IMPORTANT THERE IS TWO RESERVATION ID. reservationID is a required is a required
 //input for the superhog verification API,howerver reservation.id is the primary key of the reservation table in the database
@@ -45,7 +47,7 @@ export default function SuperhogForm() {
       echoToken: uuidv4(),
     },
     listing: {
-      listingId: "asda3466",
+      listingId: "0",
       listingName: "Padron retreat house",
       address: {
         addressLine1: "Peper street number 32",
@@ -58,10 +60,10 @@ export default function SuperhogForm() {
     },
     reservation: {
       reservationId: "02389sdfax2547a",
-      checkIn: formatDateYearMonthDay(addDays(new Date(), 1)),
-      checkOut: formatDateYearMonthDay(addDays(new Date(), 2)),
+      checkIn: formatDateYearMonthDay(addDays(new Date(), 1)).toString(),
+      checkOut: formatDateYearMonthDay(addDays(new Date(), 2)).toString(),
       channel: "Tramona",
-      creationDate: formatDateYearMonthDay(new Date()),
+      creationDate: formatDateYearMonthDay(new Date()).toString(),
     },
     guest: {
       firstName: "Peter",
@@ -109,7 +111,7 @@ export default function SuperhogForm() {
     defaultValues: defaultRequestValues,
   });
 
-  const { mutateAsync: createSuperhogRequest } =
+  const { mutateAsync: createSuperhogRequest, isLoading: isSubmitting } =
     api.superhog.createSuperhogRequest.useMutation({
       onSuccess: () => {
         toast({
@@ -126,8 +128,24 @@ export default function SuperhogForm() {
       },
     });
 
+  async function handleCreateSuperhogRequest(data: FormSchema) {
+    try {
+      await createSuperhogRequest(data);
+    } catch (error) {
+      // Handle the error gracefully here
+      const axiosError = error as AxiosError;
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          axiosError.message ||
+          "An error occurred while submitting the request.",
+      });
+    }
+  }
+
   const onSubmit = async (data: FormSchema) => {
-    await createSuperhogRequest(data);
+    await handleCreateSuperhogRequest(data);
   };
 
   return (
@@ -501,7 +519,10 @@ export default function SuperhogForm() {
                 />
               </div>
 
-              <Button type="submit">Submit</Button>
+              <Button type="submit">
+                {" "}
+                {isSubmitting ? "Submitting" : "Submit"}
+              </Button>
             </form>
           </Form>
         </CardContent>

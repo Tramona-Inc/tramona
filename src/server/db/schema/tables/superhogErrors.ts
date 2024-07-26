@@ -2,13 +2,16 @@ import {
   integer,
   pgTable,
   serial,
-  pgEnum,
   timestamp,
   text,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { properties } from "./properties";
 import { trips } from "./trips";
 import { users } from "./users";
+
+export const ALL_ACTIONS = ["create", "update", "delete"] as const;
+export const actionEnum = pgEnum("action", ALL_ACTIONS);
 
 export const superhogErrors = pgTable("superhog_errors", {
   id: serial("id").primaryKey(),
@@ -22,6 +25,7 @@ export const superhogErrors = pgTable("superhog_errors", {
     onDelete: "cascade",
   }),
   propertiesId: integer("properties_id").references(() => properties.id),
+  action: actionEnum("action").default("create").notNull(),
 });
 
 //didnt set up relations up yet because we do not have the shema flow yet

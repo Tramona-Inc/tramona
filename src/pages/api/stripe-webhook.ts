@@ -267,8 +267,6 @@ export default async function webhook(
               checkoutSessionId: checkoutSessionCompleted.id,
             })
             .where(eq(offers.id, listing_id));
-
-          console.log("Checkout session was successful!");
         } else {
           // console.error("Metadata or listing_id is null or undefined");
         }
@@ -277,12 +275,12 @@ export default async function webhook(
         {
           const chargeObject = event.data.object;
           //addingt the paymentIntentId to the trips table
-          console.log("charge object", chargeObject);
           await db
             .update(trips)
             .set({
               paymentIntentId: chargeObject.payment_intent?.toString(),
               checkoutSessionId: chargeObject.metadata.checkout_session_id,
+              totalPriceAfterFees: chargeObject.amount,
             })
             .where(
               eq(trips.offerId, parseInt(chargeObject.metadata.listing_id!)),
@@ -304,11 +302,6 @@ export default async function webhook(
           const currentSuperhogReservation = await db.query.trips.findFirst({
             where: eq(trips.superhogRequestId, superhogRequests.id),
           });
-          console.log("this is the listing id", listingId);
-          console.log("this is the property id", propertyId);
-          console.log("this is the user id", userId);
-          console.log("this is the trip id", trip);
-          console.log("currentSuperhogReservation", currentSuperhogReservation);
           if (!currentSuperhogReservation && trip) {
             void createSuperhogReservation({
               listingId,

@@ -77,12 +77,13 @@ export default function EditReservationCard({
       });
     },
     onError: (error) => {
-      console.log(error);
-      toast({
-        title: "Error",
-        description: "The reservation has not been updated successfully",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        toast({
+          title: "The reservation has not been updated successfully",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -94,18 +95,19 @@ export default function EditReservationCard({
   const onSubmit = (data: FormSchema) => {
     mutateAsync(data)
       .then(() => {
-        console.log("success");
         toast({
           title: "Reservation Updated",
           description: "The reservation has been updated successfully",
         });
       })
-      .catch((error: Error) => {
-        toast({
-          title: "Error",
-          description: "The reservation has not been updated successfully",
-          variant: "destructive",
-        });
+      .catch((error) => {
+        if (error instanceof Error) {
+          toast({
+            title: "The reservation has not been updated successfully",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       });
   };
   return (

@@ -5,6 +5,7 @@ import {
   pgEnum,
   varchar,
   text,
+  timestamp,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
@@ -31,8 +32,18 @@ export const superhogRequests = pgTable("superhog_requests", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   propertyId: integer("property_id")
+    .references(() => properties.id, {
+      onDelete: "cascade",
+    })
     .notNull()
-    .references(() => properties.id, { onDelete: "cascade" }),
+    .default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+
   // tripId: integer("trip_id")
   //   .notNull()
   //   .references(() => trips.id, { onDelete: "cascade" }),

@@ -1,12 +1,17 @@
-/* eslint-disable no-console */
 import { createTRPCRouter, roleRestrictedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import { env } from "@/env";
-import axios, { all } from "axios";
+import axios from "axios";
 import { db } from "@/server/db";
-import { properties, users, superhogRequests, trips } from "@/server/db/schema";
+import {
+  properties,
+  users,
+  superhogRequests,
+  trips,
+  superhogErrors,
+} from "@/server/db/schema";
 
-import { eq, isNotNull } from "drizzle-orm";
+import { eq, exists, isNotNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { generateTimeStamp } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -14,7 +19,6 @@ import type { Trip } from "@/server/db/schema/tables/trips";
 import { formatDateYearMonthDay } from "@/utils/utils";
 import { getCountryISO, getPostcode } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
-import { messages } from "../../db/schema/tables/messages";
 export interface ReservationInterface {
   id: number;
   checkIn: string;
@@ -141,8 +145,6 @@ export async function createSuperhogReservation({
       },
     };
 
-    console.log("this is the reservation object", reservationObject);
-
     const { verification } = await axios
       .post<unknown, ResponseType>(
         "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
@@ -150,10 +152,18 @@ export async function createSuperhogReservation({
         config,
       )
       .then((res) => res.data)
-      .catch((error: AxiosError) => {
+      .catch(async (error: AxiosError) => {
         sendSlackMessage(
           `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
         );
+        await db.insert(superhogErrors).values({
+          echoToken: reservationObject.metadata.echoToken,
+          error: error.response.data.detail,
+          userId: userId,
+          tripId: trip.id,
+          propertiesId: propertyId,
+          action: "create",
+        });
         throw new Error(error.response.data.detail);
       });
 
@@ -177,10 +187,6 @@ export async function createSuperhogReservation({
       })
       .returning({ id: superhogRequests.id });
 
-    console.log(
-      "this is the current superhog request id",
-      currentSuperHogRequestId,
-    );
     //update the trip with the superhog request id
     if (currentSuperHogRequestId.length > 0) {
       await db
@@ -254,21 +260,56 @@ export const superhogRouter = createTRPCRouter({
           config,
         )
         .then((res) => res.data)
-        .catch((error: AxiosError) => {
+        .catch(async (error: AxiosError) => {
+          //there were errors
+          await db.insert(superhogErrors).values({
+            echoToken: input.metadata.echoToken,
+            error: error.response.data.detail,
+            propertiesId: null,
+            userId: null,
+            tripId: parseInt(input.listing.listingId),
+            action: "create",
+          });
+          sendSlackMessage(
+            `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+          );
           throw new Error(error.response.data.detail);
         });
 
       if (!verification) {
+        sendSlackMessage(
+          `SUPERHOG REQUEST ERROR: there was no verification for ${input.metadata.echoToken}`,
+        );
         throw new TRPCError({ code: "NOT_FOUND" });
       }
-      await db.insert(superhogRequests).values({
-        echoToken: input.metadata.echoToken,
-        superhogStatus: verification.status,
-        superhogVerificationId: verification.verificationId,
-        superhogReservationId: input.reservation.reservationId,
-        userId: ctx.user.id, //since we dont have access to the user id
-        propertyId: parseInt(input.listing.listingId),
+
+      const superhogRequestId = await db
+        .insert(superhogRequests)
+        .values({
+          echoToken: input.metadata.echoToken,
+          superhogStatus: verification.status,
+          superhogVerificationId: verification.verificationId,
+          superhogReservationId: input.reservation.reservationId,
+          userId: ctx.user.id, //since we dont have access to the user id
+          propertyId: 0, //since we dont have access to the property id THIS FUNCTION IS JUST SO WE CAN GET CERTIFIED
+        })
+        .returning({ id: superhogRequests.id });
+
+      //update the trip with the superhog request id
+      //check if trip even exists if it doesnt return an error
+      const tripExists = await db.query.trips.findFirst({
+        where: eq(trips.id, parseInt(input.listing.listingId)),
       });
+      if (tripExists) {
+        await db
+          .update(trips)
+          .set({
+            superhogRequestId: superhogRequestId[0]!.id,
+          })
+          .where(eq(trips.id, parseInt(input.listing.listingId)));
+      } else {
+        throw new Error("The trip does not exist");
+      }
     }),
 
   getAllVerifications: roleRestrictedProcedure(["admin"]).query(async () => {
@@ -339,12 +380,19 @@ export const superhogRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
-        const response = await axios.put(
-          "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications/cancel",
-          input,
-          config,
-        );
-        console.log(response.data);
+        const currentSuperhogRequestId =
+          await db.query.superhogRequests.findFirst({
+            where: eq(
+              superhogRequests.superhogVerificationId,
+              input.verification.verificationId,
+            ),
+          });
+
+        await db
+          .update(trips)
+          .set({ superhogRequestId: null })
+          .where(eq(trips.superhogRequestId, currentSuperhogRequestId!.id));
+
         await db
           .delete(superhogRequests)
           .where(
@@ -352,10 +400,24 @@ export const superhogRouter = createTRPCRouter({
               superhogRequests.superhogVerificationId,
               input.verification.verificationId,
             ),
-          );
+          )
+          .then();
+        const response = await axios.put(
+          "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications/cancel",
+          input,
+          config,
+        );
       } catch (error) {
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
+          await db.insert(superhogErrors).values({
+            echoToken: input.metadata.echoToken,
+            error: axiosError.message,
+            propertiesId: null,
+            userId: null,
+            tripId: null,
+            action: "delete",
+          });
           throw new Error(axiosError.response.data.detail);
         }
       }
@@ -385,8 +447,6 @@ export const superhogRouter = createTRPCRouter({
           input,
           config,
         );
-        console.log(response.data);
-        console.log("it worked ");
 
         //find the id of the superhog request
         const superhogRequestId = await db.query.superhogRequests.findFirst({
@@ -409,9 +469,25 @@ export const superhogRouter = createTRPCRouter({
               superhogRequestId!.id,
             ),
           );
+
+        //update the superhog request update time
+        await db
+          .update(superhogRequests)
+          .set({
+            updatedAt: new Date(),
+          })
+          .where(eq(superhogRequests.id, superhogRequestId!.id));
       } catch (error) {
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
+          await db.insert(superhogErrors).values({
+            echoToken: input.metadata.echoToken,
+            error: axiosError.message,
+            propertiesId: null,
+            userId: null,
+            tripId: null,
+            action: "update",
+          });
           throw new Error(axiosError.response.data.detail);
         }
       }

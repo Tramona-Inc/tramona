@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function DeleteSuperhog() {
   const {
@@ -28,17 +29,19 @@ export default function DeleteSuperhog() {
     isLoading,
   }: { data: ReservationInterface[] | undefined; isLoading: boolean } =
     api.superhog.getAllVerifications.useQuery();
+  const { toast } = useToast();
 
   const deleteVerificationMutation =
     api.superhog.deleteVerification.useMutation({
       onSuccess: () => {
-        console.log("Successfully deleted verification");
+        toast({ title: "Successfully deleted verification" });
       },
       onError: (error) => {
-        console.log(
-          "Failed to delete verification this is the onError on client side",
-        );
-        console.log(error);
+        toast({
+          title: "Failed to delete verification",
+          description: error.message,
+          variant: "destructive",
+        });
       },
     });
 
@@ -110,7 +113,12 @@ export default function DeleteSuperhog() {
                             },
                           });
                         } catch (error) {
-                          console.log(error);
+                          if (error instanceof Error) {
+                            toast({
+                              title: "Failed to delete verification",
+                              description: error.message,
+                            });
+                          }
                         }
                       }}
                     >
@@ -153,7 +161,6 @@ export default function DeleteSuperhog() {
     )
   ) : null;
 
-  console.log(data);
   return (
     <Card className="m-12 px-10">
       <CardHeader className="my-5 text-3xl font-bold text-primary">
