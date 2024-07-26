@@ -19,7 +19,6 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import ErrorMsg from "@/components/ui/ErrorMsg";
-import { useState } from "react";
 
 export default function DateOfBirth() {
   const { data: session } = useSession();
