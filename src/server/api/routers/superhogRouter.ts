@@ -154,7 +154,9 @@ export async function createSuperhogReservation({
       .then((res) => res.data)
       .catch(async (error: AxiosError) => {
         sendSlackMessage(
-          `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+          [
+            `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+          ].join("\n"),
         );
         await db.insert(superhogErrors).values({
           echoToken: reservationObject.metadata.echoToken,
@@ -169,7 +171,9 @@ export async function createSuperhogReservation({
 
     if (!verification) {
       sendSlackMessage(
-        `SUPERHOG REQUEST ERROR: The verification was not created because it was not found`,
+        [
+          `SUPERHOG REQUEST ERROR: The verification was not created because it was not found`,
+        ].join("\n"),
       );
       throw new TRPCError({ code: "NOT_FOUND" });
     }
@@ -201,14 +205,18 @@ export async function createSuperhogReservation({
       verification.status == "Flagged"
     ) {
       sendSlackMessage(
-        `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${verification.status} for tripID ${trip.id} for ${user.name}`,
+        [
+          `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${verification.status} for tripID ${trip.id} for ${user.name}`,
+        ].join("\n"),
       );
     }
   }
   //top level if statement
   else {
     sendSlackMessage(
-      `*SUPERHOG REQUEST ERROR*: The property with id ${propertyId} or the user with id ${userId} does not exist in the database`,
+      [
+        `*SUPERHOG REQUEST ERROR*: The property with id ${propertyId} or the user with id ${userId} does not exist in the database`,
+      ].join("\n"),
     );
   }
 }
@@ -271,14 +279,18 @@ export const superhogRouter = createTRPCRouter({
             action: "create",
           });
           sendSlackMessage(
-            `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+            [
+              `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+            ].join("\n"),
           );
           throw new Error(error.response.data.detail);
         });
 
       if (!verification) {
         sendSlackMessage(
-          `SUPERHOG REQUEST ERROR: there was no verification for ${input.metadata.echoToken}`,
+          [
+            `SUPERHOG REQUEST ERROR: there was no verification for ${input.metadata.echoToken}`,
+          ].join("\n"),
         );
         throw new TRPCError({ code: "NOT_FOUND" });
       }
