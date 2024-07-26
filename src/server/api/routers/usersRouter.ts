@@ -1,6 +1,7 @@
 import * as bcrypt from "bcrypt";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
@@ -30,7 +31,8 @@ import axios from "axios";
 import { getCity } from "@/server/google-maps";
 
 export const usersRouter = createTRPCRouter({
-  getOnboardingStep: protectedProcedure.query(async ({ ctx }) => {
+  getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return undefined;
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
