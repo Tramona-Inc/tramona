@@ -36,8 +36,12 @@ export default function DateOfBirth() {
     defaultValues: { dob: "" },
   });
 
+  const { refetch: refetchOnboardingStep } =
+    api.users.getOnboardingStep.useQuery(undefined, { enabled: false });
+
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
     onSuccess: () => {
+      void refetchOnboardingStep();
       void router.push("/auth/onboarding-2");
     },
   });
@@ -47,7 +51,7 @@ export default function DateOfBirth() {
       await updateProfile({
         id: session.user.id,
         dateOfBirth: convertDateFormat(dob),
-        onboardingStep: 1,
+        onboardingStep: 2,
       });
     } else {
       form.setError("root", {

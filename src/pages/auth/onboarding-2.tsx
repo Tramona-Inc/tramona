@@ -36,22 +36,26 @@ export default function FirstAndLastName() {
     resolver: zodResolver(formSchema),
   });
 
+  const { refetch: refetchOnboardingStep } =
+    api.users.getOnboardingStep.useQuery(undefined, { enabled: false });
+
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
     onSuccess: () => {
+      void refetchOnboardingStep();
       void router.push("/auth/onboarding-3");
     },
   });
 
-  const onSubmit = async ({ firstName, lastName }: FormValues) => {
+  async function onSubmit({ firstName, lastName }: FormValues) {
     if (session?.user.id && firstName && lastName) {
       await updateProfile({
         id: session.user.id,
         firstName,
         lastName,
-        onboardingStep: 2,
+        onboardingStep: 3,
       });
     }
-  };
+  }
 
   return (
     <MainLayout type="auth" className="flex flex-col justify-center gap-5 p-4">
