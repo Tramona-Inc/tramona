@@ -205,6 +205,21 @@ export function getServiceFee(numOfNights: number, totalPrice: number) {
   return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
 }
 
+// 3 * num nights
+export function getSuperHogFee(numOfNights: number, totalPrice: number) {
+  return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
+}
+// total * 0.035
+export function getStripeFee(numOfNights: number, totalPrice: number) {
+  return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
+}
+
+// total + stripe fee
+export function getFinalTotal(numOfNights: number, totalPrice: number) {
+  return ((3 * numOfNights * 100) + Math.ceil(0.035 * totalPrice));
+}
+
+
 /**
  * @returns `now`, `10 minutes`, `5 hours`, `2 days`, `1 week`, `10 weeks`, etc
  */
