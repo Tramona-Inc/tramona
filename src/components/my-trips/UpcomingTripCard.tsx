@@ -18,13 +18,17 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { TripCardDetails } from "./PastTrips";
+import { type TripCardDetails } from "./PastTrips";
+import { api } from "@/utils/api";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   const chatWithAdmin = useChatWithAdmin();
+
+  const slackMutation = api.twilio.sendSlack.useMutation();
+
 
   const formatText = (text: string) => {
     const lines = text.split("\n");
@@ -39,6 +43,12 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
       </span>
     ));
   };
+
+  const handleRequestCancellation = async () => {
+    await slackMutation.mutateAsync({
+      message: `Tramona: A traveler with payment id: ${trip.offer.paymentIntentId} requested a cancellation on ${trip.property.name} from ${formatDateRange(trip.offer?.checkIn, trip.offer?.checkOut)}. The cancellation policy is ${trip.property.cancellationPolicy}.`,
+    });
+  }
 
   return (
     <div className="w-full">
@@ -110,7 +120,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               <SheetTrigger asChild>
                 <Button variant="secondary">
                   <InfoIcon className="size-5" />
-                  Cancelation Policy
+                  Cancellation Policy
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="p-0">
@@ -189,6 +199,14 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                 )}
 
                 <SheetFooter className="p-5">
+                <SheetClose asChild>
+                    <Button
+                      onClick={handleRequestCancellation}
+                      className="w-full lg:w-[200px]"
+                    >
+                      Request Cancellation
+                    </Button>
+                  </SheetClose>
                   <SheetClose asChild>
                     <Button className="w-full lg:w-[200px]">Done</Button>
                   </SheetClose>
