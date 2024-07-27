@@ -51,6 +51,8 @@ export default function Onboarding1({
     "assistedListing" | "syncPMS" | null
   >(null);
 
+  const [option, setOption] = useState(0)
+
   useCalendlyEventListener({ onEventScheduled: () => setEventScheduled(true) });
 
   const openModal = (type: "assistedListing" | "syncPMS") => {
@@ -141,7 +143,6 @@ export default function Onboarding1({
   });
 
 
-
   return (
     <>
       <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-2">
@@ -167,31 +168,33 @@ export default function Onboarding1({
               item.id === "1" ? 
               <>
               <CardSelect
-                key={item.title}
+                key={item.id}
                 title={item.title}
                 text={item.text}
-                onClick={item.onClick}
+                // onClick={item.onClick}
                 recommended = {item.recommended}
               >
                 {/* {item.icon} */}
-                <Checkbox className="w-12 h-12"></Checkbox>
+                <Checkbox className="w-12 h-12" onClick={() => setOption(parseInt(item.id))}></Checkbox>
+                {/* {console.log(option)} */}
               </CardSelect>
               </>:
               <CardSelect
               key={item.title}
               title={item.title}
               text={item.text}
-              onClick={item.onClick}
+              // onClick={item.onClick}
             >
               {/* {item.icon} */}
-              <Checkbox className="w-12 h-12"></Checkbox>
+              <Checkbox className="w-12 h-12" onClick={() => setOption(parseInt(item.id))}></Checkbox>
             </CardSelect>
             ))}
           </div>
+          
         </div>
       </div>
 
-      <OnboardingFooter isForm={false} />
+      <OnboardingFooter isForm={false} onClick={items[option-1]?.onClick}/>
       <Dialog open={showModal} onOpenChange={closeModal}>
         <DialogClose />
         <DialogContent>
