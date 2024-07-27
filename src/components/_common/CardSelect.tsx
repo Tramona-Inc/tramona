@@ -20,12 +20,12 @@ export default function CardSelect({
 }) {
   const isSm = useIsSm();
   return (
-    <button
+    <div
       className={cn(
         "flex flex-row items-center gap-5 rounded-xl border-2 p-5",
         isSelected ? "border-black" : "hover:border-zinc-400",
       )}
-      onClick={onClick}
+      // onClick={onClick}
     >
       {isSm ? (
         <>
@@ -63,7 +63,28 @@ export default function CardSelect({
             </div>
           </div>
         </div>
+<<<<<<< HEAD
       )}
     </button>
+=======
+        <p className="text-left text-sm text-muted-foreground md:text-lg">{text}</p>
+      </div>
+      </>
+      :
+      <div className="flex flex-col">
+      <div className="flex mb-4">{recommended ? <Badge className="">Recommended</Badge>: null}</div>
+      <div className="flex flex-row gap-5">
+      <div className="flex w-16 justify-center">{children}</div>
+      <div className="w-full">
+        <div className="flex flex-row gap-4">
+        <p className="text-left font-semibold md:text-xl">{title}</p>
+        </div>
+        <p className="text-left text-sm text-muted-foreground md:text-lg">{text}</p>
+      </div>
+      </div>
+      </div>
+    }
+    </div>
+>>>>>>> 4b4fdc99ca104f7a049866050d0acd8556c7128d
   );
 }

@@ -12,6 +12,7 @@ type OnboardingFooterProps = {
   isFormValid?: boolean; // New prop to indicate whether the form is valid
   isForm: boolean;
   handleError?: () => void;
+  onClick?: () => void;
 };
 
 export default function OnboardingFooter({
@@ -19,6 +20,7 @@ export default function OnboardingFooter({
   isFormValid = false, // Default value is false
   isForm,
   handleError,
+  onClick
 }: OnboardingFooterProps) {
   const [isLoading, setIsLoading] = useState(false);
   const max_pages = 10;
@@ -141,6 +143,12 @@ export default function OnboardingFooter({
         {isEdit ? (
           <Button onClick={onPressNext}>Back to summary</Button>
         ) : (
+          <div className="flex flex-row gap-2">
+            {progress === 0 && 
+          <Button className="flex" onClick={onClick}>
+            Next
+          </Button>
+          }
           <Button onClick={onPressNext} disabled={isLoading}>
             {progress === 0
               ? "Get Started"
@@ -150,6 +158,7 @@ export default function OnboardingFooter({
                   ? "Finish"
                   : "Next"}
           </Button>
+          </div>
         )}
       </div>
     </div>
