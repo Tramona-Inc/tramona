@@ -16,9 +16,8 @@ export default function CardSelect({
   text: string;
   onClick?: () => void;
   isSelected?: boolean;
-  recommended?: boolean
+  recommended?: boolean;
 }) {
-
   const isSm = useIsSm();
   return (
     <button
@@ -28,30 +27,43 @@ export default function CardSelect({
       )}
       onClick={onClick}
     >
-      {isSm ? 
-      <>
-      <div className="flex w-16 justify-center">{children}</div>
-      <div className="w-full">
-        <div className="flex flex-row gap-4">
-        <p className="text-left font-semibold md:text-xl">{title}{recommended ? <span className="pl-2"><Badge className="justify-center">recommended</Badge></span>: null}</p>
+      {isSm ? (
+        <>
+          <div className="flex w-16 justify-center">{children}</div>
+          <div className="w-full">
+            <div className="flex flex-row gap-4">
+              <p className="text-left font-semibold md:text-xl">
+                {title}
+                {recommended ? (
+                  <span className="pl-2">
+                    <Badge className="justify-center">recommended</Badge>
+                  </span>
+                ) : null}
+              </p>
+            </div>
+            <p className="text-left text-sm text-muted-foreground md:text-lg">
+              {text}
+            </p>
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col">
+          <div className="mb-4 flex">
+            {recommended ? <Badge className="">Recommended</Badge> : null}
+          </div>
+          <div className="flex flex-row gap-5">
+            <div className="flex w-16 justify-center">{children}</div>
+            <div className="w-full">
+              <div className="flex flex-row gap-4">
+                <p className="text-left font-semibold md:text-xl">{title}</p>
+              </div>
+              <p className="text-left text-sm text-muted-foreground md:text-lg">
+                {text}
+              </p>
+            </div>
+          </div>
         </div>
-        <p className="text-left text-sm text-muted-foreground md:text-lg">{text}</p>
-      </div>
-      </>
-      :
-      <div className="flex flex-col">
-      <div className="flex mb-4">{recommended ? <Badge className="">Recommended</Badge>: null}</div>
-      <div className="flex flex-row gap-5">
-      <div className="flex w-16 justify-center">{children}</div>
-      <div className="w-full">
-        <div className="flex flex-row gap-4">
-        <p className="text-left font-semibold md:text-xl">{title}</p>
-        </div>
-        <p className="text-left text-sm text-muted-foreground md:text-lg">{text}</p>
-      </div>
-      </div>
-      </div>
-    }
+      )}
     </button>
   );
 }
