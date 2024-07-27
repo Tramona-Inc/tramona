@@ -24,6 +24,7 @@ import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
+import { reservedDates } from "./tables/reservedDates";
 import { superhogRequests } from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
@@ -42,6 +43,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   groups: many(groupMembers),
   ownedGroups: many(groups),
   requestGroupsCreated: many(requestGroups),
+  reservedDates: many(reservedDates),
   hostTeams: many(hostTeamMembers),
   bids: many(bids),
   superhogRequests: many(superhogRequests),
