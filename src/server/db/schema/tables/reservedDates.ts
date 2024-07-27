@@ -16,5 +16,5 @@ import {
   });
   
   export type ReservedDate = typeof reservedDates.$inferSelect;
-  export const reservedDateSelectSchema = createSelectSchema(reservedDates);
+  export const SelectSchema = createSelectSchema(reservedDates);
   export const reservedDateInsertSchema = createInsertSchema(reservedDates);
