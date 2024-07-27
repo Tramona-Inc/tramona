@@ -16,7 +16,6 @@ export * from "./tables/offers";
 export * from "./tables/properties";
 export * from "./tables/requests";
 export * from "./tables/requestsToProperties";
-export * from "./tables/reservations";
 export * from "./tables/reservedDates"
 export * from "./tables/superhogErrors";
 export * from "./tables/superhogRequests";
