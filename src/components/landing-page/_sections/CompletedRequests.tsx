@@ -1,5 +1,4 @@
 import React from "react";
-import { cn } from "@/utils/utils";
 import Marquee from "src/components/_common/MarqueeVertical";
 import Image from "next/image";
 
