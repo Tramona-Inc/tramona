@@ -36,7 +36,7 @@ export default function SuccessfulBidDialog({
             <div className="mt-[-2.5rem] flex justify-center overflow-hidden rounded-2xl">
               <div className="relative block aspect-square w-64 overflow-clip rounded-xl">
                 <Image
-                  src={booking?.property?.imageUrls[0]!}
+                  src={booking.property.imageUrls[0]!}
                   alt=""
                   layout="fill"
                   objectFit="cover"
@@ -46,14 +46,14 @@ export default function SuccessfulBidDialog({
           </div>
           <h3 className="text-xl font-bold">Congrats on booking your trip!</h3>
           {/* <p className="font-medium">Your trip to <span className="font-extrabold">Paris</span> from June 22nd - June 28th is confirmed.</p> */}
-          {booking && (
+          {
             <p className="font-medium">
               Your trip to{" "}
               <span className="font-extrabold">{booking.property.city}</span>{" "}
               from{" "}
               {`${formatDateMonthDay(booking.checkIn)} - ${formatDateMonthDay(booking.checkOut)} is confirmed.`}
             </p>
-          )}
+          }
           <div className="md:py-5">
             <Dialog>
               <DialogTrigger asChild>
