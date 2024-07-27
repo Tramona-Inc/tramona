@@ -21,7 +21,7 @@ export default function CardSelect({
 
   const isSm = useIsSm();
   return (
-    <button
+    <div
       className={cn(
         "flex flex-row items-center gap-5 rounded-xl border-2 p-5",
         isSelected ? "border-black" : "hover:border-zinc-400",
@@ -52,6 +52,6 @@ export default function CardSelect({
       </div>
       </div>
     }
-    </button>
+    </div>
   );
 }
