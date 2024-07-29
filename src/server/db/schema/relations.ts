@@ -29,7 +29,6 @@ import { superhogRequests } from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
 import { reviews } from "./tables/reviews";
-import { reservedDates } from "./tables/reservedDates";
 import { superhogErrors } from "./tables/superhogErrors";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
