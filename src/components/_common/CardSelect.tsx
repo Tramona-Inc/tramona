@@ -22,10 +22,10 @@ export default function CardSelect({
   return (
     <div
       className={cn(
-        "flex flex-row items-center gap-5 rounded-xl border-2 p-5",
+        "flex flex-row items-center gap-5 rounded-xl border-2 p-5 hover:cursor-pointer",
         isSelected ? "border-black" : "hover:border-zinc-400",
       )}
-      // onClick={onClick}
+      onClick={onClick}
     >
       {isSm ? (
         <>

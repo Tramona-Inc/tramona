@@ -38,6 +38,7 @@ import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { on } from "events";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Home } from "lucide-react";
 
 export default function Onboarding1({
   onPressNext,
@@ -51,7 +52,7 @@ export default function Onboarding1({
     "assistedListing" | "syncPMS" | null
   >(null);
 
-  const [option, setOption] = useState(0)
+  const [option, setOption] = useState(0);
 
   useCalendlyEventListener({ onEventScheduled: () => setEventScheduled(true) });
 
@@ -71,10 +72,10 @@ export default function Onboarding1({
   const items = [
     {
       id: "1",
-      // icon: <AssistedListing />,
+      icon: <Home size={50} />,
       title: "Connect directly with Airbnb",
       text: "Connect with your Airbnb account. This is the easiest & preferred way",
-      recommended : true,
+      recommended: true,
       onClick: async () => {
         await createHospitableCustomer();
       },
@@ -100,8 +101,6 @@ export default function Onboarding1({
       text: "Have the Tramona onboarding team set up your account.",
       onClick: () => openModal("assistedListing"),
     },
-    
-   
   ];
 
   const form = useZodForm({
@@ -142,7 +141,6 @@ export default function Onboarding1({
     console.log({ pms, accountId, apiKey });
   });
 
-
   return (
     <>
       <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-2">
@@ -157,44 +155,40 @@ export default function Onboarding1({
         </div>
 
         <div className="flex flex-col items-center justify-center sm:mx-20">
-          <h1 className="mb-16 flex flex-col pt-8 text-4xl font-semibold">
-            {/* It&apos;s easy to list your
-            <span>property on Tramona</span> */}
+          <h1 className="mb-6 text-center text-4xl font-semibold">
             Get started on Tramona
           </h1>
 
-          <div className="flex flex-col gap-10">
-            {items.map((item) => (
-              item.id === "1" ? 
-              <>
-              <CardSelect
-                key={item.id}
-                title={item.title}
-                text={item.text}
-                // onClick={item.onClick}
-                recommended = {item.recommended}
-              >
-                {/* {item.icon} */}
-                <Checkbox className="w-12 h-12" onClick={() => setOption(parseInt(item.id))}></Checkbox>
-                {/* {console.log(option)} */}
-              </CardSelect>
-              </>:
-              <CardSelect
-              key={item.title}
-              title={item.title}
-              text={item.text}
-              // onClick={item.onClick}
-            >
-              {/* {item.icon} */}
-              <Checkbox className="w-12 h-12" onClick={() => setOption(parseInt(item.id))}></Checkbox>
-            </CardSelect>
-            ))}
+          <div className="flex flex-col gap-4">
+            {items.map((item) =>
+              item.id === "1" ? (
+                <>
+                  <CardSelect
+                    key={item.id}
+                    title={item.title}
+                    text={item.text}
+                    onClick={item.onClick}
+                    recommended={item.recommended}
+                  >
+                    {item.icon}
+                  </CardSelect>
+                </>
+              ) : (
+                <CardSelect
+                  key={item.title}
+                  title={item.title}
+                  text={item.text}
+                  onClick={item.onClick}
+                >
+                  {item.icon}
+                </CardSelect>
+              ),
+            )}
           </div>
-          
         </div>
       </div>
 
-      <OnboardingFooter isForm={false} onClick={items[option-1]?.onClick}/>
+      <OnboardingFooter isForm={false} onClick={items[option - 1]?.onClick} />
       <Dialog open={showModal} onOpenChange={closeModal}>
         <DialogClose />
         <DialogContent>
