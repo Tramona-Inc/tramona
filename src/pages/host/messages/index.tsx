@@ -2,6 +2,7 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import {
+  type AdminConversation,
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
@@ -14,9 +15,9 @@ import { cn } from "@/utils/utils";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
-    useState<Conversation | null>(null);
+    useState<Conversation | AdminConversation |null>(null);
 
-  const selectConversation = (conversation: Conversation | null) => {
+  const selectConversation = (conversation: Conversation | AdminConversation | null) => {
     setSelectedConversation(conversation);
   };
 

@@ -24,17 +24,17 @@ export function groupMessages(
 ) {
   const groups: MessageGroups[] = [];
 
-  console.log(messages)
+  // console.log(messages)
   messages.forEach(({ message, user }) => {
     const lastGroup = groups[groups.length - 1];
 
-    if (!user || (lastGroup && "id" in user && user.id !== lastGroup?.user?.id)) {
+    if (!user || (lastGroup && "id" in user && user.id !== lastGroup.user?.id )) {
       groups.push({
         user,
         messages: [message],
       });
     }
-    else if(!user || (lastGroup && "userToken" in user && user.userToken !== lastGroup?.user?.userToken)){
+    else if(!user || (lastGroup && "userToken" in user && user.userToken !== lastGroup.user?.userToken)){
       groups.push({
         user,
         messages: [message],

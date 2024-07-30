@@ -42,3 +42,4 @@ export const reservationSelectSchema = createSelectSchema(reservations);
 export const reservationInsertSchema = createInsertSchema(reservations);
 
 export const superhogFormSchema = reservationInsertSchema.partial();
+

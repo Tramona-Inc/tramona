@@ -56,7 +56,7 @@ export const users = pgTable(
     // custom fields
     password: varchar("password", { length: 510 }),
     username: varchar("username", { length: 60 }),
-    avatar: text("avatar"),
+    // avatar: text("avatar"),
     referralCodeUsed: varchar("referral_code_used", {
       length: REFERRAL_CODE_LENGTH,
     }),

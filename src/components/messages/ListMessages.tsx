@@ -5,14 +5,14 @@ import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
 import { api } from "@/utils/api";
 import { useConversation } from "@/utils/store/conversations";
-import { errorToast } from "@/utils/toasts";
+
 import { useSession } from "next-auth/react";
 import LoadMoreMessages from "./LoadMoreMessages";
 import { groupMessages } from "./groupMessages";
 import { MessageGroup } from "./MessageGroup";
-import { User } from "@/server/db/schema";
-import { type MessageGroups } from "./groupMessages";
-import { setOptions } from "leaflet";
+
+
+
 
 function NoMessages() {
   return (
@@ -44,7 +44,7 @@ export default function ListMessages({
   const [notification, setNotification] = useState(0);
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
-  const setOptimisticIds = useMessage((state) => state.optimisticIds)
+  const setOptimisticIds = useMessage((state) => state.setOptimisticIds)
   const currentConversationId = useMessage(
     (state) => state.currentConversationId,
   );
@@ -108,7 +108,7 @@ export default function ListMessages({
     : false;
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    console.log("Handling postgres change")
+    // console.log("Handling postgres change")
     if(!optimisticIds.includes(payload.new.id)) {
         const newMessage: ChatMessageType = {
           id: payload.new.id,
@@ -120,7 +120,8 @@ export default function ListMessages({
           read: payload.new.read,
         };
         addMessageToConversation(payload.new.conversation_id, newMessage);
-        console.log(conversations);
+        // console.log(conversations);
+        // setOptimisticIds(payload.new.id)
         setConversationToTop(payload.new.conversation_id, newMessage);
       }
     //   }
@@ -149,6 +150,7 @@ export default function ListMessages({
       };
       addMessageToAdminConversation(payload.new.conversation_id, newMessage);
       setConversationToTop(payload.new.conversation_id, newMessage)
+      // setOptimisticIds(payload.new.id)
     }
     const scrollContainer = scrollRef.current;
     if (
@@ -160,7 +162,7 @@ export default function ListMessages({
   }
 
   useEffect(() => {
-    console.log(currentConversationId);
+    // console.log(currentConversationId);
     const channel = supabase
       .channel(`${currentConversationId}`)
       .on(
@@ -174,16 +176,16 @@ export default function ListMessages({
       )
       .subscribe();
     // console.log(channel);
-    void fetchInitialMessages(currentConversationId ?? "")
+    // void fetchInitialMessages(currentConversationId ?? "")
     return () => {
-      console.log('Unsubscribing from channel');
+      // console.log('Unsubscribing from channel');
       void channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentConversationId, messages]);
+  });
 
   useEffect(() => {
-    console.log("handling guest_messages changes");
+    // console.log("handling guest_messages changes");
     const channel = supabase
     .channel(`${currentConversationId}`)
     .on(
@@ -196,12 +198,12 @@ export default function ListMessages({
       (payload: {new: GuestMessageType}) => void handlePostgresChangeOnGuest(payload) 
     )
 
-    void fetchMessagesForGuest(currentConversationId ?? "")
+    // void fetchMessagesForGuest(currentConversationId ?? "")
     return () => {
       
       void channel.unsubscribe();
     }
-  }, [currentConversationId, adminMessages])
+  })
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
@@ -271,8 +273,8 @@ export default function ListMessages({
       }
 
       const user =
-        participants?.find(
-          (participant) => isChatMessage(message) && participant?.id === message.userId,
+        participants.find(
+          (participant) => isChatMessage(message) && participant.id === message.userId,
         ) ?? null;
         // ) ?? guest_participants?.find(
         //   (participant) => participant.userToken === message.userToken
@@ -294,7 +296,7 @@ export default function ListMessages({
       return {message, user: session.user};
     }
 
-    const user = guest_participants?.find(
+    const user = guest_participants.find(
       (participant) => isGuestMessage(message) && participant.userToken === message.userToken) 
       ?? null;
 

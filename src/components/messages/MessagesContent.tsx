@@ -19,8 +19,8 @@ export default function MessagesContent({
       </EmptyStateValue>
     );
   }
-  console.log("In Message Content")
-  console.log(selectedConversation);
+  // console.log("In Message Content")
+  // console.log(selectedConversation);
 
   return (
     <div className="relative flex h-full w-full flex-col">

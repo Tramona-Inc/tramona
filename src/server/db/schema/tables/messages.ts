@@ -80,7 +80,7 @@ export const conversationParticipants = pgTable(
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
     userId: text("user_id")
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }).notNull(),
     // userToken: text("user_token").unique(),
   },
   (t) => ({
@@ -95,7 +95,7 @@ export const conversationGuests = pgTable(
       .notNull()
       .references(() => conversations.id, {onDelete: "cascade"}),
 
-    userToken: text("user_token").unique(),
+    userToken: text("user_token").unique().notNull(),
     adminId:text("admin_id").notNull(),
   },
   (t) => ({

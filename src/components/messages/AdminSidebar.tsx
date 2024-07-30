@@ -1,12 +1,11 @@
 import { api } from "@/utils/api";
 import {
-  useConversation,
   type Conversation,
+  useConversation,
   type AdminConversation,
 } from "@/utils/store/conversations";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
-import UserAvatar from "../_common/UserAvatar";
 import { formatRelative } from "date-fns";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 
@@ -17,9 +16,9 @@ export function AdminSidebar({
 }: {
   adminConversation: AdminConversation;
   isSelected: boolean;
-  setSelected: (arg0: AdminConversation) => void;
+  setSelected: (arg0: AdminConversation | Conversation) => void;
 }) {
-  const { guest_participants, guest_messages, id, name } = adminConversation;
+  const { guest_participants, guest_messages, name } = adminConversation;
 
   const displayParticipants = guest_participants
     .map((participant) => participant.userToken)

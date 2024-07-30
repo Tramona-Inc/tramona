@@ -1,26 +1,24 @@
 import { api } from "@/utils/api"
 import { type ChatMessageType, type GuestMessage, useMessage } from "@/utils/store/messages";
 import { useSession } from "next-auth/react";
-import { ScrollArea } from "../ui/scroll-area";
-import { useConversation } from "@/utils/store/conversations";
 import { useEffect } from "react";
 import { type MessageDbType, type GuestMessageType } from "@/types/supabase.message";
 import supabase from "@/utils/supabase-client";
-import { fetchGuestConversation } from "@/server/api/routers/messagesRouter";
 
 // export default function AdminMessages ({conversationId}:{
 //   conversationId: string | null
 // }) {
+  let tempToken: string;
   export default function AdminMessages (
   )  {  
   const {data: session} = useSession();
-  let tempToken: string = "";
+
   if(!session && typeof window !== "undefined"){
     tempToken = localStorage.getItem("tempToken") ?? "";
   }
   // console.log(tempToken)
   const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
-    uniqueId: session?.user.id ?? tempToken ?? "",
+    uniqueId: session?.user.id ?? tempToken,
     session: session ? true : false,
   })
   // console.log(conversationId)
@@ -47,7 +45,7 @@ import { fetchGuestConversation } from "@/server/api/routers/messagesRouter";
   )
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
-  const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
+  // const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
   const messages = conversationId ?
   conversations[conversationId]?.messages ?? [] : [];
@@ -75,8 +73,8 @@ import { fetchGuestConversation } from "@/server/api/routers/messagesRouter";
   }
 
   useEffect(() => {
-    console.log("handling postgres change for logged in user");
-    console.log(conversationId);
+    // console.log("handling postgres change for logged in user");
+    // console.log(conversationId);
     const channel = supabase
       .channel(`${conversationId}`)
       .on(
@@ -87,14 +85,14 @@ import { fetchGuestConversation } from "@/server/api/routers/messagesRouter";
           table: "messages",
         },
         (payload: { new: MessageDbType}) => {
-          console.log(payload)
+          // console.log(payload)
           void handlePostgresChange(payload)},
       )
       .subscribe();
       
-    console.log("going or no?");
+    // console.log("going or no?");
     return () => {
-      console.log("unsubscibing from channel");
+      // console.log("unsubscibing from channel");
       void channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,7 +145,7 @@ useEffect(() => {
     {session ? (messages.length > 0 ? 
               <div className="flex flex-1 w-full overflow-y-scroll flex-col-reverse gap-1 p-3">
                   
-                  { (messages.map((message, index) => ( "userId" in message && message.userId === session?.user.id ?
+                  { (messages.map((message, index) => ( "userId" in message && message.userId === session.user.id ?
                     <>
                     <div className="flex flex-row-reverse m-1 p-1" key={index}>
                       <p className="px-2 py-2 border-none bg-[#1A84E5] text-sm text-white rounded-l-xl rounded-tr-xl max-w-[15rem] h-max antialiased">

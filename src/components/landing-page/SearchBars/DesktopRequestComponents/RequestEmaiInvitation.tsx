@@ -2,14 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Plus,
-  MinusIcon,
-  LinkIcon,
-  MailIcon,
-  Sparkles,
-  ShareIcon,
-} from "lucide-react";
+import { Plus, MinusIcon, LinkIcon, MailIcon, ShareIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 

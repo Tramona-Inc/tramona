@@ -1,5 +1,5 @@
 import { useConversation } from "@/utils/store/conversations";
-import { type ChatMessageType, GuestMessage, useMessage } from "@/utils/store/messages";
+import { type ChatMessageType, type GuestMessage, useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +12,6 @@ import { Input } from "../ui/input";
 
 import { api } from "@/utils/api";
 import { sub } from "date-fns";
-import { useChatWithAdmin } from'@/utils/useChatWithAdmin'
 const formSchema = z.object({
   message: z.string().refine((data) => data.trim() !== ""),
 });
@@ -40,15 +39,13 @@ export default function ChatInput({
     (state) => state.addMessageToAdminConversation,
   )
 
-  const utils = api.useUtils();
-
-
-  const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
-
   const setConversationToTop = useConversation(
     (state) => state.setConversationToTop,
   );
 
+  const setOptimisticIds = useMessage(
+    (state) => state.setOptimisticIds,
+  )
   const removeMessageFromConversation = useMessage(
     (state) => state.removeMessageFromConversation,
   );
@@ -86,7 +83,7 @@ export default function ChatInput({
 
       setConversationToTop(conversationId, newMessage);
       addMessageToConversation(conversationId, newMessage);
-      // setOptimisticIds(newMessage.id);
+      setOptimisticIds(newMessage.id);
 
       form.reset();
 
@@ -108,7 +105,7 @@ export default function ChatInput({
         const newMessage: ChatMessageType & GuestMessage = {
           id: nanoid(),
           createdAt: new Date().toISOString().slice(0,-1),
-          conversationId: conversationId ?? "",
+          conversationId: conversationId,
           userToken: session.user.id,
           message: values.message,
           read: false,
@@ -126,9 +123,9 @@ export default function ChatInput({
           created_at: newMessage.createdAt,
         }
 
-        addMessageToAdminConversation(conversationId ?? "", newMessage)
-        setConversationToTop(conversationId ?? "", newMessage)
-        // setOptimisticIds(newMessage.id);
+        addMessageToAdminConversation(conversationId, newMessage)
+        setConversationToTop(conversationId, newMessage)
+        setOptimisticIds(newMessage.id);
 
         const { error } = await supabase
         .from("guest_messages")
@@ -140,7 +137,7 @@ export default function ChatInput({
         form.reset();
 
       if (error) {
-        removeMessageFromConversation(conversationId ?? "", newMessage.id);
+        removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
       }
       

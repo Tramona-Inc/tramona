@@ -20,6 +20,15 @@ export default function TravelerPage({
 }) {
   useMaybeSendUnsentRequests();
 
+  // const isSm = useIsSm();
+  // const isMd = useIsMd();
+  // const isLg = useIsLg();
+  // const isXl = useIsXl();
+
+  // const numPropertiesShown = isXl ? 15 : isLg ? 12 : isMd ? 9 : isSm ? 6 : 3;
+
+  // const shownProperties = staticProperties.slice(0, numPropertiesShown);
+
   const { data: isPropertyBids, error: propertyBidsError } =
     api.biddings.getAllPropertyBids.useQuery(undefined, {
       refetchOnReconnect: false,

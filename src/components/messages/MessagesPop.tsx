@@ -6,13 +6,13 @@ import { Button } from '../ui/button'
 import UserAvatar from '../_common/UserAvatar'
 import { Form, FormControl, FormField, FormItem } from '../ui/form'
 import { type ChatMessageType, type GuestMessage, useMessage } from "@/utils/store/messages";
-import { GuestMessageType, type MessageDbType } from '@/types/supabase.message';
-import { useConversation } from '@/utils/store/conversations';
+import Link from 'next/link'
+
 import { Input } from '../ui/input'
 import {MessageCircleMore, ArrowUp, X} from 'lucide-react'
-import { type Session } from 'next-auth';
+
 import { useForm } from "react-hook-form";
-import { useEffect } from 'react';
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { PopoverClose } from '@radix-ui/react-popover'
@@ -41,7 +41,7 @@ export default function MessagesPopover() {
   }
 
   const {data: conversationId} = api.messages.getConversationsWithAdmin.useQuery({
-    uniqueId: session?.user.id ?? tempToken ?? "",
+    uniqueId: session?.user.id ?? tempToken,
     session: session ? true : false,
   })
 
@@ -55,7 +55,6 @@ export default function MessagesPopover() {
     (state) => state.addMessageToAdminConversation
   )
   
-  const optimisticIds = useMessage((state) => state.optimisticIds);
   const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
   
   
@@ -80,12 +79,12 @@ export default function MessagesPopover() {
     ? adminConversations[conversationId]?.messages ?? []
     : [];
   
-  const adminDetails: ChatMessageType & GuestMessage = session ? messages.find((message) => "userId" in message && message.userId !== session.user.id) :  adminMessages.find((message) => "userToken" in message && message.userToken !== tempToken)
+  const adminDetails = session ? messages.find((message) => "userId" in message && message.userId !== session.user.id) :  adminMessages.find((message) => "userToken" in message && message.userToken !== tempToken)
   // console.log(adminDetails);
-  const { data: sender } = session ? 
-  api.messages.fetchAdminDetails.useQuery({adminId: adminDetails?.userId ?? ""}) :
-  api.messages.fetchAdminDetails.useQuery({adminId: adminDetails?.userToken  ?? ""})
-  console.log(sender?.name);
+  const { data: sender } = session && adminDetails ? 
+  api.messages.fetchAdminDetails.useQuery({adminId: (adminDetails as ChatMessageType)?.userId}) :
+  api.messages.fetchAdminDetails.useQuery({adminId: (adminDetails as GuestMessage)?.userToken ?? ""})
+
   const formSchema = z.object({
         message: z.string(),
   })
@@ -97,10 +96,10 @@ export default function MessagesPopover() {
 
       //create conversation id if it doesnot exist
       const conversationId = await createConversation({
-        uniqueId: session?.user.id ??  tempToken ?? "",
+        uniqueId: session?.user.id ??  tempToken,
         session: session ? true : false,
       });
-      console.log(conversationId)
+      // console.log(conversationId)
 
       if(!session){
         const newMessage: ChatMessageType & GuestMessage = {
@@ -145,8 +144,8 @@ export default function MessagesPopover() {
           id: nanoid(),
           createdAt: new Date().toISOString().slice(0, -1),
           conversationId: conversationId ?? "",
-          userId: session?.user.id ?? "", //user is logged in
-          userToken: "", //user has not logged in
+          userId: session.user.id, //user is logged in
+          userToken: "", //user is logged out
           message: values.message,
           read: false,
           isEdit: false,
@@ -188,11 +187,11 @@ export default function MessagesPopover() {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema)
     })
-      const today = new Date();
-      let hours = today.getHours().toString();
-      let minutes = today.getMinutes().toString();
-      hours = hours.length === 1 ? "0" + hours : hours;
-      minutes = minutes.length === 1 ? "0" + minutes : minutes;
+      // const today = new Date();
+      // let hours = today.getHours().toString();
+      // let minutes = today.getMinutes().toString();
+      // hours = hours.length === 1 ? "0" + hours : hours;
+      // minutes = minutes.length === 1 ? "0" + minutes : minutes;
       return (
       <>
       {/* <div className="fixed bottom-0 right-0 z-50"> */}
@@ -206,7 +205,7 @@ export default function MessagesPopover() {
                 <></>
               }
               </PopoverTrigger>  
-              <PopoverContent className="grid grid-rows-1 p-0 w-[21rem] h-[35rem] md:mx-6 mx-8 bg-black border rounded-xl border-gray-800">
+              <PopoverContent className="grid grid-rows-1 p-0 w-[21rem] h-[35rem] mx-8 bg-black border rounded-xl border-gray-800">
               <div className='grid grid-rows-1'>
                 <div className="flex flex-col">
                 <div className="flex flex-col w-full h-[7rem] items-center justify-start p-4 text-base font-bold text-white bg-[#1A1A1A]">
@@ -214,6 +213,9 @@ export default function MessagesPopover() {
                   <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Concierge</p>
                   <p className='flex-1 px-2 antialiased text-sm font-medium'>{sender?.name ?? "Tramona Host"}</p>
                 </div>
+                <PopoverClose>
+                  <X className='fixed top-4 left-12 text-white'/>
+                </PopoverClose>
               {/* {!session ?? 
               <AdminMessages conversationId={conversationId} />
 
@@ -258,6 +260,11 @@ export default function MessagesPopover() {
                 <UserAvatar image={session?.user.image}/>
                 <p className='text-muted-foreground antialiased font-light text-xs pt-1'>Concierge</p>
                 <p className='flex-1 px-2 antialiased text-sm font-medium'>{sender?.name ?? "Tramona Host"}</p>
+                <Button asChild className='absolute top-2 right-3 bg-inherit p-0'>
+                  <Link href="/">
+                    <X className='text-white' />
+                  </Link>
+                </Button>
               </div>
               <AdminMessages />
             </div>

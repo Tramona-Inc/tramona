@@ -16,9 +16,9 @@ export function SidebarConversation({
 }: {
   conversation: Conversation;
   isSelected: boolean;
-  setSelected: (arg0: Conversation & AdminConversation) => void;
+  setSelected: (arg0: Conversation | AdminConversation) => void;
 }) {
-  const { participants, messages, id, name } = conversation;
+  const { participants, messages, name } = conversation;
 
   const displayParticipants = participants
     .map((participant) => participant.name)

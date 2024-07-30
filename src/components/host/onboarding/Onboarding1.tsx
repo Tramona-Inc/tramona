@@ -108,7 +108,7 @@ export default function Onboarding1({
 
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
     const { bearerToken } = await generateBearerToken({ accountId, apiKey });
-    console.log(bearerToken);
+    // console.log(bearerToken);
 
     await createHostProfile({
       hostawayApiKey: apiKey,

@@ -11,12 +11,12 @@ import { cityRequestSchema } from "./schemas";
 
 export function useCityRequestForm({
   afterSubmit,
-  handleSetOpen,
-  handleShowConfetti,
+  beforeSubmit,
+  setMadeByGroupId,
 }: {
-  afterSubmit?: (madeByGroupIds?: number) => void;
-  handleSetOpen: (val: boolean) => void;
-  handleShowConfetti: (val: boolean) => void;
+  afterSubmit?: () => void;
+  beforeSubmit?: () => void;
+  setMadeByGroupId?: (val: number) => void;
 }) {
   // const [open, setOpen] = useState(true);
   const form = useZodForm({
@@ -52,16 +52,14 @@ export function useCityRequestForm({
         });
       });
     } else {
-      handleSetOpen(true);
-      handleShowConfetti(true);
+      beforeSubmit?.();
       await createRequests(newRequest)
         .then((result) => {
           form.reset();
-          afterSubmit?.(result.transactionResults.madeByGroupId);
+          afterSubmit?.();
+          setMadeByGroupId?.(result.transactionResults.madeByGroupId);
         })
         .catch(() => errorToast());
-
-      //figure out which hosts to send the request to
     }
   });
 

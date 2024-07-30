@@ -11,7 +11,7 @@ import { columns } from "@/components/admin/view-recent-host/table/columns";
 import { getAdminId } from "@/server/server-utils";
 
 
-const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
+const ADMIN_ID = await getAdminId();
 
 export async function fetchUsersConversations(userId: string) {
   return await db.query.users.findFirst({
@@ -211,7 +211,7 @@ export async function createConversationWithAdmin(userId: string | null, userTok
     //   { conversationId: createdConversationId, ad: ADMIN_ID },
     // ]
     await db.insert(conversationGuests).values(participantValues);
-    console.log("insert into cp");
+    // console.log("insert into cp");
     return createdConversationId;
   }
 
@@ -223,7 +223,7 @@ export async function createConversationWithAdmin(userId: string | null, userTok
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
-    console.log("insert into cp");
+    // console.log("insert into cp");
     return createdConversationId;
   }
 }

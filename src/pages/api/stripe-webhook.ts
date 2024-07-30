@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 import { env } from "@/env";
-import { CronJob, CronTime } from 'cron';
 import {
   createConversationWithAdmin,
   fetchConversationWithAdmin,
 } from "@/server/api/routers/messagesRouter";
+import { createSuperhogReservation } from "@/server/api/routers/superhogRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
@@ -16,12 +16,12 @@ import {
   trips,
   users,
 } from "@/server/db/schema";
-import { api } from "@/utils/api";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { sendEmail } from "@/server/server-utils";
 import PostStayEmail from "packages/transactional/emails/PostStayEmail";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
 
 // ! Necessary for stripe
 export const config = {
@@ -86,19 +86,19 @@ export default async function webhook(
                 ),
               );
 
-            await db
-              .update(trips)
-              .set({
-                paymentIntentId: paymentIntentSucceeded.id,
-                checkoutSessionId:
-                  paymentIntentSucceeded.metadata.checkout_session_id,
-              })
-              .where(
-                eq(
-                  trips.offerId,
-                  parseInt(paymentIntentSucceeded.metadata.listing_id!),
-                ),
-              ); // setting the paymentIntentId in the trips table
+            // await db
+            //   .update(trips)
+            //   .set({
+            //     paymentIntentId: paymentIntentSucceeded.id,
+            //     checkoutSessionId:
+            //       paymentIntentSucceeded.metadata.checkout_session_id,
+            //   })
+            //   .where(
+            //     eq(
+            //       trips.offerId,
+            //       parseInt(paymentIntentSucceeded.metadata.listing_id!),
+            //     ),
+            //   ); // setting the paymentIntentId in the trips table
 
             const requestId = paymentIntentSucceeded.metadata.request_id;
             if (requestId && !isNaN(parseInt(requestId))) {
@@ -109,7 +109,7 @@ export default async function webhook(
 
               if (offerId) {
                 const offer = await db.query.offers.findFirst({
-                  with: { request: true },
+                  with: { request: true, property: true, },
                   where: eq(offers.id, offerId),
                 });
 
@@ -141,7 +141,7 @@ export default async function webhook(
           // const requestID = parseInt(
           //   paymentIntentSucceeded.metadata.request_id!,
           // );
-          // const property = await db.query.properties.findFirst({
+          // const property = await ({
           //   where: eq(properties.id, propertyID),
           // });
           // const request = await db.query.requests.findFirst({
@@ -246,7 +246,8 @@ export default async function webhook(
             // Create conversation with admin if it doesn't exist
             if (!conversationId) {
               await createConversationWithAdmin(
-                paymentIntentSucceeded.metadata.user_id,
+                userId: paymentIntentSucceeded.metadata?.user_id ?? null,
+                
               );
             }
           }
@@ -269,57 +270,51 @@ export default async function webhook(
               checkoutSessionId: checkoutSessionCompleted.id,
             })
             .where(eq(offers.id, listing_id));
-
-          console.log("Checkout session was successful!");
-
-          const postStayInfo = await db.query.offers.findFirst({
-            where: eq(offers.checkoutSessionId, checkoutSessionCompleted.id),
-            with:{
-              property : { columns : { propertyType: true, name: true }},
-              request: { columns : {checkOut : true},
-                with : { madeByGroup: {
-                with: {
-                  members: {
-                    with: {
-                      user: {
-                        columns: {
-                          name: true,
-                          email: true,
-                          image: true,
-                          phoneNumber: true,
-                          id: true,
-                        },
-                      },
-                    },
-                  },
-                  invites: true,
-                },
-              }}}
-            } 
-          })
-          const newDate = postStayInfo?.request.checkOut
-          const add2days = new Date(newDate?.setDate(newDate.getDate() + 2) ?? "")
-          const members = postStayInfo?.request.madeByGroup.members
-          for(const member of members ?? []){
-            const job = new CronJob(
-              add2days,
-              function () {
-                sendEmail({
-                  to: member.user.email,
-                  subject: "How was your stay?",
-                  content: PostStayEmail({
-                    userName: member.user.name ?? "",
-                    property: postStayInfo?.property.name ?? "",
-                    house: postStayInfo?.property.propertyType ?? "",
-                  })
-                })
-              },
-              null,
-              true,
-          )
-          }
         } else {
           // console.error("Metadata or listing_id is null or undefined");
+        }
+        break;
+      case "charge.updated":
+        {
+          const chargeObject = event.data.object;
+          //addingt the paymentIntentId to the trips table
+          await db
+            .update(trips)
+            .set({
+              paymentIntentId: chargeObject.payment_intent?.toString(),
+              checkoutSessionId: chargeObject.metadata.checkout_session_id,
+              totalPriceAfterFees: chargeObject.amount,
+            })
+            .where(
+              eq(trips.offerId, parseInt(chargeObject.metadata.listing_id!)),
+            ); // setting the paymentIntentId in the trips table
+
+          //get the new trips
+          const trip = await db.query.trips.findFirst({
+            where: eq(
+              trips.offerId,
+              parseInt(chargeObject.metadata.listing_id!),
+            ),
+          });
+          //extract metadata from the charge object
+          const listingId = parseInt(chargeObject.metadata.listing_id!);
+          const propertyId = parseInt(chargeObject.metadata.property_id!);
+          const userId = chargeObject.metadata.user_id!;
+
+          //creating a superhog reservation only if does not exist
+          const currentSuperhogReservation = await db.query.trips.findFirst({
+            where: eq(trips.superhogRequestId, superhogRequests.id),
+          });
+          if (!currentSuperhogReservation && trip) {
+            void createSuperhogReservation({
+              listingId,
+              propertyId,
+              userId,
+              trip,
+            }); //creating a superhog reservation
+          } else {
+            console.log("Superhog reservation already exists");
+          }
         }
         break;
       case "identity.verification_session.processing":

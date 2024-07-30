@@ -2,7 +2,7 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
 import {
-  AdminConversation,
+  type AdminConversation,
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
@@ -16,7 +16,7 @@ import UserAvatar from '@/components/_common/UserAvatar'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import {MessageCircleMore, Mic, ArrowUp, SendHorizonal, Smile, X} from 'lucide-react'
+import { Mic, ArrowUp, Smile} from 'lucide-react'
 import {cn} from '@/utils/utils';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,9 +24,9 @@ import AdminMessages from "@/components/messages/AdminMessages";
 import * as z from "zod";
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
-    useState<Conversation & AdminConversation | null>(null);
+    useState<Conversation | AdminConversation | null>(null);
 
-  const selectConversation = (conversation: Conversation & AdminConversation | null) => {
+  const selectConversation = (conversation: Conversation | AdminConversation | null) => {
     setSelectedConversation(conversation);
   };
 
@@ -34,8 +34,8 @@ function MessageDisplay() {
   const [isViewed, setIsViewd] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
   const adminConversation = useConversation((state) => state.adminConversationList)
-  console.log(conversations)
-  console.log(adminConversation)
+  // console.log(conversations)
+  // console.log(adminConversation)
   const { query } = useRouter();
 
   useEffect(() => {
@@ -56,7 +56,7 @@ function MessageDisplay() {
     }
 
     if(query.conversationId && adminConversation.length > 0){
-      console.log(query)
+      // console.log(query)
       const conversationIdToSelect = query.conversationId as string;
       const conversationToSelect = adminConversation.find(
         (conversation) => conversation.id === conversationIdToSelect,

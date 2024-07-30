@@ -11,6 +11,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import MessagesPopover from "@/components/messages/MessagesPop";
 
 
+import { useRouter } from "next/router";
+import { api } from "@/utils/api";
+import { useEffect } from "react";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -26,13 +29,23 @@ export default function DashboardLayout({
   const isMd = useIsMd();
   const isLg = useIsLg();
   // const isMobile = useMediaQuery("(max-width: 684px)")
-  const formSchema = z.object({
-    message: z.string(),
-  })
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema)
-  })
+
+  const router = useRouter();
+
+  const { data: onboardingStep } = api.users.getOnboardingStep.useQuery();
+
+  useEffect(() => {
+    if (onboardingStep !== undefined && onboardingStep < 3) {
+      if (onboardingStep === 0) {
+        void router.push("/auth/onboarding");
+      } else if (onboardingStep === 1) {
+        void router.push("/auth/onboarding-1");
+      } else if (onboardingStep === 2) {
+        void router.push("/auth/onboarding-2");
+      }
+    }
+  }, [onboardingStep, router]);
+
   return (
     <>
       <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />

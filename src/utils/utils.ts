@@ -121,7 +121,6 @@ export function formatDateRange(
 }
 
 function removeTimezoneFromDate(date: Date) {
-  // Convert to ISO string and split by 'T' to get date part
   return new Date(date).toISOString().split("Z")[0]!;
 }
 
@@ -138,7 +137,7 @@ export function formatDateMonthDayYear(date: Date) {
 }
 
 export function formatDateYearMonthDay(date: Date) {
-  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd");
+  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd"); //ex 2021-12-31
 }
 
 export function formatShortDate(date: Date) {
@@ -148,6 +147,13 @@ export function formatShortDate(date: Date) {
 export function convertDateFormat(dateString: string) {
   const [year, month, day] = dateString.split("-");
   return `${month}/${day}/${year}`;
+}
+
+export function addDays(date: Date, days: number): Date {
+  //add days to a date object
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
 }
 
 export function getElapsedTime(createdAt: Date): string {

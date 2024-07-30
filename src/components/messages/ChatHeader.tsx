@@ -1,4 +1,4 @@
-import { AdminConversation, type Conversation } from "@/utils/store/conversations";
+import { type AdminConversation, type Conversation } from "@/utils/store/conversations";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
@@ -16,7 +16,7 @@ export default function ChatHeader({
   setSelected,
 }: ContentProps) {
 
-  const {data: session} = useSession();
+
 
   return (
     <div className="flex items-center justify-between border-b p-4">

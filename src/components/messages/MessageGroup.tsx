@@ -1,10 +1,10 @@
-import { type GuestMessageType, type MessageType } from "@/server/db/schema";
+import { User, type GuestMessageType, type MessageType } from "@/server/db/schema";
 import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 import { type MessageGroups } from "./groupMessages";
 import { AnonymousAvatar } from "../ui/avatar";
-import { type GuestMessage } from "@/utils/store/messages";
+// import { type GuestMessage } from "@/utils/store/messages";
 
 export function MessageGroup({ messageGroup }: { messageGroup: MessageGroups }) {
   const { data: session } = useSession();

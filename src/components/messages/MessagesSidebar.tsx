@@ -1,14 +1,13 @@
-import { GuestMessageType, type MessageDbType } from "@/types/supabase.message";
+import { type GuestMessageType, type MessageDbType } from "@/types/supabase.message";
 import { api } from "@/utils/api";
 import {
   useConversation,
   type Conversation,
   type AdminConversation,
-  type AdminConversations
 } from "@/utils/store/conversations";
-import { GuestMessage, useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { type GuestMessage, useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
-import { errorToast } from "@/utils/toasts";
+
 import { cn } from "@/utils/utils";
 import { sub } from "date-fns";
 import { useSession } from "next-auth/react";
@@ -19,8 +18,8 @@ import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
 import { AdminSidebar } from './AdminSidebar'
-import { AvatarFallback } from "../ui/avatar";
-import { getAdminId } from '@/server/server-utils'
+
+
 
 
 export function MessageConversation({
@@ -101,8 +100,8 @@ export function MessageConversation({
 }
 
 export type SidebarProps = {
-  selectedConversation: Conversation & AdminConversation | null;
-  setSelected: (arg0: Conversation & AdminConversation) => void;
+  selectedConversation: Conversation | AdminConversation | null;
+  setSelected: (arg0: Conversation | AdminConversation) => void;
 };
 
 export default function MessagesSidebar({
@@ -254,7 +253,7 @@ export default function MessagesSidebar({
     adminConversation,
   ]);
 
-  console.log("in Messages Sidebar");
+  // console.log("in Messages Sidebar");
 
   return (
     <div>
