@@ -19,6 +19,11 @@ export default function ActivityFeed({
     ? feed.filter((item) => item.isFiller)
     : feed;
 
+  // only display the last 50 items
+  if (dataInDisplay.length > 50) {
+    dataInDisplay.splice(50);
+  }
+
   return (
     <div className="max-w-lg space-y-4 overflow-y-auto">
       {!loadingFeed &&
