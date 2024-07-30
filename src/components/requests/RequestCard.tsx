@@ -20,15 +20,13 @@ import {
   TrashIcon,
   Users2Icon,
 } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent, CardFooter } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import RequestCardBadge from "./RequestCardBadge";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestDialog from "./WithdrawRequestDialog";
 
-import MobileSimilarProperties from "./MobileSimilarProperties";
-import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
 import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
@@ -75,23 +73,27 @@ export default function RequestCard({
   const [open, setOpen] = useState(false);
 
   return (
-    <Card className="block">
+    <Card>
       <WithdrawRequestDialog
         requestId={request.id}
         open={open}
         onOpenChange={setOpen}
       />
-      <CardContent className="space-y-2">
+      <div>
         {type !== "host" && <RequestCardBadge request={request} />}
         {type === "host" && (
           <div className="flex items-center gap-2">
-            <UserAvatar size="sm" name={request.name} image={request.image} />
+            <UserAvatar
+              size="sm"
+              name={request.traveler.name}
+              image={request.traveler.image}
+            />
             <TravelerVerificationsDialog request={request} />
             <p>&middot;</p>
             <p>{formatInterval(Date.now() - getTime(request.createdAt))} ago</p>
           </div>
         )}
-        <div className="absolute right-2 top-0 flex items-center gap-2">
+        <div className="absolute right-2 top-2 flex items-center gap-2">
           {showAvatars && (
             <RequestGroupAvatars
               request={request}
@@ -114,6 +116,8 @@ export default function RequestCard({
             </DropdownMenu>
           )}
         </div>
+      </div>
+      <CardContent className="space-y-1">
         <div className="flex items-start gap-1">
           <MapPinIcon className="shrink-0 text-primary" />
           <h2 className="text-base font-bold text-primary md:text-lg">
@@ -133,39 +137,26 @@ export default function RequestCard({
               {fmtdNumGuests}
             </span>
           </p>
-
-          {fmtdFilters && <p>{fmtdFilters}</p>}
-
-          <div className="flex flex-wrap gap-2">
-            {request.amenities.map((amenity) => (
-              <Badge key={amenity}>{amenity}</Badge>
-            ))}
-          </div>
-
-          {request.note && (
-            <div className="rounded-lg bg-zinc-100 px-4 py-2">
-              <p className="text-xs text-muted-foreground">Note</p>
-              <p>&ldquo;{request.note}&rdquo;</p>
-            </div>
-          )}
-
-          {request.airbnbLink && (
-            <a className="underline" href={request.airbnbLink}>
-              Airbnb Link
-            </a>
-          )}
         </div>
-        <div className="flex justify-end gap-2">{children}</div>
-        {isSelected && (
-          <div className="md:hidden">
-            <Separator className="my-1" />
-            <MobileSimilarProperties
-              location={request.location}
-              city={request.location}
-            />
+        {fmtdFilters && <p>{fmtdFilters}</p>}
+        <div className="flex flex-wrap gap-1">
+          {request.amenities.map((amenity) => (
+            <Badge key={amenity}>{amenity}</Badge>
+          ))}
+        </div>
+        {request.note && (
+          <div className="rounded-lg bg-zinc-100 px-4 py-2">
+            <p className="text-xs text-muted-foreground">Note</p>
+            <p>&ldquo;{request.note}&rdquo;</p>
           </div>
         )}
+        {request.airbnbLink && (
+          <a className="underline" href={request.airbnbLink}>
+            Airbnb Link
+          </a>
+        )}
       </CardContent>
+      <CardFooter>{children}</CardFooter>
     </Card>
   );
 }

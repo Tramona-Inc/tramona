@@ -6,7 +6,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import SpinnerButton from "@/components/_icons/SpinnerButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -67,7 +66,14 @@ export default function Onboarding() {
     api.users.phoneNumberIsTaken.useMutation();
   const { mutateAsync: mutateInsertPhone } =
     api.users.insertPhoneWithUserId.useMutation();
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+
+  const { refetch: refetchOnboardingStep } =
+    api.users.getOnboardingStep.useQuery(undefined, { enabled: false });
+  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
+    onSuccess: () => {
+      void refetchOnboardingStep();
+    },
+  });
 
   const { update } = useSession();
 
@@ -88,7 +94,7 @@ export default function Onboarding() {
     if (country !== "US") {
       if (session?.user.id) {
         await updateProfile({
-          id: session?.user.id,
+          id: session.user.id,
           isWhatsApp: true,
         });
       }
@@ -124,6 +130,10 @@ export default function Onboarding() {
               userId: session.user.id,
               phone: phoneNumber,
             });
+            await updateProfile({
+              id: session.user.id,
+              onboardingStep: 1,
+            });
 
             toast({
               title: "Successfully verified phone!",
@@ -133,7 +143,7 @@ export default function Onboarding() {
             void update();
 
             void router.push({
-              pathname: "/auth/date-of-birth",
+              pathname: "/auth/onboarding-1",
             });
           }
         }

@@ -32,8 +32,8 @@ const IdentityModal = () => {
 
   useEffect(() => {
     if (verificationAttempted && users?.isIdentityVerified !== undefined) {
-      console.log("Fetched verification status:", users?.isIdentityVerified);
-      setVerificationStatus(users?.isIdentityVerified);
+      console.log("Fetched verification status:", users.isIdentityVerified);
+      setVerificationStatus(users.isIdentityVerified);
       setShowVerificationBanner(true);
     }
   }, [

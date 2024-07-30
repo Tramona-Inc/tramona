@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { api } from "@/utils/api";
 import { generateTimeStamp } from "@/utils/utils";
-import { ReservationInterface } from "@/server/api/routers/superhogRouter";
+import { type ReservationInterface } from "@/server/api/routers/superhogRouter";
 import Spinner from "@/components/_common/Spinner";
 import {
   CircleCheckBigIcon,
@@ -10,7 +10,6 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import { reducer } from "../../ui/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function DeleteSuperhog() {
   const {
@@ -29,23 +29,25 @@ export default function DeleteSuperhog() {
     isLoading,
   }: { data: ReservationInterface[] | undefined; isLoading: boolean } =
     api.superhog.getAllVerifications.useQuery();
+  const { toast } = useToast();
 
   const deleteVerificationMutation =
     api.superhog.deleteVerification.useMutation({
       onSuccess: () => {
-        console.log("Successfully deleted verification");
+        toast({ title: "Successfully deleted verification" });
       },
       onError: (error) => {
-        console.log(
-          "Failed to delete verification this is the onError on client side",
-        );
-        console.log(error);
+        toast({
+          title: "Failed to delete verification",
+          description: error.message,
+          variant: "destructive",
+        });
       },
     });
 
   const content = data ? (
     data.length < 1 ? (
-      <p className="flex h-[400px] items-center justify-center text-center">
+      <p className="flex h-[400px] w-full items-center justify-center text-center">
         Currently there are no verification forms
       </p>
     ) : (
@@ -55,7 +57,7 @@ export default function DeleteSuperhog() {
             <CardHeader className="flex flex-row items-start justify-between">
               <div className="flex flex-col gap-y-1">
                 <h1 className="font-bold">{reservation.nameOfVerifiedUser}</h1>
-                <div className="flex flex-row items-center gap-x-1 text-xs  font-semibold text-primary">
+                <div className="flex flex-row items-center gap-x-1 text-xs font-semibold text-primary">
                   Status: <div>{reservation.superhogStatus} </div>
                   <div>
                     {reservation.superhogStatus === "Approved" ? (
@@ -111,7 +113,12 @@ export default function DeleteSuperhog() {
                             },
                           });
                         } catch (error) {
-                          console.log(error);
+                          if (error instanceof Error) {
+                            toast({
+                              title: "Failed to delete verification",
+                              description: error.message,
+                            });
+                          }
                         }
                       }}
                     >
@@ -154,7 +161,6 @@ export default function DeleteSuperhog() {
     )
   ) : null;
 
-  console.log(data);
   return (
     <Card className="m-12 px-10">
       <CardHeader className="my-5 text-3xl font-bold text-primary">
@@ -164,6 +170,13 @@ export default function DeleteSuperhog() {
         <p className="my-3 font-semibold">
           Select a verification report to delete
         </p>
+        <Card className="my-4 bg-red-50">
+          <CardContent>
+            <div className="font-bold">
+              Warning: Deleting a request will not the delete the trip itself...{" "}
+            </div>
+          </CardContent>
+        </Card>
         <div className=" ">
           {isLoading ? (
             <Spinner />

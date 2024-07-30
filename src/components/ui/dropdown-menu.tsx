@@ -205,7 +205,7 @@ const DropdownMenuDialogItem = React.forwardRef<
           ref={ref}
           onSelect={(event) => {
             event.preventDefault();
-            onSelect?.();
+            onSelect();
           }}
         >
           {trigger}

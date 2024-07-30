@@ -1,13 +1,7 @@
-import { api } from "@/utils/api";
-import { formatCurrency } from "@/utils/utils";
 import {
-  ConnectPayments,
-  ConnectPaymentDetails,
-  ConnectPayouts,
+  ConnectPayments, ConnectPayouts
 } from "@stripe/react-connect-js";
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import PayoutCard from "./PayoutCard";
+import { Card, CardHeader } from "@/components/ui/card";
 
 function PaymentHistory({
   hostStripeAccountId,

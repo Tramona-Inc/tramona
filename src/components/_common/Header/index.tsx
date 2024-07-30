@@ -14,16 +14,13 @@ import {
 import Link from "next/link";
 import HeaderTopRight from "./HeaderTopRight";
 
-import Sidebar from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn, useIsLg } from "@/utils/utils";
+import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
-import { SupportBtn } from "./SupportBtn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +29,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Icon } from "@/components/_icons/icons";
 import { useState } from "react";
 
 type HeaderProps =

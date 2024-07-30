@@ -3,7 +3,6 @@ import { cn } from "@/utils/utils";
 import Marquee from "src/components/_common/MarqueeVertical";
 import Image from "next/image";
 
-
 const completedRequests = [
   {
     location: "Malfa, SI",
@@ -55,34 +54,54 @@ const completedRequests = [
   },
 ];
 
-const leftImages = completedRequests.slice(0, completedRequests.length / 2)
-const rightImages = completedRequests.slice(completedRequests.length / 2)
+const leftImages = completedRequests.slice(0, completedRequests.length / 2);
+const rightImages = completedRequests.slice(completedRequests.length / 2);
 
-const PropertyCard = ({ property } : any) => {
-    return (
-      <div className="relative w-full mb-4">
-        <Image
-          className="w-full h-auto rounded-lg"
-          width={300}
-          height={200}
-          alt=""
-          src={property.image}
-        />
-        <div className="mt-2">
-          <p className="text-sm font-bold">{property.location}</p>
-          <div className="flex items-center">
-            <span className="text-sm font-semibold">${property.tramonaPrice}</span>
-            <span className="text-sm line-through ml-2 text-gray-500">${property.originalPrice}</span>
-            <span className="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">{Math.round(((property.originalPrice - property.tramonaPrice) / property.originalPrice) * 100)}% off</span>
-          </div>
+const PropertyCard = ({
+  property,
+}: {
+  property: {
+    image: string;
+    location: string;
+    tramonaPrice: number;
+    originalPrice: number;
+  };
+}) => {
+  return (
+    <div className="relative mb-4 w-full">
+      <Image
+        className="h-auto w-full rounded-lg"
+        width={300}
+        height={200}
+        alt=""
+        src={property.image}
+      />
+      <div className="mt-2">
+        <p className="text-sm font-bold">{property.location}</p>
+        <div className="flex items-center">
+          <span className="text-sm font-semibold">
+            ${property.tramonaPrice}
+          </span>
+          <span className="ml-2 text-sm text-gray-500 line-through">
+            ${property.originalPrice}
+          </span>
+          <span className="ml-2 rounded bg-blue-500 px-2 py-1 text-xs text-white">
+            {Math.round(
+              ((property.originalPrice - property.tramonaPrice) /
+                property.originalPrice) *
+                100,
+            )}
+            % off
+          </span>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 export default function CompletedRequestsSection() {
   return (
-    <div className="relative flex h-96 flex-row items-center justify-center overflow-hidden rounded-lg lg:border lg:bg-background sm:px-20 lg:shadow-xl">
+    <div className="relative flex h-96 flex-row items-center justify-center overflow-hidden rounded-lg sm:px-20 lg:border lg:bg-background lg:shadow-xl">
       <Marquee pauseOnHover vertical className="[--duration:20s]">
         {leftImages.map((property, index) => (
           <PropertyCard key={index} property={property} />
@@ -93,8 +112,8 @@ export default function CompletedRequestsSection() {
           <PropertyCard key={index} property={property} />
         ))}
       </Marquee>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 lg:bg-gradient-to-b from-white dark:from-background"></div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 lg:bg-gradient-to-t from-white dark:from-background"></div>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 from-white dark:from-background lg:bg-gradient-to-b"></div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 from-white dark:from-background lg:bg-gradient-to-t"></div>
     </div>
   );
 }

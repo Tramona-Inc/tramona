@@ -278,7 +278,7 @@ export function HostPropertyEditBtn({
     setCheckInType(property.checkInInfo ?? "self");
     setCheckIn(property.checkInTime ?? "00:00");
     setCheckOut(property.checkOutTime ?? "00:00");
-    setAmenities(property.amenities ?? []);
+    setAmenities(property.amenities);
     setOtherAmenities(property.otherAmenities);
     setImageUrls(property.imageUrls);
     setTitle(property.name);

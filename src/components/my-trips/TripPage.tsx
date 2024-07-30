@@ -26,7 +26,7 @@ dayjs.extend(relativeTime);
 export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
   const chatWithAdmin = useChatWithAdmin();
 
-  const { trip, tripPrice, coordinates } = tripData;
+  const { trip, coordinates } = tripData;
 
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
 
@@ -165,8 +165,8 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
                 {coordinates && (
                   <div className="relative z-10 my-3 overflow-clip rounded-lg">
                     <SingleLocationMap
-                      lat={coordinates.location!.lat}
-                      lng={coordinates.location!.lng}
+                      lat={coordinates.location.lat}
+                      lng={coordinates.location.lng}
                     />
                   </div>
                 )}
@@ -188,7 +188,7 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
                     Paid {dayjs(trip.createdAt).format("MMM D")}
                   </p>
                 </div>
-                <p>{formatCurrency(tripPrice)}</p>
+                <p>{formatCurrency(trip.totalPriceAfterFees)}</p>
 
                 {/* <Link
                   href={`/`}
@@ -281,12 +281,10 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
           </div>
         </div>
         <div className="sticky top-[100px] z-10 hidden h-[700px] overflow-clip rounded-lg lg:block">
-          {coordinates && (
-            <SingleLocationMap
-              lat={coordinates.location!.lat}
-              lng={coordinates.location!.lng}
-            />
-          )}
+          <SingleLocationMap
+            lat={coordinates.location.lat}
+            lng={coordinates.location.lng}
+          />
         </div>
       </div>
     </div>

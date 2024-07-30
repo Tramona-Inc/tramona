@@ -1,10 +1,8 @@
-import PlacesInput from "@/components/_common/PlacesInput";
-import { Check, ChevronDown, MapPinIcon, SearchIcon } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { Form, FormField, FormItem, FormLabel } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {

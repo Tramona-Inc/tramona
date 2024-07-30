@@ -19,7 +19,7 @@ export default function OfferCardsFeed({ offers }: Props) {
 
         <ScrollArea className="max-h-[50vh] overflow-y-auto">
           <div className="flex flex-col gap-3">
-            {feed?.map((offer: LiveFeedOffer) => (
+            {feed.map((offer: LiveFeedOffer) => (
               <OfferCard key={offer.id} offer={offer} />
             ))}
           </div>
