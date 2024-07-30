@@ -27,7 +27,7 @@ import { z } from "zod";
 const formSchema = z
   .object({
     email: zodEmail(),
-    name: zodString({ minLen: 2 }),
+    // name: zodString({ minLen: 2 }),
     password: zodPassword(),
     confirm: z.string(),
   })
@@ -99,7 +99,7 @@ export default function SignUp({
                   </FormItem>
                 )}
               />
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
@@ -111,7 +111,7 @@ export default function SignUp({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
               <FormField
                 control={form.control}
                 name="password"

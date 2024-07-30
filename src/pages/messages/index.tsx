@@ -47,7 +47,7 @@ function MessageDisplay() {
     <div className="flex h-screen-minus-header-n-footer divide-x">
       <div
         className={cn(
-          "w-full md:w-96",
+          "w-full bg-white md:w-96",
           selectedConversation && "hidden md:block",
         )}
       >

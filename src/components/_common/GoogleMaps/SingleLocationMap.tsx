@@ -1,11 +1,5 @@
-import {
-  Map,
-  MapCameraChangedEvent,
-  MapCameraProps,
-  useMap,
-  useApiIsLoaded,
-} from "@vis.gl/react-google-maps";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Map, useMap } from "@vis.gl/react-google-maps";
+import { useEffect, useState } from "react";
 import MapPointer from "./MapPointer";
 interface MapPointerProps {
   //location: google.maps.LatLngLiteral;
@@ -19,12 +13,10 @@ function SingleLocationMap({ lat, lng }: MapPointerProps) {
   );
 
   useEffect(() => {
-    if (!lat || !lng) return;
-    const center = { lat, lng } as google.maps.LatLngLiteral;
-    setLocation(center);
-  }, [map]);
+    if (lat && lng) setLocation({ lat, lng });
+  }, [lat, lng, map]);
   return (
-    <div className="focus-none h-[100%] w-[100%] rounded-lg border shadow-lg">
+    <div className="h-full w-full">
       {location && (
         <Map
           mapId="9c8e46d54d7a528b"

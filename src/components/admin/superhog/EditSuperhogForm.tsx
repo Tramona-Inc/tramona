@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { api } from "@/utils/api";
-import { ReservationInterface } from "@/server/api/routers/superhogRouter";
+import { type ReservationInterface } from "@/server/api/routers/superhogRouter";
 import EditReservationCard from "./EditReservationCard";
 
 import Spinner from "@/components/_common/Spinner";
@@ -33,6 +33,14 @@ export default function EditSuperhogForm() {
         <p className="my-3 font-semibold">
           Select the dates of a verification report to edit
         </p>
+        <Card className="my-4 bg-red-50">
+          <CardContent>
+            <div className="font-bold">
+              Warning: Changing insurance dates will change the actual trip
+              date...{" "}
+            </div>
+          </CardContent>
+        </Card>
         <div className=" ">
           {isLoading ? (
             <Spinner />

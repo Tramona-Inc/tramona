@@ -1,5 +1,5 @@
 /* OfferDialog.tsx */
-import { useState } from "react";
+import { type Dispatch, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ export default function HostRequestDialog({
   setOpen: (open: boolean) => void;
   request: HostDashboardRequest;
   properties: Property[];
-  setPropertyPrices: (prices: Record<number, string>) => void;
+  setPropertyPrices: Dispatch<React.SetStateAction<Record<number, string>>>;
   propertyPrices: Record<number, string>;
   setStep: (step: number) => void;
 }) {
@@ -63,48 +63,46 @@ export default function HostRequestDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="text-sm">
-            Select the property you’d like to offer.
+            Select the property you&apos;d like to offer.
           </div>
           <div className="space-y-2">
-            {request && (
-              <div className="rounded-md border bg-gray-50 p-4">
-                <div className="mb-4 flex justify-between">
-                  <div className="flex flex-col items-start">
-                    <div className="text-dark text-lg font-bold">
-                      {formatCurrency(
-                        request.maxTotalPrice /
-                          getNumNights(request.checkIn, request.checkOut),
-                      )}
-                      /night
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {formatCurrency(request.maxTotalPrice)} total
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="text-dark text-lg font-bold">
-                      {formatDateRange(request.checkIn, request.checkOut)}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {plural(
+            <div className="rounded-md border bg-gray-50 p-4">
+              <div className="mb-4 flex justify-between">
+                <div className="flex flex-col items-start">
+                  <div className="text-dark text-lg font-bold">
+                    {formatCurrency(
+                      request.maxTotalPrice /
                         getNumNights(request.checkIn, request.checkOut),
-                        "night",
-                      )}
-                    </div>
+                    )}
+                    /night
                   </div>
-                  <div className="flex flex-col items-end">
-                    <div className="text-dark text-lg font-bold">
-                      {plural(request.numGuests, "guest")}
-                    </div>
+                  <div className="text-sm text-gray-600">
+                    {formatCurrency(request.maxTotalPrice)} total
                   </div>
                 </div>
-                {request.note && (
-                  <div className="rounded-md bg-gray-100 p-2">
-                    <div className="text-sm text-gray-700">{request.note}</div>
+                <div className="flex flex-col items-center">
+                  <div className="text-dark text-lg font-bold">
+                    {formatDateRange(request.checkIn, request.checkOut)}
                   </div>
-                )}
+                  <div className="text-sm text-gray-600">
+                    {plural(
+                      getNumNights(request.checkIn, request.checkOut),
+                      "night",
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <div className="text-dark text-lg font-bold">
+                    {plural(request.numGuests, "guest")}
+                  </div>
+                </div>
               </div>
-            )}
+              {request.note && (
+                <div className="rounded-md bg-gray-100 p-2">
+                  <div className="text-sm text-gray-700">{request.note}</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div className="mt-4">
@@ -117,7 +115,7 @@ export default function HostRequestDialog({
             </button>
           </div>
           <div className="mb-6 space-y-4">
-            {properties?.map((property) => (
+            {properties.map((property) => (
               <div
                 key={property.id}
                 className={`flex flex-col rounded-md border bg-white p-4 ${selectedProperties.includes(property.id) ? "border-primary" : "border-gray-200"}`}
@@ -199,13 +197,7 @@ export default function HostRequestDialog({
           <Button variant="secondary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={() => {
-              setStep(1);
-            }}
-          >
-            Continue
-          </Button>
+          <Button onClick={() => setStep(1)}>Continue</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

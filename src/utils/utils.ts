@@ -2,8 +2,8 @@ import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
-  format,
   formatDate,
+  type FormatOptions,
   isSameDay,
   isSameMonth,
   isSameYear,
@@ -81,36 +81,52 @@ export function capitalize(str: string) {
  * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
-export function formatDateRange(fromDate: Date, toDate?: Date) {
+export function formatDateRange(
+  fromDate: Date,
+  toDate?: Date,
+  { withWeekday = false } = {},
+) {
   const from = removeTimezoneFromDate(fromDate);
   const to = toDate ? removeTimezoneFromDate(toDate) : "";
 
   const isCurYear = isSameYear(from, new Date());
-
-  if (!to || isSameDay(from, to)) {
-    return format(from, isCurYear ? "MMM d" : "MMM d, yyyy");
-  }
-
   const sameMonth = isSameMonth(from, to);
   const sameYear = isSameYear(from, to);
 
+  if (withWeekday) {
+    if (!to || isSameDay(from, to)) {
+      return formatDate(from, "EEE, MMMM d, yyyy");
+    }
+
+    if (sameYear) {
+      return `${formatDate(from, "EEE, MMMM d")} – ${formatDate(
+        to,
+        isCurYear ? "d, yyyy" : "MMM d, yyyy",
+      )}`;
+    }
+  }
+
+  if (!to || isSameDay(from, to)) {
+    const format = isCurYear ? "MMM d" : "MMM d, yyyy";
+    return formatDate(from, format);
+  }
+
   if (sameMonth && sameYear) {
-    return `${format(from, "MMM d")} – ${format(
+    return `${formatDate(from, "MMM d")} – ${formatDate(
       to,
       isCurYear ? "d" : "d, yyyy",
     )}`;
   }
   if (sameYear) {
-    return `${format(from, "MMM d")} – ${format(
+    return `${formatDate(from, "MMM d")} – ${formatDate(
       to,
       isCurYear ? "MMM d" : "MMM d, yyyy",
     )}`;
   }
-  return `${format(from, "MMM d, yyyy")} – ${format(to, "MMM d, yyyy")}`;
+  return `${formatDate(from, "MMM d, yyyy")} – ${formatDate(to, "MMM d, yyyy")}`;
 }
 
 function removeTimezoneFromDate(date: Date) {
-  // Convert to ISO string and split by 'T' to get date part
   return new Date(date).toISOString().split("Z")[0]!;
 }
 
@@ -119,33 +135,55 @@ export function formatDateMonthDay(date: Date) {
 }
 
 export function formatDateWeekMonthDay(date: Date) {
-  return formatDate(removeTimezoneFromDate(date), "EEE MMMM d");
+  return formatDate(removeTimezoneFromDate(date), "EEE, MMMM d");
 }
 
 export function formatDateMonthDayYear(date: Date) {
   return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
 }
 
+export function formatDateYearMonthDay(date: Date) {
+  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd"); //ex 2021-12-31
+}
+
+export function formatShortDate(date: Date) {
+  return formatDate(removeTimezoneFromDate(date), "M/d/yyyy");
+}
+
+export function convertDateFormat(dateString: string) {
+  const [year, month, day] = dateString.split("-");
+  return `${month}/${day}/${year}`;
+}
+
+export function addDays(date: Date, days: number): Date {
+  //add days to a date object
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
 export function getElapsedTime(createdAt: Date): string {
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+  const diffInSeconds = Math.floor(
+    (now.getTime() - createdAt.getTime()) / 1000,
+  );
 
   if (diffInSeconds < 60) {
-    return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
+    return `${diffInSeconds} second${diffInSeconds !== 1 ? "s" : ""} ago`;
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    return `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""} ago`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    return `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+  return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
 }
 
 export function getDisplayedName(realname: string | null): string {
@@ -191,17 +229,20 @@ export function formatInterval(ms: number) {
   return "now";
 }
 
-export function formatArrayToString(arr: string[]) {
+export function formatArrayToString(
+  arr: string[],
+  { junction }: { junction: "and" | "or" } = { junction: "and" },
+) {
   if (arr.length === 0) {
     return "";
   } else if (arr.length === 1) {
     return arr[0]!;
   } else if (arr.length === 2) {
-    return `${arr[0]} and ${arr[1]}`;
+    return `${arr[0]} ${junction} ${arr[1]}`;
   } else {
     const lastItem = arr.pop();
     const joinedItems = arr.join(", ");
-    return `${joinedItems}, and ${lastItem}`;
+    return `${joinedItems}, ${junction} ${lastItem}`;
   }
 }
 
@@ -229,7 +270,7 @@ export function getDiscountPercentage(
 // these will need to be kept in sync with
 // https://tailwindcss.com/docs/screens and ./tailwind.config.ts
 
-export const useScreenWidth = () => useWindowSize().width ?? 0;
+const useScreenWidth = () => useWindowSize().width ?? 0;
 
 /**
  * screen width >= 640 (same as tailwind `sm:`)
@@ -352,32 +393,61 @@ export function useOverflow(ref: RefObject<HTMLDivElement>): boolean {
   return isOverflowing;
 }
 
-// export function formatDateRangeWithWeekday(
-//   fromDate: Date | string,
-//   toDate?: Date | string,
-// ) {
-//   // Convert to Date objects if necessary
-//   //converting because the gssp function returns a string
-//   if (typeof fromDate === "string") {
-//     fromDate = new Date(fromDate);
-//   }
-//   if (typeof toDate === "string") {
-//     toDate = new Date(toDate);
-//   }
+function isValidBirthdate(date: string) {
+  // Regular expression to match MM/DD/YYYY format
+  const regex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
+  return regex.test(date);
+}
 
-//   fromDate = removeTimezoneFromDate(fromDate);
-//   toDate = toDate && removeTimezoneFromDate(toDate);
+export function getAge(birthdate: string) {
+  if (!isValidBirthdate(birthdate)) {
+    throw new Error("Invalid birthdate format. Please use MM/DD/YYYY.");
+  }
+  const [month, day, year] = birthdate.split("/").map(Number);
 
-//   const options: Intl.DateTimeFormatOptions = {
-//     weekday: "short",
-//     month: "short",
-//     day: "numeric",
-//   };
+  if (month && year && day) {
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
 
-//   const fromFormatted = fromDate.toLocaleDateString("en-US", options);
-//   const toFormatted = toDate
-//     ? (toDate as Date).toLocaleDateString("en-US", options)
-//     : "";
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
 
-//   return toDate ? `${fromFormatted} - ${toFormatted}` : fromFormatted;
-// }
+    // Adjust age if the birthday has not occurred yet this year
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age;
+  }
+}
+
+export function formatTime(time: string) {
+  const [hour, minute] = time.split(":").map(Number);
+  if (hour === undefined || minute === undefined) return time;
+  const fmtdMinutes = minute < 10 ? `0${minute}` : minute;
+  return hour > 12
+    ? `${hour - 12}:${fmtdMinutes} PM`
+    : `${hour}:${fmtdMinutes} AM`;
+}
+
+/**
+ * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
+ * to the end of the date string to prevent the timezone from getting converted
+ * to UTC and the formatted date being 1 day off.
+ *
+ * @example
+ * ```js
+ * formatDateString("2023-03-01", "MMM d, yyyy"); // Mar 1, 2023
+ * ```
+ */
+export function formatDateString(
+  date: string,
+  formatStr: string,
+  options: FormatOptions = {},
+) {
+  if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    throw new Error("Invalid date format, must be YYYY-MM-DD");
+  }
+  return formatDate(`${date}T00:00`, formatStr, options);
+}

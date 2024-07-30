@@ -84,10 +84,10 @@ body {
 
 @layer base {
   * {
-    @apply border-border;
+    @apply scroll-mt-36 border-border;
   }
   body {
-    @apply bg-white text-foreground;
+    @apply bg-zinc-50 text-foreground;
   }
   :root {
     @apply selection:bg-teal-700 selection:text-white;
@@ -95,12 +95,21 @@ body {
 }
 
 @layer components {
+  .subheading {
+    @apply text-xl font-semibold md:text-2xl;
+  }
 }
 
 @layer utilities {
   .paused {
     animation-play-state: paused;
   }
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Stint+Ultra+Condensed&display=swap");
+@font-face {
+  font-family: "Stint-Ultra-Condensed";
+  src: url("../../public/fonts/StintUltraCondensed-Regular.ttf");
 }
 
 .custom-tabs-trigger {
@@ -113,4 +122,11 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: 3; /* Number of lines to show before truncating */
+  line-clamp: 3;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Stint+Ultra+Condensed&display=swap");
+@font-face {
+  font-family: "Stint-Ultra-Condensed";
+  src: url("../../public/fonts/StintUltraCondensed-Regular.ttf");
 }

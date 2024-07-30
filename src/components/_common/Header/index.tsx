@@ -14,16 +14,13 @@ import {
 import Link from "next/link";
 import HeaderTopRight from "./HeaderTopRight";
 
-import Sidebar from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn, useIsLg } from "@/utils/utils";
+import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
-import { SupportBtn } from "./SupportBtn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +29,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Icon } from "@/components/_icons/icons";
 import { useState } from "react";
 
 type HeaderProps =
@@ -48,7 +44,7 @@ export default function Header(props: HeaderProps) {
       <div className="contents lg:hidden">
         <SmallHeader {...props} />
       </div>
-      <div className="container hidden lg:contents ">
+      <div className="container hidden lg:contents">
         <LargeHeader {...props} />
       </div>
     </>
@@ -57,7 +53,7 @@ export default function Header(props: HeaderProps) {
 
 const headerLinks1 = [
   { name: "Link Input", href: "/link-input" },
-  { name: "Unclaimed Offers", href: "/unclaimed-offers" },
+  //{ name: "Unclaimed Offers", href: "/unclaimed-offers" },
   { name: "Recent Deals", href: "/exclusive-offers" },
 ];
 
@@ -135,12 +131,12 @@ function LargeHeader(props: HeaderProps) {
   const pathname = usePathname();
 
   return (
-    <header className=" sticky top-0 z-50 flex h-header-height items-center border-b bg-white p-4 lg:px-24">
-      <div className="pr-10">
+    <header className="sticky top-0 z-50 flex h-header-height items-center border-b bg-white p-4 lg:pl-8 xl:px-20">
+      <div className="pr-5">
         <TramonaLogo />
       </div>
 
-      <div className="flex items-center justify-center gap-8 text-muted-foreground">
+      <div className="mt-1 flex items-center justify-center gap-x-5 leading-tight text-muted-foreground">
         {props.type === "marketing" && (
           <>
             {status !== "authenticated" &&
@@ -151,7 +147,7 @@ function LargeHeader(props: HeaderProps) {
                   render={({ selected }) => (
                     <span
                       className={cn(
-                        "font-bold",
+                        "text-sm font-bold xl:text-base",
                         selected && "underline underline-offset-2",
                       )}
                     >
@@ -171,7 +167,7 @@ function LargeHeader(props: HeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-full border bg-white px-4 py-2 text-sm font-bold text-teal-900"
+                className="whitespace-nowrap rounded-full border bg-white px-3 py-1 text-sm font-bold text-teal-900 xl:text-base"
               >
                 {link.name}
               </Link>

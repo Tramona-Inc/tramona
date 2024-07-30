@@ -6,7 +6,7 @@ import {
   InfoWindow,
 } from "@vis.gl/react-google-maps";
 import { formatCurrency } from "@/utils/utils";
-import { Poi } from "./SearchPropertiesMap";
+import { type Poi } from "./SearchPropertiesMap";
 import { useCallback, useState } from "react";
 import Image from "next/image";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";

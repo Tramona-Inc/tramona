@@ -1,12 +1,15 @@
 import * as bcrypt from "bcrypt";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
 import {
   ALL_PROPERTY_TYPES,
   bookedDates,
+  emergencyContacts,
+  groups,
   hostProfiles,
   hostTeamMembers,
   hostTeams,
@@ -28,19 +31,18 @@ import axios from "axios";
 import { getCity } from "@/server/google-maps";
 
 export const usersRouter = createTRPCRouter({
-  me: protectedProcedure.query(async ({ ctx }) => {
+  getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return undefined;
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
-        role: true,
-        referralCodeUsed: true,
+        onboardingStep: true,
       },
     });
-
-    return {
-      role: res?.role ?? "guest",
-      referralCodeUsed: res?.referralCodeUsed ?? null,
-    };
+    if (!res) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    }
+    return res.onboardingStep;
   }),
 
   myVerificationStatus: protectedProcedure.query(async ({ ctx }) => {
@@ -482,7 +484,7 @@ export const usersRouter = createTRPCRouter({
                 (amenity) => amenity.amenityName,
               ), // Keep amenities as an array
               cancellationPolicy: property.cancellationPolicy,
-            }))
+            })),
           );
 
           // Now pass the resolved array of objects to the .values() method
@@ -671,4 +673,55 @@ export const usersRouter = createTRPCRouter({
 
       return "success";
     }),
+
+  getUserVerifications: protectedProcedure
+    .input(z.object({ madeByGroupId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const verifications = await ctx.db.query.groups
+        .findFirst({
+          where: eq(groups.id, input.madeByGroupId),
+          with: {
+            owner: {
+              columns: {
+                dateOfBirth: true,
+                phoneNumber: true,
+                emailVerified: true,
+                email: true,
+              },
+            },
+          },
+        })
+        .then((res) => res?.owner);
+
+      if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return verifications;
+    }),
+
+  addEmergencyContacts: protectedProcedure
+    .input(
+      z.object({
+        emergencyEmail: z.string(),
+        emergencyPhone: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.insert(emergencyContacts).values({
+        userId: ctx.user.id,
+        emergencyEmail: input.emergencyEmail,
+        emergencyPhone: input.emergencyPhone,
+      });
+    }),
+  deleteEmergencyContact: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(emergencyContacts)
+        .where(eq(emergencyContacts.id, input.id));
+    }),
+  getEmergencyContacts: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.emergencyContacts.findMany({
+      where: eq(emergencyContacts.userId, ctx.user.id),
+    });
+  }),
 });

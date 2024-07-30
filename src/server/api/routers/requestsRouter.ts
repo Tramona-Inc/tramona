@@ -6,7 +6,6 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  MAX_REQUEST_GROUP_SIZE,
   groupMembers,
   groups,
   requestGroups,
@@ -18,22 +17,19 @@ import {
   users,
 } from "@/server/db/schema";
 import {
-  getPropertiesForRequest,
   sendText,
   sendWhatsApp,
+  scrapeUsingLink,
+  getPropertiesForRequest,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
-import {
-  formatCurrency,
-  formatDateRange,
-  getNumNights,
-  plural,
-} from "@/utils/utils";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, count, eq, exists } from "drizzle-orm";
 import { groupBy } from "lodash";
 import { z } from "zod";
+import type { Session } from "next-auth";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -224,119 +220,50 @@ export const requestsRouter = createTRPCRouter({
       });
   }),
 
-  createMultiple: protectedProcedure
+  create: protectedProcedure
     .input(
-      requestInsertSchema
-        .omit({ madeByGroupId: true, requestGroupId: true, latLngPoint: true })
-        .array()
-        .min(1)
-        .max(MAX_REQUEST_GROUP_SIZE),
+      requestInsertSchema.omit({
+        madeByGroupId: true,
+        requestGroupId: true,
+        latLngPoint: true,
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      const transactionResults = await ctx.db.transaction(async (tx) => {
-        const requestGroupId = await tx
-          .insert(requestGroups)
-          .values({ createdByUserId: ctx.user.id })
-          .returning()
-          .then((res) => res[0]!.id);
-
-        const results = await Promise.all(
-          input.map(async (req) => {
-            const madeByGroupId = await tx
-              .insert(groups)
-              .values({ ownerId: ctx.user.id })
-              .returning()
-              .then((res) => res[0]!.id);
-
-            await tx.insert(groupMembers).values({
-              userId: ctx.user.id,
-              groupId: madeByGroupId,
-            });
-
-            const { requestId } = await tx
-              .insert(requests)
-              .values({
-                ...req,
-                madeByGroupId,
-                requestGroupId,
-              })
-              .returning({ requestId: requests.id })
-              .then((res) => res[0]!);
-
-            // TODO: fix
-
-            // await getPropertiesForRequest(
-            //   { ...req, id: requestId },
-            //   { tx },
-            // ).then((propertyIds) =>
-            //   tx
-            //     .insert(requestsToProperties)
-            //     .values(
-            //       propertyIds.map((propertyId) => ({ requestId, propertyId })),
-            //     ),
-            // );
-
-            return { requestId, madeByGroupId };
-          }),
-        );
-        //   results.forEach((result) => {
-        //     if (result.status === "rejected") {
-        //       throw new TRPCError({
-        //         code: "INTERNAL_SERVER_ERROR",
-        //         message: JSON.stringify(result.reason),
-        //       });
-        //     }
-        //   });
-        // });
-
-        return { madeByGroupIds: results.map((r) => r.madeByGroupId), results };
+      const { transactionResults } = await handleRequestSubmission(input, {
+        user: ctx.user,
       });
+      return { transactionResults };
+    }),
 
-      // if (ctx.user.isWhatsApp) {
-      //   void sendWhatsApp({
-      //     templateId: "HXaf0ed60e004002469e866e535a2dcb45",
-      //     to: ctx.user.phoneNumber!,
-      //   });
-      // } else {
-      //   void sendText({
-      //     to: ctx.user.phoneNumber!,
-      //     content:
-      //       "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-      //   });
-      // }
+  createRequestWithLink: protectedProcedure
+    .input(
+      requestInsertSchema
+        .omit({
+          location: true,
+          maxTotalPrice: true,
+          madeByGroupId: true,
+          requestGroupId: true,
+          latLngPoint: true,
+        })
+        .extend({
+          airbnbLink: z.string().url(),
+          numGuests: z.number().min(1),
+        }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      //we are going to use the given data to scrape the airbnb listing and create a request
+      const response = await scrapeUsingLink(input.airbnbLink);
 
-      // if (env.NODE_ENV !== "production") return;
-
-      const { madeByGroupIds, results } = transactionResults;
-
-      const name = ctx.user.name ?? ctx.user.email;
-
-      if (input.length > 1) {
-        sendSlackMessage(
-          `*${name} just made ${input.length} requests*`,
-          `<https://tramona.com/admin|Go to admin dashboard>`,
-        );
-      } else {
-        const request = input[0]!;
-
-        const pricePerNight =
-          request.maxTotalPrice /
-          getNumNights(request.checkIn, request.checkOut);
-        const fmtdPrice = formatCurrency(pricePerNight);
-        const fmtdDateRange = formatDateRange(
-          request.checkIn,
-          request.checkOut,
-        );
-        const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
-
-        sendSlackMessage(
-          `*${name} just made a request: ${request.location}*`,
-          `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-          `<https://tramona.com/admin|Go to admin dashboard>`,
-        );
-      }
-
-      return { madeByGroupIds, results };
+      const newRequest: RequestInput = {
+        ...input,
+        location: response.cityName,
+        maxTotalPrice: response.formattedNightlyPrice,
+      };
+      //now we need to make a legitimate request with all of the data
+      const { transactionResults } = await handleRequestSubmission(newRequest, {
+        user: ctx.user,
+      });
+      return { transactionResults };
     }),
 
   // createMultiple: protectedProcedure
@@ -759,3 +686,80 @@ export const requestsRouter = createTRPCRouter({
         .where(eq(requestsToProperties.requestId, input.requestId));
     }),
 });
+
+//Reusable functions
+const modifiedRequestSchema = requestInsertSchema.omit({
+  madeByGroupId: true,
+  requestGroupId: true,
+  latLngPoint: true,
+});
+
+// Infer the type from the modified schema
+type RequestInput = z.infer<typeof modifiedRequestSchema>;
+
+export async function handleRequestSubmission(
+  input: RequestInput,
+  { user }: { user: Session["user"] },
+) {
+  // Begin a transaction
+  console.log("User ID:", user.id);
+  const transactionResults = await db.transaction(async (tx) => {
+    const requestGroupId = await tx
+      .insert(requestGroups)
+      .values({ createdByUserId: user.id })
+      .returning()
+      .then((res) => res[0]!.id);
+    console.log("Request Group ID:", requestGroupId);
+    const madeByGroupId = await tx
+      .insert(groups)
+      .values({ ownerId: user.id })
+      .returning()
+      .then((res) => res[0]!.id);
+    console.log("Made By Group ID:", madeByGroupId);
+    await tx.insert(groupMembers).values({
+      userId: user.id,
+      groupId: madeByGroupId,
+    });
+
+    const { requestId } = await tx
+      .insert(requests)
+      .values({
+        ...input,
+        madeByGroupId,
+        requestGroupId,
+      })
+      .returning({ requestId: requests.id })
+      .then((res) => res[0]!);
+
+    const propertyIds = await getPropertiesForRequest(
+      { ...input, id: requestId },
+      { tx },
+    );
+
+    if (propertyIds.length > 1) {
+      await tx
+        .insert(requestsToProperties)
+        .values(propertyIds.map((propertyId) => ({ requestId, propertyId })));
+    }
+
+    return { requestId, madeByGroupId };
+  });
+
+  // Messaging based on user preferences or environment
+  const name = user.name ?? user.email;
+  const pricePerNight = input.maxTotalPrice;
+  const fmtdPrice = formatCurrency(pricePerNight);
+  const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
+  const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
+  console.log(input.maxTotalPrice, " and this is the formatedPrice", fmtdPrice);
+
+  sendSlackMessage(
+    [
+      `*${name} just made a request: ${input.location}*`,
+      `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+      `<https://tramona.com/admin|Go to admin dashboard>`,
+    ].join("\n"),
+  );
+
+  return { transactionResults };
+}

@@ -1,18 +1,19 @@
-import { type DetailedRequest } from "@/components/requests/RequestCard";
-import { useEffect, useState } from "react";
+// this does basically nothing, were gonna abolish request groups
+
+import { type GuestDashboardRequest } from "@/components/requests/RequestCard";
 import RequestGroupCards from "./RequestGroup";
 import { type RequestGroup } from "@/server/db/schema";
 
 export function RequestCards({
   requestGroups,
-  selectedRequest,
-  setSelectedRequest,
+  // selectedRequest,
+  // setSelectedRequest,
 }: {
-  requestGroups: { group: RequestGroup; requests: DetailedRequest[] }[];
-  selectedRequest?: DetailedRequest | null;
-  setSelectedRequest?: (request: DetailedRequest | null) => void;
+  requestGroups: { group: RequestGroup; requests: GuestDashboardRequest[] }[];
+  // selectedRequest?: DetailedRequest | null;
+  // setSelectedRequest?: (request: DetailedRequest | null) => void;
 }) {
-  const [isWaiting, setIsWaiting] = useState(false);
+  // const [isWaiting, setIsWaiting] = useState(false);
 
   // code for text confirmations temporarily removed
 
@@ -48,32 +49,28 @@ export function RequestCards({
   //   isWaiting ? 10 * 1000 : null,
   // ); // 10 seconds
 
-  function startTimer() {
-    setIsWaiting(true);
-    setTimeout(() => setIsWaiting(false), 3 * 60 * 1000); // 3 minutes
-  }
+  // function startTimer() {
+  //   setIsWaiting(true);
+  //   setTimeout(() => setIsWaiting(false), 3 * 60 * 1000); // 3 minutes
+  // }
 
-  useEffect(() => {
-    const firstRequest = requestGroups[0]?.requests[0];
+  // useEffect(() => {
+  //   const firstRequest = requestGroups[0]?.requests[0];
 
-    if (firstRequest) {
-      setSelectedRequest?.(firstRequest);
-    }
-  }, []);
+  //   if (firstRequest) {
+  //     setSelectedRequest?.(firstRequest);
+  //   }
+  // }, []);
 
-  return (
-    <div className="space-y-4">
-      {requestGroups.map(({ group: requestGroup, requests }) => (
-        <RequestGroupCards
-          key={requestGroup.id}
-          requestGroup={requestGroup}
-          requests={requests}
-          isWaiting={isWaiting}
-          startTimer={startTimer}
-          selectedRequest={selectedRequest}
-          setSelectedRequest={setSelectedRequest}
-        />
-      ))}
-    </div>
-  );
+  return requestGroups.map(({ group: requestGroup, requests }) => (
+    <RequestGroupCards
+      key={requestGroup.id}
+      requests={requests}
+      // requestGroup={requestGroup}
+      // isWaiting={isWaiting}
+      // startTimer={startTimer}
+      // selectedRequest={selectedRequest}
+      // setSelectedRequest={setSelectedRequest}
+    />
+  ));
 }
