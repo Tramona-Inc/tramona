@@ -1,6 +1,6 @@
 // pages/api/reserved-dates.ts
 
-import { NextApiRequest, NextApiResponse } from 'next';
+import { type NextApiRequest, type NextApiResponse } from 'next';
 import { db } from '@/server/db';
 import { reservedDates } from '@/server/db/schema/tables/reservedDates';
 import { eq } from 'drizzle-orm';

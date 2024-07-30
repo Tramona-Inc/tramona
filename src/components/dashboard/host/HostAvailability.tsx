@@ -1,6 +1,6 @@
 import { type Property } from "@/server/db/schema/tables/properties";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   MoveLeft,
   MoveRight,
@@ -36,34 +36,34 @@ export default function HostAvailability({ property }: { property: Property }) {
     "December",
   ];
 
-  useEffect(() => {
-    const today = new Date();
-    console.log(today.toString());
-    setCurrentDate(today);
-    setCalendarDate(today);
-    fetchReservedDates();
-  }, []);
-
-  const fetchReservedDates = async () => {
+  const fetchReservedDates = useCallback(async () => {
     try {
+      setIsLoading(true);
       // refreshing iCal data
-      const iCalRefresh = await axios.post("/api/calendar-sync", {
+      const refreshICal = await axios.post("/api/calendar-sync", {
         iCalUrl: property.iCalLink,
         propertyId: property.id,
       });
-      console.log("Refresh iCal:", iCalRefresh);
-      // getting the now updated reserved dates
-      const fetchedReservedDates = await axios.get(
-        `/api/host-availability-ical?propertyId=${property.id}`,
+      console.log("Refresh iCal:", refreshICal);
+      const response = await axios.get<ReservedDate[]>(
+        `/api/host-availability-ical?propertyId=${property.id}`
       );
-      console.log("Reserved dates:", fetchedReservedDates.data);
-      setReservedDates(fetchedReservedDates.data);
+      console.log("Reserved dates:", response.data);
+      setReservedDates(response.data);
     } catch (error) {
       console.error("Error fetching reserved dates:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [property.iCalLink, property.id]);
+
+  useEffect(() => {
+    const today = new Date();
+    console.log(today.toString());
+    setCurrentDate(today);
+    setCalendarDate(today);
+    void fetchReservedDates();
+  }, [fetchReservedDates]);
 
   const isDateReserved = (date: Date) => {
     return reservedDates.some((reservedDate) => {

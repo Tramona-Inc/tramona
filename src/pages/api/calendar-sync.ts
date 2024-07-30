@@ -1,6 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { type NextApiRequest, type NextApiResponse } from "next";
 import axios from "axios";
-import ical, { VEvent } from "node-ical";
+import type { VEvent } from "node-ical";
+import ical from "node-ical";
 import { db } from "@/server/db";
 import { reservedDates } from "@/server/db/schema/tables/reservedDates";
 import { eq } from "drizzle-orm";
@@ -16,10 +17,17 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     console.log("Received POST request to sync calendar");
-    const { iCalUrl, propertyId } = req.body;
+    const { iCalUrl, propertyId } = req.body as {
+      iCalUrl: string;
+      propertyId: string;
+    };
 
     if (!propertyId) {
       return res.status(400).json({ error: "Property ID is required" });
+    }
+
+    if (!iCalUrl) {
+      return res.status(400).json({ error: "iCal URL is required" });
     }
 
     if (ongoingOps.has(propertyId)) {
@@ -33,7 +41,9 @@ export default async function handler(
     try {
       await newOperation;
       ongoingOps.delete(propertyId);
-      return res.status(200).json({ message: "Calendar sync completed successfully" });
+      return res
+        .status(200)
+        .json({ message: "Calendar sync completed successfully" });
     } catch (error) {
       ongoingOps.delete(propertyId);
       console.error("Error syncing calendar:", error);
@@ -49,20 +59,26 @@ export default async function handler(
   }
 }
 
-async function syncCalendar(iCalUrl: string, propertyId: number): Promise<void> {
+async function syncCalendar(
+  iCalUrl: string,
+  propertyId: string,
+): Promise<void> {
   console.log("iCal URL:", iCalUrl);
   console.log("Property ID:", propertyId);
 
   // fetch iCal data
   console.log("Fetching iCal data...");
-  const response = await axios.get(iCalUrl);
+  const response = await axios.get<string>(iCalUrl);
   const icsData = response.data;
   console.log("iCal data fetched successfully");
 
   // parse iCal data
   console.log("Parsing iCal data...");
   const parsedData = await ical.async.parseICS(icsData);
-  console.log("Number of items in parsed data:", Object.keys(parsedData).length);
+  console.log(
+    "Number of items in parsed data:",
+    Object.keys(parsedData).length,
+  );
 
   // process the data
   console.log("Processing events...");
@@ -72,25 +88,26 @@ async function syncCalendar(iCalUrl: string, propertyId: number): Promise<void> 
   );
   console.log("Number of VEVENT items:", events.length);
 
+  const propertyIdNumber = parseInt(propertyId, 10);
   // delete existing reserved dates for this property
-  await db.delete(reservedDates).where(eq(reservedDates.propertyId, propertyId));
+  await db
+    .delete(reservedDates)
+    .where(eq(reservedDates.propertyId, propertyIdNumber));
 
   const processedEvents = new Set();
 
   for (const event of events) {
-    if (event.start && event.end) {
-      const checkIn = new Date(event.start);
-      const checkOut = new Date(event.end);
-      const eventKey = formatDateRange(checkIn, checkOut);
+    const checkIn = new Date(event.start);
+    const checkOut = new Date(event.end);
+    const eventKey = formatDateRange(checkIn, checkOut);
 
-      if (!processedEvents.has(eventKey)) {
-        await db.insert(reservedDates).values({
-          propertyId: propertyId,
-          checkIn,
-          checkOut,
-        });
-        processedEvents.add(eventKey);
-      }
+    if (!processedEvents.has(eventKey)) {
+      await db.insert(reservedDates).values({
+        propertyId: propertyIdNumber,
+        checkIn,
+        checkOut,
+      });
+      processedEvents.add(eventKey);
     }
   }
 
@@ -98,7 +115,7 @@ async function syncCalendar(iCalUrl: string, propertyId: number): Promise<void> 
   await db
     .update(properties)
     .set({ iCalLink: iCalUrl })
-    .where(eq(properties.id, propertyId));
+    .where(eq(properties.id, propertyIdNumber));
 
   console.log(`Synced ${events.length} events for property ${propertyId}`);
 }

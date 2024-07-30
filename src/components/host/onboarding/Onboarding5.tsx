@@ -18,7 +18,6 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function PropertyAvailability({
   editing = false,
-  setHandleOnboarding,
 }) {
   const [bookedDates, setBookedDates] = useState([]);
   const setBookingDates = useHostOnboarding((state) => state.setBookingDates);

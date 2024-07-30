@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
-import HostPropertiesPriceRestriction from "./HostPropertiesAgeRestriction";
+// import HostPropertiesPriceRestriction from "./HostPropertiesAgeRestriction";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
 import { ChevronLeft, Edit2 } from "lucide-react";
@@ -17,6 +17,7 @@ import { useToast } from "@/components/ui/use-toast";
 export default function HostPropertyInfo({ property }: { property: Property }) {
   const [iCalUrl, setICalUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
   async function handleFormSubmit() {
@@ -28,6 +29,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
 
       if (response.status === 200) {
         setICalUrl("");
+        setRefreshKey((prevKey) => prevKey + 1);
 
         toast({
           title: "Success!",
@@ -53,7 +55,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
   };
 
   return (
-    <div key={property.id} className="space-y-4 p-4 sm:p-6">
+    <div key={`${property.id}-${refreshKey}`} className="space-y-4 p-4 sm:p-6">
       <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
