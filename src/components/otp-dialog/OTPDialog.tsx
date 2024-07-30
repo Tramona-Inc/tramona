@@ -1,22 +1,15 @@
 import {
   type Dispatch,
   type SetStateAction,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+  useEffect, useRef,
+  useState
 } from "react";
 
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog
 } from "../ui/alert-dialog";
 
-import TramonaIcon from "../_icons/TramonaIcon";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
 
 import { api } from "@/utils/api";
@@ -30,7 +23,6 @@ import {
 } from "@/components/ui/input-otp";
 
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import { useRouter } from "next/router";
 
 interface OTPDialogProps {
   toPhoneNumber: string;

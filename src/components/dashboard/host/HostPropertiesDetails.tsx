@@ -365,12 +365,12 @@ export default function HostPropertiesDetails({
                 lat={
                   editing
                     ? coordinateData?.coordinates.location?.lat ?? 0
-                    : property.latitude ?? 0
+                    : property.latitude
                 }
                 lng={
                   editing
                     ? coordinateData?.coordinates.location?.lng ?? 0
-                    : property.longitude ?? 0
+                    : property.longitude 
                 }
               />
             </div>
@@ -444,7 +444,7 @@ export default function HostPropertiesDetails({
             </Dialog>
           </div>
           <div className="grid grid-cols-2 gap-y-2 text-muted-foreground">
-            {(editing ? amenities : property.amenities)?.map(
+            {(editing ? amenities : property.amenities).map(
               (amenity, index) => (
                 <div key={index} className="flex items-center">
                   <p>{amenity}</p>

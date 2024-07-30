@@ -104,7 +104,7 @@ function Page() {
         <span className="font-bold">buttons and text inputs</span> to create{" "}
         <span className="font-bold">forms</span>.
         <br />
-        <a className="text-blue-700 " href="https://ui.shadcn.com/">
+        <a className="text-blue-700" href="https://ui.shadcn.com/">
           https://ui.shadcn.com/
         </a>
       </p>
@@ -175,14 +175,10 @@ function Page() {
                               variant="emptyInput"
                               className={cn(
                                 "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground",
+                                "text-muted-foreground",
                               )}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {format(field.value, "PPP")}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -384,7 +380,7 @@ function Page() {
             </AlertDialogContent>
           </AlertDialog>
         </div>
-        <div className="flex w-full flex-col gap-y-2 ">
+        <div className="flex w-full flex-col gap-y-2">
           <h1 className="font-2xl font-black">Badge</h1>
           <p>This one has variations!</p>
           <a
@@ -409,7 +405,7 @@ function Page() {
           </div>
         </div>
 
-        <div className="flex w-full flex-col gap-y-2 ">
+        <div className="flex w-full flex-col gap-y-2">
           <h1 className="font-2xl font-black">Button</h1>
           <p>This one has variations too!</p>
           <a
@@ -432,7 +428,7 @@ function Page() {
             <Button variant="white">White</Button>
           </div>
         </div>
-        <div className="flex w-full flex-col gap-y-2 ">
+        <div className="flex w-full flex-col gap-y-2">
           <h1 className="font-2xl font-black">Avatar</h1>
           <a
             href="https://ui.shadcn.com/docs/components/avatar"
@@ -445,7 +441,7 @@ function Page() {
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
         </div>
-        <div className="flex w-full flex-col gap-y-2 ">
+        <div className="flex w-full flex-col gap-y-2">
           <h1 className="font-2xl font-black">Checkbox</h1>
           <a
             href="https://ui.shadcn.com/docs/components/avatar"
@@ -466,7 +462,7 @@ function Page() {
       </div>
       <hr />
       <div className="grid grid-cols-4 py-10">
-        <div className="flex w-full flex-col gap-y-2 ">
+        <div className="flex w-full flex-col gap-y-2">
           <h1 className="font-2xl font-black">Combobox</h1>
           <a
             href="https://ui.shadcn.com/docs/components/combobox"
@@ -490,7 +486,7 @@ function Page() {
             <ComboboxDropdownMenu />
           </div>
         </div>
-        <div className="flex w-full flex-col gap-y-2 ">
+        <div className="flex w-full flex-col gap-y-2">
           <h1 className="font-2xl font-black">Hover Card </h1>
 
           <a
@@ -501,7 +497,7 @@ function Page() {
           </a>
           <HoverCardDemo />
         </div>
-        <div className="flex w-full flex-col gap-y-2 ">
+        <div className="flex w-full flex-col gap-y-2">
           <h1 className="font-2xl font-black">DialogExample</h1>
 
           <a
@@ -518,7 +514,7 @@ function Page() {
         </div>
       </div>
       <div className="flex flex-row justify-around">
-        <div className="flexflex-col gap-y-4 ">
+        <div className="flexflex-col gap-y-4">
           <h1 className="font-2xl font-black">Toggle Group</h1>
 
           <a
@@ -529,7 +525,7 @@ function Page() {
           </a>
           <ToggleGroupDemo />
         </div>
-        <div className="flex flex-col gap-y-4 ">
+        <div className="flex flex-col gap-y-4">
           <h1 className="font-2xl font-black">Tool Tip</h1>
 
           <a

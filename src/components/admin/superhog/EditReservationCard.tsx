@@ -1,7 +1,7 @@
 import { CircleCheckBigIcon, CircleOffIcon, FlagIcon } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PencilIcon } from "lucide-react";
-import { ReservationInterface } from "@/server/api/routers/superhogRouter";
+import { type ReservationInterface } from "@/server/api/routers/superhogRouter";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormField,
@@ -27,7 +26,6 @@ import { useForm } from "react-hook-form";
 import { generateTimeStamp } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { on } from "events";
 import { api } from "@/utils/api";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";

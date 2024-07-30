@@ -353,7 +353,7 @@ export const offersRouter = createTRPCRouter({
     }))
     .mutation( async ({ input }) => {
       const { to, userName, placeName, startDate, endDate, address, propertyImageLink, tripDetailLink, originalPrice, tramonaPrice, offerLink, numOfNights, tramonaServiceFee } = input
-      sendEmail({
+      await sendEmail({
         to,
         subject: "Your booking has been confirmed",
         content: BookingConfirmationEmail({

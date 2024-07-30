@@ -5,10 +5,9 @@ import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BriefcaseIcon, HistoryIcon } from "lucide-react";
 import SuccessfulBookingDialog from "@/components/my-trips/SuccessfulBookingDialog";
-import { useEffect, useState } from "react";
-import { api, RouterOutputs } from "@/utils/api";
+import { useEffect, useMemo, useState } from "react";
+import { api, type RouterOutputs } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
-import { Trip } from "@/server/db/schema";
 export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
 export default function MyTrips() {
@@ -17,12 +16,14 @@ export default function MyTrips() {
   const [booking, setBooking] = useState<TripCardDetails | null>(null);
   const { data: allTrips } = api.trips.getMyTrips.useQuery();
 
-  const upcomingTrips = allTrips
-    ? allTrips.filter((trip) => trip.checkIn > new Date())
-    : [];
-  const pastTrips = allTrips
-    ? allTrips.filter((trip) => trip.checkIn <= new Date())
-    : [];
+  const { upcomingTrips, pastTrips } = useMemo(() => {
+    if (!allTrips) return { upcomingTrips: [], pastTrips: [] };
+    const now = new Date();
+    return {
+      upcomingTrips: allTrips.filter((trip) => trip.checkIn > now),
+      pastTrips: allTrips.filter((trip) => trip.checkIn <= now),
+    };
+  }, [allTrips]);
 
   // find the last element in upcomingTrips array, which is the most recent booking. If it was created at is less than 15 seconds ago, show the dialog
   useEffect(() => {

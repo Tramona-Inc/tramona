@@ -80,14 +80,14 @@ export default function AcceptForm({
     } else {
       const travelers = await getTravelers.mutateAsync(offer.madeByGroupId);
       for (const traveler of travelers) {
-        if (traveler?.phoneNumber) {
+        if (traveler.phoneNumber) {
           if (traveler.isWhatsApp) {
             await twilioWhatsAppMutation.mutateAsync({
               templateId: "HX28c41122cfa312e326a9b5fc5e7bc255",
               to: traveler.phoneNumber,
               cost: nightlyPrice,
-              name: property?.name,
-              dates: formatDateRange(offer?.checkIn, offer?.checkOut),
+              name: property.name,
+              dates: formatDateRange(offer.checkIn, offer.checkOut),
             });
           } else {
             await twilioMutation.mutateAsync({
@@ -97,7 +97,7 @@ export default function AcceptForm({
           }
         }
         if(traveler.email){
-          sendByMail.mutateAsync({
+          await sendByMail.mutateAsync({
             to: traveler.email,
             userName: traveler.name ?? "",
             placeName: property.name,

@@ -51,7 +51,7 @@ export default function Page() {
   //   // localStorage.removeItem("showCongratsDialog");
   // }
   const isProduction = process.env.NODE_ENV === "production";
-  let baseUrl = isProduction
+  const baseUrl = isProduction
     ? "https://www.tramona.com"
     : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
   return (

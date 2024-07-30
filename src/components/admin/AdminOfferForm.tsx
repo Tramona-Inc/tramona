@@ -357,7 +357,7 @@ export default function AdminOfferForm({
   );
 
   const totalPrice = nightlyPrice * numberOfNights;
-  const [file, setFile] = useState<File | null>(null);
+  const [file] = useState<File | null>(null);
 
   return (
     <Form {...form}>

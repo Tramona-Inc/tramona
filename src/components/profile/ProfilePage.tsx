@@ -57,7 +57,7 @@ export default function ProfilePage() {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
   const code =
-    session?.user?.referralCodeUsed && data?.referralCode
+    session?.user.referralCodeUsed && data?.referralCode
       ? ""
       : data?.referralCode;
   const url = `https://tramona.com/auth/signup?code=${code}`;
@@ -380,8 +380,8 @@ export default function ProfilePage() {
           {/* Destinations Tab */}
           <TabsContent value="destinations">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {profileInfo?.bucketListDestinations?.length ? (
-                profileInfo?.bucketListDestinations.map((destination) => (
+              {profileInfo?.bucketListDestinations.length ? (
+                profileInfo.bucketListDestinations.map((destination) => (
                   <DestinationCard
                     key={destination.id}
                     destination={destination}

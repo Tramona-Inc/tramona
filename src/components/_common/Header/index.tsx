@@ -14,18 +14,14 @@ import {
 import Link from "next/link";
 // import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import HeaderTopRight from "./HeaderTopRight";
-import HamburgerMenuMobile from "./HamburgerMenuMobile";
-import { Separator } from '@/components/ui/separator'
-import Sidebar from "@/components/dashboard/Sidebar";
+
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn, useIsLg } from "@/utils/utils";
+import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
 import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
-import { SupportBtn } from "./SupportBtn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +30,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Icon } from "@/components/_icons/icons";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
