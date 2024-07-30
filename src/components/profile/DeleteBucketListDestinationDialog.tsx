@@ -1,4 +1,4 @@
-import { DialogState } from "@/utils/dialog"
+import { type DialogState } from "@/utils/dialog"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
 import { Button } from "../ui/button"
 import { api } from "@/utils/api";

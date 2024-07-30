@@ -1,12 +1,10 @@
 import ActivityFeed from "@/components/activity-feed/ActivityFeed";
-import Head from "next/head";
-import Link from "next/link";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { NextSeo } from "next-seo";
 
 export default function ExclusiveOffersPage() {
   const isProduction = process.env.NODE_ENV === "production";
-  let baseUrl = isProduction
+  const baseUrl = isProduction
     ? "https://www.tramona.com"
     : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
 
@@ -34,13 +32,11 @@ export default function ExclusiveOffersPage() {
         }}
       />
       <DashboardLayout type="guest">
-        <div className="flex min-h-screen-minus-header items-center justify-center  px-4 pb-footer-height pt-5">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex items-center">
-              <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">
-                Recent Deals
-              </h1>
-            </div>
+        <div className="min-h-screen-minus-header px-4 pb-32 pt-16">
+          <div className="mx-auto max-w-lg">
+            <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">
+              Recent Deals
+            </h1>
             <ActivityFeed />
           </div>
         </div>

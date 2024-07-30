@@ -8,7 +8,6 @@ import puppeteer from "puppeteer";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
 import { sleep } from "@/utils/utils";
-import { requestsRouter } from "./requestsRouter";
 
 type AirbnbListing = {
   id: string;
@@ -92,7 +91,7 @@ export const miscRouter = createTRPCRouter({
   scrapeUsingLink: publicProcedure
     .input(
       z.object({
-        url: zodString({ maxLen: 500 }),
+        url: zodString({ maxLen: 1000 }),
       }),
     )
     .query(async ({ input }) => {
@@ -100,19 +99,32 @@ export const miscRouter = createTRPCRouter({
       const searchParams = new URLSearchParams(url.split("?")[1]);
 
       try {
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage(); // Type assertion
+        const browser = await puppeteer.launch({ headless: true });
+        const page = await browser.newPage();
         await page.goto(url, { waitUntil: "domcontentloaded" });
 
         await sleep(2000);
 
-        const dialogExists = await page.$('[role="dialog"]');
+        // const dialogExists = await page.$('[role="dialog"]');
+        // if (dialogExists) {
+        //   await page.mouse.click(1, 1); // Click on a point outside the popup (e.g., top-left corner)
+        // }
+        const dialogExists = await page.$(`[role=“dialog”]`);
         if (dialogExists) {
           // If popup appears, click outside of it to dismiss
-          await page.mouse.click(1, 1); // Click on a point outside the popup (e.g., top-left corner)
+          await page.mouse.click(10, 10); // Click on a point outside the popup
         }
 
-        await sleep(500);
+        await sleep(1000);
+
+        // Extract city name above the map with a longer timeout and error handling
+        const cityName = await page.evaluate(() => {
+          const citySection = document.querySelector(
+            "#site-content > div > div:nth-child(1) > div:nth-child(5) > div > div > div > div:nth-child(2) > section",
+          );
+          const cityDiv = citySection?.querySelector("div:nth-child(2)"); // This targets the second child element within the section
+          return cityDiv!.textContent!.trim();
+        });
 
         await page.evaluate(() => {
           const xpathResult = document.evaluate(
@@ -123,7 +135,6 @@ export const miscRouter = createTRPCRouter({
             null,
           );
 
-          // Click reserve
           const firstNode = xpathResult.singleNodeValue;
           if (firstNode && firstNode instanceof HTMLElement) {
             firstNode.parentElement?.click();
@@ -179,7 +190,11 @@ export const miscRouter = createTRPCRouter({
         const totalPrice = Number(
           priceItems.slice(-1)[0]?.replace("$", "").replace(",", "").trim(),
         );
-        const numDays = Number(priceItems[0]?.split(" ")[2]);
+        const numDaysStr = priceItems[0]?.split(" ")[0]; // Get the number of nights
+        const numDays = Number(numDaysStr);
+        if (isNaN(numDays)) {
+          throw new Error("Failed to extract number of days from price items");
+        }
         const nightlyPrice = totalPrice / numDays;
         const propertyName =
           listingCardTextContent[0]?.substring(0, 255) ?? "Airbnb Property";
@@ -188,13 +203,14 @@ export const miscRouter = createTRPCRouter({
         const numGuests = Number(searchParams.get("adults"));
 
         const response = {
+          cityName,
           nightlyPrice,
           propertyName,
           checkIn,
           checkOut,
           numGuests,
         };
-
+        console.log(response);
         return response;
       } catch (error) {
         console.log(error);
@@ -203,5 +219,30 @@ export const miscRouter = createTRPCRouter({
           message: "Error scraping the page",
         });
       }
+    }),
+  extractBookingDetails: publicProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      // Create a URL object
+      const urlObj = new URL(input);
+
+      // Get the search parameters
+      const params = new URLSearchParams(urlObj.search);
+
+      // Extract the values with null checks
+      const numOfAdults = parseInt(params.get("adults") ?? "0", 10);
+      const numOfChildren = parseInt(params.get("children") ?? "0", 10);
+      const checkIn = params.get("check_in") ?? "";
+      const checkOut = params.get("check_out") ?? "";
+
+      // Calculate the total number of guests
+      const numOfGuests = numOfAdults + numOfChildren;
+
+      // Return the extracted details
+      return {
+        numOfGuests,
+        checkIn,
+        checkOut,
+      };
     }),
 });

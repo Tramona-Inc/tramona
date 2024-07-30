@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/utils";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 
 const AmountDisplay = ({
   title,

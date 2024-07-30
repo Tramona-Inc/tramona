@@ -1,5 +1,4 @@
 import Spinner from "@/components/_common/Spinner";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { formatCurrency } from "@/utils/utils";
 import {
@@ -7,15 +6,18 @@ import {
   ConnectPayouts,
 } from "@stripe/react-connect-js";
 import React, { useState, useEffect } from "react";
+import NoStripeAccount from "./NoStripeAccount";
 
 interface BalanceSummaryProps {
   balance: number | null;
   isStripeConnectInstanceReady: boolean;
+  stripeAccountIdNumber: null | string | undefined;
 }
 
 const BalanceSummary: React.FC<BalanceSummaryProps> = ({
   balance,
   isStripeConnectInstanceReady,
+  stripeAccountIdNumber,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
@@ -44,11 +46,13 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
               <h1 className="my-3text-center text-2xl font-bold"> Transfer </h1>
               {isStripeConnectInstanceReady ? (
                 <ConnectPayouts />
-              ) : (
+              ) : stripeAccountIdNumber ? (
                 <div className="h-96">
                   {" "}
                   Not ready <Spinner />{" "}
                 </div>
+              ) : (
+                <NoStripeAccount />
               )}
             </div>
           </DialogContent>
@@ -75,10 +79,12 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
                   futureRequirements: "include",
                 }}
               />
-            ) : (
+            ) : stripeAccountIdNumber ? (
               <div className="h-96">
                 Not ready <Spinner />{" "}
               </div>
+            ) : (
+              <NoStripeAccount />
             )}
           </div>
         </DialogContent>

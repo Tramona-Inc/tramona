@@ -16,7 +16,7 @@ export default function VideoDisplay({ url }: VideoDisplayProps) {
       <video
         ref={videoRef}
         onLoadedData={async () => {
-          await videoRef?.current?.play();
+          await videoRef.current?.play();
         }}
         src={url}
         loop

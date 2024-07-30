@@ -66,3 +66,4 @@ export type NewBid = typeof bids.$inferInsert;
 
 export const bidSelectSchema = createSelectSchema(bids);
 export const bidInsertSchema = createInsertSchema(bids);
+

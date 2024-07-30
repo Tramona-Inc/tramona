@@ -1,13 +1,6 @@
-import { type MergedDataType } from "@/components/activity-feed/ActivityFeed";
+import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
 import { Card, CardContent } from "../ui/card";
-import {
-  formatCurrency,
-  formatDateRange,
-  getElapsedTime,
-  getDisplayedName,
-  plural,
-} from "@/utils/utils";
-import ShareButton from "@/components/_common/ShareLink/ShareButton";
+import { getElapsedTime, getDisplayedName } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
 
 export default function BaseCard({
@@ -16,7 +9,7 @@ export default function BaseCard({
   userImage,
   children,
 }: React.PropsWithChildren<{
-  item: MergedDataType;
+  item: FeedItem | null;
   userName: string;
   userImage: string;
 }>) {
@@ -28,7 +21,7 @@ export default function BaseCard({
           <UserAvatar size="md" name={userName} image={userImage} />
         </div>
         <div className="min-w-0 flex-1 font-medium">
-          <div className="truncate font-bold">{getDisplayedName(userName) ?? ""}</div>
+          <div className="truncate font-bold">{getDisplayedName(userName)}</div>
           <p className="truncate text-sm text-muted-foreground">
             {elapsedTime}
           </p>

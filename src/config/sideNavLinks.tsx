@@ -42,8 +42,9 @@ export const hostMobileNavLinks = [
     name: "Requests",
     icon: BadgePercent,
   },
-  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/host/messages", name: "Messages", icon: MessageCircleIcon },
   { href: "/host/properties", name: "Properties", icon: HomeIcon },
+  { href: "/host/stays", name: "Stays", icon: Briefcase },
   { href: "/host/finances", name: "Finances", icon: DollarSign },
 ];
 
@@ -51,7 +52,7 @@ export const hostNavLinks = [...hostMobileNavLinks];
 
 export const guestMobileNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/explore", name: "Explore", icon: Search },
+  // { href: "/explore", name: "Explore", icon: Search },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
 ];
@@ -63,5 +64,5 @@ export const guestNavLinks = [
 
 export const unloggedNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/explore", name: "Explore", icon: Search },
+  // { href: "/explore", name: "Explore", icon: Search },
 ];

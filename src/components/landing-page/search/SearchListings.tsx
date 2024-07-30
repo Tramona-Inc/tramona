@@ -98,7 +98,7 @@ export default function SearchListings({
     </div>
   ));
 
-  const locationName = filters.filter?.label?.includes(',') ? filters.filter.label.split(',')[0] : filters.filter?.label
+  const locationName = filters.filter?.label.includes(',') ? filters.filter.label.split(',')[0] : filters.filter?.label
 
   // Main component rendering
   return (

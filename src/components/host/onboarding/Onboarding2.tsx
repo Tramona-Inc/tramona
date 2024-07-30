@@ -5,10 +5,7 @@ import Home from "@/components/_icons/Home";
 import Hotels from "@/components/_icons/Hotels";
 import { Form, FormField, FormItem } from "@/components/ui/form";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
-import {
-  type PropertyType,
-  useHostOnboarding,
-} from "@/utils/store/host-onboarding";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,30 +16,30 @@ import { cn } from "@/utils/utils";
 
 export const options = [
   {
-    id: "Apartment" as PropertyType,
+    id: "Apartment",
     icon: <ApartmentIcon />,
     title: "Apartment",
     text: "A specific and discrete space that is available for guests to rent",
   },
   {
-    id: "Home" as PropertyType,
+    id: "House",
     icon: <Home />,
     title: "Home",
     text: "Furnished and self-catering accommodations where guests rent the entire home",
   },
   {
-    id: "Hotels" as PropertyType,
+    id: "Hotel",
     icon: <Hotels />,
     title: "Hotels, B&Bs, & More",
     text: "Hotel or traditional bed and breakfast",
   },
   {
-    id: "Alternative" as PropertyType,
+    id: "Other",
     icon: <Alternative />,
     title: "Alternative Places",
     text: "If your property doesn't fit into any of the above categories, choose this option",
   },
-];
+] as const;
 
 // ! Honeslty didn't need to do a form
 

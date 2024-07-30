@@ -1,5 +1,4 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import StartIcon2 from "@/components/_icons/StartIcon2";
 import { ProgramFrom } from "@/components/ambassador/ProgramForm";
 
 export default function Page() {
