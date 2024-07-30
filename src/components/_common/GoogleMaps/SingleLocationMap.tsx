@@ -13,10 +13,8 @@ function SingleLocationMap({ lat, lng }: MapPointerProps) {
   );
 
   useEffect(() => {
-    if (!lat || !lng) return;
-    const center = { lat, lng } as google.maps.LatLngLiteral;
-    setLocation(center);
-  }, [map]);
+    if (lat && lng) setLocation({ lat, lng });
+  }, [lat, lng, map]);
   return (
     <div className="h-full w-full">
       {location && (

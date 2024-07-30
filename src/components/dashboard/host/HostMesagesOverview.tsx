@@ -1,9 +1,7 @@
 import {
   Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardContent,
+  CardHeader, CardTitle,
+  CardContent
 } from "@/components/ui/card";
 import { MessageCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +12,6 @@ import UserAvatar from "@/components/_common/UserAvatar";
 import { api } from "@/utils/api";
 import { useConversation } from "@/utils/store/conversations";
 import { useEffect } from "react";
-import { useMeasure } from "@uidotdev/usehooks";
 import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { type MessageDbType } from "@/types/supabase.message";
@@ -115,8 +112,7 @@ export default function HostMessagesOverview({
                         {conversation.participants[0]?.name}
                       </p>
                       <p className="line-clamp-1 text-sm text-muted-foreground">
-                        {conversation.messages[0]?.read === false &&
-                          conversation.messages[0]?.message}
+                        {conversation.messages[0]?.message}
                       </p>
                     </div>
                     <div className="flex-1" />

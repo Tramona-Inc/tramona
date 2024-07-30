@@ -10,7 +10,6 @@ import {
   type User,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 import { CustomPgDrizzleAdapter } from "./adapter";
 import { users, type User as TramonaUser } from "./db/schema";

@@ -24,8 +24,7 @@ import {
   zodEmail,
   zodPassword,
   zodPhone,
-  zodString,
-  zodUrl,
+  zodString
 } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";

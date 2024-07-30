@@ -1,9 +1,7 @@
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
-import Spinner from "@/components/_common/Spinner";
 import UpcomingTripCard from "@/components/my-trips/UpcomingTripCard";
-import { TripCardDetails } from "@/pages/my-trips";
-import { api, RouterOutputs } from "@/utils/api";
+import { type TripCardDetails } from "@/pages/my-trips";
 
 export default function UpcomingTrips({
   upcomingTrips,

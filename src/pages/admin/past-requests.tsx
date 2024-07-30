@@ -34,7 +34,7 @@ const RequestUpdateChecker: React.FC<RequestUpdateCheckerProps> = ({
     return <div>Error checking for updates.</div>;
   }
 
-  if (checkResult?.alreadyUpdated) {
+  if (checkResult.alreadyUpdated) {
     return (
       <UpdatedRequestInfoDialog request={request}>
         <Button className="rounded-full bg-yellow-100 px-2" variant="outline">

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { type z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
@@ -51,7 +51,6 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
     });
 
   function onSubmit(values: z.infer<typeof FormSchema>) {
-    console.log(values);
     updateProfileInfo(values);
   }
 
