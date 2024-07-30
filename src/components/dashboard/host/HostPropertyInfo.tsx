@@ -14,17 +14,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
-
-
 export default function HostPropertyInfo({ property }: { property: Property }) {
   const [iCalUrl, setICalUrl] = useState("");
   // const [bookedDates, setBookedDates] = useState([]);
   const { toast } = useToast();
 
-
   async function handleFormSubmit() {
     try {
-      const response = await axios.post('/api/calendar-sync', { iCalUrl, propertyId: property.id });
+      const response = await axios.post("/api/calendar-sync", {
+        iCalUrl,
+        propertyId: property.id,
+      });
 
       if (response.status === 200) {
         // const dates = response.data.dates;
@@ -40,8 +40,8 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         throw new Error("Failed to sync calendar");
       }
     } catch (error) {
-      console.error('Error syncing calendar:', error);
-      
+      console.error("Error syncing calendar:", error);
+
       toast({
         title: "Sync Failed",
         description: "An error occurred while syncing the calendar.",
@@ -50,28 +50,29 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
     }
   }
 
-
-
   return (
-    <div className="space-y-4 p-4 sm:p-6">
+    <div key={property.id} className="space-y-4 p-4 sm:p-6">
       <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
       <div>
-      <div className="space-y-4 mb-10">
-        <h1 className="text-4xl font-bold">
-          Sync your iCal
-        </h1>
-        <Label className="font-semibold">iCal URL</Label>
-        <Input
-          id="iCalUrl"
-          type="url"
-          placeholder="https://example.com/calendar.ics"
-          value={iCalUrl}
-          onChange={(e) => setICalUrl(e.target.value)}
-        />
-        <Button onClick={handleFormSubmit}>Submit</Button>
-      </div>
+        {!property.iCalLink && (
+          <div className="mb-10 space-y-4">
+            <h1 className="text-4xl font-bold">Sync your iCal</h1>
+            <Label className="font-semibold">iCal URL</Label>
+            <Input
+              id="iCalUrl"
+              type="url"
+              placeholder="https://example.com/calendar.ics"
+              value={iCalUrl}
+              onChange={(e) => setICalUrl(e.target.value)}
+            />
+            <Button onClick={handleFormSubmit}>Submit</Button>
+          </div>
+        )}
+        {property.iCalLink && (
+          <div className="text-xs">{property.iCalLink}</div>
+        )}
         <h1 className="text-2xl font-bold">
           {property.name === "" ? "No property name provided" : property.name}
         </h1>

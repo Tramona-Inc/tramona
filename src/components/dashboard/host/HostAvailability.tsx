@@ -50,16 +50,17 @@ export default function HostAvailability({ property }: { property: Property }) {
   const fetchReservedDates = async () => {
     try {
       // refreshing iCal data
-      const refreshICal = await axios.post("/api/calendar-sync", {
+      const iCalRefresh = await axios.post("/api/calendar-sync", {
         iCalUrl: property.iCalLink,
         propertyId: property.id,
       });
-      console.log("Refresh iCal:", refreshICal);
-      const response = await axios.get(
+      console.log("Refresh iCal:", iCalRefresh);
+      // getting the now updated reserved dates
+      const fetchedReservedDates = await axios.get(
         `/api/host-availability-ical?propertyId=${property.id}`,
       );
-      console.log("Reserved dates:", response.data);
-      setReservedDates(response.data);
+      console.log("Reserved dates:", fetchedReservedDates.data);
+      setReservedDates(fetchedReservedDates.data);
     } catch (error) {
       console.error("Error fetching reserved dates:", error);
     } finally {
