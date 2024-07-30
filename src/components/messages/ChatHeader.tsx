@@ -3,7 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
 import { Button, buttonVariants } from "../ui/button";
-import { useSession } from "next-auth/react";
+
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 
 export type ContentProps = {

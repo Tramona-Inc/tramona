@@ -55,7 +55,7 @@ export default function ListMessages({
     (state) => state.addMessageToConversation,
   );
 
-  const { fetchInitialMessages, fetchMessagesForGuest } = useMessage()
+  // const { fetchInitialMessages, fetchMessagesForGuest } = useMessage()
   const addMessageToAdminConversation = useMessage(
     (state) => state.addMessageToAdminConversation,
   );

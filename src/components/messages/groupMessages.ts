@@ -2,7 +2,7 @@ import { type GuestMessageType, type MessageType, type User } from "@/server/db/
 import { type GuestMessage, type ChatMessageType } from "@/utils/store/messages";
 
 export type MessageGroups = {
-  user: Pick<User, "name" | "email" | "image" | "id"> | {
+  user: Pick<User, "name" | "email" | "image" | "id"> & {
     conversationId: string;
     userToken: string | null;
     adminId: string;
