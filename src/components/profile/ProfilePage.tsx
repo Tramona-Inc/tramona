@@ -303,11 +303,11 @@ export default function ProfilePage() {
               {bucketListProperties?.length ? (
                 bucketListProperties.map((property) => (
                   <BucketListHomeOfferCard
-                    key={property!.id}
+                    key={property.id}
                     property={{
-                      ...property!,
-                      propertyId: property!.id,
-                      bucketListPropertyId: property!.bucketListId,
+                      ...property,
+                      propertyId: property.id,
+                      bucketListPropertyId: property.bucketListId,
                     }}
                   />
                 ))
