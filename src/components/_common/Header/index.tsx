@@ -55,6 +55,7 @@ const headerLinks1 = [
   { name: "Link Input", href: "/link-input" },
   //{ name: "Unclaimed Offers", href: "/unclaimed-offers" },
   { name: "Recent Deals", href: "/exclusive-offers" },
+  // { name: "Host Information", href: "/for-hosts" },
 ];
 
 const headerLinks2 = [
@@ -66,8 +67,12 @@ const headerLinks2 = [
 const hamburgerLinksDesktop = [
   { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
   { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
+  // { name: "Host with Tramona", href: "/for-hosts", icon: <DoorOpen /> },
 ];
+
+ const headLinksMobile2 = [
+  {name: "Become a host", href: "/host-onboarding"},
+ ]
 
 const hamburgerLinksMobile = [
   { name: "Link Input", href: "/link-input", icon: <Link2 /> },
@@ -78,7 +83,7 @@ const hamburgerLinksMobile = [
   { name: "Become a host", href: "/host-onboarding", icon: <Home /> },
   { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
   { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
+  // { name: "Host with Tramona", href: "/for-hosts", icon: <DoorOpen /> },
 ];
 
 function HamburgerMenu({
@@ -252,11 +257,17 @@ function SmallHeader(props: HeaderProps) {
         </div>
       )} */}
 
-      <TramonaLogo />
+      {/* <TramonaLogo /> */}
+
+      <div className="pr-5">
+        <TramonaLogo />
+      </div>
+
 
       <div className="flex flex-1 items-center justify-end gap-2">
         {props.type === "marketing" && (
           <>
+
             {status === "authenticated" && (
               <Button size="sm" asChild variant="secondary">
                 <Link href="/auth/signin">Dashboard</Link>
