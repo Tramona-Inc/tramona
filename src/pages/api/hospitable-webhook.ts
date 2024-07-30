@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
-import { type PropertyType } from "@/server/db/schema";
+import { properties, reservedDateRanges, type PropertyType } from "@/server/db/schema";
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import { db } from "@/server/db";
+
 
 const airbnbPropertyTypes = [
   "house",
@@ -35,11 +37,11 @@ const airbnbPropertyTypes = [
   "trullo",
   "windmill",
   "yurt",
-];
+] as const;
 
-type airbnbPropertyType = typeof airbnbPropertyTypes[number];
+type AirbnbPropertyType = typeof airbnbPropertyTypes[number];
 
-function convertAirbnbPropertyType(str: airbnbPropertyType): PropertyType {
+function convertAirbnbPropertyType(str: AirbnbPropertyType): PropertyType {
   switch (str) {
     case "house":
       return "House";
@@ -47,7 +49,8 @@ function convertAirbnbPropertyType(str: airbnbPropertyType): PropertyType {
       return "Apartment";
     case "barn":
       return "Barn";
-    case "bnb": return "Bed & Breakfast";
+    case "bnb":
+      return "Bed & Breakfast";
     case "boat":
       return "Boat";
     case "cabin":
@@ -87,7 +90,7 @@ function convertAirbnbPropertyType(str: airbnbPropertyType): PropertyType {
     case "ryokan":
       return "Ryokan (Japan)";
     case "shepherds_hut":
-      return "Shepherd's Hut";
+      return "Shepherd’s Hut";
     case "tent":
       return "Tent";
     case "tiny_house":
@@ -102,8 +105,6 @@ function convertAirbnbPropertyType(str: airbnbPropertyType): PropertyType {
       return "Windmill";
     case "yurt":
       return "Yurt";
-    default:
-      return
   }
 }
 
@@ -113,6 +114,67 @@ const roomTypeMapping = {
   shared_room: "Shared room",
 } as const;
 
+interface ListingCreatedWebhook {
+  action: "listing.created";
+  data: {
+    id: string;
+    public_name: string;
+    property_type: AirbnbPropertyType;
+    room_type: keyof typeof roomTypeMapping;
+    capacity: {
+      max: number;
+      beds: number;
+      bedrooms: number;
+      bathrooms: number;
+    };
+    address: {
+      latitude: number;
+      longitude: number;
+      city: string;
+      state: string;
+      country_code: string;
+      street: string;
+    };
+    description: string;
+    channel: {
+      customer: {
+        id: string;
+        name: string;
+      };
+    };
+  };
+}
+
+interface ChannelActivatedWebhook {
+  action: "channel.activated";
+  data: {
+    channel: {
+      customer: {
+        id: string;
+        name: string;
+      };
+    };
+  };
+}
+
+type ImageResponse = {
+  data: {
+    url: string;
+  }[];
+};
+
+type DateResponse = {
+  data: {
+    dates: {
+      date: string;
+      availability: {
+        available: boolean;
+      };
+    }[];
+  }
+};
+
+type HospitableWebhook = ListingCreatedWebhook | ChannelActivatedWebhook;
 
 
 export default async function webhook(
@@ -122,14 +184,15 @@ export default async function webhook(
   if (req.method === "POST") {
     console.log("got webhook");
 
-    const webhookData = req.body;
+    const webhookData = req.body as HospitableWebhook;
     switch (webhookData.action) {
       case "channel.activated":
         console.log("channel created");
         break;
       case "listing.created":
+
         const userId = webhookData.data.channel.customer.id;
-        const imageResponse = await axios.get(`https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
+        const imageResponse = await axios.get<ImageResponse>(`https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
           {
             headers: {
               Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
@@ -137,7 +200,7 @@ export default async function webhook(
           }
         );
         const images = imageResponse.data.data.map((image) => image.url);
-        const now  = new Date();
+        const now = new Date();
         const firstStartDate = now.toISOString().split('T')[0];
         const firstEndDate = new Date(now);
         firstEndDate.setDate(firstEndDate.getDate() + 365);
@@ -151,10 +214,9 @@ export default async function webhook(
         secondEndDate.setDate(now.getDate() + 540);
         const secondEndDateString = secondEndDate.toISOString().split('T')[0];
 
-        let combinedPricingAndCalendarResponse;
 
         //have to send 2 batches because hospitable only allows 365 days at a time, but it allows up to 540 days in the future
-        const firstBatch = await axios.get(`https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/calendar`,
+        const firstBatch = await axios.get<DateResponse>(`https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/calendar`,
           {
             headers: {
               Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
@@ -165,7 +227,7 @@ export default async function webhook(
             }
           }
         );
-        const secondBatch = await axios.get(`https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/calendar`,
+        const secondBatch = await axios.get<DateResponse>(`https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/calendar`,
           {
             headers: {
               Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
@@ -176,7 +238,32 @@ export default async function webhook(
             }
           }
         );
-        combinedPricingAndCalendarResponse = [...firstBatch.data.data, ...secondBatch.data.data];
+        const combinedPricingAndCalendarResponse = [...firstBatch.data.data.dates, ...secondBatch.data.data.dates];
+
+        let currentRange: { start: string, end: string } | null = null;
+        const datesReserved: { start: string, end: string }[] = [];
+
+        combinedPricingAndCalendarResponse.forEach(day => {
+          if (!day.availability.available) {
+            if (currentRange) {
+              currentRange.end = day.date;
+            } else {
+              currentRange = { start: day.date, end: day.date };
+            }
+          } else {
+            if (currentRange) {
+              datesReserved.push(currentRange);
+              currentRange = null;
+            }
+          }
+        });
+
+        // Handle the last range if it exists
+        if (currentRange) {
+          datesReserved.push(currentRange);
+        }
+
+        // Insert data into the reservedDates table
 
         const propertyObject = {
           hostId: userId,
@@ -199,37 +286,21 @@ export default async function webhook(
           //ratings: webhookData.data.ratings,
         }
 
+        const propertyId = await db.insert(properties).values(propertyObject).returning({ id: properties.id }).then((result) => result[0]!.id);
+
+        for (const dateRange of datesReserved) {
+          await db.insert(reservedDateRanges).values({
+            propertyId: propertyId,
+            start: dateRange.start,
+            end: dateRange.end,
+          });
+        }
         console.log("channel updated");
         break;
-      default:
     }
 
     console.log('Received webhook data:', webhookData);
 
-
-
-    // Do something with the webhook data
-    const {
-      id,
-      created,
-      action,
-      version,
-      data: {
-        id: channelId,
-        platform,
-        platform_id,
-        name,
-        picture,
-        location,
-        description,
-        first_connected_at,
-        customer
-      }
-    } = webhookData;
-
-    console.log(`Channel ID: ${channelId}`);
-    console.log(`Platform: ${platform}`);
-    console.log(`Customer Name: ${customer.name}`);
     // Add your processing logic here
 
 
