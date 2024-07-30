@@ -295,11 +295,9 @@ export default async function webhook(
             end: dateRange.end,
           });
         }
-        console.log("channel updated");
         break;
     }
 
-    console.log('Received webhook data:', webhookData);
 
     // Add your processing logic here
 
