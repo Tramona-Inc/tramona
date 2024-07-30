@@ -263,20 +263,57 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   // Get the customer info
-  createPaymentIntent: protectedProcedure
+  createPaymentIntent: protectedProcedure //this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
-        amount: z.number(),
-        currency: z.string(),
+        listingId: z.number(),
+        propertyId: z.number(),
+        requestId: z.number().nullable(),
+        name: z.string(),
+        price: z.number(), // Total price included tramona fee
+        tramonaServiceFee: z.number(),
+        description: z.string(),
+        cancelUrl: z.string(),
+        images: z.array(z.string().url()),
+        userId: z.string(),
+        phoneNumber: z.string(),
+        totalSavings: z.number(),
+        hostStripeId: z.string().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const currentDate = new Date(); // Get the current date and time
+      //we need the host Stripe account id to put in webhook
+      //get hostID from the property
+      // Object that can be access through webhook and client
+      const metadata = {
+        user_id: ctx.user.id,
+        listing_id: input.listingId,
+        property_id: input.propertyId,
+        request_id: input.requestId,
+        price: input.price, // Total price included tramona fee
+        tramonaServiceFee: input.tramonaServiceFee,
+        total_savings: input.totalSavings,
+        confirmed_at: currentDate.toISOString(),
+        phone_number: input.phoneNumber,
+        host_stripe_id: input.hostStripeId ?? "",
+      };
+
       const options: Stripe.PaymentIntentCreateParams = {
-        amount: input.amount,
-        currency: input.currency,
+        metadata: metadata,
+        amount: metadata.price,
+        currency: "usd", //input.currency for now we will use usd
         setup_future_usage: "off_session", // is both of and on session
         // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
         automatic_payment_methods: { enabled: true },
+        ...(metadata.host_stripe_id
+          ? {
+              transfer_data: {
+                amount: metadata.price - metadata.tramonaServiceFee,
+                destination: metadata.host_stripe_id,
+              },
+            }
+          : {}),
       };
 
       const response = await stripe.paymentIntents.create(options);
@@ -412,6 +449,7 @@ export const stripeRouter = createTRPCRouter({
       const stripeAccount = await stripeWithSecretKey.accounts.create({
         country: "US", //change this to the user country later
         email: ctx.user.email,
+        settings: {},
         controller: {
           losses: {
             payments: "application",
