@@ -2,9 +2,6 @@ import { type Property } from "@/server/db/schema/tables/properties";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { useEffect, useState } from "react";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Edit2,
   MoveLeft,
   MoveRight,
 } from "lucide-react";

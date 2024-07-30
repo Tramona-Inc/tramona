@@ -3,7 +3,7 @@ import { type Property } from "@/server/db/schema";
 import HostPropertiesPriceRestriction from "./HostPropertiesAgeRestriction";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Edit2 } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesAgeRestriction from "./HostPropertiesAgeRestriction";
@@ -16,7 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   const [iCalUrl, setICalUrl] = useState("");
-  // const [bookedDates, setBookedDates] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
   async function handleFormSubmit() {
@@ -27,8 +27,6 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
       });
 
       if (response.status === 200) {
-        // const dates = response.data.dates;
-        // setBookedDates(dates);
         setICalUrl("");
 
         toast({
@@ -49,6 +47,10 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
       });
     }
   }
+
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+  };
 
   return (
     <div key={property.id} className="space-y-4 p-4 sm:p-6">
@@ -71,8 +73,29 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           </div>
         )}
         {property.iCalLink && (
-          <div className="text-xs">{property.iCalLink}</div>
+          <div className="mb-10 space-y-4">
+            <h1 className="text-4xl font-bold">Sync your iCal</h1>
+            <Label className="font-semibold">iCal URL</Label>
+            <Input
+              id="iCalUrl"
+              type="url"
+              placeholder="https://example.com/calendar.ics"
+              value={isEditing ? iCalUrl : property.iCalLink}
+              onChange={(e) => setICalUrl(e.target.value)}
+              readOnly={!isEditing}
+              className={isEditing ? "" : "bg-gray-100"}
+            />
+            <Button onClick={handleEditToggle} variant="outline" className="mr-2">
+              {isEditing ? "Cancel" : <Edit2 className="h-4 w-4" />}
+            </Button>
+            {isEditing && (
+              <Button onClick={handleFormSubmit} className="mt-2">
+                Submit
+              </Button>
+            )}
+          </div>
         )}
+
         <h1 className="text-2xl font-bold">
           {property.name === "" ? "No property name provided" : property.name}
         </h1>
