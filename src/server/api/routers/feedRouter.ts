@@ -264,7 +264,7 @@ export const feedRouter = createTRPCRouter({
             })),
         ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-        return { mergedData };
+        return mergedData;
         }),
 
     // filler data operations

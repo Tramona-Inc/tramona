@@ -14,6 +14,7 @@ export default function BaseCard({
   userImage: string;
 }>) {
   const elapsedTime = item && getElapsedTime(new Date(item.createdAt));
+  const inPast = item && new Date(item.createdAt) < new Date();
   return (
     <Card className="w-full">
       <div className="flex items-center gap-4">
@@ -23,7 +24,7 @@ export default function BaseCard({
         <div className="min-w-0 flex-1 font-medium">
           <div className="truncate font-bold">{getDisplayedName(userName)}</div>
           <p className="truncate text-sm text-muted-foreground">
-            {elapsedTime}
+            {inPast ? elapsedTime : "Today"}
           </p>
         </div>
       </div>
