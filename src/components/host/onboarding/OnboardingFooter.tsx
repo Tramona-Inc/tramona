@@ -20,7 +20,7 @@ export default function OnboardingFooter({
   isFormValid = false, // Default value is false
   isForm,
   handleError,
-  onClick
+  onClick,
 }: OnboardingFooterProps) {
   const [isLoading, setIsLoading] = useState(false);
   const max_pages = 10;
@@ -144,20 +144,15 @@ export default function OnboardingFooter({
           <Button onClick={onPressNext}>Back to summary</Button>
         ) : (
           <div className="flex flex-row gap-2">
-            {progress === 0 && 
-          <Button className="flex" onClick={onClick}>
-            Next
-          </Button>
-          }
-          <Button onClick={onPressNext} disabled={isLoading}>
-            {progress === 0
-              ? "Get Started"
-              : progress === 8
-                ? "Review"
-                : progress === 9
-                  ? "Finish"
-                  : "Next"}
-          </Button>
+            <Button onClick={onPressNext} disabled={isLoading}>
+              {progress === 0
+                ? "Get Started"
+                : progress === 8
+                  ? "Review"
+                  : progress === 9
+                    ? "Finish"
+                    : "Next"}
+            </Button>
           </div>
         )}
       </div>
