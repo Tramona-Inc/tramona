@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import { getCancellationPolicy } from "@/utils/utils";
+import { api } from "@/utils/api";
+
 
 export default function HostPropertiesCancellation({
   property,
@@ -31,6 +33,8 @@ export default function HostPropertiesCancellation({
   const [selectedPolicy, setSelectedPolicy] = useState<string | null>(
     property.cancellationPolicy
   );
+
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
   const policies = getCancellationPolicy();
   const policyKeys = Object.keys(policies) as (keyof typeof policies)[];
@@ -48,11 +52,13 @@ export default function HostPropertiesCancellation({
     },
   });
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = async (values: FormValues) => {
     console.log("form submitted");
     console.log("form values:", values.policy);
     // Here you would update the property with the new policy
     property.cancellationPolicy = values.policy;
+    const newProperty = { ...property, cancellationPolicy: values.policy };
+    await updateProperty(newProperty);
     setEditing(false);
   };
 

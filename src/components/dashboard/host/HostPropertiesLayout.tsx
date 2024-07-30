@@ -287,7 +287,7 @@ export function HostPropertyEditBtn({
     setSmokingAllowed(property.smokingAllowed ?? false);
     setOtherHouseRules(property.otherHouseRules ?? "");
     setEditing(!editing);
-    setCancellationPolicy(property.cancellationPolicy ?? "");
+    setCancellationPolicy(property.cancellationPolicy);
   };
 
   return (
