@@ -15,7 +15,6 @@ interface ReservedDate {
   end: string;
 }
 
-
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
@@ -50,25 +49,26 @@ export default function HostAvailability({ property }: { property: Property }) {
 
   const fetchReservedDates = async () => {
     try {
-      if (property.iCalLink) {
-        // refreshing iCal data
-        const refreshICal = await axios.post('/api/calendar-sync', { iCalUrl: property.iCalLink, propertyId: property.id });
-        console.log('Refresh iCal:', refreshICal);
-      } else {
-        console.log('No iCal link found for this property. Skipping refresh');
-      }
-      const response = await axios.get(`/api/host-availability-ical?propertyId=${property.id}`);
-      console.log('Reserved dates:', response.data);
+      // refreshing iCal data
+      const refreshICal = await axios.post("/api/calendar-sync", {
+        iCalUrl: property.iCalLink,
+        propertyId: property.id,
+      });
+      console.log("Refresh iCal:", refreshICal);
+      const response = await axios.get(
+        `/api/host-availability-ical?propertyId=${property.id}`,
+      );
+      console.log("Reserved dates:", response.data);
       setReservedDates(response.data);
     } catch (error) {
-      console.error('Error fetching reserved dates:', error);
+      console.error("Error fetching reserved dates:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const isDateReserved = (date: Date) => {
-    return reservedDates.some(reservedDate => {
+    return reservedDates.some((reservedDate) => {
       const start = new Date(reservedDate.start);
       const end = new Date(reservedDate.end);
       return date >= start && date < end;
@@ -114,22 +114,21 @@ export default function HostAvailability({ property }: { property: Property }) {
             </div>
           ))}
           {monthDays.map((day, index) => {
-            const date = day ? new Date(monthDate.getFullYear(), monthDate.getMonth(), day) : null;
+            const date = day
+              ? new Date(monthDate.getFullYear(), monthDate.getMonth(), day)
+              : null;
             const isReserved = date ? isDateReserved(date) : false;
             return (
               <div
                 key={index}
-                className={`flex h-12 flex-1 items-center justify-center font-semibold 
-                  ${day ? "cursor-pointer bg-zinc-50" : ""} 
-                  ${isReserved ? "bg-reserved-pattern" : ""}
-                  ${
-                    day &&
-                    monthDate.getFullYear() === currentDate.getFullYear() &&
-                    monthDate.getMonth() === currentDate.getMonth() &&
-                    day === currentDate.getDate()
-                      ? "font-semibold text-blue-600"
-                      : "text-muted-foreground"
-                  }`}
+                className={`flex h-12 flex-1 items-center justify-center font-semibold ${day ? "cursor-pointer bg-zinc-50" : ""} ${isReserved ? "bg-reserved-pattern" : ""} ${
+                  day &&
+                  monthDate.getFullYear() === currentDate.getFullYear() &&
+                  monthDate.getMonth() === currentDate.getMonth() &&
+                  day === currentDate.getDate()
+                    ? "font-semibold text-blue-600"
+                    : "text-muted-foreground"
+                }`}
               >
                 {day}
               </div>
@@ -219,7 +218,7 @@ export default function HostAvailability({ property }: { property: Property }) {
               <span className="text-muted-foreground">Blocked dates</span>
             </div>
             <div className="flex items-center">
-              <div className="mr-2 h-6 w-6  bg-blue-100"></div>
+              <div className="mr-2 h-6 w-6 bg-blue-100"></div>
               <span className="text-muted-foreground">Booked on Tramona</span>
             </div>
           </div>
