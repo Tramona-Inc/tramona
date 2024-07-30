@@ -1,4 +1,3 @@
-import HostTeamInviteEmail from "packages/transactional/emails/HostTeamInviteEmail";
 import {
   hostProfiles,
   hostTeamInvites,
@@ -6,7 +5,7 @@ import {
   hostTeams,
   users,
 } from "@/server/db/schema";
-import { getHostTeamOwnerId, sendEmail } from "@/server/server-utils";
+import { getHostTeamOwnerId } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
 import { and, eq } from "drizzle-orm";

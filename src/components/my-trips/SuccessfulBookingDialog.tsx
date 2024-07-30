@@ -1,15 +1,10 @@
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { DialogContent, Dialog, DialogTrigger } from "../ui/dialog";
-import { type Bid } from "@/server/db/schema/tables/bids";
-import { api } from "@/utils/api";
 import { formatDateMonthDay } from "@/utils/utils";
-import Link from "next/link";
-import { getDiscountPercentage } from "@/utils/utils";
-import { useEffect, useRef, useState } from "react";
-import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
+import { useState } from "react";
 import Confetti from "react-confetti";
-import { TripCardDetails } from "@/pages/my-trips";
+import { type TripCardDetails } from "@/pages/my-trips";
 import SharePropertyDialogContent from "../_common/ShareLink/SharePropertyDialogContent";
 
 export default function SuccessfulBidDialog({

@@ -1,11 +1,11 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import PropertyPage from "@/components/property/PropertyPage";
-import { api, RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import { GetServerSideProps } from "next";
+import { type GetServerSideProps } from "next";
 import { NextSeo } from "next-seo";
 import { db } from "@/server/db";
 import { properties } from "@/server/db/schema/tables/properties";

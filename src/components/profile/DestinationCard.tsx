@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import dayjs from "dayjs";
-import { BucketListDestination } from "@/server/db/schema";
+import { type BucketListDestination } from "@/server/db/schema";
 
 type Props = {
   destination: BucketListDestination;

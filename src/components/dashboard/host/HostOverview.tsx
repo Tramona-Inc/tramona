@@ -7,7 +7,7 @@ import HostRequestsOverview from "./HostRequestsOverview";
 import { useSession } from "next-auth/react";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import { api } from "@/utils/api";
-import { hostMobileNavLinks } from "../../../config/sideNavLinks";
+
 export default function HostOverview() {
   const { data: session } = useSession({
     required: true,

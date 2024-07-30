@@ -1,4 +1,4 @@
-import { DefaultSeoProps } from "next-seo";
+import { type DefaultSeoProps } from "next-seo";
 const isProduction = process.env.NODE_ENV === "production";
 
 const baseUrl = isProduction

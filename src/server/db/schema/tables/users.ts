@@ -13,7 +13,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
-import { last } from "lodash";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
