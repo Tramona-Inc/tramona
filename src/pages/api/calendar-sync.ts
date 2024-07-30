@@ -4,6 +4,8 @@ import ical, { VEvent } from 'node-ical';
 import { db } from '@/server/db';
 import { reservedDates } from '@/server/db/schema/tables/reservedDates';
 import { eq } from 'drizzle-orm';
+import { propertiesRouter } from '@/server/api/routers/propertiesRouter'; 
+import { properties } from '@/server/db/schema/tables/properties';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
@@ -48,6 +50,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
         }
       }
+
+      // Insert iCalLink
+      await db.update(properties)
+        .set({ iCalLink: iCalUrl })
+        .where(eq(properties.id, propertyId));
 
       console.log(`Synced ${events.length} events for property ${propertyId}`);
       res.status(200).json({ message: `Synced ${events.length} events` });

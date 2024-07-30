@@ -9,6 +9,7 @@ import {
   MoveRight,
 } from "lucide-react";
 import axios from "axios";
+import Spinner from "@/components/_common/Spinner";
 interface ReservedDate {
   start: string;
   end: string;
@@ -21,6 +22,7 @@ export default function HostAvailability({ property }: { property: Property }) {
   const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
 
   const [reservedDates, setReservedDates] = useState<ReservedDate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -48,11 +50,20 @@ export default function HostAvailability({ property }: { property: Property }) {
 
   const fetchReservedDates = async () => {
     try {
+      if (property.iCalLink) {
+        // refreshing iCal data
+        const refreshICal = await axios.post('/api/calendar-sync', { iCalUrl: property.iCalLink, propertyId: property.id });
+        console.log('Refresh iCal:', refreshICal);
+      } else {
+        console.log('No iCal link found for this property. Skipping refresh');
+      }
       const response = await axios.get(`/api/host-availability-ical?propertyId=${property.id}`);
-      console.log('Reserved dates??:', response.data);
+      console.log('Reserved dates:', response.data);
       setReservedDates(response.data);
     } catch (error) {
       console.error('Error fetching reserved dates:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -86,6 +97,10 @@ export default function HostAvailability({ property }: { property: Property }) {
       1,
     );
     const monthDays = generateCalendarDays(monthDate.getMonth());
+
+    if (isLoading) {
+      return <Spinner />;
+    }
 
     return (
       <div className="w-full sm:w-1/2">
