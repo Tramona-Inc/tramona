@@ -178,7 +178,7 @@ export default function ListMessages() {
 
       const user =
         participants.find(
-          (participant) => participant?.id === message.userId,
+          (participant) => participant.id === message.userId,
         ) ?? null; // null means its a deleted user
 
       return { message, user };

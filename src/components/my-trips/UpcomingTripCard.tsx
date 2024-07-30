@@ -7,7 +7,6 @@ import { Button } from "../ui/button";
 import { formatDateRange } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import MapPin from "../_icons/MapPin";
 import {
   Sheet,
   SheetClose,
@@ -18,7 +17,7 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { TripCardDetails } from "./PastTrips";
+import { type TripCardDetails } from "@/pages/my-trips";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
@@ -35,7 +34,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               <div className="flex justify-center sm:justify-start">
                 <Link
                   href={`/my-trips/${trip.id}`}
-                  className="relative h-48 w-full -mt-8 lg:-mt-0 sm:h-32 sm:w-52"
+                  className="relative -mt-8 h-48 w-full sm:h-32 sm:w-52 lg:-mt-0"
                 >
                   <Image
                     fill

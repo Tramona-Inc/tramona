@@ -59,7 +59,7 @@ export default function GroupMembersList({
       isAdminDashboard || isSingleUser
         ? null
         : isYou
-          ? request?.requestGroup?.hasApproved !== false
+          ? request.requestGroup?.hasApproved !== false
             ? leaveGroupBtn
             : null
           : userIsOwner

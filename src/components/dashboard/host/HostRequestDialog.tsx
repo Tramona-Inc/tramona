@@ -1,5 +1,5 @@
 /* OfferDialog.tsx */
-import { Dispatch, useState } from "react";
+import { type Dispatch, useState } from "react";
 import {
   Dialog,
   DialogContent,

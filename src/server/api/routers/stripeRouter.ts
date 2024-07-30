@@ -7,8 +7,6 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { hostProfiles } from "@/server/db/schema";
 
-const isProduction = process.env.NODE_ENV === "production";
-
 export const config = {
   api: {
     bodyParser: false,
@@ -683,11 +681,10 @@ export const stripeRouter = createTRPCRouter({
     return clientSecret;
   }),
 
-  getVerificationReports: protectedProcedure.query(async ({ ctx, input }) => {
-    const verificationReport = await stripe.identity.verificationReports.list({
+  getVerificationReports: protectedProcedure.query(async () => {
+    return await stripe.identity.verificationReports.list({
       limit: 3,
     });
-    return verificationReport;
   }),
 
   getVerificationReportsById: protectedProcedure
@@ -716,12 +713,10 @@ export const stripeRouter = createTRPCRouter({
 
   // TODO: create a PaymentIntent for admin/host to accept the bidding based of the user intent
 
-  getVerificationStatus: protectedProcedure.query(({ ctx, input }) => {
+  getVerificationStatus: protectedProcedure.query(({ ctx }) => {
     const result = ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
-      columns: {
-        isIdentityVerified: true,
-      },
+      columns: { isIdentityVerified: true },
     });
 
     return result;

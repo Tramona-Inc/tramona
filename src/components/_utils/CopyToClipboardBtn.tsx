@@ -17,7 +17,7 @@ export default function CopyToClipboardBtn({
   return render({
     justCopied,
     copyMessage: () => {
-      if (timeoutId?.current) {
+      if (timeoutId.current) {
         clearTimeout(timeoutId.current);
       }
       navigator.clipboard.writeText(message).catch(() => {

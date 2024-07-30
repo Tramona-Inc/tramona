@@ -1,7 +1,13 @@
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
-import { formatDate, isSameDay, isSameMonth, isSameYear } from "date-fns";
+import {
+  formatDate,
+  type FormatOptions,
+  isSameDay,
+  isSameMonth,
+  isSameYear,
+} from "date-fns";
 import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -423,4 +429,25 @@ export function formatTime(time: string) {
   return hour > 12
     ? `${hour - 12}:${fmtdMinutes} PM`
     : `${hour}:${fmtdMinutes} AM`;
+}
+
+/**
+ * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
+ * to the end of the date string to prevent the timezone from getting converted
+ * to UTC and the formatted date being 1 day off.
+ *
+ * @example
+ * ```js
+ * formatDateString("2023-03-01", "MMM d, yyyy"); // Mar 1, 2023
+ * ```
+ */
+export function formatDateString(
+  date: string,
+  formatStr: string,
+  options: FormatOptions = {},
+) {
+  if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    throw new Error("Invalid date format, must be YYYY-MM-DD");
+  }
+  return formatDate(`${date}T00:00`, formatStr, options);
 }

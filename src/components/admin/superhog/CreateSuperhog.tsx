@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { env } from "@/env";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -33,7 +32,6 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/components/ui/use-toast";
 import { type AxiosError } from "axios";
-import Spinner from "@/components/_common/Spinner";
 
 //IMPORTANT THERE IS TWO RESERVATION ID. reservationID is a required is a required
 //input for the superhog verification API,howerver reservation.id is the primary key of the reservation table in the database
