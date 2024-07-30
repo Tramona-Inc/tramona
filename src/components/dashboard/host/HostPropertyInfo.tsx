@@ -7,14 +7,71 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesAgeRestriction from "./HostPropertiesAgeRestriction";
+import { useState } from "react";
+import axios from "axios";
+import { Label } from "recharts";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { Calendar } from "@/components/ui/calendar";
+
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
+  const [iCalUrl, setICalUrl] = useState("");
+  // const [bookedDates, setBookedDates] = useState([]);
+  const { toast } = useToast();
+
+
+  async function handleFormSubmit() {
+    try {
+      const response = await axios.post('/api/calendar-sync', { iCalUrl, propertyId: property.id });
+
+      if (response.status === 200) {
+        // const dates = response.data.dates;
+        // setBookedDates(dates);
+        setICalUrl("");
+
+        toast({
+          title: "Success!",
+          description: "Your iCal calendar has been successfully synced.",
+          variant: "default",
+        });
+      } else {
+        throw new Error("Failed to sync calendar");
+      }
+    } catch (error) {
+      console.error('Error syncing calendar:', error);
+      
+      toast({
+        title: "Sync Failed",
+        description: "An error occurred while syncing the calendar.",
+        variant: "destructive",
+      });
+    }
+  }
+
+
+
   return (
     <div className="space-y-4 p-4 sm:p-6">
       <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
       <div>
+      <div className="space-y-4 mb-10">
+        <h1 className="text-4xl font-bold">
+          Sync your iCal
+        </h1>
+        <Label className="font-semibold">iCal URL</Label>
+        <Input
+          id="iCalUrl"
+          type="url"
+          placeholder="https://example.com/calendar.ics"
+          value={iCalUrl}
+          onChange={(e) => setICalUrl(e.target.value)}
+        />
+        <Button onClick={handleFormSubmit}>Submit</Button>
+      </div>
         <h1 className="text-2xl font-bold">
           {property.name === "" ? "No property name provided" : property.name}
         </h1>

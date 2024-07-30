@@ -8,11 +8,19 @@ import {
   MoveLeft,
   MoveRight,
 } from "lucide-react";
+import axios from "axios";
+interface ReservedDate {
+  start: string;
+  end: string;
+}
+
 
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
   const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
+
+  const [reservedDates, setReservedDates] = useState<ReservedDate[]>([]);
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -35,7 +43,26 @@ export default function HostAvailability({ property }: { property: Property }) {
     console.log(today.toString());
     setCurrentDate(today);
     setCalendarDate(today);
+    fetchReservedDates();
   }, []);
+
+  const fetchReservedDates = async () => {
+    try {
+      const response = await axios.get(`/api/host-availability-ical?propertyId=${property.id}`);
+      console.log('Reserved dates??:', response.data);
+      setReservedDates(response.data);
+    } catch (error) {
+      console.error('Error fetching reserved dates:', error);
+    }
+  };
+
+  const isDateReserved = (date: Date) => {
+    return reservedDates.some(reservedDate => {
+      const start = new Date(reservedDate.start);
+      const end = new Date(reservedDate.end);
+      return date >= start && date < end;
+    });
+  };
 
   const generateCalendarDays = (month: number): (number | null)[] => {
     const year = calendarDate.getFullYear();
@@ -71,23 +98,28 @@ export default function HostAvailability({ property }: { property: Property }) {
               {day.toUpperCase()}
             </div>
           ))}
-          {monthDays.map((day, index) => (
-            <div
-              key={index}
-              className={`flex h-12 flex-1 items-center justify-center font-semibold 
-                ${day ? "cursor-pointer bg-zinc-50" : ""} 
-                ${
-                  day &&
-                  monthDate.getFullYear() === currentDate.getFullYear() &&
-                  monthDate.getMonth() === currentDate.getMonth() &&
-                  day === currentDate.getDate()
-                    ? "font-semibold text-blue-600"
-                    : "text-muted-foreground"
-                }`}
-            >
-              {day}
-            </div>
-          ))}
+          {monthDays.map((day, index) => {
+            const date = day ? new Date(monthDate.getFullYear(), monthDate.getMonth(), day) : null;
+            const isReserved = date ? isDateReserved(date) : false;
+            return (
+              <div
+                key={index}
+                className={`flex h-12 flex-1 items-center justify-center font-semibold 
+                  ${day ? "cursor-pointer bg-zinc-50" : ""} 
+                  ${isReserved ? "bg-reserved-pattern" : ""}
+                  ${
+                    day &&
+                    monthDate.getFullYear() === currentDate.getFullYear() &&
+                    monthDate.getMonth() === currentDate.getMonth() &&
+                    day === currentDate.getDate()
+                      ? "font-semibold text-blue-600"
+                      : "text-muted-foreground"
+                  }`}
+              >
+                {day}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
