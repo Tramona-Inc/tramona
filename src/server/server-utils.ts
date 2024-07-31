@@ -372,7 +372,7 @@ export async function getPropertiesForRequest(
       propertyIsNearRequest,
       propertyisAvailable,
     ),
-    columns: { id: true, city: true, latitude: true, longitude: true, hostId: true },
+    columns: { id: true, city: true, latitude: true, longitude: true },
   });
 
   return result.map((p) => p.id);
