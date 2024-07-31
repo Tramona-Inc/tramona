@@ -14,6 +14,6 @@ export const reservedDateRanges = pgTable("reserved_date_ranges", {
 });
 
 export type ReservedDate = typeof reservedDateRanges.$inferSelect;
-export const reservedDateRangeselectSchema =
-  createSelectSchema(reservedDateRanges);
+export const reservedDateSelectSchema = createSelectSchema(reservedDateRanges);
 export const reservedDateInsertSchema = createInsertSchema(reservedDateRanges);
+
