@@ -1,12 +1,10 @@
 import { type Property } from "@/server/db/schema/tables/properties";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { useCallback, useEffect, useState } from "react";
-import {
-  MoveLeft,
-  MoveRight,
-} from "lucide-react";
-import axios from "axios";
+import { MoveLeft, MoveRight } from "lucide-react";
+import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
+
 interface ReservedDate {
   start: string;
   end: string;
@@ -17,8 +15,10 @@ export default function HostAvailability({ property }: { property: Property }) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
   const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
 
-  const [reservedDates, setReservedDates] = useState<ReservedDate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
+  const { data: reservedDateRanges, isLoading, refetch } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
+  
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -36,41 +36,43 @@ export default function HostAvailability({ property }: { property: Property }) {
     "December",
   ];
 
-  const fetchReservedDates = useCallback(async () => {
+  const fetchReservedDateRanges = useCallback(async () => {
+    if (!property.iCalLink) {
+      console.warn("No iCalLink available for this property");
+      return;
+    }
+
     try {
-      setIsLoading(true);
-      // refreshing iCal data
-      const refreshICal = await axios.post("/api/calendar-sync", {
+      // Refresh iCal data
+      await syncCalendar({
         iCalUrl: property.iCalLink,
         propertyId: property.id,
       });
-      console.log("Refresh iCal:", refreshICal);
-      const response = await axios.get<ReservedDate[]>(
-        `/api/host-availability-ical?propertyId=${property.id}`
-      );
-      console.log("Reserved dates:", response.data);
-      setReservedDates(response.data);
+      console.log("Refreshed iCal data");
+      
+      // Refetch reserved date ranges
+      await refetch();
     } catch (error) {
       console.error("Error fetching reserved dates:", error);
-    } finally {
-      setIsLoading(false);
     }
-  }, [property.iCalLink, property.id]);
+  }, [property.iCalLink, property.id, syncCalendar, refetch]);
 
   useEffect(() => {
     const today = new Date();
     console.log(today.toString());
     setCurrentDate(today);
     setCalendarDate(today);
-    void fetchReservedDates();
-  }, [fetchReservedDates]);
+    if (property.iCalLink) {
+      void fetchReservedDateRanges();
+    }
+  }, [fetchReservedDateRanges, property.iCalLink]);
 
   const isDateReserved = (date: Date) => {
-    return reservedDates.some((reservedDate) => {
+    return reservedDateRanges?.some((reservedDate) => {
       const start = new Date(reservedDate.start);
       const end = new Date(reservedDate.end);
       return date >= start && date < end;
-    });
+    }) ?? false;
   };
 
   const generateCalendarDays = (month: number): (number | null)[] => {

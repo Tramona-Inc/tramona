@@ -1,6 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
-// import HostPropertiesPriceRestriction from "./HostPropertiesAgeRestriction";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
 import { ChevronLeft, Edit2 } from "lucide-react";
@@ -8,54 +7,53 @@ import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesAgeRestriction from "./HostPropertiesAgeRestriction";
 import { useState } from "react";
-import axios from "axios";
 import { Label } from "recharts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   const [iCalUrl, setICalUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  async function handleFormSubmit() {
-    try {
-      const response = await axios.post("/api/calendar-sync", {
-        iCalUrl,
-        propertyId: property.id,
+  const syncCalendarMutation = api.calendar.syncCalendar.useMutation({
+    onSuccess: () => {
+      setICalUrl("");
+      setIsEditing(false);
+      toast({
+        title: "Success!",
+        description: "Your iCal calendar has been successfully synced.",
+        variant: "default",
       });
-
-      if (response.status === 200) {
-        setICalUrl("");
-        setRefreshKey((prevKey) => prevKey + 1);
-
-        toast({
-          title: "Success!",
-          description: "Your iCal calendar has been successfully synced.",
-          variant: "default",
-        });
-      } else {
-        throw new Error("Failed to sync calendar");
-      }
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Error syncing calendar:", error);
-
       toast({
         title: "Sync Failed",
-        description: "An error occurred while syncing the calendar.",
+        description: error.message || "An error occurred while syncing the calendar.",
         variant: "destructive",
       });
-    }
+    },
+  });
+
+  function handleFormSubmit() {
+    syncCalendarMutation.mutate({
+      iCalUrl,
+      propertyId: property.id,
+    });
   }
 
   const handleEditToggle = () => {
+    if (isEditing) {
+      setICalUrl(property.iCalLink || '');
+    }
     setIsEditing(!isEditing);
   };
 
   return (
-    <div key={`${property.id}-${refreshKey}`} className="space-y-4 p-4 sm:p-6">
+    <div key={property.id} className="space-y-4 p-4 sm:p-6">
       <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
@@ -71,7 +69,9 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
               value={iCalUrl}
               onChange={(e) => setICalUrl(e.target.value)}
             />
-            <Button onClick={handleFormSubmit}>Submit</Button>
+            <Button onClick={handleFormSubmit} disabled={syncCalendarMutation.isLoading}>
+              {syncCalendarMutation.isLoading ? "Syncing..." : "Submit"}
+            </Button>
           </div>
         )}
         {property.iCalLink && (
@@ -91,8 +91,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
               {isEditing ? "Cancel" : <Edit2 className="h-4 w-4" />}
             </Button>
             {isEditing && (
-              <Button onClick={handleFormSubmit} className="mt-2">
-                Submit
+              <Button 
+                onClick={handleFormSubmit} 
+                className="mt-2"
+                disabled={syncCalendarMutation.isLoading}
+              >
+                {syncCalendarMutation.isLoading ? "Syncing..." : "Submit"}
               </Button>
             )}
           </div>

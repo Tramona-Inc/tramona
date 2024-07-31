@@ -3,7 +3,7 @@ import axios from "axios";
 import type { VEvent } from "node-ical";
 import ical from "node-ical";
 import { db } from "@/server/db";
-import { reservedDates } from "@/server/db/schema/tables/reservedDates";
+import { reservedDateRanges } from "@/server/db/schema/tables/reservedDateRanges";
 import { eq } from "drizzle-orm";
 import { properties } from "@/server/db/schema/tables/properties";
 import { formatDateRange } from "@/utils/utils";
@@ -61,7 +61,7 @@ export default async function handler(
 
 async function syncCalendar(
   iCalUrl: string,
-  propertyId: string,
+  propertyId: number,
 ): Promise<void> {
   console.log("iCal URL:", iCalUrl);
   console.log("Property ID:", propertyId);
@@ -88,24 +88,23 @@ async function syncCalendar(
   );
   console.log("Number of VEVENT items:", events.length);
 
-  const propertyIdNumber = parseInt(propertyId, 10);
   // delete existing reserved dates for this property
   await db
-    .delete(reservedDates)
-    .where(eq(reservedDates.propertyId, propertyIdNumber));
+    .delete(reservedDateRanges)
+    .where(eq(reservedDateRanges.propertyId, propertyId));
 
   const processedEvents = new Set();
 
   for (const event of events) {
-    const checkIn = new Date(event.start);
-    const checkOut = new Date(event.end);
-    const eventKey = formatDateRange(checkIn, checkOut);
+    const start = new Date(event.start);
+    const end = new Date(event.end);
+    const eventKey = formatDateRange(start, end);
 
     if (!processedEvents.has(eventKey)) {
-      await db.insert(reservedDates).values({
-        propertyId: propertyIdNumber,
-        checkIn,
-        checkOut,
+      await db.insert(reservedDateRanges).values({
+        propertyId: propertyId,
+        start,
+        end,
       });
       processedEvents.add(eventKey);
     }
@@ -115,7 +114,7 @@ async function syncCalendar(
   await db
     .update(properties)
     .set({ iCalLink: iCalUrl })
-    .where(eq(properties.id, propertyIdNumber));
+    .where(eq(properties.id, propertyId));
 
   console.log(`Synced ${events.length} events for property ${propertyId}`);
 }
