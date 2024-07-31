@@ -4,10 +4,9 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { z } from "zod";
-import axios, { AxiosResponse } from "axios";
+import axios, { type AxiosResponse } from "axios";
 import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
-import { redirect } from "next/dist/server/api-utils";
 
 export const pmsRouter = createTRPCRouter({
   generateHostawayBearerToken: publicProcedure
