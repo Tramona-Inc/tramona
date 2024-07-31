@@ -1,42 +1,80 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
-import { useHostOnboarding } from '@/utils/store/host-onboarding';
-import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import OnboardingFooter from './OnboardingFooter';
-import SaveAndExit from './SaveAndExit';
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { cn } from "@/utils/utils";
+import { zodString } from "@/utils/zod-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import OnboardingFooter from "./OnboardingFooter";
+import SaveAndExit from "./SaveAndExit";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
-  iCalUrl: z.string().url('Please enter a valid URL'),
+  checkIn: zodString({ maxLen: 100 }),
+  checkOut: zodString({ maxLen: 100 }),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function PropertyAvailability({
+export default function Onboarding6({
   editing = false,
+  setHandleOnboarding,
+}: {
+  editing?: boolean;
+  setHandleOnboarding?: (handle: () => void) => void;
 }) {
-  const [bookedDates, setBookedDates] = useState([]);
-  const setBookingDates = useHostOnboarding((state) => state.setBookingDates);
+  const otherCheckInType = useHostOnboarding(
+    (state) => state.listing.otherCheckInType,
+  );
+
+  const setOtherCheckInType = useHostOnboarding(
+    (state) => state.setOtherCheckInType,
+  );
+
+  const checkInType = useHostOnboarding((state) => state.listing.checkInType);
+  const setCheckInType = useHostOnboarding((state) => state.setCheckInType);
+
+  const handleRadioChange = (value: string) => {
+    if (value === "self" || value === "host") {
+      setOtherCheckInType(false);
+      setCheckInType(value); // Set check-in type for other options
+    } else {
+      setOtherCheckInType(true);
+      setCheckInType(""); // Clear check-in type when "Other" is selected
+    }
+  };
+
+  const checkIn = useHostOnboarding((state) => state.listing.checkIn);
+  const checkOut = useHostOnboarding((state) => state.listing.checkOut);
+  const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
+  const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
+
+  const [error, setError] = useState(false);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      checkIn: checkIn,
+      checkOut: checkOut,
+    },
   });
 
   async function handleFormSubmit(values: FormSchema) {
-    try {
-      // Send the iCal URL to your backend for processing
-      const response = await axios.post('/api/calendar-sync', { iCalUrl: values.iCalUrl, propertyId: 5033 });
-      const dates = response.data.dates;
-      setBookingDates(dates);
-      setBookedDates(dates);
-    } catch (error) {
-      console.error('Error syncing calendar:', error);
-      // Handle error (e.g., show error message to user)
-    }
+    setCheckIn(values.checkIn);
+    setCheckOut(values.checkOut);
   }
+
+  function handleError() {
+    setError(true);
+  }
+
+  useEffect(() => {
+    setHandleOnboarding &&
+      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+  }, [form.formState]);
 
   return (
     <>
@@ -44,37 +82,110 @@ export default function PropertyAvailability({
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="mt-10 flex flex-col gap-10">
           <h1 className="text-4xl font-bold">
-            Enter your iCal URL
+            How will your guest check-in / out?
           </h1>
-          <Form {...form}>
-            <FormField
-              control={form.control}
-              name="iCalUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <Label className="font-semibold">iCal URL</Label>
-                  <Input
-                    {...field}
-                    type="url"
-                    placeholder="https://example.com/calendar.ics"
-                  />
-                  <FormMessage>
-                    {form.formState.errors.iCalUrl?.message}
-                  </FormMessage>
-                </FormItem>
-              )}
-            />
-          </Form>
-          <div>
-            <h2 className="text-2xl font-bold">Booked Dates</h2>
-            <ul>
-              {bookedDates.map((date, index) => (
-                <li key={index}>
-                  {date.summary} from {new Date(date.start).toLocaleString()} to {new Date(date.end).toLocaleString()}
-                </li>
-              ))}
-            </ul>
+
+          <div className="flex flex-col gap-5">
+            <RadioGroup
+              defaultValue={otherCheckInType ? "other" : checkInType}
+              onValueChange={handleRadioChange}
+            >
+              <div className="flex items-center space-x-2 rounded-lg border p-5">
+                <RadioGroupItem value="self" id="self" />
+                <Label htmlFor="self">
+                  <h2 className="mb-2 text-lg font-bold">
+                    Self check-in / out
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Guests can check in and out by themselves
+                  </p>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 rounded-lg border p-5">
+                <RadioGroupItem value="host" id="host" />
+                <Label htmlFor="meet">
+                  <h2 className="text-lg font-bold">Meet host at door</h2>
+                  <p className="text-muted-foreground">
+                    Guests get the keys from you when they arrive at the
+                    property
+                  </p>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 rounded-lg border p-5">
+                <RadioGroupItem value="other" id="other" />
+                <Label htmlFor="option-two" className="text-lg font-bold">
+                  Other
+                </Label>
+              </div>
+            </RadioGroup>
+
+            <div>
+              <p
+                className={cn(
+                  !otherCheckInType && "text-muted-foreground",
+                  "mb-2 text-sm font-semibold",
+                )}
+              >
+                Other: please specify here
+              </p>
+              <Input
+                type="text"
+                disabled={!otherCheckInType}
+                value={otherCheckInType ? checkInType : ""}
+                onChange={(e) => setCheckInType(e.target.value)}
+              />
+              {/* //TODO display the character count */}
+            </div>
           </div>
+
+          <Form {...form}>
+            <div className="mt-5 w-full">
+              <h1 className="mb-2 text-xl font-bold">Hours</h1>
+              {error && (
+                <p className="text-red-500">
+                  Please include both a check in and check out time
+                </p>
+              )}
+              <div className="grid grid-cols-2 gap-5">
+                <FormField
+                  control={form.control}
+                  name="checkIn"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label className="font-semibold ">Check in</Label>
+                      <Input
+                        {...field}
+                        type="time"
+                        placeholder="Check in time"
+                        className="p-5"
+                      />
+                      <FormMessage>
+                        {form.formState.errors.checkIn?.message}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="checkOut"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label className="font-semibold">Check out</Label>
+                      <Input
+                        {...field}
+                        type="time"
+                        placeholder="Check out time"
+                        className="p-5"
+                      />
+                      <FormMessage>
+                        {form.formState.errors.checkOut?.message}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </Form>
         </div>
       </div>
       {!editing && (
@@ -82,6 +193,7 @@ export default function PropertyAvailability({
           handleNext={form.handleSubmit(handleFormSubmit)}
           isFormValid={form.formState.isValid}
           isForm={true}
+          handleError={handleError}
         />
       )}
     </>

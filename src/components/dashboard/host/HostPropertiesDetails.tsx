@@ -23,10 +23,10 @@ import { api } from "@/utils/api";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
 import Onboarding5 from "@/components/host/onboarding/Onboarding5";
-import Onboarding8 from "@/components/host/onboarding/Onboarding8";
-import Onboarding9 from "@/components/host/onboarding/Onboarding9";
-import Onboarding7 from "@/components/host/onboarding/Onboarding7";
-import Onboarding6 from "@/components/host/onboarding/Onboarding6";
+import Onboarding8 from "@/components/host/onboarding/Onboarding7";
+import Onboarding9 from "@/components/host/onboarding/Onboarding8";
+import Onboarding7 from "@/components/host/onboarding/Onboarding6";
+import Onboarding6 from "@/components/host/onboarding/Onboarding5";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -173,7 +173,7 @@ export default function HostPropertiesDetails({
           <div className="grid grid-cols-3 gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="secondary" className=" text-red-500">
+                <Button variant="secondary" className="text-red-500">
                   <Trash2 />
                   Delete
                 </Button>
@@ -364,13 +364,13 @@ export default function HostPropertiesDetails({
               <SingleLocationMap
                 lat={
                   editing
-                    ? coordinateData?.coordinates.location?.lat ?? 0
+                    ? (coordinateData?.coordinates.location?.lat ?? 0)
                     : property.latitude
                 }
                 lng={
                   editing
-                    ? coordinateData?.coordinates.location?.lng ?? 0
-                    : property.longitude 
+                    ? (coordinateData?.coordinates.location?.lng ?? 0)
+                    : property.longitude
                 }
               />
             </div>
@@ -405,7 +405,7 @@ export default function HostPropertiesDetails({
           </div>
           <div className="text-muted-foreground">
             <p>
-              {capitalize(editing ? checkInType : property.checkInInfo ?? "")}
+              {capitalize(editing ? checkInType : (property.checkInInfo ?? ""))}
             </p>
             <div className="flex">
               <p>
@@ -560,13 +560,13 @@ export default function HostPropertiesDetails({
             </Dialog>
           </div>
           <div>
-            <h3 className="font-semibold ">Title</h3>
+            <h3 className="font-semibold">Title</h3>
             <p className="text-muted-foreground">
               {editing ? title : property.name}
             </p>
           </div>
           <div>
-            <h3 className="font-semibold ">Description</h3>
+            <h3 className="font-semibold">Description</h3>
             <p className="text-muted-foreground">
               {editing ? description : property.about}
             </p>

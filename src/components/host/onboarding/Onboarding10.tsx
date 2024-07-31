@@ -1,171 +1,163 @@
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { MapPin } from "lucide-react";
+import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
-import SaveAndExit from "./SaveAndExit";
-import { useEffect } from "react";
+import { api } from "@/utils/api";
+import React from "react";
+import Summary1 from "./Summary1";
+import Summary2 from "./Summary2";
+import Summary4 from "./Summary4";
+import Summary7 from "./Summary7";
+import Summary8 from "./Summary8";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import { capitalize } from "@/utils/utils";
 
-const formSchema = z.object({
-  pets: z.string(),
-  smoking: z.string(),
-  additionalComments: z.string().optional(),
-});
-
-type FormSchema = z.infer<typeof formSchema>;
-
-export default function Onboarding10({
-  editing = false,
-  setHandleOnboarding,
+function Heading({
+  title,
+  editPage,
+  children,
 }: {
-  editing?: boolean;
-  setHandleOnboarding?: (handle: () => void) => void;
+  title: string;
+  editPage?: number;
+  children: React.ReactNode;
 }) {
-  const petsAllowed = useHostOnboarding((state) => state.listing.petsAllowed);
-  const smokingAllowed = useHostOnboarding(
-    (state) => state.listing.smokingAllowed,
-  );
-  const otherHouseRules = useHostOnboarding(
-    (state) => state.listing.otherHouseRules,
-  );
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+  const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
 
-  const setPetsAllowed = useHostOnboarding((state) => state.setPetsAllowed);
-  const setSmokingAllowed = useHostOnboarding(
-    (state) => state.setSmokingAllowed,
-  );
-  const setOtherHouseRules = useHostOnboarding(
-    (state) => state.setOtherHouseRules,
-  );
+  return (
+    <div className="flex flex-col gap-3 py-5">
+      <div className="flex justify-between">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p
+          className="text-sm underline transition duration-200 hover:cursor-pointer hover:text-muted-foreground"
+          onClick={() => {
+            if (editPage) {
+              setIsEdit(true);
+              setProgress(editPage);
+            }
+          }}
+        >
+          Edit
+        </p>
+      </div>
 
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      pets: petsAllowed ? "true" : "false",
-      smoking: smokingAllowed ? "true" : "false",
-      additionalComments: otherHouseRules ?? undefined,
-    },
+      <div className="flex flex-col gap-2 text-muted-foreground">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export default function Onboarding11() {
+  const { listing } = useHostOnboarding((state) => state);
+
+  const address = `${listing.location.street}${listing.location.apt ? `, ${listing.location.apt}` : ""}, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${listing.location.country}`;
+
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: address,
   });
 
-  async function handleFormSubmit(values: FormSchema) {
-    setPetsAllowed(values.pets === "true" ? true : false);
-    setSmokingAllowed(values.smoking === "true" ? true : false);
-    setOtherHouseRules(values.additionalComments ?? "");
-  }
-
-  useEffect(() => {
-    setHandleOnboarding &&
-      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
-  }, [form.formState]);
+  const lat = coordinateData?.coordinates.location?.lat;
+  const lng = coordinateData?.coordinates.location?.lng;
 
   return (
     <>
-      {!editing && <SaveAndExit />}
-      <div className="container my-10 flex flex-grow flex-col justify-center">
-        <h1 className="mb-8 text-3xl font-bold">Any house rules?</h1>
-        <Form {...form}>
-          <div className="space-y-4">
-            {/* TO DO: FIX */}
-            <FormField
-              control={form.control}
-              name="pets"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-lg font-bold text-primary">
-                    Are pets allowed?
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex flex-row items-center space-x-4">
-                      <RadioGroup
-                        className="flex flex-row gap-10"
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="true" id="true" />
-                          <Label htmlFor="allowed">Yes</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="false" id="false" />
-                          <Label htmlFor="allowed">No</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="smoking"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-lg font-bold text-primary">
-                    Is smoking allowed?
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex flex-row items-center space-x-4">
-                      <RadioGroup
-                        className="flex flex-row gap-10"
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="true" id="true" />
-                          <Label htmlFor="allowed">Yes</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="false" id="false" />
-                          <Label htmlFor="allowed">No</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="additionalComments"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-lg font-bold text-primary">
-                    Anything you&apos;d like to add? (optional)
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      className="resize-y"
-                      rows={10}
-                      placeholder="Quiet time after 11 pm, no smoking"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </Form>
+      <div className="container my-10 flex-grow sm:px-32">
+        <h1 className="mb-8 text-3xl font-semibold">Review your listing</h1>
+        <div className="grid grid-cols-1 space-y-3 divide-y">
+          <Summary1 />
+          <Summary2 />
+
+          <Heading title={"Location"} editPage={3}>
+            <div className="flex flex-row gap-5">
+              <MapPin />
+
+              <div>
+                <p> {listing.location.street}</p>
+                {listing.location.apt && <p>{listing.location.apt}</p>}
+                <p>
+                  {listing.location.city}, {listing.location.state}{" "}
+                  {listing.location.zipcode}
+                </p>
+                <p>{listing.location.country}</p>
+              </div>
+            </div>
+            {coordinateData && (
+              <div className="relative mt-4 h-[400px]">
+                <div className="absolute inset-0 z-0">
+                  <SingleLocationMap lat={lat ?? 0} lng={lng ?? 0} />
+                </div>
+              </div>
+            )}
+          </Heading>
+          <Summary4 />
+          <Heading title={"Amenities"} editPage={5}>
+            <div className="grid grid-cols-2 gap-5">
+              {listing.amenities.map((amenity, index) => (
+                <p key={index} className="flex items-center">
+                  {amenity}
+                </p>
+              ))}
+              <div className="col-span-full">
+                <p className="font-semibold text-primary">Other Amenities</p>
+              </div>
+              {listing.otherAmenities.map((amenity, index) => (
+                <p key={index} className="flex items-center">
+                  {capitalize(amenity)}
+                </p>
+              ))}
+            </div>
+          </Heading>
+          <Heading title={"Photos"} editPage={6}>
+            <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
+              <div className="relative col-span-2 row-span-2 bg-accent">
+                <Image
+                  src={listing.imageUrls[0]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                  priority
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[1]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[2]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[3]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[4]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+            </div>
+          </Heading>
+          <Summary7 />
+          <Summary8 />
+        </div>
       </div>
-      {!editing && (
-        <OnboardingFooter
-          isForm={true}
-          handleNext={form.handleSubmit(handleFormSubmit)}
-          isFormValid={form.formState.isValid}
-        />
-      )}
+      <OnboardingFooter isForm={false} />
     </>
   );
 }

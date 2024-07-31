@@ -1,201 +1,296 @@
-import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { cn } from "@/utils/utils";
-import { zodString } from "@/utils/zod-utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Plus, Trash } from "lucide-react";
+import { useState } from "react";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
-import { useEffect, useState } from "react";
 
-const formSchema = z.object({
-  checkIn: zodString({ maxLen: 100 }),
-  checkOut: zodString({ maxLen: 100 }),
-});
+const kitchenItems = [
+  {
+    id: "Stove",
+    content: "Stove",
+  },
+  {
+    id: "Refrigerator",
+    content: "Refrigerator",
+  },
+  {
+    id: "Microwave",
+    content: "Microwave",
+  },
+  {
+    id: "Oven",
+    content: "Oven",
+  },
+  {
+    id: "Freezer",
+    content: "Freezer",
+  },
+  {
+    id: "Dishwasher",
+    content: "Dishwasher",
+  },
+  {
+    id: "Dishes and silverware",
+    content: "Dishes & silverware",
+  },
+  {
+    id: "Dining table and chairs",
+    content: "Dining Table & Chairs",
+  },
+  {
+    id: "Coffee maker",
+    content: "Coffee Maker",
+  },
+];
 
-type FormSchema = z.infer<typeof formSchema>;
+const livingRoomItems = [
+  {
+    id: "TV",
+    content: "TV",
+  },
+  {
+    id: "Couch",
+    content: "Couch",
+  },
+];
 
-export default function Onboarding6({
+const heatingAndCoolingItems = [
+  {
+    id: "Heating",
+    content: "Heating",
+  },
+  {
+    id: "Air conditioning",
+    content: "Air Conditioning",
+  },
+];
+
+const laundryItems = [
+  {
+    id: "Washer",
+    content: "Washer",
+  },
+  {
+    id: "Dryer",
+    content: "Dryer",
+  },
+];
+
+const parkingItems = [
+  {
+    id: "Street Parking",
+    content: "Street Parking",
+  },
+  {
+    id: "Garage Parking",
+    content: "Garage Parking",
+  },
+  {
+    id: "Ev charging",
+    content: "EV charging",
+  },
+  {
+    id: "Driveway parking",
+    content: "Driveway parking",
+  },
+];
+
+type CheckboxSelectProps = {
+  id: string;
+  content: string;
+};
+
+function OtherBox({ item }: { item: string }) {
+  const removeOtherAmenity = useHostOnboarding(
+    (state) => state.removeOtherAmenity,
+  );
+
+  return (
+    <div className="flex flex-row items-center justify-between gap-2 rounded-lg border p-3">
+      <p className="text-sm font-bold capitalize sm:text-base">{item}</p>
+      <Button
+        variant={"ghost"}
+        size={"icon"}
+        onClick={() => removeOtherAmenity(item)}
+      >
+        <Trash color={"red"} size={20} />
+      </Button>
+    </div>
+  );
+}
+
+function CheckboxSelect({
+  item,
+  isSelected,
+}: {
+  item: CheckboxSelectProps;
+  isSelected: boolean;
+}) {
+  const setAmenity = useHostOnboarding((state) => state.setAmenity);
+  const removeAmenity = useHostOnboarding((state) => state.removeAmenity);
+
+  return (
+    <div className="flex flex-row items-center gap-2 rounded-lg border p-3">
+      <Checkbox
+        id={item.id}
+        defaultChecked={isSelected}
+        onCheckedChange={(checked) => {
+          return checked ? setAmenity(item.id) : removeAmenity(item.id);
+        }}
+      />
+      <p className="text-sm font-bold sm:text-base">{item.content}</p>
+    </div>
+  );
+}
+
+export default function Onboarding7({
   editing = false,
-  setHandleOnboarding,
 }: {
   editing?: boolean;
-  setHandleOnboarding?: (handle: () => void) => void;
 }) {
-  const otherCheckInType = useHostOnboarding(
-    (state) => state.listing.otherCheckInType,
+  const amenities: string[] = useHostOnboarding(
+    (state) => state.listing.amenities,
   );
 
-  const setOtherCheckInType = useHostOnboarding(
-    (state) => state.setOtherCheckInType,
+  const otherAmenities: string[] = useHostOnboarding(
+    (state) => state.listing.otherAmenities,
   );
 
-  const checkInType = useHostOnboarding((state) => state.listing.checkInType);
-  const setCheckInType = useHostOnboarding((state) => state.setCheckInType);
+  const setOtherAmenity = useHostOnboarding((state) => state.setOtherAmenity);
 
-  const handleRadioChange = (value: string) => {
-    if (value === "self" || value === "host") {
-      setOtherCheckInType(false);
-      setCheckInType(value); // Set check-in type for other options
-    } else {
-      setOtherCheckInType(true);
-      setCheckInType(""); // Clear check-in type when "Other" is selected
-    }
-  };
-
-  const checkIn = useHostOnboarding((state) => state.listing.checkIn);
-  const checkOut = useHostOnboarding((state) => state.listing.checkOut);
-  const setCheckIn = useHostOnboarding((state) => state.setCheckIn);
-  const setCheckOut = useHostOnboarding((state) => state.setCheckOut);
-
+  const [otherValue, setOtherValue] = useState("");
   const [error, setError] = useState(false);
 
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      checkIn: checkIn,
-      checkOut: checkOut,
-    },
-  });
-
-  async function handleFormSubmit(values: FormSchema) {
-    setCheckIn(values.checkIn);
-    setCheckOut(values.checkOut);
+  function handleAddOther() {
+    if (!otherAmenities.includes(otherValue.toLocaleLowerCase())) {
+      if (otherValue !== "") {
+        setOtherAmenity(otherValue.toLocaleLowerCase());
+        setOtherValue("");
+        setError(false);
+      }
+    } else {
+      setError(true);
+      setOtherValue("");
+    }
   }
-
-  function handleError() {
-    setError(true);
-  }
-
-  useEffect(() => {
-    setHandleOnboarding &&
-      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
-  }, [form.formState]);
 
   return (
     <>
       {!editing && <SaveAndExit />}
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
-        <div className="mt-10 flex flex-col gap-10">
-          <h1 className="text-4xl font-bold">
-            How will your guest check-in / out?
-          </h1>
+        <div className="my-20 flex flex-col gap-10">
+          <h1 className="text-4xl font-bold">What amenities do you offer?</h1>
 
-          <div className="flex flex-col gap-5">
-            <RadioGroup
-              defaultValue={otherCheckInType ? "other" : checkInType}
-              onValueChange={handleRadioChange}
-            >
-              <div className="flex items-center space-x-2 rounded-lg border p-5">
-                <RadioGroupItem value="self" id="self" />
-                <Label htmlFor="self">
-                  <h2 className="mb-2 text-lg font-bold">
-                    Self check-in / out
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Guests can check in and out by themselves
-                  </p>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 rounded-lg border p-5">
-                <RadioGroupItem value="host" id="host" />
-                <Label htmlFor="meet">
-                  <h2 className="text-lg font-bold">Meet host at door</h2>
-                  <p className="text-muted-foreground">
-                    Guests get the keys from you when they arrive at the
-                    property
-                  </p>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 rounded-lg border p-5">
-                <RadioGroupItem value="other" id="other" />
-                <Label htmlFor="option-two" className="text-lg font-bold">
-                  Other
-                </Label>
-              </div>
-            </RadioGroup>
-
-            <div>
-              <p
-                className={cn(
-                  !otherCheckInType && "text-muted-foreground",
-                  "mb-2 text-sm font-semibold",
-                )}
-              >
-                Other: please specify here
-              </p>
-              <Input
-                type="text"
-                disabled={!otherCheckInType}
-                value={otherCheckInType ? checkInType : ""}
-                onChange={(e) => setCheckInType(e.target.value)}
-              />
-              {/* //TODO display the character count */}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Kitchen</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {kitchenItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
             </div>
           </div>
 
-          <Form {...form}>
-            <div className="mt-5 w-full">
-              <h1 className="mb-2 text-xl font-bold">Hours</h1>
-              {error && (
-                <p className="text-red-500">
-                  Please include both a check in and check out time
-                </p>
-              )}
-              <div className="grid grid-cols-2 gap-5">
-                <FormField
-                  control={form.control}
-                  name="checkIn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Label className="font-semibold ">Check in</Label>
-                      <Input
-                        {...field}
-                        type="time"
-                        placeholder="Check in time"
-                        className="p-5"
-                      />
-                      <FormMessage>
-                        {form.formState.errors.checkIn?.message}
-                      </FormMessage>
-                    </FormItem>
-                  )}
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Living room</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {livingRoomItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
                 />
-                <FormField
-                  control={form.control}
-                  name="checkOut"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Label className="font-semibold">Check out</Label>
-                      <Input
-                        {...field}
-                        type="time"
-                        placeholder="Check out time"
-                        className="p-5"
-                      />
-                      <FormMessage>
-                        {form.formState.errors.checkOut?.message}
-                      </FormMessage>
-                    </FormItem>
-                  )}
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold"> Heating & cooling</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {heatingAndCoolingItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Laundry</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {laundryItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-5 text-2xl font-semibold">Parking</h3>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {parkingItems.map((item) => (
+                <CheckboxSelect
+                  key={item.id}
+                  item={item}
+                  isSelected={amenities.includes(item.id)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <h3 className="text-2xl font-semibold">Other</h3>
+            <p className="text-muted-foreground">
+              Specify additional amenities you want to highlight.
+            </p>
+            <div className="grid grid-cols-4 gap-5">
+              <div className="col-span-3">
+                <Input
+                  placeholder="Other amenity"
+                  value={otherValue}
+                  onChange={(e) => setOtherValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddOther();
+                    }
+                  }}
                 />
               </div>
+
+              <Button
+                onClick={() => {
+                  handleAddOther();
+                }}
+              >
+                <Plus />
+              </Button>
             </div>
-          </Form>
+            <div>
+              {error && (
+                <p className="text-red-500">Please no duplicate values</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3">
+              {otherAmenities.map((item, index) => (
+                <OtherBox key={index} item={item} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-      {!editing && (
-        <OnboardingFooter
-          handleNext={form.handleSubmit(handleFormSubmit)}
-          isFormValid={form.formState.isValid}
-          isForm={true}
-          handleError={handleError}
-        />
-      )}
+      {!editing && <OnboardingFooter isForm={false} />}
     </>
   );
 }
