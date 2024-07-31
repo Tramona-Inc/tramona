@@ -50,8 +50,6 @@ export default function Onboarding1({
     "assistedListing" | "syncPMS" | null
   >(null);
 
-  const [option, setOption] = useState(0);
-
   useCalendlyEventListener({ onEventScheduled: () => setEventScheduled(true) });
 
   const openModal = (type: "assistedListing" | "syncPMS") => {
@@ -190,7 +188,7 @@ export default function Onboarding1({
         </div>
       </div>
 
-      <OnboardingFooter isForm={false} onClick={items[option - 1]?.onClick} />
+      <OnboardingFooter isForm={false} />
       <Dialog open={showModal} onOpenChange={closeModal}>
         <DialogClose />
         <DialogContent>
