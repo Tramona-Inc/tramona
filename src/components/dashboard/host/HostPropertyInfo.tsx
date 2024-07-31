@@ -47,7 +47,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
 
   const handleEditToggle = () => {
     if (isEditing) {
-      setICalUrl(property.iCalLink || '');
+      setICalUrl(property.iCalLink ?? '');
     }
     setIsEditing(!isEditing);
   };

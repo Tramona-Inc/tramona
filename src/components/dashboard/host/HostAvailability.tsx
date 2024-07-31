@@ -5,11 +5,6 @@ import { MoveLeft, MoveRight } from "lucide-react";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 
-interface ReservedDate {
-  start: string;
-  end: string;
-}
-
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
