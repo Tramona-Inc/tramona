@@ -1,10 +1,10 @@
 // db/schema/tables/reservedDates.ts
 
-import { pgTable, integer, date, serial } from "drizzle-orm/pg-core";
+import { pgTable, integer, serial, date } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 
-export const reservedDateRanges = pgTable("reserved_dates", {
+export const reservedDateRanges = pgTable("reserved_date_ranges", {
   id: serial("id").primaryKey(),
   propertyId: integer("property_id")
     .notNull()
