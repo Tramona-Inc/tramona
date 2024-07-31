@@ -9,7 +9,6 @@ import {
   ExpressCheckoutElement,
 } from "@stripe/react-stripe-js";
 import { Separator } from "../ui/separator";
-import { useStripe as useCustomStripe } from "@/utils/stripe-client";
 import ContactInfoForm from "./ContactInfoForm";
 import type {
   StripePaymentElementOptions,
@@ -23,6 +22,9 @@ export default function StripeCheckoutForm({
   clientSecret: string;
 }) {
   const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "http://localhost:3000"; //change to your live server
   const paymentOptions: StripePaymentElementOptions = {
     business: { name: "Tramona" },
     layout: {
@@ -30,7 +32,6 @@ export default function StripeCheckoutForm({
     },
   };
   const stripe = useStripe();
-  const customStripe = useCustomStripe(); //OUR STRIPE HOOK. CONFUSING I KNOW
 
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
@@ -46,9 +47,7 @@ export default function StripeCheckoutForm({
       //`Elements` instance that was used to create the Payment Element
       elements,
       confirmParams: {
-        return_url: isProduction
-          ? "https://www.tramona.com"
-          : "http://localhost:3000",
+        return_url: `${baseUrl}/myTrips`,
       },
     });
 
@@ -77,30 +76,27 @@ export default function StripeCheckoutForm({
         className="flex w-full flex-col items-center gap-y-4"
       >
         <h2 className="self-start text-lg font-semibold">Payment</h2>
-        <div className="flex flex-col items-center gap-x-2">
+        <div className="mt-4 flex w-full flex-col items-center gap-y-4">
           <ExpressCheckoutElement
             options={expressCheckoutOptions}
             onConfirm={() => handleSubmit}
           />
-          <div>
-            <div className="my-2 flex flex-row items-center justify-center gap-x-2 text-nowrap text-sm text-muted-foreground">
-              <div className="w-full border border-t border-zinc-200" />
-              Or pay with card
-              <div className="w-full border border-t border-zinc-200" />
-            </div>
-            <LinkAuthenticationElement />
-            <div className="my-4 flex flex-row gap-x-6">
-              <AddressElement
-                options={{
-                  mode: "billing",
-                  autocomplete: {
-                    mode: "google_maps_api",
-                    apiKey: env.NEXT_PUBLIC_GOOGLE_PLACES_KEY,
-                  },
-                }}
-              />
-              <PaymentElement options={paymentOptions} />
-            </div>
+          <div className="my-2 flex w-full flex-row items-center justify-center gap-x-2 text-nowrap text-sm text-muted-foreground">
+            <div className="w-full border border-t border-zinc-200" />
+            Or pay with card
+            <div className="w-full border border-t border-zinc-200" />
+          </div>
+          <div className="my-4 flex w-full flex-col gap-y-6">
+            <PaymentElement options={paymentOptions} />
+            <AddressElement
+              options={{
+                mode: "billing",
+                autocomplete: {
+                  mode: "google_maps_api",
+                  apiKey: env.NEXT_PUBLIC_GOOGLE_PLACES_KEY,
+                },
+              }}
+            />
           </div>
         </div>
         <Separator className="my-2 w-full" />
