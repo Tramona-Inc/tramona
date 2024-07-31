@@ -45,7 +45,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
 
   const handleRequestCancellation = async () => {
     await slackMutation.mutateAsync({
-      message: `Tramona: A traveler with payment id: ${trip.offer.paymentIntentId} requested a cancellation on ${trip.property.name} from ${formatDateRange(trip.offer?.checkIn, trip.offer?.checkOut)}. The cancellation policy is ${trip.property.cancellationPolicy}.`,
+      message: `Tramona: A traveler with payment id: ${trip.offer?.paymentIntentId} requested a cancellation on ${trip.property.name} from ${formatDateRange(trip.offer?.checkIn, trip.offer?.checkOut)}. The cancellation policy is ${trip.property.cancellationPolicy}.`,
     });
   }
 

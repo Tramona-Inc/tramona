@@ -34,6 +34,13 @@ export const tripsRouter = createTRPCRouter({
           },
           with: { host: { columns: { name: true, image: true } } },
         },
+        offer: {
+          columns: {
+            paymentIntentId: true,
+            checkIn: true,
+            checkOut: true,
+          }
+        },
       },
     });
   }),
