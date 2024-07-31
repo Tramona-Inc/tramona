@@ -1,3 +1,5 @@
+"use client";
+
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import PaymentHistory from "@/components/host/finances/payment-history/PaymentHistory";
 import FinancesSummary from "@/components/host/finances/summary/FinancesSummary";

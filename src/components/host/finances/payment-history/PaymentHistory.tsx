@@ -1,6 +1,6 @@
-import {
-  ConnectPayments, ConnectPayouts
-} from "@stripe/react-connect-js";
+"use client";
+
+import { ConnectPayments, ConnectPayouts } from "@stripe/react-connect-js";
 import { Card, CardHeader } from "@/components/ui/card";
 
 function PaymentHistory({
