@@ -25,7 +25,7 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function Onboarding10({
+export default function Onboarding9({
   editing = false,
   setHandleOnboarding,
 }: {

@@ -48,7 +48,7 @@ function Heading({
   );
 }
 
-export default function Onboarding11() {
+export default function Onboarding10() {
   const { listing } = useHostOnboarding((state) => state);
 
   const address = `${listing.location.street}${listing.location.apt ? `, ${listing.location.apt}` : ""}, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${listing.location.country}`;

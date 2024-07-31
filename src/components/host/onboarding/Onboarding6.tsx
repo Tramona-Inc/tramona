@@ -146,7 +146,7 @@ function CheckboxSelect({
   );
 }
 
-export default function Onboarding7({
+export default function Onboarding6({
   editing = false,
 }: {
   editing?: boolean;
