@@ -2,7 +2,6 @@ import {
   BadgeHelp,
   BadgeInfo,
   BadgePercent,
-  DoorOpen,
   Home,
   Link2,
   Menu,
@@ -53,9 +52,8 @@ export default function Header(props: HeaderProps) {
 
 const headerLinks1 = [
   { name: "Link Input", href: "/link-input" },
-  //{ name: "Unclaimed Offers", href: "/unclaimed-offers" },
+
   { name: "Recent Deals", href: "/exclusive-offers" },
-  // { name: "Host Information", href: "/for-hosts" },
 ];
 
 const headerLinks2 = [
@@ -67,12 +65,7 @@ const headerLinks2 = [
 const hamburgerLinksDesktop = [
   { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
   { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  // { name: "Host with Tramona", href: "/for-hosts", icon: <DoorOpen /> },
 ];
-
- const headLinksMobile2 = [
-  {name: "Become a host", href: "/host-onboarding"},
- ]
 
 const hamburgerLinksMobile = [
   { name: "Link Input", href: "/link-input", icon: <Link2 /> },
@@ -83,7 +76,6 @@ const hamburgerLinksMobile = [
   { name: "Become a host", href: "/host-onboarding", icon: <Home /> },
   { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
   { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  // { name: "Host with Tramona", href: "/for-hosts", icon: <DoorOpen /> },
 ];
 
 function HamburgerMenu({
@@ -183,7 +175,7 @@ function LargeHeader(props: HeaderProps) {
           <Button asChild variant="ghost" className="rounded-full">
             {session?.user.role === "host" && pathname.includes("/host") ? (
               <Link href="/">Switch to Traveler</Link>
-            ) : session?.user.role !== "host" ? null : ( // <Link href="/host-onboarding">Become a host</Link>
+            ) : session?.user.role !== "host" ? null : (
               <Link href="/host">Switch to Host</Link>
             )}
           </Button>
@@ -224,28 +216,6 @@ function LargeHeader(props: HeaderProps) {
   );
 }
 
-// function SmallSidebar(props: HeaderProps) {
-//   const isVisible = !useIsLg();
-//   if (!isVisible || props.type === "marketing") return null;
-
-//   return (
-//     <Sheet>
-//       <SheetTrigger asChild>
-//         <Button variant="ghost" size="icon">
-//           <MenuIcon />
-//         </Button>
-//       </SheetTrigger>
-//       <SheetContent side="left" className="w-max p-0">
-//         {props.type === "dashboard" && (
-//           <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
-//             <Sidebar withLogo type={props.sidebarType} />
-//           </aside>
-//         )}
-//       </SheetContent>
-//     </Sheet>
-//   );
-// }
-
 function SmallHeader(props: HeaderProps) {
   const { status } = useSession();
 
@@ -263,11 +233,9 @@ function SmallHeader(props: HeaderProps) {
         <TramonaLogo />
       </div>
 
-
       <div className="flex flex-1 items-center justify-end gap-2">
         {props.type === "marketing" && (
           <>
-
             {status === "authenticated" && (
               <Button size="sm" asChild variant="secondary">
                 <Link href="/auth/signin">Dashboard</Link>
