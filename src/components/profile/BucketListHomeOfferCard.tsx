@@ -62,14 +62,14 @@ export default function BucketListHomeOfferCard({
   const { mutate: removePropertyFromBucketList } =
     apiHelper.profile.removeProperty.useMutation();
 
-  const removeFromBucketListStore = useBidding(
-    (state) => state.removePropertyIdFromBucketList,
-  );
+  // const removeFromBucketListStore = useBidding(
+  //   (state) => state.removePropertyIdFromBucketList,
+  // );
 
-  function handleRemoveBucketList() {
-    removePropertyFromBucketList(property.bucketListPropertyId);
-    removeFromBucketListStore(property.bucketListPropertyId);
-  }
+  // function handleRemoveBucketList() {
+  //   removePropertyFromBucketList(property.bucketListPropertyId);
+  //   removeFromBucketListStore(property.bucketListPropertyId);
+  // }
 
   return (
     <div className="relative">

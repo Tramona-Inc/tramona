@@ -1,24 +1,10 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
-import SqwiggleIcon from "@/components/_icons/SqwiggleIcon";
-import { liveFeedOffers } from "@/components/offer-card/data";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from "@/components/ui/carousel";
-import React from "react";
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import { cn } from "@/utils/utils";
-import Autoplay from "embla-carousel-autoplay";
 import HowItWorks from "@/components/_common/HowItWorks";
 import {
   Accordion,
@@ -310,45 +296,6 @@ function WhyPartnerWithUs() {
 }
 
 export default function HostWelcome() {
-  // State to track selected tab and image opacity
-  const [tab, setTab] = useState<number>(0);
-  const [imageOpacity, setImageOpacity] = useState<number>(1);
-  const [api, setApi] = React.useState<CarouselApi>();
-
-  // Filter the selected content based on the tab
-  const selectedContent = contents.find((content) => content.id === tab);
-
-  // Handle tab change with fade transition
-  const handleTabChange = (content: Tabs) => {
-    // Set image opacity to 0 to start the fade-out transition
-    setImageOpacity(0);
-
-    // Delay the tab change to allow time for the fade-out transition
-    setTimeout(() => {
-      // Update the tab
-      setTab(content.id);
-    }, 250); // Adjust the timeout based on your transition duration
-    setTimeout(() => {
-      setImageOpacity(1);
-    }, 500);
-  };
-
-  // Offers with discount greater than 25%
-  const selectedOffers = liveFeedOffers.filter(
-    (offer) => offer.discountPercent > 25,
-  );
-
-  React.useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setTab(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setTab(api.selectedScrollSnap());
-    });
-  }, [api]);
   const steps = [
     {
       number: "1",

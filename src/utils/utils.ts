@@ -3,7 +3,7 @@ import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
   formatDate,
-  FormatOptions,
+  type FormatOptions,
   isSameDay,
   isSameMonth,
   isSameYear,

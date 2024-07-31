@@ -1,13 +1,7 @@
 import { type Property } from "@/server/db/schema/tables/properties";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { useEffect, useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Edit2,
-  MoveLeft,
-  MoveRight,
-} from "lucide-react";
+import { MoveLeft, MoveRight } from "lucide-react";
 
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
@@ -74,16 +68,14 @@ export default function HostAvailability({ property }: { property: Property }) {
           {monthDays.map((day, index) => (
             <div
               key={index}
-              className={`flex h-12 flex-1 items-center justify-center font-semibold 
-                ${day ? "cursor-pointer bg-zinc-50" : ""} 
-                ${
-                  day &&
-                  monthDate.getFullYear() === currentDate.getFullYear() &&
-                  monthDate.getMonth() === currentDate.getMonth() &&
-                  day === currentDate.getDate()
-                    ? "font-semibold text-blue-600"
-                    : "text-muted-foreground"
-                }`}
+              className={`flex h-12 flex-1 items-center justify-center font-semibold ${day ? "cursor-pointer bg-zinc-50" : ""} ${
+                day &&
+                monthDate.getFullYear() === currentDate.getFullYear() &&
+                monthDate.getMonth() === currentDate.getMonth() &&
+                day === currentDate.getDate()
+                  ? "font-semibold text-blue-600"
+                  : "text-muted-foreground"
+              }`}
             >
               {day}
             </div>
@@ -172,7 +164,7 @@ export default function HostAvailability({ property }: { property: Property }) {
               <span className="text-muted-foreground">Blocked dates</span>
             </div>
             <div className="flex items-center">
-              <div className="mr-2 h-6 w-6  bg-blue-100"></div>
+              <div className="mr-2 h-6 w-6 bg-blue-100"></div>
               <span className="text-muted-foreground">Booked on Tramona</span>
             </div>
           </div>

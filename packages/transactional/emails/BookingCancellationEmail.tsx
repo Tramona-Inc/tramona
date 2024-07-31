@@ -13,11 +13,9 @@ interface BookingCancellationEmailProps {
 
 export default function BookingCancellationEmail({
   userName = "User",
-  confirmationNumber = "ABC123456",
   dates = { from: "06-01-2024", to: "06-02-2024" },
   property = "Property",
   reason = "Reason",
-  refund = 0,
 }: BookingCancellationEmailProps) {
   return (
     <Layout title_preview="Booking Modification">
