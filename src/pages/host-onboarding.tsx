@@ -4,13 +4,13 @@ import Onboarding2 from "@/components/host/onboarding/Onboarding2";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
 import Onboarding5 from "@/components/host/onboarding/Onboarding5";
-import Onboarding6 from "@/components/host/onboarding/Onboarding5";
-import Onboarding7 from "@/components/host/onboarding/Onboarding6";
-import Onboarding8 from "@/components/host/onboarding/Onboarding7";
-import Onboarding9 from "@/components/host/onboarding/Onboarding8";
+import Onboarding6 from "@/components/host/onboarding/Onboarding6";
+import Onboarding7 from "@/components/host/onboarding/Onboarding7";
+import Onboarding8 from "@/components/host/onboarding/Onboarding8";
+import Onboarding9 from "@/components/host/onboarding/Onboarding9";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import OnboardingLayout from "../components/host/onboarding/layout";
-import Onboarding10 from "@/components/host/onboarding/Onboarding9";
+import Onboarding10 from "@/components/host/onboarding/Onboarding10";
 
 export default function Onboarding() {
   const progress = useHostOnboarding((state) => state.progress);

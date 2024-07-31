@@ -23,10 +23,10 @@ import { api } from "@/utils/api";
 import Onboarding3 from "@/components/host/onboarding/Onboarding3";
 import Onboarding4 from "@/components/host/onboarding/Onboarding4";
 import Onboarding5 from "@/components/host/onboarding/Onboarding5";
-import Onboarding8 from "@/components/host/onboarding/Onboarding7";
-import Onboarding9 from "@/components/host/onboarding/Onboarding8";
-import Onboarding7 from "@/components/host/onboarding/Onboarding6";
-import Onboarding6 from "@/components/host/onboarding/Onboarding5";
+import Onboarding8 from "@/components/host/onboarding/Onboarding8";
+import Onboarding9 from "@/components/host/onboarding/Onboarding9";
+import Onboarding7 from "@/components/host/onboarding/Onboarding7";
+import Onboarding6 from "@/components/host/onboarding/Onboarding6";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -364,12 +364,12 @@ export default function HostPropertiesDetails({
               <SingleLocationMap
                 lat={
                   editing
-                    ? (coordinateData?.coordinates.location?.lat ?? 0)
+                    ? coordinateData?.coordinates.location?.lat ?? 0
                     : property.latitude
                 }
                 lng={
                   editing
-                    ? (coordinateData?.coordinates.location?.lng ?? 0)
+                    ? coordinateData?.coordinates.location?.lng ?? 0
                     : property.longitude
                 }
               />
@@ -405,7 +405,7 @@ export default function HostPropertiesDetails({
           </div>
           <div className="text-muted-foreground">
             <p>
-              {capitalize(editing ? checkInType : (property.checkInInfo ?? ""))}
+              {capitalize(editing ? checkInType : property.checkInInfo ?? "")}
             </p>
             <div className="flex">
               <p>
