@@ -487,10 +487,13 @@ export async function scrapeUsingLink(url: string) {
       checkOut,
       numGuests,
     };
+    console.log("Here is the response", response);
     return response;
-  } catch (error) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to scrape Airbnb: ${error.message}`);
+    } else {
+      console.error("Unexpected error:", error);
+    }
   }
 }
