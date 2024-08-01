@@ -252,9 +252,7 @@ export const requestsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       //we are going to use the given data to scrape the airbnb listing and create a request
-      console.log("the puppeter has not been called yet");
       const response = await scrapeUsingLink(input.airbnbLink);
-      console.log("the puppeter finished");
       if (!response) return; //delete this line when we have a proper error handling
       const newRequest: RequestInput = {
         ...input,
@@ -262,7 +260,6 @@ export const requestsRouter = createTRPCRouter({
         maxTotalPrice: response.formattedNightlyPrice,
       };
       //now we need to make a legitimate request with all of the data
-      console.log("the new request is", newRequest);
       const { transactionResults } = await handleRequestSubmission(newRequest, {
         user: ctx.user,
       });
@@ -423,7 +420,7 @@ export const requestsRouter = createTRPCRouter({
   //       const fmtdNumGuests = plural(request.numGuests ?? 1, "guest");
 
   //       sendSlackMessage(
-  //         `*${name} just made a request: ${request.location}*`,
+  //         `*${name} : ${request.location}*`,
   //         `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
   //         `<https://tramona.com/admin|Go to admin dashboard>`,
   //       );
@@ -705,20 +702,17 @@ export async function handleRequestSubmission(
   { user }: { user: Session["user"] },
 ) {
   // Begin a transaction
-  console.log("User ID:", user.id);
   const transactionResults = await db.transaction(async (tx) => {
     const requestGroupId = await tx
       .insert(requestGroups)
       .values({ createdByUserId: user.id })
       .returning()
       .then((res) => res[0]!.id);
-    console.log("Request Group ID:", requestGroupId);
     const madeByGroupId = await tx
       .insert(groups)
       .values({ ownerId: user.id })
       .returning()
       .then((res) => res[0]!.id);
-    console.log("Made By Group ID:", madeByGroupId);
     await tx.insert(groupMembers).values({
       userId: user.id,
       groupId: madeByGroupId,
@@ -754,7 +748,6 @@ export async function handleRequestSubmission(
   const fmtdPrice = formatCurrency(pricePerNight);
   const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
   const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
-  console.log(input.maxTotalPrice, " and this is the formatedPrice", fmtdPrice);
 
   sendSlackMessage(
     [
