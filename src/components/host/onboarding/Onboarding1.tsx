@@ -104,7 +104,7 @@ export default function Onboarding1({
     });
 
   const { mutateAsync: createHostProfile } =
-    api.users.createHostProfile.useMutation({});
+    api.users.upsertHostProfile.useMutation();
 
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
     const { bearerToken } = await generateBearerToken({ accountId, apiKey });
