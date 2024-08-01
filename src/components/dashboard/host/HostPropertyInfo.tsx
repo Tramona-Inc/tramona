@@ -18,7 +18,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
-  
+
   const syncCalendarMutation = api.calendar.syncCalendar.useMutation({
     onSuccess: () => {
       setICalUrl("");
@@ -92,8 +92,8 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
               {isEditing ? "Cancel" : <Edit2 className="h-4 w-4" />}
             </Button>
             {isEditing && (
-              <Button 
-                onClick={handleFormSubmit} 
+              <Button
+                onClick={handleFormSubmit}
                 className="mt-2"
                 disabled={syncCalendarMutation.isLoading}
               >

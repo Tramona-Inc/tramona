@@ -10,10 +10,10 @@ export default function HostAvailability({ property }: { property: Property }) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
   const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
 
-  
+
   const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
   const { data: reservedDateRanges, isLoading, refetch } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
-  
+
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -43,7 +43,7 @@ export default function HostAvailability({ property }: { property: Property }) {
         propertyId: property.id,
       });
       console.log("Refreshed iCal data");
-      
+
       // Refetch reserved date ranges
       await refetch();
     } catch (error) {
