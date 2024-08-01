@@ -126,33 +126,35 @@ export default function OnboardingFooter({
         value={(progress * 100) / max_pages}
         className="h-2 w-full rounded-none"
       />
-      <div className="flex justify-between p-5">
-        <Button
-          variant={"ghost"}
-          onClick={() => {
-            if (progress - 1 > -1) {
-              setProgress(progress - 1);
-            }
-          }}
-        >
-          Back
-        </Button>
-        {isEdit ? (
-          <Button onClick={onPressNext}>Back to summary</Button>
-        ) : (
-          <div className="flex flex-row gap-2">
-            <Button onClick={onPressNext} disabled={isLoading}>
-              {progress === 0
-                ? "Get Started"
-                : progress === 8
-                  ? "Review"
-                  : progress === 9
-                    ? "Finish"
-                    : "Next"}
-            </Button>
-          </div>
-        )}
-      </div>
+      {progress !== 0 && (
+        <div className="flex justify-between p-5">
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              if (progress - 1 > -1) {
+                setProgress(progress - 1);
+              }
+            }}
+          >
+            Back
+          </Button>
+          {isEdit ? (
+            <Button onClick={onPressNext}>Back to summary</Button>
+          ) : (
+            <div className="flex flex-row gap-2">
+              <Button onClick={onPressNext} disabled={isLoading}>
+                {progress === 0
+                  ? "Get Started"
+                  : progress === 8
+                    ? "Review"
+                    : progress === 9
+                      ? "Finish"
+                      : "Next"}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
