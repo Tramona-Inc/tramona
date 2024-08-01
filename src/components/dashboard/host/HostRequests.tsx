@@ -27,9 +27,7 @@ export default function HostRequests() {
 
   const cityData = requestsWithProperties?.find((p) => p.city === city);
 
-  const {mutate: rejectRequest} = api.requests.rejectRequest.useMutation();
-
-
+  const { mutate: rejectRequest } = api.requests.rejectRequest.useMutation();
 
   return (
     <div className="p-4">
@@ -38,9 +36,13 @@ export default function HostRequests() {
           {cityData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
-                <Button variant="darkOutline" className="mt-2" onClick={() => {
-                  rejectRequest({requestId: requestData.request.id});
-                }}>
+                <Button
+                  variant="darkOutline"
+                  className="mt-2"
+                  onClick={() => {
+                    rejectRequest({ requestId: requestData.request.id });
+                  }}
+                >
                   Reject
                 </Button>
                 <Button
@@ -60,7 +62,7 @@ export default function HostRequests() {
       ) : (
         <SkeletonText>No requests found for {city}</SkeletonText>
       )}
-      {step == 0 && (
+      {step == 0 && properties && selectedRequest && (
         <HostRequestDialog
           propertyPrices={propertyPrices}
           setPropertyPrices={setPropertyPrices}
@@ -71,7 +73,7 @@ export default function HostRequests() {
           setStep={setStep}
         />
       )}
-      {step == 1 && (
+      {step == 1 && properties && selectedRequest && (
         <HostConfirmRequestDialog
           request={selectedRequest}
           properties={properties}
@@ -82,8 +84,12 @@ export default function HostRequests() {
           setPropertyPrices={setPropertyPrices}
         />
       )}
-      {step == 2 && (
-        <HostFinishRequestDialog request={selectedRequest} open={dialogOpen} setOpen={setDialogOpen} />
+      {step == 2 && selectedRequest && (
+        <HostFinishRequestDialog
+          request={selectedRequest}
+          open={dialogOpen}
+          setOpen={setDialogOpen}
+        />
       )}
     </div>
   );

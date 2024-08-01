@@ -2,8 +2,6 @@ import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue"
 import Spinner from "@/components/_common/Spinner";
 import { RequestCards } from "@/components/requests/RequestCards";
 import { api } from "@/utils/api";
-import { type DetailedRequest } from "./RequestCard";
-import { useState } from "react";
 import PropertyOfferCard from "./PropertyOfferCard";
 
 export default function PastRequestsAndOffersTab() {
@@ -16,7 +14,7 @@ export default function PastRequestsAndOffersTab() {
   if (!requests || !offers) return <Spinner />;
 
   return requests.inactiveRequestGroups.length !== 0 ? (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-4 pb-32 md:grid-cols-2">
       <RequestCards requestGroups={requests.inactiveRequestGroups} />
       {offers.map((offer) => (
         <PropertyOfferCard

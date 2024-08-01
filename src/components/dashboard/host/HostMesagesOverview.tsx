@@ -49,7 +49,7 @@ export default function HostMessagesOverview({
   const { data: fetchedConversations, isLoading } =
     api.messages.getConversations.useQuery(undefined, {
       refetchOnWindowFocus: false,
-      refetchOnMount: false,
+      // refetchOnMount: false,
     });
   const conversations = useConversation((state) => state.conversationList);
   const { fetchInitialMessages } = useMessage();
@@ -102,7 +102,7 @@ export default function HostMessagesOverview({
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {conversations.filter((m) => m.messages[0]?.read === false && m.participants[0]?.id !== session?.user.id).length > 0 ? conversations.map((conversation) => (
+          {conversations.filter((m) => m.messages[0]?.read === false && m.messages[0]?.userId !== session?.user.id).length > 0 ? conversations.map((conversation) => (
             
             <div key={conversation.id} className="flex items-center gap-2">
                 {conversation.messages[0]?.read === false && conversation.messages[0].userId !== session?.user.id &&
@@ -113,8 +113,7 @@ export default function HostMessagesOverview({
                         {conversation.participants[0]?.name}
                       </p>
                       <p className="line-clamp-1 text-sm text-muted-foreground">
-                        {conversation.messages[0]?.read === false &&
-                          conversation.messages[0]?.message}
+                        {conversation.messages[0]?.message}
                       </p>
                     </div>
                     <div className="flex-1" />

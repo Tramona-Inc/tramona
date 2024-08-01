@@ -15,7 +15,7 @@ import {
 
 import { Tailwind } from "@react-email/tailwind";
 import * as React from "react";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -111,7 +111,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
       >
         <Head />
         <Body
-          className="flex items-center justify-center font-sans text-base"
+          className="font-sans flex items-center justify-center text-base"
           style={main}
         >
           <Container className="bg-white" style={{ backgroundColor: "white" }}>

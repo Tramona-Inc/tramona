@@ -10,7 +10,6 @@ import PlacesInput from "@/components/_common/PlacesInput";
 import { DollarSignIcon, MapPinIcon, Users2Icon } from "lucide-react";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useCityRequestForm } from "./useCityRequestForm";
 
 export function MobileRequestDealTab({
@@ -18,30 +17,18 @@ export function MobileRequestDealTab({
 }: {
   closeSheet?: () => void;
 }) {
-  const [curTab, setCurTab] = useState(0);
   const { form, onSubmit } = useCityRequestForm({
-    setCurTab,
     afterSubmit: closeSheet,
   });
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={onSubmit}
-        className="flex flex-col gap-4"
-        key={curTab} // rerender on tab changes (idk why i have to do this myself)
-      >
-        {/* <RequestTabsSwitcher
-          curTab={curTab}
-          setCurTab={setCurTab}
-          form={form}
-        /> */}
-
+      <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-4">
           <div className="grid gap-1">
             <PlacesInput
               control={form.control}
-              name={`data.${curTab}.location`}
+              name={`location`}
               formLabel="Location"
               variant="lpMobile"
               placeholder="Select a location"
@@ -49,7 +36,7 @@ export function MobileRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.date`}
+              name={`date`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -67,7 +54,7 @@ export function MobileRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.numGuests`}
+              name={`numGuests`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -85,7 +72,7 @@ export function MobileRequestDealTab({
             />
             <FormField
               control={form.control}
-              name={`data.${curTab}.maxNightlyPriceUSD`}
+              name={`maxNightlyPriceUSD`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -103,10 +90,6 @@ export function MobileRequestDealTab({
               )}
             />
           </div>
-          {/* <AirbnbLinkPopover /> */}
-          {/* <p className="mt-1 text-xs text-muted-foreground">
-                Have a property you are eyeing, input the Airbnb link here.
-              </p> */}
           <div className="flex justify-end">
             <Button type="submit" disabled={form.formState.isSubmitting}>
               Submit Request

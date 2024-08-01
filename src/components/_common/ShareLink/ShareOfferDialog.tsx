@@ -15,8 +15,11 @@ function ShareOfferDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <ShareIcon />
+        <Button variant="ghost" className="">
+          <div className="flex flex-row items-center space-x-2">
+            <ShareIcon /> 
+            <div><u>Share</u></div>
+          </div>
         </Button>
       </DialogTrigger>
       <DialogContent className="text-xl font-semibold">

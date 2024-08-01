@@ -20,7 +20,7 @@ import HostTeamsDropdownItems from "./HostTeamsDropdownItems";
 import { api } from "@/utils/api";
 import { useState } from "react";
 import CreateHostTeamDialog from "./CreateHostTeamDialog";
-import { usePathname } from "next/navigation";
+
 function DropdownTop({ session }: { session: Session }) {
   const title = session.user.name ?? session.user.email;
   const subtitle = session.user.name ? session.user.email : null;
@@ -52,7 +52,7 @@ function DropdownTop({ session }: { session: Session }) {
 export default function AvatarDropdown({ session }: { session: Session }) {
   const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
-  const pathname = usePathname();
+
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
   return (
@@ -66,7 +66,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
             image={session.user.image}
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 py-4 font-medium">
+        <DropdownMenuContent align="end" className="w-80 font-medium">
           <DropdownTop session={session} />
           <DropdownMenuSeparator />
           {session.user.role === "admin" && (

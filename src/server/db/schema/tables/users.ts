@@ -46,6 +46,8 @@ export const users = pgTable(
     // nextauth fields
     id: text("id").notNull().primaryKey(),
     name: text("name"),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
     email: text("email").notNull(),
     emailVerified: timestamp("emailVerified", { withTimezone: true }),
     image: text("image"),
@@ -84,6 +86,7 @@ export const users = pgTable(
       .default(sql`'{}'`),
     about: text("about"),
     // destinations: varchar("destinations").array(),
+    onboardingStep: integer("onboarding_step").notNull().default(0),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),

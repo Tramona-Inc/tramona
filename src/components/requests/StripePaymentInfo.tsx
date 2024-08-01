@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/OfferPage";
-import type Stripe from "stripe";
 
 interface StripeOptions {
   clientSecret?: string | null;

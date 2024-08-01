@@ -15,6 +15,7 @@ import {
   type Request,
   requests,
   requestsToProperties,
+  type User,
   users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
@@ -34,11 +35,18 @@ import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
-  type NewProperty,
   properties,
   type Property,
 } from "./../../db/schema/tables/properties";
 import { addProperty } from "@/server/server-utils";
+
+export type HostRequestsPageData = {
+  city: string;
+  requests: {
+    request: Request & { traveler: Pick<User, "name" | "image"> };
+    properties: Property[];
+  }[];
+};
 
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
@@ -52,10 +60,6 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "admin" && !input.hostName) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-
       const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
       const hostTeamId = await db.query.hostProfiles
         .findFirst({
@@ -490,16 +494,8 @@ export const propertiesRouter = createTRPCRouter({
           ORDER BY cr.city, r.id, p.id
         `);
 
-      interface CityData {
-        city: string;
-        requests: {
-          request: Request;
-          properties: Property[];
-        }[];
-      }
-
-      const organizedData: CityData[] = [];
-      const cityMap = new Map<string, CityData>();
+      const organizedData: HostRequestsPageData[] = [];
+      const cityMap = new Map<string, HostRequestsPageData>();
 
       for (const row of rawData) {
         const property = {
@@ -531,7 +527,7 @@ export const propertiesRouter = createTRPCRouter({
           hostawayListingId: row.hostaway_listing_id,
           hostName: row.host_name,
           // Add other property fields here
-        } as NewProperty;
+        } as Property;
 
         const request = {
           id: row.request_id,
@@ -554,15 +550,15 @@ export const propertiesRouter = createTRPCRouter({
           lng: row.lng,
           latLngPoint: row.lat_lng_point,
           radius: row.radius,
-          name: row.user_name,
-          profilePic: row.image,
+          amenities: row.amenities,
+          traveler: { name: row.user_name, image: row.image },
           // Add other request fields here
-        } as Request;
+        } as HostRequestsPageData["requests"][number]["request"];
 
         const city = row.property_city as string;
 
         if (!cityMap.has(city)) {
-          const newCityData: CityData = { city, requests: [] };
+          const newCityData: HostRequestsPageData = { city, requests: [] };
           cityMap.set(city, newCityData);
           organizedData.push(newCityData);
         }
@@ -578,12 +574,8 @@ export const propertiesRouter = createTRPCRouter({
         }
 
         // Check if the property is not already in the properties array
-        if (
-          property.id !== undefined &&
-          !requestData.properties.some((p) => p.id === property.id)
-        ) {
-          // TODO: fix types
-          requestData.properties.push(property as Property);
+        if (!requestData.properties.some((p) => p.id === property.id)) {
+          requestData.properties.push(property);
         }
       }
       return organizedData;

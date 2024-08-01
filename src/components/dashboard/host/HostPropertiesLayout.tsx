@@ -104,7 +104,7 @@ export default function HostPropertiesLayout({
       <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
         <ScrollArea>
           <h1 className="text-3xl font-bold">Properties</h1>
-          <p className="text-muted-foreground">24% currently vacant</p>
+          {/* <p className="text-muted-foreground">24% currently vacant</p> */}
           <div className="my-4">
             {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
             <Link href="/host-onboarding">
@@ -277,7 +277,7 @@ export function HostPropertyEditBtn({
     setCheckInType(property.checkInInfo ?? "self");
     setCheckIn(property.checkInTime ?? "00:00");
     setCheckOut(property.checkOutTime ?? "00:00");
-    setAmenities(property.amenities ?? []);
+    setAmenities(property.amenities);
     setOtherAmenities(property.otherAmenities);
     setImageUrls(property.imageUrls);
     setTitle(property.name);

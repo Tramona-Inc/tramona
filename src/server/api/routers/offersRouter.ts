@@ -155,15 +155,6 @@ export const offersRouter = createTRPCRouter({
 
       return await ctx.db.query.offers.findMany({
         where: eq(offers.requestId, input.id),
-        columns: {
-          createdAt: true,
-          totalPrice: true,
-          acceptedAt: true,
-          tramonaFee: true,
-          checkIn: true,
-          checkOut: true,
-          id: true,
-        },
         with: {
           request: {
             with: {
@@ -179,6 +170,7 @@ export const offersRouter = createTRPCRouter({
               host: {
                 columns: { id: true, name: true, email: true, image: true },
               },
+              reviews: true,
             },
           },
         },
@@ -228,10 +220,11 @@ export const offersRouter = createTRPCRouter({
             },
           },
           property: {
-            columns:{
-              latLngPoint:false,
+            columns: {
+              latLngPoint: false,
             },
             with: {
+              reviews: true,
               host: {
                 columns: {
                   id: true,
@@ -439,17 +432,17 @@ export const offersRouter = createTRPCRouter({
         })
         .then((res) => res?.hostTeam);
 
-      if (!propertyHostTeam) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+      // if (!propertyHostTeam) {
+      //   throw new TRPCError({ code: "BAD_REQUEST" });
+      // }
 
-      if (
-        !propertyHostTeam.members.find(
-          (member) => member.userId === ctx.user.id,
-        )
-      ) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+      // if (
+      //   !propertyHostTeam.members.find(
+      //     (member) => member.userId === ctx.user.id,
+      //   )
+      // ) {
+      //   throw new TRPCError({ code: "UNAUTHORIZED" });
+      // }
 
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
