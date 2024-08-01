@@ -255,6 +255,7 @@ export const requestsRouter = createTRPCRouter({
       console.log("the puppeter has not been called yet");
       const response = await scrapeUsingLink(input.airbnbLink);
       console.log("the puppeter finished");
+      if (!response) return; //delete this line when we have a proper error handling
       const newRequest: RequestInput = {
         ...input,
         location: response.cityName,
