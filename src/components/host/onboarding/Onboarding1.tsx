@@ -153,8 +153,8 @@ export default function Onboarding1({
           />
         </div>
 
-        <div className="flex flex-col items-center justify-center sm:mx-20">
-          <h1 className="mb-6 text-center text-4xl font-semibold">
+        <div className="my-6 flex flex-col items-center gap-6 sm:mx-20">
+          <h1 className="text-center text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl">
             Get started on Tramona
           </h1>
           <div className="flex flex-col gap-4">
