@@ -1,4 +1,3 @@
-import SettingsLayout from "@/components/_common/Layout/SettingsLayout";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/use-toast";
@@ -12,7 +11,6 @@ type OnboardingFooterProps = {
   isFormValid?: boolean; // New prop to indicate whether the form is valid
   isForm: boolean;
   handleError?: () => void;
-  onClick?: () => void;
 };
 
 export default function OnboardingFooter({
@@ -20,7 +18,6 @@ export default function OnboardingFooter({
   isFormValid = false, // Default value is false
   isForm,
   handleError,
-  onClick,
 }: OnboardingFooterProps) {
   const [isLoading, setIsLoading] = useState(false);
   const max_pages = 10;

@@ -36,8 +36,6 @@ import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { on } from "events";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Home } from "lucide-react";
 
 export default function Onboarding1({
@@ -51,8 +49,6 @@ export default function Onboarding1({
   const [dialogType, setDialogType] = useState<
     "assistedListing" | "syncPMS" | null
   >(null);
-
-  const [option, setOption] = useState(0);
 
   useCalendlyEventListener({ onEventScheduled: () => setEventScheduled(true) });
 
@@ -128,6 +124,9 @@ export default function Onboarding1({
   const { mutateAsync: createHostProfile } =
     api.users.createHostProfile.useMutation({});
 
+  const { data: isHospitableCustomer } =
+    api.pms.getHospitableCustomer.useQuery();
+
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
     const { bearerToken } = await generateBearerToken({ accountId, apiKey });
     console.log(bearerToken);
@@ -158,21 +157,22 @@ export default function Onboarding1({
           <h1 className="mb-6 text-center text-4xl font-semibold">
             Get started on Tramona
           </h1>
-
           <div className="flex flex-col gap-4">
             {items.map((item) =>
               item.id === "1" ? (
-                <>
-                  <CardSelect
-                    key={item.id}
-                    title={item.title}
-                    text={item.text}
-                    onClick={item.onClick}
-                    recommended={item.recommended}
-                  >
-                    {item.icon}
-                  </CardSelect>
-                </>
+                !isHospitableCustomer && (
+                  <>
+                    <CardSelect
+                      key={item.id}
+                      title={item.title}
+                      text={item.text}
+                      onClick={item.onClick}
+                      recommended={item.recommended}
+                    >
+                      {item.icon}
+                    </CardSelect>
+                  </>
+                )
               ) : (
                 <CardSelect
                   key={item.title}
@@ -188,7 +188,7 @@ export default function Onboarding1({
         </div>
       </div>
 
-      <OnboardingFooter isForm={false} onClick={items[option - 1]?.onClick} />
+      <OnboardingFooter isForm={false} />
       <Dialog open={showModal} onOpenChange={closeModal}>
         <DialogClose />
         <DialogContent>
