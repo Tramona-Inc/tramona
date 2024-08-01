@@ -122,7 +122,7 @@ export default function Onboarding1({
     });
 
   const { mutateAsync: createHostProfile } =
-    api.users.createHostProfile.useMutation({});
+    api.users.upsertHostProfile.useMutation();
 
   const { data: isHospitableCustomer } =
     api.pms.getHospitableCustomer.useQuery();

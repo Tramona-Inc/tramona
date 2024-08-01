@@ -87,7 +87,7 @@ export default function SignIn({
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: from ?? `${window.location.origin}/auth/onboarding`,
+      callbackUrl: from ?? `${window.location.origin}`,
     }).then(() => {
       if (inviteLinkId) {
         void inviteUser({ inviteLinkId });

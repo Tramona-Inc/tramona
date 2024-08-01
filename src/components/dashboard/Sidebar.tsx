@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { NavBarLink } from "./NavBarLink";
+import { Button } from "../ui/button";
 
 export default function Sidebar({
   type,
@@ -108,10 +109,12 @@ export default function Sidebar({
       </div>
       <div className="mb-6 bg-zinc-100 text-center">
         <DropdownMenu>
-          <DropdownMenuTrigger className="">
-            <Menu />
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu />
+            </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align="start">
             <DropdownMenuGroup>
               <Link href="/settings/personal-information">
                 <DropdownMenuItem className="text-primary">
