@@ -1,6 +1,6 @@
-// db/schema/tables/reservedDateRanges.ts
+// db/schema/tables/reservedDates.ts
 
-import { pgTable, integer, serial, date } from "drizzle-orm/pg-core";
+import { pgTable, integer, date, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 
