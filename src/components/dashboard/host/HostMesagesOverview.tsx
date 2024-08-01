@@ -1,7 +1,6 @@
 import {
   Card,
   CardHeader,
-  CardFooter,
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
@@ -14,7 +13,6 @@ import UserAvatar from "@/components/_common/UserAvatar";
 import { api } from "@/utils/api";
 import { useConversation } from "@/utils/store/conversations";
 import { useEffect } from "react";
-import { useMeasure } from "@uidotdev/usehooks";
 import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { type MessageDbType } from "@/types/supabase.message";
