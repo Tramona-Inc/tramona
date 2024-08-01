@@ -102,7 +102,7 @@ export default function ChatInput({
       }
     }
       else if(session && checkConversationId?.conversationId === conversationId) {
-        const newMessage: ChatMessageType & GuestMessage = {
+        const newMessage: GuestMessage = {
           id: nanoid(),
           createdAt: new Date().toISOString().slice(0,-1),
           conversationId: conversationId,
@@ -110,7 +110,6 @@ export default function ChatInput({
           message: values.message,
           read: false,
           isEdit: false,
-          userId: "",
         };
 
         const newMessageToDb = {

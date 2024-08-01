@@ -63,7 +63,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
           <UserAvatar
             name={session.user.name}
             email={session.user.email}
-            image={profileInfo?.avatar ?? session.user.image}
+            image={session.user.image}
           />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80 py-4 font-medium">

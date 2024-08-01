@@ -135,7 +135,7 @@ export default function ProfilePage() {
               size="xl"
               name={profileInfo?.name}
               email={profileInfo?.email}
-              image={profileInfo?.avatar}
+              image={profileInfo?.image}
               className="border border-black"
             />
             {/* <button>
@@ -350,11 +350,11 @@ export default function ProfilePage() {
               {bucketListProperties?.length ? (
                 bucketListProperties.map((property) => (
                   <BucketListHomeOfferCard
-                    key={property!.id}
+                    key={property.id}
                     property={{
-                      ...property!,
-                      propertyId: property!.id,
-                      bucketListPropertyId: property!.bucketListId,
+                      ...property,
+                      propertyId: property.id,
+                      bucketListPropertyId: property.bucketListId,
                     }}
                   />
                 ))

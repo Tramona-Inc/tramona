@@ -11,7 +11,8 @@ import { columns } from "@/components/admin/view-recent-host/table/columns";
 import { getAdminId } from "@/server/server-utils";
 
 
-const ADMIN_ID = await getAdminId();
+const ADMIN_ID = await getAdminId()
+
 
 export async function fetchUsersConversations(userId: string) {
   return await db.query.users.findFirst({
@@ -73,7 +74,7 @@ export async function fetchGuestConversation(conversationId: string) {
 
 export async function fetchAdminConversations() {
   const result = await db.query.conversationGuests.findMany({
-    where: eq(conversationGuests.adminId, ADMIN_ID),
+    where: eq(conversationGuests.adminId, ADMIN_ID ?? ""),
     columns: {},
     with: {
       conversations:{
@@ -278,6 +279,21 @@ export async function addTwoUserToConversation(
 }
 
 export const messagesRouter = createTRPCRouter({
+
+  fetchAdminId:protectedProcedure
+  .query(async ({ctx}) => {
+    if(ctx.user.id === process.env.TRAMONA_USER_ADMIN_ID){
+      const adminId = process.env.TRAMONA_USER_ADMIN_ID
+      return adminId
+    } else if(ctx.user.role === "admin") {
+      const adminId = ctx.user.id
+      return adminId
+    } else {
+      const adminId = await getAdminId();
+      return adminId
+    }
+  }),
+
   getConversations: protectedProcedure.query(async ({ ctx }) => {
     const result = await fetchUsersConversations(ctx.user.id);
 
@@ -326,11 +342,7 @@ export const messagesRouter = createTRPCRouter({
     return [];
   }),
 
-  fetchAdminId:protectedProcedure
-  .query(async () => {
-    const admin_id = await getAdminId()
-    return admin_id
-  }),
+  
 
   fetchAdminDetails: publicProcedure
   .input(z.object(
@@ -360,6 +372,7 @@ export const messagesRouter = createTRPCRouter({
 
   getConversationForAdmin: publicProcedure
   .query(async () => {
+    // const adminId = messagesRouter.fetchAdminId({ctx})
     const result = await fetchAdminConversations();
     if(result){
       const adminConversation = result.map((conversation) => ({

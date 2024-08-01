@@ -14,7 +14,7 @@ export type GuestMessage = GuestMessageType;
 type ConversationsState = Record<
   string,
   {
-    messages: ChatMessageType[];
+    messages: (ChatMessageType | GuestMessage)[];
     page: number;
     hasMore: boolean;
     alreadyFetched: boolean;
@@ -24,7 +24,7 @@ type ConversationsState = Record<
 type AdminConversationsState = Record<
   string,
   {
-    messages: GuestMessage[];
+    messages:  (ChatMessageType | GuestMessage)[];
     page: number;
     hasMore: boolean;
     alreadyFetched: boolean;
