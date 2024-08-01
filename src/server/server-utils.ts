@@ -387,7 +387,7 @@ export async function getAdminId() {
 //function to scrape using the url
 export async function scrapeUsingLink(url: string) {
   const searchParams = new URLSearchParams(url.split("?")[1]);
-
+  console.log("the pupeetter function was called");
   try {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -409,6 +409,7 @@ export async function scrapeUsingLink(url: string) {
         "#site-content > div > div:nth-child(1) > div:nth-child(5) > div > div > div > div:nth-child(2) > section",
       );
       const cityDiv = citySection?.querySelector("div:nth-child(2)");
+      console.log("The pupeeter function is working and is about to return ");
       return cityDiv!.textContent!.trim();
     });
 
@@ -486,10 +487,13 @@ export async function scrapeUsingLink(url: string) {
       checkOut,
       numGuests,
     };
+    console.log("Here is the response", response);
     return response;
-  } catch (error) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to scrape Airbnb: ${error.message}`);
+    } else {
+      console.error("Unexpected error:", error);
+    }
   }
 }

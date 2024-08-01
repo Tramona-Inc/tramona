@@ -252,14 +252,17 @@ export const requestsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       //we are going to use the given data to scrape the airbnb listing and create a request
+      console.log("the puppeter has not been called yet");
       const response = await scrapeUsingLink(input.airbnbLink);
-
+      console.log("the puppeter finished");
+      if (!response) return; //delete this line when we have a proper error handling
       const newRequest: RequestInput = {
         ...input,
         location: response.cityName,
         maxTotalPrice: response.formattedNightlyPrice,
       };
       //now we need to make a legitimate request with all of the data
+      console.log("the new request is", newRequest);
       const { transactionResults } = await handleRequestSubmission(newRequest, {
         user: ctx.user,
       });
