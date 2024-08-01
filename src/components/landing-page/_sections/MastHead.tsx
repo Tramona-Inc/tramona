@@ -17,7 +17,12 @@ import Link from "next/link";
 
 export default function MastHead() {
 
-
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  })
+}
 
   return (
     // padding for the sides? and do we want rounded corners?
@@ -344,7 +349,7 @@ export default function MastHead() {
           <p className="mb-6 text-sm text-zinc-600">
             properties your matches will be coming from
           </p>
-          <Button className="rounded-full bg-teal-900 px-6 py-2 text-white transition-colors hover:bg-teal-950">
+          <Button onClick={scrollToTop} className="rounded-full bg-teal-900 px-6 py-2 text-white transition-colors hover:bg-teal-950">
             Submit a request
           </Button>
         </div>
