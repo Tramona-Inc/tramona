@@ -1,3 +1,5 @@
+"use client";
+
 import React, { type ReactElement, useEffect } from "react";
 
 import { useState } from "react";
@@ -8,7 +10,7 @@ import { env } from "@/env";
 import {
   loadConnectAndInitialize,
   type StripeConnectInstance,
-} from "@stripe/connect-js";
+} from "@stripe/connect-js/pure";
 import { useSession } from "next-auth/react";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 

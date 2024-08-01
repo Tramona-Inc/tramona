@@ -2,7 +2,7 @@ import { guestMenuNavLinks } from "@/config/menuNavLinks";
 import {
   adminNavLinks,
   guestMobileNavLinks,
-  hostMobileNavLinks,
+  hostNavLinks,
   unloggedNavLinks,
   adminMessageLink
 } from "@/config/sideNavLinks";
@@ -40,7 +40,7 @@ function LoggedInMenu({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const currentYear = new Date().getFullYear();
 
-  const {data: isHost} = api.users.isHost.useQuery();
+  const { data: isHost } = api.users.isHost.useQuery();
 
   const pathname = usePathname();
 
@@ -156,7 +156,7 @@ export default function MobileNav({
     type === "admin"
       ? adminNavLinks
       : type === "host"
-        ? hostMobileNavLinks
+        ? hostNavLinks
         : isAdmin
           ? [
               ...guestMobileNavLinks,
@@ -170,7 +170,7 @@ export default function MobileNav({
 
   return (
     <header
-      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001]  lg:hidden *:lg:hidden ${type == "unlogged" ? `justify-around px-20` : ` *:flex-1`}`}
+      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001] lg:hidden *:lg:hidden ${type == "unlogged" ? `justify-around px-20` : `*:flex-1`}`}
     >
       {navLinks.map((link, index) => (
         <NavBarLink key={index} href={link.href} icon={link.icon}>
