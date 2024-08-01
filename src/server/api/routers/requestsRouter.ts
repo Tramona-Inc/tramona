@@ -261,6 +261,7 @@ export const requestsRouter = createTRPCRouter({
         maxTotalPrice: response.formattedNightlyPrice,
       };
       //now we need to make a legitimate request with all of the data
+      console.log("the new request is", newRequest);
       const { transactionResults } = await handleRequestSubmission(newRequest, {
         user: ctx.user,
       });
