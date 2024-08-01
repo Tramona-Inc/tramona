@@ -18,6 +18,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
+  
   const syncCalendarMutation = api.calendar.syncCalendar.useMutation({
     onSuccess: () => {
       setICalUrl("");

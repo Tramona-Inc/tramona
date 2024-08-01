@@ -32,12 +32,11 @@ export default function HostAvailability({ property }: { property: Property }) {
   ];
 
   const fetchReservedDateRanges = useCallback(async () => {
-    if (!property.iCalLink) {
-      console.warn("No iCalLink available for this property");
-      return;
-    }
-
     try {
+      if (!property.iCalLink) {
+        console.log("No iCalLink for this property");
+        return;
+      }
       // Refresh iCal data
       await syncCalendar({
         iCalUrl: property.iCalLink,
@@ -57,10 +56,8 @@ export default function HostAvailability({ property }: { property: Property }) {
     console.log(today.toString());
     setCurrentDate(today);
     setCalendarDate(today);
-    if (property.iCalLink) {
-      void fetchReservedDateRanges();
-    }
-  }, [fetchReservedDateRanges, property.iCalLink]);
+    void fetchReservedDateRanges();
+  }, [fetchReservedDateRanges]);
 
   const isDateReserved = (date: Date) => {
     return reservedDateRanges?.some((reservedDate) => {
