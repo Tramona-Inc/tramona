@@ -111,8 +111,8 @@ importers:
         specifier: ^0.0.17
         version: 0.0.17(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-email/tailwind':
-        specifier: ^0.0.18
-        version: 0.0.18(react@18.2.0)
+        specifier: ^0.0.19
+        version: 0.0.19(react@18.2.0)
       '@react-google-maps/api':
         specifier: ^2.19.3
         version: 2.19.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -123,11 +123,11 @@ importers:
         specifier: ^7.0.2
         version: 7.3.2
       '@stripe/connect-js':
-        specifier: 3.3.8-beta-1
-        version: 3.3.8-beta-1
+        specifier: 3.3.12
+        version: 3.3.12
       '@stripe/react-connect-js':
         specifier: 3.3.11-beta-1
-        version: 3.3.11-beta-1(@stripe/connect-js@3.3.8-beta-1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 3.3.11-beta-1(@stripe/connect-js@3.3.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@stripe/react-stripe-js':
         specifier: ^2.4.0
         version: 2.7.3(@stripe/stripe-js@2.4.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3350,12 +3350,6 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  '@react-email/tailwind@0.0.18':
-    resolution: {integrity: sha512-ob8CXX/Pqq1U8YfL5OJTL48WJkixizyoXMMRYTiDLDN9LVLU7lSLtcK9kOD9CgFbO2yUPQr7/5+7gnQJ+cXa8Q==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      react: ^18.2.0
-
   '@react-email/tailwind@0.0.19':
     resolution: {integrity: sha512-bA0w4D7mSNowxWhcO0jBJauFIPf2Ok7QuKlrHwCcxyX35L2pb5D6ZmXYOrD9C6ADQuVz5oEX+oed3zpSLROgPg==}
     engines: {node: '>=18.0.0'}
@@ -3918,8 +3912,8 @@ packages:
   '@storybook/types@7.6.20':
     resolution: {integrity: sha512-GncdY3x0LpbhmUAAJwXYtJDUQEwfF175gsjH0/fxPkxPoV7Sef9TM41jQLJW/5+6TnZoCZP/+aJZTJtq3ni23Q==}
 
-  '@stripe/connect-js@3.3.8-beta-1':
-    resolution: {integrity: sha512-d8YtRu6yK3lVgIuc0RuXpazfxraKbe59/6+xndBWIdfAwx6HbwO90n/yDMIPc1M3h6egfQrSsRwGhHlcYWI1bg==}
+  '@stripe/connect-js@3.3.12':
+    resolution: {integrity: sha512-hXbgvGq9Lb6BYgsb8lcbjL76Yqsxr0yAj6T9ZFTfUK0O4otI5GSEWum9do9rf/E5OfYy6fR1FG/77Jve2w1o6Q==}
 
   '@stripe/react-connect-js@3.3.11-beta-1':
     resolution: {integrity: sha512-mpF2l+NLLV/0heI+vn4NUhlpRuuj2iKL+ltYvCaVSLpiCGO7O2YWjZWmp0UHD2BbOtA8Jtmhe+1y9VC1VosJCQ==}
@@ -13993,10 +13987,6 @@ snapshots:
     dependencies:
       react: 18.2.0
 
-  '@react-email/tailwind@0.0.18(react@18.2.0)':
-    dependencies:
-      react: 18.2.0
-
   '@react-email/tailwind@0.0.19(react@18.2.0)':
     dependencies:
       react: 18.2.0
@@ -15343,11 +15333,11 @@ snapshots:
       '@types/express': 4.17.21
       file-system-cache: 2.3.0
 
-  '@stripe/connect-js@3.3.8-beta-1': {}
+  '@stripe/connect-js@3.3.12': {}
 
-  '@stripe/react-connect-js@3.3.11-beta-1(@stripe/connect-js@3.3.8-beta-1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@stripe/react-connect-js@3.3.11-beta-1(@stripe/connect-js@3.3.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@stripe/connect-js': 3.3.8-beta-1
+      '@stripe/connect-js': 3.3.12
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
