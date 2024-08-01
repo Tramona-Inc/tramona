@@ -198,7 +198,7 @@ async function generateConversation(
   return createdConversation?.id;
 }
 
-export async function createConversationWithAdmin(userId: string | null, userToken: string | null) {
+export async function createConversationWithAdmin(userId: string, userToken: string) {
   // Generate conversation and get id
   const createdConversationId = await generateConversation();
   if(!userId && createdConversationId !== undefined){
