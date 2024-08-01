@@ -125,8 +125,11 @@ export const pmsRouter = createTRPCRouter({
 
       return response.data as HospitableCustomerResponse;
     } catch (error) {
-      console.error("Error fetching with Hospitable:", error);
-      throw new Error("Failed to fetch with Hospitable");
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          return null;
+        }
+      }
     }
   }),
 

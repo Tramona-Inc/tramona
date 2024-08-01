@@ -161,17 +161,15 @@ export default function Onboarding1({
             {items.map((item) =>
               item.id === "1" ? (
                 !isHospitableCustomer && (
-                  <>
-                    <CardSelect
-                      key={item.id}
-                      title={item.title}
-                      text={item.text}
-                      onClick={item.onClick}
-                      recommended={item.recommended}
-                    >
-                      {item.icon}
-                    </CardSelect>
-                  </>
+                  <CardSelect
+                    key={item.id}
+                    title={item.title}
+                    text={item.text}
+                    onClick={item.onClick}
+                    recommended={item.recommended}
+                  >
+                    {item.icon}
+                  </CardSelect>
                 )
               ) : (
                 <CardSelect
