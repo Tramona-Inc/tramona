@@ -169,15 +169,25 @@ export const usersRouter = createTRPCRouter({
     return !!res;
   }),
 
-  createHostProfile: protectedProcedure
+  upsertHostProfile: protectedProcedure
     .input(
-      z.object({
-        hostawayAccountId: z.string().optional(),
-        hostawayBearerToken: z.string().optional(),
-        hostawayApiKey: z.string().optional(),
-      }),
+      z
+        .object({
+          hostawayAccountId: z.string().optional(),
+          hostawayBearerToken: z.string().optional(),
+          hostawayApiKey: z.string().optional(),
+        })
+        .optional(),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input = {} }) => {
+      const existingHostProfile = await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+      });
+
+      if (existingHostProfile) {
+        return existingHostProfile;
+      }
+
       const teamId = await ctx.db
         .insert(hostTeams)
         .values({
@@ -194,16 +204,13 @@ export const usersRouter = createTRPCRouter({
         userId: ctx.user.id,
       });
 
-      const res = await ctx.db
-        .insert(hostProfiles)
-        .values({
-          userId: ctx.user.id,
-          curTeamId: teamId,
-          hostawayApiKey: input.hostawayApiKey,
-          hostawayAccountId: input.hostawayAccountId,
-          hostawayBearerToken: input.hostawayBearerToken,
-        })
-        .returning();
+      await ctx.db.insert(hostProfiles).values({
+        userId: ctx.user.id,
+        curTeamId: teamId,
+        hostawayApiKey: input.hostawayApiKey,
+        hostawayAccountId: input.hostawayAccountId,
+        hostawayBearerToken: input.hostawayBearerToken,
+      });
 
       interface PropertyType {
         id: number;
@@ -525,7 +532,6 @@ export const usersRouter = createTRPCRouter({
           console.log(err);
         }
       }
-      return res;
     }),
 
   getHostInfo: protectedProcedure.query(async ({ ctx }) => {

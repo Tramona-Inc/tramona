@@ -87,6 +87,8 @@ export const ALL_PROPERTY_TYPES = [
   "Villa",
 ] as const;
 
+export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
+
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
   "Shared room",
