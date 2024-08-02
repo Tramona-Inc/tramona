@@ -301,7 +301,6 @@ function SmallHeader(props: HeaderProps) {
             {/* <Link href={sidebarType== "host" ? "/host" : "dashboard"} >Dashboard</Link> */}
           </Button>
         )}
-
         {props.type === "marketing" ? (
           <div className="flex w-full justify-end gap-x-2">
             {status === "authenticated" && (
@@ -319,8 +318,7 @@ function SmallHeader(props: HeaderProps) {
             )}
           </div>
         ) : null}
-
-        {status === "authenticated" && (
+        {status === "authenticated" && session.user.role == "host" && (
           <div className="flex items-center gap-x-2 self-end justify-self-end">
             <AvatarDropdown session={session} size="sm" />
             <HamburgerMenu
@@ -330,6 +328,12 @@ function SmallHeader(props: HeaderProps) {
                   : hamburgerLinksHostMobileToHost
               }
             />
+          </div>
+        )}{" "}
+        {status === "authenticated" && session.user.role != "host" && (
+          <div className="flex items-center gap-x-2 self-end justify-self-end">
+            <AvatarDropdown session={session} size="sm" />
+            <HamburgerMenu links={hamburgerLinksMobile} />
           </div>
         )}
       </div>
