@@ -1,20 +1,108 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
-import HostPropertiesPriceRestriction from "./HostPropertiesAgeRestriction";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Edit2 } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesAgeRestriction from "./HostPropertiesAgeRestriction";
+import { useState } from "react";
+import { Label } from "recharts";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
+  const [iCalUrl, setICalUrl] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
+
+
+  const syncCalendarMutation = api.calendar.syncCalendar.useMutation({
+    onSuccess: () => {
+      setICalUrl("");
+      setIsEditing(false);
+      toast({
+        title: "Success!",
+        description: "Your iCal calendar has been successfully synced.",
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      console.error("Error syncing calendar:", error);
+      toast({
+        title: "Sync Failed",
+        description: error.message || "An error occurred while syncing the calendar.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  function handleFormSubmit() {
+    syncCalendarMutation.mutate({
+      iCalUrl,
+      propertyId: property.id,
+    });
+  }
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      setICalUrl(property.iCalLink ?? '');
+    }
+    setIsEditing(!isEditing);
+  };
+
   return (
-    <div className="space-y-4 p-4 sm:p-6">
+    <div key={property.id} className="space-y-4 p-4 sm:p-6">
       <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
       <div>
+        {!property.iCalLink && (
+          <div className="mb-10 space-y-4">
+            <h1 className="text-4xl font-bold">Sync your iCal</h1>
+            <Label className="font-semibold">iCal URL</Label>
+            <Input
+              id="iCalUrl"
+              type="url"
+              placeholder="https://example.com/calendar.ics"
+              value={iCalUrl}
+              onChange={(e) => setICalUrl(e.target.value)}
+            />
+            <Button onClick={handleFormSubmit} disabled={syncCalendarMutation.isLoading}>
+              {syncCalendarMutation.isLoading ? "Syncing..." : "Submit"}
+            </Button>
+          </div>
+        )}
+        {property.iCalLink && (
+          <div className="mb-10 space-y-4">
+            <h1 className="text-4xl font-bold">Sync your iCal</h1>
+            <Label className="font-semibold">iCal URL</Label>
+            <Input
+              id="iCalUrl"
+              type="url"
+              placeholder="https://example.com/calendar.ics"
+              value={isEditing ? iCalUrl : property.iCalLink}
+              onChange={(e) => setICalUrl(e.target.value)}
+              readOnly={!isEditing}
+              className={isEditing ? "" : "bg-gray-100"}
+            />
+            <Button onClick={handleEditToggle} variant="outline" className="mr-2">
+              {isEditing ? "Cancel" : <Edit2 className="h-4 w-4" />}
+            </Button>
+            {isEditing && (
+              <Button
+                onClick={handleFormSubmit}
+                className="mt-2"
+                disabled={syncCalendarMutation.isLoading}
+              >
+                {syncCalendarMutation.isLoading ? "Syncing..." : "Submit"}
+              </Button>
+            )}
+          </div>
+        )}
+
         <h1 className="text-2xl font-bold">
           {property.name === "" ? "No property name provided" : property.name}
         </h1>
