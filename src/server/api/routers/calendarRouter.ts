@@ -72,37 +72,37 @@ export async function syncCalendar(
 }
 
 export const calendarRouter = createTRPCRouter({
-    syncCalendar: publicProcedure
-      .input(
-        z.object({
-          iCalUrl: z.string().url().nullable(),
-          propertyId: z.number(),
-        }),
-      )
-      .mutation(async ({ input }) => {
-        const { iCalUrl, propertyId } = input;
-  
-        if (!iCalUrl) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "iCalUrl is required",
-          });
-        }
-  
-        try {
-          await syncCalendar(iCalUrl, propertyId);
-          return { message: "Calendar sync completed successfully" };
-        } catch (error) {
-          if (error instanceof TRPCError) {
-            throw error;
-          }
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to sync calendar",
-            cause: error,
-          });
-        }
+  syncCalendar: publicProcedure
+    .input(
+      z.object({
+        iCalUrl: z.string().url().nullable(),
+        propertyId: z.number(),
       }),
+    )
+    .mutation(async ({ input }) => {
+      const { iCalUrl, propertyId } = input;
+
+      if (!iCalUrl) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "iCalUrl is required",
+        });
+      }
+
+      try {
+        await syncCalendar(iCalUrl, propertyId);
+        return { message: "Calendar sync completed successfully" };
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to sync calendar",
+          cause: error,
+        });
+      }
+    }),
   getReservedDateRanges: publicProcedure
     .input(z.object({ propertyId: z.number() }))
     .query(async ({ input }) => {
