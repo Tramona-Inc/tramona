@@ -4,10 +4,9 @@ import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-
 import { Clock8, Handshake, CircleDollarSign } from "lucide-react";
-import { TestimonialCarousel } from "@/components/landing-page/_sections/SeeCompletedRequests";
-import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
+import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
+import AddAirbnbLink from "../components/link-input/AddAirbnbLink";
 
 // ... (other imports)
 
@@ -54,7 +53,7 @@ export default function Page() {
                   for a better price
                 </p>
                 <div className="mx-auto mt-8 max-w-3xl">
-                  {/* <AddAirbnbLink /> */}
+                  <AddAirbnbLink fromRequestDealTab={false} />
                 </div>
               </div>
             </div>
@@ -178,12 +177,10 @@ export default function Page() {
         </h2>
 
         {/* testimonial carousel */}
-        <div className="mx-4 mt-10 hidden justify-center space-y-4 lg:mx-0 lg:mt-16 lg:flex lg:space-y-8">
+        <div className="flex mx-4 mt-20 justify-center space-y-4 lg:mx-0 lg:mt-16 lg:space-y-8">
           <TestimonialCarousel />
         </div>
-        <div className="mx-4 mt-20 flex justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
-          <MobileTestimonialCarousel />
-        </div>
+
       </section>
 
       <div className="mt-32 bg-teal-700/15 px-4 py-8 lg:rounded-xl">

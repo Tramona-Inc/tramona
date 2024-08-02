@@ -2,11 +2,6 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import ProfileForm from "@/components/profile/ProfileForm";
-import ProfileSidebar from "@/components/profile/ProfileSidebar";
-import ReferralDashboard from "@/components/profile/ReferralDashboard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Edit2Icon, Share2Icon } from "lucide-react";
 import ProfilePage from "@/components/profile/ProfilePage";
 
 export default function Page() {

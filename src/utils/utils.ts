@@ -1,7 +1,13 @@
 import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
-import { formatDate, isSameDay, isSameMonth, isSameYear } from "date-fns";
+import {
+  formatDate,
+  type FormatOptions,
+  isSameDay,
+  isSameMonth,
+  isSameYear,
+} from "date-fns";
 import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -121,7 +127,6 @@ export function formatDateRange(
 }
 
 function removeTimezoneFromDate(date: Date) {
-  // Convert to ISO string and split by 'T' to get date part
   return new Date(date).toISOString().split("Z")[0]!;
 }
 
@@ -138,7 +143,7 @@ export function formatDateMonthDayYear(date: Date) {
 }
 
 export function formatDateYearMonthDay(date: Date) {
-  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd");
+  return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd"); //ex 2021-12-31
 }
 
 export function formatShortDate(date: Date) {
@@ -148,6 +153,13 @@ export function formatShortDate(date: Date) {
 export function convertDateFormat(dateString: string) {
   const [year, month, day] = dateString.split("-");
   return `${month}/${day}/${year}`;
+}
+
+export function addDays(date: Date, days: number): Date {
+  //add days to a date object
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
 }
 
 export function getElapsedTime(createdAt: Date): string {
@@ -417,4 +429,25 @@ export function formatTime(time: string) {
   return hour > 12
     ? `${hour - 12}:${fmtdMinutes} PM`
     : `${hour}:${fmtdMinutes} AM`;
+}
+
+/**
+ * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
+ * to the end of the date string to prevent the timezone from getting converted
+ * to UTC and the formatted date being 1 day off.
+ *
+ * @example
+ * ```js
+ * formatDateString("2023-03-01", "MMM d, yyyy"); // Mar 1, 2023
+ * ```
+ */
+export function formatDateString(
+  date: string,
+  formatStr: string,
+  options: FormatOptions = {},
+) {
+  if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    throw new Error("Invalid date format, must be YYYY-MM-DD");
+  }
+  return formatDate(`${date}T00:00`, formatStr, options);
 }

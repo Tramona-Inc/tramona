@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DesktopRequestDealTab } from "../landing-page/SearchBars/DesktopRequestDealTab";
+import CityRequestFormContainer from "../landing-page/SearchBars/CityRequestFormContainer";
 import { MobileRequestDealTab } from "../landing-page/SearchBars/MobileRequestDealTab";
 import {
   Dialog,
@@ -29,8 +29,9 @@ export function NewCityRequestBtn() {
         <div className="contents sm:hidden">
           <MobileRequestDealTab closeSheet={() => setOpen(false)} />
         </div>
+        :
         <div className="hidden sm:contents">
-          <DesktopRequestDealTab />
+          <CityRequestFormContainer />
         </div>
       </DialogContent>
     </Dialog>

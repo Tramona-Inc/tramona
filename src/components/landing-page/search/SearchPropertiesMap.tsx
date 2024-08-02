@@ -42,31 +42,27 @@ function SearchPropertiesMap({
   const setRadius = useCitiesFilter((state) => state.setRadius);
   const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
 
-  const {
-    data: initialProperties,
-    isLoading,
-    fetchNextPage,
-    isFetchingNextPage,
-  } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
-    {
-      guests: filters.guests,
-      beds: filters.beds,
-      bedrooms: filters.bedrooms,
-      bathrooms: filters.bathrooms,
-      maxNightlyPrice: filters.maxNightlyPrice,
-      lat: filters.filter?.lat,
-      long: filters.filter?.long,
-      houseRules: filters.houseRules,
-      roomType: filters.roomType,
-      checkIn: filters.checkIn,
-      checkOut: filters.checkOut,
-      radius: filters.radius,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      refetchOnWindowFocus: false,
-    },
-  );
+  const { data: initialProperties } =
+    api.properties.getAllInfiniteScroll.useInfiniteQuery(
+      {
+        guests: filters.guests,
+        beds: filters.beds,
+        bedrooms: filters.bedrooms,
+        bathrooms: filters.bathrooms,
+        maxNightlyPrice: filters.maxNightlyPrice,
+        lat: filters.filter?.lat,
+        long: filters.filter?.long,
+        houseRules: filters.houseRules,
+        roomType: filters.roomType,
+        checkIn: filters.checkIn,
+        checkOut: filters.checkOut,
+        radius: filters.radius,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        refetchOnWindowFocus: false,
+      },
+    );
 
   const [markers, setMarkers] = useState<Poi[]>([]);
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
@@ -137,12 +133,12 @@ function SearchPropertiesMap({
   useEffect(() => {
     console.log("setting function ref from propertiesMap");
     setFunctionRef(fetchNextPageOfAdjustedProperties);
-  }, [setFunctionRef]);
+  }, [fetchNextPageOfAdjustedProperties, setFunctionRef]);
 
   // When the filter changes the location, this use effect will pan the map to the new location
   useEffect(() => {
     //I dont wnat this to run if the center was set by the camera change
-    if (location?.lat && location?.lng) {
+    if (location?.lat && location.lng) {
       setCenter(location);
       if (map) {
         map.panTo(location);
@@ -151,38 +147,34 @@ function SearchPropertiesMap({
         console.log("map not ready");
       }
     }
-  }, [location]); //use to be map but is now location // my goal is to make this only run if the
+  }, [location, map]); //use to be map but is now location // my goal is to make this only run if the
 
   const propertiesCoordinates = useMemo(() => {
     if (adjustedProperties && mapBoundaries !== null) {
       return adjustedProperties.pages.flatMap((page) =>
-        page.data
-          .filter((property) => property.lat !== null && property.long !== null)
-          .map((property) => ({
-            key: property.name,
-            location: {
-              lat: property.lat,
-              lng: property.long,
-            },
-            originalNightlyPrice: property.originalNightlyPrice,
-            id: `${property.id}`,
-            image: property.imageUrls[0]!,
-          })),
+        page.data.map((property) => ({
+          key: property.name,
+          location: {
+            lat: property.lat,
+            lng: property.long,
+          },
+          originalNightlyPrice: property.originalNightlyPrice,
+          id: `${property.id}`,
+          image: property.imageUrls[0]!,
+        })),
       );
     } else if (initialProperties) {
       return initialProperties.pages.flatMap((page) =>
-        page.data
-          .filter((property) => property.lat !== null && property.long !== null)
-          .map((property) => ({
-            key: property.name,
-            location: {
-              lat: property.lat,
-              lng: property.long,
-            },
-            originalNightlyPrice: property.originalNightlyPrice,
-            id: `${property.id}`,
-            image: property.imageUrls[0]!,
-          })),
+        page.data.map((property) => ({
+          key: property.name,
+          location: {
+            lat: property.lat,
+            lng: property.long,
+          },
+          originalNightlyPrice: property.originalNightlyPrice,
+          id: `${property.id}`,
+          image: property.imageUrls[0]!,
+        })),
       );
     }
     return [];
@@ -192,24 +184,21 @@ function SearchPropertiesMap({
     setMarkers(propertiesCoordinates as Poi[]);
   }, [propertiesCoordinates]);
 
-  const handleCameraChanged = useCallback(
-    debounce((ev: MapCameraChangedEvent) => {
-      const newCenter = {
-        lat: ev.detail.center.lat,
-        lng: ev.detail.center.lng,
-      };
-      setCenter(newCenter);
+  const handleCameraChanged = debounce((ev: MapCameraChangedEvent) => {
+    const newCenter = {
+      lat: ev.detail.center.lat,
+      lng: ev.detail.center.lng,
+    };
+    setCenter(newCenter);
 
-      setMapBoundaries({
-        north: ev.detail.bounds.north,
-        south: ev.detail.bounds.south,
-        east: ev.detail.bounds.east,
-        west: ev.detail.bounds.west,
-      });
-      void fetchNextPageOfAdjustedProperties();
-    }, 700),
-    [setCenter, fetchNextPageOfAdjustedProperties, setFilter],
-  );
+    setMapBoundaries({
+      north: ev.detail.bounds.north,
+      south: ev.detail.bounds.south,
+      east: ev.detail.bounds.east,
+      west: ev.detail.bounds.west,
+    });
+    void fetchNextPageOfAdjustedProperties();
+  }, 700);
 
   return (
     <div

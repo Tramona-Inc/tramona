@@ -1,17 +1,19 @@
-import React, { useEffect } from "react";
-import { useFormContext, Controller } from "react-hook-form";
-import type { Control } from "react-hook-form";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import React, { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import { CalendarIcon, Users2Icon } from "lucide-react";
 import Spinner from "@/components/_common/Spinner";
+import { useLinkRequestForm } from "./useLinkRequestForm";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import RequestSubmittedDialog from "./DesktopRequestComponents/RequestSubmittedDialog";
 
 interface LinkConfirmationProps {
   open: boolean;
@@ -24,13 +26,7 @@ interface LinkConfirmationProps {
       }
     | undefined;
   extractIsLoading: boolean;
-  formControl: Control<any>;
-  formFields: {
-    checkIn: string;
-    checkOut: string;
-    numGuests: string;
-  };
-  onSubmit: () => void;
+  airbnbLink: string;
 }
 
 const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
@@ -38,104 +34,136 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
   setOpen,
   extractedLinkDataState,
   extractIsLoading,
-  formControl,
-  formFields,
-  onSubmit,
+  airbnbLink,
 }) => {
-  const { setValue, watch, reset } = useFormContext();
+  const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
+    useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [madeByGroupId, setMadeByGroupId] = useState<number>();
+
+  const { form, onSubmit } = useLinkRequestForm({
+    afterSubmit() {
+      setOpen(false);
+      setRequestSubmittedDialogOpen(true);
+      setShowConfetti(true);
+      form.reset();
+    },
+    setMadeByGroupId,
+  });
 
   useEffect(() => {
-    console.log("extractedLinkDataState", extractedLinkDataState);
     if (extractedLinkDataState) {
       const checkInDate = new Date(extractedLinkDataState.checkIn);
       const checkOutDate = new Date(extractedLinkDataState.checkOut);
 
       if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime())) {
-        setValue(formFields.checkIn, checkInDate);
-        setValue(formFields.checkOut, checkOutDate);
-        setValue(formFields.numGuests, extractedLinkDataState.numOfGuests);
+        form.setValue("date.from", checkInDate);
+        form.setValue("date.to", checkOutDate);
+        form.setValue("numGuests", extractedLinkDataState.numOfGuests);
+        form.setValue("airbnbLink", airbnbLink);
       } else {
         console.error("Invalid date extracted", { checkInDate, checkOutDate });
       }
     }
-  }, [extractedLinkDataState]);
-
-  const checkInValue = watch(formFields.checkIn) as Date | undefined;
-  const checkOutValue = watch(formFields.checkOut) as Date | undefined;
-  const numGuestsValue = watch(formFields.numGuests) as number;
-
-  const handleConfirm = () => {
-    setOpen(false);
-    onSubmit(); // Call the form submit handler
-  };
+  }, [extractedLinkDataState, airbnbLink, form]);
 
   const handleCancel = () => {
     setOpen(false);
-    reset(); // Reset the form
+    form.reset(); // Reset the form
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Confirm Booking Details</DialogTitle>
-        </DialogHeader>
-        {extractIsLoading ? (
-          <Spinner />
-        ) : (
-          <div className="space-y-2">
-            <Controller
-              name={formFields.checkIn}
-              control={formControl}
-              render={({ field }) => (
-                <DateRangeInput
-                  {...field}
-                  label="Check In/Out"
-                  icon={CalendarIcon}
-                  variant="lpDesktop"
-                  disablePast
-                  className="bg-white"
-                  onChange={(value) => {
-                    setValue(formFields.checkIn, value?.from ?? undefined);
-                    setValue(formFields.checkOut, value?.to ?? undefined);
-                  }}
-                  value={{ from: checkInValue, to: checkOutValue }}
-                />
+    <div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogHeader></DialogHeader>
+        <DialogContent className="sm:p-12">
+          <h3 className="mb-10 text-center text-xl font-semibold">
+            Please confirm your request details
+          </h3>
+          <Form {...form}>
+            <form className="flex flex-col gap-y-4" onSubmit={onSubmit}>
+              {extractIsLoading ? (
+                <Spinner />
+              ) : (
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name={`date`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <DateRangeInput
+                            {...field}
+                            label="Check in/out"
+                            icon={CalendarIcon}
+                            variant="lpDesktop"
+                            disablePast
+                            className="bg-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`numGuests`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            label="Guests"
+                            placeholder="Add guests"
+                            icon={Users2Icon}
+                            variant="lpDesktop"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="airbnbLink"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Airbnb Link"
+                        placeholder={airbnbLink}
+                        disabled
+                        icon={Users2Icon}
+                        variant="lpDesktop"
+                      />
+                    )}
+                  />
+                </div>
               )}
-            />
-            <Controller
-              name={formFields.numGuests}
-              control={formControl}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Number of Guests"
-                  placeholder="Add guests"
-                  icon={Users2Icon}
-                  variant="lpDesktop"
-                  onChange={(e) =>
-                    setValue(formFields.numGuests, Number(e.target.value))
-                  }
-                  value={numGuestsValue || ""}
-                />
-              )}
-            />
-          </div>
-        )}
-        <div className="flex w-full justify-between gap-x-2">
-          <Button onClick={handleCancel} variant="secondary">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={extractIsLoading}
-            variant="greenPrimary"
-          >
-            {extractIsLoading ? "Submitting..." : "Submit Request"}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+              <div className="flex w-full flex-row-reverse justify-between gap-x-2">
+                <Button
+                  type="submit"
+                  disabled={extractIsLoading || form.formState.isSubmitting}
+                  variant="greenPrimary"
+                >
+                  {extractIsLoading ? "Submitting..." : "Confirm"}
+                </Button>
+                <Button onClick={handleCancel} variant="secondary">
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      <RequestSubmittedDialog
+        open={requestSubmittedDialogOpen}
+        setOpen={setRequestSubmittedDialogOpen}
+        showConfetti={showConfetti}
+        madeByGroupId={madeByGroupId}
+        form={form}
+      />
+    </div>
   );
 };
 

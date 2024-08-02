@@ -1,6 +1,7 @@
 import * as bcrypt from "bcrypt";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
@@ -22,7 +23,7 @@ import { eq } from "drizzle-orm";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { generateReferralCode } from "@/utils/utils";
-import { zodNumber, zodString } from "@/utils/zod-utils";
+import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -30,19 +31,18 @@ import axios from "axios";
 import { getCity } from "@/server/google-maps";
 
 export const usersRouter = createTRPCRouter({
-  me: protectedProcedure.query(async ({ ctx }) => {
+  getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return undefined;
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
-        role: true,
-        referralCodeUsed: true,
+        onboardingStep: true,
       },
     });
-
-    return {
-      role: res?.role ?? "guest",
-      referralCodeUsed: res?.referralCodeUsed ?? null,
-    };
+    if (!res) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    }
+    return res.onboardingStep;
   }),
 
   myVerificationStatus: protectedProcedure.query(async ({ ctx }) => {
@@ -169,15 +169,25 @@ export const usersRouter = createTRPCRouter({
     return !!res;
   }),
 
-  createHostProfile: protectedProcedure
+  upsertHostProfile: protectedProcedure
     .input(
-      z.object({
-        hostawayAccountId: z.string().optional(),
-        hostawayBearerToken: z.string().optional(),
-        hostawayApiKey: z.string().optional(),
-      }),
+      z
+        .object({
+          hostawayAccountId: z.string().optional(),
+          hostawayBearerToken: z.string().optional(),
+          hostawayApiKey: z.string().optional(),
+        })
+        .optional(),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input = {} }) => {
+      const existingHostProfile = await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+      });
+
+      if (existingHostProfile) {
+        return existingHostProfile;
+      }
+
       const teamId = await ctx.db
         .insert(hostTeams)
         .values({
@@ -194,16 +204,13 @@ export const usersRouter = createTRPCRouter({
         userId: ctx.user.id,
       });
 
-      const res = await ctx.db
-        .insert(hostProfiles)
-        .values({
-          userId: ctx.user.id,
-          curTeamId: teamId,
-          hostawayApiKey: input.hostawayApiKey,
-          hostawayAccountId: input.hostawayAccountId,
-          hostawayBearerToken: input.hostawayBearerToken,
-        })
-        .returning();
+      await ctx.db.insert(hostProfiles).values({
+        userId: ctx.user.id,
+        curTeamId: teamId,
+        hostawayApiKey: input.hostawayApiKey,
+        hostawayAccountId: input.hostawayAccountId,
+        hostawayBearerToken: input.hostawayBearerToken,
+      });
 
       interface PropertyType {
         id: number;
@@ -525,7 +532,6 @@ export const usersRouter = createTRPCRouter({
           console.log(err);
         }
       }
-      return res;
     }),
 
   getHostInfo: protectedProcedure.query(async ({ ctx }) => {

@@ -2,31 +2,24 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Plus,
-  MinusIcon,
-  LinkIcon,
-  MailIcon,
-  Sparkles,
-  ShareIcon,
-} from "lucide-react";
+import { Plus, MinusIcon, LinkIcon, MailIcon, ShareIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
 
 interface EmailInvitationProps {
-  madeByGroupIds?: number[];
+  madeByGroupId: number;
   inviteLink: string | null;
-  handleInvite: (emails: string[]) => void;
-  isLoading: boolean;
 }
 
-const EmailInvitation: React.FC<EmailInvitationProps> = ({
-  madeByGroupIds, // keeping this here for proper email sending
+const EmailInvitation = ({
+  madeByGroupId, // keeping this here for proper email sending
   inviteLink,
-  handleInvite,
-  isLoading,
-}) => {
+}: EmailInvitationProps) => {
   const [emails, setEmails] = useState<string[]>([""]);
   const [isEmailFormVisible, setIsEmailFormVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const inviteUserByEmail = api.groups.inviteUserByEmail.useMutation();
 
   const handleEmailChange = (index: number, value: string) => {
     const newEmails = [...emails];
@@ -63,7 +56,29 @@ const EmailInvitation: React.FC<EmailInvitationProps> = ({
   };
 
   const onInvite = () => {
-    handleInvite(emails);
+    void handleInvite(emails);
+  };
+  const handleInvite = async (emails: string[]) => {
+    if (!madeByGroupId) {
+      toast({ title: "Group IDs not available" });
+      return;
+    }
+
+    setIsLoading(true);
+    // try {
+    //   // for (const email of emails) {
+    //   //   for (const groupId of madeByGroupId) {
+    //   //     if (email.length > 0) {
+    //   //       await inviteUserByEmail.mutateAsync({ email, groupId });
+    //   //     }
+    //   //   }
+    //   }
+    //   toast({ title: "Invites sent successfully!" });
+    // } catch (error) {
+    //   toast({ title: "Error sending invites" });
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   return (

@@ -8,12 +8,10 @@ import { linkRequestSchema } from "./schemas";
 
 export function useLinkRequestForm({
   afterSubmit,
-  handleSetOpen,
-  handleShowConfetti,
+  setMadeByGroupId,
 }: {
-  afterSubmit?: (madeByGroupIds?: number) => void;
-  handleSetOpen: (val: boolean) => void;
-  handleShowConfetti: (val: boolean) => void;
+  afterSubmit?: () => void;
+  setMadeByGroupId?: (val: number) => void;
 }) {
   const form = useZodForm({
     schema: linkRequestSchema,
@@ -34,22 +32,20 @@ export function useLinkRequestForm({
       checkOut: checkOut,
       ...restData,
     };
-
     if (status === "unauthenticated") {
       localStorage.setItem("unsentRequests", JSON.stringify(newRequests));
       void router.push("/auth/signin").then(() => {
         toast({
-          title: `Request saved: ${newRequests.airbnbLink}`,
+          title: `Request saved`,
           description: "It will be sent after you sign in",
         });
       });
     } else {
-      handleSetOpen(true);
-      handleShowConfetti(true);
       await createRequestWithLink(newRequests)
         .then((result) => {
           form.reset();
-          afterSubmit?.(result.transactionResults.madeByGroupId);
+          afterSubmit?.();
+          setMadeByGroupId?.(result.transactionResults.madeByGroupId);
         })
         .catch(() => errorToast());
     }

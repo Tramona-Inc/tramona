@@ -64,13 +64,6 @@ export default function HelpCenter() {
                 <br />
                 <br />
                 <a
-                  href="tel:+1(425)628-3838"
-                  className="text-blue-600 underline underline-offset-2"
-                >
-                  +1 (425) 628-3838
-                </a>{" "}
-                or{" "}
-                <a
                   href="tel:+1(425)877-8881"
                   className="text-blue-600 underline underline-offset-2"
                 >

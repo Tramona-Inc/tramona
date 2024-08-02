@@ -28,7 +28,7 @@ async function fetchEmailVerified(email: string) {
 }
 
 async function updateExistingUserAuth(
-  name: string,
+  // name: string,
   email: string,
   hashedPassword: string,
   userQueriedId: string,
@@ -36,7 +36,7 @@ async function updateExistingUserAuth(
   return await db
     .update(users)
     .set({
-      name: name,
+      // name: name,
       email: email,
       password: hashedPassword,
     })
@@ -46,7 +46,7 @@ async function updateExistingUserAuth(
 }
 
 async function insertUserAuth(
-  name: string,
+  // name: string,
   email: string,
   hashedPassword: string,
   makeHost = false,
@@ -55,7 +55,7 @@ async function insertUserAuth(
     .insert(users)
     .values({
       id: crypto.randomUUID(),
-      name: name,
+      // name: name,
       email: email,
       password: hashedPassword,
       role: makeHost ? "host" : "guest",
@@ -111,7 +111,7 @@ export const authRouter = createTRPCRouter({
   createUser: publicProcedure
     .input(
       z.object({
-        name: zodString({ minLen: 2 }),
+        // name: zodString({ minLen: 2 }),
         email: zodEmail(),
         password: zodPassword(),
         referralCode: z.string().optional(),
@@ -135,14 +135,14 @@ export const authRouter = createTRPCRouter({
         // Users signed up but didn't verify email
         if (userQueriedWEmail?.emailVerified === null) {
           user = await updateExistingUserAuth(
-            input.name,
+            // input.name,
             input.email,
             hashedPassword,
             userQueriedWEmail.id,
           );
         } else {
           // Initial sign up insert the user info
-          user = await insertUserAuth(input.name, input.email, hashedPassword);
+          user = await insertUserAuth(input.email, hashedPassword);
 
           if (user) {
             await Promise.all([
@@ -207,7 +207,7 @@ export const authRouter = createTRPCRouter({
         // Users signed up but didn't verify email
         if (userQueriedWEmail?.emailVerified === null) {
           user = await updateExistingUserAuth(
-            input.name,
+            // input.name,
             input.email,
             hashedPassword,
             userQueriedWEmail.id,
@@ -215,7 +215,7 @@ export const authRouter = createTRPCRouter({
         } else {
           // Initial sign up insert the user info
           user = await insertUserAuth(
-            input.name,
+            // input.name,
             input.email,
             hashedPassword,
             true,
