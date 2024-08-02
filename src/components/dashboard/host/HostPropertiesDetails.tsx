@@ -173,7 +173,7 @@ export default function HostPropertiesDetails({
           <div className="grid grid-cols-3 gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="secondary" className=" text-red-500">
+                <Button variant="secondary" className="text-red-500">
                   <Trash2 />
                   Delete
                 </Button>
@@ -370,7 +370,7 @@ export default function HostPropertiesDetails({
                 lng={
                   editing
                     ? coordinateData?.coordinates.location?.lng ?? 0
-                    : property.longitude 
+                    : property.longitude
                 }
               />
             </div>
@@ -560,13 +560,13 @@ export default function HostPropertiesDetails({
             </Dialog>
           </div>
           <div>
-            <h3 className="font-semibold ">Title</h3>
+            <h3 className="font-semibold">Title</h3>
             <p className="text-muted-foreground">
               {editing ? title : property.name}
             </p>
           </div>
           <div>
-            <h3 className="font-semibold ">Description</h3>
+            <h3 className="font-semibold">Description</h3>
             <p className="text-muted-foreground">
               {editing ? description : property.about}
             </p>

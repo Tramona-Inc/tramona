@@ -118,6 +118,9 @@ module.exports = {
         marquee: "marquee var(--duration) linear infinite",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
+      backgroundImage: {
+        'reserved-pattern': "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
+      },
     },
   },
   plugins: [

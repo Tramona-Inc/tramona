@@ -21,6 +21,7 @@ import { superhogRouter } from "./routers/superhogRouter";
 import { pmsRouter } from "./routers/pmsRouter";
 import { reviewsRouter } from "./routers/reviewsRouter";
 import { feedRouter } from "./routers/feedRouter";
+import { calendarRouter } from "./routers/calendarRouter";
 
 /**
  * This is the primary router for your server.
@@ -50,6 +51,7 @@ export const appRouter = createTRPCRouter({
   pms: pmsRouter,
   reviews: reviewsRouter,
   feed: feedRouter,
+  calendar: calendarRouter,
 });
 
 // export type definition of API
