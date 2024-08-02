@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import RequestFeed from "@/components/activity-feed/RequestFeed";
 
 const DamageProtection = () => {
   const protectionMethods = [
@@ -113,9 +114,9 @@ const contents: Tabs[] = [
 function IntroSection() {
   return (
     <section className="max-w-7xl mx-auto relative flex justify-center bg-white px-2">
-      <div className="flex flex-col-reverse items-center lg:flex-row lg:space-x-10 xl:space-x-20">
+      <div className="flex flex-col space-y-8 items-center lg:flex-row lg:space-x-10 xl:space-x-20">
         <div className="max-w-xl space-y-5">
-          <h2 className="text-center text-4xl font-semibold tracking-tight text-primaryGreen md:text-6xl">
+          <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
             List on Tramona
           </h2>
           <p className="text-center text-4xl font-semibold tracking-tight md:text-6xl">
@@ -125,14 +126,8 @@ function IntroSection() {
             100% free to use, sign up and let the requests start rolling in
           </p>
         </div>
-        <div className="py-10 md:py-5">
-          <Image
-            src={"/assets/images/host-welcome/4.avif"}
-            width={500}
-            height={500}
-            alt=""
-            className="w-full rounded-lg"
-          />
+        <div className="px-2 py-2 border rounded-lg shadow-xl">
+          <RequestFeed />
         </div>
       </div>
     </section>
@@ -195,7 +190,7 @@ function ReadytoListOnTramona() {
       <div className="flex items-center justify-end space-x-2">
         <div className="text-sm">Ready to list on Tramona?</div>
         <Link
-          href="host/onboarding"
+          href="/host-onboarding"
           className={buttonVariants({
             variant: "greenPrimary",
             size: "sm",
@@ -247,7 +242,7 @@ function WhatAreYouWaitingFor() {
       </h1>
       <div className="flex items-center justify-center space-x-4">
         <Link
-          href="host/onboarding"
+          href="/host-onboarding"
         >
           <Button className="h-16 w-80 bg-primaryGreen text-xl">Become a Host</Button>
         </Link>
