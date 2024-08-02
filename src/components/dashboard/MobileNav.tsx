@@ -173,7 +173,7 @@ export default function MobileNav({
           {link.name}
         </NavBarLink>
       ))}
-      <Menu>
+      {/* <Menu>
         <div
           className={cn(
             "relative flex flex-col items-center gap-1 px-1 py-3 text-center text-xs font-medium text-muted-foreground",
@@ -182,7 +182,7 @@ export default function MobileNav({
           <MenuIcon className="size-6 lg:size-8" />
           Menu
         </div>
-      </Menu>
+      </Menu> */}
     </header>
   );
 }

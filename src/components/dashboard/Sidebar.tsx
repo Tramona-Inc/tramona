@@ -107,6 +107,7 @@ export default function Sidebar({
           </div>
         ))}
       </div>
+
       <div className="mb-6 bg-zinc-100 text-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

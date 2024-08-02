@@ -113,18 +113,36 @@ const contents: Tabs[] = [
 
 function IntroSection() {
   return (
-    <section className="relative mx-auto flex max-w-7xl justify-center bg-white px-2">
-      <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
-        <div className="max-w-xl space-y-5">
-          <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
-            List on Tramona
-          </h2>
-          <p className="text-center text-4xl font-semibold tracking-tight md:text-6xl">
-            Let&apos;s make sure your calendar is filled
-          </p>
-          <p className="text-center text-lg font-medium tracking-tight md:text-2xl">
-            100% free to use, sign up and let the requests start rolling in
-          </p>
+    <div className="[&>*]:flex [&>*]:min-h-[calc(100vh-4.25rem)] [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-8 [&>*]:px-4 [&>*]:py-16 [&>*]:md:px-16">
+      <section className="relative bg-white">
+        <div className="flex flex-col-reverse items-center lg:flex-row lg:space-x-10 xl:space-x-20">
+          <div className="max-w-xl space-y-5 lg:space-y-10">
+            <h2 className="text-4xl font-bold tracking-tight md:text-6xl">
+              Welcome Hosts!
+            </h2>
+            <p className="text-lg tracking-tight md:text-2xl">
+              Tramona is a travel service built specifically to decrease your
+              vacancies and increase your month-over-month profit.
+            </p>
+            <Link
+              href="host-onboarding"
+              className={buttonVariants({
+                variant: "greenPrimary",
+                size: "lg",
+              })}
+            >
+              Sign Up Now
+            </Link>
+          </div>
+          <div className="py-10 md:py-5">
+            <Image
+              src={"/assets/images/host-welcome/4.avif"}
+              width={500}
+              height={500}
+              alt=""
+              className="w-full rounded-lg"
+            />
+          </div>
         </div>
         <div className="rounded-lg border px-2 py-2 shadow-xl">
           <RequestFeed />
