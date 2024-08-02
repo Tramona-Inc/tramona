@@ -9,15 +9,20 @@ import PlacesPopover from "./PlacesPopover";
 import { LocateFixed } from "lucide-react";
 import { Button } from "../ui/button";
 import { MapModal } from "../MapModal";
-import { type LatLngAndRadiusForm } from "../MapInput";
 
+/**
+ * pass setRadius and setLatLng to show the map pin
+ */
 export default function PlacesInput({
   className,
   formLabel,
   placeholder,
   variant,
   icon,
-  form,
+  radius,
+  setRadius,
+  latLng,
+  setLatLng,
   ...props
 }: Omit<React.ComponentProps<typeof FormField>, "render"> & {
   className?: string;
@@ -25,74 +30,81 @@ export default function PlacesInput({
   placeholder?: string;
   variant?: InputVariant;
   icon?: React.FC<{ className?: string }>;
-} & (
-    | {
-        withMapModal?: false; // technically withMapModal is redundant but it makes things more explicit
-        form?: undefined;
-      }
-    | {
-        withMapModal: true;
-        form: LatLngAndRadiusForm;
-      }
-  )) {
+  radius?: number;
+  setRadius?: (radius?: number) => void;
+  latLng: { lat: number; lng: number };
+  setLatLng?: (latLng: { lat: number; lng: number }) => void;
+}) {
   const [open, setOpen] = useState(false);
   const utils = api.useUtils();
 
   return (
     <FormField
       {...props}
-      render={({ field }) => (
-        <FormItem className={cn("relative", className)}>
-          <div className="flex items-center">
-            <div className="flex-grow">
-              <PlacesPopover
-                open={open}
-                setOpen={setOpen}
-                value={field.value as string}
-                onValueChange={async (location) => {
-                  field.onChange(location);
-                  const { coordinates } =
-                    await utils.offers.getCoordinates.fetch({ location });
-                  const { lat, lng } = coordinates.location!;
-                  form?.setValue("latLng", { lat, lng });
-                }}
-                className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
-                trigger={({ value }) => (
-                  <InputButton
-                    withClearBtn
-                    variant={variant}
-                    label={formLabel}
-                    placeholder={placeholder}
-                    value={value}
-                    setValue={field.onChange}
-                    type="button"
-                    role="combobox"
-                    icon={icon}
-                    className="bg-white"
-                  >
-                    {value ? value : "Enter your destination"}
-                  </InputButton>
-                )}
+      render={({ field }) => {
+        const fieldIsFilled = !!field.value;
+        const showMapPin = fieldIsFilled && setLatLng && setRadius;
+
+        const mapPin = !showMapPin ? null : (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button type="button" size="icon" variant="secondary">
+                <LocateFixed className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <MapModal
+                latLng={latLng}
+                setLatLng={setLatLng}
+                radius={radius}
+                setRadius={setRadius}
               />
-              <FormMessage />
+            </DialogContent>
+          </Dialog>
+        );
+
+        return (
+          <FormItem className={cn("relative", className)}>
+            <div className="flex items-center">
+              <div className="flex-grow">
+                <PlacesPopover
+                  open={open}
+                  setOpen={setOpen}
+                  value={field.value as string}
+                  onValueChange={async (location) => {
+                    field.onChange(location);
+                    const { coordinates } =
+                      await utils.offers.getCoordinates.fetch({ location });
+                    const { lat, lng } = coordinates.location!;
+                    setLatLng?.({ lat, lng });
+                  }}
+                  className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
+                  trigger={({ value }) => (
+                    <InputButton
+                      withClearBtn
+                      variant={variant}
+                      label={formLabel}
+                      placeholder={placeholder}
+                      value={value}
+                      setValue={field.onChange}
+                      type="button"
+                      role="combobox"
+                      icon={icon}
+                      className="bg-white"
+                    >
+                      {value ? value : "Enter your destination"}
+                    </InputButton>
+                  )}
+                />
+                <FormMessage />
+              </div>
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 transform">
+                {mapPin}
+              </div>
             </div>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 transform">
-              {field.value && form && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button type="button" size="icon" variant="secondary">
-                      <LocateFixed className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <MapModal form={form} />
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-          </div>
-        </FormItem>
-      )}
+          </FormItem>
+        );
+      }}
     />
   );
 }

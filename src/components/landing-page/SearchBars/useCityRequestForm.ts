@@ -18,9 +18,7 @@ export function useCityRequestForm({
 }) {
   const form = useZodForm({
     schema: cityRequestSchema,
-    defaultValues: {
-      amenities: [],
-    },
+    defaultValues: { amenities: [] },
   });
 
   const { status } = useSession();

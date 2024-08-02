@@ -422,15 +422,15 @@ export const offersRouter = createTRPCRouter({
         ),
     )
     .mutation(async ({ ctx, input }) => {
-      const propertyHostTeam = await ctx.db.query.properties
-        .findFirst({
-          where: eq(properties.id, input.propertyId),
-          columns: { id: true },
-          with: {
-            hostTeam: { with: { members: true } },
-          },
-        })
-        .then((res) => res?.hostTeam);
+      // const propertyHostTeam = await ctx.db.query.properties
+      //   .findFirst({
+      //     where: eq(properties.id, input.propertyId),
+      //     columns: { id: true },
+      //     with: {
+      //       hostTeam: { with: { members: true } },
+      //     },
+      //   })
+      //   .then((res) => res?.hostTeam);
 
       // if (!propertyHostTeam) {
       //   throw new TRPCError({ code: "BAD_REQUEST" });

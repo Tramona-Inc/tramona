@@ -43,15 +43,13 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
     const [madeByGroupId, setMadeByGroupId] = useState<number>();
     const [_inviteLink, setInviteLink] = useState<string | null>(null);
 
-    const cityForm = useCityRequestForm({
+    const { form, onSubmit } = useCityRequestForm({
       beforeSubmit() {
         setRequestSubmittedDialogOpen(true);
         setShowConfetti(true);
       },
       setMadeByGroupId,
     });
-
-    const { form, onSubmit } = cityForm;
 
     const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
       { groupId: madeByGroupId! },
@@ -82,9 +80,11 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
             )}
           >
             <PlacesInput
-              withMapModal
-              form={form}
               control={form.control}
+              latLng={form.getValues("latLng")}
+              setLatLng={(latLng) => form.setValue("latLng", latLng)}
+              radius={form.getValues("radius")}
+              setRadius={(radius) => form.setValue("radius", radius)}
               name="location"
               formLabel="Location"
               variant="lpDesktop"

@@ -3,37 +3,38 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "./ui/dialog";
 import { METERS_PER_MILE } from "@/utils/constants";
-import { type UseFormReturn } from "react-hook-form";
+import { useState } from "react";
 
-export type LatLngAndRadiusForm = UseFormReturn<{
+export function MapModal({
+  radius,
+  latLng,
+  setRadius,
+  setLatLng,
+}: {
+  radius?: number;
   latLng: { lat: number; lng: number };
-  radius: number;
-}>;
+  setRadius: (radius?: number) => void;
+  setLatLng: (latLng: { lat: number; lng: number }) => void;
+}) {
+  const [editedLatLng, setEditedLatLng] = useState(latLng);
+  const [editedRadius, setEditedRadius] = useState(radius ?? 5);
 
-export function MapModal({ form }: { form: LatLngAndRadiusForm }) {
-  const { latLng, radius } = form.watch();
+  const saveEditedValues = () => {
+    setLatLng(editedLatLng);
+    setRadius(editedRadius);
+  };
 
-  const handleMapClick = (
-    _mapProps: unknown,
+  function onDragendOrClick(
+    _event: unknown,
     _map: unknown,
-    clickEvent: { latLng: { lat: () => number; lng: () => number } },
-  ) => {
-    form.setValue("latLng", {
+    clickEvent?: { latLng: { lat: () => number; lng: () => number } },
+  ) {
+    if (!clickEvent) return;
+    setEditedLatLng({
       lat: clickEvent.latLng.lat(),
       lng: clickEvent.latLng.lng(),
     });
-  };
-
-  const onMarkerDragend = (
-    _event: unknown,
-    _map: unknown,
-    coord: { latLng: { lat: () => number; lng: () => number } },
-  ) => {
-    form.setValue("latLng", {
-      lat: coord.latLng.lat(),
-      lng: coord.latLng.lng(),
-    });
-  };
+  }
 
   return (
     <>
@@ -48,40 +49,46 @@ export function MapModal({ form }: { form: LatLngAndRadiusForm }) {
       <div className="relative h-[300px] overflow-hidden rounded-lg border sm:h-[400px]">
         {/* @ts-expect-error their typedefs are wrong */}
         <Map
+          disableDefaultUI
           google={google}
-          initialCenter={latLng}
+          center={latLng}
           zoom={11}
-          onClick={handleMapClick}
           style={{ height: "100%", width: "100%" }}
-          onDragend={onMarkerDragend}
+          onClick={onDragendOrClick}
+          onDragend={onDragendOrClick}
         >
           <Circle
-            center={latLng}
-            radius={radius * METERS_PER_MILE}
+            center={editedLatLng}
+            radius={editedRadius * METERS_PER_MILE}
             options={{
               fillColor: "rgba(0, 123, 255, 0.3)",
               strokeColor: "rgba(0, 123, 255, 0.6)",
               strokeWeight: 2,
             }}
           />
-          <Marker draggable position={latLng} />
+          <Marker draggable position={editedLatLng} />
         </Map>
       </div>
       <div className="pt-4">
         <label className="block text-base font-extrabold">
-          Radius: {radius.toFixed(1)} miles
+          Radius: {editedRadius.toFixed(1)} miles
         </label>
         <Slider
           min={1}
           max={10}
           step={0.1}
-          value={[radius]}
-          onValueChange={(e) => form.setValue("radius", e[0]!)}
+          value={[editedRadius]}
+          onValueChange={(e) => setEditedRadius(e[0]!)}
         />
       </div>
       <DialogFooter>
         <DialogClose asChild>
-          <Button variant="greenPrimary">Done</Button>
+          <Button variant="secondary">Cancel</Button>
+        </DialogClose>
+        <DialogClose asChild>
+          <Button variant="greenPrimary" onClick={saveEditedValues}>
+            Done
+          </Button>
         </DialogClose>
       </DialogFooter>
     </>
