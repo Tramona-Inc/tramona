@@ -22,6 +22,8 @@ export const cityRequestSchema = z.object({
   minNumBathrooms: z.number().optional(),
   amenities: z.enum(ALL_REQUESTABLE_AMENITIES).array(),
   note: optional(zodString().max(100)),
+  latLng: z.object({ lat: z.number(), lng: z.number() }),
+  radius: z.number().optional(),
 });
 
 export const linkRequestSchema = z

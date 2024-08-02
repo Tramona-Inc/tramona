@@ -6,9 +6,10 @@ import { cn } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import PlacesPopover from "./PlacesPopover";
-import MapModal from "@/components/map-modal";
 import { LocateFixed } from "lucide-react";
 import { Button } from "../ui/button";
+import { MapModal } from "../MapModal";
+import { type LatLngAndRadiusForm } from "../MapInput";
 
 export default function PlacesInput({
   className,
@@ -16,7 +17,7 @@ export default function PlacesInput({
   placeholder,
   variant,
   icon,
-  onSave,
+  form,
   ...props
 }: Omit<React.ComponentProps<typeof FormField>, "render"> & {
   className?: string;
@@ -24,15 +25,18 @@ export default function PlacesInput({
   placeholder?: string;
   variant?: InputVariant;
   icon?: React.FC<{ className?: string }>;
-  onSave: (location: { lat: number; lng: number }, radius: number) => void;
-}) {
+} & (
+    | {
+        withMapModal?: false; // technically withMapModal is redundant but it makes things more explicit
+        form?: undefined;
+      }
+    | {
+        withMapModal: true;
+        form: LatLngAndRadiusForm;
+      }
+  )) {
   const [open, setOpen] = useState(false);
   const utils = api.useUtils();
-  const [isMapOpen, setIsMapOpen] = useState(false);
-  const [initialLocation, setInitialLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
 
   return (
     <FormField
@@ -44,17 +48,13 @@ export default function PlacesInput({
               <PlacesPopover
                 open={open}
                 setOpen={setOpen}
-                value={field.value}
+                value={field.value as string}
                 onValueChange={async (location) => {
                   field.onChange(location);
-                  if (location) {
-                    const { coordinates } =
-                      await utils.offers.getCoordinates.fetch({
-                        location,
-                      });
-                    const { lat, lng } = coordinates.location!;
-                    setInitialLocation({ lat, lng });
-                  }
+                  const { coordinates } =
+                    await utils.offers.getCoordinates.fetch({ location });
+                  const { lat, lng } = coordinates.location!;
+                  form?.setValue("latLng", { lat, lng });
                 }}
                 className="w-96 -translate-y-11 overflow-clip px-0 pt-0"
                 trigger={({ value }) => (
@@ -77,25 +77,15 @@ export default function PlacesInput({
               <FormMessage />
             </div>
             <div className="absolute right-2 top-1/2 -translate-y-1/2 transform">
-              {initialLocation && (
-                <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
+              {field.value && form && (
+                <Dialog>
                   <DialogTrigger asChild>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="secondary"
-                      onClick={() => setIsMapOpen(true)}
-                    >
+                    <Button type="button" size="icon" variant="secondary">
                       <LocateFixed className="h-4 w-4" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <MapModal
-                      initialLocation={initialLocation}
-                      setInitialLocation={setInitialLocation}
-                      setOpen={setIsMapOpen}
-                      onSave={onSave}
-                    />
+                    <MapModal form={form} />
                   </DialogContent>
                 </Dialog>
               )}

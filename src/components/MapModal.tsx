@@ -1,33 +1,27 @@
-/* map-modal.tsx */
-import { useState } from "react";
 import { Map, Marker, Circle } from "google-maps-react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { DialogFooter } from "./ui/dialog";
+import { DialogClose, DialogFooter } from "./ui/dialog";
+import { METERS_PER_MILE } from "@/utils/constants";
+import { type UseFormReturn } from "react-hook-form";
 
-interface MapModalProps {
-  initialLocation: { lat: number; lng: number };
-  onSave: (location: { lat: number; lng: number }, radius: number) => void;
-  setOpen: (open: boolean) => void;
-  setInitialLocation: (location: { lat: number; lng: number }) => void; // Updated this part
-}
+export type LatLngAndRadiusForm = UseFormReturn<{
+  latLng: { lat: number; lng: number };
+  radius: number;
+}>;
 
-const MapModal = ({
-  initialLocation,
-  onSave,
-  setOpen,
-  setInitialLocation,
-}: MapModalProps) => {
-  const [radius, setRadius] = useState(5); // 5 miles in meters
+export function MapModal({ form }: { form: LatLngAndRadiusForm }) {
+  const { latLng, radius } = form.watch();
 
   const handleMapClick = (
     _mapProps: unknown,
     _map: unknown,
     clickEvent: { latLng: { lat: () => number; lng: () => number } },
   ) => {
-    const lat = clickEvent.latLng.lat();
-    const lng = clickEvent.latLng.lng();
-    setInitialLocation({ lat, lng });
+    form.setValue("latLng", {
+      lat: clickEvent.latLng.lat(),
+      lng: clickEvent.latLng.lng(),
+    });
   };
 
   const onMarkerDragend = (
@@ -35,16 +29,10 @@ const MapModal = ({
     _map: unknown,
     coord: { latLng: { lat: () => number; lng: () => number } },
   ) => {
-    const newLocation = {
+    form.setValue("latLng", {
       lat: coord.latLng.lat(),
       lng: coord.latLng.lng(),
-    };
-    setInitialLocation(newLocation);
-  };
-
-  const handleSave = () => {
-    setOpen(false);
-    onSave(initialLocation, radius);
+    });
   };
 
   return (
@@ -58,27 +46,25 @@ const MapModal = ({
         </div>
       </div>
       <div className="relative h-[300px] overflow-hidden rounded-lg border sm:h-[400px]">
+        {/* @ts-expect-error their typedefs are wrong */}
         <Map
           google={google}
-          initialCenter={initialLocation}
+          initialCenter={latLng}
           zoom={11}
           onClick={handleMapClick}
           style={{ height: "100%", width: "100%" }}
+          onDragend={onMarkerDragend}
         >
           <Circle
-            center={initialLocation}
-            radius={radius * 1609.34}
+            center={latLng}
+            radius={radius * METERS_PER_MILE}
             options={{
               fillColor: "rgba(0, 123, 255, 0.3)",
               strokeColor: "rgba(0, 123, 255, 0.6)",
               strokeWeight: 2,
             }}
           />
-          <Marker
-            position={initialLocation}
-            draggable={true}
-            onDragend={onMarkerDragend}
-          />
+          <Marker draggable position={latLng} />
         </Map>
       </div>
       <div className="pt-4">
@@ -89,20 +75,15 @@ const MapModal = ({
           min={1}
           max={10}
           step={0.1}
-          defaultValue={[5]}
-          onValueChange={(e) => setRadius(Number(e[0]))}
+          value={[radius]}
+          onValueChange={(e) => form.setValue("radius", e[0]!)}
         />
       </div>
       <DialogFooter>
-        <Button onClick={() => setOpen(false)} variant={"secondary"}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} variant={"greenPrimary"}>
-          Save Location
-        </Button>
+        <DialogClose asChild>
+          <Button variant="greenPrimary">Done</Button>
+        </DialogClose>
       </DialogFooter>
     </>
   );
-};
-
-export default MapModal;
+}

@@ -51,7 +51,12 @@ export default function CityRequestFormContainer() {
           fromRequestDealTab={true}
         />
       )}
-      <Button type="submit" variant="greenPrimary" onClick={handleSubmit}>
+      <Button
+        type="submit"
+        size="lg"
+        variant="greenPrimary"
+        onClick={handleSubmit}
+      >
         Submit Request
       </Button>
     </div>

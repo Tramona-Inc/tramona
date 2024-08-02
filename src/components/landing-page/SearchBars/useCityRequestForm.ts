@@ -40,8 +40,6 @@ export function useCityRequestForm({
       ...restData,
     };
 
-    console.log("DKFJDKJSFKDFJ", newRequests);
-
     if (status === "unauthenticated") {
       localStorage.setItem("unsentRequests", JSON.stringify(newRequest));
       void router.push("/auth/signin").then(() => {

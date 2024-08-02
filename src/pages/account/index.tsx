@@ -1,11 +1,6 @@
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 
-import AccountSidebar from "@/components/account/AccountSidebar";
-import CashbackAccount from "@/components/account/CashbackAccount";
-import ReferFolks from "@/components/account/ReferFolks";
-
-import { api } from "@/utils/api";
 import ReferralDashboard from "@/components/profile/ReferralDashboard";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 

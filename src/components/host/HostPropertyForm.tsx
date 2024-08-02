@@ -293,7 +293,7 @@ export default function HostPropertyForm({
               <FormItem className="col-span-full">
                 <FormLabel>Address (optional)</FormLabel>
                 <FormControl>
-                  <Input {...field} type="text" value={field.value ?? ""} />
+                  <Input {...field} type="text" value={field.value} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -61,7 +61,7 @@ export default function Onboarding8({
   useEffect(() => {
     setHandleOnboarding &&
       setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
-  }, [form.formState]);
+  }, [form, form.formState, handleFormSubmit, setHandleOnboarding]);
 
   return (
     <>

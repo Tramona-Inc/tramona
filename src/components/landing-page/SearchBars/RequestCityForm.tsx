@@ -41,7 +41,7 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
       useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [madeByGroupId, setMadeByGroupId] = useState<number>();
-    const [inviteLink, setInviteLink] = useState<string | null>(null);
+    const [_inviteLink, setInviteLink] = useState<string | null>(null);
 
     const cityForm = useCityRequestForm({
       beforeSubmit() {
@@ -82,8 +82,10 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
             )}
           >
             <PlacesInput
+              withMapModal
+              form={form}
               control={form.control}
-              name={`location`}
+              name="location"
               formLabel="Location"
               variant="lpDesktop"
               placeholder="Select a location"
@@ -109,6 +111,7 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name={`numGuests`}
@@ -127,6 +130,7 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name={`maxNightlyPriceUSD`}

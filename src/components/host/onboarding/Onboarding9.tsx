@@ -66,6 +66,7 @@ export default function Onboarding9({
   useEffect(() => {
     setHandleOnboarding &&
       setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.formState]);
 
   return (

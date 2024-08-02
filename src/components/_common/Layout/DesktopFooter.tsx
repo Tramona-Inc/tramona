@@ -1,65 +1,74 @@
 import { Facebook, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
-function FooterLink({
-  children,
-  href,
-  external = false,
-}: {
-  children: ReactNode;
-  href: string;
-  external?: boolean;
-}) {
-  return (
-    <Link
-      target={external ? "_blank" : "_self"}
-      className="block py-0.5 text-sm underline-offset-4 hover:underline"
-      href={href}
-    >
-      {children}
-    </Link>
-  );
-}
+const footerLinks = [
+  {
+    label: "Terms",
+    href: "/tos",
+  },
+  {
+    label: "FAQ",
+    href: "/faq",
+  },
+  {
+    label: "Sign up",
+    href: "/auth/signup",
+  },
+  {
+    label: "Sign in",
+    href: "/auth/signin",
+  },
+  {
+    label: "Help",
+    href: "/help-center",
+  },
+];
 
-const DesktopFooter: React.FC = () => {
+const footerSocials = [
+  {
+    href: "https://www.instagram.com/shoptramona/",
+    Icon: Instagram,
+  },
+  {
+    href: "https://www.facebook.com/ShopTramona",
+    Icon: Facebook,
+  },
+  {
+    href: "https://www.linkedin.com/company/tramona/",
+    Icon: Linkedin,
+  },
+];
+
+export default function DesktopFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="z-50 bg-black text-white md:block">
-      <div className=" mx-auto flex w-11/12  justify-center px-4 py-2 text-xs lg:text-base">
-        {/* <hr className="my-6 h-px border-none bg-neutral-300" /> */}
-        <div className="flex w-full flex-col items-center justify-center gap-2 text-center md:flex-row md:justify-between">
-          <div className="text-nowrap text-sm text-zinc-100 sm:mb-0">
-            © {currentYear} Tramona. All rights reserved.
-          </div>
-
-          <div className="flex w-full flex-row justify-center gap-2 px-8 sm:gap-4 lg:-ml-20 lg:gap-8">
-            <FooterLink href="/tos">Terms</FooterLink>
-            <FooterLink href="/faq">FAQ</FooterLink>
-            <FooterLink href="/auth/signup">Sign up</FooterLink>
-            <FooterLink href="/auth/signin">Sign in</FooterLink>
-            <FooterLink href="/help-center">Help</FooterLink>
-          </div>
-
-          <div className="flex gap-4">
-            <FooterLink external href="https://www.instagram.com/shoptramona/">
-              <Instagram size={18} strokeWidth={1.3} />
-            </FooterLink>
-            <FooterLink external href="https://www.facebook.com/ShopTramona">
-              <Facebook size={18} strokeWidth={1.3} />
-            </FooterLink>
-            <FooterLink
-              external
-              href="https://www.linkedin.com/company/tramona/"
+    <footer className="z-50 bg-zinc-900 px-4 text-sm text-zinc-300">
+      <div className="flex items-center">
+        <p className="flex-1">© {currentYear} Tramona. All rights reserved.</p>
+        {footerLinks.map((link) => (
+          <Link
+            className="px-4 py-3 underline-offset-2 hover:underline"
+            key={link.href}
+            href={link.href}
+          >
+            {link.label}
+          </Link>
+        ))}
+        <div className="flex flex-1 justify-end">
+          {footerSocials.map(({ href, Icon }) => (
+            <Link
+              className="rounded-md p-2 hover:bg-white/10"
+              target="_blank"
+              rel="noopener noreferrer"
+              href={href}
+              key={href}
             >
-              <Linkedin size={18} strokeWidth={1.3} />
-            </FooterLink>
-          </div>
+              <Icon size={18} strokeWidth={1.3} />
+            </Link>
+          ))}
         </div>
       </div>
     </footer>
   );
-};
-
-export default DesktopFooter;
+}

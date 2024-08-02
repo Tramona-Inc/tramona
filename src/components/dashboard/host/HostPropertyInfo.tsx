@@ -1,6 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
-import HostPropertiesPriceRestriction from "./HostPropertiesAgeRestriction";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
 import { ChevronLeft } from "lucide-react";
