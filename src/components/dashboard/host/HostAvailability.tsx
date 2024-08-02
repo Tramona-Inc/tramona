@@ -10,10 +10,12 @@ export default function HostAvailability({ property }: { property: Property }) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
   const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
 
-
   const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
-  const { data: reservedDateRanges, isLoading, refetch } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
-
+  const {
+    data: reservedDateRanges,
+    isLoading,
+    refetch,
+  } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -60,11 +62,13 @@ export default function HostAvailability({ property }: { property: Property }) {
   }, [fetchReservedDateRanges]);
 
   const isDateReserved = (date: Date) => {
-    return reservedDateRanges?.some((reservedDate) => {
-      const start = new Date(reservedDate.start);
-      const end = new Date(reservedDate.end);
-      return date >= start && date < end;
-    }) ?? false;
+    return (
+      reservedDateRanges?.some((reservedDate) => {
+        const start = new Date(reservedDate.start);
+        const end = new Date(reservedDate.end);
+        return date >= start && date < end;
+      }) ?? false
+    );
   };
 
   const generateCalendarDays = (month: number): (number | null)[] => {
