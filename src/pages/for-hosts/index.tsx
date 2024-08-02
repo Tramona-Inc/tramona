@@ -59,8 +59,8 @@ const DamageProtection = () => {
             Property Protection
           </h2>
           <p className="text-sm text-gray-700 md:text-base">
-            Tramona offers $50,000 in protection for each booking.This will move
-            up to 1M in the coming months
+            Tramona offers $50,000 in protection for each booking. This will
+            move up to 1M in the coming months
           </p>
         </div>
         <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
