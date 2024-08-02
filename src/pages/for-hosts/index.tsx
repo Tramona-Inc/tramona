@@ -107,14 +107,14 @@ const contents: Tabs[] = [
     id: 3,
     title: "We sign you up",
     info: "Have any questions? Schedule a call and we will help onboard you and answer all questions in the meantime.",
-    image: "/assets/images/host-welcome/3.avif",
+    image: "/assets/images/host-welcome/4.avif",
   },
 ];
 
 function IntroSection() {
   return (
-    <section className="max-w-7xl mx-auto relative flex justify-center bg-white px-2">
-      <div className="flex flex-col space-y-8 items-center lg:flex-row lg:space-x-10 xl:space-x-20">
+    <section className="relative mx-auto flex max-w-7xl justify-center bg-white px-2">
+      <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
         <div className="max-w-xl space-y-5">
           <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
             List on Tramona
@@ -126,14 +126,13 @@ function IntroSection() {
             100% free to use, sign up and let the requests start rolling in
           </p>
         </div>
-        <div className="px-2 py-2 border rounded-lg shadow-xl">
+        <div className="rounded-lg border px-2 py-2 shadow-xl">
           <RequestFeed />
         </div>
       </div>
     </section>
   );
 }
-
 
 function FAQ() {
   const accordionItems = [
@@ -159,7 +158,7 @@ function FAQ() {
   ];
 
   return (
-    <section className="max-w-7xl mx-auto grid grid-cols-1 gap-6 md:grid-cols-3 p-4">
+    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-4 md:grid-cols-3">
       <div>
         <h1 className="text-3xl font-bold md:text-4xl">
           Frequently asked questions
@@ -183,10 +182,9 @@ function FAQ() {
   );
 }
 
-
 function ReadytoListOnTramona() {
   return (
-    <section className="max-w-7xl mx-auto flex justify-end p-2">
+    <section className="mx-auto mt-4 flex max-w-7xl justify-end p-2">
       <div className="flex items-center justify-end space-x-2">
         <div className="text-sm">Ready to list on Tramona?</div>
         <Link
@@ -205,7 +203,7 @@ function ReadytoListOnTramona() {
 
 function ListInAMinute() {
   return (
-    <section className="mx-auto max-w-7xl px-4 space-y-8 sm:px-6 md:px-8 lg:px-10 xl:px-12 md:space-y-24">
+    <section className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 md:space-y-24 md:px-8 lg:px-10 xl:px-12">
       <h1 className="text-center text-3xl font-bold md:text-4xl lg:text-5xl">
         List in less than 1 minute with our effortless sign up flow
       </h1>
@@ -213,7 +211,7 @@ function ListInAMinute() {
         {contents.map((content) => (
           <div
             key={content.id}
-            className="space-y-4 rounded-xl bg-zinc-50 p-4 text-center sm:p-6"
+            className="rounded-xl bg-zinc-50 p-4 text-center sm:p-6"
           >
             <div className="mx-auto h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-36 lg:w-36">
               <Image
@@ -224,7 +222,9 @@ function ListInAMinute() {
                 height={150}
               />
             </div>
-            <h2 className="text-xl font-bold sm:text-2xl md:text-3xl">{content.title}</h2>
+            <h2 className="h-10 text-xl font-bold sm:text-2xl md:h-14 md:text-3xl lg:h-24">
+              {content.title}
+            </h2>
             <p className="text-sm text-muted-foreground sm:text-base">
               {content.info}
             </p>
@@ -241,10 +241,10 @@ function WhatAreYouWaitingFor() {
         What are you waiting for? Requests are coming in now!
       </h1>
       <div className="flex items-center justify-center space-x-4">
-        <Link
-          href="/host-onboarding"
-        >
-          <Button className="h-16 w-80 bg-primaryGreen text-xl">Become a Host</Button>
+        <Link href="/host-onboarding">
+          <Button className="h-16 w-80 bg-primaryGreen text-xl">
+            Become a Host
+          </Button>
         </Link>
       </div>
     </section>
