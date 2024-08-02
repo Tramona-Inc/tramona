@@ -120,7 +120,7 @@ function IntroSection() {
             List on Tramona
           </h2>
           <p className="text-center text-4xl font-semibold tracking-tight md:text-6xl">
-            Let's make sure your calendar is filled
+            Let&apos;s make sure your calendar is filled
           </p>
           <p className="text-center text-lg font-medium tracking-tight md:text-2xl">
             100% free to use, sign up and let the requests start rolling in
@@ -184,20 +184,38 @@ function FAQ() {
 
 function ReadytoListOnTramona() {
   return (
-    <section className="mx-auto mt-4 flex max-w-7xl justify-end p-2">
-      <div className="flex items-center justify-end space-x-2">
-        <div className="text-sm">Ready to list on Tramona?</div>
-        <Link
-          href="/host-onboarding"
-          className={buttonVariants({
-            variant: "greenPrimary",
-            size: "sm",
-          })}
-        >
-          Become a Host
-        </Link>
-      </div>
-    </section>
+    <>
+      <section className="mx-auto mt-4 hidden max-w-7xl p-2 text-end sm:block">
+        <div className="flex items-center justify-end space-x-2">
+          <div className="text-sm">Ready to list on Tramona?</div>
+          <Link
+            href="/host-onboarding"
+            className={buttonVariants({
+              variant: "greenPrimary",
+              size: "sm",
+            })}
+          >
+            Become a Host
+          </Link>
+        </div>
+      </section>
+      <section className="fixed bottom-0 z-10 w-full bg-white p-4 shadow-inner sm:hidden">
+        <div className="flex flex-col justify-center gap-4 shadow-2xl">
+          <div className="text-center font-semibold">
+            Ready to list on Tramona?
+          </div>
+          <Link
+            href="/host-onboarding"
+            className={buttonVariants({
+              variant: "greenPrimary",
+              size: "sm",
+            })}
+          >
+            Become a Host
+          </Link>
+        </div>
+      </section>
+    </>
   );
 }
 
