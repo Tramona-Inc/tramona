@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Clock8, Handshake, CircleDollarSign } from "lucide-react";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import AddAirbnbLink from "../components/link-input/AddAirbnbLink";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 // ... (other imports)
 
@@ -28,7 +29,7 @@ export default function Page() {
   };
 
   return (
-    <MainLayout>
+    <DashboardLayout type="guest">
       <section className="relative bg-white pb-4">
         <div className="relative h-[500px] lg:h-[511px]">
           <div className="absolute inset-0">
@@ -177,10 +178,9 @@ export default function Page() {
         </h2>
 
         {/* testimonial carousel */}
-        <div className="flex mx-4 mt-20 justify-center space-y-4 lg:mx-0 lg:mt-16 lg:space-y-8">
+        <div className="mx-4 mt-20 flex justify-center space-y-4 lg:mx-0 lg:mt-16 lg:space-y-8">
           <TestimonialCarousel />
         </div>
-
       </section>
 
       <div className="mt-32 bg-teal-700/15 px-4 py-8 lg:rounded-xl">
@@ -196,6 +196,6 @@ export default function Page() {
           </Button>
         </div>
       </div>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

@@ -5,7 +5,6 @@ import {
   hostNavLinks,
   unloggedNavLinks,
 } from "@/config/sideNavLinks";
-import { cn } from "@/utils/utils";
 import {
   ArrowLeftRight,
   ChevronDownIcon,
@@ -15,7 +14,6 @@ import {
   ShieldQuestion,
   Contact,
   MessageCircleQuestion,
-  MenuIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -147,8 +145,6 @@ export default function MobileNav({
 }) {
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
-
-  const Menu = session ? LoggedInMenu : LoggedOutMenu;
 
   const navLinks =
     type === "admin"

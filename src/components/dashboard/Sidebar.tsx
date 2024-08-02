@@ -7,25 +7,12 @@ import { api } from "@/utils/api";
 import { plural } from "@/utils/utils";
 import {
   ArrowLeftRight,
-  Contact,
-  Menu,
-  MessageCircleQuestion,
-  Settings,
-  ShieldQuestion,
-  Wallet,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { useCallback, useEffect } from "react";
 import { TramonaLogo } from "../_common/Header/TramonaLogo";
 import { Badge } from "../ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+
 import { NavBarLink } from "./NavBarLink";
 import { Button } from "../ui/button";
 

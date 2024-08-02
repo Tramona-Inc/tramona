@@ -1,14 +1,11 @@
 import {
   BadgeHelp,
   BadgeInfo,
-  BadgePercent,
   DoorOpen,
   Home,
-  Link2,
   Menu,
   MenuIcon,
   MessageCircleQuestion,
-  Tag,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -30,7 +27,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { Avatar } from "@radix-ui/react-avatar";
 import AvatarDropdown from "./AvatarDropdown";
 
 type HeaderProps =
@@ -303,11 +299,6 @@ function SmallHeader(props: HeaderProps) {
         )}
         {props.type === "marketing" ? (
           <div className="flex w-full justify-end gap-x-2">
-            {status === "authenticated" && (
-              <Button size="sm" asChild variant="secondary">
-                <Link href="/auth/signin">Dashboard</Link>
-              </Button>
-            )}
             {status !== "authenticated" && (
               <>
                 <Button size="sm" asChild variant="greenPrimary">
