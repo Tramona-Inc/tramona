@@ -13,7 +13,7 @@ export function useRequireRole(allowedRoles: User["role"][]) {
     ) {
       void signIn();
     }
-  }, [allowedRoles, session?.data?.user.role, session.status]);
+  }, [allowedRoles, session.data?.user.role, session.status]);
 
   return session;
 }

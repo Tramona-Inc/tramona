@@ -4,6 +4,7 @@ import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 type OnboardingFooterProps = {
   handleNext?: () => void;
@@ -18,7 +19,8 @@ export default function OnboardingFooter({
   isForm,
   handleError,
 }: OnboardingFooterProps) {
-  const max_pages = 10;
+  const [isLoading, setIsLoading] = useState(false);
+  const maxPages = 10;
 
   const progress = useHostOnboarding((state) => state.progress);
   const isEdit = useHostOnboarding((state) => state.isEdit);
@@ -31,7 +33,7 @@ export default function OnboardingFooter({
   const router = useRouter();
 
   const { mutateAsync: createHostProfile } =
-    api.users.createHostProfile.useMutation();
+    api.users.upsertHostProfile.useMutation();
 
   const { mutateAsync: createProperty } = api.properties.create.useMutation({
     onSuccess: () => {
@@ -46,9 +48,12 @@ export default function OnboardingFooter({
   });
 
   async function onPressNext() {
-    if (progress === 9) {
-      await createHostProfile({}).then(() =>
-        createProperty({
+    setIsLoading(true);
+    try {
+      if (progress === 9) {
+        await createHostProfile();
+
+        await createProperty({
           propertyType: listing.propertyType,
           roomType: listing.spaceType,
           maxNumGuests: listing.maxGuests,
@@ -78,68 +83,74 @@ export default function OnboardingFooter({
           petsAllowed: listing.petsAllowed,
           smokingAllowed: listing.smokingAllowed,
           otherHouseRules: listing.otherHouseRules ?? undefined,
-        }),
-      );
-    } else {
-      if (isEdit) {
-        if (isForm) {
-          if (isFormValid) {
-            handleNext && handleNext();
+        });
+      } else {
+        if (isEdit) {
+          if (isForm) {
+            if (isFormValid) {
+              handleNext && handleNext();
+              setIsEdit(false);
+              setProgress(9);
+            } else {
+              handleError && handleError();
+            }
+          } else {
             setIsEdit(false);
             setProgress(9);
-          } else {
-            handleError && handleError();
           }
         } else {
-          setIsEdit(false);
-          setProgress(9);
-        }
-      } else {
-        if (isForm) {
-          if (isFormValid) {
-            handleNext && handleNext();
+          if (isForm) {
+            if (isFormValid) {
+              handleNext && handleNext();
+              setProgress(progress + 1);
+            } else {
+              handleError && handleError();
+            }
+          } else {
             setProgress(progress + 1);
-          } else {
-            handleError && handleError();
           }
-        } else {
-          setProgress(progress + 1);
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
     <div className="sticky bottom-0 bg-white">
       <Progress
-        value={(progress * 100) / max_pages}
+        value={(progress * 100) / maxPages}
         className="h-2 w-full rounded-none"
       />
-      <div className="flex justify-between p-5">
-        <Button
-          variant={"ghost"}
-          onClick={() => {
-            if (progress - 1 > -1) {
-              setProgress(progress - 1);
-            }
-          }}
-        >
-          Back
-        </Button>
-        {isEdit ? (
-          <Button onClick={onPressNext}>Back to summary</Button>
-        ) : (
-          <Button onClick={onPressNext}>
-            {progress === 0
-              ? "Get Started"
-              : progress === 8
-                ? "Review"
-                : progress === 9
-                  ? "Finish"
-                  : "Next"}
+      {progress !== 0 && (
+        <div className="flex justify-between p-5">
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              if (progress - 1 > -1) {
+                setProgress(progress - 1);
+              }
+            }}
+          >
+            Back
           </Button>
-        )}
-      </div>
+          {isEdit ? (
+            <Button onClick={onPressNext}>Back to summary</Button>
+          ) : (
+            <div className="flex flex-row gap-2">
+              <Button onClick={onPressNext} disabled={isLoading}>
+                {progress === 0
+                  ? "Get Started"
+                  : progress === 8
+                    ? "Review"
+                    : progress === 9
+                      ? "Finish"
+                      : "Next"}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

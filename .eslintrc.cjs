@@ -44,7 +44,7 @@ const config = {
     "@typescript-eslint/no-inferrable-types": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unnecessary-condition": "warn",
-    "no-console": "warn",
+    // "no-console": "warn",
     "prefer-const": "warn",
     "react/no-deprecated": "error",
     "react/jsx-no-target-blank": "error",

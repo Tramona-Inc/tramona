@@ -36,6 +36,7 @@ import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
+import { Home } from "lucide-react";
 
 export default function Onboarding1({
   onPressNext,
@@ -67,24 +68,34 @@ export default function Onboarding1({
   const items = [
     {
       id: "1",
-      icon: <ManuallyAdd />,
-      title: "Manually Add",
-      text: "Complete a simple step-by-step process to add your property information",
-      onClick: onPressNext,
+      icon: <Home size={50} />,
+      title: "Connect directly with Airbnb",
+      text: "Connect with your Airbnb account. This is the easiest & preferred way",
+      recommended: true,
+      onClick: async () => {
+        await createHospitableCustomer();
+      },
     },
     {
       id: "2",
       icon: <AssistedListing />,
-      title: "Assisted Listing",
-      text: "Have the Tramona onboarding team set up my account.",
-      onClick: () => openModal("assistedListing"),
+      title: "PMS",
+      text: "Connect with our PMS partners for effortless signup.",
+      onClick: () => openModal("syncPMS"),
     },
     {
       id: "3",
+      icon: <ManuallyAdd />,
+      title: "You Add",
+      text: "Manually list your properties",
+      onClick: onPressNext,
+    },
+    {
+      id: "4",
       icon: <AssistedListing />,
-      title: "Sync with PMS",
-      text: "Do you use a PMS? Easily sync your properties to Tramona.",
-      onClick: () => openModal("syncPMS"),
+      title: "We Add",
+      text: "Have the Tramona onboarding team set up your account.",
+      onClick: () => openModal("assistedListing"),
     },
   ];
 
@@ -96,6 +107,13 @@ export default function Onboarding1({
     }),
   });
 
+  const { mutateAsync: createHospitableCustomer } =
+    api.pms.createHospitableCustomer.useMutation({
+      onSuccess: (res) => {
+        void router.push(res.data.return_url);
+      },
+    });
+
   const { mutateAsync: generateBearerToken } =
     api.pms.generateHostawayBearerToken.useMutation({
       onSuccess: () => {
@@ -104,7 +122,10 @@ export default function Onboarding1({
     });
 
   const { mutateAsync: createHostProfile } =
-    api.users.createHostProfile.useMutation({});
+    api.users.upsertHostProfile.useMutation();
+
+  const { data: isHospitableCustomer } =
+    api.pms.getHospitableCustomer.useQuery();
 
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
     const { bearerToken } = await generateBearerToken({ accountId, apiKey });
@@ -132,23 +153,35 @@ export default function Onboarding1({
           />
         </div>
 
-        <div className="flex flex-col items-center justify-center sm:mx-20">
-          <h1 className="mb-16 flex flex-col pt-8 text-4xl font-semibold">
-            It&apos;s easy to list your
-            <span>property on Tramona</span>
+        <div className="my-6 flex flex-col items-center gap-6 sm:mx-20">
+          <h1 className="text-center text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl">
+            Get started on Tramona
           </h1>
-
-          <div className="flex flex-col gap-10">
-            {items.map((item) => (
-              <CardSelect
-                key={item.title}
-                title={item.title}
-                text={item.text}
-                onClick={item.onClick}
-              >
-                {item.icon}
-              </CardSelect>
-            ))}
+          <div className="flex flex-col gap-4">
+            {items.map((item) =>
+              item.id === "1" ? (
+                !isHospitableCustomer && (
+                  <CardSelect
+                    key={item.id}
+                    title={item.title}
+                    text={item.text}
+                    onClick={item.onClick}
+                    recommended={item.recommended}
+                  >
+                    {item.icon}
+                  </CardSelect>
+                )
+              ) : (
+                <CardSelect
+                  key={item.title}
+                  title={item.title}
+                  text={item.text}
+                  onClick={item.onClick}
+                >
+                  {item.icon}
+                </CardSelect>
+              ),
+            )}
           </div>
         </div>
       </div>

@@ -64,6 +64,17 @@ export function getHomePageFromRole(role: User["role"]) {
   }
 }
 
+//(XXX) XXX-XXXX format.
+export const formatPhoneNumberWithParentheses = (phoneNumber: string) => {
+  const cleaned = ("" + phoneNumber).replace(/\D/g, "");
+
+  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+  if (match) {
+    return `(${match[1]}) ${match[2]}-${match[3]}`;
+  }
+  return phoneNumber;
+};
+
 // TODO: make this not specific to map screenshots
 export function getS3ImgUrl(fileName: string) {
   return `https://tramona-map-screenshots.s3.us-east-1.amazonaws.com/${fileName}`;

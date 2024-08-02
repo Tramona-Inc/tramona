@@ -13,31 +13,20 @@ import {
   MessageCircle,
   MessageCircleMore,
   MessagesSquare,
-  Plus,
   Twitter,
   Youtube,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import React from "react";
 import UserAvatar from "../_common/UserAvatar";
 import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
-import BucketListHomeOfferCard from "./BucketListHomeOfferCard";
 import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDialog";
-import DestinationCard from "./DestinationCard";
 import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
-import EmptyBagSvg from "../_common/EmptyStateSvg/EmptyBagSvg";
+import { useMemo, useState } from "react";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -46,7 +35,7 @@ export default function ProfilePage() {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
   const code =
-    session?.user?.referralCodeUsed && data?.referralCode
+    session?.user.referralCodeUsed && data?.referralCode
       ? ""
       : data?.referralCode;
   const url = `https://tramona.com/auth/signup?code=${code}`;
@@ -84,14 +73,14 @@ export default function ProfilePage() {
 
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
 
-  const { data: bucketListProperties } =
-    api.profile.getAllPropertiesWithDetails.useQuery();
+  // const { data: bucketListProperties } =
+  //   api.profile.getAllPropertiesWithDetails.useQuery();
 
-  const [selectedBLDestinationId, setSelectedBLDestinationId] = React.useState<
+  const [selectedBLDestinationId, setSelectedBLDestinationId] = useState<
     number | null
   >(null);
 
-  const selectedBLDestination = React.useMemo(() => {
+  const selectedBLDestination = useMemo(() => {
     return profileInfo?.bucketListDestinations.find(
       (d) => d.id === selectedBLDestinationId,
     );
@@ -104,7 +93,7 @@ export default function ProfilePage() {
   const deleteBLDDialogState = useDialogState();
 
   return (
-    <div className="mx-auto mb-5 min-h-screen-minus-header max-w-4xl space-y-3">
+    <div className="mx-auto min-h-screen-minus-header max-w-4xl space-y-3 pb-10">
       {/* Profile Header */}
       <section className="rounded-lg border">
         <div className="relative h-40 bg-teal-900 lg:h-52">
@@ -127,15 +116,15 @@ export default function ProfilePage() {
                   {profileInfo?.name}
                 </h2>
                 {verificationStatus?.isIdentityVerified == "true" ? (
-                  <div className="flex flex-row items-center gap-x-1  text-center text-xs font-semibold tracking-tighter text-green-800">
+                  <div className="flex flex-row items-center gap-x-1 text-center text-xs font-semibold tracking-tighter text-green-800">
                     <BadgeCheck size={22} /> Verified
                   </div>
                 ) : verificationStatus?.isIdentityVerified == "pending" ? (
-                  <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
+                  <div className="flex flex-row items-center gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
                     <Clock2Icon size={22} /> Pending
                   </div>
                 ) : (
-                  <div className="flex flex-row items-center  gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
+                  <div className="flex flex-row items-center gap-x-1 text-xs font-semibold tracking-tighter text-red-500">
                     <BadgeXIcon size={22} /> Not Verified
                   </div>
                 )}
@@ -169,7 +158,7 @@ export default function ProfilePage() {
           </div>
           <div className="flex gap-3 lg:col-start-4 lg:justify-end">
             <Button
-              className="w-1/2 bg-[#cfd8d6]/75 text-primary hover:bg-[#cfd8d6] lg:w-auto"
+              variant="secondary"
               onClick={() => editProfileDialogState.setState("open")}
             >
               <Edit />
@@ -181,20 +170,19 @@ export default function ProfilePage() {
       {/* pop up if no verified */}
       {verificationStatus?.isIdentityVerified == "false" && (
         <section className="flex flex-col justify-center gap-x-2 rounded-lg border border-red-200 p-4">
-          <div className="flex flex-row gap-x-1 font-bold ">
+          <div className="flex flex-row gap-x-1 font-bold">
             <InfoIcon size={24} className="text-red-400" /> Verify your Identity
           </div>
           <p className="ml-2">
             Hosts are more likely to accept your bid when they know who you are.
           </p>
-          <div className="  mt-3 flex w-1/4">
+          <div className="mt-3 flex w-1/4">
             <VerificationProvider>
               <IdentityModal />
             </VerificationProvider>
           </div>
         </section>
       )}
-      {/* Bucket List */}
 
       {/* About Me */}
       <section className="space-y-2 rounded-lg border p-4">
@@ -208,11 +196,13 @@ export default function ProfilePage() {
         </p>
       </section>
 
-      <section className="space-y-5 rounded-lg border p-4">
+      {/* Bucket List */}
+      {/* <section className="space-y-5 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-bold">Bucket List</h2>
           <div className="flex items-center">
-            {/* <Dialog>
+            Share Dialog (not functional yet)
+            <Dialog>
               <DialogTrigger asChild>
                 <Button
                   variant="ghost"
@@ -259,7 +249,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </DialogContent>
-            </Dialog> */}
+            </Dialog>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -297,17 +287,17 @@ export default function ProfilePage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Properties Tab */}
+          Properties Tab 
           <TabsContent value="properties">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
               {bucketListProperties?.length ? (
                 bucketListProperties.map((property) => (
                   <BucketListHomeOfferCard
-                    key={property!.id}
+                    key={property.id}
                     property={{
-                      ...property!,
-                      propertyId: property!.id,
-                      bucketListPropertyId: property!.bucketListId,
+                      ...property,
+                      propertyId: property.id,
+                      bucketListPropertyId: property.bucketListId,
                     }}
                   />
                 ))
@@ -330,11 +320,11 @@ export default function ProfilePage() {
             </div>
           </TabsContent>
 
-          {/* Destinations Tab */}
+          Destinations Tab
           <TabsContent value="destinations">
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {profileInfo?.bucketListDestinations?.length ? (
-                profileInfo?.bucketListDestinations.map((destination) => (
+              {profileInfo?.bucketListDestinations.length ? (
+                profileInfo.bucketListDestinations.map((destination) => (
                   <DestinationCard
                     key={destination.id}
                     destination={destination}
@@ -356,7 +346,7 @@ export default function ProfilePage() {
             </div>
           </TabsContent>
         </Tabs>
-      </section>
+      </section> */}
 
       <AddBucketListDestinationDialog state={addBLDestinationDialogState} />
       <EditBucketListDestinationDialog

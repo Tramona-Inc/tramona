@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -9,6 +10,9 @@ module.exports = {
   ],
   prefix: "",
   theme: {
+    fontFamily: {
+      magazine: ["Stint-Ultra-Condensed", "sans-serif"],
+    },
     container: {
       center: true,
       padding: "2rem",
@@ -19,6 +23,9 @@ module.exports = {
     extend: {
       fontSize: {
         "8xl": "4.6rem",
+        fontFamily: {
+          mulish: ["Mulish", "sans-serif"],
+        },
       },
       spacing: {
         "screen-minus-header-n-footer": "var(--screen-minus-header-n-footer)",
@@ -37,6 +44,11 @@ module.exports = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+        },
+        primaryGreen: {
+          DEFAULT: "hsl(var(--primary-green))",
+          background: "hsl(var(--primary-green-background))",
+          hover: "hsl(var(--primary-green-hover))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -63,6 +75,9 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      borderWidth: {
+        custom: "2px",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -87,11 +102,21 @@ module.exports = {
             "background-position": "right center",
           },
         },
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(calc(-100% - var(--gap)))" },
+        },
+        "marquee-vertical": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(calc(-100% - var(--gap)))" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         text: "text 5s ease infinite",
+        marquee: "marquee var(--duration) linear infinite",
+        "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
     },
   },

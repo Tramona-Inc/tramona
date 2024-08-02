@@ -74,7 +74,7 @@ export default function PropertyDeclineDialog({
         // }
       } else {
         //const traveler = await getTraveler.mutateAsync(data?.madeByGroupId);
-        const travelers = await getTravelers.mutateAsync(data?.madeByGroupId);
+        const travelers = await getTravelers.mutateAsync(data.madeByGroupId);
         for (const traveler of travelers) {
           if (traveler.phoneNumber) {
             const nightlyPrice =

@@ -19,11 +19,10 @@ import {
   zodString,
   zodUrl,
 } from "@/utils/zod-utils";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
+
 import { z } from "zod";
-import TagSelect from "../_common/TagSelect";
 import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 import {
   Select,
@@ -32,16 +31,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { SelectIcon } from "@radix-ui/react-select";
-
-import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { getS3ImgUrl } from "@/utils/formatters";
 import { getNumNights } from "@/utils/utils";
 import axios from "axios";
 import ErrorMsg from "../ui/ErrorMsg";
+import { parseListingUrl, zodListingUrl } from "@/utils/listing-sites";
+import { useZodForm } from "@/utils/useZodForm";
+import {
+  stringifyRoomsWithBeds,
+  zodRoomsWithBedsParser,
+} from "@/utils/zodRoomsWithBeds";
 
 const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
@@ -54,20 +56,24 @@ const formSchema = z.object({
   propertyName: zodString(),
   offeredPriceUSD: optional(zodNumber({ min: 1 })),
   hostName: zodString(),
+  hostProfilePic: zodUrl(),
   address: zodString({ maxLen: 1000 }),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
   numBedrooms: zodInteger({ min: 1 }),
   numBathrooms: zodInteger({ min: 1 }),
+  roomsWithBeds: zodString(),
   propertyType: z.enum(ALL_PROPERTY_TYPES),
+  checkInDate: optional(zodString()),
+  checkOutDate: optional(zodString()),
   originalNightlyPriceUSD: zodNumber(),
   offeredNightlyPriceUSD: zodNumber({ min: 1 }),
   avgRating: zodNumber({ min: 0, max: 5 }),
   numRatings: zodInteger({ min: 1 }),
-  amenities: z.string().array(),
+  amenities: z.string().transform((s) => s.split("\n").map((s) => s.trim())),
   about: zodString({ maxLen: Infinity }),
-  airbnbUrl: optional(zodUrl()),
+  originalListingUrl: optional(zodListingUrl),
   airbnbMessageUrl: optional(zodUrl()),
   tramonaFee: zodNumber({ min: 0 }),
   checkInInfo: optional(zodString()),
@@ -75,10 +81,17 @@ const formSchema = z.object({
   checkOutTime: optional(zodTime),
   cancellationPolicy: optional(zodString()),
   imageUrls: z.object({ value: zodUrl() }).array(),
+  reviews: z
+    .object({
+      profilePic: zodUrl(),
+      name: zodString(),
+      review: zodString({ maxLen: Infinity }),
+      rating: zodInteger({ min: 1, max: 5 }),
+    })
+    .array(),
+
   // mapScreenshot: optional(zodString()),
 });
-
-type FormSchema = z.infer<typeof formSchema>;
 
 export default function AdminOfferForm({
   afterSubmit,
@@ -88,16 +101,18 @@ export default function AdminOfferForm({
   offer,
 }: {
   afterSubmit?: () => void;
-  request: Request;
   offer?: OfferWithProperty;
+  request?: Request;
 }) {
-  const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+  let numberOfNights = request
+    ? getNumNights(request.checkIn, request.checkOut)
+    : 1;
   const offeredNightlyPriceUSD = offer
     ? Math.round(offer.totalPrice / numberOfNights / 100)
     : 1;
 
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+  const form = useZodForm({
+    schema: formSchema,
     defaultValues: {
       imageUrls: [
         { value: "" },
@@ -106,12 +121,13 @@ export default function AdminOfferForm({
         { value: "" },
         { value: "" },
       ],
-      amenities: [],
+      reviews: [{ profilePic: "", name: "", review: "", rating: 0 }],
       ...(offer
         ? {
             // im sorry
             // ?? undefineds are to turn string | null into string | undefined
             hostName: offer.property.hostName ?? undefined,
+            hostProfilePic: offer.property.hostProfilePic ?? undefined,
             address: offer.property.address,
             areaDescription: offer.property.areaDescription ?? undefined,
             mapScreenshot: offer.property.mapScreenshot ?? undefined,
@@ -122,7 +138,7 @@ export default function AdminOfferForm({
             propertyType: offer.property.propertyType,
             avgRating: offer.property.avgRating,
             numRatings: offer.property.numRatings,
-            amenities: offer.property.amenities,
+            amenities: offer.property.amenities.join("\n"),
             about: offer.property.about,
             airbnbUrl: offer.property.airbnbUrl ?? undefined,
             airbnbMessageUrl: offer.property.airbnbMessageUrl ?? undefined,
@@ -137,27 +153,51 @@ export default function AdminOfferForm({
             checkInTime: offer.property.checkInTime ?? undefined,
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
+            reviews: offer.property.reviews,
+            roomsWithBeds: offer.property.roomsWithBeds
+              ? stringifyRoomsWithBeds(offer.property.roomsWithBeds)
+              : undefined,
           }
         : {}),
     },
   });
+
+  const { checkInDate, checkOutDate } = form.watch();
+
+  !request && (numberOfNights = getNumNights(checkInDate!, checkOutDate!));
 
   const imageUrlInputs = useFieldArray({
     name: "imageUrls",
     control: form.control,
   });
 
-  const updatePropertiesMutation = api.properties.update.useMutation();
-  const updateOffersMutation = api.offers.update.useMutation();
-  const createPropertiesMutation = api.properties.create.useMutation();
-  const createOffersMutation = api.offers.create.useMutation();
+  const reviewInputs = useFieldArray({
+    name: "reviews",
+    control: form.control,
+  });
+
+  const updatePropertyMutation = api.properties.update.useMutation();
+  const updateOfferMutation = api.offers.update.useMutation();
+  const createPropertyMutation = api.properties.create.useMutation();
+  const createOfferMutation = api.offers.create.useMutation();
+  const createReviewsMutation = api.reviews.create.useMutation();
   const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
   // const getOwnerMutation = api.groups.getGroupOwner.useMutation();
   const getMembersMutation = api.groups.getGroupMembers.useMutation();
 
-  async function onSubmit(data: FormSchema) {
+  const onSubmit = form.handleSubmit(async (data) => {
+    const res = zodRoomsWithBedsParser.safeParse(data.roomsWithBeds);
+    if (!res.success) {
+      form.setError("roomsWithBeds", {
+        message: res.error.issues[0]!.message,
+      });
+      return;
+    }
+
+    const roomsWithBeds = res.data;
+
     let url: string | null = null;
 
     if (file) {
@@ -181,6 +221,11 @@ export default function AdminOfferForm({
       data.offeredNightlyPriceUSD * numberOfNights * 100,
     );
 
+    const originalListing =
+      propertyData.originalListingUrl !== undefined
+        ? parseListingUrl(propertyData.originalListingUrl)
+        : undefined;
+
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
@@ -192,6 +237,10 @@ export default function AdminOfferForm({
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
       mapScreenshot: url,
+
+      originalListingSite: originalListing?.Site.siteName,
+      originalListingId: originalListing?.listingId,
+      roomsWithBeds,
     };
 
     // if offer wasnt null then this is an "update offer" form
@@ -199,23 +248,28 @@ export default function AdminOfferForm({
     if (offer) {
       const newOffer = {
         id: offer.id,
-        requestId: request.id,
+        requestId: request ? request.id : offer.request?.id,
         propertyId: offer.property.id,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
       };
 
+      await createReviewsMutation.mutateAsync({
+        reviews: propertyData.reviews,
+        propertyId: offer.property.id,
+      });
+
       await Promise.all([
-        updatePropertiesMutation.mutateAsync({
+        updatePropertyMutation.mutateAsync({
           ...newProperty,
           id: offer.property.id,
           isPrivate: true,
         }),
-        updateOffersMutation.mutateAsync(newOffer).catch(() => errorToast()),
+        updateOfferMutation.mutateAsync(newOffer).catch(() => errorToast()),
       ]);
       // ...otherwise its a "create offer" form so make a new property and offer
     } else {
-      const propertyId = await createPropertiesMutation
+      const propertyId = await createPropertyMutation
         .mutateAsync({ ...newProperty, isPrivate: true })
         .catch(() => errorToast());
 
@@ -227,24 +281,27 @@ export default function AdminOfferForm({
       }
 
       const newOffer = {
-        requestId: request.id,
+        requestId: request?.id,
         propertyId,
         totalPrice,
         tramonaFee: data.tramonaFee * 100,
-        checkIn: request.checkIn,
-        checkOut: request.checkOut,
-        groupId: request.madeByGroupId,
+        checkIn: request ? request.checkIn : new Date(checkInDate!),
+        checkOut: request ? request.checkOut : new Date(checkOutDate!),
+        groupId: request?.madeByGroupId,
       };
 
-      await createOffersMutation
-        .mutateAsync(newOffer)
-        .catch(() => errorToast());
+      await createReviewsMutation.mutateAsync({
+        reviews: propertyData.reviews,
+        propertyId,
+      });
+
+      await createOfferMutation.mutateAsync(newOffer).catch(() => errorToast());
     }
 
     //const traveler = await getOwnerMutation.mutateAsync(request.madeByGroupId);
-    const travelers = await getMembersMutation.mutateAsync(
-      request.madeByGroupId,
-    );
+    const travelers = request
+      ? await getMembersMutation.mutateAsync(request.madeByGroupId)
+      : [];
 
     for (const traveler of travelers) {
       if (traveler.phoneNumber) {
@@ -256,12 +313,12 @@ export default function AdminOfferForm({
         } else {
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `Tramona: You have a new match for a request in your Tramona account!\nTramona price: $${data.offeredNightlyPriceUSD}, Airbnb price: $${data.originalNightlyPriceUSD}.\n\nCheck it out now!`
+            msg: `Tramona: You have a new match for a request in your Tramona account!\nTramona price: $${data.offeredNightlyPriceUSD}, Airbnb price: $${data.originalNightlyPriceUSD}.\n\nCheck it out now!`,
           });
 
           await twilioMutation.mutateAsync({
             to: traveler.phoneNumber,
-            msg: `https://www.tramona.com/requests/${request.id}`,
+            msg: `https://www.tramona.com/requests/${request ? request.id : ""}`,
           });
         }
       }
@@ -270,28 +327,29 @@ export default function AdminOfferForm({
     successfulAdminOfferToast({
       propertyName: newProperty.name,
       totalPrice,
-      checkIn: request.checkIn,
-      checkOut: request.checkOut,
+      checkIn: request ? request.checkIn : new Date(checkInDate!),
+      checkOut: request ? request.checkOut : new Date(checkOutDate!),
       isUpdate: !!offer,
     });
 
     afterSubmit?.();
-  }
+  });
 
   const defaultNightlyPrice = 0;
-  const [isAirbnb, setIsAirbnb] = useState<boolean>(true);
   const [nightlyPrice, setNightlyPrice] = useState(
     offer ? offeredNightlyPriceUSD : defaultNightlyPrice,
   );
 
   const totalPrice = nightlyPrice * numberOfNights;
-  const [file, setFile] = useState<File | null>(null);
+  const [file] = useState<File | null>(null);
 
   return (
     <Form {...form}>
       <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
+      {/* {JSON.stringify(form.formState.errors, null, 2)} */}
+      {/* {JSON.stringify(form.formState.errors, null, 2)} */}
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={onSubmit}
         className="grid grid-cols-1 gap-4 md:grid-cols-2"
       >
         <FormField
@@ -324,6 +382,34 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
+          name="hostProfilePic"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Host profile picture</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="hostProfilePic"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Host profile picture</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="originalNightlyPriceUSD"
           render={({ field }) => (
             <FormItem>
@@ -341,19 +427,37 @@ export default function AdminOfferForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="tramonaFee"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Tramona Fee</FormLabel>
-              <FormControl>
-                <Input {...field} inputMode="decimal" prefix="$" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!request && (
+          <>
+            <FormField
+              control={form.control}
+              name="checkInDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Check In Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="date" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="checkOutDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Check Out Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="date" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
 
         <FormField
           control={form.control}
@@ -372,6 +476,20 @@ export default function AdminOfferForm({
                   prefix="$"
                   suffix="/night"
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tramonaFee"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tramona Fee</FormLabel>
+              <FormControl>
+                <Input {...field} inputMode="decimal" prefix="$" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -480,6 +598,24 @@ export default function AdminOfferForm({
 
         <FormField
           control={form.control}
+          name="roomsWithBeds"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Beds in Rooms</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  rows={4}
+                  placeholder="Each line = beds in 1 room, formatted like '1 Queen, 2 Twin'"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="avgRating"
           render={({ field }) => (
             <FormItem>
@@ -511,13 +647,9 @@ export default function AdminOfferForm({
           name="amenities"
           render={({ field }) => (
             <FormItem className="col-span-full">
-              <FormLabel>Amenities</FormLabel>
+              <FormLabel>Amenities (put 1 per line)</FormLabel>
               <FormControl>
-                <TagSelect
-                  options={ALL_PROPERTY_AMENITIES}
-                  onChange={field.onChange}
-                  value={field.value}
-                />
+                <Textarea {...field} className="resize-y" rows={10} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -538,48 +670,40 @@ export default function AdminOfferForm({
           )}
         />
 
-        <div className="col-span-full flex flex-row items-center justify-between">
-          <div>
-            <h1 className="text-sm text-muted-foreground">Listing Type </h1>
-            <p>{isAirbnb ? "Airbnb" : "Direct"}</p>
-          </div>
-          <Switch
-            checked={isAirbnb}
-            onCheckedChange={() => setIsAirbnb(!isAirbnb)}
-          />
-        </div>
-
-        {isAirbnb && (
-          <>
-            <FormField
-              control={form.control}
-              name="airbnbUrl"
-              render={({ field }) => (
-                <FormItem className="col-span-full">
-                  <FormLabel>Airbnb URL</FormLabel>
-                  <FormControl>
-                    <Input {...field} inputMode="url" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="airbnbMessageUrl"
-              render={({ field }) => (
-                <FormItem className="col-span-full">
-                  <FormLabel>Airbnb Message Host Url</FormLabel>
-                  <FormControl>
-                    <Input {...field} inputMode="url" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
+        <FormField
+          control={form.control}
+          name="originalListingUrl"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Original Listing URL</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  inputMode="url"
+                  placeholder="Leave blank for direct listings"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="originalListingUrl"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Original Listing URL</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  inputMode="url"
+                  placeholder="Leave blank for direct listings"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -594,6 +718,7 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="checkInInfo"
@@ -748,6 +873,78 @@ export default function AdminOfferForm({
               onClick={() => imageUrlInputs.append({ value: "" })}
             >
               Add another image (optional)
+            </Button>
+          </div>
+        </FormItem>
+
+        <FormItem className="col-span-full space-y-1">
+          <FormLabel>Reviews</FormLabel>
+          <div className="space-y-4">
+            {reviewInputs.fields.map((review, index) => (
+              <div key={review.id} className="space-y-1">
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.profilePic`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input {...field} placeholder="Profile Picture URL" />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.name`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input {...field} placeholder="Name" />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.rating`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="1"
+                        max="5"
+                        placeholder="Rating (1-5)"
+                      />
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`reviews.${index}.review`}
+                  render={({ field }) => (
+                    <FormControl>
+                      <Textarea {...field} placeholder="Review" />
+                    </FormControl>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="emptyInput"
+                  onClick={() => reviewInputs.remove(index)}
+                >
+                  Remove Review
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              onClick={() =>
+                reviewInputs.append({
+                  profilePic: "",
+                  name: "",
+                  rating: 1,
+                  review: "",
+                })
+              }
+            >
+              Add Another Review
             </Button>
           </div>
         </FormItem>

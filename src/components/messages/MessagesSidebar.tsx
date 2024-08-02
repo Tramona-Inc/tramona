@@ -62,7 +62,7 @@ export function MessageConversation({
   return (
     <div
       className={cn(
-        "flex items-center justify-start border-b px-4 py-6 hover:cursor-pointer hover:bg-zinc-200 lg:p-8",
+        "flex items-center justify-start px-4 py-6 hover:cursor-pointer hover:bg-zinc-200",
         isSelected && "bg-zinc-100",
       )}
       onClick={() => handleSelected()}
@@ -117,6 +117,11 @@ export default function MessagesSidebar({
     (state) => state.setConversationList,
   );
 
+  const addMessageToConversation = useMessage(
+    (state) => state.addMessageToConversation
+  )
+  const { fetchInitialMessages } = useMessage()
+
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
     if (fetchedConversations) {
@@ -137,15 +142,15 @@ export default function MessagesSidebar({
   // Map and listen to all the connects the user is part of
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-      if (!optimisticIds.includes(payload.new.id)) {
-        const { error } = await supabase
-          .from("user")
-          .select("name, email, image")
-          .eq("id", payload.new.user_id)
-          .single();
-        if (error) {
-          errorToast();
-        } else {
+      // if (!optimisticIds.includes(payload.new.id)) {
+      //   const { error } = await supabase
+      //     .from("user")
+      //     .select("name, email, image")
+      //     .eq("id", payload.new.user_id)
+      //     .single();
+      //   if (error) {
+      //     errorToast();
+      //   } else {
           const newMessage: ChatMessageType = {
             id: payload.new.id,
             conversationId: payload.new.conversation_id,
@@ -157,8 +162,10 @@ export default function MessagesSidebar({
           };
 
           setConversationToTop(payload.new.conversation_id, newMessage);
-        }
-      }
+          // addMessageToConversation(payload.new.conversation_id, newMessage)
+          // void fetchInitialMessages(payload.new.conversation_id)
+      //   }
+      // }
     };
 
     const fetchConversationIds = async () => {
@@ -192,22 +199,23 @@ export default function MessagesSidebar({
     };
 
     void fetchConversationIds();
-  }, [optimisticIds, selectedConversation?.id, session, setConversationToTop]);
+  }, [
+    conversations,
+    optimisticIds,
+    selectedConversation?.id,
+    session,
+    setConversationToTop,
+  ]);
 
   return (
-    <div
-      className={cn(
-        "col-span-1 block md:col-span-4 md:border-r lg:col-span-3 2xl:col-span-2",
-        selectedConversation && "hidden md:block",
-      )}
-    >
-      <h1 className="flex h-[73px] w-full items-center border-b p-4 text-4xl font-bold md:text-2xl md:font-semibold lg:p-8">
-        Messages
-      </h1>
+    <div>
+      <div className="flex h-[73px] items-center border-b p-4">
+        <h1 className="text-2xl font-bold">Messages</h1>
+      </div>
 
-      <ScrollArea className="h-full">
+      <ScrollArea className="h-full p-2">
         {!isLoading ? (
-          conversations && conversations.length > 0 ? (
+          conversations.length > 0 ? (
             conversations.map((conversation) => (
               <SidebarConversation
                 key={conversation.id}
@@ -217,7 +225,7 @@ export default function MessagesSidebar({
               />
             ))
           ) : (
-            <div className="flex h-full flex-col items-center justify-center ">
+            <div className="flex h-full flex-col items-center justify-center">
               <MessageEmptySvg />
               <h2 className="text-2xl font-bold">No conversations yet</h2>
               <p className="max-w-[300px] text-center text-muted-foreground">

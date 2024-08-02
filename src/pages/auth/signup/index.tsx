@@ -27,7 +27,7 @@ import { z } from "zod";
 const formSchema = z
   .object({
     email: zodEmail(),
-    name: zodString({ minLen: 2 }),
+    // name: zodString({ minLen: 2 }),
     password: zodPassword(),
     confirm: z.string(),
   })
@@ -99,7 +99,7 @@ export default function SignUp({
                   </FormItem>
                 )}
               />
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
@@ -111,7 +111,7 @@ export default function SignUp({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
               <FormField
                 control={form.control}
                 name="password"
@@ -161,25 +161,24 @@ export default function SignUp({
           </div>
 
           <div className="my-5 flex w-full flex-col items-center justify-center gap-5">
-            {providers &&
-              Object.values(providers)
-                .slice(1) // remove the email provider
-                .map((provider) => {
-                  return (
-                    <Button
-                      key={provider.name}
-                      variant={"darkOutline"}
-                      onClick={() => signIn(provider.id)}
-                      className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
-                    >
-                      <Icons iconName={provider.name} />
-                      <span className="col-span-3 text-lg font-extrabold tracking-tight">
-                        Sign up with
-                        {" " + provider.name}
-                      </span>
-                    </Button>
-                  );
-                })}
+            {Object.values(providers)
+              .slice(1) // remove the email provider
+              .map((provider) => {
+                return (
+                  <Button
+                    key={provider.name}
+                    variant={"darkOutline"}
+                    onClick={() => signIn(provider.id)}
+                    className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
+                  >
+                    <Icons iconName={provider.name} />
+                    <span className="col-span-3 text-lg font-extrabold tracking-tight">
+                      Sign up with
+                      {" " + provider.name}
+                    </span>
+                  </Button>
+                );
+              })}
           </div>
         </section>
         <p>

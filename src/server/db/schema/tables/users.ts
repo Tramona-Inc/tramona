@@ -46,8 +46,10 @@ export const users = pgTable(
     // nextauth fields
     id: text("id").notNull().primaryKey(),
     name: text("name"),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
     email: text("email").notNull(),
-    emailVerified: timestamp("emailVerified", { mode: "date" }),
+    emailVerified: timestamp("emailVerified", { withTimezone: true }),
     image: text("image"),
 
     // custom fields
@@ -61,13 +63,13 @@ export const users = pgTable(
       .notNull()
       .default("Partner"),
     phoneNumber: varchar("phone_number", { length: 20 }),
-    lastTextAt: timestamp("last_text_at").defaultNow(),
+    lastTextAt: timestamp("last_text_at", { withTimezone: true }).defaultNow(),
     isWhatsApp: boolean("is_whats_app").default(false).notNull(),
     stripeCustomerId: varchar("stripe_customer_id"),
     setupIntentId: varchar("setup_intent_id"),
 
     // mode: "string" cuz nextauth doesnt serialize/deserialize dates
-    createdAt: timestamp("created_at", { mode: "string" })
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .notNull()
       .defaultNow(),
     //stripe identity verifications
@@ -84,6 +86,7 @@ export const users = pgTable(
       .default(sql`'{}'`),
     about: text("about"),
     // destinations: varchar("destinations").array(),
+    onboardingStep: integer("onboarding_step").notNull().default(0),
   },
   (t) => ({
     phoneNumberIdx: index().on(t.phoneNumber),
@@ -109,7 +112,9 @@ export const referralCodes = pgTable(
     numBookingsUsingCode: integer("num_bookings_using_code")
       .notNull()
       .default(0),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
     ownerIdIdx: index("owner_id_idx").on(t.ownerId),
@@ -133,7 +138,9 @@ export const referralEarnings = pgTable(
       .notNull()
       .default("pending"),
     cashbackEarned: integer("cashback_earned").notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
     referralCodeIdx: index().on(t.referralCode),

@@ -1,7 +1,7 @@
 import { CircleCheckBigIcon, CircleOffIcon, FlagIcon } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PencilIcon } from "lucide-react";
-import { ReservationInterface } from "@/server/api/routers/superhogRouter";
+import { type ReservationInterface } from "@/server/api/routers/superhogRouter";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormField,
@@ -27,7 +26,6 @@ import { useForm } from "react-hook-form";
 import { generateTimeStamp } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { on } from "events";
 import { api } from "@/utils/api";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
@@ -71,19 +69,19 @@ export default function EditReservationCard({
   };
   const { mutateAsync } = api.superhog.updateVerification.useMutation({
     onSuccess: () => {
-      console.log("success");
       toast({
         title: "Reservation Updated",
         description: "The reservation has been updated successfully",
       });
     },
     onError: (error) => {
-      console.log(error);
-      toast({
-        title: "Error",
-        description: "The reservation has not been updated successfully",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        toast({
+          title: "The reservation has not been updated successfully",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -95,18 +93,19 @@ export default function EditReservationCard({
   const onSubmit = (data: FormSchema) => {
     mutateAsync(data)
       .then(() => {
-        console.log("success");
         toast({
           title: "Reservation Updated",
           description: "The reservation has been updated successfully",
         });
       })
-      .catch((error: Error) => {
-        toast({
-          title: "Error",
-          description: "The reservation has not been updated successfully",
-          variant: "destructive",
-        });
+      .catch((error) => {
+        if (error instanceof Error) {
+          toast({
+            title: "The reservation has not been updated successfully",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       });
   };
   return (
@@ -114,7 +113,7 @@ export default function EditReservationCard({
       <CardHeader className="flex flex-row items-start justify-between">
         <div className="flex flex-col gap-y-1">
           <h1 className="font-bold">{reservation.nameOfVerifiedUser}</h1>
-          <div className="flex flex-row items-center gap-x-1 text-xs  font-semibold text-primary">
+          <div className="flex flex-row items-center gap-x-1 text-xs font-semibold text-primary">
             Status: <div>{reservation.superhogStatus} </div>
             <div>
               {reservation.superhogStatus === "Approved" ? (
@@ -136,7 +135,7 @@ export default function EditReservationCard({
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>
-                Edit {reservation.nameOfVerifiedUser}&aposs check-in dates
+                Edit {reservation.nameOfVerifiedUser}&apos;s check-in dates
               </DialogTitle>
               <DialogDescription className="text-sm">
                 Make changes to the request here. Click update when you&aposre

@@ -4,7 +4,7 @@ import AdminOfferDialog from "@/components/admin/AdminOfferDialog";
 import DeleteRequestDialog from "@/components/admin/DeleteRequestDialog";
 import RejectRequestDialog from "@/components/admin/RejectRequestDialog";
 import RequestCard, {
-  type RequestWithUser,
+  type AdminDashboardRequst,
 } from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
@@ -13,12 +13,12 @@ import Head from "next/head";
 function IncomingRequestCards({
   requests,
 }: {
-  requests: RequestWithUser[] | undefined;
+  requests: AdminDashboardRequst[] | undefined;
 }) {
   return requests ? (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
-        <RequestCard isAdminDashboard key={request.id} request={request}>
+        <RequestCard type="admin" key={request.id} request={request}>
           <DeleteRequestDialog requestId={request.id}>
             <Button className="rounded-full" variant="outline">
               Delete

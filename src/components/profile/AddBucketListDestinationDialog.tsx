@@ -5,7 +5,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/utils/api";
-import { DialogState } from "@/utils/dialog";
+import { type DialogState } from "@/utils/dialog";
 import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";

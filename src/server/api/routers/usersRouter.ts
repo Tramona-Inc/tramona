@@ -1,12 +1,15 @@
 import * as bcrypt from "bcrypt";
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
 import {
   ALL_PROPERTY_TYPES,
   bookedDates,
+  emergencyContacts,
+  groups,
   hostProfiles,
   hostTeamMembers,
   hostTeams,
@@ -25,21 +28,21 @@ import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import axios from "axios";
+import { getCity } from "@/server/google-maps";
 
 export const usersRouter = createTRPCRouter({
-  me: protectedProcedure.query(async ({ ctx }) => {
+  getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return undefined;
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
-        role: true,
-        referralCodeUsed: true,
+        onboardingStep: true,
       },
     });
-
-    return {
-      role: res?.role ?? "guest",
-      referralCodeUsed: res?.referralCodeUsed ?? null,
-    };
+    if (!res) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    }
+    return res.onboardingStep;
   }),
 
   myVerificationStatus: protectedProcedure.query(async ({ ctx }) => {
@@ -166,15 +169,25 @@ export const usersRouter = createTRPCRouter({
     return !!res;
   }),
 
-  createHostProfile: protectedProcedure
+  upsertHostProfile: protectedProcedure
     .input(
-      z.object({
-        hostawayAccountId: z.string().optional(),
-        hostawayBearerToken: z.string().optional(),
-        hostawayApiKey: z.string().optional(),
-      }),
+      z
+        .object({
+          hostawayAccountId: z.string().optional(),
+          hostawayBearerToken: z.string().optional(),
+          hostawayApiKey: z.string().optional(),
+        })
+        .optional(),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input = {} }) => {
+      const existingHostProfile = await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+      });
+
+      if (existingHostProfile) {
+        return existingHostProfile;
+      }
+
       const teamId = await ctx.db
         .insert(hostTeams)
         .values({
@@ -191,16 +204,13 @@ export const usersRouter = createTRPCRouter({
         userId: ctx.user.id,
       });
 
-      const res = await ctx.db
-        .insert(hostProfiles)
-        .values({
-          userId: ctx.user.id,
-          curTeamId: teamId,
-          hostawayApiKey: input.hostawayApiKey,
-          hostawayAccountId: input.hostawayAccountId,
-          hostawayBearerToken: input.hostawayBearerToken,
-        })
-        .returning();
+      await ctx.db.insert(hostProfiles).values({
+        userId: ctx.user.id,
+        curTeamId: teamId,
+        hostawayApiKey: input.hostawayApiKey,
+        hostawayAccountId: input.hostawayAccountId,
+        hostawayBearerToken: input.hostawayBearerToken,
+      });
 
       interface PropertyType {
         id: number;
@@ -405,8 +415,18 @@ export const usersRouter = createTRPCRouter({
         } as const;
 
         const convertToTimeString = (time: number) => {
-          const hours = Math.floor(time / 100);
-          const minutes = time % 100;
+          let hours, minutes;
+
+          if (time < 100) {
+            // If the time is less than 100, treat it as hours only
+            hours = time;
+            minutes = 0;
+          } else {
+            // Otherwise, treat it as HHMM
+            hours = Math.floor(time / 100);
+            minutes = time % 100;
+          }
+
           return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`;
         };
 
@@ -441,39 +461,43 @@ export const usersRouter = createTRPCRouter({
         const listings: Listing[] = hostawayProperties.result;
 
         try {
+          const propertyObjects = await Promise.all(
+            listings.map(async (property) => ({
+              hostId: ctx.user.id,
+              propertyType: z
+                .enum(ALL_PROPERTY_TYPES)
+                .catch("Other")
+                .parse(propertyTypeMap[property.propertyTypeId]),
+              roomType: roomTypeMapping[property.roomType],
+              maxNumGuests: property.personCapacity,
+              numBeds: property.bedsNumber,
+              numBedrooms: property.bedroomsNumber,
+              numBathrooms: property.bathroomsNumber,
+              latitude: property.lat,
+              longitude: property.lng,
+              city: await getCity({ lat: property.lat, lng: property.lng }),
+              hostName: property.contactName,
+              hostawayListingId: property.id,
+              checkInTime: convertToTimeString(property.checkInTimeStart),
+              checkOutTime: convertToTimeString(property.checkOutTime),
+              name: property.name,
+              about: property.description,
+              propertyPMS: "Hostaway",
+              address: property.address,
+              avgRating: property.starRating ?? 0,
+              hostTeamId: teamId,
+              imageUrls: property.listingImages,
+              amenities: property.listingAmenities.map(
+                (amenity) => amenity.amenityName,
+              ), // Keep amenities as an array
+              cancellationPolicy: property.cancellationPolicy,
+            })),
+          );
+
+          // Now pass the resolved array of objects to the .values() method
           const insertedProperties = await ctx.db
             .insert(properties)
-            .values(
-              listings.map((property) => ({
-                hostId: ctx.user.id,
-                propertyType: z
-                  .enum(ALL_PROPERTY_TYPES)
-                  .catch("Other")
-                  .parse(propertyTypeMap[property.propertyTypeId]),
-                roomType: roomTypeMapping[property.roomType],
-                maxNumGuests: property.personCapacity,
-                numBeds: property.bedsNumber,
-                numBedrooms: property.bedroomsNumber,
-                numBathrooms: property.bathroomsNumber,
-                latitude: property.lat,
-                longitude: property.lng,
-                hostName: property.contactName,
-                hostawayListingId: property.id,
-                checkInTime: convertToTimeString(property.checkInTimeStart),
-                checkOutTime: convertToTimeString(property.checkOutTime),
-                name: property.name,
-                about: property.description,
-                propertyPMS: "Hostaway",
-                address: property.address,
-                avgRating: property.starRating ?? 0,
-                hostTeamId: teamId,
-                imageUrls: property.listingImages,
-                amenities: property.listingAmenities.map(
-                  (amenity) => amenity.amenityName,
-                ), // Keep amenities as an array
-                cancellationPolicy: property.cancellationPolicy,
-              })),
-            )
+            .values(propertyObjects)
             .returning({
               id: properties.id,
               listingId: properties.hostawayListingId,
@@ -508,7 +532,6 @@ export const usersRouter = createTRPCRouter({
           console.log(err);
         }
       }
-      return res;
     }),
 
   getHostInfo: protectedProcedure.query(async ({ ctx }) => {
@@ -656,4 +679,55 @@ export const usersRouter = createTRPCRouter({
 
       return "success";
     }),
+
+  getUserVerifications: protectedProcedure
+    .input(z.object({ madeByGroupId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const verifications = await ctx.db.query.groups
+        .findFirst({
+          where: eq(groups.id, input.madeByGroupId),
+          with: {
+            owner: {
+              columns: {
+                dateOfBirth: true,
+                phoneNumber: true,
+                emailVerified: true,
+                email: true,
+              },
+            },
+          },
+        })
+        .then((res) => res?.owner);
+
+      if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return verifications;
+    }),
+
+  addEmergencyContacts: protectedProcedure
+    .input(
+      z.object({
+        emergencyEmail: z.string(),
+        emergencyPhone: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.insert(emergencyContacts).values({
+        userId: ctx.user.id,
+        emergencyEmail: input.emergencyEmail,
+        emergencyPhone: input.emergencyPhone,
+      });
+    }),
+  deleteEmergencyContact: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(emergencyContacts)
+        .where(eq(emergencyContacts.id, input.id));
+    }),
+  getEmergencyContacts: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.emergencyContacts.findMany({
+      where: eq(emergencyContacts.userId, ctx.user.id),
+    });
+  }),
 });

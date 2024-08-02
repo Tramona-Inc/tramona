@@ -8,7 +8,7 @@ import {
   InboxIcon,
   LayoutDashboardIcon,
   MessageCircleIcon,
-  Search,
+  Users2Icon,
   WrenchIcon,
 } from "lucide-react";
 
@@ -35,25 +35,23 @@ export const adminNavLinks = [
   { href: "/requests", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
-export const hostMobileNavLinks = [
+export const hostNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
   {
     href: "/host/requests",
     name: "Requests",
     icon: BadgePercent,
   },
-  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/host/messages", name: "Messages", icon: MessageCircleIcon },
   { href: "/host/properties", name: "Properties", icon: HomeIcon },
-];
-
-export const hostNavLinks = [
-  ...hostMobileNavLinks,
-  { href: "/host/payout", name: "Payout", icon: DollarSign },
+  { href: "/host/stays", name: "Stays", icon: Briefcase },
+  { href: "/host/finances", name: "Finances", icon: DollarSign },
+  { href: "/host/team", name: "Team", icon: Users2Icon },
 ];
 
 export const guestMobileNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/explore", name: "Explore", icon: Search },
+  // { href: "/explore", name: "Explore", icon: Search },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
 ];
@@ -65,5 +63,5 @@ export const guestNavLinks = [
 
 export const unloggedNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/explore", name: "Explore", icon: Search },
+  // { href: "/explore", name: "Explore", icon: Search },
 ];

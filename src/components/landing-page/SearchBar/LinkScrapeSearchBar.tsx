@@ -165,7 +165,7 @@
 //         <div className="grid grid-cols-2 rounded-[42px] bg-black/50 p-0.5 backdrop-blur-md lg:grid-cols-11">
 //           <FormField
 //             control={form.control}
-//             name={`data.${curTab}.airbnbLink`}
+//             name={`airbnbLink`}
 //             render={({ field }) => (
 //               <FormItem className="lg:col-span-11">
 //                 <FormLabel>Listing URL</FormLabel>

@@ -1,42 +1,33 @@
 import { type Conversation } from "@/utils/store/conversations";
-import { cn } from "@/utils/utils";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
 import ChatMessages from "./ChatMessages";
-
-export type ContentProps = {
-  selectedConversation: Conversation | null;
-  setSelected: (arg0: Conversation | null) => void;
-};
+import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
+import ConversationsEmptySvg from "../_common/EmptyStateSvg/ConversationsEmptySvg";
 
 export default function MessagesContent({
   selectedConversation,
   setSelected,
-}: ContentProps) {
+}: {
+  selectedConversation: Conversation | null;
+  setSelected: (arg0: Conversation | null) => void;
+}) {
+  if (!selectedConversation) {
+    return (
+      <EmptyStateValue description="Select a convesation to read more">
+        <ConversationsEmptySvg />
+      </EmptyStateValue>
+    );
+  }
+
   return (
-    <div
-      className={cn(
-        "col-span-5 flex h-full items-center justify-center md:col-span-4 lg:col-span-5 2xl:col-span-6",
-        !selectedConversation && "hidden md:flex",
-      )}
-    >
-      {!selectedConversation ? (
-        <>
-          <p className="font-semibold text-muted-foreground">
-            Select a conversation to read more
-          </p>
-        </>
-      ) : (
-        // Main Message content
-        <div className="relative flex h-full w-full flex-col">
-          <ChatHeader
-            selectedConversation={selectedConversation}
-            setSelected={setSelected}
-          />
-          <ChatMessages conversationId={selectedConversation.id} />
-          <ChatInput conversationId={selectedConversation.id} />
-        </div>
-      )}
+    <div className="relative flex h-full w-full flex-col">
+      <ChatHeader
+        selectedConversation={selectedConversation}
+        setSelected={setSelected}
+      />
+      <ChatMessages conversationId={selectedConversation.id} />
+      <ChatInput conversationId={selectedConversation.id} />
     </div>
   );
 }

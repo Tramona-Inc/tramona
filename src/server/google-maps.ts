@@ -42,15 +42,32 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
     component.types.includes("country"),
   );
 
-  const city = addressComponents.find((component) =>
-    component.types.includes("locality"),
-  )?.long_name;
+  const cityComponent = addressComponents.find(
+    (component) =>
+      component.types.includes("locality") ||
+      component.types.includes("sublocality") ||
+      component.types.includes("neighborhood") ||
+      component.types.includes("administrative_area_level_3"),
+  );
 
   const state = addressComponents.find((component) =>
     component.types.includes("administrative_area_level_1"),
   )?.short_name;
 
-  console.log({ city, country, state });
+  let city = cityComponent?.long_name;
+
+  // Map specific neighborhoods to their parent cities
+  if (cityComponent?.types.includes("neighborhood")) {
+    const parentLocality = addressComponents.find(
+      (component) =>
+        component.types.includes("locality") ||
+        component.types.includes("sublocality") ||
+        component.types.includes("administrative_area_level_3"),
+    );
+    if (parentLocality) {
+      city = parentLocality.long_name;
+    }
+  }
 
   if (!country || !city) return "[Unknown location]";
 
@@ -60,4 +77,54 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
   }
 
   return `${city}, ${country.long_name || country.short_name}`;
+}
+
+export async function getCountryISO({
+  lat,
+  lng,
+}: {
+  lat: number;
+  lng: number;
+}): Promise<string | null> {
+  const addressComponents = await googleMaps
+    .reverseGeocode({
+      params: {
+        latlng: { lat, lng },
+        key: env.GOOGLE_MAPS_KEY,
+      },
+    })
+    .then((res) => res.data.results[0]?.address_components);
+
+  if (!addressComponents) return null;
+
+  const country = addressComponents.find((component) =>
+    component.types.includes("country"),
+  );
+
+  return country ? country.short_name : null;
+}
+
+export async function getPostcode({
+  lat,
+  lng,
+}: {
+  lat: number;
+  lng: number;
+}): Promise<string | null> {
+  const addressComponents = await googleMaps
+    .reverseGeocode({
+      params: {
+        latlng: { lat, lng },
+        key: env.GOOGLE_MAPS_KEY,
+      },
+    })
+    .then((res) => res.data.results[0]?.address_components);
+
+  if (!addressComponents) return null;
+
+  const postalCode = addressComponents.find((component) =>
+    component.types.includes("postal_code"),
+  );
+
+  return postalCode ? postalCode.long_name : null;
 }

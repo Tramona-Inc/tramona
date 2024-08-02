@@ -3,7 +3,7 @@ import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
 import { formatDateRange } from "@/utils/utils";
 import Image from "next/image";
-import { type TripCardDetails } from "./PastTrips";
+import { type TripCardDetails } from "@/pages/my-trips";
 
 export default function PastTripCard({ trip }: { trip: TripCardDetails }) {
   return (

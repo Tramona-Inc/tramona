@@ -47,13 +47,8 @@ export default function RequestRefreshForm({
   afterSubmit?: () => void;
   request: Request;
 }) {
-  const { data: session } = useSession();
   const updateRequest = api.requests.updateRequest.useMutation();
-  const {
-    data: checkResult,
-    isLoading,
-    isError,
-  } = api.requests.checkRequestUpdate.useQuery(
+  const { data: checkResult } = api.requests.checkRequestUpdate.useQuery(
     {
       requestId: request.id,
     },
@@ -63,11 +58,9 @@ export default function RequestRefreshForm({
   );
 
   const numberOfNights = getNumNights(request.checkIn, request.checkOut);
-  const old_price = request
-    ? Math.round(request.maxTotalPrice / numberOfNights / 100)
-    : 1;
+  const oldPrice = Math.round(request.maxTotalPrice / numberOfNights / 100);
 
-  const priceOptions: number[] = calculatePriceOptions(old_price);
+  const priceOptions: number[] = calculatePriceOptions(oldPrice);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -284,7 +277,7 @@ export default function RequestRefreshForm({
               <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
                 <strong>Price Preference Updated To:</strong>
                 <span className="mt-1 text-gray-600 sm:mt-0">
-                  ${watch("price") + old_price} per night
+                  ${watch("price") + oldPrice} per night
                 </span>
               </div>
               {watch("preferences") && (

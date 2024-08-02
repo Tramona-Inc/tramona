@@ -74,8 +74,7 @@ export default function SignIn({
 
   const { query } = useRouter();
   const [inviteLinkId] = useInviteStore((state) => [state.inviteLinkId]);
-  const { mutate: inviteUser } = api.groups.inviteUserById.useMutation();
-
+  const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
 
   const handleSubmit = async ({
     email,
@@ -88,14 +87,13 @@ export default function SignIn({
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: from ?? `${window.location.origin}/auth/onboarding`,
+      callbackUrl: from ?? `${window.location.origin}`,
     }).then(() => {
       if (inviteLinkId) {
-        void inviteUser({ inviteLinkId});
+        void inviteUser({ inviteLinkId });
       }
     });
   };
-
 
   useEffect(() => {
     if (query.error) {
@@ -228,9 +226,7 @@ export default function SignIn({
 }
 
 export async function getStaticProps() {
-  const providers = await getProviders();
-
   return {
-    props: { providers: providers ?? [] },
+    props: { providers: await getProviders() },
   };
 }

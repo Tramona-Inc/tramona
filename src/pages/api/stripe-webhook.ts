@@ -4,9 +4,11 @@ import {
   createConversationWithAdmin,
   fetchConversationWithAdmin,
 } from "@/server/api/routers/messagesRouter";
+import { createSuperhogReservation } from "@/server/api/routers/superhogRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
+  hostProfiles,
   offers,
   referralCodes,
   referralEarnings,
@@ -17,6 +19,7 @@ import {
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
 
 // ! Necessary for stripe
 export const config = {
@@ -81,6 +84,20 @@ export default async function webhook(
                 ),
               );
 
+            // await db
+            //   .update(trips)
+            //   .set({
+            //     paymentIntentId: paymentIntentSucceeded.id,
+            //     checkoutSessionId:
+            //       paymentIntentSucceeded.metadata.checkout_session_id,
+            //   })
+            //   .where(
+            //     eq(
+            //       trips.offerId,
+            //       parseInt(paymentIntentSucceeded.metadata.listing_id!),
+            //     ),
+            //   ); // setting the paymentIntentId in the trips table
+
             const requestId = paymentIntentSucceeded.metadata.request_id;
             if (requestId && !isNaN(parseInt(requestId))) {
               await db
@@ -90,7 +107,7 @@ export default async function webhook(
 
               if (offerId) {
                 const offer = await db.query.offers.findFirst({
-                  with: { request: true },
+                  with: { request: true, property: true, },
                   where: eq(offers.id, offerId),
                 });
 
@@ -122,7 +139,7 @@ export default async function webhook(
           // const requestID = parseInt(
           //   paymentIntentSucceeded.metadata.request_id!,
           // );
-          // const property = await db.query.properties.findFirst({
+          // const property = await ({
           //   where: eq(properties.id, propertyID),
           // });
           // const request = await db.query.requests.findFirst({
@@ -245,15 +262,56 @@ export default async function webhook(
           );
 
           await db
-            .update(offers)
+            .update(trips)
             .set({
               checkoutSessionId: checkoutSessionCompleted.id,
             })
             .where(eq(offers.id, listing_id));
-
-          console.log("Checkout session was successful!");
         } else {
           // console.error("Metadata or listing_id is null or undefined");
+        }
+        break;
+      case "charge.updated":
+        {
+          const chargeObject = event.data.object;
+          //addingt the paymentIntentId to the trips table
+          await db
+            .update(trips)
+            .set({
+              paymentIntentId: chargeObject.payment_intent?.toString(),
+              checkoutSessionId: chargeObject.metadata.checkout_session_id,
+              totalPriceAfterFees: chargeObject.amount,
+            })
+            .where(
+              eq(trips.offerId, parseInt(chargeObject.metadata.listing_id!)),
+            ); // setting the paymentIntentId in the trips table
+
+          //get the new trips
+          const trip = await db.query.trips.findFirst({
+            where: eq(
+              trips.offerId,
+              parseInt(chargeObject.metadata.listing_id!),
+            ),
+          });
+          //extract metadata from the charge object
+          const listingId = parseInt(chargeObject.metadata.listing_id!);
+          const propertyId = parseInt(chargeObject.metadata.property_id!);
+          const userId = chargeObject.metadata.user_id!;
+
+          //creating a superhog reservation only if does not exist
+          const currentSuperhogReservation = await db.query.trips.findFirst({
+            where: eq(trips.superhogRequestId, superhogRequests.id),
+          });
+          if (!currentSuperhogReservation && trip) {
+            void createSuperhogReservation({
+              listingId,
+              propertyId,
+              userId,
+              trip,
+            }); //creating a superhog reservation
+          } else {
+            console.log("Superhog reservation already exists");
+          }
         }
         break;
       case "identity.verification_session.processing":
@@ -379,6 +437,25 @@ export default async function webhook(
           }
         }
       }
+
+      case "account.external_account.created":
+        //"use this for when you want an event to trigger after onboarding",
+
+        break;
+
+      case "account.updated":
+        const account = event.data.object;
+
+        if (account.id) {
+          const stripeAccount = await stripe.accounts.retrieve(account.id);
+          await db
+            .update(hostProfiles)
+            .set({
+              chargesEnabled: stripeAccount.payouts_enabled, // fix later or true
+            })
+            .where(eq(hostProfiles.stripeAccountId, account.id));
+        }
+        break;
 
       default:
       // console.log(`Unhandled event type ${event.type}`);

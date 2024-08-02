@@ -28,8 +28,6 @@ export default function OfferCard({
   checkOut: Date;
   requestId: number;
 }>) {
-  const isPremium = false; // temporary until we add payments
-
   const hostName = property.host?.name ?? property.hostName;
 
   const numNights = getNumNights(checkIn, checkOut);
@@ -41,14 +39,9 @@ export default function OfferCard({
   );
 
   return (
-    <Card className={cn(isPremium && "p-0", "overflow-clip")}>
+    <Card className="p-0">
       <CardContent>
-        {isPremium && (
-          <div className="mb-2 bg-gold p-2.5 text-center text-sm font-medium text-black">
-            Must be a Tramona Lisa member to book this deal!
-          </div>
-        )}
-        <div className={cn("space-y-4", isPremium && "p-4 pt-0")}>
+        <div className="space-y-4">
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-stretch">
             <div
               className={`relative h-64 w-72 overflow-clip rounded-xl bg-cover bg-center`}
@@ -113,7 +106,7 @@ export default function OfferCard({
               </Badge>
             )}
             <Badge variant="secondary">{property.propertyType}</Badge>
-            {property.amenities && property.amenities.length > 0 && (
+            {property.amenities.length > 0 && (
               <Badge variant="secondary">
                 {plural(property.amenities.length, "amenity", "amenities")}
               </Badge>
@@ -153,7 +146,7 @@ export default function OfferCard({
           </div>
         </div>
       </CardContent>
-      <CardFooter className={cn(isPremium && "p-4")}>{children}</CardFooter>
+      <CardFooter>{children}</CardFooter>
     </Card>
   );
 }

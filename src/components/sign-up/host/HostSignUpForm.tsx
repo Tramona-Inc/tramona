@@ -24,8 +24,7 @@ import {
   zodEmail,
   zodPassword,
   zodPhone,
-  zodString,
-  zodUrl,
+  zodString
 } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
@@ -43,7 +42,7 @@ const formSchema = z
     password: zodPassword(),
     confirm: z.string(),
     hostType: z.enum(ALL_HOST_TYPES),
-    profileUrl: zodUrl(),
+    //profileUrl: zodUrl(),
   })
   .refine((data) => data.password === data.confirm, {
     message: "Passwords don't match",
@@ -119,7 +118,7 @@ export default function HostSignUpForm() {
         password: newUser.password,
         // confirm: newUser.confirm,
         hostType: newUser.hostType,
-        profileUrl: newUser.profileUrl,
+        //profileUrl: newUser.profileUrl,
         conversationId: query.conversationId as string,
       };
 
@@ -247,22 +246,6 @@ export default function HostSignUpForm() {
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="profileUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="text"
-                    placeholder="Enter your profile link"
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

@@ -1,4 +1,3 @@
-import { hostPropertyFormSchema } from "@/components/host/HostPropertyForm";
 import {
   createTRPCRouter,
   optionallyAuthedProcedure,
@@ -8,13 +7,17 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
+  groups,
   hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
+  type Request,
+  requests,
+  requestsToProperties,
+  type User,
   users,
 } from "@/server/db/schema";
-import { getCoordinates } from "@/server/google-maps";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
 import {
@@ -28,32 +31,63 @@ import {
   notExists,
   sql,
 } from "drizzle-orm";
-
 import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
   properties,
+  type Property,
 } from "./../../db/schema/tables/properties";
 import { addProperty } from "@/server/server-utils";
 
+export type HostRequestsPageData = {
+  city: string;
+  requests: {
+    request: Request & { traveler: Pick<User, "name" | "image"> };
+    properties: Property[];
+  }[];
+};
+
 export const propertiesRouter = createTRPCRouter({
   create: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyInsertSchema.omit({ hostId: true }))
+    .input(
+      propertyInsertSchema.omit({
+        hostId: true,
+        city: true,
+        latitude: true,
+        longitude: true,
+        latLngPoint: true,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "admin" && !input.hostName) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
+      const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
+      const hostTeamId = await db.query.hostProfiles
+        .findFirst({
+          where: eq(hostProfiles.userId, ctx.user.id),
+          columns: { curTeamId: true },
+        })
+        .then((res) => res?.curTeamId);
+
+      if (!hostTeamId) {
+        //logic
       }
 
-      const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
-
-      const id = await addProperty({property: input, hostId});
+      const id = await addProperty({ property: input, hostId, hostTeamId });
       return id;
     }),
 
   // uses the hostId passed in the input instead of the admin's user id
   createForHost: roleRestrictedProcedure(["admin"])
-    .input(propertyInsertSchema.extend({ hostId: z.string() })) // make hostid required
+    .input(
+      propertyInsertSchema
+        .omit({
+          city: true,
+          latitude: true,
+          longitude: true,
+          latLngPoint: true,
+        })
+        .extend({ hostId: z.string() }),
+    ) // make hostid required
     .mutation(async ({ ctx, input }) => {
       const host = await ctx.db.query.users.findFirst({
         columns: { name: true, role: true },
@@ -67,7 +101,7 @@ export const propertiesRouter = createTRPCRouter({
         return { status: "user not a host" } as const;
       }
 
-      await ctx.db.insert(properties).values(input);
+      await addProperty({ property: input, hostId: input.hostId });
 
       return {
         status: "success",
@@ -76,7 +110,7 @@ export const propertiesRouter = createTRPCRouter({
     }),
 
   update: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyUpdateSchema.omit({ hostId: true }))
+    .input(propertyUpdateSchema.omit({ hostId: true, latLngPoint: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "admin" && !input.hostName) {
         throw new TRPCError({ code: "BAD_REQUEST" });
@@ -307,9 +341,6 @@ export const propertiesRouter = createTRPCRouter({
       const long = input.long ?? 0;
       const radius = input.radius;
 
-      console.log("Input boundaries:", boundaries);
-      console.log("Cursor:", cursor);
-
       const data = await ctx.db
         .select({
           id: properties.id,
@@ -395,8 +426,6 @@ export const propertiesRouter = createTRPCRouter({
         .limit(12)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
-      console.log("Fetched properties count:", data.length);
-
       return {
         data,
         nextCursor: data.length ? data[data.length - 1]?.id : null,
@@ -430,52 +459,138 @@ export const propertiesRouter = createTRPCRouter({
         limit: input?.limit,
       });
     }),
-  getHostRequestsSidebar: roleRestrictedProcedure(["host"]).query(
+  getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
-      const curTeamId = await ctx.db.query.hostProfiles
-        .findFirst({
-          where: eq(hostProfiles.userId, ctx.user.id),
-          columns: { curTeamId: true },
-        })
-        .then((res) => res?.curTeamId);
+      const rawData = await ctx.db.execute(sql`
+          WITH host_properties AS (
+            SELECT
+              p.*,
+              rp.request_id
+            FROM ${properties} p
+            JOIN ${requestsToProperties} rp ON p.id = rp.property_id
+            WHERE p.host_id = ${ctx.user.id}
+          ),
+          city_requests AS (
+            SELECT
+              hp.request_id,
+              hp.city
+            FROM host_properties hp
+            JOIN ${requests} r ON hp.request_id = r.id
+            GROUP BY hp.city, hp.request_id
+          )
+          SELECT
+            cr.city AS property_city,
+            cr.request_id,
+            p.id AS property_id,
+            p.*,
+            r.*,
+            u.name AS user_name,
+            u.image
+          FROM city_requests cr
+          JOIN ${requests} r ON cr.request_id = r.id
+          JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
+          JOIN ${groups} g ON r.made_by_group_id = g.id
+          JOIN ${users} u ON g.owner_id = u.id
+          ORDER BY cr.city, r.id, p.id
+        `);
 
-      console.log("USER ID", ctx.user.id);
-      console.log("CURR ID", curTeamId);
+      const organizedData: HostRequestsPageData[] = [];
+      const cityMap = new Map<string, HostRequestsPageData>();
 
-      if (!curTeamId) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+      for (const row of rawData) {
+        const property = {
+          id: row.property_id,
+          hostId: row.host_id,
+          hostTeamId: row.host_team_id,
+          propertyType: row.property_type,
+          address: row.address,
+          city: row.property_city,
+          roomType: row.room_type,
+          maxNumGuests: row.max_num_guests,
+          numBeds: row.num_beds,
+          numBedrooms: row.num_bedrooms,
+          numBathrooms: row.num_bathrooms,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          checkInTime: row.check_in_time,
+          checkOutTime: row.check_out_time,
+          amenities: row.amenities,
+          imageUrls: row.image_url,
+          name: row.name,
+          about: row.about,
+          avgRating: row.avg_rating,
+          numRatings: row.num_ratings,
+          cancellationPolicy: row.cancellation_policy,
+          createdAt: row.created_at,
+          isPrivate: row.is_private,
+          hostProfilePic: row.host_profile_pic,
+          hostawayListingId: row.hostaway_listing_id,
+          hostName: row.host_name,
+          // Add other property fields here
+        } as Property;
 
-      return await ctx.db.query.properties
-        .findMany({
-          columns: { id: true, imageUrls: true, name: true, address: true },
-          where: eq(properties.hostTeamId, curTeamId),
-          with: { requestsToProperties: true, bids: true },
-        })
-        .then((res) =>
-          res
-            .map((p) => {
-              const { requestsToProperties, bids, ...rest } = p;
-              return {
-                ...rest,
-                numRequests: requestsToProperties.length,
-                numBids: bids.length,
-              };
-            })
-            .sort((a, b) => b.numRequests - a.numRequests),
+        const request = {
+          id: row.request_id,
+          madeByGroupId: row.made_by_group_id,
+          requestGroupId: row.request_group_id,
+          maxTotalPrice: row.max_total_price,
+          location: row.location,
+          checkIn: row.check_in,
+          checkOut: row.check_out,
+          numGuests: row.num_guests,
+          minNumBeds: row.min_num_beds,
+          minNumBedrooms: row.min_num_bedrooms,
+          minNumBathrooms: row.min_num_bathrooms,
+          propertyType: row.property_type,
+          note: row.note,
+          airbnbLink: row.airbnb_link,
+          createdAt: row.created_at,
+          resolvedAt: row.resolved_at,
+          lat: row.lat,
+          lng: row.lng,
+          latLngPoint: row.lat_lng_point,
+          radius: row.radius,
+          amenities: row.amenities,
+          traveler: { name: row.user_name, image: row.image },
+          // Add other request fields here
+        } as HostRequestsPageData["requests"][number]["request"];
+
+        const city = row.property_city as string;
+
+        if (!cityMap.has(city)) {
+          const newCityData: HostRequestsPageData = { city, requests: [] };
+          cityMap.set(city, newCityData);
+          organizedData.push(newCityData);
+        }
+
+        const cityData = cityMap.get(city)!;
+        let requestData = cityData.requests.find(
+          (r) => r.request.id === request.id,
         );
+
+        if (!requestData) {
+          requestData = { request, properties: [] };
+          cityData.requests.push(requestData);
+        }
+
+        // Check if the property is not already in the properties array
+        if (!requestData.properties.some((p) => p.id === property.id)) {
+          requestData.properties.push(property);
+        }
+      }
+      return organizedData;
     },
   ),
-  hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
-    .input(hostPropertyFormSchema)
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.db.insert(properties).values({
-        ...input,
-        hostId: ctx.user.id,
-        hostName: ctx.user.name,
-        imageUrls: input.imageUrls,
-      });
-    }),
+  // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
+  //   .input(hostPropertyFormSchema)
+  //   .mutation(async ({ ctx, input }) => {
+  //     return await ctx.db.insert(properties).values({
+  //       ...input,
+  //       hostId: ctx.user.id,
+  //       hostName: ctx.user.name,
+  //       imageUrls: input.imageUrls,
+  //     });
+  //   }),
   getBlockedDates: protectedProcedure
     .input(z.object({ propertyId: z.number() }))
     .query(async ({ ctx, input }) => {

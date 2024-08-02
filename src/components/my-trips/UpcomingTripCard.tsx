@@ -7,7 +7,6 @@ import { Button } from "../ui/button";
 import { formatDateRange } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import MapPin from "../_icons/MapPin";
 import {
   Sheet,
   SheetClose,
@@ -18,7 +17,7 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { TripCardDetails } from "./PastTrips";
+import { type TripCardDetails } from "@/pages/my-trips";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
@@ -29,23 +28,26 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   return (
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
-        <Link href={`/my-trips/${trip.id}`} className="relative w-96">
-          <Image
-            fill
-            alt=""
-            className="object-cover"
-            src={trip.property.imageUrls[0]!}
-          />
-          <Badge variant="lightGray" className="absolute left-4 top-4">
-            Trip {dayjs(trip.checkIn).fromNow()}
-          </Badge>
-        </Link>
-
         <div className="flex w-full flex-col gap-4 p-4 pt-12 lg:pt-4">
           <div className="flex w-full flex-col justify-between gap-3 lg:flex-row lg:gap-6">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold">{trip.property.name}</h2>
-              <div className="flex gap-2">
+            <div className="flex flex-col gap-4 lg:gap-0">
+              <div className="flex justify-center sm:justify-start">
+                <Link
+                  href={`/my-trips/${trip.id}`}
+                  className="relative -mt-8 h-48 w-full sm:h-32 sm:w-52 lg:-mt-0"
+                >
+                  <Image
+                    fill
+                    alt=""
+                    className="rounded-md object-cover"
+                    src={trip.property.imageUrls[0]!}
+                  />
+                  <Badge variant="lightGray" className="absolute left-2 top-3">
+                    Trip {dayjs(trip.checkIn).fromNow()}
+                  </Badge>
+                </Link>
+              </div>
+              <div className="mt-4 flex gap-2">
                 <UserAvatar
                   name={trip.property.host?.name}
                   // image={trip.property.host?.image}
@@ -66,28 +68,28 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                 </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold">Location</h3>
-              <div className="flex">
-                <MapPin />
-                <p>{trip.property.address}</p>
+            <div className="mt-4 flex flex-col gap-4">
+              <h2 className="text-xl font-bold lg:text-2xl">
+                {trip.property.name}
+              </h2>
+
+              <p>{trip.property.address}</p>
+
+              <div className="">
+                <p>{formatDateRange(trip.checkIn, trip.checkOut)}</p>
+                <Link
+                  href={`/my-trips/${trip.id}`}
+                  className="text-sm font-bold underline underline-offset-4"
+                >
+                  View more
+                </Link>
               </div>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold">Check-in details</h3>
-              <p>{formatDateRange(trip.checkIn, trip.checkOut)}</p>
-              <Link
-                href={`/my-trips/${trip.id}`}
-                className="text-sm font-bold underline underline-offset-4"
-              >
-                View more
-              </Link>
             </div>
           </div>
 
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
-          <div className="flex flex-col justify-end gap-2 sm:flex-row">
+          <div className="flex flex-col justify-center gap-2 px-4 sm:flex-row lg:gap-4">
             <Button variant="secondary" onClick={() => chatWithAdmin()}>
               <MessageCircle className="size-4" />
               Message your host

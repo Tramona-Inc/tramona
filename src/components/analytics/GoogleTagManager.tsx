@@ -2,6 +2,7 @@ import Script from "next/script";
 
 const GoogleTagManager = () => (
   <>
+    {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
     <Script
       src="https://www.googletagmanager.com/gtag/js?id=G-WBTN40GDLM"
       strategy="beforeInteractive"

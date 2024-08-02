@@ -2,8 +2,10 @@ import {
   boolean,
   date,
   doublePrecision,
+  geometry,
   index,
   integer,
+  pgEnum,
   pgTable,
   serial,
   smallint,
@@ -15,6 +17,24 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { propertyTypeEnum } from "./properties";
 import { users } from "./users";
+import { z } from "zod";
+import { sql } from "drizzle-orm";
+
+export const ALL_REQUESTABLE_AMENITIES = [
+  "Pool",
+  "Hot tub",
+  "A/C",
+  "Dedicated workspace",
+  "Kitchen",
+  "Wifi",
+] as const;
+
+export type RequestableAmenity = (typeof ALL_REQUESTABLE_AMENITIES)[number];
+
+export const requestableAmenitiesEnum = pgEnum(
+  "requestable_amenities",
+  ALL_REQUESTABLE_AMENITIES,
+);
 
 export const requests = pgTable(
   "requests",
@@ -35,24 +55,41 @@ export const requests = pgTable(
     minNumBedrooms: smallint("min_num_bedrooms").default(1),
     minNumBathrooms: smallint("min_num_bathrooms").default(1),
     propertyType: propertyTypeEnum("property_type"),
+    amenities: requestableAmenitiesEnum("amenities")
+      .array()
+      .notNull()
+      .default(sql`'{}'`),
     note: varchar("note", { length: 255 }),
     airbnbLink: varchar("airbnb_link", { length: 512 }),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    resolvedAt: timestamp("resolved_at"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     lat: doublePrecision("lat"),
     lng: doublePrecision("lng"),
     radius: doublePrecision("radius"),
+    latLngPoint: geometry("lat_lng_point", {
+      type: "point",
+      mode: "xy",
+      srid: 4326,
+    }),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),
     requestGroupidIdx: index().on(t.requestGroupId),
+    requestSpatialIndex: index("request_spacial_index").using(
+      "gist",
+      t.latLngPoint,
+    ),
   }),
 );
-
 export type Request = typeof requests.$inferSelect;
 export type NewRequest = typeof requests.$inferInsert;
 export const requestSelectSchema = createSelectSchema(requests);
-export const requestInsertSchema = createInsertSchema(requests);
+export const requestInsertSchema = createInsertSchema(requests, {
+  latLngPoint: z.object({ x: z.number(), y: z.number() }),
+  amenities: z.array(z.enum(ALL_REQUESTABLE_AMENITIES)),
+});
 
 export const MAX_REQUEST_GROUP_SIZE = 10;
 
@@ -81,7 +118,9 @@ export const requestGroups = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     hasApproved: boolean("has_approved").default(false).notNull(),
-    confirmationSentAt: timestamp("confirmation_sent_at")
+    confirmationSentAt: timestamp("confirmation_sent_at", {
+      withTimezone: true,
+    })
       .notNull()
       .defaultNow(),
     haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),

@@ -565,7 +565,7 @@ export const biddingRouter = createTRPCRouter({
       numGuests: random(1, 5),
     });
   }),
-
+  
   getAllHostPending: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
       const allHostProperties = (

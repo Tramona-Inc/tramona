@@ -3,13 +3,7 @@ import { api } from "@/utils/api";
 import { type Request } from "@/server/db/schema";
 import { formatCurrency, formatDateRange } from "@/utils/utils";
 
-export default function RequestRefreshForm({
-  afterSubmit,
-  request,
-}: {
-  afterSubmit?: () => void;
-  request: Request;
-}) {
+export default function RequestRefreshForm({ request }: { request: Request }) {
   const [updatedRequestInfo, setUpdatedRequestInfo] = useState<{
     preferences?: string;
     updatedPriceNightlyUSD?: number;
@@ -31,7 +25,7 @@ export default function RequestRefreshForm({
       setUpdatedRequestInfo({
         preferences: data.preferences ?? undefined,
         updatedPriceNightlyUSD: data.updatedPriceNightlyUSD ?? undefined,
-        propertyLinks: data.propertyLinks ?? [],
+        propertyLinks: data.propertyLinks,
       });
     }
   }, [data]);
@@ -56,8 +50,10 @@ export default function RequestRefreshForm({
             Price Preference:
           </h2>
           <p className="text-gray-600">
-            {formatCurrency(updatedRequestInfo.updatedPriceNightlyUSD+request.maxTotalPrice)} per
-            night
+            {formatCurrency(
+              updatedRequestInfo.updatedPriceNightlyUSD + request.maxTotalPrice,
+            )}{" "}
+            per night
           </p>
         </div>
       )}
@@ -99,7 +95,7 @@ export default function RequestRefreshForm({
         <h2 className="mb-4 text-center text-xl font-semibold text-gray-800">
           Original Request Information
         </h2>
-        <ul className="space-y-2 list-disc pl-5 text-gray-600">
+        <ul className="list-disc space-y-2 pl-5 text-gray-600">
           <li>
             <strong>Max total price:</strong>{" "}
             {formatCurrency(request.maxTotalPrice)}
