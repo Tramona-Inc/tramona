@@ -5,7 +5,7 @@ import {
 } from "@/server/api/trpc";
 import { z } from "zod";
 import axios, { type AxiosResponse } from "axios";
-import { users } from "@/server/db/schema";
+import { hostProfiles, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 export const pmsRouter = createTRPCRouter({
@@ -101,37 +101,45 @@ export const pmsRouter = createTRPCRouter({
     }),
 
   getHospitableCustomer: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.user.id),
-    });
-    if (!user) {
-      throw new Error("User not found");
-    }
-    const { id } = user;
+    const isHospitable = await ctx.db.query.hostProfiles.findFirst({
+      where: eq(hostProfiles.userId, ctx.user.id),
+    }).then((profile) => profile?.isHospitableCustomer);
 
-    try {
-      const response = await axios.get(
-        `https://connect.hospitable.com/api/v1/customers/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
-          },
-        },
-      );
-
-      type HospitableCustomerResponse = {
-        data: AxiosResponse;
-      };
-
-      return response.data as HospitableCustomerResponse;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 404) {
-          return null;
-        }
-      }
-    }
+    return isHospitable;
   }),
+
+
+  //   const user = await ctx.db.query.users.findFirst({
+  //     where: eq(users.id, ctx.user.id),
+  //   });
+  //   if (!user) {
+  //     throw new Error("User not found");
+  //   }
+  //   const { id } = user;
+
+  //   try {
+  //     const response = await axios.get(
+  //       `https://connect.hospitable.com/api/v1/customers/${id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+  //         },
+  //       },
+  //     );
+
+  //     type HospitableCustomerResponse = {
+  //       data: AxiosResponse;
+  //     };
+
+  //     return response.data as HospitableCustomerResponse;
+  //   } catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       if (error.response?.status === 404) {
+  //         return null;
+  //       }
+  //     }
+  //   }
+  // }),
 
   createHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
     const user = await ctx.db.query.users.findFirst({

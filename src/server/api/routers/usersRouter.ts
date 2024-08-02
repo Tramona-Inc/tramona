@@ -18,7 +18,7 @@ import {
   userUpdateSchema,
   users,
 } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, is } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -176,6 +176,7 @@ export const usersRouter = createTRPCRouter({
           hostawayAccountId: z.string().optional(),
           hostawayBearerToken: z.string().optional(),
           hostawayApiKey: z.string().optional(),
+          isHospitableCustomer: z.boolean().optional(),
         })
         .optional(),
     )
@@ -184,7 +185,13 @@ export const usersRouter = createTRPCRouter({
         where: eq(hostProfiles.userId, ctx.user.id),
       });
 
-      if (existingHostProfile) {
+      if (existingHostProfile && input.isHospitableCustomer !== undefined) {
+        await ctx.db
+          .update(hostProfiles)
+          .set({ isHospitableCustomer: input.isHospitableCustomer })
+          .where(eq(hostProfiles.userId, ctx.user.id));
+        return;
+      } else if (existingHostProfile) {
         return existingHostProfile;
       }
 
@@ -210,6 +217,7 @@ export const usersRouter = createTRPCRouter({
         hostawayApiKey: input.hostawayApiKey,
         hostawayAccountId: input.hostawayAccountId,
         hostawayBearerToken: input.hostawayBearerToken,
+        isHospitableCustomer: input.isHospitableCustomer,
       });
 
       interface PropertyType {

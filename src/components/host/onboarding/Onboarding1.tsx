@@ -37,6 +37,7 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { Home } from "lucide-react";
+import Spinner from "@/components/_common/Spinner";
 
 export default function Onboarding1({
   onPressNext,
@@ -109,7 +110,10 @@ export default function Onboarding1({
 
   const { mutateAsync: createHospitableCustomer } =
     api.pms.createHospitableCustomer.useMutation({
-      onSuccess: (res) => {
+      onSuccess: async (res) => {
+        await createHostProfile({
+          isHospitableCustomer: true,
+        });
         void router.push(res.data.return_url);
       },
     });
@@ -124,7 +128,7 @@ export default function Onboarding1({
   const { mutateAsync: createHostProfile } =
     api.users.upsertHostProfile.useMutation();
 
-  const { data: isHospitableCustomer } =
+  const { data: isHospitableCustomer, isLoading } =
     api.pms.getHospitableCustomer.useQuery();
 
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
@@ -157,32 +161,36 @@ export default function Onboarding1({
           <h1 className="text-center text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl">
             Get started on Tramona
           </h1>
-          <div className="flex flex-col gap-4">
-            {items.map((item) =>
-              item.id === "1" ? (
-                !isHospitableCustomer && (
+          {isLoading ? (
+            <Spinner />
+          ) : (
+            <div className="flex flex-col gap-4">
+              {items.map((item) =>
+                item.id === "1" ? (
+                  !isHospitableCustomer && (
+                    <CardSelect
+                      key={item.id}
+                      title={item.title}
+                      text={item.text}
+                      onClick={item.onClick}
+                      recommended={item.recommended}
+                    >
+                      {item.icon}
+                    </CardSelect>
+                  )
+                ) : (
                   <CardSelect
-                    key={item.id}
+                    key={item.title}
                     title={item.title}
                     text={item.text}
                     onClick={item.onClick}
-                    recommended={item.recommended}
                   >
                     {item.icon}
                   </CardSelect>
-                )
-              ) : (
-                <CardSelect
-                  key={item.title}
-                  title={item.title}
-                  text={item.text}
-                  onClick={item.onClick}
-                >
-                  {item.icon}
-                </CardSelect>
-              ),
-            )}
-          </div>
+                ),
+              )}
+            </div>
+          )}
         </div>
       </div>
 
