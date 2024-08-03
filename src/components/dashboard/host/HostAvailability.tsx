@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { MoveLeft, MoveRight } from "lucide-react";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
+import { daysOfWeek, months } from "@/utils/constants";
 
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
@@ -17,22 +18,6 @@ export default function HostAvailability({ property }: { property: Property }) {
     refetch,
   } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
 
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
   const fetchReservedDateRanges = useCallback(async () => {
     try {
       if (!property.iCalLink) {
@@ -41,7 +26,7 @@ export default function HostAvailability({ property }: { property: Property }) {
       }
       // Refresh iCal data
       await syncCalendar({
-        iCalUrl: property.iCalLink,
+        iCalLink: property.iCalLink,
         propertyId: property.id,
       });
       console.log("Refreshed iCal data");
