@@ -343,7 +343,7 @@ importers:
         version: 4.2.1(leaflet@1.9.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-phone-number-input:
         specifier: ^3.3.9
-        version: 3.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 3.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-share:
         specifier: ^5.1.0
         version: 5.1.0(react@18.2.0)
@@ -8540,8 +8540,8 @@ packages:
       react: ^18.0.0
       react-dom: ^18.0.0
 
-  react-phone-number-input@3.4.4:
-    resolution: {integrity: sha512-zeyZeS1Iazhj3vTHj6qOyTTguBf/WFLAe9OtA8s0Itycy7AOoQI0vFlpxKDaEcyvYup7Wt79lKu+nl/nJwyLdw==}
+  react-phone-number-input@3.4.5:
+    resolution: {integrity: sha512-IlLTG0F/2P+72drqGNiYaguV3KOD4EVxQWGJ7YSofbOb6vyCWWLJqQIQsFFNpfrMrXzYtB3G+aHL9tprGfisFw==}
     peerDependencies:
       react: '>=16.8'
       react-dom: '>=16.8'
@@ -20500,7 +20500,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  react-phone-number-input@3.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  react-phone-number-input@3.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       classnames: 2.5.1
       country-flag-icons: 1.5.13
