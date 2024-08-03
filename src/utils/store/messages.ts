@@ -8,7 +8,7 @@ import { read } from "fs";
 import { set } from "lodash";
 
 export type ChatMessageType = MessageType & {userId: string}; // make userId non-null
-export type GuestMessage = GuestMessageType; 
+export type GuestMessage = GuestMessageType & {userToken : string}; 
 
 
 type ConversationsState = Record<
@@ -178,6 +178,8 @@ export const useMessage = create<MessageState>((set, get) => ({
       return updatedState;
     });
   },
+
+  //this is logged in users
   fetchInitialMessages: async (conversationId: string): Promise<void> => {
     const state = get();
 
@@ -239,6 +241,8 @@ export const useMessage = create<MessageState>((set, get) => ({
       errorToast();
     }
   },
+
+  //this is for logged out users
   fetchMessagesForGuest: async (conversationId: string): Promise<void> => {
     const state = get();
 
@@ -262,7 +266,7 @@ export const useMessage = create<MessageState>((set, get) => ({
         const chatMessages: (ChatMessageType & GuestMessage)[] = data.map((message) => ({
           id: message.id,
           conversationId: message.conversation_id,
-          userToken: message.user_token,
+          userToken: message.user_token ?? "",
           message: message.message,
           createdAt: message.created_at,
           isEdit: message.is_edit,

@@ -246,8 +246,8 @@ export default async function webhook(
             // Create conversation with admin if it doesn't exist
             if (!conversationId) {
               await createConversationWithAdmin(
-                userId: paymentIntentSucceeded.metadata?.user_id ?? null,
-                
+                userId: paymentIntentSucceeded.metadata?.user_id ?? "",
+                userToken: "",
               );
             }
           }

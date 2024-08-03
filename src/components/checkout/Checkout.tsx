@@ -11,6 +11,7 @@ import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "../requests/StripePaymentInfo";
 import CheckoutInfoForm from "./ContactInfoForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import { useSession } from "next-auth/react";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -20,6 +21,7 @@ export default function Checkout({
   const router = useRouter();
   const chatWithAdmin = useChatWithAdmin();
   const isMobile = !useIsSm();
+  const {data: session} = useSession();
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -27,6 +29,7 @@ export default function Checkout({
     event.preventDefault();
     router.back();
   };
+
 
   function BestPriceCard() {
     return (
@@ -196,7 +199,7 @@ export default function Checkout({
         Questions?{" "}
         <span className="text-teal-900 underline">
           <button
-            onClick={() => chatWithAdmin()}
+            onClick={() => chatWithAdmin({uniqueId: session?.user.id ?? "", session: true})}
             className="text-blue-600 underline underline-offset-2"
           >
             Chat with host

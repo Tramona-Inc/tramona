@@ -2,7 +2,7 @@ import { type GuestMessageType, type MessageType, type User } from "@/server/db/
 import { type GuestMessage, type ChatMessageType } from "@/utils/store/messages";
 
 export type MessageGroups = {
-  user: Pick<User, "name" | "email" | "image" | "id"> & {
+  user: Pick<User, "name" | "email" | "image" | "id"> | {
     conversationId: string;
     userToken: string | null;
     adminId: string;
@@ -28,7 +28,7 @@ export function groupMessages(
   messages.forEach(({ message, user }) => {
     const lastGroup = groups[groups.length - 1];
 
-    if (!user || (lastGroup && "id" in user && user.id !== lastGroup.user?.id )) {
+    if (!user || (lastGroup  && "id" in user && user.id !== lastGroup.user?.id )) {
       groups.push({
         user,
         messages: [message],

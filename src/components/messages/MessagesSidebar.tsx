@@ -100,7 +100,7 @@ export function MessageConversation({
 }
 
 export type SidebarProps = {
-  selectedConversation: Conversation | AdminConversation | null;
+  selectedConversation: Conversation | AdminConversation ;
   setSelected: (arg0: Conversation | AdminConversation) => void;
 };
 
@@ -121,6 +121,9 @@ export default function MessagesSidebar({
   const {data: fetchedConversationsForAdmin} = api.messages.getConversationForAdmin.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
+
+  
+  console.log("fetchedConversationsForAdmin",fetchedConversationsForAdmin)
 
   const conversations = useConversation((state) => state.conversationList);
 
@@ -174,7 +177,7 @@ export default function MessagesSidebar({
       const newMessage: GuestMessage = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
-        userToken: payload.new.user_token,
+        userToken: payload.new.user_token ?? "",
         message: payload.new.message,
         isEdit: payload.new.is_edit,
         createdAt: payload.new.created_at,

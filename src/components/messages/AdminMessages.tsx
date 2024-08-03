@@ -63,11 +63,12 @@ export default function AdminMessages() {
   const handlePostgresChangeOnGuest = async (payload: {
     new: GuestMessageType;
   }) => {
+    console.log("in AdminMessages->handlePostgresChangeOnGuest")
     if (!optimisticIds.includes(payload.new.id)) {
       const newMessage: ChatMessageType | GuestMessage = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
-        userToken: payload.new.user_token,
+        userToken: payload.new.user_token ?? "",
         message: payload.new.message,
         isEdit: payload.new.is_edit,
         createdAt: payload.new.created_at,
@@ -81,8 +82,8 @@ export default function AdminMessages() {
   };
 
   useEffect(() => {
-    // console.log("handling postgres change for logged in user");
-    // console.log(conversationId);
+    console.log("handling postgres change for logged in user");
+    console.log(conversationId);
     const channel = supabase
       .channel(`${conversationId}`)
       .on(
@@ -105,11 +106,11 @@ export default function AdminMessages() {
       void channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId, messages]);
+  }, [supabase, messages]);
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     console.log("coming to handlePostgresChange");
-    if (optimisticIds.includes(payload.new.id)) {
+    if (!optimisticIds.includes(payload.new.id)) {
       const newMessage: ChatMessageType & GuestMessage = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
@@ -127,6 +128,7 @@ export default function AdminMessages() {
   };
 
   useEffect(() => {
+    console.log("in AdminMessages", conversationId)
     const channel = supabase
       .channel(`${conversationId}`)
       .on(
@@ -145,7 +147,7 @@ export default function AdminMessages() {
       void channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adminMessages]);
+  }, [supabase, adminMessages]);
 
   return (
     <>

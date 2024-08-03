@@ -12,15 +12,9 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
 // import { useMediaQuery } from "@/components/_utils/useMediaQuery";
-import UserAvatar from '@/components/_common/UserAvatar'
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Mic, ArrowUp, Smile} from 'lucide-react'
 import {cn} from '@/utils/utils';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import AdminMessages from "@/components/messages/AdminMessages";
 import * as z from "zod";
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -34,6 +28,9 @@ function MessageDisplay() {
   const [isViewed, setIsViewd] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
   const adminConversation = useConversation((state) => state.adminConversationList)
+
+
+
   // console.log(conversations)
   // console.log(adminConversation)
   const { query } = useRouter();
@@ -45,28 +42,18 @@ function MessageDisplay() {
         (conversation) => conversation.id === conversationIdToSelect,
       );
 
-      if (
-        conversationToSelect &&
-        selectedConversation?.id !== conversationToSelect.id
-      ) {
-        setSelectedConversation(conversationToSelect);
-      }
+      conversationToSelect && setSelectedConversation(selectedConversation)
 
+    //   if (
+    //     conversationToSelect &&
+    //     selectedConversation?.id !== conversationToSelect.id
+    //   ) {
+    //     setSelectedConversation(conversationToSelect);
+    //   }
+      console.log("getting from query", selectedConversation)
       setIsViewd(true);
     }
-
-    if(query.conversationId && adminConversation.length > 0){
-      // console.log(query)
-      const conversationIdToSelect = query.conversationId as string;
-      const conversationToSelect = adminConversation.find(
-        (conversation) => conversation.id === conversationIdToSelect,
-      );
-
-      if(conversationIdToSelect && selectedConversation?.id !== conversationToSelect?.id) {
-        setSelectedConversation(conversationToSelect)
-      }
-    }
-  }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
+  }, [conversations, isViewed, query.conversationId, selectedConversation?.id, adminConversation]);
 
   return (
     <div className="flex h-screen-minus-header-n-footer divide-x">
@@ -144,7 +131,7 @@ export default function MessagePage() {
         Messages | Tramona
       </title>
     </Head>  */}
-    <DashboardLayout type={session?.user.role ?? "guest"}>
+    {/* <DashboardLayout type={session?.user.role ?? "guest"}>
       <div className="grid grid-rows-1 p-0 w-screen h-screen-minus-header-n-footer bg-black border  border-gray-800">
       <div className="flex flex-col">
       <div className="flex flex-col w-full h-[7rem] items-center justify-start p-4 text-base font-bold text-white bg-[#1A1A1A]">
@@ -179,7 +166,7 @@ export default function MessagePage() {
                 <ArrowUp className='text-xs antialiased'/>
               </Button>
               </div>
-      </DashboardLayout>
+      </DashboardLayout> */}
       </div>
     </>
   );

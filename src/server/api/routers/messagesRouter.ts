@@ -229,6 +229,11 @@ export async function createConversationWithAdmin(userId: string, userToken: str
   }
 }
 
+//for chat with real host
+// export async function createConversationWithHost(userId:string, hostId: string) {
+  
+// }
+
 export async function createConversationWithOffer(
   userId: string,
   offerUserId: string,
@@ -280,19 +285,6 @@ export async function addTwoUserToConversation(
 
 export const messagesRouter = createTRPCRouter({
 
-  fetchAdminId:protectedProcedure
-  .query(async ({ctx}) => {
-    if(ctx.user.id === process.env.TRAMONA_USER_ADMIN_ID){
-      const adminId = process.env.TRAMONA_USER_ADMIN_ID
-      return adminId
-    } else if(ctx.user.role === "admin") {
-      const adminId = ctx.user.id
-      return adminId
-    } else {
-      const adminId = await getAdminId();
-      return adminId
-    }
-  }),
 
   getConversations: protectedProcedure.query(async ({ ctx }) => {
     const result = await fetchUsersConversations(ctx.user.id);
@@ -346,7 +338,9 @@ export const messagesRouter = createTRPCRouter({
 
   fetchAdminDetails: publicProcedure
   .input(z.object(
-    {adminId: z.string(),}
+    {
+      adminId: z.string(),
+    }
   ))
   .query(async ({input}) => {
     const result = await db.query.users.findFirst(
@@ -406,6 +400,18 @@ export const messagesRouter = createTRPCRouter({
     }
   }),
 
+  //when the real host is onboard
+  // createConversationWithHost: protectedProcedure
+  // .input(z.object({
+  //   hostId: z.string(),
+  // }))
+  // .mutation(async ({ctx}) => {
+  //   const conversationId = await fetchConversationWithAdmin(ctx.user.id)
+  //   if(!conversationId) {
+  //       return await createConversationWithHost(userId: ctx.user.id, hostId:hostId);
+  //   }
+  //   return conversationId;
+  // }),
 
    createConversationWithAdmin: publicProcedure
   .input(z.object({
@@ -442,6 +448,12 @@ export const messagesRouter = createTRPCRouter({
   // .mutation( async () => {
     
   // } )
+
+  fetchAdminId:protectedProcedure
+  .query(async () => {
+    const adminId = await getAdminId()
+    return adminId
+  }),
 
 
   createConversationWithOffer: protectedProcedure

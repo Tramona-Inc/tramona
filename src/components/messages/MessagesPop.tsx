@@ -198,11 +198,7 @@ export default function MessagesPopover() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  // const today = new Date();
-  // let hours = today.getHours().toString();
-  // let minutes = today.getMinutes().toString();
-  // hours = hours.length === 1 ? "0" + hours : hours;
-  // minutes = minutes.length === 1 ? "0" + minutes : minutes;
+
   return (
     <>
       {/* <div className="fixed bottom-0 right-0 z-50"> */}

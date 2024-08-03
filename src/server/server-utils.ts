@@ -380,7 +380,7 @@ export async function getPropertiesForRequest(
 
 export async function getAdminId() {
   return await db.query.users
-    .findFirst({ where: eq(users.email, "zarananakrani@gmail.com") })
+    .findFirst({ where: eq(users.email, "info@tramona.com") })
     .then((res) => res!.id);
 }
 

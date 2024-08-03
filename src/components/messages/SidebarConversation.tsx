@@ -16,7 +16,7 @@ export function SidebarConversation({
 }: {
   conversation: Conversation;
   isSelected: boolean;
-  setSelected: (arg0: Conversation | AdminConversation) => void;
+  setSelected: (arg0: Conversation ) => void;
 }) {
   const { participants, messages, name } = conversation;
 

@@ -10,7 +10,7 @@ import { useSession } from "next-auth/react";
 import LoadMoreMessages from "./LoadMoreMessages";
 import { groupMessages } from "./groupMessages";
 import { MessageGroup } from "./MessageGroup";
-
+import { errorToast } from "@/utils/toasts";
 
 
 
@@ -50,7 +50,7 @@ export default function ListMessages({
   );
   const { conversations, adminConversations } = useMessage();
 
-  // console.log(currentConversationId);
+  console.log(currentConversationId);
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
   );
@@ -109,7 +109,7 @@ export default function ListMessages({
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     // console.log("Handling postgres change")
-    if(!optimisticIds.includes(payload.new.id)) {
+    if(optimisticIds.includes(payload.new.id)) {
         const newMessage: ChatMessageType = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
@@ -137,13 +137,14 @@ export default function ListMessages({
   };
 
   const handlePostgresChangeOnGuest = async (payload: {new: GuestMessageType}) => {
-    if(!optimisticIds.includes(payload.new.id)) {
+    console.log("in ListMessages -> in handlePostgresChangeOnGuest")
+    if(optimisticIds.includes(payload.new.id)) {
       const newMessage: GuestMessage = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
         // userId: "",
         message: payload.new.message,
-        userToken: payload.new.user_token,
+        userToken: payload.new.user_token ?? "",
         isEdit: payload.new.is_edit,
         createdAt: payload.new.created_at,
         read: payload.new.read,
@@ -161,10 +162,11 @@ export default function ListMessages({
     }
   }
 
+  //this is for loggedin users
   useEffect(() => {
-    // console.log(currentConversationId);
+    console.log("for logged in users", conversationId);
     const channel = supabase
-      .channel(`${currentConversationId}`)
+      .channel(`${conversationId}`)
       .on(
         "postgres_changes",
         {
@@ -182,12 +184,13 @@ export default function ListMessages({
       void channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  });
+  }, [supabase]);
 
+  //this is for logged out users conversations
   useEffect(() => {
-    // console.log("handling guest_messages changes");
+    console.log("handling guest_messages changes", conversationId);
     const channel = supabase
-    .channel(`${currentConversationId}`)
+    .channel(`${conversationId}`)
     .on(
       "postgres_changes",
       {
@@ -203,7 +206,7 @@ export default function ListMessages({
       
       void channel.unsubscribe();
     }
-  })
+  }, [supabase])
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;

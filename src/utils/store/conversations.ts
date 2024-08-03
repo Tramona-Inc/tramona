@@ -32,7 +32,7 @@ type ConversationListState = {
 export const useConversation = create<ConversationListState>((set) => ({
   conversationList: [],
   adminConversationList: [],
-  setConversationList: (conversationList: Conversations  | []) => {
+  setConversationList: (conversationList: Conversations | []) => {
     set(() => ({ conversationList }));
   },
   setAdminConversationList: ( adminConversationList: AdminConversations | []) => {
