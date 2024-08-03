@@ -347,6 +347,7 @@ export const properties = pgTable(
       mode: "xy",
       srid: 4326,
     }),
+    iCalLink: text("ical_link"),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),

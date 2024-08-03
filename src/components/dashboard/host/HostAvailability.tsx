@@ -1,35 +1,60 @@
 import { type Property } from "@/server/db/schema/tables/properties";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MoveLeft, MoveRight } from "lucide-react";
+import { api } from "@/utils/api";
+import Spinner from "@/components/_common/Spinner";
+import { daysOfWeek, months } from "@/utils/constants";
 
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
   const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
 
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
+  const {
+    data: reservedDateRanges,
+    isLoading,
+    refetch,
+  } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
+
+  const fetchReservedDateRanges = useCallback(async () => {
+    try {
+      if (!property.iCalLink) {
+        console.log("No iCalLink for this property");
+        return;
+      }
+      // Refresh iCal data
+      await syncCalendar({
+        iCalLink: property.iCalLink,
+        propertyId: property.id,
+      });
+      console.log("Refreshed iCal data");
+
+      // Refetch reserved date ranges
+      await refetch();
+    } catch (error) {
+      console.error("Error fetching reserved dates:", error);
+    }
+  }, [property.iCalLink, property.id, syncCalendar, refetch]);
 
   useEffect(() => {
     const today = new Date();
     console.log(today.toString());
     setCurrentDate(today);
     setCalendarDate(today);
-  }, []);
+    void fetchReservedDateRanges();
+  }, [fetchReservedDateRanges]);
+
+  const isDateReserved = (date: Date) => {
+    return (
+      reservedDateRanges?.some((reservedDate) => {
+        const start = new Date(reservedDate.start);
+        const end = new Date(reservedDate.end);
+        return date >= start && date < end;
+      }) ?? false
+    );
+  };
 
   const generateCalendarDays = (month: number): (number | null)[] => {
     const year = calendarDate.getFullYear();
@@ -54,6 +79,10 @@ export default function HostAvailability({ property }: { property: Property }) {
     );
     const monthDays = generateCalendarDays(monthDate.getMonth());
 
+    if (isLoading) {
+      return <Spinner />;
+    }
+
     return (
       <div className="w-full sm:w-1/2">
         <div className="grid grid-cols-7 gap-2">
@@ -65,21 +94,27 @@ export default function HostAvailability({ property }: { property: Property }) {
               {day.toUpperCase()}
             </div>
           ))}
-          {monthDays.map((day, index) => (
-            <div
-              key={index}
-              className={`flex h-12 flex-1 items-center justify-center font-semibold ${day ? "cursor-pointer bg-zinc-50" : ""} ${
-                day &&
-                monthDate.getFullYear() === currentDate.getFullYear() &&
-                monthDate.getMonth() === currentDate.getMonth() &&
-                day === currentDate.getDate()
-                  ? "font-semibold text-blue-600"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {day}
-            </div>
-          ))}
+          {monthDays.map((day, index) => {
+            const date = day
+              ? new Date(monthDate.getFullYear(), monthDate.getMonth(), day)
+              : null;
+            const isReserved = date ? isDateReserved(date) : false;
+            return (
+              <div
+                key={index}
+                className={`flex h-12 flex-1 items-center justify-center font-semibold ${day ? "cursor-pointer bg-zinc-50" : ""} ${isReserved ? "bg-reserved-pattern" : ""} ${
+                  day &&
+                  monthDate.getFullYear() === currentDate.getFullYear() &&
+                  monthDate.getMonth() === currentDate.getMonth() &&
+                  day === currentDate.getDate()
+                    ? "font-semibold text-blue-600"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {day}
+              </div>
+            );
+          })}
         </div>
       </div>
     );

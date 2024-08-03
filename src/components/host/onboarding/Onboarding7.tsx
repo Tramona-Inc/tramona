@@ -30,15 +30,19 @@ export default function Onboarding7({
   editing?: boolean;
   setHandleOnboarding?: (handle: () => void) => void;
 }) {
-  const imageURLs = useHostOnboarding((state) => state.listing.imageUrls);
+  const initialImageUrls = useHostOnboarding(
+    (state) => state.listing.imageUrls,
+  );
   const [error, setError] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      imageURLs: imageURLs,
+      imageURLs: initialImageUrls,
     },
   });
+
+  const imageUrls = form.watch().imageURLs;
 
   const setImageUrls = useHostOnboarding((state) => state.setImageUrls);
 
@@ -96,7 +100,7 @@ export default function Onboarding7({
             <div className="my-5 text-center">
               <p className="font-bold">
                 Total Uploaded Images:{" "}
-                <span className="font-normal">{imageURLs.length}</span>
+                <span className="font-normal">{imageUrls.length}</span>
               </p>
             </div>
           </div>
@@ -105,7 +109,7 @@ export default function Onboarding7({
       {!editing && (
         <OnboardingFooter
           handleNext={form.handleSubmit(handleFormSubmit)}
-          isFormValid={form.formState.isValid || imageURLs.length >= 5}
+          isFormValid={form.formState.isValid || initialImageUrls.length >= 5}
           isForm={true}
           handleError={handleError}
         />

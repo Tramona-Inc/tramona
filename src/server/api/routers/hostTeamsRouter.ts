@@ -66,7 +66,7 @@ export const hostTeamsRouter = createTRPCRouter({
           }),
         });
 
-        return { status: "sent invite" as const };
+        return { status: "sent invite" } as const;
       }
 
       const userInTeam = await ctx.db.query.hostTeamMembers
@@ -79,7 +79,7 @@ export const hostTeamsRouter = createTRPCRouter({
         .then((res) => !!res);
 
       if (userInTeam) {
-        return { status: "already in team" };
+        return { status: "already in team" } as const;
       }
 
       await ctx.db.insert(hostTeamMembers).values({
@@ -87,7 +87,7 @@ export const hostTeamsRouter = createTRPCRouter({
         userId: invitee.id,
       });
 
-      return { status: "added user" as const, inviteeName: invitee.name };
+      return { status: "added user", inviteeName: invitee.name } as const;
     }),
 
   inviteUserById: protectedProcedure
