@@ -14,14 +14,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
-  const [iCalUrl, setICalUrl] = useState("");
+  const [iCalLink, setiCalLink] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
-
   const syncCalendarMutation = api.calendar.syncCalendar.useMutation({
     onSuccess: () => {
-      setICalUrl("");
+      setiCalLink("");
       setIsEditing(false);
       toast({
         title: "Success!",
@@ -33,7 +32,8 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
       console.error("Error syncing calendar:", error);
       toast({
         title: "Sync Failed",
-        description: error.message || "An error occurred while syncing the calendar.",
+        description:
+          error.message || "An error occurred while syncing the calendar.",
         variant: "destructive",
       });
     },
@@ -41,14 +41,14 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
 
   function handleFormSubmit() {
     syncCalendarMutation.mutate({
-      iCalUrl,
+      iCalLink,
       propertyId: property.id,
     });
   }
 
   const handleEditToggle = () => {
     if (isEditing) {
-      setICalUrl(property.iCalLink ?? '');
+      setiCalLink(property.iCalLink ?? "");
     }
     setIsEditing(!isEditing);
   };
@@ -64,13 +64,16 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             <h1 className="text-4xl font-bold">Sync your iCal</h1>
             <Label className="font-semibold">iCal URL</Label>
             <Input
-              id="iCalUrl"
+              id="iCalLink"
               type="url"
               placeholder="https://example.com/calendar.ics"
-              value={iCalUrl}
-              onChange={(e) => setICalUrl(e.target.value)}
+              value={iCalLink}
+              onChange={(e) => setiCalLink(e.target.value)}
             />
-            <Button onClick={handleFormSubmit} disabled={syncCalendarMutation.isLoading}>
+            <Button
+              onClick={handleFormSubmit}
+              disabled={syncCalendarMutation.isLoading}
+            >
               {syncCalendarMutation.isLoading ? "Syncing..." : "Submit"}
             </Button>
           </div>
@@ -80,15 +83,19 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             <h1 className="text-4xl font-bold">Sync your iCal</h1>
             <Label className="font-semibold">iCal URL</Label>
             <Input
-              id="iCalUrl"
+              id="iCalLink"
               type="url"
               placeholder="https://example.com/calendar.ics"
-              value={isEditing ? iCalUrl : property.iCalLink}
-              onChange={(e) => setICalUrl(e.target.value)}
+              value={isEditing ? iCalLink : property.iCalLink}
+              onChange={(e) => setiCalLink(e.target.value)}
               readOnly={!isEditing}
               className={isEditing ? "" : "bg-gray-100"}
             />
-            <Button onClick={handleEditToggle} variant="outline" className="mr-2">
+            <Button
+              onClick={handleEditToggle}
+              variant="outline"
+              className="mr-2"
+            >
               {isEditing ? "Cancel" : <Edit2 className="h-4 w-4" />}
             </Button>
             {isEditing && (
