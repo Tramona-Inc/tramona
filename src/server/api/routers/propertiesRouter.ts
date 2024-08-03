@@ -476,6 +476,7 @@ export const propertiesRouter = createTRPCRouter({
               hp.city
             FROM host_properties hp
             JOIN ${requests} r ON hp.request_id = r.id
+            WHERE r.check_in >= CURRENT_DATE 
             GROUP BY hp.city, hp.request_id
           )
           SELECT
@@ -491,8 +492,8 @@ export const propertiesRouter = createTRPCRouter({
           JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
           JOIN ${groups} g ON r.made_by_group_id = g.id
           JOIN ${users} u ON g.owner_id = u.id
-          ORDER BY cr.city, r.id, p.id
-        `);
+          ORDER BY r.check_in, cr.city, r.id, p.id
+        `); 
 
       const organizedData: HostRequestsPageData[] = [];
       const cityMap = new Map<string, HostRequestsPageData>();

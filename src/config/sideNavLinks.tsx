@@ -8,7 +8,7 @@ import {
   InboxIcon,
   LayoutDashboardIcon,
   MessageCircleIcon,
-  Search,
+  Users2Icon,
   WrenchIcon,
 } from "lucide-react";
 
@@ -35,7 +35,7 @@ export const adminNavLinks = [
   { href: "/requests", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
-export const hostMobileNavLinks = [
+export const hostNavLinks = [
   { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
   {
     href: "/host/requests",
@@ -46,9 +46,8 @@ export const hostMobileNavLinks = [
   { href: "/host/properties", name: "Properties", icon: HomeIcon },
   { href: "/host/stays", name: "Stays", icon: Briefcase },
   { href: "/host/finances", name: "Finances", icon: DollarSign },
+  { href: "/host/team", name: "Team", icon: Users2Icon },
 ];
-
-export const hostNavLinks = [...hostMobileNavLinks];
 
 export const guestMobileNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },

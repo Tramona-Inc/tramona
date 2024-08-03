@@ -19,3 +19,4 @@ export const months = [
   "November",
   "December",
 ];
+export const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

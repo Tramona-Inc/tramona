@@ -13,7 +13,7 @@ export const hostTeams = pgTable(
   "host_teams",
   {
     id: serial("id").primaryKey(),
-    name: text("name"),
+    name: text("name").notNull(),
     ownerId: text("owner_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
