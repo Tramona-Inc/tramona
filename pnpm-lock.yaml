@@ -126,8 +126,8 @@ importers:
         specifier: 3.3.12
         version: 3.3.12
       '@stripe/react-connect-js':
-        specifier: 3.3.11-beta-1
-        version: 3.3.11-beta-1(@stripe/connect-js@3.3.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 3.3.13
+        version: 3.3.13(@stripe/connect-js@3.3.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@stripe/react-stripe-js':
         specifier: ^2.4.0
         version: 2.7.3(@stripe/stripe-js@2.4.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -167,6 +167,9 @@ importers:
       '@trpc/server':
         specifier: ^10.45.0
         version: 10.45.2
+      '@types/ical':
+        specifier: ^0.8.3
+        version: 0.8.3
       '@types/jsonwebtoken':
         specifier: ^9.0.5
         version: 9.0.6
@@ -245,6 +248,9 @@ importers:
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
+      ical:
+        specifier: ^0.8.0
+        version: 0.8.0
       input-otp:
         specifier: ^1.2.0
         version: 1.2.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -287,6 +293,9 @@ importers:
       ngrok:
         specifier: 5.0.0-beta.2
         version: 5.0.0-beta.2
+      node-ical:
+        specifier: ^0.18.0
+        version: 0.18.0
       nodemailer:
         specifier: ^6.9.8
         version: 6.9.14
@@ -3758,10 +3767,10 @@ packages:
   '@stripe/connect-js@3.3.12':
     resolution: {integrity: sha512-hXbgvGq9Lb6BYgsb8lcbjL76Yqsxr0yAj6T9ZFTfUK0O4otI5GSEWum9do9rf/E5OfYy6fR1FG/77Jve2w1o6Q==}
 
-  '@stripe/react-connect-js@3.3.11-beta-1':
-    resolution: {integrity: sha512-mpF2l+NLLV/0heI+vn4NUhlpRuuj2iKL+ltYvCaVSLpiCGO7O2YWjZWmp0UHD2BbOtA8Jtmhe+1y9VC1VosJCQ==}
+  '@stripe/react-connect-js@3.3.13':
+    resolution: {integrity: sha512-kMxYjeQUcl/ixu/mSeX5QGIr/MuP+YxFSEBdb8j6w+tbK82tmcjyFDgoQTQwVXNqUV6jI66Kks3XcfpPRfeiJA==}
     peerDependencies:
-      '@stripe/connect-js': '>=3.3.6-beta-1'
+      '@stripe/connect-js': '>=3.3.11'
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
@@ -4186,6 +4195,9 @@ packages:
 
   '@types/http-errors@2.0.4':
     resolution: {integrity: sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==}
+
+  '@types/ical@0.8.3':
+    resolution: {integrity: sha512-qPejGORaXOstmqyKzp0Qw9nXDPiWiahiJJcx4zMB0zJVg0rLfJ6bDip/naqagEqYTjKl/LI91399hR8zFwRJ5A==}
 
   '@types/istanbul-lib-coverage@2.0.6':
     resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
@@ -4770,6 +4782,9 @@ packages:
   axe-core@4.10.0:
     resolution: {integrity: sha512-Mr2ZakwQ7XUAjp7pAwQWRhhK8mQQ6JAaNWSjmjxil0R8BPioMtQsTLOolGYkji1rcL++3dCqZA3zWqpT+9Ew6g==}
     engines: {node: '>=4'}
+
+  axios@1.6.7:
+    resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
 
   axios@1.7.2:
     resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
@@ -6719,6 +6734,9 @@ packages:
   humanize-ms@1.2.1:
     resolution: {integrity: sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==}
 
+  ical@0.8.0:
+    resolution: {integrity: sha512-/viUSb/RGLLnlgm0lWRlPBtVeQguQRErSPYl3ugnUaKUnzQswKqOG3M8/P1v1AB5NJwlHTuvTq1cs4mpeG2rCg==}
+
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
     engines: {node: '>=0.10.0'}
@@ -7286,6 +7304,9 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
 
+  luxon@1.28.1:
+    resolution: {integrity: sha512-gYHAa180mKrNIUJCbwpmD0aTu9kV0dREDrwNnuyFAsO1Wt0EVYSZelPnJlbj9HplzXX/YWXHFTL45kvZ53M0pw==}
+
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
@@ -7483,6 +7504,12 @@ packages:
   mlly@1.7.1:
     resolution: {integrity: sha512-rrVRZRELyQzrIUAVMHxP97kv+G786pHmOKzuFII8zDYahFBS7qnHh2AlYSl1GAHhaMPCz6/oHjVMcfFYgFYHgA==}
 
+  moment-timezone@0.5.45:
+    resolution: {integrity: sha512-HIWmqA86KcmCAhnMAN0wuDOARV/525R2+lOLotuGFzn4HO+FH+/645z2wx0Dt3iDv6/p61SIvKnDstISainhLQ==}
+
+  moment@2.30.1:
+    resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
+
   mrmime@2.0.0:
     resolution: {integrity: sha512-eu38+hdgojoyq63s+yTpN4XMBdt5l8HhMhc4VKLO9KM5caLIBvUm4thi7fFaxyTmCKeNnXZ5pAlBwCUnhA09uw==}
     engines: {node: '>=10'}
@@ -7635,6 +7662,9 @@ packages:
   node-fetch@3.3.2:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  node-ical@0.18.0:
+    resolution: {integrity: sha512-FrOUPztjw9OUgSB9o/ffhl86BiVClQTut97C2NqCwKIgOAcKPEw5UQMuSuNJO/Y4hqTyJdKZh2TCqNHQnE9YFg==}
 
   node-int64@0.4.0:
     resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
@@ -8768,6 +8798,15 @@ packages:
 
   ripemd160@2.0.2:
     resolution: {integrity: sha512-ii4iagi25WusVoiC4B4lq7pbXfAp3D9v5CwfkY33vffw2+pkDjY1D8GaN7spsxvCSx8dkPqOZCEZyfxcmJG2IA==}
+
+  rrule@2.4.1:
+    resolution: {integrity: sha512-+NcvhETefswZq13T8nkuEnnQ6YgUeZaqMqVbp+ZiFDPCbp3AVgQIwUvNVDdMNrP05bKZG9ddDULFp0qZZYDrxg==}
+
+  rrule@2.6.4:
+    resolution: {integrity: sha512-sLdnh4lmjUqq8liFiOUXD5kWp/FcnbDLPwq5YAc/RrN6120XOPb86Ae5zxF7ttBVq8O3LxjjORMEit1baluahA==}
+
+  rrule@2.8.1:
+    resolution: {integrity: sha512-hM3dHSBMeaJ0Ktp7W38BJZ7O1zOgaFEsn41PDk+yHoEtfLV+PoJt9E9xAlZiWgf/iqEqionN0ebHFZIDAp+iGw==}
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
@@ -15208,7 +15247,7 @@ snapshots:
 
   '@stripe/connect-js@3.3.12': {}
 
-  '@stripe/react-connect-js@3.3.11-beta-1(@stripe/connect-js@3.3.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@stripe/react-connect-js@3.3.13(@stripe/connect-js@3.3.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@stripe/connect-js': 3.3.12
       react: 18.2.0
@@ -15614,6 +15653,10 @@ snapshots:
   '@types/http-cache-semantics@4.0.4': {}
 
   '@types/http-errors@2.0.4': {}
+
+  '@types/ical@0.8.3':
+    dependencies:
+      rrule: 2.6.4
 
   '@types/istanbul-lib-coverage@2.0.6': {}
 
@@ -16296,6 +16339,14 @@ snapshots:
       xml2js: 0.6.2
 
   axe-core@4.10.0: {}
+
+  axios@1.6.7:
+    dependencies:
+      follow-redirects: 1.15.6
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
 
   axios@1.7.2:
     dependencies:
@@ -18598,6 +18649,10 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  ical@0.8.0:
+    dependencies:
+      rrule: 2.4.1
+
   iconv-lite@0.4.24:
     dependencies:
       safer-buffer: 2.1.2
@@ -19149,6 +19204,9 @@ snapshots:
     dependencies:
       react: 18.2.0
 
+  luxon@1.28.1:
+    optional: true
+
   lz-string@1.5.0: {}
 
   magic-string@0.30.11:
@@ -19311,6 +19369,12 @@ snapshots:
       pathe: 1.1.2
       pkg-types: 1.1.3
       ufo: 1.5.4
+
+  moment-timezone@0.5.45:
+    dependencies:
+      moment: 2.30.1
+
+  moment@2.30.1: {}
 
   mrmime@2.0.0: {}
 
@@ -19477,6 +19541,15 @@ snapshots:
       data-uri-to-buffer: 4.0.1
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
+
+  node-ical@0.18.0:
+    dependencies:
+      axios: 1.6.7
+      moment-timezone: 0.5.45
+      rrule: 2.8.1
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - debug
 
   node-int64@0.4.0: {}
 
@@ -20768,6 +20841,20 @@ snapshots:
     dependencies:
       hash-base: 3.1.0
       inherits: 2.0.4
+
+  rrule@2.4.1:
+    optionalDependencies:
+      luxon: 1.28.1
+
+  rrule@2.6.4:
+    dependencies:
+      tslib: 1.14.1
+    optionalDependencies:
+      luxon: 1.28.1
+
+  rrule@2.8.1:
+    dependencies:
+      tslib: 2.6.3
 
   run-parallel@1.2.0:
     dependencies:
