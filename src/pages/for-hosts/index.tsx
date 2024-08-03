@@ -5,72 +5,48 @@ import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import HowItWorksHost from "@/pages/how-it-works-host";
+import HowItWorks from "@/components/_common/HowItWorks";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import RequestFeed from "@/components/activity-feed/RequestFeed";
 
 const DamageProtection = () => {
-  const protectionMethods = [
-    {
-      id: 0,
-      description: "Our own screening",
-    },
-    {
-      id: 1,
-      description: "Another screening with a 3rd party",
-    },
-    {
-      id: 2,
-      description: "An optional in depth, multi-hour screening with Stripe",
-    },
-  ];
   return (
     <section className="space-y-10 bg-white px-4 py-10 md:px-6 lg:px-8">
-      <h1 className="text-center text-3xl font-bold md:text-5xl">
-        Tramona Cover
+      <h1 className="text-center text-3xl font-bold md:text-4xl">
+        Your home, protected
       </h1>
-      <h2 className="text-center text-2xl font-semibold md:text-4xl">
-        Listing on Tramona is Safe and Effective
-      </h2>
-      <div className="mx-auto flex max-w-5xl flex-col items-start">
+      <div className="mx-auto flex max-w-7xl flex-col-reverse items-center md:flex-row">
         <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
-          <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-            Guest Identity Verification
+          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl lg:text-5xl">
+            Damage Protection for Hosts
           </h2>
-          <h3 className="text-lg font-semibold text-gray-900 md:text-xl">
-            Tramona vets travelers in 3 ways so you are safe and protected when
-            a guest checks in
-          </h3>
-          {protectionMethods.map((method) => (
-            <div key={method.id}>
-              <p className="text-sm text-gray-700 md:text-base">
-                {method.id + 1}.&nbsp;{method.description}
-              </p>
-            </div>
-          ))}
-        </div>
-        <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
-          <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-            Property Protection
-          </h2>
-          <p className="text-sm text-gray-700 md:text-base">
-            Tramona offers $50,000 in protection for each booking. This will
-            move up to 1M in the coming months
+          <p className="text-lg text-gray-700 md:text-xl">
+            Discovering damages can be stressful, and your peace of mind is our
+            top priority. That&apos;s why we have partnered with Superhog to
+            provide all our hosts/property managers with damage protection up to
+            $50,000.
+          </p>
+          <p className="text-lg text-gray-700 md:text-xl">
+            Our collaboration with Superhog ensures a seamless experience for
+            you. They specialize in handling incidents and will take charge of
+            the process from here.
           </p>
         </div>
-        <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
-          <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-            24 Hour Safety Line
-          </h2>
-          <p className="text-sm text-gray-700 md:text-base">
-            If you ever feel unsafe, our app provides one-tap access to
-            specially-trained safety agents, day or night.
-          </p>
+        <div className="w-full md:w-1/2">
+          <div className="h-64 w-full overflow-hidden rounded-lg md:h-auto">
+            <Image
+              src="/assets/images/landing-page/damage_protection.jpeg"
+              alt=""
+              width={384}
+              height={300}
+              unoptimized
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -87,27 +63,21 @@ type Tabs = {
 const contents: Tabs[] = [
   {
     id: 0,
-    title: "Directly with Airbnb",
-    info: "Instantly sign up with Airbnb Via our partner hospitable. This will redirect you to Airbnb and allow an effortless onboarding",
+    title: "We make the market efficent",
+    info: "More negotiation means more deals. Deals that previously would not have happened. We give you the freedom to choose if you want them.",
     image: "/assets/images/host-welcome/1.avif",
   },
   {
     id: 1,
-    title: "Sign up Manually",
-    info: "Manually onboard yourself, you can also just enter a link in this section and most information we need will come instantly over",
+    title: "We are creating new deals",
+    info: "By being on Tramona you have the freedom to do accept deals that work for you. ",
     image: "/assets/images/host-welcome/2.jpg",
   },
   {
     id: 2,
-    title: "Sign up with PMS",
-    info: "Use a PMS? As of now we are partnered with Hostaway. More coming soon!",
+    title: "We increase your month-over-month revenue",
+    info: "Customers are often swayed to book a trip when presented with a good deal. Deals increase the likelihood of bookings - which means more money for you!",
     image: "/assets/images/host-welcome/3.avif",
-  },
-  {
-    id: 3,
-    title: "We sign you up",
-    info: "Have any questions? Schedule a call and we will help onboard you and answer all questions in the meantime.",
-    image: "/assets/images/host-welcome/4.avif",
   },
 ];
 
@@ -144,9 +114,69 @@ function IntroSection() {
             />
           </div>
         </div>
-        <div className="rounded-lg border px-2 py-2 shadow-xl">
-          <RequestFeed />
-        </div>
+      </section>
+    </div>
+  );
+}
+
+function Partners() {
+  const partners = [
+    {
+      name: "Hostaway",
+      image: "/assets/logos/hostaway-logo.png",
+    },
+    {
+      name: "Hostfully",
+      image: "/assets/logos/hostfully-logo.png",
+    },
+    {
+      name: "OwnerRez",
+      image: "/assets/logos/ownerRez-logo.png",
+    },
+    {
+      name: "Hospitable",
+      image: "/assets/logos/hospitable-logo.png",
+    },
+    {
+      name: "Superhog",
+      image: "/assets/logos/superhog-logo.png",
+    },
+  ];
+
+  return (
+    <section className="space-y-8 text-center md:space-y-12">
+      <h1 className="text-3xl font-bold md:text-4xl">
+        We work with industry leading partners
+      </h1>
+      <div className="flex flex-col flex-wrap items-center justify-evenly gap-10 md:flex-row md:gap-0">
+        {partners.map((partner) => (
+          <div key={partner.name}>
+            <Image
+              src={partner.image}
+              alt={partner.name}
+              width={150}
+              height={150}
+            />
+          </div>
+        ))}
+      </div>
+      <p className="text-xl font-bold text-muted-foreground">
+        Plus more coming soon
+      </p>
+    </section>
+  );
+}
+
+function SafetyHotline() {
+  return (
+    <section className="mx-8 rounded-xl bg-zinc-50 px-1 py-8 md:mx-24 md:py-14">
+      <div className="space-y-4 text-balance text-center">
+        <h1 className="text-2xl font-bold md:text-4xl">
+          Tramona has a 24-safety line for hosts and Travelers
+        </h1>
+        <p className="text-sm text-muted-foreground md:text-base">
+          Call our support line at any time, with any questions you may have.
+        </p>
       </div>
     </section>
   );
@@ -176,7 +206,7 @@ function FAQ() {
   ];
 
   return (
-    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-4 md:grid-cols-3">
+    <section className="mx-8 grid grid-cols-1 gap-6 md:mx-24 md:grid-cols-3">
       <div>
         <h1 className="text-3xl font-bold md:text-4xl">
           Frequently asked questions
@@ -200,129 +230,132 @@ function FAQ() {
   );
 }
 
-function ReadytoListOnTramona() {
-  return (
-    <>
-      <section className="mx-auto mt-4 hidden max-w-7xl p-2 text-end sm:block">
-        <div className="flex items-center justify-end space-x-2">
-          <div className="text-sm">Ready to list on Tramona?</div>
-          <Link
-            href="/host-onboarding"
-            className={buttonVariants({
-              variant: "greenPrimary",
-              size: "sm",
-            })}
-          >
-            Become a Host
-          </Link>
-        </div>
-      </section>
-      <section className="fixed bottom-0 z-10 w-full bg-white p-4 shadow-inner sm:hidden">
-        <div className="flex flex-col justify-center gap-4 shadow-2xl">
-          <div className="text-center font-semibold">
-            Ready to list on Tramona?
-          </div>
-          <Link
-            href="/host-onboarding"
-            className={buttonVariants({
-              variant: "greenPrimary",
-              size: "sm",
-            })}
-          >
-            Become a Host
-          </Link>
-        </div>
-      </section>
-    </>
-  );
-}
+function WhyPartnerWithUs() {
+  const reasons = [
+    {
+      title: "Looking for a place?",
+      description:
+        "Tramona keeps guests safe by not only verifying them on Tramona, but also making sure they are verified on Airbnb as well.",
+      number: "300,000+",
+      numberDescription: "proprieties your matches will be coming from",
+      callToAction: {
+        name: "Submit a request",
+        href: "/",
+      },
+    },
+    {
+      title: "Listing your place",
+      description:
+        "It's as easy as making an account and connecting to a PMS if you have one. Once on, wait for requests to roll in.",
+      number: "15%",
+      numberDescription: "fewer vacancies when using Tramona",
+      callToAction: {
+        name: "List my place",
+        href: "/host/properties",
+      },
+    },
+  ];
 
-function ListInAMinute() {
   return (
-    <section className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 md:space-y-24 md:px-8 lg:px-10 xl:px-12">
-      <h1 className="text-center text-3xl font-bold md:text-4xl lg:text-5xl">
-        List in less than 1 minute with our effortless sign up flow
+    <section className="mx-8 space-y-8 md:mx-24 md:space-y-16">
+      <h1 className="text-center text-3xl font-bold md:text-4xl">
+        Why partner with us?
       </h1>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-8">
-        {contents.map((content) => (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10">
+        {reasons.map((reason, index) => (
           <div
-            key={content.id}
-            className="rounded-xl bg-zinc-50 p-4 text-center sm:p-6"
+            key={index}
+            className="space-y-4 rounded-xl bg-zinc-50 p-4 text-center md:p-10"
           >
-            <div className="mx-auto h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-36 lg:w-36">
-              <Image
-                src={content.image}
-                alt=""
-                layout="responsive"
-                width={150}
-                height={150}
-              />
-            </div>
-            <h2 className="h-10 text-xl font-bold sm:text-2xl md:h-14 md:text-3xl lg:h-24">
-              {content.title}
-            </h2>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              {content.info}
+            <h2 className="text-3xl font-bold md:text-4xl">{reason.title}</h2>
+            <p className="text-sm text-muted-foreground md:text-base">
+              {reason.description}
             </p>
+            <p className="text-3xl font-bold text-teal-900 md:text-4xl">
+              {reason.number}
+            </p>
+            <p className="text-sm font-bold md:text-base">
+              {reason.numberDescription}
+            </p>
+            <div>
+              <Link href={reason.callToAction.href}>
+                <Button
+                  variant="greenPrimary"
+                  size="lg"
+                  className="rounded-full"
+                >
+                  {reason.callToAction.name}
+                </Button>
+              </Link>
+            </div>
           </div>
         ))}
       </div>
     </section>
   );
 }
-function WhatAreYouWaitingFor() {
-  return (
-    <section className="mx-8 space-y-8 md:mx-24 md:space-y-16">
-      <h1 className="text-center text-3xl font-bold md:text-5xl">
-        What are you waiting for? Requests are coming in now!
-      </h1>
-      <div className="flex items-center justify-center space-x-4">
-        <Link href="/host-onboarding">
-          <Button className="h-16 w-80 bg-primaryGreen text-xl">
-            Become a Host
-          </Button>
-        </Link>
-      </div>
-    </section>
-  );
-}
 
 export default function HostWelcome() {
+  const steps = [
+    {
+      number: "1",
+      title: "Sign up as a host",
+      description: (
+        <>
+          We work with many of the biggest PMS providers, if we don&apos;t work
+          with yours please let us know{" "}
+          <Link href="/help-center" className="underline">
+            here
+          </Link>
+          . If you don&apos;t have a PMS, you can also sign up normally
+        </>
+      ),
+    },
+    {
+      number: "2",
+      title: "Set your settings in your dashboard",
+      description:
+        "Travelers come to us and tell us how much they want to spend and where they want to go.",
+    },
+    {
+      number: "3",
+      title: "Wait for requests to roll in",
+      description:
+        "Requests will be sent right to your phone and you can accept, reject, or counter offer.",
+    },
+  ];
+
   return (
-    <MainLayout className="mx-auto max-w-full">
-      <div className="relative overflow-x-hidden bg-white">
-        <Head>
-          <title>Hosts | Tramona</title>
-        </Head>
+    <MainLayout>
+      <Head>
+        <title>Hosts | Tramona</title>
+      </Head>
 
-        <ReadytoListOnTramona />
+      <IntroSection />
 
-        <hr className="mx-24 mb-12 mt-2 h-px border-0"></hr>
+      <HowItWorks steps={steps} title="How does hosting with Tramona work?" />
 
-        <IntroSection />
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
+      <Partners />
 
-        <ListInAMinute />
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
+      <DamageProtection />
 
-        <HowItWorksHost />
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
+      <SafetyHotline />
 
-        <DamageProtection />
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
+      <FAQ />
 
-        <WhatAreYouWaitingFor />
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
 
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
+      <WhyPartnerWithUs />
 
-        <FAQ />
-
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
-      </div>
+      <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
     </MainLayout>
   );
 }
