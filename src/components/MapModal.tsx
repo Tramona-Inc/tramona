@@ -51,11 +51,10 @@ export function MapModal({
         <Map
           disableDefaultUI
           google={google}
-          center={latLng}
+          initialCenter={latLng}
           zoom={11}
           style={{ height: "100%", width: "100%" }}
           onClick={onDragendOrClick}
-          onDragend={onDragendOrClick}
         >
           <Circle
             center={editedLatLng}
@@ -66,7 +65,7 @@ export function MapModal({
               strokeWeight: 2,
             }}
           />
-          <Marker draggable position={editedLatLng} />
+          <Marker draggable position={editedLatLng} onDragend={onDragendOrClick} />
         </Map>
       </div>
       <div className="pt-4">

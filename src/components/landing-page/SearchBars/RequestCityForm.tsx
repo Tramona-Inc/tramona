@@ -70,6 +70,8 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
       submit: onSubmit,
     }));
 
+    const { latLng, radius } = form.watch();
+
     return (
       <Form {...form}>
         <form className="flex flex-col justify-between gap-y-4">
@@ -81,9 +83,9 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
           >
             <PlacesInput
               control={form.control}
-              latLng={form.getValues("latLng")}
+              latLng={latLng}
               setLatLng={(latLng) => form.setValue("latLng", latLng)}
-              radius={form.getValues("radius")}
+              radius={radius}
               setRadius={(radius) => form.setValue("radius", radius)}
               name="location"
               formLabel="Location"
