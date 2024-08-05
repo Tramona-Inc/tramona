@@ -10,6 +10,8 @@ import { useState } from "react";
 import { type Property } from "@/server/db/schema";
 import HostConfirmRequestDialog from "./HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 export default function HostRequests() {
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
     {},
@@ -31,6 +33,11 @@ export default function HostRequests() {
 
   return (
     <div className="p-4">
+      <div className="mb-4 xl:hidden">
+        <Link href="/host/requests">
+          <ChevronLeft />
+        </Link>
+      </div>
       {cityData ? (
         <div className="grid gap-4 md:grid-cols-2">
           {cityData.requests.map((requestData) => (

@@ -26,24 +26,24 @@ export default function Page() {
       </Head>
       <div className="px-4 pb-32 pt-16">
         <div className="mx-auto max-w-xl space-y-4">
-          <h1 className="text-3xl font-bold">Team</h1>
+          <div>
+            <h1 className="text-3xl font-bold">Manage team</h1>
+          </div>
           {curTeam ? (
             <HostTeamInviteForm hostTeamId={curTeam.id} />
           ) : (
             <Spinner />
           )}
-          {curTeamMembers ? (
-            curTeamMembers.map((member) => (
-              <TeamMember
-                key={member.id}
-                member={member}
-                isYou={member.id === session.user.id}
-                isOwner={member.id === curTeam?.ownerId}
-              />
-            ))
-          ) : (
-            <Spinner />
-          )}
+          {curTeamMembers
+            ? curTeamMembers.map((member) => (
+                <TeamMember
+                  key={member.id}
+                  member={member}
+                  isYou={member.id === session.user.id}
+                  isOwner={member.id === curTeam?.ownerId}
+                />
+              ))
+            : null}
         </div>
       </div>
     </DashboardLayout>
@@ -69,7 +69,7 @@ function TeamMember({
       />
       <div className="flex-1 -space-y-1 font-medium">
         <div>
-          {member.name ?? member.email ?? ""}{" "}
+          {member.name ?? member.email}{" "}
           {isYou && <span className="text-muted-foreground">(You)</span>}{" "}
           {isOwner && (
             <Badge variant="secondary" size="sm">

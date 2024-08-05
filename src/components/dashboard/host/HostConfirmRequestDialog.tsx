@@ -74,13 +74,16 @@ export default function HostConfirmRequestDialog({
   );
 
   const handleSubmit = async () => {
-    for (const property of selectedProperties) {
-      await createOffersMutation.mutateAsync({
-        requestId: request.id,
-        propertyId: property.id,
-        totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
-      });
-    }
+    await Promise.all(
+      // todo: make procedure accept array
+      selectedProperties.map(async (property) => {
+        await createOffersMutation.mutateAsync({
+          requestId: request.id,
+          propertyId: property.id,
+          totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
+        });
+      }),
+    );
 
     setStep(2);
   };

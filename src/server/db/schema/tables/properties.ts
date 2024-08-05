@@ -97,6 +97,8 @@ export const ALL_CANCELLATION_POLICIES = [
   "Long Term",
 ] as const;
 
+export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
+
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
   "Shared room",
@@ -355,6 +357,7 @@ export const properties = pgTable(
       mode: "xy",
       srid: 4326,
     }),
+    iCalLink: text("ical_link"),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
