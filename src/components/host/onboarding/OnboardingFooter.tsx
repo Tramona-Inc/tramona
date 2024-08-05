@@ -1,4 +1,3 @@
-import SettingsLayout from "@/components/_common/Layout/SettingsLayout";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/use-toast";
@@ -21,7 +20,7 @@ export default function OnboardingFooter({
   handleError,
 }: OnboardingFooterProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const max_pages = 10;
+  const maxPages = 10;
 
   const progress = useHostOnboarding((state) => state.progress);
   const isEdit = useHostOnboarding((state) => state.isEdit);
@@ -34,7 +33,7 @@ export default function OnboardingFooter({
   const router = useRouter();
 
   const { mutateAsync: createHostProfile } =
-    api.users.createHostProfile.useMutation();
+    api.users.upsertHostProfile.useMutation();
 
   const { data: isHost } = api.users.isHost.useQuery();
 
@@ -53,9 +52,9 @@ export default function OnboardingFooter({
   async function onPressNext() {
     setIsLoading(true);
     try {
-      if (progress === 9) {
+      if (progress === 10) {
         if (!isHost) {
-          await createHostProfile({});
+          await createHostProfile();
         }
 
         await createProperty({
@@ -88,6 +87,7 @@ export default function OnboardingFooter({
           petsAllowed: listing.petsAllowed,
           smokingAllowed: listing.smokingAllowed,
           otherHouseRules: listing.otherHouseRules ?? undefined,
+          cancellationPolicy: listing.cancellationPolicy,
         });
       } else {
         if (isEdit) {
@@ -95,13 +95,13 @@ export default function OnboardingFooter({
             if (isFormValid) {
               handleNext && handleNext();
               setIsEdit(false);
-              setProgress(9);
+              setProgress(10);
             } else {
               handleError && handleError();
             }
           } else {
             setIsEdit(false);
-            setProgress(9);
+            setProgress(10);
           }
         } else {
           if (isForm) {
@@ -124,34 +124,38 @@ export default function OnboardingFooter({
   return (
     <div className="sticky bottom-0 bg-white">
       <Progress
-        value={(progress * 100) / max_pages}
+        value={(progress * 100) / maxPages}
         className="h-2 w-full rounded-none"
       />
-      <div className="flex justify-between p-5">
-        <Button
-          variant={"ghost"}
-          onClick={() => {
-            if (progress - 1 > -1) {
-              setProgress(progress - 1);
-            }
-          }}
-        >
-          Back
-        </Button>
-        {isEdit ? (
-          <Button onClick={onPressNext}>Back to summary</Button>
-        ) : (
-          <Button onClick={onPressNext} disabled={isLoading}>
-            {progress === 0
-              ? "Get Started"
-              : progress === 8
-                ? "Review"
-                : progress === 9
-                  ? "Finish"
-                  : "Next"}
+      {progress !== 0 && (
+        <div className="flex justify-between p-5">
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              if (progress - 1 > -1) {
+                setProgress(progress - 1);
+              }
+            }}
+          >
+            Back
           </Button>
-        )}
-      </div>
+          {isEdit ? (
+            <Button onClick={onPressNext}>Back to summary</Button>
+          ) : (
+            <div className="flex flex-row gap-2">
+              <Button onClick={onPressNext} disabled={isLoading}>
+                {progress === 0
+                  ? "Get Started"
+                  : progress === 9
+                    ? "Review"
+                    : progress === 10
+                      ? "Finish"
+                      : "Next"}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

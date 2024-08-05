@@ -1,4 +1,5 @@
 import {
+  type ALL_CANCELLATION_POLICIES,
   type ALL_PROPERTY_ROOM_TYPES,
   type ALL_PROPERTY_TYPES,
 } from "@/server/db/schema/tables/properties";
@@ -8,6 +9,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
 export type SpaceType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
+export type CancellationType = (typeof ALL_CANCELLATION_POLICIES)[number];
 
 export type LocationType = {
   country: string;
@@ -24,6 +26,7 @@ type HostOnboardingState = {
   isEdit: boolean;
   listing: {
     propertyType: PropertyType;
+    cancellationPolicy: CancellationType;
     spaceType: SpaceType;
     maxGuests: number;
     bedrooms: number;
@@ -49,6 +52,7 @@ type HostOnboardingState = {
   setBeds: (beds: number) => void;
   setBathrooms: (bathrooms: number) => void;
   setPropertyType: (property: PropertyType) => void;
+  setCancellationPolicy: (cancellationPolicy: CancellationType) => void;
   setSpaceType: (property: SpaceType) => void;
   setLocation: (location: LocationType) => void;
   setCheckInType: (checkInType: string) => void; // Add this line
@@ -77,6 +81,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
       isEdit: false,
       listing: {
         propertyType: "Other",
+        cancellationPolicy: "Flexible",
         spaceType: "Other",
         maxGuests: 1,
         bedrooms: 1,
@@ -151,6 +156,15 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           listing: {
             ...state.listing,
             propertyType,
+          },
+        }));
+      },
+      setCancellationPolicy: (cancellationPolicy: CancellationType) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            cancellationPolicy,
           },
         }));
       },

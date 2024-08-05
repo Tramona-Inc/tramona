@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { plural } from "@/utils/utils";
+import { getCancellationPolicy, plural } from "@/utils/utils";
 import "leaflet/dist/leaflet.css";
 import {
   ArrowLeftIcon,
@@ -305,8 +305,9 @@ export default function PropertyPage({ property }: { property: Property }) {
         </h2>
         <div className="py-2">
           <p className="text-sm font-medium text-black">
-            {property.cancellationPolicy ??
-              "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+            {property.cancellationPolicy
+              ? getCancellationPolicy(property.cancellationPolicy)
+              : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
           </p>
         </div>
       </section>

@@ -1,6 +1,12 @@
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { z } from "zod";
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
+import { users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export const pmsRouter = createTRPCRouter({
   generateHostawayBearerToken: publicProcedure
@@ -93,4 +99,95 @@ export const pmsRouter = createTRPCRouter({
         throw new Error("Failed to fetch Hostaway calendar");
       }
     }),
+
+  getHospitableCustomer: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const { id } = user;
+
+    try {
+      const response = await axios.get(
+        `https://connect.hospitable.com/api/v1/customers/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+        },
+      );
+
+      type HospitableCustomerResponse = {
+        data: AxiosResponse;
+      };
+
+      return response.data as HospitableCustomerResponse;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          return null;
+        }
+      }
+    }
+  }),
+
+  createHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
+    const user = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+    });
+
+    // Check if a user was found
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Destructure the necessary properties from the user object
+    const { id, name, email, phoneNumber } = user;
+    try {
+      const response = await axios.post(
+        "https://connect.hospitable.com/api/v1/customers",
+        {
+          id,
+          name,
+          email,
+          phone: phoneNumber,
+          timezone: "UTC",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+        },
+      );
+
+      type HospitableAuthCodeResponse = {
+        data: {
+          expires_at: Date;
+          return_url: string;
+        };
+      };
+
+      const authCodeResponse = await axios.post<HospitableAuthCodeResponse>(
+        "https://connect.hospitable.com/api/v1/auth-codes",
+        {
+          customer_id: id,
+          redirect_url: "https://tramona.com/host",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+        },
+      );
+
+      console.log("Hospitable sync response:", response.data);
+      console.log("Hospitable auth code response:", authCodeResponse.data);
+      return authCodeResponse.data;
+    } catch (error) {
+      console.error("Error syncing with Hospitable:", error);
+      throw new Error("Failed to sync with Hospitable");
+    }
+  }),
 });

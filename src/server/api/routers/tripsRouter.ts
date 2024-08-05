@@ -30,8 +30,16 @@ export const tripsRouter = createTRPCRouter({
             imageUrls: true,
             address: true,
             city: true,
+            cancellationPolicy: true,
           },
           with: { host: { columns: { name: true, image: true } } },
+        },
+        offer: {
+          columns: {
+            paymentIntentId: true,
+            checkIn: true,
+            checkOut: true,
+          }
         },
       },
     });
