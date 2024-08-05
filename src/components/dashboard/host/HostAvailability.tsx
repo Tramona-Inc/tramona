@@ -4,32 +4,19 @@ import { useCallback, useEffect, useState } from "react";
 import { MoveLeft, MoveRight } from "lucide-react";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
+import { daysOfWeek, months } from "@/utils/constants";
 
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
   const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
 
-
   const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
-  const { data: reservedDateRanges, isLoading, refetch } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
-
-
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const {
+    data: reservedDateRanges,
+    isLoading,
+    refetch,
+  } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
 
   const fetchReservedDateRanges = useCallback(async () => {
     try {
@@ -39,7 +26,7 @@ export default function HostAvailability({ property }: { property: Property }) {
       }
       // Refresh iCal data
       await syncCalendar({
-        iCalUrl: property.iCalLink,
+        iCalLink: property.iCalLink,
         propertyId: property.id,
       });
       console.log("Refreshed iCal data");
@@ -60,11 +47,13 @@ export default function HostAvailability({ property }: { property: Property }) {
   }, [fetchReservedDateRanges]);
 
   const isDateReserved = (date: Date) => {
-    return reservedDateRanges?.some((reservedDate) => {
-      const start = new Date(reservedDate.start);
-      const end = new Date(reservedDate.end);
-      return date >= start && date < end;
-    }) ?? false;
+    return (
+      reservedDateRanges?.some((reservedDate) => {
+        const start = new Date(reservedDate.start);
+        const end = new Date(reservedDate.end);
+        return date >= start && date < end;
+      }) ?? false
+    );
   };
 
   const generateCalendarDays = (month: number): (number | null)[] => {

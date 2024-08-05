@@ -9,25 +9,7 @@ import { TestimonialCarousel } from "@/components/landing-page/_sections/testimo
 import AddAirbnbLink from "../components/link-input/AddAirbnbLink";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
-// ... (other imports)
-
 export default function Page() {
-  // Create a wrapper function that matches the expected SubmitHandler signature
-
-  const handleEnterLink = (event: { preventDefault: () => void }) => {
-    event.preventDefault(); // Prevent default form submission behavior
-    // Submit form data using form.onSubmit or other logic here
-
-    const scrollToTop = () => {
-      const c = document.documentElement.scrollTop || document.body.scrollTop;
-      if (c > 0) {
-        window.requestAnimationFrame(scrollToTop);
-        window.scrollTo(0, c - c / 16);
-      }
-    };
-    scrollToTop();
-  };
-
   return (
     <DashboardLayout type="guest">
       <section className="relative bg-white pb-4">
@@ -165,7 +147,7 @@ export default function Page() {
           </p>
           <Button
             type="submit"
-            onClick={handleEnterLink}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="text-md h-[62px] w-[294px] rounded-full bg-[#004236] text-[24px] font-semibold text-white"
           >
             Enter Link

@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { type RouterOutputs } from "@/utils/api";
-import { formatDateWeekMonthDay, plural } from "@/utils/utils";
+import { formatDateWeekMonthDay, getCancellationPolicy, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   ImagesIcon,
@@ -392,8 +392,9 @@ export default function OfferPage({
             </div>
             <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
             <p>
-              {property.cancellationPolicy ??
-                "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+              {property.cancellationPolicy
+                ? getCancellationPolicy(property.cancellationPolicy)
+                : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
             </p>
           </section>
 

@@ -54,6 +54,7 @@ export default function SaveAndExit() {
       smokingAllowed: listing.smokingAllowed,
       otherHouseRules: listing.otherHouseRules ?? undefined,
       propertyStatus: "Drafted",
+      cancellationPolicy: listing.cancellationPolicy,
     });
   }
 
