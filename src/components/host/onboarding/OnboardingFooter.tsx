@@ -35,6 +35,8 @@ export default function OnboardingFooter({
   const { mutateAsync: createHostProfile } =
     api.users.upsertHostProfile.useMutation();
 
+  const { data: isHost } = api.users.isHost.useQuery();
+
   const { mutateAsync: createProperty } = api.properties.create.useMutation({
     onSuccess: () => {
       resetSession();
@@ -51,7 +53,9 @@ export default function OnboardingFooter({
     setIsLoading(true);
     try {
       if (progress === 10) {
-        await createHostProfile();
+        if (!isHost) {
+          await createHostProfile();
+        }
 
         await createProperty({
           propertyType: listing.propertyType,
