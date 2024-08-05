@@ -5,7 +5,7 @@ import {
   hostTeams,
   users,
 } from "@/server/db/schema";
-import { getHostTeamOwnerId } from "@/server/server-utils";
+import { getHostTeamOwnerId, sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
 import { and, eq } from "drizzle-orm";
@@ -15,20 +15,29 @@ import {
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";
+import HostTeamInviteEmail from "packages/transactional/emails/HostTeamInviteEmail";
 
 export const hostTeamsRouter = createTRPCRouter({
   inviteUserByEmail: protectedProcedure
     .input(z.object({ email: z.string(), hostTeamId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const hostTeamOwnerId = await getHostTeamOwnerId(input.hostTeamId);
+      const hostTeam = await ctx.db.query.hostTeams.findFirst({
+        where: eq(hostTeams.id, input.hostTeamId),
+        columns: { name: true },
+        with: { owner: { columns: { id: true } } },
+      });
 
-      if (ctx.user.id !== hostTeamOwnerId) {
+      if (!hostTeam) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (ctx.user.id !== hostTeam.owner.id) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       const invitee = await ctx.db.query.users.findFirst({
         where: eq(users.email, input.email),
-        columns: { id: true, name: true, role: true },
+        columns: { id: true, name: true, email: true },
       });
 
       if (!invitee) {
@@ -48,16 +57,16 @@ export const hostTeamsRouter = createTRPCRouter({
             },
           });
 
-        // await sendEmail({
-        //   to: input.email,
-        //   subject: "You've been invited to a request on Tramona",
-        //   content: HostTeamInviteEmail({
-        //     email: ctx.user.email,
-        //     name: ctx.user.name,
-        //   }),
-        // });
+        await sendEmail({
+          to: input.email,
+          subject: `You've been invited to ${hostTeam.name} on Tramona`,
+          content: HostTeamInviteEmail({
+            email: ctx.user.email,
+            name: ctx.user.name,
+          }),
+        });
 
-        return { status: "sent invite" as const };
+        return { status: "sent invite" } as const;
       }
 
       const userInTeam = await ctx.db.query.hostTeamMembers
@@ -70,7 +79,7 @@ export const hostTeamsRouter = createTRPCRouter({
         .then((res) => !!res);
 
       if (userInTeam) {
-        return { status: "already in team" };
+        return { status: "already in team" } as const;
       }
 
       await ctx.db.insert(hostTeamMembers).values({
@@ -78,14 +87,7 @@ export const hostTeamsRouter = createTRPCRouter({
         userId: invitee.id,
       });
 
-      if (invitee.role !== "host" && invitee.role !== "admin") {
-        await ctx.db
-          .update(users)
-          .set({ role: "host" })
-          .where(eq(users.id, invitee.id));
-      }
-
-      return { status: "added user" as const, inviteeName: invitee.name };
+      return { status: "added user", inviteeName: invitee.name } as const;
     }),
 
   inviteUserById: protectedProcedure

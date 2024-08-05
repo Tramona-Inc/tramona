@@ -81,6 +81,7 @@ export function capitalize(str: string) {
  * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
+
 export function formatDateRange(
   fromDate: Date,
   toDate?: Date,

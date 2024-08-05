@@ -66,7 +66,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
             image={session.user.image}
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 py-4 font-medium">
+        <DropdownMenuContent align="end" className="w-80 font-medium">
           <DropdownTop session={session} />
           <DropdownMenuSeparator />
           {session.user.role === "admin" && (
