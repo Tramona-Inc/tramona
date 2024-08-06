@@ -101,7 +101,7 @@ const CustomStripeCheckout = ({
               iconColor: "#004236",
               tabIconSelectedColor: "#004236",
               accessibleColorOnColorPrimary: "#004236",
-              tabLogoColor: "#004236",
+              //tabLogoColor: "#004236",
             },
             rules: {
               ".Block": {
@@ -159,7 +159,7 @@ const CustomStripeCheckout = ({
       .catch((error) => {
         console.error("Error creating checkout session:", error);
       });
-  }, []); // Re-run useEffect when fetchClientSecret changes
+  }, []); // For some reason, I am getting a rerender
 
   return (
     <div className="w-full">
@@ -172,6 +172,7 @@ const CustomStripeCheckout = ({
           <Spinner />
         </div>
       )}
+      ``
     </div>
   );
 };

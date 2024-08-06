@@ -4,8 +4,11 @@ import { DialogContent, Dialog, DialogTrigger } from "../ui/dialog";
 import { formatDateMonthDay } from "@/utils/utils";
 import { useState } from "react";
 import Confetti from "react-confetti";
-import { type TripCardDetails } from "@/pages/my-trips";
 import SharePropertyDialogContent from "../_common/ShareLink/SharePropertyDialogContent";
+import { type RouterOutputs } from "@/utils/api";
+
+type TripCardDetails =
+  RouterOutputs["trips"]["getMyTripsPageDetailsByPaymentIntentId"];
 
 export default function SuccessfulBidDialog({
   open,
@@ -13,12 +16,9 @@ export default function SuccessfulBidDialog({
   booking,
 }: {
   open: boolean;
-  setOpen: (o: boolean) => void;
-  booking: TripCardDetails | null;
+  setOpen?: (o: boolean) => void;
+  booking: TripCardDetails;
 }) {
-  const [showShareDialog, setShowShareDialog] = useState(false);
-  if (!booking) return null;
-
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogContent>
@@ -31,7 +31,7 @@ export default function SuccessfulBidDialog({
             <div className="mt-[-2.5rem] flex justify-center overflow-hidden rounded-2xl">
               <div className="relative block aspect-square w-64 overflow-clip rounded-xl">
                 <Image
-                  src={booking.property.imageUrls[0]!}
+                  src={booking.trip.property.imageUrls[0]!}
                   alt=""
                   layout="fill"
                   objectFit="cover"
@@ -39,14 +39,18 @@ export default function SuccessfulBidDialog({
               </div>
             </div>
           </div>
-          <h3 className="text-xl font-bold">Congrats on booking your trip!</h3>
+          <h3 className="text-xl font-bold">
+            Congratulations on booking your trip!
+          </h3>
           {/* <p className="font-medium">Your trip to <span className="font-extrabold">Paris</span> from June 22nd - June 28th is confirmed.</p> */}
           {
             <p className="font-medium">
               Your trip to{" "}
-              <span className="font-extrabold">{booking.property.city}</span>{" "}
+              <span className="font-extrabold">
+                {booking.trip.property.city}
+              </span>{" "}
               from{" "}
-              {`${formatDateMonthDay(booking.checkIn)} - ${formatDateMonthDay(booking.checkOut)} is confirmed.`}
+              {`${formatDateMonthDay(booking.trip.checkIn)} - ${formatDateMonthDay(booking.trip.checkOut)} is confirmed.`}
             </p>
           }
           <div className="md:py-5">
@@ -61,8 +65,8 @@ export default function SuccessfulBidDialog({
               </DialogTrigger>
               <DialogContent className="text-xl font-semibold">
                 <SharePropertyDialogContent
-                  id={booking.property.id}
-                  propertyName={booking.property.name}
+                  id={booking.trip.property.id}
+                  propertyName={booking.trip.property.name}
                 />
               </DialogContent>
             </Dialog>

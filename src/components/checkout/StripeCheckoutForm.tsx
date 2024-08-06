@@ -47,7 +47,7 @@ export default function StripeCheckoutForm({
       //`Elements` instance that was used to create the Payment Element
       elements,
       confirmParams: {
-        return_url: `${baseUrl}/myTrips`,
+        return_url: `${baseUrl}/my-trips/confirmation`,
       },
     });
 

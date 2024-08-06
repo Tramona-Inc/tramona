@@ -19,11 +19,18 @@ import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import Spinner from "../_common/Spinner";
 import { type RouterOutputs } from "@/utils/api";
 export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
+export type TripWithDetailsConfirmation =
+  RouterOutputs["trips"]["getMyTripsPageDetailsByPaymentIntentId"];
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
+export default function TripPage({
+  tripData,
+}: {
+  tripData: TripWithDetails | TripWithDetailsConfirmation;
+  isConfirmation?: boolean;
+}) {
   const chatWithAdmin = useChatWithAdmin();
 
   const { trip, coordinates } = tripData;
@@ -72,7 +79,7 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
               <div className="flex justify-between pt-2">
                 <div className="flex gap-2">
                   <UserAvatar
-                    name={trip.property.hostName}
+                    name={trip.property.host?.name}
                     // image={trip.property.host?.image}
                     image={
                       trip.property.host?.image ??
@@ -148,14 +155,12 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
                 <p>Los Angeles, CA, USA</p> */}
                 <p>{trip.property.address}</p>
 
-                {coordinates && (
-                  <div className="relative z-10 my-3 overflow-clip rounded-lg">
-                    <SingleLocationMap
-                      lat={coordinates.location.lat}
-                      lng={coordinates.location.lng}
-                    />
-                  </div>
-                )}
+                <div className="relative z-10 my-3 overflow-clip rounded-lg">
+                  <SingleLocationMap
+                    lat={coordinates.location.lat}
+                    lng={coordinates.location.lng}
+                  />
+                </div>
               </div>
               <Link
                 href={`/property/${trip.property.id}`}
