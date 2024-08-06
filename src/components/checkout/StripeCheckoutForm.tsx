@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   useStripe,
   useElements,
   PaymentElement,
   AddressElement,
-  LinkAuthenticationElement,
   ExpressCheckoutElement,
 } from "@stripe/react-stripe-js";
 import { Separator } from "../ui/separator";

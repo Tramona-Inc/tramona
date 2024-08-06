@@ -179,7 +179,7 @@ export default function TripPage({
                     Paid {dayjs(trip.createdAt).format("MMM D")}
                   </p>
                 </div>
-                <p>{formatCurrency(trip.totalPriceAfterFees)}</p>
+                <p>{formatCurrency(trip.totalPriceAfterFees!)}</p>
 
                 {/* <Link
                   href={`/`}

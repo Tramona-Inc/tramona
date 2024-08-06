@@ -49,13 +49,13 @@ const CustomStripeCheckout = ({
   const [paymentIntentResponse, setPaymentIntentResponse] =
     useState<Stripe.Response<Stripe.PaymentIntent> | null>(null);
   const [checkoutReady, setCheckoutReady] = useState(false);
-  const createPaymentIntent = api.stripe.createPaymentIntent.useMutation();
+  const authorizePayment = api.stripe.authorizePayment.useMutation();
 
   const fetchClientSecret = useCallback(async () => {
     if (!session.data?.user) return;
     try {
-      const response = await createPaymentIntent.mutateAsync({
-        listingId: offer.id,
+      const response = await authorizePayment.mutateAsync({
+        offerId: offer.id,
         propertyId: property.id,
         requestId: offer.requestId ?? null,
         name: property.name,
@@ -172,7 +172,6 @@ const CustomStripeCheckout = ({
           <Spinner />
         </div>
       )}
-      ``
     </div>
   );
 };

@@ -96,6 +96,7 @@ export const tripsRouter = createTRPCRouter({
               longitude: true,
               checkInInfo: true,
               address: true,
+              cancellationPolicy: true,
             },
             with: {
               host: {
@@ -133,6 +134,7 @@ export const tripsRouter = createTRPCRouter({
               longitude: true,
               checkInInfo: true,
               address: true,
+              cancellationPolicy: true,
             },
             with: {
               host: {

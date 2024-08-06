@@ -19,6 +19,8 @@ import type { Trip } from "@/server/db/schema/tables/trips";
 import { formatDateYearMonthDay } from "@/utils/utils";
 import { getCountryISO, getPostcode } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
+
+import { stripe } from "@/server/api/routers/stripeRouter";
 export interface ReservationInterface {
   id: number;
   checkIn: string;
@@ -87,12 +89,12 @@ type ResponseType = {
 //   //check to see if the reservation has already been created by checking the trips table since this will becalled on everyupdate
 
 export async function createSuperhogReservation({
-  listingId,
+  paymentIntentId,
   propertyId,
   userId,
   trip,
 }: {
-  listingId: number;
+  paymentIntentId: string;
   propertyId: number;
   userId: string;
   trip: Trip;
@@ -209,6 +211,16 @@ export async function createSuperhogReservation({
           `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${verification.status} for tripID ${trip.id} for ${user.name}`,
         ].join("\n"),
       );
+    } else {
+      console.log("Superhog was approved and just need to capture the payment");
+      //approved we can take the payment
+      const intent = await stripe.paymentIntents.capture(paymentIntentId); //will capture the authorized amount by default
+      // Update trips table
+      await db
+        .update(trips)
+        .set({ paymentCaptured: true })
+        .where(eq(trips.id, trip.id));
+      return intent;
     }
   }
   //top level if statement

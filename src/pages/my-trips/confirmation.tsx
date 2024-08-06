@@ -17,6 +17,7 @@ export default function TripDetailsPage() {
   const redirectStatus =
     (Array.isArray(redirect_status) ? redirect_status[0] : redirect_status) ??
     "requires_payment_method";
+  console.log("redirect Status", redirectStatus);
 
   const validRedirectStatuses = [
     "succeeded",
@@ -48,13 +49,13 @@ export default function TripDetailsPage() {
       {trip && validRedirectStatuses.includes(redirectStatus) ? (
         <div>
           {redirectStatus !== "succeeded" ? (
+            <div>We need to redo your payment</div>
+          ) : (
             <SuccessfulBookingDialog
               open={open}
               booking={trip}
               setOpen={setOpen}
             />
-          ) : (
-            <div>We need to redo your payment</div>
           )}
           <TripPage tripData={trip} isConfirmation={true} />
         </div>
