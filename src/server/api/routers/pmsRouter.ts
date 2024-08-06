@@ -173,7 +173,7 @@ export const pmsRouter = createTRPCRouter({
         "https://connect.hospitable.com/api/v1/auth-codes",
         {
           customer_id: id,
-          redirect_url: "https://tramona.com/host",
+          redirect_url: "http://localhost:3000/host",
         },
         {
           headers: {

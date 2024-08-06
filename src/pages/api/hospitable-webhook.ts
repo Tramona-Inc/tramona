@@ -192,7 +192,7 @@ export default async function webhook(
       case "listing.created":
 
         const userId = webhookData.data.channel.customer.id;
-        const imageResponse = await axios.get<ImageResponse>(`https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
+        const imageResponse = await axios.get<ImageResponse>(`c${webhookData.data.id}/images`,
           {
             headers: {
               Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,

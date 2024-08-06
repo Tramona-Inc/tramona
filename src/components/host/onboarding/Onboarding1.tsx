@@ -140,6 +140,8 @@ export default function Onboarding1({
     console.log({ pms, accountId, apiKey });
   });
 
+  console.log('hello there!', isHospitableCustomer)
+
   return (
     <>
       <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-2">
