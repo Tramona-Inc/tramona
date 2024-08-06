@@ -65,9 +65,10 @@ export default function ListMessages({
   )
   const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
   const { mutateAsync: adminMessagesToRead } = api.messages.setGuestMessagesToRead.useMutation();
-
+  const {data: checkConversationId} = api.messages.checkConversationWithAdmin.useQuery({conversationId: conversationId})
 
   const { data: session } = useSession();
+
 
 
   const messages = currentConversationId
@@ -113,34 +114,7 @@ export default function ListMessages({
     : false;
 
   console.log(optimisticIds)
-  const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    console.log("Handling postgres change")
-    if(!optimisticIds.includes(payload.new.id)) {
-        const newMessage: ChatMessageType = {
-          id: payload.new.id,
-          conversationId: payload.new.conversation_id,
-          userId: payload.new.user_id ?? "",
-          message: payload.new.message,
-          isEdit: payload.new.is_edit,
-          createdAt: payload.new.created_at,
-          read: payload.new.read,
-        };
-
-        addMessageToConversation(payload.new.conversation_id, newMessage);
-        setConversationToTop(payload.new.conversation_id, newMessage);
-        setOptimisticIds(payload.new.id)
-      }
-    //   }
-    // }
-
-    const scrollContainer = scrollRef.current;
-    if (
-      scrollContainer.scrollTop <
-      scrollContainer.scrollHeight - scrollContainer.clientHeight - 10
-    ) {
-      setNotification((current) => current + 1);
-    }
-  };
+  
 
   const handlePostgresChangeOnGuest = async (payload: {new: GuestMessageType}) => {
     console.log("in ListMessages -> in handlePostgresChangeOnGuest")
@@ -170,7 +144,6 @@ export default function ListMessages({
   //this is for loggedin users
   useEffect(() => {
     console.log("for logged in users", conversationId);
-    
       const channel = supabase
         .channel(`${conversationId}`)
         .on(
@@ -180,19 +153,45 @@ export default function ListMessages({
             schema: "public",
             table: "messages",
           },
-          (payload: { new: MessageDbType }) => {
-            console.log("calling handlePostgresCHnage")
+          (payload: { new: MessageDbType }) => 
             void handlePostgresChange(payload)
-          }
         )
-        .subscribe();
+        .subscribe(status=>console.log(status));
       return () => {
         // console.log('Unsubscribing from channel');
         void channel.unsubscribe();
       };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+}, [supabase, messages, optimisticIds]);
 
+const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+  console.log("Handling postgres change")
+  if(!optimisticIds.includes(payload.new.id)) {
+      const newMessage: ChatMessageType = {
+        id: payload.new.id,
+        conversationId: payload.new.conversation_id,
+        userId: payload.new.user_id ?? "",
+        message: payload.new.message,
+        isEdit: payload.new.is_edit,
+        createdAt: payload.new.created_at,
+        read: payload.new.read,
+      };
+
+      addMessageToConversation(payload.new.conversation_id, newMessage);
+      setConversationToTop(payload.new.conversation_id, newMessage);
+      
+    }
+  //   }
+  // }
+
+  const scrollContainer = scrollRef.current;
+  if (
+    scrollContainer.scrollTop <
+    scrollContainer.scrollHeight - scrollContainer.clientHeight - 10
+  ) {
+    setNotification((current) => current + 1);
+  }
+};
 
 
   //this is for logged out users conversations
@@ -210,13 +209,13 @@ export default function ListMessages({
           (payload: { new: GuestMessageType }) =>
             void handlePostgresChangeOnGuest(payload),
         )
-        .subscribe();
+        .subscribe(status=>console.log(status));
   
       return () => {
         void channel.unsubscribe();
       };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase]);
+  }, [supabase, adminMessages, optimisticIds]);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
