@@ -9,19 +9,25 @@ import SuccessfulBookingDialog from "@/components/my-trips/SuccessfulBookingDial
 
 export default function TripDetailsPage() {
   const [open, setOpen] = useState(true);
-  //const [openChange, setOpenChange] = useState();
   const router = useRouter();
-  const { payment_intent } = router.query;
+  const { payment_intent, redirect_status } = router.query;
 
-  // Ensure payment_intent is a string
-  const paymentIntent = Array.isArray(payment_intent)
-    ? payment_intent[0]
-    : payment_intent;
+  const paymentIntent =
+    (Array.isArray(payment_intent) ? payment_intent[0] : payment_intent) ?? "";
+  const redirectStatus =
+    (Array.isArray(redirect_status) ? redirect_status[0] : redirect_status) ??
+    "requires_payment_method";
+
+  const validRedirectStatuses = [
+    "succeeded",
+    "processing",
+    "requires_payment_method",
+  ];
 
   const { data: trip, refetch: fetchMyTrip } =
     api.trips.getMyTripsPageDetailsByPaymentIntentId.useQuery(
       {
-        paymentIntentId: paymentIntent!,
+        paymentIntentId: paymentIntent,
       },
       {
         enabled: false,
@@ -31,22 +37,25 @@ export default function TripDetailsPage() {
   useEffect(() => {
     if (paymentIntent) {
       void fetchMyTrip();
-      console.log(" trip", trip);
     }
-  }, [paymentIntent]);
+  }, [paymentIntent, fetchMyTrip]);
 
   return (
     <DashboardLayout type="guest">
       <Head>
         <title>My Trips | Tramona</title>
       </Head>
-      {trip ? (
+      {trip && validRedirectStatuses.includes(redirectStatus) ? (
         <div>
-          <SuccessfulBookingDialog
-            open={open}
-            booking={trip}
-            setOpen={setOpen}
-          />
+          {redirectStatus !== "succeeded" ? (
+            <SuccessfulBookingDialog
+              open={open}
+              booking={trip}
+              setOpen={setOpen}
+            />
+          ) : (
+            <div>We need to redo your payment</div>
+          )}
           <TripPage tripData={trip} isConfirmation={true} />
         </div>
       ) : (
