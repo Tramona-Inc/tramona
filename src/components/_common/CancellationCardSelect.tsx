@@ -1,43 +1,45 @@
+import { type CancellationPolicy } from "@/server/db/schema";
 import { cn } from "@/utils/utils";
 import React from "react";
 
+function formatText(text: string) {
+  const lines = text.split("\n");
+  return lines.map((line, index) => (
+    <span key={index} className="block">
+      <span style={{ color: "#000000", fontWeight: "bold" }}>
+        {line.split(":")[0]}:
+      </span>
+      <span style={{ color: "#343434" }}>
+        {line.includes(":") && line.split(":")[1]}
+      </span>
+    </span>
+  ));
+}
+
 export default function CancellationCardSelect({
-  title,
+  policy,
   text,
   onClick,
   isSelected,
 }: {
-  title: string;
+  policy: CancellationPolicy;
   text: string;
   onClick?: () => void;
   isSelected?: boolean;
 }) {
-
-  const formatText = (text: string) => {
-    const lines = text.split("\n");
-    return lines.map((line, index) => (
-      <span key={index} className="block">
-        <span style={{ color: '#000000', fontWeight: 'bold' }}>
-          {line.split(":")[0]}:
-        </span>
-        <span style={{ color: '#343434' }}>
-          {line.includes(":") && line.split(":")[1]}
-        </span>
-      </span>
-    ));
-  };
-
   return (
     <button
       className={cn(
-        "block w-full rounded-xl border-2 p-5 space-y-3",
+        "block w-full rounded-xl border-2 px-6 py-3 text-left",
         isSelected ? "border-black" : "hover:border-zinc-400",
       )}
       onClick={onClick}
     >
-      <p className="font-bold md:text-xl">{title}</p>
+      <p className="text-center text-lg font-bold">{policy}</p>
       {isSelected ? (
-        <p className="text-left text-sm text-muted-foreground whitespace-pre-line">{formatText(text)}</p>
+        <p className="whitespace-pre-line text-left text-sm text-muted-foreground">
+          {policy === "Non-refundable" ? text : formatText(text)}
+        </p>
       ) : (
         <p
           className={cn(

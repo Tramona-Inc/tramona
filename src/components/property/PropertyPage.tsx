@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { getCancellationPolicy, plural } from "@/utils/utils";
+import { plural } from "@/utils/utils";
 import "leaflet/dist/leaflet.css";
 import {
   ArrowLeftIcon,
@@ -27,6 +27,7 @@ import PropertyAmenities from "../offers/PropertyAmenities";
 import AmenitiesComponent from "../offers/CategorizedAmenities";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { useRouter } from "next/router";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
 export default function PropertyPage({ property }: { property: Property }) {
   // const isBooked = false;
@@ -306,7 +307,7 @@ export default function PropertyPage({ property }: { property: Property }) {
         <div className="py-2">
           <p className="text-sm font-medium text-black">
             {property.cancellationPolicy
-              ? getCancellationPolicy(property.cancellationPolicy)
+              ? getCancellationPolicyDescription(property.cancellationPolicy)
               : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
           </p>
         </div>

@@ -5,16 +5,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { options as cancellationPolicyOptions } from "./Onboarding10";
 import { useState } from "react";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { ALL_CANCELLATION_POLICIES } from "@/server/db/schema";
 
 export default function Summary1() {
   const [isEditing, setIsEditing] = useState(false);
 
   const { listing } = useHostOnboarding((state) => state);
 
-  const setCancellationPolicy = useHostOnboarding((state) => state.setCancellationPolicy);
+  const setCancellationPolicy = useHostOnboarding(
+    (state) => state.setCancellationPolicy,
+  );
 
   return (
     <div className="flex flex-col gap-3 py-5">
@@ -39,13 +41,13 @@ export default function Summary1() {
             <Button variant="outline">Edit your cancellation policy</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-60">
-            {cancellationPolicyOptions.map((item) => (
+            {ALL_CANCELLATION_POLICIES.map((policy) => (
               <DropdownMenuItem
-                key={item.title}
-                onClick={() => setCancellationPolicy(item.id)}
+                key={policy}
+                onClick={() => setCancellationPolicy(policy)}
                 className="cursor-pointer p-1"
               >
-                {item.id}
+                {policy}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

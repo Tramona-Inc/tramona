@@ -112,16 +112,11 @@ export const propertiesRouter = createTRPCRouter({
   update: roleRestrictedProcedure(["admin", "host"])
     .input(propertyUpdateSchema.omit({ hostId: true, latLngPoint: true }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "admin" && !input.hostName) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+      // TODO: auth
 
       await ctx.db
         .update(properties)
-        .set({
-          ...input,
-          hostId: ctx.user.role === "admin" ? null : ctx.user.id,
-        })
+        .set(input)
         .where(eq(properties.id, input.id));
     }),
 
@@ -493,7 +488,7 @@ export const propertiesRouter = createTRPCRouter({
           JOIN ${groups} g ON r.made_by_group_id = g.id
           JOIN ${users} u ON g.owner_id = u.id
           ORDER BY r.check_in, cr.city, r.id, p.id
-        `); 
+        `);
 
       const organizedData: HostRequestsPageData[] = [];
       const cityMap = new Map<string, HostRequestsPageData>();

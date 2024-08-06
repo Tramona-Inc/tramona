@@ -13,11 +13,11 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { formatCurrency, getCancellationPolicy, plural } from "@/utils/utils";
+import { formatCurrency, plural } from "@/utils/utils";
 import "leaflet/dist/leaflet.css";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
-import Spinner from "../_common/Spinner";
 import { type RouterOutputs } from "@/utils/api";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
 
 // Plugin for relative time
@@ -29,20 +29,6 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
   const { trip, coordinates } = tripData;
 
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
-
-  const formatText = (text: string) => {
-    const lines = text.split("\n");
-    return lines.map((line, index) => (
-      <span key={index} className="block">
-        <span style={{ color: "#000000", fontWeight: "bold" }}>
-          {line.split(":")[0]}:
-        </span>
-        <span style={{ color: "#343434" }}>
-          {line.includes(":") && line.split(":")[1]}
-        </span>
-      </span>
-    ));
-  };
 
   return (
     <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
@@ -208,53 +194,15 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
                   </>
                 )}
 
-                {trip.property.cancellationPolicy ? (
-                  <p className="pb-2 font-bold">
-                    Cancellation Policy: {trip.property.cancellationPolicy}
-                  </p>
-                ) : (
-                  <p className="pb-2 font-bold">Cancellation Policy</p>
-                )}
-
-                {trip.property.cancellationPolicy ? (
-                  <p className="whitespace-pre-line text-left text-sm text-muted-foreground">
-                    {formatText(
-                      getCancellationPolicy(trip.property.cancellationPolicy),
-                    )}
-                  </p>
-                ) : (
-                  <ol type="1" className="list-inside list-decimal">
-                    <li>
-                      Cancelation Period:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          Guests must notify us of any cancellation in writing
-                          within the designated cancellation period.
-                        </li>
-                      </ul>
-                    </li>
-
-                    <li>
-                      Cancellation Fees:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          If cancellation is made <strong>14 days</strong> or
-                          more prior to the scheduled arrival date, guests will
-                          receive a full refund of the booking deposit.
-                        </li>
-                        <li>
-                          If cancellation is made within <strong>7 days</strong>{" "}
-                          of the scheduled arrival date, guests will forfeit the
-                          booking deposit.
-                        </li>
-                        <li>
-                          In the event of a no-show or cancellation on the day
-                          of check-in, guests will be charged the full amount of
-                          the reservation.
-                        </li>
-                      </ul>
-                    </li>
-                  </ol>
+                {trip.property.cancellationPolicy !== null && (
+                  <>
+                    <p className="pb-2 font-bold">Cancellation Policy</p>
+                    <p>
+                      {getCancellationPolicyDescription(
+                        trip.property.cancellationPolicy,
+                      )}
+                    </p>
+                  </>
                 )}
               </div>
 
