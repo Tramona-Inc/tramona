@@ -3,6 +3,7 @@ import { properties, reservedDateRanges, type PropertyType } from "@/server/db/s
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
+import { property } from "lodash";
 
 
 const airbnbPropertyTypes = [
@@ -281,6 +282,8 @@ export default async function webhook(
           about: webhookData.data.description,
           address: webhookData.data.address.street + ", " + webhookData.data.address.city + ", " + webhookData.data.address.state + ", " + webhookData.data.address.country_code,
           imageUrls: images,
+          originalListingPlatform: "Hospitable" as const,
+          originalListingId: webhookData.data.id,
           //amenities: webhookData.data.amenities,
           //cancellationPolicy: webhookData.data.cancellation_policy,
           //ratings: webhookData.data.ratings,

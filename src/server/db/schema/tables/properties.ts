@@ -189,11 +189,11 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Archived",
 ]);
 
-export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
+export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable"] as const;
 
 export const propertyPMSEnum = pgEnum("property_pms", ALL_PROPERTY_PMS);
 
-export const listingSiteEnum = pgEnum("listing_site", ALL_LISTING_SITE_NAMES);
+export const listingPlatformEnum = pgEnum("listing_platform", [...ALL_LISTING_SITE_NAMES, ...ALL_PROPERTY_PMS]);
 
 export const ALL_BED_TYPES = [
   "Single Bed",
@@ -280,7 +280,7 @@ export const properties = pgTable(
     hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
     // null = only on Tramona
-    originalListingSite: listingSiteEnum("original_listing_site"),
+    originalListingPlatform: listingPlatformEnum("original_listing_platform"),
     originalListingId: varchar("original_listing_id"),
 
     roomsWithBeds: jsonb("rooms_with_beds").$type<RoomWithBeds[]>(),
@@ -294,7 +294,7 @@ export const properties = pgTable(
     numBeds: smallint("num_beds").notNull(),
     numBedrooms: smallint("num_bedrooms").notNull(),
     numBathrooms: doublePrecision("num_bathrooms"),
-    propertyPMS: propertyPMSEnum("property_pms"),
+    // propertyPMS: propertyPMSEnum("property_pms"),
 
     // for when blake/preju manually upload, otherwise get the host's name via hostId
     hostName: varchar("host_name", { length: 255 }),
@@ -351,7 +351,7 @@ export const properties = pgTable(
     airbnbBookUrl: varchar("airbnb_book_url"),
     hostImageUrl: varchar("host_image_url"),
     pricingScreenUrl: varchar("pricing_screen_url"),
-    hostawayListingId: integer("hostaway_listing_id"),
+    // hostawayListingId: integer("hostaway_listing_id"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",

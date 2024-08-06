@@ -90,13 +90,13 @@ export function createListing({
 }
 
 export function getOriginalListing(
-  property: Pick<Property, "originalListingId" | "originalListingSite">,
+  property: Pick<Property, "originalListingId" | "originalListingPlatform">,
 ) {
-  if (!property.originalListingSite || !property.originalListingId) {
+  if (!property.originalListingPlatform || !property.originalListingId) {
     return null;
   }
   return createListing({
     id: property.originalListingId,
-    siteName: property.originalListingSite,
+    siteName: property.originalListingPlatform,
   });
 }
