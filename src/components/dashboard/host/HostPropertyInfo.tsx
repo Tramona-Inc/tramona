@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
+import PublishDraftBanner from "./PublishDraftBanner";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   const [iCalLink, setiCalLink] = useState("");
