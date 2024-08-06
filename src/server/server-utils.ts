@@ -36,6 +36,7 @@ import { getCity, getCoordinates } from "./google-maps";
 import puppeteer from "puppeteer";
 import { sleep } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
+import axios from "axios";
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
@@ -493,4 +494,59 @@ export async function scrapeUsingLink(url: string) {
       console.error("Unexpected error:", error);
     }
   }
+}
+
+type HospitablePriceResponse = {
+  data: {
+    dates: {
+      price: { amount: number };
+    }[];
+  };
+};
+
+type HostawayPriceResponse = {
+  result: {
+    totalPrice: number;
+  };
+};
+
+export async function getPropertyOriginalPrice(
+  property: Pick<Property, "originalListingId" | "originalListingPlatform">,
+  params: {
+    checkIn: string;
+    checkOut: string;
+    numGuests: number;
+  },
+) {
+  if (property.originalListingPlatform === "Hospitable") {
+    const { data } = await axios.get<HospitablePriceResponse>(
+      `https://connect.hospitable.com/api/v1/listings/${property.originalListingId}/calendar`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+        },
+        params: {
+          start_date: params.checkIn,
+          end_date: params.checkOut,
+        },
+      },
+    );
+    const totalPrice = data.data.dates.reduce((acc, date) => {
+      return acc + date.price.amount;
+    }, 0);
+    return totalPrice;
+  } else if (property.originalListingPlatform === "Hostaway") {
+    const { data } = await axios.get<HostawayPriceResponse>(
+      `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HOSTAWAY_API_KEY}`,
+        },
+        params,
+      },
+    );
+    const totalPrice = data.result.totalPrice;
+    return totalPrice;
+  }
+  // code for other options
 }

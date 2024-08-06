@@ -89,9 +89,10 @@ export function createListing({
   return Site.createListing(id);
 }
 
-export function getOriginalListing(
-  property: Pick<Property, "originalListingId" | "originalListingSite">,
-) {
+export function getOriginalListing(property: {
+  originalListingId?: string;
+  originalListingSite?: ListingSiteName;
+}) {
   if (!property.originalListingSite || !property.originalListingId) {
     return null;
   }
