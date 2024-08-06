@@ -14,12 +14,18 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils/utils";
 import { type FeedItem } from "./ActivityFeed";
+import { Button } from "@/components/ui/button";
+import OfferDialog from "./admin/OfferDialog";
+import { useSession } from "next-auth/react";
 
 export default function FeedOfferCard({
   offer,
 }: {
   offer: FeedItem & { type: "offer" };
 }) {
+  const { data: session } = useSession();
+  const isAdmin = session && session.user.role === "admin";
+
   const userName = offer.request?.madeByGroup.owner.name ?? "";
   const userImage = offer.request?.madeByGroup.owner.image ?? "";
   const numOfNights = getNumNights(offer.checkIn, offer.checkOut);
@@ -54,7 +60,7 @@ export default function FeedOfferCard({
       <div className="flex">
         <div className=""></div>
         <div className="w-full space-y-2">
-          <div className="grid">
+          <div className="flex w-full items-start justify-between">
             <div>
               <p className="mb-5">Recieved a match</p>
               <p className="font-bold">
@@ -72,6 +78,11 @@ export default function FeedOfferCard({
                 </p>
               )}
             </div>
+            {isAdmin && offer.isFiller && (
+              <OfferDialog offer={offer}>
+                <Button className="ml-auto rounded-full">Edit</Button>
+              </OfferDialog>
+            )}
           </div>
           <div className="relative">
             <Carousel
@@ -83,25 +94,27 @@ export default function FeedOfferCard({
               }}
             >
               <CarouselContent className="-ml-2 md:-ml-4">
-                {offer.property.imageUrls.slice(0, 5).map((photo, index) => (
-                  <CarouselItem
-                    key={index}
-                    className="basis-1/2 pl-2 md:basis-1/3 md:pl-4"
-                  >
-                    <Link
-                      href={`/property/${offer.property.id}`}
-                      className="relative block aspect-[4/3] overflow-clip rounded-xl"
+                {offer.property.imageUrls
+                  .slice(0, 5)
+                  .map((photo: string, index: number) => (
+                    <CarouselItem
+                      key={index}
+                      className="basis-1/2 pl-2 md:basis-1/3 md:pl-4"
                     >
-                      <Image
-                        src={photo}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-                        alt=""
-                        className="object-cover"
-                      />
-                    </Link>
-                  </CarouselItem>
-                ))}
+                      <Link
+                        href={`/property/${offer.property.id}`}
+                        className="relative block aspect-[4/3] overflow-clip rounded-xl"
+                      >
+                        <Image
+                          src={photo}
+                          fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                          alt=""
+                          className="object-cover"
+                        />
+                      </Link>
+                    </CarouselItem>
+                  ))}
               </CarouselContent>
               <CarouselPrevious
                 className="absolute left-2 top-1/2 size-6 -translate-y-1/2"

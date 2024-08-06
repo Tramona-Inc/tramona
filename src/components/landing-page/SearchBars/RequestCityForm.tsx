@@ -41,17 +41,15 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
       useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [madeByGroupId, setMadeByGroupId] = useState<number>();
-    const [inviteLink, setInviteLink] = useState<string | null>(null);
+    const [_inviteLink, setInviteLink] = useState<string | null>(null);
 
-    const cityForm = useCityRequestForm({
+    const { form, onSubmit } = useCityRequestForm({
       beforeSubmit() {
         setRequestSubmittedDialogOpen(true);
         setShowConfetti(true);
       },
       setMadeByGroupId,
     });
-
-    const { form, onSubmit } = cityForm;
 
     const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
       { groupId: madeByGroupId! },
@@ -72,6 +70,8 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
       submit: onSubmit,
     }));
 
+    const { latLng, radius } = form.watch();
+
     return (
       <Form {...form}>
         <form className="flex flex-col justify-between gap-y-4">
@@ -83,7 +83,11 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
           >
             <PlacesInput
               control={form.control}
-              name={`location`}
+              latLng={latLng}
+              setLatLng={(latLng) => form.setValue("latLng", latLng)}
+              radius={radius}
+              setRadius={(radius) => form.setValue("radius", radius)}
+              name="location"
               formLabel="Location"
               variant="lpDesktop"
               placeholder="Select a location"
@@ -109,6 +113,7 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name={`numGuests`}
@@ -127,6 +132,7 @@ const RequestCityForm = forwardRef<RequestCityFormRef, RequestCityFormProps>(
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name={`maxNightlyPriceUSD`}

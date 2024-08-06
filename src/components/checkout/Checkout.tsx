@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { getCancellationPolicy, getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
+import { getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "../requests/StripePaymentInfo";
 import CheckoutInfoForm from "./ContactInfoForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -63,13 +64,13 @@ export default function Checkout({
   }
 
   function CancellationPolicy() {
+    if (property.cancellationPolicy === null) return null;
+
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Cancellation Policy</h3>
         <p className="text-sm font-semibold leading-5 text-muted-foreground">
-          {property.cancellationPolicy
-            ? getCancellationPolicy(property.cancellationPolicy)
-            : "No cancellation policy"}
+          {getCancellationPolicyDescription(property.cancellationPolicy)}
         </p>
       </div>
     );

@@ -1,53 +1,20 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { HelpCircleIcon, InfoIcon, MessageCircle } from "lucide-react";
+import { HelpCircleIcon, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { formatDateRange, getCancellationPolicy } from "@/utils/utils";
+import { formatDateRange } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "../ui/sheet";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { type TripCardDetails } from "@/pages/my-trips";
-import { api } from "@/utils/api";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   const chatWithAdmin = useChatWithAdmin();
-
-  const slackMutation = api.twilio.sendSlack.useMutation();
-
-
-  const formatText = (text: string) => {
-    const lines = text.split("\n");
-    return lines.map((line, index) => (
-      <span key={index} className="block">
-        <span style={{ color: "#000000", fontWeight: "bold" }}>
-          {line.split(":")[0]}:
-        </span>
-        <span style={{ color: "#343434" }}>
-          {line.includes(":") && line.split(":")[1]}
-        </span>
-      </span>
-    ));
-  };
-
-  const handleRequestCancellation = async () => {
-    await slackMutation.mutateAsync({
-      message: `Tramona: A traveler with payment id: ${trip.offer?.paymentIntentId} requested a cancellation on ${trip.property.name} from ${formatDateRange(trip.offer?.checkIn, trip.offer?.checkOut)}. The cancellation policy is ${trip.property.cancellationPolicy}.`,
-    });
-  }
 
   return (
     <div className="w-full">
@@ -118,104 +85,6 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               <MessageCircle className="size-4" />
               Message your host
             </Button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="secondary">
-                  <InfoIcon className="size-5" />
-                  Cancellation Policy
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="p-0">
-                <SheetHeader className="border-b-[1px] p-5">
-                  <SheetTitle className="text-xl font-bold lg:text-2xl">
-                    {trip.property.cancellationPolicy ? (
-                      <p>
-                        Cancellation Policy: {trip.property.cancellationPolicy}
-                      </p>
-                    ) : (
-                      <p>Cancellation Policy</p>
-                    )}
-                  </SheetTitle>
-                </SheetHeader>
-                {trip.property.cancellationPolicy ? (
-                  <p className="whitespace-pre-line text-left text-sm text-muted-foreground border-b-[1px] px-5 py-10">
-                  {formatText(getCancellationPolicy(trip.property.cancellationPolicy))}
-                </p>
-                ): (
-                <div className="border-b-[1px] px-5 py-10">
-                  <ol type="1" className="list-inside list-decimal">
-                    <li>
-                      Cancelation Period:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          Guests must notify us of any cancellation in writing
-                          within the designated cancellation period.
-                        </li>
-                      </ul>
-                    </li>
-
-                    <li>
-                      Cancellation Fees:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          If cancellation is made <strong>14 days</strong> or
-                          more prior to the scheduled arrival date, guests will
-                          receive a full refund of the booking deposit.
-                        </li>
-                        <li>
-                          If cancellation is made within <strong>7 days</strong>{" "}
-                          of the scheduled arrival date, guests will forfeit the
-                          booking deposit.
-                        </li>
-                        <li>
-                          In the event of a no-show or cancellation on the day
-                          of check-in, guests will be charged the full amount of
-                          the reservation.
-                        </li>
-                      </ul>
-                    </li>
-
-                    <li>
-                      Reservation Modifications:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          Guests may request modifications to their reservation
-                          dates, subject to availability. Any changes must be
-                          requested in writing and approved by us.
-                        </li>
-                      </ul>
-                    </li>
-
-                    <li>
-                      Refunds:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          Refunds, if applicable, will be processed within{" "}
-                          <strong>30 business days</strong> from the date of
-                          cancellation confirmation.
-                        </li>
-                      </ul>
-                    </li>
-                  </ol>
-                </div>
-                )}
-
-                <SheetFooter className="p-5">
-                <SheetClose asChild>
-                    <Button
-                      onClick={handleRequestCancellation}
-                      className="w-full lg:w-[200px]"
-                    >
-                      Request Cancellation
-                    </Button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Button className="w-full lg:w-[200px]">Done</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
-
             <Button asChild variant="secondary">
               <Link href="/faq">
                 <HelpCircleIcon />

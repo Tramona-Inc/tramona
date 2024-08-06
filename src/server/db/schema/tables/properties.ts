@@ -87,6 +87,10 @@ export const ALL_PROPERTY_TYPES = [
   "Villa",
 ] as const;
 
+export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
+
+export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
+
 export const ALL_CANCELLATION_POLICIES = [
   "Flexible",
   "Moderate",
@@ -95,9 +99,15 @@ export const ALL_CANCELLATION_POLICIES = [
   "Super Strict 30 Days",
   "Super Strict 60 Days",
   "Long Term",
+  "Non-refundable",
 ] as const;
 
-export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
+export type CancellationPolicy = (typeof ALL_CANCELLATION_POLICIES)[number];
+
+export const cancellationPolicyEnum = pgEnum(
+  "cancellation_policy",
+  ALL_CANCELLATION_POLICIES,
+);
 
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
@@ -105,12 +115,12 @@ export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Private room",
 ] as const;
 
+export type PropertyRoomType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
+
 export const ALL_PROPERTY_ROOM_TYPES = [
   ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
   "Other",
 ] as const;
-
-export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
 
 export const propertyRoomTypeEnum = pgEnum(
   "property_room_type",
@@ -343,13 +353,14 @@ export const properties = pgTable(
     originalNightlyPrice: integer("original_nightly_price"), // in cents
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
-    cancellationPolicy: text("cancellation_policy"),
+    cancellationPolicy: cancellationPolicyEnum("cancellation_policy"),
 
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     isPrivate: boolean("is_private").notNull().default(false),
     ageRestriction: integer("age_restriction"),
+    priceRestriction: integer("price_restriction"),
     propertyStatus: propertyStatusEnum("property_status").default("Listed"),
     airbnbBookUrl: varchar("airbnb_book_url"),
     hostImageUrl: varchar("host_image_url"),
