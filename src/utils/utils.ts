@@ -206,10 +206,22 @@ export function getDisplayedName(realname: string | null): string {
 // }
 
 // TODO: fix hacky
+
 export function getNumNights(from: Date | string, to: Date | string) {
   return Math.round(
     (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),
   );
+}
+
+export function getPropertyId(url: string): number | null {
+  const parsedUrl = new URL(url);
+  const pathSegments = parsedUrl.pathname.split('/');
+  const propertyId = pathSegments[pathSegments.length - 1];
+  if (propertyId){
+    return parseInt(propertyId);
+  } else {
+    return null;
+  }
 }
 
 /**

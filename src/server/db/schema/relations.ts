@@ -29,6 +29,7 @@ import { superhogRequests } from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
 import { reviews } from "./tables/reviews";
+import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { superhogErrors } from "./tables/superhogErrors";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -381,3 +382,17 @@ export const emergencyContactsRelations = relations(
     }),
   }),
 );
+
+export const fillerOffersRelations = relations(fillerOffers, ({ one }) => ({
+  property: one(properties, {
+    fields: [fillerOffers.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const fillerBookingsRelations = relations(fillerBookings, ({ one }) => ({
+  property: one(properties, {
+    fields: [fillerBookings.propertyId],
+    references: [properties.id],
+  }),
+}));
