@@ -39,13 +39,16 @@ export default function ChatInput({
     (state) => state.addMessageToAdminConversation,
   )
 
+  const setOptimisticIds = useMessage(
+    (state) => state.setOptimisticIds,
+  )
+
+  // const setAdminIds 
+
   const setConversationToTop = useConversation(
     (state) => state.setConversationToTop,
   );
 
-  const setOptimisticIds = useMessage(
-    (state) => state.setOptimisticIds,
-  )
   const removeMessageFromConversation = useMessage(
     (state) => state.removeMessageFromConversation,
   );
@@ -63,7 +66,7 @@ export default function ChatInput({
 
       const newMessage: ChatMessageType = {
         id: nanoid(),
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString().slice(0,-1),
         conversationId: conversationId,
         userId: session.user.id,
         message: values.message,
@@ -81,21 +84,20 @@ export default function ChatInput({
         is_edit: newMessage.isEdit,
       };
 
-      setConversationToTop(conversationId, newMessage);
       addMessageToConversation(conversationId, newMessage);
-      setOptimisticIds(newMessage.id);
-
+      setConversationToTop(conversationId, newMessage);
+      
       form.reset();
 
-
+      
       // ! Optimistic UI first then add to db
       const { error } = await supabase
-        .from("messages")
-        .insert(newMessageToDb)
-        .select("*, user(email, name, image)")
-        // .select("*")
-        .single();
-
+      .from("messages")
+      .insert(newMessageToDb)
+      .select("*, user(email, name, image)")
+      // .select("*")
+      .single();
+      
       if (error) {
         removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
@@ -124,7 +126,8 @@ export default function ChatInput({
 
         addMessageToAdminConversation(conversationId, newMessage)
         setConversationToTop(conversationId, newMessage)
-        setOptimisticIds(newMessage.id);
+
+          form.reset();
 
         const { error } = await supabase
         .from("guest_messages")
@@ -133,7 +136,6 @@ export default function ChatInput({
         .select("*")
         .single();
 
-        form.reset();
 
       if (error) {
         removeMessageFromConversation(conversationId, newMessage.id);

@@ -82,29 +82,32 @@ export default function AdminMessages() {
   };
 
   useEffect(() => {
+    if(session){
+      const channel = supabase
+        .channel(`${conversationId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+          },
+          (payload: { new: MessageDbType }) => {
+            // console.log(payload)
+            void handlePostgresChange(payload);
+          },
+        )
+        .subscribe();
+  
+  
+      // console.log("going or no?");
+      return () => {
+        // console.log("unsubscibing from channel");
+        void channel.unsubscribe();
+      };
+    }
     console.log("handling postgres change for logged in user");
     console.log(conversationId);
-    const channel = supabase
-      .channel(`${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        (payload: { new: MessageDbType }) => {
-          // console.log(payload)
-          void handlePostgresChange(payload);
-        },
-      )
-      .subscribe();
-
-    // console.log("going or no?");
-    return () => {
-      // console.log("unsubscibing from channel");
-      void channel.unsubscribe();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase, messages]);
 
@@ -129,23 +132,25 @@ export default function AdminMessages() {
 
   useEffect(() => {
     console.log("in AdminMessages", conversationId)
-    const channel = supabase
-      .channel(`${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "guest_messages",
-        },
-        (payload: { new: GuestMessageType }) =>
-          void handlePostgresChangeOnGuest(payload),
-      )
-      .subscribe();
-
-    return () => {
-      void channel.unsubscribe();
-    };
+    if(!session){
+      const channel = supabase
+        .channel(`${conversationId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "guest_messages",
+          },
+          (payload: { new: GuestMessageType }) =>
+            void handlePostgresChangeOnGuest(payload),
+        )
+        .subscribe();
+  
+      return () => {
+        void channel.unsubscribe();
+      };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase, adminMessages]);
 

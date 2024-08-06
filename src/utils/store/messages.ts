@@ -63,6 +63,7 @@ type MessageState = {
 export const useMessage = create<MessageState>((set, get) => ({
   conversations: {},
   adminConversations: {},
+  optimisticIds: [],
   currentConversationId: null,
   setCurrentConversationId: (id: string) => {
     set(() => ({
@@ -87,12 +88,12 @@ export const useMessage = create<MessageState>((set, get) => ({
         updatedConversations[conversationId] = {
           messages: [
             newMessage,
-            ...(updatedConversations[conversationId]?.messages ?? []),
+            ...(updatedConversations[conversationId].messages),
           ],
-          page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
-          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
+          page: updatedConversations[conversationId].page, // Set a default value for page
+          hasMore: updatedConversations[conversationId].hasMore,
           alreadyFetched:
-            updatedConversations[conversationId]?.alreadyFetched ?? true,
+            updatedConversations[conversationId].alreadyFetched,
         };
       }
       // Ensure TypeScript understands that this is a ChatMessageType[]
@@ -110,6 +111,7 @@ export const useMessage = create<MessageState>((set, get) => ({
     newMessage: GuestMessage,
   ) => {
     set((state) => {
+      console.log(state)
       const updatedAdminConversations: AdminConversationsState = {
         ...state.adminConversations,
       }
@@ -118,11 +120,11 @@ export const useMessage = create<MessageState>((set, get) => ({
         updatedAdminConversations[conversationId] = {
           messages: [
             newMessage,
-            ...(updatedAdminConversations[conversationId]?.messages ?? []),
+            ...(updatedAdminConversations[conversationId].messages),
           ],
-          page: updatedAdminConversations[conversationId]?.page ?? 1,
-          hasMore: updatedAdminConversations[conversationId]?.hasMore ?? false,
-          alreadyFetched: updatedAdminConversations[conversationId]?.alreadyFetched ?? true,
+          page: updatedAdminConversations[conversationId].page,
+          hasMore: updatedAdminConversations[conversationId].hasMore,
+          alreadyFetched: updatedAdminConversations[conversationId].alreadyFetched,
         };
       }
         const updatedAdminState: MessageState = {
@@ -130,10 +132,10 @@ export const useMessage = create<MessageState>((set, get) => ({
           adminConversations: updatedAdminConversations,
           optimisticIds: [...state.optimisticIds, newMessage.id]
         }
+        console.log(updatedAdminState)
         return updatedAdminState
     })
   },
-  optimisticIds: [],
   setOptimisticIds: (id: string) =>
     set((state) => ({
       optimisticIds: [...state.optimisticIds, id],
@@ -152,13 +154,13 @@ export const useMessage = create<MessageState>((set, get) => ({
         // Add the new message to the existing conversation
         updatedConversations[conversationId] = {
           messages: [
-            ...(updatedConversations[conversationId]?.messages ?? []),
+            ...(updatedConversations[conversationId]?.messages),
             ...moreMessages,
           ],
-          page: (updatedConversations[conversationId]?.page ?? 1) + 1,
+          page: (updatedConversations[conversationId]?.page) + 1,
           hasMore: moreMessages.length >= LIMIT_MESSAGE,
           alreadyFetched:
-            updatedConversations[conversationId]?.alreadyFetched ?? true,
+            updatedConversations[conversationId]?.alreadyFetched,
         };
       } else {
         // If the conversation doesn't exist, create a new conversation with the new message

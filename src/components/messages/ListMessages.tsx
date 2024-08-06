@@ -69,11 +69,14 @@ export default function ListMessages({
 
   const { data: session } = useSession();
 
+
   const messages = currentConversationId
     ? conversations[currentConversationId]?.messages ?? []
     : [];
 
-  const adminMessages = currentConversationId ? adminConversations[conversationId]?.messages ?? [] : [];
+  const adminMessages = currentConversationId ? adminConversations[currentConversationId]?.messages ?? [] : [];
+
+
 
 
   // Set all the messages to read when loaded
@@ -101,15 +104,18 @@ export default function ListMessages({
     if(unreadAdminMessagesIds.length > 0){
       void adminMessagesToRead( {unreadMessageIds: unreadAdminMessagesIds} )
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConversationId, adminMessages])
+
 
   const hasMore = currentConversationId
     ? conversations[currentConversationId]?.hasMore ?? false
     : false;
 
+  console.log(optimisticIds)
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    // console.log("Handling postgres change")
-    if(optimisticIds.includes(payload.new.id)) {
+    console.log("Handling postgres change")
+    if(!optimisticIds.includes(payload.new.id)) {
         const newMessage: ChatMessageType = {
           id: payload.new.id,
           conversationId: payload.new.conversation_id,
@@ -119,10 +125,10 @@ export default function ListMessages({
           createdAt: payload.new.created_at,
           read: payload.new.read,
         };
+
         addMessageToConversation(payload.new.conversation_id, newMessage);
-        // console.log(conversations);
-        // setOptimisticIds(payload.new.id)
         setConversationToTop(payload.new.conversation_id, newMessage);
+        setOptimisticIds(payload.new.id)
       }
     //   }
     // }
@@ -138,11 +144,10 @@ export default function ListMessages({
 
   const handlePostgresChangeOnGuest = async (payload: {new: GuestMessageType}) => {
     console.log("in ListMessages -> in handlePostgresChangeOnGuest")
-    if(optimisticIds.includes(payload.new.id)) {
+    if(!optimisticIds.includes(payload.new.id)) {
       const newMessage: GuestMessage = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
-        // userId: "",
         message: payload.new.message,
         userToken: payload.new.user_token ?? "",
         isEdit: payload.new.is_edit,
@@ -165,48 +170,53 @@ export default function ListMessages({
   //this is for loggedin users
   useEffect(() => {
     console.log("for logged in users", conversationId);
-    const channel = supabase
-      .channel(`${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        (payload: { new: MessageDbType }) => void handlePostgresChange(payload),
-      )
-      .subscribe();
-    // console.log(channel);
-    // void fetchInitialMessages(currentConversationId ?? "")
-    return () => {
-      // console.log('Unsubscribing from channel');
-      void channel.unsubscribe();
-    };
+    
+      const channel = supabase
+        .channel(`${conversationId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+          },
+          (payload: { new: MessageDbType }) => {
+            console.log("calling handlePostgresCHnage")
+            void handlePostgresChange(payload)
+          }
+        )
+        .subscribe();
+      return () => {
+        // console.log('Unsubscribing from channel');
+        void channel.unsubscribe();
+      };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase]);
+}, []);
+
+
 
   //this is for logged out users conversations
   useEffect(() => {
-    console.log("handling guest_messages changes", conversationId);
-    const channel = supabase
-    .channel(`${conversationId}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema:"public",
-        table:"guest_messages",
-      },
-      (payload: {new: GuestMessageType}) => void handlePostgresChangeOnGuest(payload) 
-    )
-
-    // void fetchMessagesForGuest(currentConversationId ?? "")
-    return () => {
-      
-      void channel.unsubscribe();
-    }
-  }, [supabase])
+    console.log("in AdminMessages", currentConversationId)
+      const channel = supabase
+        .channel(`${conversationId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "guest_messages",
+          },
+          (payload: { new: GuestMessageType }) =>
+            void handlePostgresChangeOnGuest(payload),
+        )
+        .subscribe();
+  
+      return () => {
+        void channel.unsubscribe();
+      };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase]);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;

@@ -53,6 +53,8 @@ function MessageDisplay() {
       console.log("getting from query", selectedConversation)
       setIsViewd(true);
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id, adminConversation]);
 
   return (

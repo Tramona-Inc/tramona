@@ -1,4 +1,4 @@
-import { AdminConversation, type Conversation } from "@/utils/store/conversations";
+import { type AdminConversation, type Conversation } from "@/utils/store/conversations";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
 import ChatMessages from "./ChatMessages";

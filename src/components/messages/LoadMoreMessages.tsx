@@ -56,6 +56,7 @@ export default function LoadMoreMessages() {
       if (error) {
         errorToast();
       } else {
+        console.log("has more")
         const loadedMessages: (ChatMessageType & GuestMessage)[] = data.map((message) => ({
           conversationId: message.conversation_id,
           id: message.id,
