@@ -17,8 +17,7 @@ import Link from "next/link";
 
 export default function MastHead() {
   return (
-    // padding for the sides? and do we want rounded corners?
-    <section className="relative bg-white pb-4">
+    <section className="relative bg-white pb-32">
       <div className="relative sm:mb-24 sm:h-[700px] lg:mb-0">
         <div className="absolute inset-0">
           <Image
@@ -30,16 +29,9 @@ export default function MastHead() {
             className="select-none"
           />
         </div>
-        {/* <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black"></div> */}
         <div className="relative grid h-full grid-cols-1 p-4 lg:grid-cols-1">
           <div className="flex flex-col justify-center">
             <div className="relative pt-10 text-center">
-              {/* <div className="relative inline-block rounded-full border-t border-white/20 bg-teal-900  px-3 font-extrabold uppercase tracking-wide text-white shadow-[1px_1px_10px] shadow-teal-100/60">
-                $250k+ saved so far
-              </div> */}
-              {/* <div className="relative inline-flex items-center gap-1 rounded-full border-t border-white/30 bg-teal-50 px-3 text-sm font-extrabold uppercase tracking-wide text-teal-900 sm:text-base">
-                $250k+ saved so far
-              </div> */}
               <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-zinc-900 lg:text-5xl">
                 Book the same properties you see on Airbnb for less
               </h1>
@@ -49,7 +41,6 @@ export default function MastHead() {
                 price.
               </p>
               <div className="hidden items-center justify-center pt-4 lg:flex">
-                {/* separate component, white borders? */}
                 <div className="-ml-2">
                   <UserAvatarMastHead
                     size={"md"}
@@ -101,9 +92,6 @@ export default function MastHead() {
       <div className="mx-0 mt-8 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
         <TestimonialCarousel />
       </div>
-      {/* <div className="mt-8 flex max-w-full justify-center space-y-4 lg:mx-0 lg:mt-16 lg:hidden lg:space-y-8">
-        <MobileTestimonialCarousel />
-      </div> */}
 
       <div className="mt-20 space-y-4 lg:mt-24 lg:space-y-12">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
@@ -174,29 +162,27 @@ export default function MastHead() {
             <h2 className="text-2xl font-extrabold lg:text-4xl">
               See completed requests
             </h2>
-            <div className="text-sm font-semibold text-[#7E7564]">
+            <div className="text-sm font-semibold text-muted-foreground">
               Check out our feed to see recent deals
             </div>
             <div className="hidden lg:block">
-              <Link href="/exclusive-offers">
-                <Button variant="greenPrimary">View deals</Button>
-              </Link>
+              <Button asChild variant="greenPrimary">
+                <Link href="/exclusive-offers">View deals</Link>
+              </Button>
             </div>
           </div>
           <div className="flex items-center justify-center">
             <CompletedRequestsSection />
           </div>
           <div className="flex justify-center pt-8 lg:hidden">
-            <Link href="/exclusive-offers">
-              <Button variant="greenPrimary" size="lg">
-                View deals
-              </Button>
-            </Link>
+            <Button asChild variant="greenPrimary" size="lg">
+              <Link href="/exclusive-offers">View deals</Link>
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto mt-20 max-w-7xl justify-center space-y-4 lg:mb-20 lg:mt-28 lg:space-y-8">
+      <div className="mx-auto mt-20 max-w-7xl justify-center space-y-4 lg:mt-28 lg:space-y-8">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           Why use Tramona?
         </h2>
@@ -275,60 +261,55 @@ export default function MastHead() {
         </div>
       </div>
 
-      {/* <div className="mt-8 space-y-4 lg:mt-14 lg:space-y-8">
-        <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
-          How Tramona Works
-        </h2>
-        <div className="relative h-56">
-          <div className="absolute inset-0 overflow-x-auto">
-            <div className="flex gap-4">
-              {infoCards.map((card, index) => (
-                <div
-                  key={index}
-                  className="flex min-w-64 flex-col items-start gap-2 rounded-2xl bg-teal-700/15 p-4 md:flex-1"
-                >
-                  <div className="rounded-lg bg-white p-2">
-                    <card.icon />
-                  </div>
-                  <h3 className="text-xl font-bold">{card.title}</h3>
-                  <p className="text-sm">{card.description}</p>
-                </div>
-              ))}
-            </div>
+      <div className="mx-auto grid max-w-7xl gap-4 px-4 pt-32 md:grid-cols-2">
+        <div className="flex flex-1 flex-col items-center rounded-2xl bg-zinc-100 p-6 text-center">
+          <div className="flex-1">
+            <h3 className="mb-4 text-3xl font-bold">Looking for a place?</h3>
+            <p className="mb-6 text-sm text-zinc-600">
+              Tramona keeps guests safe by not only verifying them on Tramona,
+              but also making sure they are verified on Airbnb as well.
+            </p>
           </div>
-        </div>
-      </div> */}
-
-      <div className="mx-auto flex max-w-7xl flex-col gap-10 px-3 py-8 md:flex-row lg:mb-20">
-        <div className="flex flex-1 flex-col items-center rounded-lg bg-zinc-100 p-6 text-center">
-          <h3 className="mb-4 text-2xl font-bold">Looking for a place?</h3>
-          <p className="mb-6 text-sm text-zinc-600">
-            Tramona keeps guests safe by not only verifying them on Tramona, but
-            also making sure they are verified on Airbnb as well.
-          </p>
           <div className="mb-2 text-4xl font-bold text-teal-900">300,000+</div>
           <p className="mb-6 text-sm text-zinc-600">
             properties your matches will be coming from
           </p>
-          <button className="rounded-full bg-teal-900 px-6 py-2 text-white transition-colors hover:bg-teal-950">
+          <Button variant="greenPrimary" size="lg" className="rounded-full">
             Submit a request
-          </button>
+          </Button>
         </div>
 
-        <div className="flex flex-1 flex-col items-center rounded-lg bg-zinc-100 p-6 text-center">
-          <h3 className="mb-4 text-2xl font-bold">Listing your place?</h3>
-          <p className="mb-6 text-sm text-zinc-600">
-            It&apos;s as easy as making an account and signing up as a host. We
-            have API access from the biggest PMS&apos;s, or you can upload
-            manually. Once on, wait for requests to roll in.
-          </p>
+        <div className="flex flex-1 flex-col items-center rounded-2xl bg-zinc-100 p-6 text-center">
+          <div className="flex-1">
+            <h3 className="mb-4 text-3xl font-bold">Listing your place?</h3>
+            <p className="mb-6 text-sm text-zinc-600">
+              It&apos;s as easy as making an account and signing up as a host.
+              We have API access from the biggest PMS&apos;s, or you can upload
+              manually. Once on, wait for requests to roll in.
+            </p>
+          </div>
           <div className="mb-2 text-4xl font-bold text-teal-900">15%</div>
           <p className="mb-6 text-sm text-zinc-600">
             increase in occupancy when using Tramona
           </p>
-          <button className="rounded-full bg-teal-900 px-6 py-2 text-white transition-colors hover:bg-teal-950">
+          <Button variant="greenPrimary" size="lg" className="rounded-full">
             List my place
-          </button>
+          </Button>
+        </div>
+
+        <div className="col-span-full flex flex-col items-center gap-2 rounded-2xl bg-zinc-100 p-6">
+          <h2 className="text-center text-3xl font-bold">New To Tramona?</h2>
+          <div className="text-sm font-medium text-zinc-600">
+            Check out our FAQ for any questions, or send us a message directly
+          </div>
+          <Button
+            asChild
+            variant="greenPrimary"
+            size="lg"
+            className="mt-4 w-40 rounded-full"
+          >
+            <Link href="/faq">FAQ</Link>
+          </Button>
         </div>
       </div>
     </section>

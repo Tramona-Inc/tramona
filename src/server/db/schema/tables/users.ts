@@ -13,6 +13,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { offers } from "..";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
+import { zodString } from "@/utils/zod-utils";
 
 // we need to put referralCodes and users in the same file because
 // the tables depend on each other
@@ -166,3 +167,32 @@ export const userSelectSchema = createSelectSchema(users);
 export const userUpdateSchema = userInsertSchema
   .partial()
   .required({ id: true });
+export const ProfileInfoSchema = z.object({
+  name: zodString(),
+  about: zodString({ maxLen: 1000 }),
+  location: zodString(),
+  facebook_link: z
+    .string()
+    .url()
+    .startsWith("https://www.facebook.com/", "Must be a Facebook link")
+    .optional()
+    .or(z.literal("")),
+  youtube_link: z
+    .string()
+    .url()
+    .startsWith("https://www.youtube.com/", "Must be a YouTube link")
+    .optional()
+    .or(z.literal("")),
+  instagram_link: z
+    .string()
+    .url()
+    .startsWith("https://www.instagram.com/", "Must be a Instagram link")
+    .optional()
+    .or(z.literal("")),
+  twitter_link: z
+    .string()
+    .url()
+    .startsWith("https://x.com/", "Must be a Twitter link")
+    .optional()
+    .or(z.literal("")),
+});
