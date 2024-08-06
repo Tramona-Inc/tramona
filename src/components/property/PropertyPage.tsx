@@ -27,6 +27,7 @@ import PropertyAmenities from "../offers/PropertyAmenities";
 import AmenitiesComponent from "../offers/CategorizedAmenities";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { useRouter } from "next/router";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
 export default function PropertyPage({ property }: { property: Property }) {
   // const isBooked = false;
@@ -305,8 +306,9 @@ export default function PropertyPage({ property }: { property: Property }) {
         </h2>
         <div className="py-2">
           <p className="text-sm font-medium text-black">
-            {property.cancellationPolicy ??
-              "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
+            {property.cancellationPolicy
+              ? getCancellationPolicyDescription(property.cancellationPolicy)
+              : "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
           </p>
         </div>
       </section>

@@ -79,7 +79,7 @@ const AllTimeDataChart = ({
       <div className="flex items-center justify-center">
         <p className="left-14 top-4 mb-1 mt-4 text-start text-2xl lg:absolute">
           <strong>
-            {allTimeData && allTimeData.length > 0
+            {allTimeData.length > 0
               ? formatCurrency(
                   allTimeData.reduce((sum, year) => sum + year.Earnings, 0),
                 )
@@ -88,13 +88,12 @@ const AllTimeDataChart = ({
           all time
         </p>
       </div>
-      {allTimeData && (
-        <ChartComponent
-          data={allTimeData}
-          dataKey="Earnings"
-          xAxisDataKey="date"
-        />
-      )}
+
+      <ChartComponent
+        data={allTimeData}
+        dataKey="Earnings"
+        xAxisDataKey="date"
+      />
     </div>
   );
 };

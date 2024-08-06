@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import CityRequestFormContainer from "../landing-page/SearchBars/CityRequestFormContainer";
-import { MobileRequestDealTab } from "../landing-page/SearchBars/MobileRequestDealTab";
+
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PlusIcon } from "lucide-react";
-import { useIsSm } from "@/utils/utils";
 
 export function NewCityRequestBtn() {
-  const isMobile = !useIsSm();
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,11 +25,7 @@ export function NewCityRequestBtn() {
         <DialogHeader className="border-b pb-2 font-bold">
           Request a deal
         </DialogHeader>
-        {isMobile ? (
-          <MobileRequestDealTab closeSheet={() => setOpen(false)} />
-        ) : (
-          <CityRequestFormContainer />
-        )}
+        <CityRequestFormContainer />
       </DialogContent>
     </Dialog>
   );

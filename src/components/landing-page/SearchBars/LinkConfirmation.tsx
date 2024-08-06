@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DateRangeInput from "@/components/_common/DateRangeInput";
@@ -75,7 +80,7 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
   return (
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogHeader></DialogHeader>
+        <DialogTitle>Please confirm your request details</DialogTitle>
         <DialogContent className="sm:p-12">
           <h3 className="mb-10 text-center text-xl font-semibold">
             Please confirm your request details

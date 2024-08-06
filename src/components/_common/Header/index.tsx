@@ -1,14 +1,11 @@
 import {
   BadgeHelp,
   BadgeInfo,
-  BadgePercent,
   DoorOpen,
   Home,
-  Link2,
   Menu,
   MenuIcon,
   MessageCircleQuestion,
-  Tag,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -30,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import AvatarDropdown from "./AvatarDropdown";
 
 type HeaderProps =
   | {
@@ -53,14 +51,14 @@ export default function Header(props: HeaderProps) {
 
 const headerLinks1 = [
   { name: "Link Input", href: "/link-input" },
-  //{ name: "Unclaimed Offers", href: "/unclaimed-offers" },
   { name: "Recent Deals", href: "/exclusive-offers" },
+  //{ name: "Unclaimed Offers", href: "/unclaimed-offers" },
 ];
 
 const headerLinks2 = [
   { name: "How it works", href: "/how-it-works" },
   { name: "24/7 Support", href: "/help-center" },
-  { name: "Become a host", href: "/host-onboarding" },
+  { name: "Become a host", href: "/for-hosts" },
 ];
 
 const hamburgerLinksDesktop = [
@@ -70,15 +68,25 @@ const hamburgerLinksDesktop = [
 ];
 
 const hamburgerLinksMobile = [
-  { name: "Link Input", href: "/link-input", icon: <Link2 /> },
-  { name: "Unclaimed Offers", href: "/unclaimed-offers", icon: <Tag /> },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: <BadgePercent /> },
+  { name: "Become a host", href: "/for-hosts", icon: <Home /> },
   { name: "How it works", href: "/how-it-works", icon: <Menu /> },
   { name: "24/7 Support", href: "/help-center", icon: <BadgeHelp /> },
-  { name: "Become a host", href: "/host-onboarding", icon: <Home /> },
-  { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
-  { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
+  // { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
+  // { name: "Contact", href: "/support", icon: <BadgeInfo /> },
+  // { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
+  // { name: "Link Input", href: "/link-input", icon: <Link2 /> },
+  // { name: "Unclaimed Offers", href: "/unclaimed-offers", icon: <Tag /> },
+  // { name: "Recent Deals", href: "/exclusive-offers", icon: <BadgePercent /> },
+];
+
+export const hamburgerLinksHostMobileToTraveler = [
+  { name: "Switch to Traveler", href: "/", icon: <DoorOpen /> },
+  { name: "24/7 Support", href: "/help-center", icon: <BadgeHelp /> },
+];
+
+export const hamburgerLinksHostMobileToHost = [
+  { name: "Switch to Host", href: "/host", icon: <DoorOpen /> },
+  { name: "24/7 Support", href: "/help-center", icon: <BadgeHelp /> },
 ];
 
 function HamburgerMenu({
@@ -137,27 +145,22 @@ function LargeHeader(props: HeaderProps) {
       </div>
 
       <div className="mt-1 flex items-center justify-center gap-x-5 leading-tight text-muted-foreground">
-        {props.type === "marketing" && (
-          <>
-            {status !== "authenticated" &&
-              headerLinks1.map((link) => (
-                <NavLink
-                  key={link.href}
-                  href={link.href}
-                  render={({ selected }) => (
-                    <span
-                      className={cn(
-                        "text-sm font-bold xl:text-base",
-                        selected && "underline underline-offset-2",
-                      )}
-                    >
-                      {link.name}
-                    </span>
-                  )}
-                />
-              ))}
-          </>
-        )}
+        {headerLinks1.map((link) => (
+          <NavLink
+            key={link.href}
+            href={link.href}
+            render={({ selected }) => (
+              <span
+                className={cn(
+                  "text-sm font-bold xl:text-base",
+                  selected && "underline underline-offset-2",
+                )}
+              >
+                {link.name}
+              </span>
+            )}
+          />
+        ))}
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-2">
@@ -167,7 +170,7 @@ function LargeHeader(props: HeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="whitespace-nowrap rounded-full border bg-white px-3 py-1 text-sm font-bold text-teal-900 xl:text-base"
+                className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
               >
                 {link.name}
               </Link>
@@ -175,13 +178,47 @@ function LargeHeader(props: HeaderProps) {
           </>
         )}
         {props.type === "dashboard" ? (
-          <Button asChild variant="ghost" className="rounded-full">
-            {session?.user.role === "host" && pathname.includes("/host") ? (
-              <Link href="/">Switch to Traveler</Link>
-            ) : session?.user.role !== "host" ? null : ( // <Link href="/host-onboarding">Become a host</Link>
-              <Link href="/host">Switch to Host</Link>
+          <>
+            <Link
+              href="/help-center"
+              className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
+            >
+              24/7 Support
+            </Link>
+            {session?.user.role == "guest" && (
+              <Link
+                href="/for-hosts"
+                className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
+              >
+                Become a host
+              </Link>
             )}
-          </Button>
+
+            {session?.user.role === "host" && pathname.includes("/host") ? (
+              <Link
+                href="/"
+                className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
+              >
+                Switch to Traveler
+              </Link>
+            ) : session?.user.role !== "host" ? null : ( // <Link href="/host-onboarding">Become a host</Link>
+              <Link
+                href="/host"
+                className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
+              >
+                Switch to Host
+              </Link>
+            )}
+
+            {status !== "authenticated" && (
+              <>
+                <Button asChild variant="greenPrimary" className="font-bold">
+                  <Link href="/auth/signup">Sign Up</Link>
+                </Button>
+                <HamburgerMenu links={hamburgerLinksDesktop} />
+              </>
+            )}
+          </>
         ) : (
           <Button asChild variant="ghost" className="font-bold">
             <Link href="/auth/signin">
@@ -195,21 +232,6 @@ function LargeHeader(props: HeaderProps) {
               <Link href="/auth/signup">Sign Up</Link>
             </Button>
             <HamburgerMenu links={hamburgerLinksDesktop} />
-          </>
-        )}
-
-        {status == "authenticated" && (
-          <>
-            <Button
-              size="icon"
-              className="grid place-items-center rounded-full text-xl font-extrabold"
-              variant="outline"
-              asChild
-            >
-              <Link href="/help-center">
-                <QuestionMarkIcon />
-              </Link>
-            </Button>
           </>
         )}
 
@@ -242,8 +264,8 @@ function LargeHeader(props: HeaderProps) {
 // }
 
 function SmallHeader(props: HeaderProps) {
-  const { status } = useSession();
-
+  const { status, data: session } = useSession();
+  const pathname = usePathname();
   return (
     <header className="container sticky top-0 z-50 flex h-header-height items-center border-b bg-white text-sm sm:text-base">
       {/* {props.type === "dashboard" && (
@@ -251,29 +273,55 @@ function SmallHeader(props: HeaderProps) {
           <SmallSidebar {...props} />
         </div>
       )} */}
-
       <TramonaLogo />
 
-      <div className="flex flex-1 items-center justify-end gap-2">
-        {props.type === "marketing" && (
-          <>
-            {status === "authenticated" && (
-              <Button size="sm" asChild variant="secondary">
-                <Link href="/auth/signin">Dashboard</Link>
-              </Button>
-            )}
+      <div className="flex w-full flex-row items-center justify-between gap-x-1">
+        {props.type !== "marketing" && (
+          <Button size="sm" asChild variant="ghost" className="place-items-end">
+            <Link
+              href={
+                props.sidebarType == "host"
+                  ? "/host"
+                  : props.sidebarType == "admin"
+                    ? "/admin"
+                    : "/"
+              }
+            >
+              Dashboard
+            </Link>
+            {/* <Link href={sidebarType== "host" ? "/host" : "dashboard"} >Dashboard</Link> */}
+          </Button>
+        )}
+        {props.type === "marketing" ? (
+          <div className="flex w-full justify-end gap-x-2">
             {status !== "authenticated" && (
               <>
                 <Button size="sm" asChild variant="greenPrimary">
-                  <Link href="/auth/signup">Sign up</Link>
+                  <Link href="/auth/signup">Log In</Link>
                 </Button>
                 <HamburgerMenu links={hamburgerLinksMobile} />
               </>
             )}
-          </>
+          </div>
+        ) : null}
+        {status === "authenticated" && session.user.role == "host" && (
+          <div className="flex items-center gap-x-2 self-end justify-self-end">
+            <AvatarDropdown session={session} size="sm" />
+            <HamburgerMenu
+              links={
+                pathname.includes("/host")
+                  ? hamburgerLinksHostMobileToTraveler
+                  : hamburgerLinksHostMobileToHost
+              }
+            />
+          </div>
+        )}{" "}
+        {status === "authenticated" && session.user.role != "host" && (
+          <div className="flex items-center gap-x-2 self-end justify-self-end">
+            <AvatarDropdown session={session} size="sm" />
+            <HamburgerMenu links={hamburgerLinksMobile} />
+          </div>
         )}
-
-        {/* <HeaderTopRight /> */}
       </div>
     </header>
   );

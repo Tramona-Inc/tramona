@@ -13,22 +13,28 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import BookingDialog from "./admin/BookingDialog";
+import { useSession } from "next-auth/react";
 
 export default function FeedBookingCard({
-  confirmation,
+  booking,
 }: {
-  confirmation: FeedItem & { type: "booking" };
+  booking: FeedItem & { type: "booking" };
 }) {
-  const userName = confirmation.group.owner.name ?? "";
-  const userImage = confirmation.group.owner.image ?? "";
-  const numOfNights = getNumNights(confirmation.checkIn, confirmation.checkOut);
+  const { data: session } = useSession();
+  const isAdmin = session && session.user.role === "admin";
+
+  const userName = booking.group.owner.name ?? "";
+  const userImage = booking.group.owner.image ?? "";
+  const numOfNights = getNumNights(booking.checkIn, booking.checkOut);
   const discount =
-    confirmation.property.originalNightlyPrice && confirmation.offer
+    booking.property.originalNightlyPrice && booking.offer
       ? Math.round(
           (1 -
-            confirmation.offer.totalPrice /
+            booking.offer.totalPrice /
               numOfNights /
-              confirmation.property.originalNightlyPrice) *
+              booking.property.originalNightlyPrice) *
             100,
         )
       : 0;
@@ -49,35 +55,38 @@ export default function FeedBookingCard({
   }, [carouselApi]);
 
   return (
-    <BaseCard item={confirmation} userName={userName} userImage={userImage}>
+    <BaseCard item={booking} userName={userName} userImage={userImage}>
       <div className="flex">
         <div className=""></div>
         <div className="w-full space-y-2">
-          <div className="grid">
+          <div className="flex w-full items-start justify-between">
             <div>
               <p className="mb-5">
                 Booked a trip to{" "}
-                <span className="font-bold">{confirmation.property.city}</span>
+                <span className="font-bold">{booking.property.city}</span>
               </p>
-              {confirmation.offer && (
+              {booking.offer && (
                 <p className="font-bold">
                   Tramona Price:{" "}
                   <span className="text-teal-900">
-                    {formatCurrency(
-                      confirmation.offer.totalPrice / numOfNights,
-                    )}
+                    {formatCurrency(booking.offer.totalPrice / numOfNights)}
                   </span>
                 </p>
               )}
-              {confirmation.property.originalNightlyPrice && (
+              {booking.property.originalNightlyPrice && (
                 <p>
                   <span className="text-muted-foreground">Airbnb Price: </span>
                   <span className="line-through">
-                    {formatCurrency(confirmation.property.originalNightlyPrice)}
+                    {formatCurrency(booking.property.originalNightlyPrice)}
                   </span>
                 </p>
               )}
             </div>
+            {isAdmin && booking.isFiller && (
+              <BookingDialog booking={booking}>
+                <Button className="ml-auto rounded-full">Edit</Button>
+              </BookingDialog>
+            )}
           </div>
           <div className="relative">
             <Carousel
@@ -89,15 +98,15 @@ export default function FeedBookingCard({
               }}
             >
               <CarouselContent className="-ml-2 md:-ml-4">
-                {confirmation.property.imageUrls
+                {booking.property.imageUrls
                   .slice(0, 5)
-                  .map((photo, index) => (
+                  .map((photo: string, index: number) => (
                     <CarouselItem
                       key={index}
                       className="basis-1/2 pl-2 md:basis-1/3 md:pl-4"
                     >
                       <Link
-                        href={`/property/${confirmation.property.id}`}
+                        href={`/property/${booking.property.id}`}
                         className="relative block aspect-[4/3] overflow-clip rounded-xl"
                       >
                         <Image

@@ -3,10 +3,12 @@ import {
   BadgePercent,
   Briefcase,
   DollarSign,
+  HandshakeIcon,
   HistoryIcon,
   HomeIcon,
   InboxIcon,
   LayoutDashboardIcon,
+  LinkIcon,
   MessageCircleIcon,
   Users2Icon,
   WrenchIcon,
@@ -35,8 +37,7 @@ export const adminNavLinks = [
   { href: "/requests", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
-export const hostNavLinks = [
-  { href: "/host", name: "Dashboard", icon: LayoutDashboardIcon },
+export const hostMobileNavLinks = [
   {
     href: "/host/requests",
     name: "Requests",
@@ -63,5 +64,7 @@ export const guestNavLinks = [
 
 export const unloggedNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
+  { href: "/link-input", name: "Link Input", icon: LinkIcon },
+  { href: "/exclusive-offers", name: "Recent Deals", icon: HandshakeIcon },
   // { href: "/explore", name: "Explore", icon: Search },
 ];

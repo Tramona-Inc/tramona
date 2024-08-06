@@ -35,6 +35,8 @@ export default function OnboardingFooter({
   const { mutateAsync: createHostProfile } =
     api.users.upsertHostProfile.useMutation();
 
+  const { data: isHost } = api.users.isHost.useQuery();
+
   const { mutateAsync: createProperty } = api.properties.create.useMutation({
     onSuccess: () => {
       resetSession();
@@ -50,8 +52,10 @@ export default function OnboardingFooter({
   async function onPressNext() {
     setIsLoading(true);
     try {
-      if (progress === 9) {
-        await createHostProfile();
+      if (progress === 10) {
+        if (!isHost) {
+          await createHostProfile();
+        }
 
         await createProperty({
           propertyType: listing.propertyType,
@@ -83,6 +87,7 @@ export default function OnboardingFooter({
           petsAllowed: listing.petsAllowed,
           smokingAllowed: listing.smokingAllowed,
           otherHouseRules: listing.otherHouseRules ?? undefined,
+          cancellationPolicy: listing.cancellationPolicy,
         });
       } else {
         if (isEdit) {
@@ -90,13 +95,13 @@ export default function OnboardingFooter({
             if (isFormValid) {
               handleNext && handleNext();
               setIsEdit(false);
-              setProgress(9);
+              setProgress(10);
             } else {
               handleError && handleError();
             }
           } else {
             setIsEdit(false);
-            setProgress(9);
+            setProgress(10);
           }
         } else {
           if (isForm) {
@@ -141,9 +146,9 @@ export default function OnboardingFooter({
               <Button onClick={onPressNext} disabled={isLoading}>
                 {progress === 0
                   ? "Get Started"
-                  : progress === 8
+                  : progress === 9
                     ? "Review"
-                    : progress === 9
+                    : progress === 10
                       ? "Finish"
                       : "Next"}
               </Button>
