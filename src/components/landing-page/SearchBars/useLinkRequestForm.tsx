@@ -45,9 +45,9 @@ export function useLinkRequestForm({
         .then((result) => {
           form.reset();
           afterSubmit?.();
-          setMadeByGroupId?.(result.transactionResults.madeByGroupId);
+          setMadeByGroupId?.(result!.transactionResults.madeByGroupId);
         })
-        .catch(() => errorToast());
+        .catch(() => errorToast("Couldn't create request with link"));
     }
   });
 

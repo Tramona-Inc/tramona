@@ -2,10 +2,6 @@ import { relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
 import { bids } from "./tables/bids";
-import {
-  bucketListDestinations,
-  bucketListProperties,
-} from "./tables/bucketList";
 import { counters } from "./tables/counters";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
 import { hostProfiles } from "./tables/hostProfiles";
@@ -31,6 +27,7 @@ import { superhogRequests } from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
 import { reviews } from "./tables/reviews";
+import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { superhogErrors } from "./tables/superhogErrors";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -49,8 +46,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   hostTeams: many(hostTeamMembers),
   bids: many(bids),
   superhogRequests: many(superhogRequests),
-  bucketListDestinations: many(bucketListDestinations),
-  bucketListProperties: many(bucketListProperties),
   emergencyContacts: many(emergencyContacts),
   superHogErrors: many(superhogErrors),
 }));
@@ -350,30 +345,6 @@ export const superhogErrorsRelations = relations(superhogErrors, ({ one }) => ({
   }),
 }));
 
-export const bucketListDestinationsRelations = relations(
-  bucketListDestinations,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [bucketListDestinations.userId],
-      references: [users.id],
-    }),
-  }),
-);
-
-export const bucketListPropertiesRelations = relations(
-  bucketListProperties,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [bucketListProperties.userId],
-      references: [users.id],
-    }),
-    property: one(properties, {
-      fields: [bucketListProperties.propertyId],
-      references: [properties.id],
-    }),
-  }),
-);
-
 export const tripsRelations = relations(trips, ({ one, many }) => ({
   group: one(groups, {
     fields: [trips.groupId],
@@ -407,3 +378,17 @@ export const emergencyContactsRelations = relations(
     }),
   }),
 );
+
+export const fillerOffersRelations = relations(fillerOffers, ({ one }) => ({
+  property: one(properties, {
+    fields: [fillerOffers.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const fillerBookingsRelations = relations(fillerBookings, ({ one }) => ({
+  property: one(properties, {
+    fields: [fillerBookings.propertyId],
+    references: [properties.id],
+  }),
+}));

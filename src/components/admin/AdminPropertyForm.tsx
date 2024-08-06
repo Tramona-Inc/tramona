@@ -1,4 +1,5 @@
 import {
+  ALL_CANCELLATION_POLICIES,
   ALL_PROPERTY_ROOM_TYPES,
   ALL_PROPERTY_TYPES,
 } from "@/server/db/schema/tables/properties";
@@ -68,6 +69,8 @@ const formSchema = z.object({
   smokingAllowed: z.enum(["yes", "no"]).transform((s) => s === "yes"),
 
   otherHouseRules: z.string().max(1000).optional(),
+
+  cancellationPolicy: z.enum(ALL_CANCELLATION_POLICIES),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -428,6 +431,26 @@ export default function AdminPropertyForm() {
                 <Textarea {...field} />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="cancellationPolicy"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cancellation Policy</FormLabel>
+              <FormControl>
+                <Select {...field}>
+                  <SelectContent>
+                    {ALL_CANCELLATION_POLICIES.map((policy) => (
+                      <SelectItem key={policy} value={policy}>
+                        {policy}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
             </FormItem>
           )}
         />

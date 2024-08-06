@@ -1,8 +1,4 @@
-import {
-  Card,
-  CardHeader, CardTitle,
-  CardContent
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { MessageCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
@@ -43,13 +39,14 @@ export default function HostMessagesOverview({
 }: {
   className?: string;
 }) {
-
-  const {data: session} = useSession();
-  const { data: fetchedConversations, isLoading } =
-    api.messages.getConversations.useQuery(undefined, {
+  const { data: session } = useSession();
+  const { data: fetchedConversations } = api.messages.getConversations.useQuery(
+    undefined,
+    {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
-    });
+    },
+  );
   const conversations = useConversation((state) => state.conversationList);
   const { fetchInitialMessages } = useMessage();
   const { setConversationList } = useConversation();
@@ -87,7 +84,13 @@ export default function HostMessagesOverview({
           <MessageCircleIcon />
           <CardTitle>Messages</CardTitle>
           <Badge variant="secondary">
-            {conversations.filter((m) => m.messages[0]?.read === false && m.messages[0].userId !== session?.user.id).length}{" "}
+            {
+              conversations.filter(
+                (m) =>
+                  m.messages[0]?.read === false &&
+                  m.messages[0].userId !== session?.user.id,
+              ).length
+            }{" "}
             new
           </Badge>
           <div className="flex-1" />
@@ -101,27 +104,32 @@ export default function HostMessagesOverview({
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {conversations.filter((m) => m.messages[0]?.read === false && m.messages[0]?.userId !== session?.user.id).length > 0 ? conversations.map((conversation) => (
-            
-            <div key={conversation.id} className="flex items-center gap-2">
-                {conversation.messages[0]?.read === false && conversation.participants[0]?.id !== session?.user.id &&
-                <>
-                <UserAvatar name={conversation.participants[0]?.image} />
-                    <div>
-                      <p className="font-semibold">
-                        {conversation.participants[0]?.name}
-                      </p>
-                      <p className="line-clamp-1 text-sm text-muted-foreground">
-                        {conversation.messages[0]?.message}
-                      </p>
-                    </div>
-                    <div className="flex-1" />
-                    <div className="size-2 shrink-0 rounded-full bg-blue-500" />
-                  </>
-                }
+          {conversations.filter(
+            (m) =>
+              m.messages[0]?.read === false &&
+              m.participants[0]?.id !== session?.user.id,
+          ).length > 0 ? (
+            conversations.map((conversation) => (
+              <div key={conversation.id} className="flex items-center gap-2">
+                {conversation.messages[0]?.read === false &&
+                  conversation.participants[0]?.id !== session?.user.id && (
+                    <>
+                      <UserAvatar name={conversation.participants[0]?.image} />
+                      <div>
+                        <p className="font-semibold">
+                          {conversation.participants[0]?.name}
+                        </p>
+                        <p className="line-clamp-1 text-sm text-muted-foreground">
+                          {conversation.messages[0]?.message}
+                        </p>
+                      </div>
+                      <div className="flex-1" />
+                      <div className="size-2 shrink-0 rounded-full bg-blue-500" />
+                    </>
+                  )}
               </div>
             ))
-           : (
+          ) : (
             <div className="flex-1 items-center justify-center">
               <p className="text-black">No new messages</p>
             </div>

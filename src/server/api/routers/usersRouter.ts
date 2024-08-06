@@ -14,6 +14,7 @@ import {
   hostTeamMembers,
   hostTeams,
   properties,
+  propertyInsertSchema,
   referralCodes,
   userUpdateSchema,
   users,
@@ -463,7 +464,7 @@ export const usersRouter = createTRPCRouter({
           {},
         );
 
-        const hostawayProperties: ListingsResponse = await axios
+        const hostawayProperties = await axios
           .get<ListingsResponse>(`https://api.hostaway.com/v1/listings`, {
             headers: {
               Authorization: `Bearer ${input.hostawayBearerToken}`,
@@ -471,7 +472,7 @@ export const usersRouter = createTRPCRouter({
           })
           .then((res) => res.data);
 
-        const listings: Listing[] = hostawayProperties.result;
+        const listings = hostawayProperties.result;
 
         try {
           const propertyObjects = await Promise.all(
@@ -503,7 +504,9 @@ export const usersRouter = createTRPCRouter({
               amenities: property.listingAmenities.map(
                 (amenity) => amenity.amenityName,
               ), // Keep amenities as an array
-              cancellationPolicy: property.cancellationPolicy,
+              cancellationPolicy: propertyInsertSchema.shape.cancellationPolicy
+                .catch(null)
+                .parse(property.cancellationPolicy),
             })),
           );
 

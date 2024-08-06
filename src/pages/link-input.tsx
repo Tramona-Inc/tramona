@@ -7,10 +7,11 @@ import Link from "next/link";
 import { Clock8, Handshake, CircleDollarSign } from "lucide-react";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import AddAirbnbLink from "../components/link-input/AddAirbnbLink";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 export default function Page() {
   return (
-    <MainLayout>
+    <DashboardLayout type="guest">
       <section className="relative bg-white pb-4">
         <div className="relative h-[500px] lg:h-[511px]">
           <div className="absolute inset-0">
@@ -177,6 +178,6 @@ export default function Page() {
           </Button>
         </div>
       </div>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

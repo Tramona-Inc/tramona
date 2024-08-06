@@ -2,11 +2,9 @@ import { guestMenuNavLinks } from "@/config/menuNavLinks";
 import {
   adminNavLinks,
   guestMobileNavLinks,
-  hostNavLinks,
+  hostMobileNavLinks,
   unloggedNavLinks,
-  adminMessageLink
 } from "@/config/sideNavLinks";
-import { cn } from "@/utils/utils";
 import {
   ArrowLeftRight,
   ChevronDownIcon,
@@ -16,8 +14,7 @@ import {
   ShieldQuestion,
   Contact,
   MessageCircleQuestion,
-  MenuIcon,
-  MessageCircleMoreIcon
+  MessageCircleMoreIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -150,13 +147,11 @@ export default function MobileNav({
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
 
-  const Menu = session ? LoggedInMenu : LoggedOutMenu;
-
   const navLinks =
     type === "admin"
       ? adminNavLinks
       : type === "host"
-        ? hostNavLinks
+        ? hostMobileNavLinks
         : isAdmin
           ? [
               ...guestMobileNavLinks,
@@ -170,14 +165,14 @@ export default function MobileNav({
 
   return (
     <header
-      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001] lg:hidden *:lg:hidden ${type == "unlogged" ? `justify-around px-20` : `*:flex-1`}`}
+      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001] *:flex-1 lg:hidden *:lg:hidden`}
     >
       {navLinks.map((link, index) => (
         <NavBarLink key={index} href={link.href} icon={link.icon}>
           {link.name}
         </NavBarLink>
       ))}
-      <Menu>
+      {/* <Menu>
         <div
           className={cn(
             "relative flex flex-col items-center gap-1 px-1 py-3 text-center text-xs font-medium text-muted-foreground",
@@ -186,7 +181,7 @@ export default function MobileNav({
           <MenuIcon className="size-6 lg:size-8" />
           Menu
         </div>
-      </Menu>
+      </Menu> */}
     </header>
   );
 }

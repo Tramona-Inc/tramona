@@ -11,6 +11,7 @@ import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "../requests/StripePaymentInfo";
 import CheckoutInfoForm from "./ContactInfoForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { useSession } from "next-auth/react";
 
 export default function Checkout({
@@ -66,13 +67,13 @@ export default function Checkout({
   }
 
   function CancellationPolicy() {
+    if (property.cancellationPolicy === null) return null;
+
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Cancellation Policy</h3>
         <p className="text-sm font-semibold leading-5 text-muted-foreground">
-          {property.cancellationPolicy
-            ? property.cancellationPolicy
-            : "No cancellation policy"}
+          {getCancellationPolicyDescription(property.cancellationPolicy)}
         </p>
       </div>
     );

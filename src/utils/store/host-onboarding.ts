@@ -1,13 +1,10 @@
 import {
-  type ALL_PROPERTY_ROOM_TYPES,
-  type ALL_PROPERTY_TYPES,
-} from "@/server/db/schema/tables/properties";
-
+  type CancellationPolicy,
+  type PropertyRoomType,
+  type PropertyType,
+} from "@/server/db/schema";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-
-export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
-export type SpaceType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
 
 export type LocationType = {
   country: string;
@@ -24,7 +21,8 @@ type HostOnboardingState = {
   isEdit: boolean;
   listing: {
     propertyType: PropertyType;
-    spaceType: SpaceType;
+    cancellationPolicy: CancellationPolicy | null;
+    spaceType: PropertyRoomType;
     maxGuests: number;
     bedrooms: number;
     beds: number;
@@ -49,7 +47,10 @@ type HostOnboardingState = {
   setBeds: (beds: number) => void;
   setBathrooms: (bathrooms: number) => void;
   setPropertyType: (property: PropertyType) => void;
-  setSpaceType: (property: SpaceType) => void;
+  setCancellationPolicy: (
+    cancellationPolicy: CancellationPolicy | null,
+  ) => void;
+  setSpaceType: (property: PropertyRoomType) => void;
   setLocation: (location: LocationType) => void;
   setCheckInType: (checkInType: string) => void; // Add this line
   setOtherCheckInType: (otherCheckInType: boolean) => void;
@@ -77,6 +78,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
       isEdit: false,
       listing: {
         propertyType: "Other",
+        cancellationPolicy: "Flexible",
         spaceType: "Other",
         maxGuests: 1,
         bedrooms: 1,
@@ -154,7 +156,18 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           },
         }));
       },
-      setSpaceType: (spaceType: SpaceType) => {
+      setCancellationPolicy: (
+        cancellationPolicy: CancellationPolicy | null,
+      ) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            cancellationPolicy,
+          },
+        }));
+      },
+      setSpaceType: (spaceType: PropertyRoomType) => {
         set((state) => ({
           ...state,
           listing: {

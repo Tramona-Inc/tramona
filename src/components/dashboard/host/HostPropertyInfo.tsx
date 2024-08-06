@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
-import { ChevronLeft, Edit2 } from "lucide-react";
+import { AlertCircle, ChevronLeft, Edit2 } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesAgeRestriction from "./HostPropertiesAgeRestriction";
@@ -141,9 +141,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           </TabsTrigger>
           <TabsTrigger
             value="cancellation"
-            className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
+            className="relative data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
             Cancellation policy
+            {!property.cancellationPolicy && (
+              <AlertCircle className="absolute top-0 right-0 text-red-600" size={16} />
+            )}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="details">

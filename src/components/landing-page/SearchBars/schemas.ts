@@ -22,6 +22,8 @@ export const cityRequestSchema = z.object({
   minNumBathrooms: z.number().optional(),
   amenities: z.enum(ALL_REQUESTABLE_AMENITIES).array(),
   note: optional(zodString().max(100)),
+  latLng: z.object({ lat: z.number(), lng: z.number() }),
+  radius: z.number().optional(),
 });
 
 export const linkRequestSchema = z
@@ -39,6 +41,9 @@ export const linkRequestSchema = z
         message: 'URL must start with "https://www.airbnb.com/rooms"',
       }),
     note: optional(zodString()),
+    radius: z.number().optional(),
+    lat: z.number().optional(),
+    lng: z.number().optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.numGuests) {

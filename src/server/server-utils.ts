@@ -387,7 +387,6 @@ export async function getAdminId() {
 //function to scrape using the url
 export async function scrapeUsingLink(url: string) {
   const searchParams = new URLSearchParams(url.split("?")[1]);
-
   try {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -487,9 +486,11 @@ export async function scrapeUsingLink(url: string) {
       numGuests,
     };
     return response;
-  } catch (error) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to scrape Airbnb: ${error.message}`);
+    } else {
+      console.error("Unexpected error:", error);
+    }
   }
 }
