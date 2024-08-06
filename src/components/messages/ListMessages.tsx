@@ -158,11 +158,10 @@ export default function ListMessages({
         )
         .subscribe(status=>console.log(status));
       return () => {
-        // console.log('Unsubscribing from channel');
         void channel.unsubscribe();
       };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [supabase, messages, optimisticIds]);
+}, [supabase]);
 
 const handlePostgresChange = async (payload: { new: MessageDbType }) => {
   console.log("Handling postgres change")
@@ -179,7 +178,7 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
 
       addMessageToConversation(payload.new.conversation_id, newMessage);
       setConversationToTop(payload.new.conversation_id, newMessage);
-      
+      setOptimisticIds(payload.new.id) 
     }
   //   }
   // }

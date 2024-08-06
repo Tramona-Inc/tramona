@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import AvatarDropdown from "./AvatarDropdown";
+import { Separator } from "@/components/ui/separator";
 
 type HeaderProps =
   | {
