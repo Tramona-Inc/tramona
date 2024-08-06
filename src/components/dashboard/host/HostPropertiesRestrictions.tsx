@@ -33,7 +33,10 @@ export default function HostPropertiesRestrictions({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { age: property.ageRestriction ?? undefined },
+    defaultValues: {
+      age: property.ageRestriction ?? undefined,
+      price: property.priceRestriction ?? undefined,
+    },
     mode: "onChange",
     reValidateMode: "onChange",
   });
@@ -42,7 +45,11 @@ export default function HostPropertiesRestrictions({
 
   const onSubmit = async () => {
     const { age, price } = form.getValues();
-    const newProperty = { ...property, ageRestriction: Number(age) };
+    const newProperty = {
+      ...property,
+      ageRestriction: Number(age),
+      priceRestriction: Number(price),
+    };
     await updateProperty(newProperty);
   };
 
@@ -79,6 +86,7 @@ export default function HostPropertiesRestrictions({
                         className="w-full"
                         disabled={!editing}
                         type="number"
+                        placeholder="Minimum booking age"
                       />
                     </FormControl>
                     <FormMessage />
