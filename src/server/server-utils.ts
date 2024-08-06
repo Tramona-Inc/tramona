@@ -507,13 +507,10 @@ type HostawayPriceResponse = {
   result: {
     totalPrice: number;
   };
-}
+};
 
 export async function getPropertyOriginalPrice(
-  property: Pick<
-    Property,
-    "originalListingId" | "originalListingPlatform"
-  >,
+  property: Pick<Property, "originalListingId" | "originalListingPlatform">,
   params: {
     checkIn: string;
     checkOut: string;
@@ -537,8 +534,7 @@ export async function getPropertyOriginalPrice(
       return acc + date.price.amount;
     }, 0);
     return totalPrice;
-  }
-  else if (property.originalListingPlatform === "Hostaway") {
+  } else if (property.originalListingPlatform === "Hostaway") {
     const { data } = await axios.get<HostawayPriceResponse>(
       `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,
       {

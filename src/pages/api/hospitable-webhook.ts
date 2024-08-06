@@ -3,7 +3,6 @@ import { properties, reservedDateRanges, type PropertyType } from "@/server/db/s
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
-import { property } from "lodash";
 
 
 const airbnbPropertyTypes = [

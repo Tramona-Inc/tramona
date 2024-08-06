@@ -89,14 +89,15 @@ export function createListing({
   return Site.createListing(id);
 }
 
-export function getOriginalListing(
-  property: Pick<Property, "originalListingId" | "originalListingPlatform">,
-) {
-  if (!property.originalListingPlatform || !property.originalListingId) {
+export function getOriginalListing(property: {
+  originalListingId?: string;
+  originalListingSite?: ListingSiteName;
+}) {
+  if (!property.originalListingSite || !property.originalListingId) {
     return null;
   }
   return createListing({
     id: property.originalListingId,
-    siteName: property.originalListingPlatform,
+    siteName: property.originalListingSite,
   });
 }
