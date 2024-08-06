@@ -243,6 +243,9 @@ export function HostPropertyEditBtn({
   const setOtherHouseRules = useHostOnboarding(
     (state) => state.setOtherHouseRules,
   );
+  const setCancellationPolicy = useHostOnboarding(
+    (state) => state.setCancellationPolicy,
+  );
 
   const addressWithApt: LocationType = {
     country: property.address.split(", ")[4] ?? "",
@@ -286,6 +289,7 @@ export function HostPropertyEditBtn({
     setSmokingAllowed(property.smokingAllowed ?? false);
     setOtherHouseRules(property.otherHouseRules ?? "");
     setEditing(!editing);
+    setCancellationPolicy(property.cancellationPolicy);
   };
 
   return (
@@ -296,8 +300,8 @@ export function HostPropertyEditBtn({
             Cancel
           </Button>
           <Button
-            variant="secondary"
-            className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+            variant="greenPrimary"
+            className="shadow-lg sm:shadow-none"
             onClick={() => {
               setEditing(!editing);
               onSubmit?.();
@@ -310,7 +314,7 @@ export function HostPropertyEditBtn({
       ) : (
         <Button
           variant="secondary"
-          className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+          className="shadow-lg sm:shadow-none"
           onClick={handleEditClick}
           type="button"
         >

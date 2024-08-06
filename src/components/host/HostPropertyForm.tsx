@@ -34,7 +34,10 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
+import {
+  ALL_CANCELLATION_POLICIES,
+  ALL_PROPERTY_TYPES,
+} from "@/server/db/schema";
 import { ALL_PROPERTY_AMENITIES } from "@/server/db/schema/tables/propertyAmenities";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
@@ -57,6 +60,8 @@ export const hostPropertyFormSchema = z.object({
     .object({ value: zodUrl() })
     .array()
     .transform((arr) => arr.map((o) => o.value)),
+
+  cancellationPolicy: z.enum(ALL_CANCELLATION_POLICIES),
 });
 
 type FormSchema = z.infer<typeof hostPropertyFormSchema>;
@@ -399,6 +404,27 @@ export default function HostPropertyForm({
               </Button>
             </div>
           </FormItem>
+
+          <FormField
+            control={form.control}
+            name="cancellationPolicy"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cancellation Policy</FormLabel>
+                <FormControl>
+                  <Select {...field}>
+                    <SelectContent>
+                      {ALL_CANCELLATION_POLICIES.map((policy) => (
+                        <SelectItem key={policy} value={policy}>
+                          {policy}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
           <Button
             disabled={form.formState.isSubmitting}

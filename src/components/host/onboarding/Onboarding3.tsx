@@ -3,10 +3,7 @@ import Home from "@/components/_icons/Home";
 import Room from "@/components/_icons/Room";
 import SharedRoom from "@/components/_icons/SharedRoom";
 import { Button } from "@/components/ui/button";
-import {
-  type SpaceType,
-  useHostOnboarding,
-} from "@/utils/store/host-onboarding";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { Minus, Plus } from "lucide-react";
 import OnboardingFooter from "./OnboardingFooter";
 import SaveAndExit from "./SaveAndExit";
@@ -14,24 +11,24 @@ import { useState } from "react";
 
 export const options = [
   {
-    id: "Entire place" as SpaceType,
+    id: "Entire place",
     icon: <Home />,
     title: "Entire Place",
     text: "Guests have the whole place to themselves.",
   },
   {
-    id: "Private room" as SpaceType,
+    id: "Private room",
     icon: <Room />,
     title: "Private Room",
     text: "Guests have their own room in a home and access to shared spaces.",
   },
   {
-    id: "Shared room" as SpaceType,
+    id: "Shared room",
     icon: <SharedRoom />,
     title: "Shared Room",
     text: "Guests sleep in a room or common area that may be shared with you or others.",
   },
-];
+] as const;
 
 export function Total({
   name,

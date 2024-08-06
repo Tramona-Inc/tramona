@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 const DamageProtection = () => {
   return (
@@ -95,7 +96,7 @@ function IntroSection() {
               vacancies and increase your month-over-month profit.
             </p>
             <Link
-              href="host/onboarding"
+              href="host-onboarding"
               className={buttonVariants({
                 variant: "greenPrimary",
                 size: "lg",
@@ -326,7 +327,7 @@ export default function HostWelcome() {
   ];
 
   return (
-    <MainLayout>
+    <DashboardLayout type={"guest"}>
       <Head>
         <title>Hosts | Tramona</title>
       </Head>
@@ -356,6 +357,6 @@ export default function HostWelcome() {
       <WhyPartnerWithUs />
 
       <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

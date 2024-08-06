@@ -9,9 +9,16 @@ export default function Page() {
       <Head>
         <title>Offers & Requests | Tramona</title>
       </Head>
-      <HostRequestsLayout>
-        <HostRequests />
-      </HostRequestsLayout>
+      <div className="hidden xl:block">
+        <HostRequestsLayout>
+          <HostRequests />
+        </HostRequestsLayout>
+      </div>
+      <div className="xl:hidden">
+        <div className="mb-16">
+          <HostRequests />
+        </div>
+      </div>
     </DashboardLayout>
   );
 }

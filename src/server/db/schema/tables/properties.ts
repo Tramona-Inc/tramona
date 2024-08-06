@@ -89,18 +89,38 @@ export const ALL_PROPERTY_TYPES = [
 
 export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
 
+export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
+
+export const ALL_CANCELLATION_POLICIES = [
+  "Flexible",
+  "Moderate",
+  "Firm",
+  "Strict",
+  "Super Strict 30 Days",
+  "Super Strict 60 Days",
+  "Long Term",
+  "Non-refundable",
+] as const;
+
+export type CancellationPolicy = (typeof ALL_CANCELLATION_POLICIES)[number];
+
+export const cancellationPolicyEnum = pgEnum(
+  "cancellation_policy",
+  ALL_CANCELLATION_POLICIES,
+);
+
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
   "Shared room",
   "Private room",
 ] as const;
 
+export type PropertyRoomType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
+
 export const ALL_PROPERTY_ROOM_TYPES = [
   ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
   "Other",
 ] as const;
-
-export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
 
 export const propertyRoomTypeEnum = pgEnum(
   "property_room_type",
@@ -330,7 +350,7 @@ export const properties = pgTable(
     originalNightlyPrice: integer("original_nightly_price"), // in cents
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
-    cancellationPolicy: text("cancellation_policy"),
+    cancellationPolicy: cancellationPolicyEnum("cancellation_policy"),
 
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -347,6 +367,7 @@ export const properties = pgTable(
       mode: "xy",
       srid: 4326,
     }),
+    iCalLink: text("ical_link"),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
