@@ -72,6 +72,10 @@ export const Airbnb: ListingSite<"Airbnb"> = {
       },
 
       async getPrice(params) {
+        await fetch("https://api.ipify.org/")
+          .then((res) => res.text())
+          .then(console.log);
+
         const checkoutUrl = this.getCheckoutUrl(params);
 
         const jsonStr = await fetch(checkoutUrl, {
