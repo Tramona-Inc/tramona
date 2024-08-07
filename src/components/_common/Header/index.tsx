@@ -50,7 +50,7 @@ export default function Header(props: HeaderProps) {
 }
 
 const headerLinks1 = [
-  { name: "Link Input", href: "/link-input" },
+  // { name: "Link Input", href: "/link-input" },
   { name: "Recent Deals", href: "/exclusive-offers" },
   //{ name: "Unclaimed Offers", href: "/unclaimed-offers" },
 ];
