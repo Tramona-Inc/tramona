@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
-import { type OfferWithDetails } from "../offers/OfferPage";
+import { type OfferWithDetails } from "../offers/PropertyPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import StripePaymentInfo from "../requests/StripePaymentInfo";

@@ -7,7 +7,7 @@
 // import SuperHostIcon from "@/common/components/icons/superhost";
 // import PaywallDialog from "@/common/components/paywall-dialog";
 import Spinner from "@/components/_common/Spinner";
-import OfferPage from "@/components/offers/OfferPage";
+import OfferPage from "@/components/offers/PropertyPage";
 import { api } from "@/utils/api";
 
 import { useSession } from "next-auth/react";

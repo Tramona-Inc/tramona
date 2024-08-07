@@ -90,7 +90,7 @@ export function createListing({
 }
 
 export function getOriginalListing(property: {
-  originalListingId?: string;
+  originalListingId?: string | null;
   originalListingSite?: ListingSiteName;
 }) {
   if (!property.originalListingSite || !property.originalListingId) {

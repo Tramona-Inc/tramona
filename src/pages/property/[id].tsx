@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import PropertyPage from "@/components/property/PropertyPage";
+import PropertyPage from "@/components/offers/PropertyPage";
+import OfferPage from "@/components/offers/PropertyPage";
 import { api, type RouterOutputs } from "@/utils/api";
 import Head from "next/head";
 import { useRouter } from "next/router";

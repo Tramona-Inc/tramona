@@ -60,7 +60,7 @@ export const requests = pgTable(
       .notNull()
       .default(sql`'{}'`),
     note: varchar("note", { length: 255 }),
-    airbnbLink: varchar("airbnb_link", { length: 512 }),
+    // airbnbLink: varchar("airbnb_link", { length: 512 }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

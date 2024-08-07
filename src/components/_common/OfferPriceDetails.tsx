@@ -7,17 +7,17 @@ import { type Offer } from "@/server/db/schema";
 export function OfferPriceDetails({
   offer,
 }: {
-  offer: Pick<Offer, "totalPrice" | "tramonaFee" | "checkIn" | "checkOut">;
+  offer?: Pick<Offer, "totalPrice" | "tramonaFee" | "checkIn" | "checkOut">;
 }) {
-  const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.totalPrice / numberOfNights;
-  const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
-  const total = offer.totalPrice + offer.tramonaFee + tax;
+  const numberOfNights = getNumNights(offer?.checkIn ?? new Date(), offer?.checkOut ?? new Date());
+  const nightlyPrice = offer && offer.totalPrice / numberOfNights;
+  const tax = offer && (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
+  const total = offer && offer.totalPrice + offer.tramonaFee + tax!;
 
   const items = [
     {
-      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(offer.totalPrice)}`,
+      title: `${formatCurrency(nightlyPrice ?? 0)} x ${plural(numberOfNights, "night")}`,
+      price: `${formatCurrency(offer?.totalPrice ?? 0)}`,
     },
     {
       title: "Cleaning fee",
@@ -25,11 +25,11 @@ export function OfferPriceDetails({
     },
     {
       title: "Tramona service fee",
-      price: `${formatCurrency(offer.tramonaFee)}`,
+      price: `${formatCurrency(offer?.tramonaFee ?? 0)}`,
     },
     {
       title: "Taxes",
-      price: `${formatCurrency(tax)}`,
+      price: `${formatCurrency(tax!)}`,
     },
   ];
 
@@ -47,7 +47,7 @@ export function OfferPriceDetails({
       <Separator />
       <div className="flex items-center justify-between pb-4 font-bold">
         <p>Total (USD)</p>
-        <p>{formatCurrency(total)}</p>
+        <p>{formatCurrency(total!)}</p>
       </div>
     </div>
   );
