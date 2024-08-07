@@ -196,22 +196,21 @@ export async function createSuperhogReservation({
       .returning({ id: superhogRequests.id });
 
     //update the trip with the superhog request id
-    if (currentSuperHogRequestId.length > 0) {
-      const currentTripId = await db
-        .update(trips)
-        .set({
-          superhogRequestId: currentSuperHogRequestId[0]!.id,
-        })
-        .where(eq(trips.id, trip.id))
-        .returning({ id: trips.id });
-
-      //record the action in the superhog action table
-      await db.insert(superhogActionOnTrips).values({
-        action: "update",
-        tripId: currentTripId[0]!.id,
+    const currentTripId = await db
+      .update(trips)
+      .set({
         superhogRequestId: currentSuperHogRequestId[0]!.id,
-      });
-    }
+      })
+      .where(eq(trips.id, trip.id))
+      .returning({ id: trips.id });
+    console.log("currentTripId", currentTripId);
+    //record the action in the superhog action table
+    await db.insert(superhogActionOnTrips).values({
+      action: "create",
+      tripId: currentTripId[0]!.id,
+      superhogRequestId: currentSuperHogRequestId[0]!.id,
+    });
+
     if (
       verification.status === "Rejected" ||
       verification.status == "Flagged"
@@ -341,6 +340,12 @@ export const superhogRouter = createTRPCRouter({
             superhogRequestId: superhogRequestId[0]!.id,
           })
           .where(eq(trips.id, parseInt(input.reservation.reservationId)));
+
+        await db.insert(superhogActionOnTrips).values({
+          action: "create",
+          tripId: tripExists.id,
+          superhogRequestId: superhogRequestId[0]!.id,
+        });
         //super temp for testing
         sendSlackMessage(
           [
