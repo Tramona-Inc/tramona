@@ -33,7 +33,6 @@ import {
   linkInputProperties,
   linkInputPropertyInsertSchema,
 } from "@/server/db/schema/tables/linkInputProperties";
-import { env } from "process";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -581,7 +580,7 @@ export async function handleRequestSubmission(
   const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
   const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
 
-  if (env.NODE_ENV !== "development") {
+  if (user.role !== "admin") {
     sendSlackMessage(
       [
         `*${name} just made a request: ${input.location}*`,
