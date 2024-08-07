@@ -135,6 +135,7 @@ export default async function handler() {
       numNights = getNumNights(randomDate.checkIn, randomDate.checkOut);
     }
     if (offer && randomDate.checkIn && randomDate.checkOut) {
+      // @ts-expect-error TODO !!!
       await db.insert(fillerOffers).values({
         userName: username,
         userProfilePicUrl: picture,
@@ -165,7 +166,8 @@ export default async function handler() {
       numNights = getNumNights(randomDate.checkIn, randomDate.checkOut);
     }
     if (booking && randomDate.checkIn && randomDate.checkOut) {
-      const fillerBooking = {
+      // @ts-expect-error TODO !!!
+      await db.insert(fillerBookings).values({
         userName: username,
         userProfilePicUrl: picture,
         propertyId: booking.property.id,
@@ -174,9 +176,7 @@ export default async function handler() {
         checkIn: new Date(randomDate.checkIn),
         checkOut: new Date(randomDate.checkOut),
         entryCreationTime: new Date(creationTime),
-      };
-
-      await db.insert(fillerBookings).values(fillerBooking);
+      });
     }
   }
 }

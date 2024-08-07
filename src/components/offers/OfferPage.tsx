@@ -330,6 +330,7 @@ export default function OfferPage({
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 font-semibold text-teal-700 underline underline-offset-2"
                 href={originalListing.getReviewsUrl({
+                  // TODO
                   checkIn: offer.checkIn,
                   checkOut: offer.checkOut,
                   numGuests: request?.numGuests ?? 1,

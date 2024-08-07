@@ -16,6 +16,7 @@ import {
 import {
   CalendarIcon,
   EllipsisIcon,
+  LinkIcon,
   MapPinIcon,
   TrashIcon,
   Users2Icon,
@@ -32,12 +33,11 @@ import UserAvatar from "../_common/UserAvatar";
 import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
 import { getTime } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
+import { Separator } from "../ui/separator";
 
 export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
   | "inactiveRequestGroups"][number]["requests"][number];
-
-type T = GuestDashboardRequest["linkInputProperty"];
 
 export type AdminDashboardRequst = RouterOutputs["requests"]["getAll"][
   | "incomingRequests"
@@ -81,7 +81,15 @@ export default function RequestCard({
         onOpenChange={setOpen}
       />
       <div>
-        {type !== "host" && <RequestCardBadge request={request} />}
+        <div className="flex flex-wrap gap-2">
+          {type !== "host" && <RequestCardBadge request={request} />}
+          {type === "guest" && request.linkInputProperty && (
+            <Badge variant="pink">
+              <LinkIcon className="size-4" />
+              Airbnb Link
+            </Badge>
+          )}
+        </div>
         {type === "host" && (
           <div className="flex items-center gap-2">
             <UserAvatar

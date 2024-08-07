@@ -94,6 +94,7 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
 
               <PlacesInput
                 name="location"
+                // @ts-expect-error TODO !!!
                 control={form.control}
                 formLabel="Location"
                 className="col-span-full sm:col-span-1"

@@ -11,6 +11,7 @@ const badgeVariants = cva(
         primary: "bg-primary/20 text-primary",
         secondary: "bg-zinc-200 text-zinc-600 font-medium",
         red: "text-red-800 bg-red-100 border border-red-200",
+        pink: "text-pink-800 bg-pink-100 border border-pink-200",
         green: "bg-green-100 text-green-800 border border-green-200",
         yellow: "bg-amber-100 text-amber-800 border border-amber-200",
         blue: "bg-blue-100 border border-blue-200 text-blue-800",

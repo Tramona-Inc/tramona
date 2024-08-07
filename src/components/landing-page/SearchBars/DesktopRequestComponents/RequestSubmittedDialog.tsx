@@ -18,7 +18,7 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   setOpen,
   showConfetti,
   madeByGroupId,
-  location: city,
+  location,
 }) => {
   // Watch the specific data entry for the current tab
   // Now we can directly access location or use a fallback
@@ -43,10 +43,10 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
           <CircleCheckBig color="#528456" className="mr-2" /> Request sent!
         </div>
         <p className="mb-4 ml-8">
-          {city ? (
+          {location ? (
             <>
-              We sent your request out to every host in <b>{city}</b>. In the
-              next 24 hours, hosts will send you properties that match your
+              We sent your request out to every host in <b>{location}</b>. In
+              the next 24 hours, hosts will send you properties that match your
               requirements. To check out matches,{" "}
             </>
           ) : (

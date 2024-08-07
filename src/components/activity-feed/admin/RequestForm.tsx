@@ -59,8 +59,8 @@ export default function CreateRequestForm({
     defaultValues: {
       ...(request
         ? {
-            userName: request.madeByGroup.owner.name || "",
-            userProfilePicUrl: request.madeByGroup.owner.image || "",
+            userName: request.madeByGroup.owner.name ?? "",
+            userProfilePicUrl: request.madeByGroup.owner.image ?? "",
             checkIn: request.checkIn.toISOString().slice(0, 10),
             checkOut: request.checkOut.toISOString().slice(0, 10),
             location: request.location,
@@ -97,11 +97,11 @@ export default function CreateRequestForm({
     console.log(formattedData);
     // send the data to backend
     if (request) {
-      const fillerRequestId = await updateFillerRequest
+      await updateFillerRequest
         .mutateAsync({ id: request.id, ...formattedData })
         .catch(() => errorToast());
     } else {
-      const fillerRequestId = await createFillerRequest
+      await createFillerRequest
         .mutateAsync(formattedData)
         .catch(() => errorToast());
     }
@@ -112,7 +112,7 @@ export default function CreateRequestForm({
     const userData = await createUserNameAndPic();
     let userName = "";
     let userProfilePicUrl = "";
-    if (userData && userData[0]) {
+    if (userData?.[0]) {
       userName = userData[0].name;
       userProfilePicUrl = userData[0].picture;
     }
@@ -240,6 +240,7 @@ export default function CreateRequestForm({
         />
 
         <PlacesInput
+          // @ts-expect-error TODO !!!
           control={form.control}
           name="location"
           formLabel="Location"

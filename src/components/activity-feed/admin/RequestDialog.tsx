@@ -18,14 +18,14 @@ import { Button } from "@/components/ui/button";
 export default function CreateRequestDialog({
   children,
   request,
-}: React.PropsWithChildren<{ request?: FeedItem }>) {
+}: React.PropsWithChildren<{ request?: FeedItem & { type: "request" } }>) {
   const [isOpen, setIsOpen] = useState(false);
   const deleteFillerRequest = api.feed.deleteFillerRequest.useMutation();
 
   async function deleteRequest() {
     if (!request) return;
     await deleteFillerRequest
-      .mutateAsync({ id: request?.id })
+      .mutateAsync({ id: request.id })
       .then(() => toast({ title: "Sucessfully deleted request" }))
       .catch(() => errorToast());
     setIsOpen(false);

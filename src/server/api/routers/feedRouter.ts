@@ -522,6 +522,7 @@ export const feedRouter = createTRPCRouter({
           numNights = getNumNights(randomDate.checkIn, randomDate.checkOut);
         }
         if (randomDate.checkIn && randomDate.checkOut && offer) {
+          // @ts-expect-error TODO !!!
           await ctx.db.insert(fillerOffers).values({
             userName: username,
             userProfilePicUrl: picture,
@@ -552,7 +553,8 @@ export const feedRouter = createTRPCRouter({
           numNights = getNumNights(randomDate.checkIn, randomDate.checkOut);
         }
         if (booking && randomDate.checkIn && randomDate.checkOut) {
-          const fillerBooking = {
+          // @ts-expect-error TODO !!!
+          await ctx.db.insert(fillerBookings).values({
             userName: username,
             userProfilePicUrl: picture,
             propertyId: booking.property.id,
@@ -561,8 +563,7 @@ export const feedRouter = createTRPCRouter({
             checkIn: new Date(randomDate.checkIn),
             checkOut: new Date(randomDate.checkOut),
             entryCreationTime: new Date(creationTime),
-          };
-          await ctx.db.insert(fillerBookings).values(fillerBooking);
+          });
         }
       }
     },

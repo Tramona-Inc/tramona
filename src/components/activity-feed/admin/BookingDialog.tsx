@@ -18,14 +18,14 @@ import { Button } from "@/components/ui/button";
 export default function CreateBookingDialog({
   children,
   booking,
-}: React.PropsWithChildren<{ booking?: FeedItem }>) {
+}: React.PropsWithChildren<{ booking?: FeedItem & { type: "booking" } }>) {
   const [isOpen, setIsOpen] = useState(false);
   const deleteFillerBooking = api.feed.deleteFillerBooking.useMutation();
 
   async function deleteBooking() {
     if (!booking) return;
     await deleteFillerBooking
-      .mutateAsync({ id: booking?.id })
+      .mutateAsync({ id: booking.id })
       .then(() => toast({ title: "Sucessfully deleted booking" }))
       .catch(() => errorToast());
     setIsOpen(false);

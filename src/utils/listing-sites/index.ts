@@ -6,8 +6,8 @@ import { Vrbo } from "./Vrbo";
 import { type ListingSiteName } from "@/server/db/schema";
 
 export type ListingSiteUrlParams = {
-  checkIn?: string;
-  checkOut?: string;
+  checkIn?: string | Date;
+  checkOut?: string | Date;
   numGuests: number;
 };
 
@@ -87,8 +87,8 @@ export function createListing({
 }
 
 export function getOriginalListing(property: {
-  originalListingId?: string;
-  originalListingSite?: ListingSiteName;
+  originalListingId?: string | null;
+  originalListingSite?: ListingSiteName | null;
 }) {
   if (!property.originalListingSite || !property.originalListingId) {
     return null;

@@ -58,6 +58,7 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
     await createRequestWithLink({ property, request })
       .then(({ madeByGroupId }) => {
         setMadeByGroupId(madeByGroupId);
+        setOpen(false);
         setRequestSubmittedDialogOpen(true);
         setShowConfetti(true);
       })

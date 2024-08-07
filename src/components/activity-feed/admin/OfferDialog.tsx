@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 export default function CreateOfferDialog({
   children,
   offer,
-}: React.PropsWithChildren<{ offer?: FeedItem }>) {
+}: React.PropsWithChildren<{ offer?: FeedItem & { type: "offer" } }>) {
   const [isOpen, setIsOpen] = useState(false);
   const deleteFillerOffer = api.feed.deleteFillerOffer.useMutation();
 
