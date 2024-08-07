@@ -57,7 +57,10 @@ export default function LinkRequestForm() {
                         <Loader2Icon className="h-4 w-4 animate-[spin_0.4s_linear_infinite]" />
                       )}
                     </div>
-                    <FormMessage className="absolute right-2 top-1" />
+                    {/* TODO: fix this hack (required showing up after submission) */}
+                    {form.formState.errors.url?.message !== "Required" && (
+                      <FormMessage className="absolute right-2 top-1" />
+                    )}
                   </div>
                 </FormControl>
               </FormItem>
