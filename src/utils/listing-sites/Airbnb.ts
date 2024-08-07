@@ -91,6 +91,7 @@ export const Airbnb: ListingSite<"Airbnb"> = {
             return $("#data-deferred-state-0").text();
           }).catch((err) => {
             console.error(err);
+            console.log('erioeore');
             throw err;
           });
 
