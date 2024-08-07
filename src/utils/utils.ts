@@ -246,9 +246,10 @@ export function getPriceBreakdown(bookingCost: number, numNights: number, superh
   const superhogFeePaid = numNights * superhogFee * 100;
   const taxPaid = (bookingCost + superhogFeePaid) * tax
   const totalMinusStripe = bookingCost + superhogFeePaid + taxPaid;
-  const stripeFee = Math.ceil(totalMinusStripe * 0.035);
-  const serviceFee = superhogFeePaid + stripeFee;
-  const finalTotal = totalMinusStripe + stripeFee;
+  // should always cover the stripe fee + a little extra
+  const stripeCoverFee = Math.ceil(totalMinusStripe * 0.04);
+  const serviceFee = superhogFeePaid + stripeCoverFee;
+  const finalTotal = totalMinusStripe + stripeCoverFee;
 
   const priceBreakdown = {
     bookingCost: bookingCost,

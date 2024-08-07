@@ -11,31 +11,13 @@ export function OfferPriceDetails({
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
   const nightlyPrice = offer.totalPrice / numberOfNights;
-  const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
-  const total = offer.totalPrice + offer.tramonaFee + tax;
 
-  const { bookingCost, taxPaid, serviceFee, firstTotal, finalTotal } = getPriceBreakdown(offer.totalPrice, numberOfNights, SUPERHOG_FEE, TAX_PERCENTAGE);
+  const { bookingCost, taxPaid, serviceFee, finalTotal } = getPriceBreakdown(offer.totalPrice, numberOfNights, SUPERHOG_FEE, TAX_PERCENTAGE);
 
   const items = [
-    // {
-    //   title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-    //   price: `${formatCurrency(offer.totalPrice)}`,
-    // },
-    // {
-    //   title: "Cleaning fee",
-    //   price: "Included",
-    // },
-    // {
-    //   title: "Tramona service fee",
-    //   price: `${formatCurrency(offer.tramonaFee)}`,
-    // },
-    // {
-    //   title: "Taxes",
-    //   price: `${formatCurrency(tax)}`,
-    // },
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(offer.totalPrice)}`,
+      price: `${formatCurrency(bookingCost)}`,
     },
     {
       title: "Cleaning fee",
