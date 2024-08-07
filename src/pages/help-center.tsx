@@ -38,9 +38,21 @@ export default function HelpCenter() {
             <div>
               <h2 className="font-bold">Refunds & cancellations</h2>
               <p>
-                Some of our properties have refunds while some do not. Please
-                make sure you check what the policy is before booking. There is
-                a 10% base service fee on every cancellation.
+                Each property and host has different cancellation policies. Once
+                you get matches, you will be able to see the policy each host is
+                offering.{" "}
+              </p>
+              <br />
+              <p>
+                To request a refund, go to your{" "}
+                <Link
+                  href="/my-trips"
+                  className="text-blue-600 underline underline-offset-2"
+                >
+                  My Trips
+                </Link>{" "}
+                page. Click on the trip and request a refund there. We will
+                process your refund in less than 48 hours if applicable.
               </p>
             </div>
             <div>
@@ -60,14 +72,14 @@ export default function HelpCenter() {
               <p>
                 If it is an emergency regarding safety, please call 911. If it
                 is an emergency regarding something Tramona can help with,
-                please call:
+                please email us at:
                 <br />
                 <br />
                 <a
-                  href="tel:+1(425)877-8881"
+                  href="mailto:info@tramona.com"
                   className="text-blue-600 underline underline-offset-2"
                 >
-                  +1 (425) 877-8881
+                  info@tramona.com
                 </a>
               </p>
             </div>
