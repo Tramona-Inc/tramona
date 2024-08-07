@@ -55,7 +55,7 @@ export const Airbnb: ListingSite<"Airbnb"> = {
         const { checkIn, checkOut, numGuests } = params;
 
         const url = new URL(
-          `${Airbnb.baseUrl}/book/stays/${this.id}?productId=${this.id}`,
+          `${Airbnb.baseUrl}/book/stays/${this.id}?productId=${this.id}&guestCurrency=USD`,
         );
 
         if (checkIn) {
