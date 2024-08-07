@@ -307,7 +307,6 @@ export default async function webhook(
             ),
           });
           //extract metadata from the charge object
-          const offerId = parseInt(chargeObject.metadata.offer_id!);
           const propertyId = parseInt(chargeObject.metadata.property_id!);
           const userId = chargeObject.metadata.user_id!;
 

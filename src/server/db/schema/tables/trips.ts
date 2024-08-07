@@ -47,6 +47,7 @@ export const trips = pgTable(
       () => superhogRequests.id,
     ),
     paymentCaptured: boolean("payment_captured").notNull().default(false),
+    hostPayed: boolean("host_payed").notNull().default(false),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),
