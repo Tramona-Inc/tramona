@@ -22,74 +22,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { ALL_LISTING_SITE_NAMES } from "@/utils/listing-sites";
-
-export const ALL_PROPERTY_TYPES = [
-  "Condominium",
-  "Apartment",
-  "Guesthouse",
-  "House",
-  "Loft",
-  "Boat",
-  "Camper/RV",
-  "Chalet",
-  "Bed & Breakfast",
-  "Castle",
-  "Tent",
-  "Cabin",
-  "Townhouse",
-  "Bungalow",
-  "Hut",
-  "Dorm",
-  "Aparthotel",
-  "Hotel",
-  "Yurt",
-  "Treehouse",
-  "Cottage",
-  "Guest Suite",
-  "Tiny House",
-  "Plane",
-  "Igloo",
-  "Serviced apartment",
-  "Other",
-  "Lighthouse",
-  "Tipi",
-  "Cave",
-  "Island",
-  "Earth House",
-  "Train",
-  "Boutique hotel",
-  "Nature lodge",
-  "Hostel",
-  "Timeshare",
-  "Minsu (Taiwan)",
-  "Ryokan (Japan)",
-  "Pension (Korea)",
-  "Heritage hotel (India)",
-  "Barn",
-  "Campsite",
-  "Casa Particular (Cuba)",
-  "Cycladic House",
-  "Dammusi",
-  "Dome House",
-  "Farm Stay",
-  "Holiday Park",
-  "Houseboat",
-  "Kezhan",
-  "Ranch",
-  "Religious Building",
-  "Riad",
-  "Shipping Container",
-  "Tower",
-  "Trullo",
-  "Windmill",
-  "Shepherd’s Hut",
-  "Villa",
-] as const;
-
-export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
-
-export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
+import { ALL_LISTING_SITE_NAMES, propertyTypeEnum } from "../common";
 
 export const ALL_CANCELLATION_POLICIES = [
   "Flexible",
@@ -132,28 +65,6 @@ export const ALL_HOUSE_RULE_ITEMS = ["Pets allowed", "Smoking Allowed"];
 export const propertyAmenitiesEnum = pgEnum(
   "property_amenities",
   ALL_PROPERTY_AMENITIES,
-);
-
-export const ALL_PROPERTY_STANDOUT_AMENITIES = [
-  "Pool",
-  "Hot tub",
-  "Patio",
-  "BBQ grill",
-  "Outdoor dining area",
-  "Fire pit",
-  "Pool table",
-  "Indoor fireplace",
-  "Piano",
-  "Exercise equipment",
-  "Lake access",
-  "Beach access",
-  "Ski-in/Ski-out",
-  "Outdoor shower",
-] as const;
-
-export const propertyStandoutAmenitiesEnum = pgEnum(
-  "property_standout_amenities",
-  ALL_PROPERTY_STANDOUT_AMENITIES,
 );
 
 export const ALL_PROPERTY_SAFETY_ITEMS = [

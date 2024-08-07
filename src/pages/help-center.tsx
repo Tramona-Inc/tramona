@@ -45,12 +45,12 @@ export default function HelpCenter() {
               <br />
               <p>
                 To request a refund, go to your{" "}
-                <a
+                <Link
                   href="/my-trips"
                   className="text-blue-600 underline underline-offset-2"
                 >
                   My Trips
-                </a>{" "}
+                </Link>{" "}
                 page. Click on the trip and request a refund there. We will
                 process your refund in less than 48 hours if applicable.
               </p>

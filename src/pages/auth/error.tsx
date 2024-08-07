@@ -17,7 +17,7 @@ export default function Page() {
         <br />
         <br />
         Please{" "}
-        <Link href="/support" className="underline underline-offset-2">
+        <Link href="/help" className="underline underline-offset-2">
           contact support
         </Link>{" "}
         if the issue persists

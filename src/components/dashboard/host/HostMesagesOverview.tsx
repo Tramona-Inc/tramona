@@ -13,27 +13,6 @@ import supabase from "@/utils/supabase-client";
 import { type MessageDbType } from "@/types/supabase.message";
 import { useSession } from "next-auth/react";
 
-// const fakeMessages = [
-//   {
-//     name: "Heidi",
-//     message:
-//       "Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore tempora fugit hic natus quos",
-//     id: 1,
-//   },
-//   {
-//     name: "Heidi",
-//     message:
-//       "Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore tempora fugit hic natus quos",
-//     id: 2,
-//   },
-//   {
-//     name: "Heidi",
-//     message:
-//       "Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore tempora fugit hic natus quos",
-//     id: 3,
-//   },
-// ];
-
 export default function HostMessagesOverview({
   className,
 }: {
