@@ -62,7 +62,7 @@ export default function StripeCheckoutForm({
     <div>
       <form
         onSubmit={handleSubmit}
-        className="flex w-full flex-col items-center gap-y-4"
+        className="flex w-full flex-col items-center gap-y-2"
       >
         <h2 className="self-start text-lg font-semibold">Payment</h2>
         <div className="mt-4 flex w-full flex-col items-center gap-y-4">
@@ -106,7 +106,7 @@ export default function StripeCheckoutForm({
 
 function TermsAndSubmit() {
   return (
-    <div className="md:mt-8">
+    <div className="">
       <div className="mb-8 space-y-4 text-muted-foreground">
         <p className="text-sm font-semibold leading-5">
           On behalf of Tramona we ask that you please follow the house rules and

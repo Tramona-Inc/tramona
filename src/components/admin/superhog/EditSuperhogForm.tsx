@@ -12,6 +12,7 @@ export default function EditSuperhogForm() {
   }: { data: ReservationInterface[] | undefined; isLoading: boolean } =
     api.superhog.getAllVerifications.useQuery();
 
+  console.log("data", data);
   const content = data ? (
     data.length < 1 ? (
       <p className="flex h-[400px] items-center justify-center text-center">
