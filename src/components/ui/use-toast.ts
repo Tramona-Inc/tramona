@@ -166,6 +166,7 @@ function toast({ ...props }: Toast) {
   };
 }
 
+// TODO: remove and replace with importing `toast` directly
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState);
 
