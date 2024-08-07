@@ -39,8 +39,9 @@ export default function DashboardLayout({
   return (
     <>
       <div className="bg-red-600 px-4 py-2 text-center text-sm font-semibold text-white">
-        One of our upstream providers is experiencing issues, thank you for your
-        patience while the issue gets resolved.
+        One of our upstream providers is experiencing issues, so parts of the
+        site are not working. Thank you for your patience while the issue gets
+        resolved.
       </div>
       <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
       <div className="relative min-h-screen-minus-header lg:flex">
