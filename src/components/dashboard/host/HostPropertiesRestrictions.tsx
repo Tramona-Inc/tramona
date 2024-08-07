@@ -54,7 +54,7 @@ export default function HostPropertiesRestrictions({
   };
 
   return (
-    <div className="my-6">
+    <div className="mb-24 mt-6">
       <div className="text-end">
         <HostPropertyEditBtn
           editing={editing}
