@@ -75,8 +75,12 @@ export const Airbnb: ListingSite<"Airbnb"> = {
         const checkoutUrl = this.getCheckoutUrl(params);
 
         const jsonStr = await fetch(checkoutUrl)
-          .then((res) => res.text())
+          .then((res) => {
+            console.log({ res });
+            return res.text();
+          })
           .then((html) => {
+            console.log({ html });
             const $ = cheerio.load(html);
             return $("#data-deferred-state-0").text();
           });
