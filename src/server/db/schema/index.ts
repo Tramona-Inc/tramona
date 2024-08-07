@@ -17,6 +17,7 @@ export * from "./tables/properties";
 export * from "./tables/requests";
 export * from "./tables/requestsToProperties";
 export * from "./tables/reservedDateRanges";
+export * from "./tables/superhogActionsOnTrips";
 export * from "./tables/superhogErrors";
 export * from "./tables/superhogRequests";
 export * from "./tables/users";

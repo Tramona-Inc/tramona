@@ -1,7 +1,7 @@
 import {
   integer,
   pgTable,
-  primaryKey,
+  serial,
   timestamp,
   index,
 } from "drizzle-orm/pg-core";
@@ -12,12 +12,17 @@ import { superhogErrorAction } from "./superhogErrors";
 export const superhogActionOnTrips = pgTable(
   "superhog_action_on_trips",
   {
-    id: integer("id").primaryKey(),
-    tripId: integer("trip_id").references(() => trips.id),
-    createdAt: timestamp("created_at", { withTimezone: true }),
+    id: serial("id").primaryKey(),
+    tripId: integer("trip_id").references(() => trips.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     action: superhogErrorAction("action").default("create").notNull(),
     superhogRequestId: integer("superhog_request_id").references(
       () => superhogRequests.id,
+      { onDelete: "cascade" },
     ),
   },
   (t) => ({

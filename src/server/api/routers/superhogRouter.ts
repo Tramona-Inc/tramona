@@ -9,6 +9,7 @@ import {
   superhogRequests,
   trips,
   superhogErrors,
+  superhogActionOnTrips,
 } from "@/server/db/schema";
 
 import { eq, isNotNull } from "drizzle-orm";
@@ -21,6 +22,7 @@ import { getCountryISO, getPostcode } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
 
 import { stripe } from "@/server/api/routers/stripeRouter";
+
 export interface ReservationInterface {
   id: number;
   checkIn: string;
@@ -195,12 +197,20 @@ export async function createSuperhogReservation({
 
     //update the trip with the superhog request id
     if (currentSuperHogRequestId.length > 0) {
-      await db
+      const currentTripId = await db
         .update(trips)
         .set({
           superhogRequestId: currentSuperHogRequestId[0]!.id,
         })
-        .where(eq(trips.id, trip.id));
+        .where(eq(trips.id, trip.id))
+        .returning({ id: trips.id });
+
+      //record the action in the superhog action table
+      await db.insert(superhogActionOnTrips).values({
+        action: "update",
+        tripId: currentTripId[0]!.id,
+        superhogRequestId: currentSuperHogRequestId[0]!.id,
+      });
     }
     if (
       verification.status === "Rejected" ||
@@ -430,12 +440,18 @@ export const superhogRouter = createTRPCRouter({
               input.verification.verificationId,
             ),
           });
-
+        //record the acition in the superhog action table
+        await db.insert(superhogActionOnTrips).values({
+          action: "delete",
+          tripId: parseInt(currentSuperhogRequestId!.superhogReservationId),
+          superhogRequestId: currentSuperhogRequestId?.id,
+        });
+        //delet from the trips table
         await db
           .update(trips)
           .set({ superhogRequestId: null })
           .where(eq(trips.superhogRequestId, currentSuperhogRequestId!.id));
-
+        //delete from the superhog request table
         await db
           .delete(superhogRequests)
           .where(
@@ -493,11 +509,18 @@ export const superhogRouter = createTRPCRouter({
 
         //find the id of the superhog request
         const superhogRequestId = await db.query.superhogRequests.findFirst({
-          columns: { id: true },
           where: eq(
             superhogRequests.superhogVerificationId,
             input.verification.verificationId,
           ),
+        });
+
+        //keep track of the action in the actions table
+        //record the acition in the superhog action table
+        await db.insert(superhogActionOnTrips).values({
+          action: "update",
+          tripId: parseInt(superhogRequestId!.superhogReservationId),
+          superhogRequestId: superhogRequestId!.id,
         });
 
         await db
