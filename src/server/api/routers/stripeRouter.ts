@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { users } from "@/server/db/schema";
+import { trips, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
@@ -103,47 +103,47 @@ export const stripeRouter = createTRPCRouter({
       return { clientSecret: session.client_secret };
     }),
 
-  authorizePayment: protectedProcedure
-    .input(
-      z.object({
-        listingId: z.number(),
-        propertyId: z.number(),
-        requestId: z.number(),
-        name: z.string(),
-        price: z.number(),
-        description: z.string(),
-        cancelUrl: z.string(),
-        images: z.array(z.string().url()),
-        userId: z.string(),
-        phoneNumber: z.string(),
-        totalSavings: z.number(),
-        //hostId: z.string(),
-      }),
-    )
-    .mutation(({ ctx, input }) => {
-      const currentDate = new Date(); // Get the current date and time
+  // authorizePayment: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       listingId: z.number(),
+  //       propertyId: z.number(),
+  //       requestId: z.number(),
+  //       name: z.string(),
+  //       price: z.number(),
+  //       description: z.string(),
+  //       cancelUrl: z.string(),
+  //       images: z.array(z.string().url()),
+  //       userId: z.string(),
+  //       phoneNumber: z.string(),
+  //       totalSavings: z.number(),
+  //       //hostId: z.string(),
+  //     }),
+  //   )
+  //   .mutation(({ ctx, input }) => {
+  //     const currentDate = new Date(); // Get the current date and time
 
-      // Object that can be access through webhook and client
-      const metadata = {
-        user_id: ctx.user.id,
-        listing_id: input.listingId,
-        property_id: input.propertyId,
-        request_id: input.requestId,
-        price: input.price,
-        total_savings: input.totalSavings,
-        confirmed_at: currentDate.toISOString(),
-        phone_number: input.phoneNumber,
-        // host_id: input.hostId,
-      };
+  //     // Object that can be access through webhook and client
+  //     const metadata = {
+  //       user_id: ctx.user.id,
+  //       listing_id: input.listingId,
+  //       property_id: input.propertyId,
+  //       request_id: input.requestId,
+  //       price: input.price,
+  //       total_savings: input.totalSavings,
+  //       confirmed_at: currentDate.toISOString(),
+  //       phone_number: input.phoneNumber,
+  //       // host_id: input.hostId,
+  //     };
 
-      return stripe.paymentIntents.create({
-        payment_method_types: ["card"],
-        amount: input.price,
-        currency: "usd",
-        capture_method: "manual",
-        metadata: metadata, // metadata access for checkout session
-      });
-    }),
+  //     return stripe.paymentIntents.create({
+  //       payment_method_types: ["card"],
+  //       amount: input.price,
+  //       currency: "usd",
+  //       capture_method: "manual",
+  //       metadata: metadata, // metadata access for checkout session
+  //     });
+  //   }),
 
   // Get the customer info
   createSetupIntentSession: protectedProcedure
@@ -261,25 +261,81 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   // Get the customer info
-  createPaymentIntent: protectedProcedure
+  authorizePayment: protectedProcedure //this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
-        amount: z.number(),
-        currency: z.string(),
+        offerId: z.number(),
+        propertyId: z.number(),
+        requestId: z.number().nullable(),
+        name: z.string(),
+        price: z.number(), // Total price included tramona fee
+        tramonaServiceFee: z.number(),
+        description: z.string(),
+        cancelUrl: z.string(),
+        images: z.array(z.string().url()),
+        userId: z.string(),
+        phoneNumber: z.string(),
+        totalSavings: z.number(),
+        hostStripeId: z.string().nullable(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const currentDate = new Date(); // Get the current date and time
+      //we need the host Stripe account id to put in webhook
+      //get hostID from the property
+      // Object that can be access through webhook and client
+      const metadata = {
+        user_id: ctx.user.id,
+        offer_id: input.offerId,
+        property_id: input.propertyId,
+        request_id: input.requestId,
+        price: input.price, // Total price included tramona fee
+        tramonaServiceFee: input.tramonaServiceFee,
+        total_savings: input.totalSavings,
+        confirmed_at: currentDate.toISOString(),
+        phone_number: input.phoneNumber,
+        host_stripe_id: input.hostStripeId ?? "",
+      };
+
       const options: Stripe.PaymentIntentCreateParams = {
-        amount: input.amount,
-        currency: input.currency,
+        metadata: metadata,
+        amount: metadata.price,
+        capture_method: "manual", // this is saying that we will capture the payment later and not now
+        payment_method_options: {
+          // this is saying we can charge more after payment is completed if not using card(any method that does not support capture)
+          card: {
+            capture_method: "manual",
+          },
+        },
+        currency: "usd", //input.currency for now we will use usd
         setup_future_usage: "off_session", // is both of and on session
         // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
         automatic_payment_methods: { enabled: true },
+        ...(metadata.host_stripe_id
+          ? {
+              transfer_data: {
+                amount: metadata.price - metadata.tramonaServiceFee,
+                destination: metadata.host_stripe_id,
+              },
+            }
+          : {}),
       };
 
       const response = await stripe.paymentIntents.create(options);
 
       return response;
+    }),
+
+  capturePayment: protectedProcedure // not using rn because the logic is in the stripe-webhook/superhog router.
+    .input(z.object({ paymentIntentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const intent = await stripe.paymentIntents.capture(input.paymentIntentId); //will capture the authorized amount by default
+      // will trigger the payment_intent.amount_capturable_updated
+      await ctx.db
+        .update(trips)
+        .set({ paymentCaptured: true })
+        .where(eq(trips.paymentIntentId, input.paymentIntentId));
+      return intent;
     }),
 
   confirmSetupIntent: protectedProcedure
@@ -410,6 +466,7 @@ export const stripeRouter = createTRPCRouter({
       const stripeAccount = await stripeWithSecretKey.accounts.create({
         country: "US", //change this to the user country later
         email: ctx.user.email,
+        settings: {},
         controller: {
           losses: {
             payments: "application",

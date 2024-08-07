@@ -5,13 +5,13 @@ import HostPropertiesDetails from "./HostPropertiesDetails";
 import { AlertCircle, ChevronLeft, Edit2 } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
-import HostPropertiesAgeRestriction from "./HostPropertiesAgeRestriction";
 import { useState } from "react";
 import { Label } from "recharts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
+import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   const [iCalLink, setiCalLink] = useState("");
@@ -128,10 +128,10 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             Listing details
           </TabsTrigger>
           <TabsTrigger
-            value="age"
+            value="restrictions"
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
-            Age restriction
+            Restrictions
           </TabsTrigger>
           <TabsTrigger
             value="availability"
@@ -145,17 +145,20 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           >
             Cancellation policy
             {!property.cancellationPolicy && (
-              <AlertCircle className="absolute top-0 right-0 text-red-600" size={16} />
+              <AlertCircle
+                className="absolute right-0 top-0 text-red-600"
+                size={16}
+              />
             )}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
           <HostPropertiesDetails property={property} />
         </TabsContent>
-        <TabsContent value="age">
-          <HostPropertiesAgeRestriction
+        <TabsContent value="restrictions">
+          <HostPropertiesRestrictions
             property={property}
-            key={`age-${property.id}`}
+            key={`restrictions-${property.id}`}
           />
         </TabsContent>
         <TabsContent value="availability">

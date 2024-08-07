@@ -11,26 +11,9 @@ import { Slider } from "@/components/ui/slider";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { useZodForm } from "@/utils/useZodForm";
 import { z } from "zod";
-import { CounterInput } from "../_common/CounterInput";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-
-export function Total({
-  name,
-  total,
-  setTotal,
-}: {
-  name: string;
-  total: number;
-  setTotal: (total: number) => void;
-}) {
-  return (
-    <div className="flex flex-row items-center justify-between">
-      <p className="text-sm font-semibold">{name}</p>
-      <CounterInput value={total} onChange={setTotal} />
-    </div>
-  );
-}
+import { Total } from "../_common/Total";
 
 const houseRuleItems = [
   {

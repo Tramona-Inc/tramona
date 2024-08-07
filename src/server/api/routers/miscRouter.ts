@@ -3,11 +3,11 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
-import puppeteer from "puppeteer";
-
+import { zodUrl } from "@/utils/zod-utils";
+import * as cheerio from "cheerio";
+import { getCity, getCoordinates } from "@/server/google-maps";
+import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
-import { zodString } from "@/utils/zod-utils";
-import { sleep } from "@/utils/utils";
 
 type AirbnbListing = {
   id: string;
@@ -88,161 +88,64 @@ export const miscRouter = createTRPCRouter({
 
       return averageNightlyPrice;
     }),
-  scrapeUsingLink: publicProcedure
+
+  scrapeAirbnbLink: publicProcedure
     .input(
       z.object({
-        url: zodString({ maxLen: 1000 }),
+        url: zodUrl(),
+        params: z.object({
+          checkIn: z.string(),
+          checkOut: z.string(),
+          numGuests: z.number(),
+        }),
       }),
     )
-    .query(async ({ input }) => {
-      const { url } = input;
-      const searchParams = new URLSearchParams(url.split("?")[1]);
+    .query(async ({ input: { url, params } }) => {
+      const airbnbListingId = Airbnb.parseId(url);
+      if (!airbnbListingId) return { status: "failed to parse url" } as const;
 
-      try {
-        const browser = await puppeteer.launch({ headless: true });
-        const page = await browser.newPage();
-        await page.goto(url, { waitUntil: "domcontentloaded" });
+      const [res, price] = await Promise.all([
+        fetch(url),
+        await Airbnb.createListing(airbnbListingId).getPrice(params),
+      ]);
 
-        await sleep(2000);
+      if (res.status === 404) return { status: "not found" } as const;
+      if (!res.ok) return { status: "failed to fetch" } as const;
 
-        // const dialogExists = await page.$('[role="dialog"]');
-        // if (dialogExists) {
-        //   await page.mouse.click(1, 1); // Click on a point outside the popup (e.g., top-left corner)
-        // }
-        const dialogExists = await page.$(`[role=“dialog”]`);
-        if (dialogExists) {
-          // If popup appears, click outside of it to dismiss
-          await page.mouse.click(10, 10); // Click on a point outside the popup
-        }
+      const html = await res.text();
+      const $ = cheerio.load(html);
+      // title is swapped with description because the og:description is actually the property title,
+      // and the og:title is more like a description
+      const title = $('meta[property="og:description"]').attr("content");
+      const description = $('meta[property="og:title"]').attr("content");
+      const imageUrl = $('meta[property="og:image"]').attr("content");
 
-        await sleep(1000);
+      const pageTitle = $("title").text();
 
-        // Extract city name above the map with a longer timeout and error handling
-        const cityName = await page.evaluate(() => {
-          const citySection = document.querySelector(
-            "#site-content > div > div:nth-child(1) > div:nth-child(5) > div > div > div > div:nth-child(2) > section",
-          );
-          const cityDiv = citySection?.querySelector("div:nth-child(2)"); // This targets the second child element within the section
-          return cityDiv!.textContent!.trim();
-        });
-
-        await page.evaluate(() => {
-          const xpathResult = document.evaluate(
-            '//span[contains(text(), "Reserve")]',
-            document,
-            null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE,
-            null,
-          );
-
-          const firstNode = xpathResult.singleNodeValue;
-          if (firstNode && firstNode instanceof HTMLElement) {
-            firstNode.parentElement?.click();
-          }
-        });
-        await sleep(5000);
-
-        const priceItems = await page.evaluate(() => {
-          const divsWithPriceItemTestIds = Array.from(
-            document.querySelectorAll('div[data-testid^="price-item"]'),
-          );
-          const prices = divsWithPriceItemTestIds.map((div) => {
-            const testId = div.getAttribute("data-testid");
-            if (testId && testId.startsWith("price-item-ACCOMMODATION")) {
-              const siblingDivs = Array.from(div.parentElement?.children ?? []);
-              const siblingTextContents = siblingDivs.map((sibling) =>
-                sibling.textContent?.trim(),
-              );
-              return siblingTextContents;
-            } else {
-              const span = div.querySelector("span");
-              return span ? span.textContent?.trim() : null;
-            }
-          });
-          return prices.flat().filter((price) => price !== null);
-        });
-
-        const imgSrcUrl = await page.evaluate(() => {
-          const listingCardSection = document.querySelector(
-            '[data-section-id="LISTING_CARD"]',
-          );
-          if (!listingCardSection) return null;
-
-          const img = listingCardSection.querySelector("img");
-          return img ? img.getAttribute("src") : null;
-        });
-
-        const listingCardTextContent = await page.evaluate(() => {
-          const listingCardSection = document.querySelector(
-            '[data-section-id="LISTING_CARD"]',
-          );
-          if (!listingCardSection) return [];
-
-          const textContents = [];
-          for (const child of listingCardSection.children) {
-            textContents.push(child.textContent);
-          }
-          return textContents.filter(Boolean);
-        });
-
-        await browser.close();
-
-        const totalPrice = Number(
-          priceItems.slice(-1)[0]?.replace("$", "").replace(",", "").trim(),
-        );
-        const numDaysStr = priceItems[0]?.split(" ")[0]; // Get the number of nights
-        const numDays = Number(numDaysStr);
-        if (isNaN(numDays)) {
-          throw new Error("Failed to extract number of days from price items");
-        }
-        const nightlyPrice = totalPrice / numDays;
-        const propertyName =
-          listingCardTextContent[0]?.substring(0, 255) ?? "Airbnb Property";
-        const checkIn = new Date(searchParams.get("check_in")!);
-        const checkOut = new Date(searchParams.get("check_out")!);
-        const numGuests = Number(searchParams.get("adults"));
-
-        const response = {
-          cityName,
-          nightlyPrice,
-          propertyName,
-          checkIn,
-          checkOut,
-          numGuests,
-        };
-        console.log(response);
-        return response;
-      } catch (error) {
-        console.log(error);
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error scraping the page",
-        });
+      if (!title || !description || !imageUrl || !pageTitle) {
+        return { status: "failed to scrape" } as const;
       }
-    }),
-  extractBookingDetails: publicProcedure
-    .input(z.string())
-    .query(async ({ input }) => {
-      // Create a URL object
-      const urlObj = new URL(input);
 
-      // Get the search parameters
-      const params = new URLSearchParams(urlObj.search);
+      // refactor to use regex
+      const cityName = pageTitle.match(/for Rent in (.*?) - Airbnb/)?.[1];
 
-      // Extract the values with null checks
-      const numOfAdults = parseInt(params.get("adults") ?? "0", 10);
-      const numOfChildren = parseInt(params.get("children") ?? "0", 10);
-      const checkIn = params.get("check_in") ?? "";
-      const checkOut = params.get("check_out") ?? "";
+      console.log(cityName);
 
-      // Calculate the total number of guests
-      const numOfGuests = numOfAdults + numOfChildren;
+      if (!cityName) {
+        return { status: "failed to parse title" } as const;
+      }
 
-      // Return the extracted details
+      const coords = await getCoordinates(cityName).then((res) => res.location);
+
+      const location = coords && (await getCity(coords).catch(() => undefined));
+
+      if (!location) {
+        return { status: "failed to extract city" } as const;
+      }
+
       return {
-        numOfGuests,
-        checkIn,
-        checkOut,
-      };
+        status: "success",
+        data: { title, description, imageUrl, location, price },
+      } as const;
     }),
 });

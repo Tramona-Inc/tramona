@@ -239,7 +239,7 @@ const AmenitiesComponent: React.FC<{ propertyAmenities: string[] }> = ({
 
         return (
           amenities.length > 0 && (
-            <div key={category} className="category-section">
+            <div key={category}>
               <h3 className="inline-flex items-center justify-center pb-4 pt-10 text-black">
                 {React.createElement(categoryDetails.icon)}
                 <p className="text-md ml-2 font-semibold">{category}</p>

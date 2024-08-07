@@ -11,11 +11,9 @@ import { cityRequestSchema } from "./schemas";
 
 export function useCityRequestForm({
   afterSubmit,
-  beforeSubmit,
   setMadeByGroupId,
 }: {
   afterSubmit?: () => void;
-  beforeSubmit?: () => void;
   setMadeByGroupId?: (val: number) => void;
 }) {
   // const [open, setOpen] = useState(true);
@@ -50,12 +48,11 @@ export function useCityRequestForm({
         });
       });
     } else {
-      beforeSubmit?.();
       await createRequests(newRequest)
-        .then((result) => {
+        .then(({ madeByGroupId }) => {
           form.reset();
           afterSubmit?.();
-          setMadeByGroupId?.(result.transactionResults.madeByGroupId);
+          setMadeByGroupId?.(madeByGroupId);
         })
         .catch(() => errorToast());
     }

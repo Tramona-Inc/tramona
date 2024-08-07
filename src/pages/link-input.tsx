@@ -1,4 +1,3 @@
-import MainLayout from "@/components/_common/Layout/MainLayout";
 import linkInputBg from "public/assets/images/link-input-bg.jpg";
 import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock8, Handshake, CircleDollarSign } from "lucide-react";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
-import AddAirbnbLink from "../components/link-input/AddAirbnbLink";
+import LinkRequestForm from "../components/link-input/LinkRequestForm";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 export default function Page() {
@@ -31,12 +30,12 @@ export default function Page() {
                 <h1 className="mx-auto max-w-3xl text-balance text-[32px] font-bold text-gray-900 lg:text-5xl">
                   Already have a property you like?
                 </h1>
-                <p className="mx-auto max-w-[38rem] pt-4 text-[14px] font-bold text-[#584F3E] lg:pt-4 lg:text-base">
+                <p className="mx-auto max-w-[38rem] pt-4 text-[14px] font-bold opacity-70 lg:pt-4 lg:text-base">
                   Let us get you the same property, or their next door neighbor,
                   for a better price
                 </p>
                 <div className="mx-auto mt-8 max-w-3xl">
-                  <AddAirbnbLink fromRequestDealTab={false} />
+                  <LinkRequestForm />
                 </div>
               </div>
             </div>

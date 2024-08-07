@@ -34,17 +34,11 @@ export function useMaybeSendUnsentRequests() {
 
     const { data: unsentRequest } = res;
 
-    void (async () => {
-      try {
-        createRequests(unsentRequest).catch(() => {
-          throw new Error();
-        });
-
-        successfulRequestToast(unsentRequest);
-      } catch (e) {
+    void createRequests(unsentRequest)
+      .then(() => successfulRequestToast(unsentRequest))
+      .catch(() => {
         errorToast();
         localStorage.setItem("unsentRequests", unsentRequestsJSON);
-      }
-    })();
+      });
   }, [createRequests, status]);
 }

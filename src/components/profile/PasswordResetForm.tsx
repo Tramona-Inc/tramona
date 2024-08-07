@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,13 +13,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { zodString } from "@/utils/zod-utils";
+import { zodPassword, zodString } from "@/utils/zod-utils";
 
 const formSchema = z
   .object({
     oldPassword: zodString(),
-    password: zodString({ minLen: 3 }),
-    confirmPassword: zodString({ minLen: 3 }),
+    password: zodPassword(),
+    confirmPassword: zodPassword(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "The passwords didn't match, please try again",
@@ -28,9 +27,6 @@ const formSchema = z
   });
 
 export default function PasswordResetForm() {
-  // const { data: session } = useSession();
-  // const user = session?.user;
-
   const { toast } = useToast();
 
   const form = useForm({

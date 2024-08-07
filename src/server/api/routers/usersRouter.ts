@@ -491,12 +491,12 @@ export const usersRouter = createTRPCRouter({
               longitude: property.lng,
               city: await getCity({ lat: property.lat, lng: property.lng }),
               hostName: property.contactName,
-              hostawayListingId: property.id,
+              originalListingId: property.id.toString(),
               checkInTime: convertToTimeString(property.checkInTimeStart),
               checkOutTime: convertToTimeString(property.checkOutTime),
               name: property.name,
               about: property.description,
-              propertyPMS: "Hostaway",
+              originalListingPlatform: "Hostaway" as const,
               address: property.address,
               avgRating: property.starRating ?? 0,
               hostTeamId: teamId,
@@ -516,7 +516,7 @@ export const usersRouter = createTRPCRouter({
             .values(propertyObjects)
             .returning({
               id: properties.id,
-              listingId: properties.hostawayListingId,
+              listingId: properties.originalListingId,
             });
 
           const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format

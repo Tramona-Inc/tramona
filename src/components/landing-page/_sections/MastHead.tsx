@@ -72,7 +72,7 @@ export default function MastHead() {
                 <div className="-ml-2">
                   <Avatar
                     size={"md"}
-                    className="flex items-center justify-center border-2 border-white bg-teal-900 text-xs font-semibold text-white"
+                    className="flex items-center justify-center border-2 border-[#EBF5F4] bg-teal-900 text-xs font-semibold text-white"
                   >
                     +450
                   </Avatar>

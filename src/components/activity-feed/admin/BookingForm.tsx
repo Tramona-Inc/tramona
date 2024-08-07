@@ -50,19 +50,19 @@ export default function CreateBookingForm({
     defaultValues: {
       ...(booking
         ? {
-            userName: booking.group.owner.name || "",
-            userProfilePicUrl: booking.group.owner.image || "",
+            userName: booking.group.owner.name ?? "",
+            userProfilePicUrl: booking.group.owner.image ?? "",
             checkIn: booking.checkIn.toISOString().slice(0, 10),
             checkOut: booking.checkOut.toISOString().slice(0, 10),
             propertyUrl:
               "https://www.tramona.com/property/" + booking.property.id,
             entryCreationTime: booking.createdAt.toISOString().slice(0, 19),
             nightlyPrice:
-              (booking.offer?.totalPrice || 0) /
+              (booking.offer?.totalPrice ?? 0) /
               getNumNights(booking.checkIn, booking.checkOut) /
               100,
             originalNightlyPrice:
-              (booking.property.originalNightlyPrice || 0) / 100 || 0,
+              (booking.property.originalNightlyPrice ?? 0) / 100 || 0,
           }
         : {
             userName: "",
@@ -86,18 +86,18 @@ export default function CreateBookingForm({
       entryCreationTime: new Date(data.entryCreationTime),
       maxTotalPrice:
         data.nightlyPrice * 100 * getNumNights(data.checkIn, data.checkOut),
-      propertyId: getPropertyId(data.propertyUrl) || 0,
+      propertyId: getPropertyId(data.propertyUrl) ?? 0,
       checkIn: new Date(data.checkIn), // Convert string to Date
       checkOut: new Date(data.checkOut),
     };
     console.log(formattedData);
     // send the data to backend
     if (booking) {
-      const fillerBookingId = await updateFillerBooking
+      await updateFillerBooking
         .mutateAsync({ id: booking.id, ...formattedData })
         .catch(() => errorToast());
     } else {
-      const fillerBookingId = await createFillerBooking
+      await createFillerBooking
         .mutateAsync(formattedData)
         .catch(() => errorToast());
     }

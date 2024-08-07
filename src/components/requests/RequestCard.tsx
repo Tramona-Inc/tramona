@@ -16,6 +16,7 @@ import {
 import {
   CalendarIcon,
   EllipsisIcon,
+  LinkIcon,
   MapPinIcon,
   TrashIcon,
   Users2Icon,
@@ -31,6 +32,8 @@ import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
 import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
 import { getTime } from "date-fns";
+import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
+import { Separator } from "../ui/separator";
 
 export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequestGroups"
@@ -46,14 +49,12 @@ export type HostDashboardRequest =
 export default function RequestCard({
   request,
   type,
-  isSelected,
   children,
 }: (
   | { type: "guest"; request: GuestDashboardRequest }
   | { type: "admin"; request: AdminDashboardRequst }
   | { type: "host"; request: HostDashboardRequest }
 ) & {
-  isSelected?: boolean;
   children?: React.ReactNode;
 }) {
   const pricePerNight =
@@ -80,7 +81,15 @@ export default function RequestCard({
         onOpenChange={setOpen}
       />
       <div>
-        {type !== "host" && <RequestCardBadge request={request} />}
+        <div className="flex flex-wrap gap-2">
+          {type !== "host" && <RequestCardBadge request={request} />}
+          {type === "guest" && request.linkInputProperty && (
+            <Badge variant="pink">
+              <LinkIcon className="size-4" />
+              Airbnb Link
+            </Badge>
+          )}
+        </div>
         {type === "host" && (
           <div className="flex items-center gap-2">
             <UserAvatar
@@ -150,10 +159,8 @@ export default function RequestCard({
             <p>&ldquo;{request.note}&rdquo;</p>
           </div>
         )}
-        {request.airbnbLink && (
-          <a className="underline" href={request.airbnbLink}>
-            Airbnb Link
-          </a>
+        {type === "guest" && request.linkInputProperty && (
+          <LinkInputPropertyCard property={request.linkInputProperty} />
         )}
       </CardContent>
       <CardFooter>{children}</CardFooter>

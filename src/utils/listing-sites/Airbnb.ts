@@ -1,5 +1,6 @@
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
+import * as cheerio from "cheerio";
 
 export const Airbnb: ListingSite<"Airbnb"> = {
   siteName: "Airbnb",
@@ -9,6 +10,17 @@ export const Airbnb: ListingSite<"Airbnb"> = {
   //                              ^^^^^^^
   parseId(url) {
     return new URL(url).pathname.split("/")[2];
+  },
+
+  parseUrlParams(url) {
+    const urlObj = new URL(url);
+    const numGuestsStr = urlObj.searchParams.get("adults");
+
+    return {
+      checkIn: urlObj.searchParams.get("check_in") ?? undefined,
+      checkOut: urlObj.searchParams.get("check_out") ?? undefined,
+      numGuests: numGuestsStr ? parseInt(numGuestsStr) : undefined,
+    };
   },
 
   createListing(id) {
@@ -27,7 +39,7 @@ export const Airbnb: ListingSite<"Airbnb"> = {
           url.searchParams.set("check_out", formatDateYearMonthDay(checkOut));
         }
         if (numGuests) {
-          url.searchParams.set("guests", numGuests.toString());
+          url.searchParams.set("adults", numGuests.toString());
         }
 
         return url.toString();
@@ -57,6 +69,27 @@ export const Airbnb: ListingSite<"Airbnb"> = {
         }
 
         return url.toString();
+      },
+
+      async getPrice(params) {
+        const checkoutUrl = this.getCheckoutUrl(params);
+
+        const jsonStr = await fetch(checkoutUrl)
+          .then((res) => res.text())
+          .then((html) => {
+            const $ = cheerio.load(html);
+            return $("#data-deferred-state-0").text();
+          });
+
+        const priceRegex =
+          /"priceBreakdown":.*"total":.*"total":.*"amountMicros":"(\d+)"/;
+
+        const match = jsonStr.match(priceRegex);
+
+        if (!match?.[1]) throw new Error("Failed to extract price");
+
+        // "amountMicros" are ten-thousands of cents (e.g. $100 <-> 100,000,000)
+        return Math.round(Number(match[1]) / 10000);
       },
     };
   },

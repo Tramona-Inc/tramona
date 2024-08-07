@@ -1,4 +1,3 @@
-import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,7 +11,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import PlacesInput from "@/components/_common/PlacesInput";
 import { getNumNights, getPropertyId } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
@@ -51,8 +49,8 @@ export default function CreateOfferForm({
     defaultValues: {
       ...(offer
         ? {
-            userName: offer.request?.madeByGroup.owner.name || "",
-            userProfilePicUrl: offer.request?.madeByGroup.owner.image || "",
+            userName: offer.request?.madeByGroup.owner.name ?? "",
+            userProfilePicUrl: offer.request?.madeByGroup.owner.image ?? "",
             checkIn: offer.checkIn.toISOString().slice(0, 10),
             checkOut: offer.checkOut.toISOString().slice(0, 10),
             propertyUrl: "https://www.tramona.com/property/" + offer.propertyId,
@@ -62,7 +60,7 @@ export default function CreateOfferForm({
               getNumNights(offer.checkIn, offer.checkOut) /
               100,
             originalNightlyPrice:
-              (offer.property.originalNightlyPrice || 0) / 100 || 0,
+              (offer.property.originalNightlyPrice ?? 0) / 100 || 0,
           }
         : {
             userName: "",
@@ -87,7 +85,7 @@ export default function CreateOfferForm({
       maxTotalPrice:
         data.nightlyPrice * 100 * getNumNights(data.checkIn, data.checkOut),
       originalNightlyPrice: data.originalNightlyPrice * 100,
-      propertyId: getPropertyId(data.propertyUrl) || 0,
+      propertyId: getPropertyId(data.propertyUrl) ?? 0,
       checkIn: new Date(data.checkIn), // Convert string to Date
       checkOut: new Date(data.checkOut),
     };

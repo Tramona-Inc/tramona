@@ -18,7 +18,7 @@ export function NewCityRequestBtn() {
       <DialogTrigger asChild>
         <Button className="mb-4 rounded-md pr-3" variant="secondary">
           <PlusIcon className="-ml-1 size-5" />
-          Create new city request
+          New request
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl">

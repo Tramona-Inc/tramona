@@ -65,7 +65,12 @@ export function MapModal({
               strokeWeight: 2,
             }}
           />
-          <Marker draggable position={editedLatLng} onDragend={onDragendOrClick} />
+          <Marker
+            draggable
+            position={editedLatLng}
+            // @ts-expect-error their typedefs are wrong
+            onDragend={onDragendOrClick}
+          />
         </Map>
       </div>
       <div className="pt-4">

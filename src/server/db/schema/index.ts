@@ -1,6 +1,7 @@
 // new files for tables need to be manually added here
 
 export * from "./relations";
+export * from "./common";
 export * from "./tables/auth/accounts";
 export * from "./tables/auth/sessions";
 export * from "./tables/auth/verificationTokens";
@@ -22,3 +23,4 @@ export * from "./tables/users";
 export * from "./tables/reviews";
 export * from "./tables/trips";
 export * from "./tables/feedFiller";
+export * from "./tables/linkInputProperties";

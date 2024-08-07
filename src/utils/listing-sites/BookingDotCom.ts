@@ -11,6 +11,17 @@ export const BookingDotCom: ListingSite<"Booking.com"> = {
     return url.match(/\/hotel\/(.+)\.html/)?.[1];
   },
 
+  parseUrlParams(url) {
+    const urlObj = new URL(url);
+    const numGuestsStr = urlObj.searchParams.get("group_adults");
+
+    return {
+      checkIn: urlObj.searchParams.get("checkin") ?? undefined,
+      checkOut: urlObj.searchParams.get("checkout") ?? undefined,
+      numGuests: numGuestsStr ? parseInt(numGuestsStr) : undefined,
+    };
+  },
+
   createListing(id) {
     return {
       id,
@@ -41,6 +52,10 @@ export const BookingDotCom: ListingSite<"Booking.com"> = {
       getCheckoutUrl(params) {
         const listingUrl = this.getListingUrl(params);
         return `${listingUrl}#availability`;
+      },
+
+      getPrice(params) {
+        throw new Error("not implemented"); // TODO
       },
     };
   },
